@@ -20,8 +20,10 @@ export async function signupUser({
 }: SignupData) {
   try {
     // Hashear la contraseña
-    const saltRounds = 10;
-    const hashedPassword = await bcrypt.hash(password, saltRounds);
+    const hashedPassword = await bcrypt.hash(
+      password,
+      parseInt(process.env.SALT_ROUNDS || "10")
+    );
 
     // Crear el nuevo usuario
     const nuevoUsuario = await prisma.usuario.create({

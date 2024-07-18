@@ -3,7 +3,16 @@ import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
 export async function GET() {
-  const usuarios = await prisma.usuario.findMany();
+  const usuarios = await prisma.usuario.findMany({
+    select: {
+      id: true,
+      email: true,
+      fullName: true,
+      username: true,
+      avatar: true,
+      rol: true,
+    },
+  });
   return NextResponse.json(usuarios);
 }
 
