@@ -13,6 +13,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+
+// Actualizamos el modelo Usuario para incluir la relación con Rol
 model Usuario {
   id                          Int       @id @default(autoincrement())
   fullName                    String    @db.VarChar(150)
@@ -22,7 +24,26 @@ model Usuario {
   avatar                      String?   @db.VarChar(150)
   reset_password_token        String?   @db.VarChar(255)
   reset_password_token_expired DateTime?
+  rol                         Rol?      @relation(fields: [rolId], references: [id])
+  rolId                       Int?
 
   @@index([fullName])
   @@index([username])
 }
+
+// Actualizamos el modelo Permiso para incluir la relación con Rol
+model Permiso {
+  id    Int    @id @default(autoincrement())
+  name  String @unique @db.VarChar(100)
+  roles Rol[]
+}
+
+model Rol {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique @db.VarChar(150)
+  permisos    Permiso[]
+  usuarios    Usuario[]
+  @@index([name])
+}
+
+
