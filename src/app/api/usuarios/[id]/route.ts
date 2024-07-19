@@ -76,7 +76,11 @@ export async function PUT(
         avatar: true,
       },
     });
-    return NextResponse.json(updatedUser);
+    const usuarioConRol = {
+      ...updatedUser,
+      rol: updatedUser.rol?.name,
+    };
+    return NextResponse.json(usuarioConRol);
   } catch (error) {
     console.error("Error al obtener información del usuario:", error);
     return NextResponse.json(

@@ -175,6 +175,7 @@ const UsuariosPage = () => {
       const response = await authFetch(`/api/usuarios/${id}`);
       const userData = await response.json();
       setEditingUser({
+        id,
         fullName: userData.fullName,
         username: userData.username,
         email: userData.email,
@@ -203,11 +204,12 @@ const UsuariosPage = () => {
       if (response.ok) {
         setSnackbarMessage("Usuario actualizado con éxito");
         setSnackbarSeverity("success");
-        // Actualizar la lista de usuarios
-        const updatedUsers = usuarios.map((user) =>
-          user.id === editingUser.id ? { ...user, ...editingUser } : user
+        const updatedUser = await response.json();
+        setUsuarios((prevUsuarios) =>
+          prevUsuarios.map((user) =>
+            user.id === editingUser.id ? updatedUser : user
+          )
         );
-        setUsuarios(updatedUsers);
       } else {
         setSnackbarMessage("Error al actualizar el usuario");
         setSnackbarSeverity("error");
