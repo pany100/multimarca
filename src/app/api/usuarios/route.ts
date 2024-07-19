@@ -10,10 +10,18 @@ export async function GET() {
       fullName: true,
       username: true,
       avatar: true,
-      rol: true,
+      rol: {
+        select: {
+          name: true,
+        },
+      },
     },
   });
-  return NextResponse.json(usuarios);
+  const usuariosConRolName = usuarios.map((usuario) => ({
+    ...usuario,
+    rol: usuario.rol?.name,
+  }));
+  return NextResponse.json(usuariosConRolName);
 }
 
 export async function POST(request: Request) {

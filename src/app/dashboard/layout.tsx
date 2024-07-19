@@ -25,6 +25,16 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <Typography variant="h4" component="h1" gutterBottom>
             Dashboard
           </Typography>
+          <Box sx={{ mb: 2 }}>
+            <Typography
+              variant="body2"
+              component="a"
+              onClick={() => window.history.back()}
+              sx={{ cursor: "pointer", textDecoration: "underline" }}
+            >
+              Volver
+            </Typography>
+          </Box>
           <Box sx={{ display: "flex" }}>
             <IconButton onClick={() => setDrawerOpen(true)}>
               <MenuIcon />
