@@ -29,7 +29,7 @@ export async function POST(request: Request) {
     });
     const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL;
 
-    const resetPasswordUrl = `${frontendUrl}/reset-password/${resetPasswordToken}`;
+    const resetPasswordUrl = `${frontendUrl}/reset-password?token=${resetPasswordToken}`;
 
     await sendEmail({
       to: email,
