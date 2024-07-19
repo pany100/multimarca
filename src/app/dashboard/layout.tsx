@@ -51,7 +51,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                   </ListItem>
                 )}
                 {permisos.includes("Roles") && (
-                  <ListItem button>
+                  <ListItem button component={Link} href="/dashboard/roles">
                     <ListItemText primary="Roles" />
                   </ListItem>
                 )}

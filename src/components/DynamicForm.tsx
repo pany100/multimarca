@@ -1,8 +1,10 @@
 import React from "react";
 import {
+  Checkbox,
   TextField,
   FormControl,
   InputLabel,
+  ListItemText,
   Select,
   MenuItem,
 } from "@mui/material";
@@ -10,8 +12,10 @@ import {
 interface FieldConfig {
   name: string;
   label: string;
-  type: "text" | "email" | "select";
-  options?: { id: number | string; name: string }[];
+  type: "text" | "multiselect" | "select" | "email";
+  options?: Record<string, string | number>[];
+  valueKey?: string;
+  labelKey?: string;
 }
 
 interface DynamicFormProps<T> {
@@ -40,6 +44,39 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
                       {option.name}
                     </MenuItem>
                   ))}
+                </Select>
+              </FormControl>
+            );
+          case "multiselect":
+            return (
+              <FormControl key={field.name} fullWidth margin="normal">
+                <InputLabel>{field.label}</InputLabel>
+                <Select
+                  multiple
+                  value={item?.[field.name as keyof T] || []}
+                  onChange={(e) =>
+                    handleChange(field.name as keyof T, e.target.value)
+                  }
+                  renderValue={(selected) => (selected as string[]).join(", ")}
+                >
+                  {field.options?.map((option) => {
+                    const value = option[field.valueKey || "id"];
+                    const label = option[field.labelKey || "name"];
+                    return (
+                      <MenuItem key={option.id} value={value}>
+                        <Checkbox
+                          checked={
+                            Array.isArray(item?.[field.name as keyof T]) &&
+                            (item?.[field.name as keyof T] as any[]).some(
+                              (itemValue) =>
+                                itemValue.toString() === value.toString()
+                            )
+                          }
+                        />
+                        <ListItemText primary={label} />
+                      </MenuItem>
+                    );
+                  })}
                 </Select>
               </FormControl>
             );

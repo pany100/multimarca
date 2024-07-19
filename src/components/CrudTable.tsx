@@ -5,7 +5,6 @@ import {
   Modal,
   Typography,
   Button,
-  TextField,
   Snackbar,
   Alert,
   Dialog,
@@ -14,6 +13,7 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import authFetch from "@/utils/authFetch";
+import AddIcon from "@mui/icons-material/Add";
 
 interface CrudTableProps<T> {
   title: string;
@@ -23,6 +23,7 @@ interface CrudTableProps<T> {
     item: T | null,
     handleChange: (field: keyof T, value: any) => void
   ) => React.ReactNode;
+  createNewItem?: () => T;
 }
 
 function CrudTable<T extends { id: string }>({
@@ -30,6 +31,7 @@ function CrudTable<T extends { id: string }>({
   columns,
   apiEndpoint,
   renderEditForm,
+  createNewItem,
 }: CrudTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [editingItem, setEditingItem] = useState<T | null>(null);
@@ -41,6 +43,13 @@ function CrudTable<T extends { id: string }>({
     message: "",
     severity: "success" as "success" | "error",
   });
+  const [addModalOpen, setAddModalOpen] = useState(false);
+  const [newItem, setNewItem] = useState<T | null>(null);
+
+  const handleAddClick = () => {
+    setNewItem(createNewItem ? createNewItem() : null);
+    setAddModalOpen(true);
+  };
 
   useEffect(() => {
     const fetchItems = async () => {
@@ -65,6 +74,48 @@ function CrudTable<T extends { id: string }>({
   const handleDeleteClick = (id: string) => {
     setItemToDelete(id);
     setDeleteConfirmOpen(true);
+  };
+
+  const handleAddSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newItem) return;
+
+    try {
+      const response = await authFetch(apiEndpoint, {
+        method: "POST",
+        body: JSON.stringify(newItem),
+      });
+
+      if (response.ok) {
+        const createdItem = await response.json();
+        setItems((prevItems) => [...prevItems, createdItem]);
+        setSnackbar({
+          open: true,
+          message: `${title} creado con éxito`,
+          severity: "success",
+        });
+      } else {
+        setSnackbar({
+          open: true,
+          message: `Error al crear ${title}`,
+          severity: "error",
+        });
+      }
+    } catch (error) {
+      console.error(`Error al crear ${title}:`, error);
+      setSnackbar({
+        open: true,
+        message: `Error al realizar la solicitud de creación`,
+        severity: "error",
+      });
+    } finally {
+      setAddModalOpen(false);
+      setNewItem(null);
+    }
+  };
+
+  const handleNewItemChange = (field: keyof T, value: any) => {
+    setNewItem((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
   const handleEditSubmit = async (e: React.FormEvent) => {
@@ -172,6 +223,16 @@ function CrudTable<T extends { id: string }>({
       <Typography variant="h5" component="h2" gutterBottom>
         {title}
       </Typography>
+      {createNewItem && (
+        <Button
+          variant="contained"
+          color="primary"
+          startIcon={<AddIcon />}
+          onClick={handleAddClick}
+        >
+          Agregar {title}
+        </Button>
+      )}
       <DataGrid
         rows={items}
         columns={[...columns, actionColumn]}
@@ -204,6 +265,32 @@ function CrudTable<T extends { id: string }>({
           </Box>
         </Box>
       </Modal>
+      {createNewItem && (
+        <Modal open={addModalOpen} onClose={() => setAddModalOpen(false)}>
+          <Box
+            sx={{
+              position: "absolute",
+              top: "50%",
+              left: "50%",
+              transform: "translate(-50%, -50%)",
+              width: 400,
+              bgcolor: "background.paper",
+              boxShadow: 24,
+              p: 4,
+            }}
+          >
+            <Typography variant="h6" component="h2">
+              Agregar nuevo {title}
+            </Typography>
+            <Box component="form" onSubmit={handleAddSubmit} sx={{ mt: 2 }}>
+              {renderEditForm(newItem, handleNewItemChange)}
+              <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+                Crear
+              </Button>
+            </Box>
+          </Box>
+        </Modal>
+      )}
       <Dialog
         open={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}

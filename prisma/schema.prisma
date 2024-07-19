@@ -24,8 +24,8 @@ model Usuario {
   avatar                      String?   @db.VarChar(150)
   reset_password_token        String?   @db.VarChar(255)
   reset_password_token_expired DateTime?
-  rol                         Rol?      @relation(fields: [rolId], references: [id])
-  rolId                       Int?
+  rol                         Rol   @relation(fields: [rolId], references: [id])
+  rolId                       Int
 
   @@index([fullName])
   @@index([username])
