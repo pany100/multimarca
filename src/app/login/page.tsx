@@ -13,6 +13,7 @@ import {
   Alert,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -20,6 +21,17 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
   const [error, setError] = useState("");
+  const { isAuthenticated, isLoading } = useAuth();
+
+  React.useEffect(() => {
+    if (!isLoading && isAuthenticated) {
+      router.push("/dashboard");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
+  if (isLoading) {
+    return <Typography>Cargando...</Typography>;
+  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();

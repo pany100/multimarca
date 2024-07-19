@@ -23,9 +23,28 @@ export async function GET(request: NextRequest) {
         fullName: true,
         username: true,
         avatar: true,
-        rol: true,
+        rol: {
+          select: {
+            name: true,
+            permisos: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
       },
     });
+
+    // Transformar los permisos a un array de strings
+    const permisos =
+      usuario?.rol?.permisos.map((permiso) => permiso.name) || [];
+
+    // Crear un nuevo objeto con los datos del usuario y los permisos
+    const usuarioConPermisos = {
+      ...usuario,
+      permisos,
+    };
 
     if (!usuario) {
       return NextResponse.json(
@@ -34,7 +53,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json(usuario);
+    return NextResponse.json(usuarioConPermisos);
   } catch (error) {
     console.error("Error en /usuarios/yo:", error);
     return NextResponse.json(
