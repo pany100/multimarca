@@ -46,4 +46,46 @@ model Rol {
   @@index([name])
 }
 
+model Cliente {
+  id                        Int      @id @default(autoincrement())
+  phone                     String?  @db.VarChar(20)
+  fullName                  String   @db.VarChar(150)
+  email                     String?  @db.VarChar(150)
+  birthday                  DateTime?
+  address                   String?  @db.VarChar(200)
+  city                      String?  @db.VarChar(100)
+  state                     String?  @db.VarChar(100)
+  postal_code               String?  @db.VarChar(10)
+  tax_status                String?  @db.VarChar(50)
+  dni                       String?  @unique @db.VarChar(20)
+  can_receive_notifications Boolean  @default(true)
+  cars                      Auto[]
+
+  @@index([fullName])
+  @@index([email])
+  @@index([dni])
+}
+
+model Auto {
+  id                Int      @id @default(autoincrement())
+  patent            String   @unique @db.VarChar(150)
+  model             String?  @db.VarChar(150)
+  brand             String?  @db.VarChar(150)
+  color             String?  @db.VarChar(50)
+  year              Int?
+  kms               Int?
+  valves            Int?
+  owner             Cliente   @relation(fields: [ownerId], references: [id])
+  ownerId           Int
+  chassis_number    String?  @db.VarChar(150)
+  engine_number     String?  @db.VarChar(150)
+  observations      String?  @db.VarChar(255)
+  transmission_type String?  @db.VarChar(20)
+  cedulaVerdePath   String?  @db.VarChar(255)
+
+  @@index([patent])
+  @@index([ownerId])
+}
+
+
 

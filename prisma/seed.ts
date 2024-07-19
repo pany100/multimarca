@@ -1,4 +1,8 @@
 const { PrismaClient } = require("@prisma/client");
+const fs = require("fs") as typeof import("fs");
+const path = require("path");
+const { parse } = require("csv-parse/sync");
+
 const prismaClient = new PrismaClient();
 
 const permisos = [
@@ -115,7 +119,7 @@ async function main() {
       fullName: "Gabriela Ateca",
       username: "Gaby",
       email: "gabriela.ateca@gmail.com",
-      rolId: 2,
+      rolId: 6,
       avatar: "/images/avatars/2.png",
       password: "8nD3xZoKmu32zK",
     },
@@ -129,6 +133,105 @@ async function main() {
     });
   }
   console.log("Carga de usuarios completada.");
+
+  console.log("Iniciando carga de clientes desde CSV...");
+
+  const csvFilePath = path.resolve(__dirname, "../data/clients.csv");
+  const fileContent = fs.readFileSync(csvFilePath, { encoding: "utf-8" });
+
+  const records = parse(fileContent, {
+    columns: true,
+    skip_empty_lines: true,
+  });
+  for (const record of records) {
+    const existingCliente = await prismaClient.cliente.findFirst({
+      where: {
+        fullName: record.nombre_completo,
+        phone: record.telefono,
+      },
+    });
+    if (existingCliente) {
+      continue;
+    }
+    await prismaClient.cliente.create({
+      data: {
+        phone: record.telefono === "" ? null : record.telefono,
+        fullName: record.nombre_completo === "" ? null : record.nombre_completo,
+        email: record.email === "" ? null : record.email,
+        birthday: record.cumple === "" ? null : record.cumple,
+        address: record.dirección === "" ? null : record.dirección,
+        city: record.ciudad === "" ? null : record.ciudad,
+        state: record.provincia === "" ? null : record.provincia,
+        postal_code: record.codigo_postal === "" ? null : record.codigo_postal,
+        tax_status: record.afip === "" ? null : record.afip,
+        dni: record.dni === "" ? null : record.dni,
+        can_receive_notifications: true,
+      },
+    });
+  }
+
+  console.log("Carga de clientes completada.");
+
+  console.log("Iniciando carga de autos desde CSV...");
+
+  const autosFilePath = path.resolve(__dirname, "../data/cars.csv");
+  const content = fs.readFileSync(autosFilePath, { encoding: "utf-8" });
+
+  const carRecords = parse(content, {
+    columns: true,
+    skip_empty_lines: true,
+  });
+
+  for (const record of carRecords) {
+    let owner;
+    if (record.duenio !== "") {
+      const cliente = await prismaClient.cliente.findFirst({
+        where: { fullName: record.duenio },
+      });
+      if (cliente) {
+        owner = { connect: { id: cliente.id } };
+      } else {
+        console.log(
+          `No se encontró el cliente ${record.duenio}. Continuando con el siguiente registro.`
+        );
+        continue;
+      }
+    }
+    await prismaClient.auto.upsert({
+      where: { patent: record.patente },
+      update: {
+        patent: record.patente === "" ? null : record.patente,
+        brand: record.marca === "" ? null : record.marca,
+        model: record.modelo === "" ? null : record.modelo,
+        valves: record.valvulas === "" ? null : parseInt(record.valvulas),
+        color: record.color === "" ? null : record.color,
+        year: record.anio === "" ? null : parseInt(record.anio),
+        kms: record.kilometros === "" ? null : parseInt(record.kilometros),
+        owner: owner,
+        chassis_number: record.chasis === "" ? null : record.chasis,
+        engine_number: record.motor === "" ? null : record.motor,
+        observations: record.observaciones === "" ? null : record.observaciones,
+        transmission_type:
+          record.transmision === "" ? null : record.transmision,
+      },
+      create: {
+        patent: record.patente === "" ? null : record.patente,
+        brand: record.marca === "" ? null : record.marca,
+        model: record.modelo === "" ? null : record.modelo,
+        valves: record.valvulas === "" ? null : parseInt(record.valvulas),
+        color: record.color === "" ? null : record.color,
+        year: record.anio === "" ? null : parseInt(record.anio),
+        kms: record.kilometros === "" ? null : parseInt(record.kilometros),
+        owner: owner,
+        chassis_number: record.chasis === "" ? null : record.chasis,
+        engine_number: record.motor === "" ? null : record.motor,
+        observations: record.observaciones === "" ? null : record.observaciones,
+        transmission_type:
+          record.transmision === "" ? null : record.transmision,
+      },
+    });
+  }
+  console.log("Carga de Autos completada.");
 }
 
 main()
