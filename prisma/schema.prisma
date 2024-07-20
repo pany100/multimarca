@@ -81,7 +81,7 @@ model Auto {
   engine_number     String?  @db.VarChar(150)
   observations      String?  @db.VarChar(255)
   transmission_type String?  @db.VarChar(20)
-  cedulaVerdePath   String?  @db.VarChar(255)
+  cedulaVerdePath   String?  @db.VarChar(1000)
 
   @@index([patent])
   @@index([ownerId])

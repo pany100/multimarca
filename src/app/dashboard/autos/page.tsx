@@ -123,17 +123,26 @@ const AutosPage = () => {
 
   const handleSaveCedulaVerde = async (file: File | null) => {
     if (file && selectedAuto) {
-      // Aquí implementarías la lógica para guardar el archivo
-      console.log(
-        `Guardando cédula verde para auto con patente ${selectedAuto.patent}`
-      );
-      // Ejemplo de cómo podrías enviar el archivo al servidor:
-      // const formData = new FormData();
-      // formData.append('file', file);
-      // await fetch(`/api/autos/${selectedAuto.id}/cedula-verde`, {
-      //   method: 'POST',
-      //   body: formData,
-      // });
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await fetch(`/api/autos/${selectedAuto.id}/cedula`, {
+          method: "PUT",
+          body: formData,
+        });
+
+        if (!response.ok) {
+          throw new Error("Error al guardar la cédula verde");
+        }
+
+        const updatedAuto = await response.json();
+        console.log("Cédula verde guardada exitosamente", updatedAuto);
+
+        setModalOpen(false);
+      } catch (error) {
+        console.error("Error al guardar la cédula verde:", error);
+      }
     }
   };
 
