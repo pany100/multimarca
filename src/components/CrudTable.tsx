@@ -26,6 +26,7 @@ interface CrudTableProps<T> {
     handleChange: (field: keyof T, value: any) => void
   ) => React.ReactNode;
   createNewItem?: () => T;
+  extraActions?: (item: T) => React.ReactNode; // Nueva propiedad
 }
 
 function CrudTable<T extends { id: string }>({
@@ -34,6 +35,7 @@ function CrudTable<T extends { id: string }>({
   apiEndpoint,
   renderEditForm,
   createNewItem,
+  extraActions,
 }: CrudTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -241,6 +243,7 @@ function CrudTable<T extends { id: string }>({
         >
           <DeleteIcon />
         </IconButton>
+        {extraActions && extraActions(params.row)}
       </Box>
     ),
   };

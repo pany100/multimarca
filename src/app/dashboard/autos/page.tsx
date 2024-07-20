@@ -1,8 +1,11 @@
 "use client";
 
+import CedulaVerdeModal from "@/components/CedulaVerdeModal";
 import CrudTable from "@/components/CrudTable";
 import DynamicForm, { FieldConfig } from "@/components/DynamicForm";
-
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import { IconButton, Tooltip } from "@mui/material";
+import { useState } from "react";
 interface Auto {
   owner?: {
     id: string;
@@ -24,6 +27,9 @@ interface Auto {
 }
 
 const AutosPage = () => {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedAuto, setSelectedAuto] = useState<Auto | null>(null);
+
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "patent", headerName: "Patente", width: 120 },
@@ -102,14 +108,54 @@ const AutosPage = () => {
     };
   };
 
+  const extraActions = (auto: Auto) => (
+    <Tooltip title="Agregar cédula verde">
+      <IconButton onClick={() => handleExtraAction(auto)} size="small">
+        <DirectionsCarIcon />
+      </IconButton>
+    </Tooltip>
+  );
+
+  const handleExtraAction = (auto: Auto) => {
+    setSelectedAuto(auto);
+    setModalOpen(true);
+  };
+
+  const handleSaveCedulaVerde = async (file: File | null) => {
+    if (file && selectedAuto) {
+      // Aquí implementarías la lógica para guardar el archivo
+      console.log(
+        `Guardando cédula verde para auto con patente ${selectedAuto.patent}`
+      );
+      // Ejemplo de cómo podrías enviar el archivo al servidor:
+      // const formData = new FormData();
+      // formData.append('file', file);
+      // await fetch(`/api/autos/${selectedAuto.id}/cedula-verde`, {
+      //   method: 'POST',
+      //   body: formData,
+      // });
+    }
+  };
+
   return (
-    <CrudTable<Auto>
-      title="Gestión de Autos"
-      columns={columns}
-      apiEndpoint="/api/autos"
-      renderEditForm={renderEditForm}
-      createNewItem={createNewAuto}
-    />
+    <>
+      <CrudTable<Auto>
+        title="Gestión de Autos"
+        columns={columns}
+        apiEndpoint="/api/autos"
+        renderEditForm={renderEditForm}
+        createNewItem={createNewAuto}
+        extraActions={extraActions}
+      />
+      {selectedAuto && (
+        <CedulaVerdeModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSave={handleSaveCedulaVerde}
+          patente={selectedAuto.patent}
+        />
+      )}
+    </>
   );
 };
 
