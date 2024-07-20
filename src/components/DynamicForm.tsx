@@ -11,7 +11,7 @@ import {
 import debounce from "lodash/debounce";
 import { useState } from "react";
 
-interface FieldConfig {
+export interface FieldConfig {
   name: string;
   label: string;
   type:
@@ -23,6 +23,9 @@ interface FieldConfig {
     | "date"
     | "number"
     | "autocomplete";
+  relatedObjectName?: string;
+  relatedObjectIdField?: string;
+  relatedObjectLabelField?: string;
   options?: Record<string, string | number>[];
   valueKey?: string;
   labelKey?: string;
@@ -74,16 +77,65 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
                 </Select>
               </FormControl>
             );
+          case "date":
+            return (
+              <TextField
+                key={field.name}
+                fullWidth
+                margin="normal"
+                type="date"
+                value={
+                  item?.[field.name as keyof T]
+                    ? new Date(item[field.name as keyof T] as string)
+                        .toISOString()
+                        .split("T")[0]
+                    : ""
+                }
+                onChange={(e) =>
+                  handleChange(field.name as keyof T, e.target.value)
+                }
+                label={field.label}
+              />
+            );
           case "autocomplete":
+            const relatedObject = field.relatedObjectName
+              ? item?.[field.relatedObjectName as keyof T]
+              : null;
+            const relatedObjectId =
+              field.relatedObjectIdField && relatedObject
+                ? relatedObject[
+                    field.relatedObjectIdField as keyof typeof relatedObject
+                  ]
+                : undefined;
+            const relatedObjectLabel =
+              field.relatedObjectLabelField && relatedObject
+                ? relatedObject[
+                    field.relatedObjectLabelField as keyof typeof relatedObject
+                  ]
+                : undefined;
+
             return (
               <Autocomplete
+                key={field.name}
                 options={autocompleteOptions[field.name] || []}
                 getOptionLabel={(option) => option.label}
                 value={
-                  item?.[field.name as keyof T]
-                    ? autocompleteOptions[field.name]?.find(
-                        (option) => option.value === item[field.name as keyof T]
-                      ) || null
+                  relatedObjectId && relatedObjectLabel
+                    ? {
+                        value: relatedObjectId.toString(),
+                        label: relatedObjectLabel.toString(),
+                      }
+                    : item?.[field.name as keyof T]
+                    ? {
+                        value: String(item[field.name as keyof T]),
+                        label: String(
+                          autocompleteOptions[field.name]?.find(
+                            (option) =>
+                              option.value ===
+                              String(item[field.name as keyof T])
+                          )?.label || ""
+                        ),
+                      }
                     : null
                 }
                 onChange={(_, newValue) =>

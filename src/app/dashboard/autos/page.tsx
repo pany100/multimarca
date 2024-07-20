@@ -1,7 +1,7 @@
 "use client";
 
 import CrudTable from "@/components/CrudTable";
-import DynamicForm from "@/components/DynamicForm";
+import DynamicForm, { FieldConfig } from "@/components/DynamicForm";
 
 interface Auto {
   id: string;
@@ -17,23 +17,6 @@ interface Auto {
   engine_number: string | null;
   observations: string | null;
   transmission_type: string | null;
-}
-
-type FieldType =
-  | "text"
-  | "email"
-  | "select"
-  | "multiselect"
-  | "checkbox"
-  | "date"
-  | "number"
-  | "autocomplete";
-
-interface FormField {
-  name: string;
-  label: string;
-  type: FieldType;
-  searchOptions?: (query: string) => Promise<any[]>;
 }
 
 const AutosPage = () => {
@@ -53,7 +36,7 @@ const AutosPage = () => {
     },
   ];
 
-  const formFields: FormField[] = [
+  const formFields: FieldConfig[] = [
     { name: "patent", label: "Patente", type: "text" },
     { name: "brand", label: "Marca", type: "text" },
     { name: "model", label: "Modelo", type: "text" },
@@ -65,6 +48,9 @@ const AutosPage = () => {
       name: "ownerId",
       label: "Propietario",
       type: "autocomplete",
+      relatedObjectName: "owner",
+      relatedObjectIdField: "id",
+      relatedObjectLabelField: "fullName",
       searchOptions: async (query: string) => {
         const response = await fetch(
           `/api/clientes?query=${query}&limit=10&page=0`
