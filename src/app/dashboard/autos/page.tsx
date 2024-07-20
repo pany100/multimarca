@@ -62,6 +62,10 @@ const AutosPage = () => {
           value: cliente.id,
         }));
       },
+      getInitialValue: (auto: Auto) => ({
+        value: auto.owner?.id || auto.ownerId,
+        label: auto.owner?.fullName || "",
+      }),
     },
     { name: "chassis_number", label: "Número de Chasis", type: "text" },
     { name: "engine_number", label: "Número de Motor", type: "text" },

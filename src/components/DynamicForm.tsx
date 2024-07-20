@@ -9,7 +9,7 @@ import {
   TextField,
 } from "@mui/material";
 import debounce from "lodash/debounce";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export interface FieldConfig {
   name: string;
@@ -27,7 +27,7 @@ export interface FieldConfig {
   valueKey?: string;
   labelKey?: string;
   searchOptions?: (query: string) => Promise<any[]>;
-  initialValue?: { value: string; label: string } | null;
+  getInitialValue?: (item: any) => { value: any; label: string };
 }
 
 interface DynamicFormProps<T> {
@@ -40,6 +40,8 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
   const [autocompleteOptions, setAutocompleteOptions] = useState<
     Record<string, { value: string; label: string }[]>
   >({});
+  const initializedRef = useRef(false);
+
   const debouncedSearch = debounce(
     async (
       field: FieldConfig,
@@ -53,6 +55,23 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
     },
     300
   );
+  useEffect(() => {
+    if (item && !initializedRef.current) {
+      // Cargar opciones iniciales para los campos de autocompletado
+      fields.forEach((field) => {
+        if (field.type === "autocomplete" && field.getInitialValue) {
+          const initialValue = field.getInitialValue(item);
+          if (initialValue) {
+            setAutocompleteOptions((prev) => ({
+              ...prev,
+              [field.name]: [initialValue],
+            }));
+          }
+        }
+      });
+      initializedRef.current = true;
+    }
+  }, [item, fields]);
   return (
     <>
       {fields.map((field) => {
@@ -76,6 +95,14 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
               </FormControl>
             );
           case "autocomplete":
+            console.log(field.getInitialValue?.(item) || null);
+            console.log(
+              item?.[field.name as keyof T]
+                ? autocompleteOptions[field.name]?.find(
+                    (option) => option.value === item[field.name as keyof T]
+                  ) || null
+                : null
+            );
             return (
               <Autocomplete
                 options={autocompleteOptions[field.name] || []}
@@ -87,6 +114,7 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
                       ) || null
                     : null
                 }
+                defaultValue={field.getInitialValue?.(item) || null}
                 onChange={(_, newValue) =>
                   handleChange(field.name as keyof T, newValue?.value)
                 }
