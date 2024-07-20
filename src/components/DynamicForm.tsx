@@ -1,4 +1,5 @@
 import {
+  Autocomplete,
   Checkbox,
   FormControl,
   InputLabel,
@@ -7,14 +8,25 @@ import {
   Select,
   TextField,
 } from "@mui/material";
+import debounce from "lodash/debounce";
+import { useState } from "react";
 
 interface FieldConfig {
   name: string;
   label: string;
-  type: "text" | "multiselect" | "select" | "email" | "checkbox" | "date";
+  type:
+    | "text"
+    | "email"
+    | "select"
+    | "multiselect"
+    | "checkbox"
+    | "date"
+    | "number"
+    | "autocomplete";
   options?: Record<string, string | number>[];
   valueKey?: string;
   labelKey?: string;
+  searchOptions?: (query: string) => Promise<any[]>;
 }
 
 interface DynamicFormProps<T> {
@@ -24,6 +36,22 @@ interface DynamicFormProps<T> {
 }
 
 function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
+  const [autocompleteOptions, setAutocompleteOptions] = useState<
+    Record<string, { value: string; label: string }[]>
+  >({});
+  const debouncedSearch = debounce(
+    async (
+      field: FieldConfig,
+      query: string,
+      callback: (options: { value: string; label: string }[]) => void
+    ) => {
+      if (field.searchOptions) {
+        const options = await field.searchOptions(query);
+        callback(options);
+      }
+    },
+    300
+  );
   return (
     <>
       {fields.map((field) => {
@@ -45,6 +73,43 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
                   ))}
                 </Select>
               </FormControl>
+            );
+          case "autocomplete":
+            return (
+              <Autocomplete
+                options={autocompleteOptions[field.name] || []}
+                getOptionLabel={(option) => option.label}
+                value={
+                  item?.[field.name as keyof T]
+                    ? autocompleteOptions[field.name]?.find(
+                        (option) => option.value === item[field.name as keyof T]
+                      ) || null
+                    : null
+                }
+                onChange={(_, newValue) =>
+                  handleChange(field.name as keyof T, newValue?.value)
+                }
+                onInputChange={(_, newInputValue) => {
+                  debouncedSearch(
+                    field,
+                    newInputValue,
+                    (options: { value: string; label: string }[]) => {
+                      setAutocompleteOptions((prev) => ({
+                        ...prev,
+                        [field.name]: options,
+                      }));
+                    }
+                  );
+                }}
+                renderInput={(params) => (
+                  <TextField {...params} label={field.label} />
+                )}
+                isOptionEqualToValue={(option, value) =>
+                  option.value === value.value
+                }
+                loadingText="Buscando..."
+                noOptionsText="No se encontraron resultados"
+              />
             );
           case "multiselect":
             return (
