@@ -1,18 +1,17 @@
-import React from "react";
 import {
   Checkbox,
-  TextField,
   FormControl,
   InputLabel,
   ListItemText,
-  Select,
   MenuItem,
+  Select,
+  TextField,
 } from "@mui/material";
 
 interface FieldConfig {
   name: string;
   label: string;
-  type: "text" | "multiselect" | "select" | "email";
+  type: "text" | "multiselect" | "select" | "email" | "checkbox" | "date";
   options?: Record<string, string | number>[];
   valueKey?: string;
   labelKey?: string;

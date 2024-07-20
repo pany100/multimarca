@@ -2,26 +2,70 @@ import { signupUser } from "@/lib/auth/signupUser";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
-export async function GET() {
-  const usuarios = await prisma.usuario.findMany({
-    select: {
-      id: true,
-      email: true,
-      fullName: true,
-      username: true,
-      avatar: true,
-      rol: {
-        select: {
-          name: true,
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "0");
+    const size = parseInt(searchParams.get("size") || "10");
+    const query = searchParams.get("query") || "";
+
+    const skip = page * size;
+
+    const [usuarios, total] = await Promise.all([
+      prisma.usuario.findMany({
+        where: {
+          OR: [
+            { fullName: { contains: query } },
+            { email: { contains: query } },
+            { username: { contains: query } },
+          ],
         },
-      },
-    },
-  });
-  const usuariosConRolName = usuarios.map((usuario) => ({
-    ...usuario,
-    rol: usuario.rol?.name,
-  }));
-  return NextResponse.json(usuariosConRolName);
+        select: {
+          id: true,
+          email: true,
+          fullName: true,
+          username: true,
+          avatar: true,
+          rol: {
+            select: {
+              name: true,
+            },
+          },
+        },
+        skip,
+        take: size,
+        orderBy: { fullName: "asc" },
+      }),
+      prisma.usuario.count({
+        where: {
+          OR: [
+            { fullName: { contains: query } },
+            { email: { contains: query } },
+            { username: { contains: query } },
+          ],
+        },
+      }),
+    ]);
+
+    const usuariosConRolName = usuarios.map((usuario) => ({
+      ...usuario,
+      rol: usuario.rol?.name,
+    }));
+
+    return NextResponse.json({
+      items: usuariosConRolName,
+      total,
+      page,
+      size,
+      totalPages: Math.ceil(total / size),
+    });
+  } catch (error) {
+    console.error("Error al obtener usuarios:", error);
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {

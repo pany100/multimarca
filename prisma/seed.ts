@@ -147,7 +147,6 @@ async function main() {
     const existingCliente = await prismaClient.cliente.findFirst({
       where: {
         fullName: record.nombre_completo,
-        phone: record.telefono,
       },
     });
     if (existingCliente) {

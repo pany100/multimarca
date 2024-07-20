@@ -1,27 +1,53 @@
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
-    const roles = await prisma.rol.findMany({
-      select: {
-        id: true,
-        name: true,
-        permisos: {
-          select: {
-            id: true,
-            name: true,
+    const { searchParams } = new URL(request.url);
+    const page = parseInt(searchParams.get("page") || "0");
+    const size = parseInt(searchParams.get("size") || "10");
+    const query = searchParams.get("query") || "";
+
+    const skip = page * size;
+
+    const [roles, total] = await Promise.all([
+      prisma.rol.findMany({
+        where: {
+          name: { contains: query },
+        },
+        select: {
+          id: true,
+          name: true,
+          permisos: {
+            select: {
+              id: true,
+              name: true,
+            },
           },
         },
-      },
-    });
+        skip,
+        take: size,
+        orderBy: { name: "asc" },
+      }),
+      prisma.rol.count({
+        where: {
+          name: { contains: query },
+        },
+      }),
+    ]);
 
     const rolesConPermisos = roles.map((rol) => ({
       ...rol,
       permisos: rol.permisos.map((permiso) => permiso.name),
     }));
 
-    return NextResponse.json(rolesConPermisos);
+    return NextResponse.json({
+      items: rolesConPermisos,
+      total,
+      page,
+      size,
+      totalPages: Math.ceil(total / size),
+    });
   } catch (error) {
     console.error("Error al obtener roles:", error);
     return NextResponse.json(
