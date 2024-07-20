@@ -1,19 +1,21 @@
-import React, { useState, useEffect } from "react";
-import {
-  Box,
-  IconButton,
-  Modal,
-  Typography,
-  Button,
-  Snackbar,
-  Alert,
-  Dialog,
-} from "@mui/material";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import EditIcon from "@mui/icons-material/Edit";
-import DeleteIcon from "@mui/icons-material/Delete";
 import authFetch from "@/utils/authFetch";
 import AddIcon from "@mui/icons-material/Add";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import {
+  Alert,
+  Box,
+  Button,
+  CircularProgress,
+  Dialog,
+  IconButton,
+  Modal,
+  Snackbar,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import React, { useCallback, useEffect, useState } from "react";
 
 interface CrudTableProps<T> {
   title: string;
@@ -34,6 +36,13 @@ function CrudTable<T extends { id: string }>({
   createNewItem,
 }: CrudTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [totalItems, setTotalItems] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 10,
+  });
   const [editingItem, setEditingItem] = useState<T | null>(null);
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
@@ -51,19 +60,37 @@ function CrudTable<T extends { id: string }>({
     setAddModalOpen(true);
   };
 
-  useEffect(() => {
-    const fetchItems = async () => {
-      try {
-        const response = await authFetch(apiEndpoint);
-        const data = await response.json();
-        setItems(data);
-      } catch (error) {
-        console.error(`Error al obtener ${title}:`, error);
-      }
-    };
+  const fetchItems = useCallback(async () => {
+    setLoading(true);
+    try {
+      const response = await authFetch(
+        `${apiEndpoint}?page=${paginationModel.page}&size=${paginationModel.pageSize}&query=${searchTerm}`
+      );
+      const data = await response.json();
+      setItems(Array.isArray(data) ? data : data.items || []);
+      setTotalItems(
+        typeof data.total === "number"
+          ? data.total
+          : Array.isArray(data)
+          ? data.length
+          : 0
+      );
+    } catch (error) {
+      setItems([]);
+      setTotalItems(0);
+    } finally {
+      setLoading(false);
+    }
+  }, [apiEndpoint, paginationModel.page, paginationModel.pageSize, searchTerm]);
 
+  useEffect(() => {
     fetchItems();
-  }, [apiEndpoint, title]);
+  }, [fetchItems]);
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setPaginationModel({ ...paginationModel, page: 0 }); // Reset to first page on new search
+  };
 
   const handleEditClick = (id: string) => {
     const itemToEdit = items.find((item) => item.id === id);
@@ -233,14 +260,31 @@ function CrudTable<T extends { id: string }>({
           Agregar {title}
         </Button>
       )}
-      <DataGrid
-        rows={items}
-        columns={[...columns, actionColumn]}
-        initialState={{
-          pagination: { paginationModel: { page: 0, pageSize: 5 } },
-        }}
-        pageSizeOptions={[5, 10]}
+      <TextField
+        label="Buscar"
+        variant="outlined"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        fullWidth
+        margin="normal"
       />
+      {loading && <CircularProgress />}
+      {!loading && items.length === 0 ? (
+        <Typography>No hay datos para mostrar</Typography>
+      ) : (
+        <DataGrid
+          rows={items}
+          columns={[...columns, actionColumn]}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[10, 20, 30]}
+          rowCount={totalItems}
+          paginationMode="server"
+          filterMode="server"
+          loading={loading}
+          getRowId={(row) => row.id}
+        />
+      )}
       <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
         <Box
           sx={{
