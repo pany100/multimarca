@@ -4,6 +4,10 @@ import CrudTable from "@/components/CrudTable";
 import DynamicForm, { FieldConfig } from "@/components/DynamicForm";
 
 interface Auto {
+  owner?: {
+    id: string;
+    fullName: string;
+  };
   id: string;
   patent: string;
   model: string | null;
@@ -48,9 +52,6 @@ const AutosPage = () => {
       name: "ownerId",
       label: "Propietario",
       type: "autocomplete",
-      relatedObjectName: "owner",
-      relatedObjectIdField: "id",
-      relatedObjectLabelField: "fullName",
       searchOptions: async (query: string) => {
         const response = await fetch(
           `/api/clientes?query=${query}&limit=10&page=0`
