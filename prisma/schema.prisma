@@ -87,5 +87,13 @@ model Auto {
   @@index([ownerId])
 }
 
+model ControlMecanico {
+  id   Int    @id @default(autoincrement())
+  name String @unique @db.VarChar(150)
+  type String @db.VarChar(10)
+
+  @@index([name])
+}
+
 
 
