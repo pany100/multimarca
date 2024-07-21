@@ -25,7 +25,14 @@ const StockPage = () => {
     { field: "name", headerName: "Nombre", width: 200 },
     { field: "brand", headerName: "Marca", width: 150 },
     { field: "buyPrice", headerName: "Precio de compra", width: 150 },
-    { field: "units", headerName: "Unidades", width: 100 },
+    {
+      field: "units",
+      headerName: "Unidades",
+      width: 100,
+      valueGetter: (units: any) => {
+        return units === null || units === undefined ? 0 : units;
+      },
+    },
     { field: "restockValue", headerName: "Valor de reposición", width: 150 },
     { field: "label", headerName: "Etiqueta", width: 150 },
     { field: "markup", headerName: "Margen", width: 100 },
