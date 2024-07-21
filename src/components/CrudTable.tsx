@@ -28,6 +28,7 @@ interface CrudTableProps<T> {
   createNewItem?: () => T;
   extraActions?: (item: T) => React.ReactNode;
   getRowClassName?: (params: GridRowParams) => string;
+  refreshTrigger?: number;
 }
 
 function CrudTable<T extends { id: string }>({
@@ -38,6 +39,7 @@ function CrudTable<T extends { id: string }>({
   createNewItem,
   extraActions,
   getRowClassName,
+  refreshTrigger = 0,
 }: CrudTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -93,6 +95,10 @@ function CrudTable<T extends { id: string }>({
   useEffect(() => {
     fetchItems();
   }, [fetchItems]);
+
+  useEffect(() => {
+    fetchItems();
+  }, [fetchItems, refreshTrigger]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);

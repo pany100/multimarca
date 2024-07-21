@@ -2,7 +2,18 @@
 
 import CrudTable from "@/components/CrudTable";
 import DynamicForm, { FieldConfig } from "@/components/DynamicForm";
-import { Box, Tab, Tabs } from "@mui/material";
+import {
+  Alert,
+  Autocomplete,
+  Box,
+  Button,
+  Modal,
+  Snackbar,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import { useState } from "react";
 
@@ -23,7 +34,61 @@ interface Stock {
 }
 
 const StockPage = () => {
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
   const [tabValue, setTabValue] = useState(0);
+  const [openModal, setOpenModal] = useState(false);
+  const [selectedProveedor, setSelectedProveedor] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const [porcentajeAumento, setPorcentajeAumento] = useState("");
+  const [proveedorOptions, setProveedorOptions] = useState<
+    Array<{ id: number; name: string }>
+  >([]);
+
+  const handleUpdatePrices = async () => {
+    if (!selectedProveedor || !porcentajeAumento) return;
+
+    try {
+      const response = await fetch("/api/stock/updateByProvider", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          proveedorId: selectedProveedor.id,
+          porcentajeAumento: parseFloat(porcentajeAumento),
+        }),
+      });
+
+      if (response.ok) {
+        setSnackbar({
+          open: true,
+          message: "Precios actualizados con éxito",
+          severity: "success",
+        });
+        setOpenModal(false);
+        setRefreshTrigger((prev) => prev + 1);
+      } else {
+        setSnackbar({
+          open: true,
+          message: "Error al actualizar precios",
+          severity: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+      setSnackbar({
+        open: true,
+        message: "Error al actualizar precios",
+        severity: "error",
+      });
+    }
+  };
 
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
@@ -118,6 +183,11 @@ const StockPage = () => {
           <Tab label="Restock" />
         </Tabs>
       </Box>
+      <Box sx={{ width: "100%", mb: 2 }}>
+        <Button variant="contained" onClick={() => setOpenModal(true)}>
+          Actualizar precios por proveedor
+        </Button>
+      </Box>
       {tabValue === 0 && (
         <CrudTable<Stock>
           title="Stock"
@@ -126,6 +196,7 @@ const StockPage = () => {
           renderEditForm={renderEditForm}
           createNewItem={createNewStock}
           getRowClassName={getRowClassName}
+          refreshTrigger={refreshTrigger}
         />
       )}
       {tabValue === 1 && (
@@ -136,8 +207,87 @@ const StockPage = () => {
           renderEditForm={renderEditForm}
           createNewItem={createNewStock}
           getRowClassName={getRowClassName}
+          refreshTrigger={refreshTrigger}
         />
       )}
+      <Modal open={openModal} onClose={() => setOpenModal(false)}>
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: 400,
+            bgcolor: "background.paper",
+            boxShadow: 24,
+            p: 4,
+          }}
+        >
+          <Typography variant="h6" component="h2">
+            Actualizar precio por proveedor
+          </Typography>
+          <Typography sx={{ mt: 2 }}>
+            Buscar proveedor y poner el % de aumento que se le va a aplicar a
+            todos los repuestos provenientes del mismo
+          </Typography>
+          <Autocomplete
+            options={proveedorOptions}
+            getOptionLabel={(option: { name: string; id: number }) =>
+              option.name
+            }
+            renderInput={(params) => (
+              <TextField {...params} label="Proveedor" />
+            )}
+            onChange={(_, newValue) =>
+              setSelectedProveedor(
+                newValue ? { id: newValue.id, name: newValue.name } : null
+              )
+            }
+            sx={{ mt: 2 }}
+            onInputChange={(_, newInputValue) => {
+              if (newInputValue) {
+                fetch(`/api/proveedores?query=${newInputValue}&limit=10&page=0`)
+                  .then((response) => response.json())
+                  .then((data) => {
+                    const options = data.items.map(
+                      (proveedor: { name: string; id: number }) => ({
+                        id: proveedor.id,
+                        name: proveedor.name,
+                      })
+                    );
+                    setProveedorOptions(options);
+                  });
+              }
+            }}
+          />
+          <TextField
+            label="Porcentaje de aumento"
+            type="number"
+            value={porcentajeAumento}
+            onChange={(e) => setPorcentajeAumento(e.target.value)}
+            sx={{ mt: 2 }}
+          />
+          <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}>
+            <Button onClick={() => setOpenModal(false)}>Descartar</Button>
+            <Button onClick={handleUpdatePrices} variant="contained">
+              Guardar
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+      >
+        <Alert
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
