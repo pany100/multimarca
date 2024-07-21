@@ -231,6 +231,30 @@ async function main() {
     });
   }
   console.log("Carga de Autos completada.");
+
+  console.log("Iniciando carga de Mano de Obra...");
+  const trabajosData = fs.readFileSync("data/works.csv", { encoding: "utf-8" });
+  const trabajosRecords = parse(trabajosData, {
+    columns: true,
+    skip_empty_lines: true,
+  });
+
+  for (const record of trabajosRecords) {
+    await prismaClient.manoDeObra.upsert({
+      where: { name: record.name },
+      update: {
+        name: record.name,
+        sellPrice:
+          record.sellPrice === "" ? null : parseFloat(record.sellPrice),
+      },
+      create: {
+        name: record.name,
+        sellPrice:
+          record.sellPrice === "" ? null : parseFloat(record.sellPrice),
+      },
+    });
+  }
+  console.log("Carga de Mano de Obra completada.");
 }
 
 main()

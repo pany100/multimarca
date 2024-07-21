@@ -95,5 +95,12 @@ model ControlMecanico {
   @@index([name])
 }
 
+model ManoDeObra {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique @db.VarChar(250)
+  sellPrice Decimal?  @db.Decimal(10, 2)
+
+  @@index([name])
+}
 
 
