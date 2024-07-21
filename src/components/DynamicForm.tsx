@@ -161,10 +161,9 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
                     : null
                 }
                 defaultValue={field.getInitialValue?.(item) || null}
-                onChange={(_, newValue) => {
-                  handleChange(field.name as keyof T, newValue?.value);
-                  field.onChange?.(newValue);
-                }}
+                onChange={(_, newValue) =>
+                  handleChange(field.name as keyof T, newValue?.value)
+                }
                 onInputChange={(_, newInputValue) => {
                   debouncedSearch(
                     field,

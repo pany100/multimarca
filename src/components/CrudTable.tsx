@@ -307,6 +307,7 @@ function CrudTable<T extends { id: string }>({
           loading={loading}
           getRowId={(row) => row.id}
           getRowClassName={getRowClassName}
+          getRowHeight={() => "auto"}
         />
       )}
       <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>

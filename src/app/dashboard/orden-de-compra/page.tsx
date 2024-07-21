@@ -9,8 +9,10 @@ import {
   Grid,
   IconButton,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import * as Yup from "yup";
 
 interface OrdenDeCompra {
   id: string;
@@ -30,6 +32,28 @@ interface OrdenDeCompra {
     };
   }>;
 }
+
+const ordenDeCompraSchema = Yup.object().shape({
+  fecha: Yup.date().required("La fecha es requerida"),
+  precioTotal: Yup.number()
+    .positive("El precio total debe ser mayor a 0")
+    .required("El precio total es requerido"),
+  proveedorId: Yup.number()
+    .positive("Debe seleccionar un proveedor")
+    .required("El proveedor es requerido"),
+  items: Yup.array()
+    .of(
+      Yup.object().shape({
+        stockId: Yup.number()
+          .positive("Debe seleccionar un stock")
+          .required("El stock es requerido"),
+        cantidad: Yup.number()
+          .positive("La cantidad debe ser mayor a 0")
+          .required("La cantidad es requerida"),
+      })
+    )
+    .min(1, "Debe agregar al menos un item"),
+});
 
 const OrdenDeCompraPage = () => {
   const [items, setItems] = useState<OrdenDeCompra["items"]>([]);
@@ -52,6 +76,34 @@ const OrdenDeCompraPage = () => {
       width: 200,
       valueGetter: (proveedor: any) => proveedor?.name || "",
     },
+    {
+      field: "detalle",
+      headerName: "Detalle",
+      width: 300,
+      renderCell: (params: any) => {
+        const items = params.row.items || [];
+        return (
+          <div
+            style={{
+              whiteSpace: "normal",
+              wordWrap: "break-word",
+              lineHeight: "1.2em",
+              padding: "10px 0",
+            }}
+          >
+            {items.map((item: any, index: number) => (
+              <Typography
+                key={index}
+                variant="body2"
+                style={{ marginBottom: "5px" }}
+              >
+                {item.stock.name}: {item.cantidad}
+              </Typography>
+            ))}
+          </div>
+        );
+      },
+    },
   ];
 
   const searchStock = async (query: string, index: number) => {
@@ -72,6 +124,16 @@ const OrdenDeCompraPage = () => {
     }
   };
 
+  const validateItems = (items: OrdenDeCompra["items"]) => {
+    if (items.length === 0) return "Debe agregar al menos un item";
+    for (const item of items) {
+      if (item.stockId === 0 || item.cantidad === 0) {
+        return "Todos los items deben tener stock y cantidad";
+      }
+    }
+    return null;
+  };
+
   const formFields: FieldConfig[] = [
     { name: "fecha", label: "Fecha", type: "date" },
     { name: "precioTotal", label: "Precio Total", type: "number" },
@@ -89,12 +151,16 @@ const OrdenDeCompraPage = () => {
           value: proveedor.id,
         }));
       },
-      getInitialValue: (ordenDeCompra: OrdenDeCompra) => ({
-        value: ordenDeCompra.proveedorId,
-        label: ordenDeCompra.proveedor?.name || "",
-      }),
-      onChange: (value: { value: number; label: string }) => {
-        setProveedorId(value.value);
+      getInitialValue: (ordenDeCompra: OrdenDeCompra) => {
+        const value = {
+          value: ordenDeCompra.proveedorId,
+          label: ordenDeCompra.proveedor?.name || "",
+        };
+        setProveedorId(ordenDeCompra.proveedorId);
+        return value;
+      },
+      onChange: (value: { value: number; label: string } | null) => {
+        setProveedorId(value?.value ?? null);
       },
     },
     {
@@ -106,6 +172,12 @@ const OrdenDeCompraPage = () => {
         if (currentItems.length > 0) {
           setItems(currentItems);
         }
+        const isLastItemComplete = () => {
+          if (items.length === 0) return true;
+          const lastItem = items[items.length - 1];
+          return lastItem.stockId !== 0 && lastItem.cantidad !== 0;
+        };
+
         return (
           <>
             {items.map((item, index) => (
@@ -173,6 +245,7 @@ const OrdenDeCompraPage = () => {
                 setItems(newItems);
                 onChange(newItems);
               }}
+              disabled={!isLastItemComplete()}
             >
               Agregar Item
             </Button>
