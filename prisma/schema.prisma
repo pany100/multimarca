@@ -112,6 +112,7 @@ model Proveedor {
   mobile  String? @db.VarChar(150)
   iva     String? @db.VarChar(150)
   cuit    String? @db.VarChar(150)
+  stocks  Stock[]
 
   @@index([name])
   @@index([cuit])
@@ -134,4 +135,19 @@ model Mecanico {
   @@index([dni])
 }
 
+model Stock {
+  id           Int      @id @default(autoincrement())
+  name         String   @db.VarChar(250)
+  brand        String   @db.VarChar(250)
+  buyPrice     Decimal  @db.Decimal(10, 2)
+  units        Int?
+  restockValue Int?
+  label        String?  @db.VarChar(250)
+  markup       Float?
+  proveedor    Proveedor @relation(fields: [proveedorId], references: [id])
+  proveedorId  Int
 
+  @@index([name])
+  @@index([brand])
+  @@index([proveedorId])
+}
