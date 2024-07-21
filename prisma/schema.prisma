@@ -113,6 +113,7 @@ model Proveedor {
   iva     String? @db.VarChar(150)
   cuit    String? @db.VarChar(150)
   stocks  Stock[]
+  ordenesDeCompra OrdenDeCompra[]
 
   @@index([name])
   @@index([cuit])
@@ -146,8 +147,33 @@ model Stock {
   markup       Float?
   proveedor    Proveedor @relation(fields: [proveedorId], references: [id])
   proveedorId  Int
+  ordenDeCompraItems OrdenDeCompraItem[]
 
   @@index([name])
   @@index([brand])
   @@index([proveedorId])
+}
+
+model OrdenDeCompra {
+  id              Int       @id @default(autoincrement())
+  fecha           DateTime  @default(now())
+  precioTotal     Decimal   @db.Decimal(10, 2)
+  proveedor       Proveedor @relation(fields: [proveedorId], references: [id])
+  proveedorId     Int
+  items           OrdenDeCompraItem[]
+
+  @@index([proveedorId])
+  @@index([fecha])
+}
+
+model OrdenDeCompraItem {
+  id              Int           @id @default(autoincrement())
+  cantidad        Int
+  stock           Stock         @relation(fields: [stockId], references: [id])
+  stockId         Int
+  ordenDeCompra   OrdenDeCompra @relation(fields: [ordenDeCompraId], references: [id])
+  ordenDeCompraId Int
+
+  @@index([stockId])
+  @@index([ordenDeCompraId])
 }

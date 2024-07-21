@@ -23,12 +23,15 @@ export interface FieldConfig {
     | "date"
     | "number"
     | "autocomplete"
-    | "tel";
+    | "tel"
+    | "custom";
   options?: Record<string, string | number>[];
   valueKey?: string;
   labelKey?: string;
   searchOptions?: (query: string) => Promise<any[]>;
   getInitialValue?: (item: any) => { value: any; label: string };
+  render?: (value: any, onChange: (value: any) => void) => React.ReactNode;
+  onChange?: (value: any) => void;
 }
 
 interface DynamicFormProps<T> {
@@ -77,6 +80,18 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
     <>
       {fields.map((field) => {
         switch (field.type) {
+          case "custom":
+            if (field.render) {
+              return (
+                <div key={field.name}>
+                  {field.render(
+                    item ? item[field.name as keyof T] : null,
+                    (value) => handleChange(field.name as keyof T, value)
+                  )}
+                </div>
+              );
+            }
+            return null;
           case "date":
             return (
               <TextField
@@ -146,9 +161,10 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
                     : null
                 }
                 defaultValue={field.getInitialValue?.(item) || null}
-                onChange={(_, newValue) =>
-                  handleChange(field.name as keyof T, newValue?.value)
-                }
+                onChange={(_, newValue) => {
+                  handleChange(field.name as keyof T, newValue?.value);
+                  field.onChange?.(newValue);
+                }}
                 onInputChange={(_, newInputValue) => {
                   debouncedSearch(
                     field,
