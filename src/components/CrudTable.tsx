@@ -14,7 +14,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import React, { useCallback, useEffect, useState } from "react";
 
 interface CrudTableProps<T> {
@@ -26,7 +26,8 @@ interface CrudTableProps<T> {
     handleChange: (field: keyof T, value: any) => void
   ) => React.ReactNode;
   createNewItem?: () => T;
-  extraActions?: (item: T) => React.ReactNode; // Nueva propiedad
+  extraActions?: (item: T) => React.ReactNode;
+  getRowClassName?: (params: GridRowParams) => string;
 }
 
 function CrudTable<T extends { id: string }>({
@@ -36,6 +37,7 @@ function CrudTable<T extends { id: string }>({
   renderEditForm,
   createNewItem,
   extraActions,
+  getRowClassName,
 }: CrudTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -65,9 +67,12 @@ function CrudTable<T extends { id: string }>({
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const response = await authFetch(
-        `${apiEndpoint}?page=${paginationModel.page}&size=${paginationModel.pageSize}&query=${searchTerm}`
-      );
+      const url = new URL(apiEndpoint, window.location.origin);
+      url.searchParams.append("page", paginationModel.page.toString());
+      url.searchParams.append("size", paginationModel.pageSize.toString());
+      if (searchTerm) url.searchParams.append("query", searchTerm);
+
+      const response = await authFetch(url.toString());
       const data = await response.json();
       setItems(Array.isArray(data) ? data : data.items || []);
       setTotalItems(
@@ -110,7 +115,10 @@ function CrudTable<T extends { id: string }>({
     if (!newItem) return;
 
     try {
-      const response = await authFetch(apiEndpoint, {
+      const url = new URL(apiEndpoint, window.location.origin);
+      const baseUrl = `${url.origin}${url.pathname}`;
+
+      const response = await authFetch(baseUrl, {
         method: "POST",
         body: JSON.stringify(newItem),
       });
@@ -152,7 +160,10 @@ function CrudTable<T extends { id: string }>({
     if (!editingItem) return;
 
     try {
-      const response = await authFetch(`${apiEndpoint}/${editingItem.id}`, {
+      const url = new URL(apiEndpoint, window.location.origin);
+      const baseUrl = `${url.origin}${url.pathname}`;
+
+      const response = await authFetch(`${baseUrl}/${editingItem.id}`, {
         method: "PUT",
         body: JSON.stringify(editingItem),
       });
@@ -193,7 +204,10 @@ function CrudTable<T extends { id: string }>({
     if (!itemToDelete) return;
 
     try {
-      const response = await authFetch(`${apiEndpoint}/${itemToDelete}`, {
+      const url = new URL(apiEndpoint, window.location.origin);
+      const baseUrl = `${url.origin}${url.pathname}`;
+
+      const response = await authFetch(`${baseUrl}/${itemToDelete}`, {
         method: "DELETE",
       });
       if (response.ok) {
@@ -286,6 +300,7 @@ function CrudTable<T extends { id: string }>({
           filterMode="server"
           loading={loading}
           getRowId={(row) => row.id}
+          getRowClassName={getRowClassName}
         />
       )}
       <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>

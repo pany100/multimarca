@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import React, { useState } from "react";
+import "src/app/globals.css";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { userData } = useAuth();

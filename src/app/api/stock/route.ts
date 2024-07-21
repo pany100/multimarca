@@ -7,23 +7,38 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get("page") || "0");
     const size = parseInt(searchParams.get("size") || "10");
     const query = searchParams.get("query") || "";
+    const needsRestock = searchParams.get("needsRestock") === "true";
 
     const skip = page * size;
 
+    let whereClause: any = {
+      OR: [{ name: { contains: query } }, { brand: { contains: query } }],
+    };
+
+    if (needsRestock) {
+      whereClause = {
+        AND: [
+          whereClause,
+          {
+            OR: [
+              { units: { lte: prisma.stock.fields.restockValue } },
+              { units: null },
+            ],
+          },
+        ],
+      };
+    }
+
     const [stocks, total] = await Promise.all([
       prisma.stock.findMany({
-        where: {
-          OR: [{ name: { contains: query } }, { brand: { contains: query } }],
-        },
+        where: whereClause,
         skip,
         take: size,
         orderBy: { name: "asc" },
         include: { proveedor: true },
       }),
       prisma.stock.count({
-        where: {
-          OR: [{ name: { contains: query } }, { brand: { contains: query } }],
-        },
+        where: whereClause,
       }),
     ]);
 

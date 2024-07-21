@@ -2,6 +2,9 @@
 
 import CrudTable from "@/components/CrudTable";
 import DynamicForm, { FieldConfig } from "@/components/DynamicForm";
+import { Box, Tab, Tabs } from "@mui/material";
+import { GridRowParams } from "@mui/x-data-grid";
+import { useState } from "react";
 
 interface Stock {
   id: string;
@@ -20,6 +23,8 @@ interface Stock {
 }
 
 const StockPage = () => {
+  const [tabValue, setTabValue] = useState(0);
+
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "name", headerName: "Nombre", width: 200 },
@@ -95,15 +100,45 @@ const StockPage = () => {
       proveedorId: 0,
     };
   };
+  const getRowClassName = (params: GridRowParams) => {
+    if (params.row.units < params.row.restockValue) {
+      return "low-stock-row";
+    }
+    return "";
+  };
 
   return (
-    <CrudTable<Stock>
-      title="Stock"
-      columns={columns}
-      apiEndpoint="/api/stock"
-      renderEditForm={renderEditForm}
-      createNewItem={createNewStock}
-    />
+    <>
+      <Box sx={{ width: "100%" }}>
+        <Tabs
+          value={tabValue}
+          onChange={(_, newValue) => setTabValue(newValue)}
+        >
+          <Tab label="Stock" />
+          <Tab label="Restock" />
+        </Tabs>
+      </Box>
+      {tabValue === 0 && (
+        <CrudTable<Stock>
+          title="Stock"
+          columns={columns}
+          apiEndpoint="/api/stock"
+          renderEditForm={renderEditForm}
+          createNewItem={createNewStock}
+          getRowClassName={getRowClassName}
+        />
+      )}
+      {tabValue === 1 && (
+        <CrudTable<Stock>
+          title="Restock"
+          columns={columns}
+          apiEndpoint="/api/stock?needsRestock=true"
+          renderEditForm={renderEditForm}
+          createNewItem={createNewStock}
+          getRowClassName={getRowClassName}
+        />
+      )}
+    </>
   );
 };
 
