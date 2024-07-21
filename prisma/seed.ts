@@ -255,6 +255,80 @@ async function main() {
     });
   }
   console.log("Carga de Mano de Obra completada.");
+
+  console.log("Iniciando carga de Mecánicos...");
+  const mecanicosData = fs.readFileSync("data/mechanics.csv", {
+    encoding: "utf-8",
+  });
+  const mecanicosRecords = parse(mecanicosData, {
+    columns: true,
+    skip_empty_lines: true,
+  });
+
+  for (const record of mecanicosRecords) {
+    await prismaClient.mecanico.upsert({
+      where: { name: record.nombre },
+      update: {
+        name: record.nombre,
+        dni: record.dni === "" ? null : BigInt(record.dni),
+        address: record.dirección === "" ? null : record.dirección,
+        city: record.ciudad === "" ? null : record.ciudad,
+        state: record.provincia === "" ? null : record.provincia,
+        postal_code:
+          record["codigo postal"] === "" ? null : record["codigo postal"],
+        email: record.email === "" ? null : record.email,
+        phone: record.teléfono === "" ? null : record.teléfono,
+        birthday: record.cumpleaños === "" ? null : record.cumpleaños,
+      },
+      create: {
+        name: record.nombre,
+        dni: record.dni === "" ? null : BigInt(record.dni),
+        address: record.dirección === "" ? null : record.dirección,
+        city: record.ciudad === "" ? null : record.ciudad,
+        state: record.provincia === "" ? null : record.provincia,
+        postal_code:
+          record["codigo postal"] === "" ? null : record["codigo postal"],
+        email: record.email === "" ? null : record.email,
+        phone: record.teléfono === "" ? null : record.teléfono,
+        birthday: record.cumpleaños === "" ? null : record.cumpleaños,
+      },
+    });
+  }
+  console.log("Carga de Mecánicos completada.");
+
+  console.log("Iniciando carga de Proveedores...");
+  const proveedoresData = fs.readFileSync("data/providers.csv", {
+    encoding: "utf-8",
+  });
+  const proveedoresRecords = parse(proveedoresData, {
+    columns: true,
+    skip_empty_lines: true,
+  });
+
+  for (const record of proveedoresRecords) {
+    await prismaClient.proveedor.upsert({
+      where: { name: record.nombre },
+      update: {
+        name: record.nombre,
+        address: record.dirección === "" ? null : record.dirección,
+        email: record.email === "" ? null : record.email,
+        phone: record.teléfono === "" ? null : record.teléfono,
+        mobile: record.celular === "" ? null : record.celular,
+        iva: record.iva === "" ? null : record.iva,
+        cuit: record.CUIT === "" ? null : record.CUIT,
+      },
+      create: {
+        name: record.nombre,
+        address: record.dirección === "" ? null : record.dirección,
+        email: record.email === "" ? null : record.email,
+        phone: record.teléfono === "" ? null : record.teléfono,
+        mobile: record.celular === "" ? null : record.celular,
+        iva: record.iva === "" ? null : record.iva,
+        cuit: record.CUIT === "" ? null : record.CUIT,
+      },
+    });
+  }
+  console.log("Carga de Proveedores completada.");
 }
 
 main()

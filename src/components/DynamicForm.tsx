@@ -22,7 +22,8 @@ export interface FieldConfig {
     | "checkbox"
     | "date"
     | "number"
-    | "autocomplete";
+    | "autocomplete"
+    | "tel";
   options?: Record<string, string | number>[];
   valueKey?: string;
   labelKey?: string;
@@ -76,6 +77,44 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
     <>
       {fields.map((field) => {
         switch (field.type) {
+          case "date":
+            return (
+              <TextField
+                key={field.name}
+                fullWidth
+                margin="normal"
+                label={field.label}
+                type="date"
+                value={
+                  item?.[field.name as keyof T]
+                    ? new Date(item[field.name as keyof T] as string)
+                        .toISOString()
+                        .split("T")[0]
+                    : ""
+                }
+                onChange={(e) =>
+                  handleChange(field.name as keyof T, e.target.value)
+                }
+              />
+            );
+          case "tel":
+            return (
+              <TextField
+                key={field.name}
+                fullWidth
+                margin="normal"
+                label={field.label}
+                type="tel"
+                value={item?.[field.name as keyof T] || ""}
+                onChange={(e) =>
+                  handleChange(field.name as keyof T, e.target.value)
+                }
+                inputProps={{
+                  pattern: "[0-9]{9,12}", // Patrón para números de teléfono entre 9 y 12 dígitos
+                  inputMode: "numeric",
+                }}
+              />
+            );
           case "select":
             return (
               <FormControl key={field.name} fullWidth margin="normal">
@@ -95,14 +134,6 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
               </FormControl>
             );
           case "autocomplete":
-            console.log(field.getInitialValue?.(item) || null);
-            console.log(
-              item?.[field.name as keyof T]
-                ? autocompleteOptions[field.name]?.find(
-                    (option) => option.value === item[field.name as keyof T]
-                  ) || null
-                : null
-            );
             return (
               <Autocomplete
                 options={autocompleteOptions[field.name] || []}

@@ -103,4 +103,35 @@ model ManoDeObra {
   @@index([name])
 }
 
+model Proveedor {
+  id      Int     @id @default(autoincrement())
+  name    String  @unique @db.VarChar(150)
+  address String? @db.VarChar(150)
+  email   String? @db.VarChar(150)
+  phone   String? @db.VarChar(150)
+  mobile  String? @db.VarChar(150)
+  iva     String? @db.VarChar(150)
+  cuit    String? @db.VarChar(150)
+
+  @@index([name])
+  @@index([cuit])
+}
+
+model Mecanico {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique @db.VarChar(150)
+  start_date  DateTime?
+  dni         BigInt?
+  address     String?  @db.VarChar(150)
+  city        String?  @db.VarChar(150)
+  state       String?  @db.VarChar(150)
+  postal_code String?  @db.VarChar(10)
+  email       String?  @db.VarChar(150)
+  phone       String?  @db.VarChar(150)
+  birthday    DateTime?
+
+  @@index([name])
+  @@index([dni])
+}
+
 
