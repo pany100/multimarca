@@ -2,12 +2,18 @@
 
 import CrudTable from "@/components/CrudTable";
 import DynamicForm, { FieldConfig } from "@/components/DynamicForm";
-import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Autocomplete,
   Button,
-  Grid,
-  IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
@@ -57,9 +63,16 @@ const ordenDeCompraSchema = Yup.object().shape({
 
 const OrdenDeCompraPage = () => {
   const [items, setItems] = useState<OrdenDeCompra["items"]>([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [newItem, setNewItem] = useState({
+    id: "",
+    stockId: 0,
+    stock: { id: 0, name: "" },
+    cantidad: 0,
+  });
   const [proveedorId, setProveedorId] = useState<number | null>(null);
   const [stockOptions, setStockOptions] = useState<
-    Array<Array<{ id: number; name: string }>>
+    Array<{ id: number; name: string }>
   >([]);
 
   useEffect(() => {
@@ -106,7 +119,7 @@ const OrdenDeCompraPage = () => {
     },
   ];
 
-  const searchStock = async (query: string, index: number) => {
+  const searchStock = async (query: string) => {
     if (proveedorId) {
       const response = await fetch(
         `/api/proveedores/${proveedorId}/stock?query=${query}&page=0&size=10`
@@ -116,11 +129,7 @@ const OrdenDeCompraPage = () => {
         id: stock.id,
         name: stock.name,
       }));
-      setStockOptions((prev) => {
-        const newOptions = [...prev];
-        newOptions[index] = results;
-        return newOptions;
-      });
+      setStockOptions(results);
     }
   };
 
@@ -172,83 +181,99 @@ const OrdenDeCompraPage = () => {
         if (currentItems.length > 0) {
           setItems(currentItems);
         }
-        const isLastItemComplete = () => {
-          if (items.length === 0) return true;
-          const lastItem = items[items.length - 1];
-          return lastItem.stockId !== 0 && lastItem.cantidad !== 0;
-        };
-
         return (
           <>
-            {items.map((item, index) => (
-              <Grid container spacing={2} key={index}>
-                <Grid item xs={5}>
-                  <Autocomplete
-                    options={stockOptions[index] || []}
-                    getOptionLabel={(option: { name: string; id: number }) =>
-                      option.name
-                    }
-                    renderInput={(params) => (
-                      <TextField {...params} label="Stock" />
-                    )}
-                    value={item.stock}
-                    onChange={(_, newValue) => {
-                      const newItems = [...items];
-                      newItems[index].stockId = newValue?.id ?? 0;
-                      newItems[index].stock = newValue ?? { id: 0, name: "" };
-                      setItems(newItems);
-                      onChange(newItems);
-                    }}
-                    onInputChange={(_, newInputValue) => {
-                      searchStock(newInputValue, index);
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={5}>
-                  <TextField
-                    label="Unidades"
-                    type="number"
-                    value={item.cantidad}
-                    onChange={(e) => {
-                      const newItems = [...items];
-                      newItems[index].cantidad = Number(e.target.value);
-                      setItems(newItems);
-                      onChange(newItems);
-                    }}
-                  />
-                </Grid>
-                <Grid item xs={2}>
-                  <IconButton
-                    onClick={() => {
-                      const newItems = items.filter((_, i) => i !== index);
-                      setItems(newItems);
-                      onChange(newItems);
-                    }}
-                  >
-                    <DeleteIcon />
-                  </IconButton>
-                </Grid>
-              </Grid>
-            ))}
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Stock</TableCell>
+                  <TableCell>Cantidad</TableCell>
+                  <TableCell>Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {items.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{item.stock.name}</TableCell>
+                    <TableCell>{item.cantidad}</TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => {
+                          const newItems = items.filter((i) => i !== item);
+                          setItems(newItems);
+                          onChange(newItems);
+                        }}
+                      >
+                        Eliminar
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
             <Button
               variant="contained"
-              onClick={() => {
-                const newItems = [
-                  ...items,
-                  {
-                    id: "",
-                    stockId: 0,
-                    stock: { id: 0, name: "" },
-                    cantidad: 0,
-                  },
-                ];
-                setItems(newItems);
-                onChange(newItems);
-              }}
-              disabled={!isLastItemComplete()}
+              onClick={() => setOpenModal(true)}
+              disabled={proveedorId === 0}
             >
               Agregar Item
             </Button>
+            <Dialog open={openModal} onClose={() => setOpenModal(false)}>
+              <DialogTitle>Agregar Nuevo Item</DialogTitle>
+              <DialogContent>
+                <Autocomplete
+                  options={stockOptions || []}
+                  getOptionLabel={(option: { name: string; id: number }) =>
+                    option.name
+                  }
+                  renderInput={(params) => (
+                    <TextField {...params} label="Stock" />
+                  )}
+                  value={newItem.stock}
+                  onChange={(_, newValue) => {
+                    setNewItem({
+                      ...newItem,
+                      stockId: newValue?.id ?? 0,
+                      stock: newValue ?? { id: 0, name: "" },
+                    });
+                  }}
+                  onInputChange={(_, newInputValue) => {
+                    searchStock(newInputValue);
+                  }}
+                />
+                <TextField
+                  label="Unidades"
+                  type="number"
+                  value={newItem.cantidad}
+                  onChange={(e) => {
+                    setNewItem({
+                      ...newItem,
+                      cantidad: Number(e.target.value),
+                    });
+                  }}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
+                <Button
+                  onClick={() => {
+                    const newItems = [...items, newItem];
+                    setItems(newItems);
+                    onChange(newItems);
+                    setOpenModal(false);
+                    setNewItem({
+                      id: "",
+                      stockId: 0,
+                      stock: { id: 0, name: "" },
+                      cantidad: 0,
+                    });
+                  }}
+                  disabled={newItem.stockId === 0 || newItem.cantidad === 0}
+                >
+                  Agregar
+                </Button>
+              </DialogActions>
+            </Dialog>
           </>
         );
       },
