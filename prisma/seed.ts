@@ -329,6 +329,22 @@ async function main() {
     });
   }
   console.log("Carga de Proveedores completada.");
+
+  console.log("Iniciando carga de Categorías de Gasto...");
+  const categoriasGasto = [
+    "Pago Proveedores",
+    "Pago Mecánicos",
+    "Pago General",
+  ];
+
+  for (const categoria of categoriasGasto) {
+    await prismaClient.categoriaGasto.upsert({
+      where: { nombre: categoria },
+      update: {},
+      create: { nombre: categoria },
+    });
+  }
+  console.log("Carga de Categorías de Gasto completada.");
 }
 
 main()

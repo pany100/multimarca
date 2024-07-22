@@ -132,6 +132,7 @@ model Mecanico {
   email       String?  @db.VarChar(150)
   phone       String?  @db.VarChar(150)
   birthday    DateTime?
+  gastosRealizados Gasto[]
 
   @@index([name])
   @@index([dni])
@@ -162,6 +163,7 @@ model OrdenDeCompra {
   proveedor       Proveedor @relation(fields: [proveedorId], references: [id])
   proveedorId     Int
   items           OrdenDeCompraItem[]
+  gastos Gasto[]
 
   @@index([proveedorId])
   @@index([fecha])
@@ -195,4 +197,30 @@ model Extraccion {
 enum TipoExtraccion {
   EFECTIVO
   TRANSFERENCIA
+}
+
+model Gasto {
+  id              Int           @id @default(autoincrement())
+  nombre          String        @db.VarChar(150)
+  precio          Decimal       @db.Decimal(10, 2)
+  fecha           DateTime
+  categoriaId     Int
+  categoria       CategoriaGasto @relation(fields: [categoriaId], references: [id])
+  mecanicoId      Int?
+  mecanico        Mecanico?      @relation(fields: [mecanicoId], references: [id])
+  ordenDeCompraId Int?
+  ordenDeCompra   OrdenDeCompra? @relation(fields: [ordenDeCompraId], references: [id])
+
+  @@index([categoriaId])
+  @@index([mecanicoId])
+  @@index([ordenDeCompraId])
+  @@index([fecha])
+}
+
+model CategoriaGasto {
+  id     Int     @id @default(autoincrement())
+  nombre String  @unique @db.VarChar(150)
+  gastos Gasto[]
+
+  @@index([nombre])
 }

@@ -50,6 +50,7 @@ export interface FieldConfig {
     error: string | undefined
   ) => React.ReactNode;
   onChange?: (value: any, setValue: UseFormSetValue<any>) => void;
+  hidden?: (item: any) => boolean;
 }
 
 interface DynamicFormProps<T> {
@@ -77,7 +78,7 @@ function DynamicForm<T extends FieldValues>({
   } = useForm<T>({
     resolver: yupResolver(validationSchema),
     defaultValues: (item || {}) as DefaultValues<T>,
-    mode: "onBlur",
+    mode: "onChange",
   });
   const [autocompleteOptions, setAutocompleteOptions] = useState<
     Record<string, { value: string; label: string }[]>
@@ -134,6 +135,9 @@ function DynamicForm<T extends FieldValues>({
       sx={{ mt: 2 }}
     >
       {fields.map((field) => {
+        if (field.hidden && typeof field.hidden === "function" && item) {
+          if (field.hidden(item)) return null;
+        }
         switch (field.type) {
           case "custom":
             if (field.render) {

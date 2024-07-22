@@ -29,6 +29,7 @@ interface CrudTableProps<T> {
   getRowClassName?: (params: GridRowParams) => string;
   refreshTrigger?: number;
   validationSchema: yup.ObjectSchema<any>;
+  nonEditableItems?: number[];
 }
 
 function CrudTable<T extends { id: string }>({
@@ -41,6 +42,7 @@ function CrudTable<T extends { id: string }>({
   refreshTrigger = 0,
   fields,
   validationSchema,
+  nonEditableItems = [],
 }: CrudTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -247,20 +249,28 @@ function CrudTable<T extends { id: string }>({
     field: "acciones",
     headerName: "Acciones",
     width: 120,
-    renderCell: (params) => (
-      <Box>
-        <IconButton onClick={() => handleEditClick(params.row.id)} size="small">
-          <EditIcon />
-        </IconButton>
-        <IconButton
-          onClick={() => handleDeleteClick(params.row.id)}
-          size="small"
-        >
-          <DeleteIcon />
-        </IconButton>
-        {extraActions && extraActions(params.row)}
-      </Box>
-    ),
+    renderCell: (params) => {
+      if (nonEditableItems.includes(params.row.id)) {
+        return null;
+      }
+      return (
+        <Box>
+          <IconButton
+            onClick={() => handleEditClick(params.row.id)}
+            size="small"
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            onClick={() => handleDeleteClick(params.row.id)}
+            size="small"
+          >
+            <DeleteIcon />
+          </IconButton>
+          {extraActions && extraActions(params.row)}
+        </Box>
+      );
+    },
   };
 
   return (
@@ -307,6 +317,10 @@ function CrudTable<T extends { id: string }>({
             "& .MuiDataGrid-cell": {
               display: "flex",
               alignItems: "center",
+              minHeight: "50px",
+            },
+            "& .MuiDataGrid-row": {
+              minHeight: "50px !important", // Asegura la altura mínima para la fila
             },
           }}
         />
