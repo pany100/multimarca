@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import React, { useCallback, useEffect, useState } from "react";
+import * as yup from "yup";
 import DynamicForm, { FieldConfig } from "./DynamicForm";
 
 interface CrudTableProps<T> {
@@ -27,6 +28,7 @@ interface CrudTableProps<T> {
   extraActions?: (item: T) => React.ReactNode;
   getRowClassName?: (params: GridRowParams) => string;
   refreshTrigger?: number;
+  validationSchema: yup.ObjectSchema<any>;
 }
 
 function CrudTable<T extends { id: string }>({
@@ -38,6 +40,7 @@ function CrudTable<T extends { id: string }>({
   getRowClassName,
   refreshTrigger = 0,
   fields,
+  validationSchema,
 }: CrudTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -335,6 +338,7 @@ function CrudTable<T extends { id: string }>({
             fields={fields}
             handleChange={handleChange}
             onSubmit={handleEditSubmit}
+            validationSchema={validationSchema}
           />
         </Box>
       </Modal>
@@ -360,6 +364,7 @@ function CrudTable<T extends { id: string }>({
               fields={fields}
               handleChange={handleNewItemChange}
               onSubmit={handleAddSubmit}
+              validationSchema={validationSchema}
             />
           </Box>
         </Modal>

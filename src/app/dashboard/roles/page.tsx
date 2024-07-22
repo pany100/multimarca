@@ -10,17 +10,6 @@ interface Rol {
   permisos: string[];
 }
 
-type FieldType = "text" | "multiselect" | "select" | "email";
-
-interface FormField {
-  name: string;
-  label: string;
-  type: FieldType;
-  options?: { id: number; name: string }[];
-  valueKey?: string;
-  labelKey?: string;
-}
-
 const RolesPage = () => {
   const [permisos, setPermisos] = React.useState<
     { id: number; name: string }[]

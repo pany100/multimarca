@@ -17,20 +17,6 @@ interface Cliente {
   can_receive_notifications: boolean;
 }
 
-type FieldType =
-  | "text"
-  | "email"
-  | "select"
-  | "multiselect"
-  | "checkbox"
-  | "date";
-
-interface FormField {
-  name: string;
-  label: string;
-  type: FieldType;
-}
-
 const ClientesPage = () => {
   const columns = [
     { field: "id", headerName: "ID", width: 70 },

@@ -1,9 +1,11 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Autocomplete,
   Box,
   Button,
   Checkbox,
   FormControl,
+  FormHelperText,
   InputLabel,
   ListItemText,
   MenuItem,
@@ -12,6 +14,14 @@ import {
 } from "@mui/material";
 import debounce from "lodash/debounce";
 import { useEffect, useRef, useState } from "react";
+import {
+  DefaultValues,
+  FieldValues,
+  Path,
+  SubmitHandler,
+  useForm,
+} from "react-hook-form";
+import * as yup from "yup";
 
 export interface FieldConfig {
   name: string;
@@ -32,7 +42,11 @@ export interface FieldConfig {
   labelKey?: string;
   searchOptions?: (query: string) => Promise<any[]>;
   getInitialValue?: (item: any) => { value: any; label: string };
-  render?: (value: any, onChange: (value: any) => void) => React.ReactNode;
+  render?: (
+    value: any,
+    onChange: (value: any) => void,
+    error: string | undefined
+  ) => React.ReactNode;
   onChange?: (value: any, updateOtherFields: (updates: any) => void) => void;
 }
 
@@ -41,14 +55,25 @@ interface DynamicFormProps<T> {
   fields: FieldConfig[];
   handleChange: (field: keyof T, value: any) => void;
   onSubmit: (e: React.FormEvent) => Promise<void>;
+  validationSchema: yup.ObjectSchema<any>;
 }
 
-function DynamicForm<T>({
+function DynamicForm<T extends FieldValues>({
   item,
   fields,
   handleChange,
   onSubmit,
+  validationSchema,
 }: DynamicFormProps<T>) {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<T>({
+    resolver: yupResolver(validationSchema),
+    defaultValues: (item || {}) as DefaultValues<T>,
+    mode: "onBlur",
+  });
   const [autocompleteOptions, setAutocompleteOptions] = useState<
     Record<string, { value: string; label: string }[]>
   >({});
@@ -64,6 +89,10 @@ function DynamicForm<T>({
     if (fieldConfig?.onChange) {
       fieldConfig.onChange(value, updateOtherFields);
     }
+  };
+
+  const onSubmitHandler: SubmitHandler<T> = async (data: any) => {
+    await onSubmit(data);
   };
 
   const initializedRef = useRef(false);
@@ -99,8 +128,13 @@ function DynamicForm<T>({
     }
   }, [item, fields]);
   return (
-    <Box component="form" onSubmit={onSubmit} sx={{ mt: 2 }}>
+    <Box
+      component="form"
+      onSubmit={handleSubmit(onSubmitHandler)}
+      sx={{ mt: 2 }}
+    >
       {fields.map((field) => {
+        console.log(!!errors[field.name as keyof T]);
         switch (field.type) {
           case "custom":
             if (field.render) {
@@ -108,7 +142,8 @@ function DynamicForm<T>({
                 <div key={field.name}>
                   {field.render(
                     item ? item[field.name as keyof T] : null,
-                    (value) => handleFieldChange(field.name as keyof T, value)
+                    (value) => handleFieldChange(field.name as keyof T, value),
+                    errors[field.name as keyof T]?.message as string | undefined
                   )}
                 </div>
               );
@@ -121,7 +156,12 @@ function DynamicForm<T>({
                 fullWidth
                 margin="normal"
                 label={field.label}
+                {...register(field.name as Path<T>)}
+                error={!!errors[field.name as keyof T]}
+                helperText={errors[field.name as keyof T]?.message as string}
                 type="date"
+                InputLabelProps={{ shrink: true }}
+                inputProps={{ max: new Date().toISOString().split("T")[0] }}
                 value={
                   item?.[field.name as keyof T]
                     ? new Date(item[field.name as keyof T] as string)
@@ -141,6 +181,9 @@ function DynamicForm<T>({
                 fullWidth
                 margin="normal"
                 label={field.label}
+                {...register(field.name as Path<T>)}
+                error={!!errors[field.name as keyof T]}
+                helperText={errors[field.name as keyof T]?.message as string}
                 type="tel"
                 value={item?.[field.name as keyof T] || ""}
                 onChange={(e) =>
@@ -154,20 +197,33 @@ function DynamicForm<T>({
             );
           case "select":
             return (
-              <FormControl key={field.name} fullWidth margin="normal">
+              <FormControl
+                key={field.name}
+                fullWidth
+                margin="normal"
+                error={!!errors[field.name as Path<T>]}
+              >
                 <InputLabel>{field.label}</InputLabel>
                 <Select
-                  value={item?.[field.name as keyof T] || ""}
+                  value={
+                    item?.[field.name as keyof T] ||
+                    (field.getInitialValue && item
+                      ? field.getInitialValue(item).value
+                      : "")
+                  }
                   onChange={(e) =>
                     handleFieldChange(field.name as keyof T, e.target.value)
                   }
                 >
                   {field.options?.map((option) => (
-                    <MenuItem key={option.id} value={option.id}>
-                      {option.name}
+                    <MenuItem key={option.value} value={option.value}>
+                      {option.label}
                     </MenuItem>
                   ))}
                 </Select>
+                <FormHelperText>
+                  {errors[field.name as Path<T>]?.message as string}
+                </FormHelperText>
               </FormControl>
             );
           case "autocomplete":
@@ -199,7 +255,14 @@ function DynamicForm<T>({
                   );
                 }}
                 renderInput={(params) => (
-                  <TextField {...params} label={field.label} />
+                  <TextField
+                    {...params}
+                    label={field.label}
+                    error={!!errors[field.name as Path<T>]}
+                    helperText={
+                      errors[field.name as Path<T>]?.message as string
+                    }
+                  />
                 )}
                 isOptionEqualToValue={(option, value) =>
                   option.value === value.value
@@ -210,7 +273,12 @@ function DynamicForm<T>({
             );
           case "multiselect":
             return (
-              <FormControl key={field.name} fullWidth margin="normal">
+              <FormControl
+                key={field.name}
+                fullWidth
+                margin="normal"
+                error={!!errors[field.name as Path<T>]}
+              >
                 <InputLabel>{field.label}</InputLabel>
                 <Select
                   multiple
@@ -239,6 +307,9 @@ function DynamicForm<T>({
                     );
                   })}
                 </Select>
+                <FormHelperText>
+                  {errors[field.name as Path<T>]?.message as string}
+                </FormHelperText>
               </FormControl>
             );
           default:
@@ -247,6 +318,9 @@ function DynamicForm<T>({
                 key={field.name}
                 fullWidth
                 margin="normal"
+                {...register(field.name as Path<T>)}
+                error={!!errors[field.name as keyof T]}
+                helperText={errors[field.name as keyof T]?.message as string}
                 label={field.label}
                 type={field.type}
                 value={item?.[field.name as keyof T] || ""}

@@ -23,8 +23,8 @@ const ControlesMecanicosPage = () => {
       label: "Tipo",
       type: "select",
       options: [
-        { id: "texto", name: "Texto" },
-        { id: "checkbox", name: "Checkbox" },
+        { value: "texto", label: "Texto" },
+        { value: "checkbox", label: "Checkbox" },
       ],
     },
   ];
