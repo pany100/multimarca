@@ -44,6 +44,7 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
   const [autocompleteOptions, setAutocompleteOptions] = useState<
     Record<string, { value: string; label: string }[]>
   >({});
+
   const initializedRef = useRef(false);
 
   const debouncedSearch = debounce(

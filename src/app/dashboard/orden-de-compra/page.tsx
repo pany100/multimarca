@@ -133,16 +133,6 @@ const OrdenDeCompraPage = () => {
     }
   };
 
-  const validateItems = (items: OrdenDeCompra["items"]) => {
-    if (items.length === 0) return "Debe agregar al menos un item";
-    for (const item of items) {
-      if (item.stockId === 0 || item.cantidad === 0) {
-        return "Todos los items deben tener stock y cantidad";
-      }
-    }
-    return null;
-  };
-
   const formFields: FieldConfig[] = [
     { name: "fecha", label: "Fecha", type: "date" },
     { name: "precioTotal", label: "Precio Total", type: "number" },
