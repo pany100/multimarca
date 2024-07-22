@@ -33,7 +33,7 @@ export interface FieldConfig {
   searchOptions?: (query: string) => Promise<any[]>;
   getInitialValue?: (item: any) => { value: any; label: string };
   render?: (value: any, onChange: (value: any) => void) => React.ReactNode;
-  onChange?: (value: any) => void;
+  onChange?: (value: any, updateOtherFields: (updates: any) => void) => void;
 }
 
 interface DynamicFormProps<T> {
@@ -52,6 +52,19 @@ function DynamicForm<T>({
   const [autocompleteOptions, setAutocompleteOptions] = useState<
     Record<string, { value: string; label: string }[]>
   >({});
+  const updateOtherFields = (updates: Partial<T>) => {
+    Object.entries(updates).forEach(([field, value]) => {
+      handleChange(field as keyof T, value);
+    });
+  };
+
+  const handleFieldChange = (field: keyof T, value: any) => {
+    handleChange(field, value);
+    const fieldConfig = fields.find((f) => f.name === field);
+    if (fieldConfig?.onChange) {
+      fieldConfig.onChange(value, updateOtherFields);
+    }
+  };
 
   const initializedRef = useRef(false);
 
@@ -95,7 +108,7 @@ function DynamicForm<T>({
                 <div key={field.name}>
                   {field.render(
                     item ? item[field.name as keyof T] : null,
-                    (value) => handleChange(field.name as keyof T, value)
+                    (value) => handleFieldChange(field.name as keyof T, value)
                   )}
                 </div>
               );
@@ -117,7 +130,7 @@ function DynamicForm<T>({
                     : ""
                 }
                 onChange={(e) =>
-                  handleChange(field.name as keyof T, e.target.value)
+                  handleFieldChange(field.name as keyof T, e.target.value)
                 }
               />
             );
@@ -131,7 +144,7 @@ function DynamicForm<T>({
                 type="tel"
                 value={item?.[field.name as keyof T] || ""}
                 onChange={(e) =>
-                  handleChange(field.name as keyof T, e.target.value)
+                  handleFieldChange(field.name as keyof T, e.target.value)
                 }
                 inputProps={{
                   pattern: "[0-9]{9,12}", // Patrón para números de teléfono entre 9 y 12 dígitos
@@ -146,7 +159,7 @@ function DynamicForm<T>({
                 <Select
                   value={item?.[field.name as keyof T] || ""}
                   onChange={(e) =>
-                    handleChange(field.name as keyof T, e.target.value)
+                    handleFieldChange(field.name as keyof T, e.target.value)
                   }
                 >
                   {field.options?.map((option) => (
@@ -171,7 +184,7 @@ function DynamicForm<T>({
                 }
                 defaultValue={field.getInitialValue?.(item) || null}
                 onChange={(_, newValue) =>
-                  handleChange(field.name as keyof T, newValue?.value)
+                  handleFieldChange(field.name as keyof T, newValue?.value)
                 }
                 onInputChange={(_, newInputValue) => {
                   debouncedSearch(
@@ -203,7 +216,7 @@ function DynamicForm<T>({
                   multiple
                   value={item?.[field.name as keyof T] || []}
                   onChange={(e) =>
-                    handleChange(field.name as keyof T, e.target.value)
+                    handleFieldChange(field.name as keyof T, e.target.value)
                   }
                   renderValue={(selected) => (selected as string[]).join(", ")}
                 >
@@ -238,7 +251,7 @@ function DynamicForm<T>({
                 type={field.type}
                 value={item?.[field.name as keyof T] || ""}
                 onChange={(e) =>
-                  handleChange(field.name as keyof T, e.target.value)
+                  handleFieldChange(field.name as keyof T, e.target.value)
                 }
               />
             );

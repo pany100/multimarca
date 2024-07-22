@@ -158,8 +158,14 @@ const OrdenDeCompraPage = () => {
         setProveedorId(ordenDeCompra.proveedorId);
         return value;
       },
-      onChange: (value: { value: number; label: string } | null) => {
+      onChange: (
+        value: { value: number; label: string } | null,
+        updateOtherFields: (updates: any) => void
+      ) => {
         setProveedorId(value?.value ?? null);
+        updateOtherFields({
+          items: [],
+        });
       },
     },
     {
