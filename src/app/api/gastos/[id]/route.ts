@@ -31,11 +31,20 @@ export async function PUT(
       include: {
         categoria: true,
         mecanico: true,
-        ordenDeCompra: true,
+        ordenDeCompra: {
+          include: {
+            proveedor: true,
+          },
+        },
       },
     });
 
-    return NextResponse.json(gastoActualizado);
+    const gastosConProveedor = {
+      ...gastoActualizado,
+      providerId: gastoActualizado.ordenDeCompra?.proveedor?.id || null,
+    };
+
+    return NextResponse.json(gastosConProveedor);
   } catch (error) {
     console.error("Error al actualizar gasto:", error);
     return NextResponse.json(

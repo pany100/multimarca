@@ -39,7 +39,9 @@ export interface FieldConfig {
     | "autocomplete"
     | "tel"
     | "custom";
-  options?: Record<string, string | number>[];
+  options?:
+    | Record<string, string | number>[]
+    | ((data: any) => Record<string, string | number>[]);
   valueKey?: string;
   labelKey?: string;
   searchOptions?: (query: string) => Promise<any[]>;
@@ -240,7 +242,10 @@ function DynamicForm<T extends FieldValues>({
                     handleFieldChange(field.name as keyof T, e.target.value)
                   }
                 >
-                  {field.options?.map((option) => (
+                  {(typeof field.options === "function"
+                    ? field.options(item)
+                    : field.options
+                  )?.map((option) => (
                     <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>
@@ -324,11 +329,14 @@ function DynamicForm<T extends FieldValues>({
                   }
                   renderValue={(selected) => (selected as string[]).join(", ")}
                 >
-                  {field.options?.map((option) => {
-                    const value = option[field.valueKey || "id"];
-                    const label = option[field.labelKey || "name"];
+                  {(typeof field.options === "function"
+                    ? field.options(item)
+                    : field.options
+                  )?.map((option: Record<string, string | number>) => {
+                    const value = option[field.valueKey || "value"];
+                    const label = option[field.labelKey || "label"];
                     return (
-                      <MenuItem key={option.id} value={value}>
+                      <MenuItem key={value} value={value}>
                         <Checkbox
                           checked={
                             Array.isArray(item?.[field.name as keyof T]) &&

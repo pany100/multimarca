@@ -84,11 +84,20 @@ export async function POST(request: Request) {
       include: {
         categoria: true,
         mecanico: true,
-        ordenDeCompra: true,
+        ordenDeCompra: {
+          include: {
+            proveedor: true,
+          },
+        },
       },
     });
 
-    return NextResponse.json(nuevoGasto, { status: 201 });
+    const gastosConProveedor = {
+      ...nuevoGasto,
+      providerId: nuevoGasto.ordenDeCompra?.proveedor?.id || null,
+    };
+
+    return NextResponse.json(gastosConProveedor, { status: 201 });
   } catch (error) {
     console.error("Error al crear gasto:", error);
     return NextResponse.json(

@@ -2,7 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { UseFormSetValue } from "react-hook-form";
 import * as yup from "yup";
 
@@ -35,6 +35,8 @@ interface Gasto {
 
 const GastosPage = () => {
   const [options, setOptions] = useState([]);
+  const initializedRef = useRef(false);
+
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "nombre", headerName: "Nombre", width: 200 },
@@ -56,15 +58,16 @@ const GastosPage = () => {
       field: "ordenDeCompra",
       headerName: "Orden de Compra",
       width: 150,
-      valueGetter: (ordenDeCompra: any) =>
-        ordenDeCompra
+      valueGetter: (ordenDeCompra: any) => {
+        return ordenDeCompra
           ? `Proveedor: ${ordenDeCompra?.proveedor.name} - Orden: #${
               ordenDeCompra?.id
             } - Fecha: ${new Date(ordenDeCompra?.fecha).toLocaleDateString(
               "es-ES",
               { day: "numeric", month: "long", year: "numeric" }
             )}`
-          : "-",
+          : "-";
+      },
     },
   ];
 
@@ -126,10 +129,10 @@ const GastosPage = () => {
           value: proveedor.id,
         }));
       },
-      getInitialValue: (stock: Gasto) => {
+      getInitialValue: (gasto: Gasto) => {
         return {
-          value: stock.ordenDeCompra?.proveedor.id || "",
-          label: stock.ordenDeCompra?.proveedor.name || "",
+          value: gasto.ordenDeCompra?.proveedor.id || "",
+          label: gasto.ordenDeCompra?.proveedor.name || "",
         };
       },
       hidden: (gasto: Gasto) => gasto.categoriaId !== 1,
@@ -137,6 +140,7 @@ const GastosPage = () => {
         value: number | null,
         setValue: UseFormSetValue<any>
       ) => {
+        initializedRef.current = true;
         if (value) {
           const response = await fetch(
             `/api/proveedores/${value}/orden-de-compra`
@@ -163,7 +167,18 @@ const GastosPage = () => {
       label: "Orden de Compra",
       type: "select",
       hidden: (gasto: Gasto) => gasto.categoriaId !== 1,
-      options: options,
+      options: (gasto: Gasto) => {
+        if (gasto.ordenDeCompraId && !initializedRef.current) {
+          const init = [
+            {
+              value: gasto.ordenDeCompra?.id || 0,
+              label: `ID: ${gasto.ordenDeCompra?.id} - ${gasto.ordenDeCompra?.fecha}`,
+            },
+          ];
+          return init;
+        }
+        return options;
+      },
     },
   ];
 
