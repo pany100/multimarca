@@ -1,7 +1,7 @@
 "use client";
 
 import CrudTable from "@/components/CrudTable";
-import DynamicForm, { FieldConfig } from "@/components/DynamicForm";
+import { FieldConfig } from "@/components/DynamicForm";
 
 interface ManoDeObra {
   id: string;
@@ -21,17 +21,6 @@ const ManoDeObraPage = () => {
     { name: "sellPrice", label: "Precio de Venta", type: "number" },
   ];
 
-  const renderEditForm = (
-    trabajo: ManoDeObra | null,
-    handleChange: (field: keyof ManoDeObra, value: any) => void
-  ) => (
-    <DynamicForm<ManoDeObra>
-      item={trabajo}
-      fields={formFields}
-      handleChange={handleChange}
-    />
-  );
-
   const createNewTrabajo = (): ManoDeObra => {
     return {
       id: "",
@@ -45,8 +34,8 @@ const ManoDeObraPage = () => {
       title="Mano de Obra"
       columns={columns}
       apiEndpoint="/api/mano-de-obra"
-      renderEditForm={renderEditForm}
       createNewItem={createNewTrabajo}
+      fields={formFields}
     />
   );
 };

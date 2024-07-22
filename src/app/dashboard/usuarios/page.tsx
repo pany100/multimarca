@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
 import CrudTable from "@/components/CrudTable";
-import DynamicForm from "@/components/DynamicForm";
 import authFetch from "@/utils/authFetch";
+import React from "react";
 
 interface Usuario {
   id: string;
@@ -54,23 +53,12 @@ const UsuariosPage = () => {
     { name: "avatar", label: "Avatar URL", type: "text" },
   ];
 
-  const renderEditForm = (
-    usuario: Usuario | null,
-    handleChange: (field: keyof Usuario, value: any) => void
-  ) => (
-    <DynamicForm<Usuario>
-      item={usuario}
-      fields={formFields}
-      handleChange={handleChange}
-    />
-  );
-
   return (
     <CrudTable<Usuario>
       title="Gestión de Usuarios"
       columns={columns}
+      fields={formFields}
       apiEndpoint="/api/usuarios"
-      renderEditForm={renderEditForm}
     />
   );
 };

@@ -1,7 +1,6 @@
 "use client";
 
 import CrudTable from "@/components/CrudTable";
-import DynamicForm from "@/components/DynamicForm";
 
 interface Cliente {
   id: string;
@@ -65,17 +64,6 @@ const ClientesPage = () => {
     { name: "dni", label: "DNI", type: "text" },
   ];
 
-  const renderEditForm = (
-    cliente: Cliente | null,
-    handleChange: (field: keyof Cliente, value: any) => void
-  ) => (
-    <DynamicForm<Cliente>
-      item={cliente}
-      fields={formFields}
-      handleChange={handleChange}
-    />
-  );
-
   const createNewCliente = (): Cliente => {
     return {
       id: "",
@@ -98,8 +86,8 @@ const ClientesPage = () => {
       title="Gestión de Clientes"
       columns={columns}
       apiEndpoint="/api/clientes"
-      renderEditForm={renderEditForm}
       createNewItem={createNewCliente}
+      fields={formFields}
     />
   );
 };

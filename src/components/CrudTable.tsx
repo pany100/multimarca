@@ -16,15 +16,13 @@ import {
 } from "@mui/material";
 import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import React, { useCallback, useEffect, useState } from "react";
+import DynamicForm, { FieldConfig } from "./DynamicForm";
 
 interface CrudTableProps<T> {
   title: string;
   columns: GridColDef[];
   apiEndpoint: string;
-  renderEditForm: (
-    item: T | null,
-    handleChange: (field: keyof T, value: any) => void
-  ) => React.ReactNode;
+  fields: FieldConfig[];
   createNewItem?: () => T;
   extraActions?: (item: T) => React.ReactNode;
   getRowClassName?: (params: GridRowParams) => string;
@@ -35,11 +33,11 @@ function CrudTable<T extends { id: string }>({
   title,
   columns,
   apiEndpoint,
-  renderEditForm,
   createNewItem,
   extraActions,
   getRowClassName,
   refreshTrigger = 0,
+  fields,
 }: CrudTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -333,7 +331,11 @@ function CrudTable<T extends { id: string }>({
             Editar {title}
           </Typography>
           <Box component="form" onSubmit={handleEditSubmit} sx={{ mt: 2 }}>
-            {renderEditForm(editingItem, handleChange)}
+            <DynamicForm<T>
+              item={editingItem}
+              fields={fields}
+              handleChange={handleChange}
+            />
             <Button type="submit" variant="contained" sx={{ mt: 2 }}>
               Guardar cambios
             </Button>
@@ -358,7 +360,11 @@ function CrudTable<T extends { id: string }>({
               Agregar nuevo {title}
             </Typography>
             <Box component="form" onSubmit={handleAddSubmit} sx={{ mt: 2 }}>
-              {renderEditForm(newItem, handleNewItemChange)}
+              <DynamicForm<T>
+                item={newItem}
+                fields={fields}
+                handleChange={handleNewItemChange}
+              />
               <Button type="submit" variant="contained" sx={{ mt: 2 }}>
                 Crear
               </Button>

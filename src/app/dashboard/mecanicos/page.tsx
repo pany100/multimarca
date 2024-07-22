@@ -1,7 +1,7 @@
 "use client";
 
 import CrudTable from "@/components/CrudTable";
-import DynamicForm, { FieldConfig } from "@/components/DynamicForm";
+import { FieldConfig } from "@/components/DynamicForm";
 
 interface Mecanico {
   id: string;
@@ -39,17 +39,6 @@ const MecanicosPage = () => {
     { name: "birthday", label: "Fecha de Nacimiento", type: "date" },
   ];
 
-  const renderEditForm = (
-    mecanico: Mecanico | null,
-    handleChange: (field: keyof Mecanico, value: any) => void
-  ) => (
-    <DynamicForm<Mecanico>
-      item={mecanico}
-      fields={formFields}
-      handleChange={handleChange}
-    />
-  );
-
   const createNewMecanico = (): Mecanico => {
     return {
       id: "",
@@ -71,7 +60,7 @@ const MecanicosPage = () => {
       title="Mecánicos"
       columns={columns}
       apiEndpoint="/api/mecanicos"
-      renderEditForm={renderEditForm}
+      fields={formFields}
       createNewItem={createNewMecanico}
     />
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import CrudTable from "@/components/CrudTable";
-import DynamicForm, { FieldConfig } from "@/components/DynamicForm";
+import { FieldConfig } from "@/components/DynamicForm";
 import {
   Autocomplete,
   Button,
@@ -270,17 +270,6 @@ const OrdenDeCompraPage = () => {
     },
   ];
 
-  const renderEditForm = (
-    ordenDeCompra: OrdenDeCompra | null,
-    handleChange: (field: keyof OrdenDeCompra, value: any) => void
-  ) => (
-    <DynamicForm<OrdenDeCompra>
-      item={ordenDeCompra}
-      fields={formFields}
-      handleChange={handleChange}
-    />
-  );
-
   const createNewOrdenDeCompra = (): OrdenDeCompra => {
     return {
       id: "",
@@ -299,7 +288,7 @@ const OrdenDeCompraPage = () => {
       title="Órdenes de Compra"
       columns={columns}
       apiEndpoint="/api/orden-de-compra"
-      renderEditForm={renderEditForm}
+      fields={formFields}
       createNewItem={createNewOrdenDeCompra}
     />
   );

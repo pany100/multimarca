@@ -1,7 +1,7 @@
 "use client";
 
 import CrudTable from "@/components/CrudTable";
-import DynamicForm, { FieldConfig } from "@/components/DynamicForm";
+import { FieldConfig } from "@/components/DynamicForm";
 
 interface Proveedor {
   id: string;
@@ -36,17 +36,6 @@ const ProveedoresPage = () => {
     { name: "cuit", label: "CUIT", type: "text" },
   ];
 
-  const renderEditForm = (
-    proveedor: Proveedor | null,
-    handleChange: (field: keyof Proveedor, value: any) => void
-  ) => (
-    <DynamicForm<Proveedor>
-      item={proveedor}
-      fields={formFields}
-      handleChange={handleChange}
-    />
-  );
-
   const createNewProveedor = (): Proveedor => {
     return {
       id: "",
@@ -65,7 +54,7 @@ const ProveedoresPage = () => {
       title="Proveedores"
       columns={columns}
       apiEndpoint="/api/proveedores"
-      renderEditForm={renderEditForm}
+      fields={formFields}
       createNewItem={createNewProveedor}
     />
   );

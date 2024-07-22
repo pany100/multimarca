@@ -1,7 +1,7 @@
 "use client";
 
 import CrudTable from "@/components/CrudTable";
-import DynamicForm, { FieldConfig } from "@/components/DynamicForm";
+import { FieldConfig } from "@/components/DynamicForm";
 import {
   Alert,
   Autocomplete,
@@ -142,17 +142,6 @@ const StockPage = () => {
     },
   ];
 
-  const renderEditForm = (
-    stock: Stock | null,
-    handleChange: (field: keyof Stock, value: any) => void
-  ) => (
-    <DynamicForm<Stock>
-      item={stock}
-      fields={formFields}
-      handleChange={handleChange}
-    />
-  );
-
   const createNewStock = (): Stock => {
     return {
       id: "",
@@ -193,7 +182,7 @@ const StockPage = () => {
           title="Stock"
           columns={columns}
           apiEndpoint="/api/stock"
-          renderEditForm={renderEditForm}
+          fields={formFields}
           createNewItem={createNewStock}
           getRowClassName={getRowClassName}
           refreshTrigger={refreshTrigger}
@@ -204,7 +193,7 @@ const StockPage = () => {
           title="Restock"
           columns={columns}
           apiEndpoint="/api/stock?needsRestock=true"
-          renderEditForm={renderEditForm}
+          fields={formFields}
           createNewItem={createNewStock}
           getRowClassName={getRowClassName}
           refreshTrigger={refreshTrigger}

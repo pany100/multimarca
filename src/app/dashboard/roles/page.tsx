@@ -1,9 +1,8 @@
 "use client";
 
-import React from "react";
 import CrudTable from "@/components/CrudTable";
-import DynamicForm from "@/components/DynamicForm";
 import authFetch from "@/utils/authFetch";
+import React from "react";
 
 interface Rol {
   id: string;
@@ -57,17 +56,6 @@ const RolesPage = () => {
     },
   ];
 
-  const renderEditForm = (
-    rol: Rol | null,
-    handleChange: (field: keyof Rol, value: any) => void
-  ) => (
-    <DynamicForm<Rol>
-      item={rol}
-      fields={formFields}
-      handleChange={handleChange}
-    />
-  );
-
   const createNewRole = (): Rol => {
     return {
       id: "", // El id generalmente se asigna en el backend
@@ -81,7 +69,7 @@ const RolesPage = () => {
       title="Roles"
       columns={columns}
       apiEndpoint="/api/roles"
-      renderEditForm={renderEditForm}
+      fields={formFields}
       createNewItem={createNewRole}
     />
   );
