@@ -26,7 +26,11 @@ export async function GET(request: Request) {
         include: {
           categoria: true,
           mecanico: true,
-          ordenDeCompra: true,
+          ordenDeCompra: {
+            include: {
+              proveedor: true,
+            },
+          },
         },
       }),
       prisma.gasto.count({

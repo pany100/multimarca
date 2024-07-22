@@ -51,6 +51,7 @@ export interface FieldConfig {
   ) => React.ReactNode;
   onChange?: (value: any, setValue: UseFormSetValue<any>) => void;
   hidden?: (item: any) => boolean;
+  excludeFromSubmit?: boolean;
 }
 
 interface DynamicFormProps<T> {
@@ -93,7 +94,14 @@ function DynamicForm<T extends FieldValues>({
   };
 
   const onSubmitHandler: SubmitHandler<T> = async (data: any) => {
-    await onSubmit(data);
+    const submitData = Object.keys(data).reduce((acc, key) => {
+      const field = fields.find((f) => f.name === key);
+      if (!field || !field.excludeFromSubmit) {
+        acc[key as keyof T] = data[key as keyof T];
+      }
+      return acc;
+    }, {} as T);
+    await onSubmit(submitData as T);
   };
 
   const initializedRef = useRef(false);

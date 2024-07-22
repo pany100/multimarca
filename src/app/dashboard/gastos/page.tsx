@@ -2,6 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import { useState } from "react";
 import * as yup from "yup";
 
 interface Gasto {
@@ -32,6 +33,7 @@ interface Gasto {
 }
 
 const GastosPage = () => {
+  const [options, setOptions] = useState([]);
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "nombre", headerName: "Nombre", width: 200 },
@@ -53,7 +55,13 @@ const GastosPage = () => {
       field: "ordenDeCompra",
       headerName: "Orden de Compra",
       width: 150,
-      valueGetter: (ordenDeCompra: any) => `#${ordenDeCompra?.id}` || "",
+      valueGetter: (ordenDeCompra: any) =>
+        `Proveedor: ${ordenDeCompra?.proveedor.name} - Orden: #${
+          ordenDeCompra?.id
+        } - Fecha: ${new Date(ordenDeCompra?.fecha).toLocaleDateString(
+          "es-ES",
+          { day: "numeric", month: "long", year: "numeric" }
+        )}`,
     },
   ];
 
@@ -101,10 +109,51 @@ const GastosPage = () => {
       }),
     },
     {
+      name: "proveedor",
+      label: "Proveedor",
+      type: "autocomplete",
+      excludeFromSubmit: true,
+      searchOptions: async (query: string) => {
+        const response = await fetch(
+          `/api/proveedores?query=${query}&limit=10&page=0`
+        );
+        const data = await response.json();
+        return data.items.map((proveedor: { name: any; id: any }) => ({
+          label: proveedor.name,
+          value: proveedor.id,
+        }));
+      },
+      getInitialValue: (stock: Gasto) => {
+        return {
+          value: stock.ordenDeCompra?.proveedor.id.toString() || "",
+          label: stock.ordenDeCompra?.proveedor.name || "",
+        };
+      },
+      hidden: (gasto: Gasto) => gasto.categoriaId !== 1,
+      onChange: async (value: number | null) => {
+        if (value) {
+          const response = await fetch(
+            `/api/proveedores/${value}/orden-de-compra`
+          );
+          const data = await response.json();
+          const customOptions = data.map(
+            (order: { id: number; fecha: string; deuda: number }) => ({
+              value: order.id,
+              label: `ID: ${order.id} - ${
+                order.fecha
+              } - Deuda: $${order.deuda.toFixed(2)}`,
+            })
+          );
+          setOptions(customOptions);
+        }
+      },
+    },
+    {
       name: "ordenDeCompraId",
       label: "Orden de Compra",
-      type: "text",
+      type: "select",
       hidden: (gasto: Gasto) => gasto.categoriaId !== 1,
+      options: options,
     },
   ];
 
