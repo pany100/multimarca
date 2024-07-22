@@ -117,17 +117,14 @@ function CrudTable<T extends { id: string }>({
     setDeleteConfirmOpen(true);
   };
 
-  const handleAddSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newItem) return;
-
+  const handleAddSubmit = async (data: T) => {
     try {
       const url = new URL(apiEndpoint, window.location.origin);
       const baseUrl = `${url.origin}${url.pathname}`;
 
       const response = await authFetch(baseUrl, {
         method: "POST",
-        body: JSON.stringify(newItem),
+        body: JSON.stringify(data),
       });
 
       if (response.ok) {
@@ -162,17 +159,14 @@ function CrudTable<T extends { id: string }>({
     setNewItem((prev) => (prev ? { ...prev, [field]: value } : null));
   };
 
-  const handleEditSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingItem) return;
-
+  const handleEditSubmit = async (data: T) => {
     try {
       const url = new URL(apiEndpoint, window.location.origin);
       const baseUrl = `${url.origin}${url.pathname}`;
 
-      const response = await authFetch(`${baseUrl}/${editingItem.id}`, {
+      const response = await authFetch(`${baseUrl}/${data.id}`, {
         method: "PUT",
-        body: JSON.stringify(editingItem),
+        body: JSON.stringify(data),
       });
 
       if (response.ok) {

@@ -15,6 +15,7 @@ import {
 import debounce from "lodash/debounce";
 import { useEffect, useRef, useState } from "react";
 import {
+  Controller,
   DefaultValues,
   FieldValues,
   Path,
@@ -54,7 +55,7 @@ interface DynamicFormProps<T> {
   item: T | null;
   fields: FieldConfig[];
   handleChange: (field: keyof T, value: any) => void;
-  onSubmit: (e: React.FormEvent) => Promise<void>;
+  onSubmit: (data: T) => Promise<void>;
   validationSchema: yup.ObjectSchema<any>;
 }
 
@@ -69,6 +70,7 @@ function DynamicForm<T extends FieldValues>({
     register,
     handleSubmit,
     formState: { errors },
+    control,
   } = useForm<T>({
     resolver: yupResolver(validationSchema),
     defaultValues: (item || {}) as DefaultValues<T>,
@@ -134,7 +136,6 @@ function DynamicForm<T extends FieldValues>({
       sx={{ mt: 2 }}
     >
       {fields.map((field) => {
-        console.log(!!errors[field.name as keyof T]);
         switch (field.type) {
           case "custom":
             if (field.render) {
@@ -211,6 +212,7 @@ function DynamicForm<T extends FieldValues>({
                       ? field.getInitialValue(item).value
                       : "")
                   }
+                  {...register(field.name as Path<T>)}
                   onChange={(e) =>
                     handleFieldChange(field.name as keyof T, e.target.value)
                   }
@@ -228,47 +230,54 @@ function DynamicForm<T extends FieldValues>({
             );
           case "autocomplete":
             return (
-              <Autocomplete
-                options={autocompleteOptions[field.name] || []}
-                getOptionLabel={(option) => option.label}
-                value={
-                  item?.[field.name as keyof T]
-                    ? autocompleteOptions[field.name]?.find(
-                        (option) => option.value === item[field.name as keyof T]
-                      ) || null
-                    : null
-                }
-                defaultValue={field.getInitialValue?.(item) || null}
-                onChange={(_, newValue) =>
-                  handleFieldChange(field.name as keyof T, newValue?.value)
-                }
-                onInputChange={(_, newInputValue) => {
-                  debouncedSearch(
-                    field,
-                    newInputValue,
-                    (options: { value: string; label: string }[]) => {
-                      setAutocompleteOptions((prev) => ({
-                        ...prev,
-                        [field.name]: options,
-                      }));
+              <Controller
+                name={field.name as Path<T>}
+                control={control}
+                render={({ field: { onChange, value } }) => (
+                  <Autocomplete
+                    options={autocompleteOptions[field.name] || []}
+                    getOptionLabel={(option) => option.label}
+                    value={
+                      item?.[field.name as keyof T]
+                        ? autocompleteOptions[field.name]?.find(
+                            (option) =>
+                              option.value === item[field.name as keyof T]
+                          ) || null
+                        : null
                     }
-                  );
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label={field.label}
-                    error={!!errors[field.name as Path<T>]}
-                    helperText={
-                      errors[field.name as Path<T>]?.message as string
+                    defaultValue={field.getInitialValue?.(item) || null}
+                    onChange={(_, newValue) =>
+                      handleFieldChange(field.name as keyof T, newValue?.value)
                     }
+                    onInputChange={(_, newInputValue) => {
+                      debouncedSearch(
+                        field,
+                        newInputValue,
+                        (options: { value: string; label: string }[]) => {
+                          setAutocompleteOptions((prev) => ({
+                            ...prev,
+                            [field.name]: options,
+                          }));
+                        }
+                      );
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label={field.label}
+                        error={!!errors[field.name as Path<T>]}
+                        helperText={
+                          errors[field.name as Path<T>]?.message as string
+                        }
+                      />
+                    )}
+                    isOptionEqualToValue={(option, value) =>
+                      option.value === value.value
+                    }
+                    loadingText="Buscando..."
+                    noOptionsText="No se encontraron resultados"
                   />
                 )}
-                isOptionEqualToValue={(option, value) =>
-                  option.value === value.value
-                }
-                loadingText="Buscando..."
-                noOptionsText="No se encontraron resultados"
               />
             );
           case "multiselect":
@@ -282,6 +291,7 @@ function DynamicForm<T extends FieldValues>({
                 <InputLabel>{field.label}</InputLabel>
                 <Select
                   multiple
+                  {...register(field.name as Path<T>)}
                   value={item?.[field.name as keyof T] || []}
                   onChange={(e) =>
                     handleFieldChange(field.name as keyof T, e.target.value)
