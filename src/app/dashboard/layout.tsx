@@ -79,7 +79,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                     component={Link}
                     href="/dashboard/mano-de-obra"
                   >
-                    <ListItemText primary="Trabajos" />
+                    <ListItemText primary="Mano de obra" />
                   </ListItem>
                 )}
                 {permisos.includes("Mecanicos") && (
@@ -108,6 +108,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                     href="/dashboard/orden-de-compra"
                   >
                     <ListItemText primary="OrdenesCompra" />
+                  </ListItem>
+                )}
+                {permisos.includes("RetirosDinero") && (
+                  <ListItem
+                    button
+                    component={Link}
+                    href="/dashboard/extracciones"
+                  >
+                    <ListItemText primary="Extracciones" />
                   </ListItem>
                 )}
               </List>

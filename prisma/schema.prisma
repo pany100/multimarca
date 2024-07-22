@@ -26,6 +26,7 @@ model Usuario {
   reset_password_token_expired DateTime?
   rol                         Rol   @relation(fields: [rolId], references: [id])
   rolId                       Int
+  extracciones                Extraccion[]
 
   @@index([fullName])
   @@index([username])
@@ -176,4 +177,22 @@ model OrdenDeCompraItem {
 
   @@index([stockId])
   @@index([ordenDeCompraId])
+}
+
+model Extraccion {
+  id            Int      @id @default(autoincrement())
+  monto         Decimal  @db.Decimal(10, 2)
+  fecha         DateTime @default(now())
+  usuarioId     Int
+  usuario       Usuario  @relation(fields: [usuarioId], references: [id])
+  motivo        String   @db.VarChar(150)
+  tipoExtraccion TipoExtraccion
+
+  @@index([usuarioId])
+  @@index([fecha])
+}
+
+enum TipoExtraccion {
+  EFECTIVO
+  TRANSFERENCIA
 }
