@@ -250,3 +250,15 @@ model VentaItem {
   @@index([ventaId])
   @@index([stockId])
 }
+
+model NotificacionWhatsapp {
+  id          Int      @id @default(autoincrement())
+  description String   @db.VarChar(250)
+  date        DateTime
+  whatsappKey String   @db.VarChar(250)
+  processed   Boolean  @default(false)
+  informacion String?  @db.Text
+
+  @@index([date])
+  @@index([processed])
+}

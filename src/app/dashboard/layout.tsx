@@ -138,6 +138,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                     <ListItemText primary="Ventas" />
                   </ListItem>
                 )}
+                {permisos.includes("NotificacionesClientes") && (
+                  <ListItem
+                    button
+                    component={Link}
+                    href="/dashboard/notificaciones-whatsapp"
+                  >
+                    <ListItemText primary="Notificaciones WhatsApp" />
+                  </ListItem>
+                )}
               </List>
             </Drawer>
             <Box sx={{ flexGrow: 1, pl: 3 }}>{children}</Box>

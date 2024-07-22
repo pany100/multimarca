@@ -187,7 +187,6 @@ function DynamicForm<T extends FieldValues>({
                 helperText={errors[field.name as keyof T]?.message as string}
                 type="date"
                 InputLabelProps={{ shrink: true }}
-                inputProps={{ max: new Date().toISOString().split("T")[0] }}
                 value={
                   item?.[field.name as keyof T]
                     ? new Date(item[field.name as keyof T] as string)
