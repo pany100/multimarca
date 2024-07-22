@@ -13,20 +13,19 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 // Actualizamos el modelo Usuario para incluir la relación con Rol
 model Usuario {
-  id                          Int       @id @default(autoincrement())
-  fullName                    String    @db.VarChar(150)
-  username                    String    @db.VarChar(150)
-  email                       String    @unique @db.VarChar(150)
-  password                    String    @db.VarChar(300)
-  avatar                      String?   @db.VarChar(150)
-  reset_password_token        String?   @db.VarChar(255)
+  id                           Int          @id @default(autoincrement())
+  fullName                     String       @db.VarChar(150)
+  username                     String       @db.VarChar(150)
+  email                        String       @unique @db.VarChar(150)
+  password                     String       @db.VarChar(300)
+  avatar                       String?      @db.VarChar(150)
+  reset_password_token         String?      @db.VarChar(255)
   reset_password_token_expired DateTime?
-  rol                         Rol   @relation(fields: [rolId], references: [id])
-  rolId                       Int
-  extracciones                Extraccion[]
+  rol                          Rol          @relation(fields: [rolId], references: [id])
+  rolId                        Int
+  extracciones                 Extraccion[]
 
   @@index([fullName])
   @@index([username])
@@ -40,27 +39,29 @@ model Permiso {
 }
 
 model Rol {
-  id          Int       @id @default(autoincrement())
-  name        String    @unique @db.VarChar(150)
-  permisos    Permiso[]
-  usuarios    Usuario[]
+  id       Int       @id @default(autoincrement())
+  name     String    @unique @db.VarChar(150)
+  permisos Permiso[]
+  usuarios Usuario[]
+
   @@index([name])
 }
 
 model Cliente {
-  id                        Int      @id @default(autoincrement())
-  phone                     String?  @db.VarChar(20)
-  fullName                  String   @db.VarChar(150)
-  email                     String?  @db.VarChar(150)
+  id                        Int       @id @default(autoincrement())
+  phone                     String?   @db.VarChar(20)
+  fullName                  String    @db.VarChar(150)
+  email                     String?   @db.VarChar(150)
   birthday                  DateTime?
-  address                   String?  @db.VarChar(200)
-  city                      String?  @db.VarChar(100)
-  state                     String?  @db.VarChar(100)
-  postal_code               String?  @db.VarChar(10)
-  tax_status                String?  @db.VarChar(50)
-  dni                       String?  @unique @db.VarChar(20)
-  can_receive_notifications Boolean  @default(true)
+  address                   String?   @db.VarChar(200)
+  city                      String?   @db.VarChar(100)
+  state                     String?   @db.VarChar(100)
+  postal_code               String?   @db.VarChar(10)
+  tax_status                String?   @db.VarChar(50)
+  dni                       String?   @unique @db.VarChar(20)
+  can_receive_notifications Boolean   @default(true)
   cars                      Auto[]
+  ventas                    Venta[]
 
   @@index([fullName])
   @@index([email])
@@ -68,21 +69,21 @@ model Cliente {
 }
 
 model Auto {
-  id                Int      @id @default(autoincrement())
-  patent            String   @unique @db.VarChar(150)
-  model             String?  @db.VarChar(150)
-  brand             String?  @db.VarChar(150)
-  color             String?  @db.VarChar(50)
+  id                Int     @id @default(autoincrement())
+  patent            String  @unique @db.VarChar(150)
+  model             String? @db.VarChar(150)
+  brand             String? @db.VarChar(150)
+  color             String? @db.VarChar(50)
   year              Int?
   kms               Int?
   valves            Int?
-  owner             Cliente   @relation(fields: [ownerId], references: [id])
+  owner             Cliente @relation(fields: [ownerId], references: [id])
   ownerId           Int
-  chassis_number    String?  @db.VarChar(150)
-  engine_number     String?  @db.VarChar(150)
-  observations      String?  @db.VarChar(255)
-  transmission_type String?  @db.VarChar(20)
-  cedulaVerdePath   String?  @db.VarChar(1000)
+  chassis_number    String? @db.VarChar(150)
+  engine_number     String? @db.VarChar(150)
+  observations      String? @db.VarChar(255)
+  transmission_type String? @db.VarChar(20)
+  cedulaVerdePath   String? @db.VarChar(1000)
 
   @@index([patent])
   @@index([ownerId])
@@ -99,21 +100,21 @@ model ControlMecanico {
 model ManoDeObra {
   id        Int      @id @default(autoincrement())
   name      String   @unique @db.VarChar(250)
-  sellPrice Decimal?  @db.Decimal(10, 2)
+  sellPrice Decimal? @db.Decimal(10, 2)
 
   @@index([name])
 }
 
 model Proveedor {
-  id      Int     @id @default(autoincrement())
-  name    String  @unique @db.VarChar(150)
-  address String? @db.VarChar(150)
-  email   String? @db.VarChar(150)
-  phone   String? @db.VarChar(150)
-  mobile  String? @db.VarChar(150)
-  iva     String? @db.VarChar(150)
-  cuit    String? @db.VarChar(150)
-  stocks  Stock[]
+  id              Int             @id @default(autoincrement())
+  name            String          @unique @db.VarChar(150)
+  address         String?         @db.VarChar(150)
+  email           String?         @db.VarChar(150)
+  phone           String?         @db.VarChar(150)
+  mobile          String?         @db.VarChar(150)
+  iva             String?         @db.VarChar(150)
+  cuit            String?         @db.VarChar(150)
+  stocks          Stock[]
   ordenesDeCompra OrdenDeCompra[]
 
   @@index([name])
@@ -121,17 +122,17 @@ model Proveedor {
 }
 
 model Mecanico {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique @db.VarChar(150)
-  start_date  DateTime?
-  dni         BigInt?
-  address     String?  @db.VarChar(150)
-  city        String?  @db.VarChar(150)
-  state       String?  @db.VarChar(150)
-  postal_code String?  @db.VarChar(10)
-  email       String?  @db.VarChar(150)
-  phone       String?  @db.VarChar(150)
-  birthday    DateTime?
+  id               Int       @id @default(autoincrement())
+  name             String    @unique @db.VarChar(150)
+  start_date       DateTime?
+  dni              BigInt?
+  address          String?   @db.VarChar(150)
+  city             String?   @db.VarChar(150)
+  state            String?   @db.VarChar(150)
+  postal_code      String?   @db.VarChar(10)
+  email            String?   @db.VarChar(150)
+  phone            String?   @db.VarChar(150)
+  birthday         DateTime?
   gastosRealizados Gasto[]
 
   @@index([name])
@@ -139,17 +140,18 @@ model Mecanico {
 }
 
 model Stock {
-  id           Int      @id @default(autoincrement())
-  name         String   @db.VarChar(250)
-  brand        String   @db.VarChar(250)
-  buyPrice     Decimal  @db.Decimal(10, 2)
-  units        Int?
-  restockValue Int?
-  label        String?  @db.VarChar(250)
-  markup       Float?
-  proveedor    Proveedor @relation(fields: [proveedorId], references: [id])
-  proveedorId  Int
+  id                 Int                 @id @default(autoincrement())
+  name               String              @db.VarChar(250)
+  brand              String              @db.VarChar(250)
+  buyPrice           Decimal             @db.Decimal(10, 2)
+  units              Int?
+  restockValue       Int?
+  label              String?             @db.VarChar(250)
+  markup             Float?
+  proveedor          Proveedor           @relation(fields: [proveedorId], references: [id])
+  proveedorId        Int
   ordenDeCompraItems OrdenDeCompraItem[]
+  ventas             VentaItem[]
 
   @@index([name])
   @@index([brand])
@@ -157,13 +159,13 @@ model Stock {
 }
 
 model OrdenDeCompra {
-  id              Int       @id @default(autoincrement())
-  fecha           DateTime  @default(now())
-  precioTotal     Decimal   @db.Decimal(10, 2)
-  proveedor       Proveedor @relation(fields: [proveedorId], references: [id])
-  proveedorId     Int
-  items           OrdenDeCompraItem[]
-  gastos Gasto[]
+  id          Int                 @id @default(autoincrement())
+  fecha       DateTime            @default(now())
+  precioTotal Decimal             @db.Decimal(10, 2)
+  proveedor   Proveedor           @relation(fields: [proveedorId], references: [id])
+  proveedorId Int
+  items       OrdenDeCompraItem[]
+  gastos      Gasto[]
 
   @@index([proveedorId])
   @@index([fecha])
@@ -182,12 +184,12 @@ model OrdenDeCompraItem {
 }
 
 model Extraccion {
-  id            Int      @id @default(autoincrement())
-  monto         Decimal  @db.Decimal(10, 2)
-  fecha         DateTime @default(now())
-  usuarioId     Int
-  usuario       Usuario  @relation(fields: [usuarioId], references: [id])
-  motivo        String   @db.VarChar(150)
+  id             Int            @id @default(autoincrement())
+  monto          Decimal        @db.Decimal(10, 2)
+  fecha          DateTime       @default(now())
+  usuarioId      Int
+  usuario        Usuario        @relation(fields: [usuarioId], references: [id])
+  motivo         String         @db.VarChar(150)
   tipoExtraccion TipoExtraccion
 
   @@index([usuarioId])
@@ -200,9 +202,9 @@ enum TipoExtraccion {
 }
 
 model Gasto {
-  id              Int           @id @default(autoincrement())
-  nombre          String        @db.VarChar(150)
-  precio          Decimal       @db.Decimal(10, 2)
+  id              Int            @id @default(autoincrement())
+  nombre          String         @db.VarChar(150)
+  precio          Decimal        @db.Decimal(10, 2)
   fecha           DateTime
   categoriaId     Int
   categoria       CategoriaGasto @relation(fields: [categoriaId], references: [id])
@@ -223,4 +225,28 @@ model CategoriaGasto {
   gastos Gasto[]
 
   @@index([nombre])
+}
+
+model Venta {
+  id        Int         @id @default(autoincrement())
+  fecha     DateTime    @default(now())
+  clienteId Int?
+  cliente   Cliente?    @relation(fields: [clienteId], references: [id])
+  items     VentaItem[] @relation("VentaToItems")
+  total     Decimal     @db.Decimal(10, 2)
+
+  @@index([clienteId])
+  @@index([fecha])
+}
+
+model VentaItem {
+  id       Int   @id @default(autoincrement())
+  ventaId  Int
+  venta    Venta @relation("VentaToItems", fields: [ventaId], references: [id], onDelete: Cascade)
+  stockId  Int
+  stock    Stock @relation(fields: [stockId], references: [id])
+  cantidad Int
+
+  @@index([ventaId])
+  @@index([stockId])
 }

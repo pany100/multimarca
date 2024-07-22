@@ -1,0 +1,265 @@
+"use client";
+
+import CrudTable from "@/components/CrudTable";
+import { FieldConfig } from "@/components/DynamicForm";
+import {
+  Autocomplete,
+  Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+} from "@mui/material";
+import { useState } from "react";
+import * as yup from "yup";
+
+interface Venta {
+  id: string;
+  fecha: string;
+  total: number;
+  clienteId: number;
+  cliente: {
+    fullName: string;
+  };
+  items: Array<{
+    id: string;
+    cantidad: number;
+    stockId: number;
+    stock: {
+      id: number;
+      name: string;
+      price: number;
+    };
+  }>;
+}
+
+const VentasPage = () => {
+  const [items, setItems] = useState<Venta["items"]>([]);
+  const [openModal, setOpenModal] = useState(false);
+  const [newItem, setNewItem] = useState({
+    id: "",
+    stockId: 0,
+    stock: { id: 0, name: "", price: 0 },
+    cantidad: 0,
+  });
+  const [stockOptions, setStockOptions] = useState<
+    Array<{ id: number; name: string; price: number }>
+  >([]);
+
+  const columns = [
+    { field: "id", headerName: "ID", width: 70 },
+    { field: "fecha", headerName: "Fecha", width: 200 },
+    { field: "total", headerName: "Total", width: 150 },
+    {
+      field: "cliente",
+      headerName: "Cliente",
+      width: 200,
+      valueGetter: (cliente: any) => cliente?.fullName || "",
+    },
+    {
+      field: "detalle",
+      headerName: "Detalle",
+      width: 300,
+      renderCell: (params: any) => {
+        const items = params.row.items || [];
+        return (
+          <div
+            style={{
+              whiteSpace: "normal",
+              wordWrap: "break-word",
+              lineHeight: "1.2em",
+              padding: "10px 0",
+            }}
+          >
+            {items.map((item: any, index: number) => (
+              <Typography
+                key={index}
+                variant="body2"
+                style={{ marginBottom: "5px" }}
+              >
+                {item.stock.name}: {item.cantidad}
+              </Typography>
+            ))}
+          </div>
+        );
+      },
+    },
+  ];
+
+  const searchStock = async (query: string) => {
+    const response = await fetch(`/api/stock?query=${query}&page=0&size=10`);
+    const data = await response.json();
+    const results = data.items.map(
+      (stock: { name: string; id: number; price: number }) => ({
+        id: stock.id,
+        name: stock.name,
+        price: stock.price,
+      })
+    );
+    setStockOptions(results);
+  };
+
+  const formFields: FieldConfig[] = [
+    { name: "fecha", label: "Fecha", type: "date" },
+    { name: "total", label: "Total", type: "number" },
+    {
+      name: "clienteId",
+      label: "Cliente",
+      type: "autocomplete",
+      searchOptions: async (query: string) => {
+        const response = await fetch(
+          `/api/clientes?query=${query}&limit=10&page=0`
+        );
+        const data = await response.json();
+        return data.items.map((cliente: { fullName: any; id: any }) => ({
+          label: cliente.fullName,
+          value: cliente.id,
+        }));
+      },
+      getInitialValue: (venta: Venta) => ({
+        value: venta.clienteId,
+        label: venta.cliente?.fullName || "",
+      }),
+    },
+    {
+      name: "items",
+      label: "Items",
+      type: "custom",
+      render: (value, onChange, error) => {
+        const currentItems = (value as Venta["items"]) || [];
+        if (currentItems.length > 0) {
+          setItems(currentItems);
+        }
+        return (
+          <>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Stock</TableCell>
+                  <TableCell>Cantidad</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {items.map((item) => (
+                  <TableRow key={item.id}>
+                    <TableCell>{item.stock.name}</TableCell>
+                    <TableCell>{item.cantidad}</TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => {
+                          const newItems = items.filter((i) => i !== item);
+                          setItems(newItems);
+                          onChange(newItems);
+                        }}
+                      >
+                        Eliminar
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            {error && <Typography color="error">{error}</Typography>}
+            <Button variant="contained" onClick={() => setOpenModal(true)}>
+              Agregar Item
+            </Button>
+            <Dialog open={openModal} onClose={() => setOpenModal(false)}>
+              <DialogTitle>Agregar Nuevo Item</DialogTitle>
+              <DialogContent>
+                <Autocomplete
+                  options={stockOptions || []}
+                  getOptionLabel={(option: { name: string; id: number }) =>
+                    option.name
+                  }
+                  renderInput={(params) => (
+                    <TextField {...params} label="Stock" />
+                  )}
+                  value={newItem.stock}
+                  onChange={(_, newValue) => {
+                    setNewItem({
+                      ...newItem,
+                      stockId: newValue?.id ?? 0,
+                      stock: newValue ?? { id: 0, name: "", price: 0 },
+                    });
+                  }}
+                  onInputChange={(_, newInputValue) => {
+                    searchStock(newInputValue);
+                  }}
+                />
+                <TextField
+                  label="Unidades"
+                  type="number"
+                  value={newItem.cantidad}
+                  onChange={(e) => {
+                    setNewItem({
+                      ...newItem,
+                      cantidad: Number(e.target.value),
+                    });
+                  }}
+                />
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
+                <Button
+                  onClick={() => {
+                    const newItems = [...items, newItem];
+                    setItems(newItems);
+                    onChange(newItems);
+                    setOpenModal(false);
+                    setNewItem({
+                      id: "",
+                      stockId: 0,
+                      stock: { id: 0, name: "", price: 0 },
+                      cantidad: 0,
+                    });
+                  }}
+                  disabled={newItem.stockId === 0 || newItem.cantidad === 0}
+                >
+                  Agregar
+                </Button>
+              </DialogActions>
+            </Dialog>
+          </>
+        );
+      },
+    },
+  ];
+
+  const createNewVenta = (): Venta => {
+    return {
+      id: "",
+      fecha: new Date().toISOString().split("T")[0],
+      total: 0,
+      clienteId: 0,
+      cliente: {
+        fullName: "",
+      },
+      items: [],
+    };
+  };
+
+  return (
+    <CrudTable<Venta>
+      title="Ventas"
+      columns={columns}
+      apiEndpoint="/api/ventas"
+      fields={formFields}
+      createNewItem={createNewVenta}
+      validationSchema={yup.object({
+        fecha: yup.date().required("La fecha es requerida"),
+        total: yup.number().required("El total es requerido"),
+        clienteId: yup.number().required("El cliente es requerido"),
+        items: yup.array().min(1, "Debe agregar al menos un item"),
+      })}
+    />
+  );
+};
+
+export default VentasPage;
