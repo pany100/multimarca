@@ -73,6 +73,7 @@ function DynamicForm<T extends FieldValues>({
     formState: { errors },
     setValue,
     control,
+    watch,
   } = useForm<T>({
     resolver: yupResolver(validationSchema),
     defaultValues: (item || {}) as DefaultValues<T>,
@@ -246,7 +247,7 @@ function DynamicForm<T extends FieldValues>({
                 render={({ field: { onChange, value } }) => (
                   <Autocomplete
                     options={autocompleteOptions[field.name] || []}
-                    getOptionLabel={(option) => option.label}
+                    getOptionLabel={(option) => option?.label || ""}
                     value={
                       value
                         ? autocompleteOptions[field.name]?.find(
@@ -256,8 +257,11 @@ function DynamicForm<T extends FieldValues>({
                     }
                     defaultValue={field.getInitialValue?.(item) || null}
                     onChange={(_, newValue) => {
-                      onChange(newValue?.value);
-                      handleFieldChange(field.name as keyof T, newValue?.value);
+                      onChange(newValue?.value || null);
+                      handleFieldChange(
+                        field.name as keyof T,
+                        newValue?.value || null
+                      );
                     }}
                     onInputChange={(_, newInputValue) => {
                       debouncedSearch(
@@ -282,7 +286,7 @@ function DynamicForm<T extends FieldValues>({
                       />
                     )}
                     isOptionEqualToValue={(option, value) =>
-                      option.value === value.value
+                      option?.value === value?.value
                     }
                     loadingText="Buscando..."
                     noOptionsText="No se encontraron resultados"
