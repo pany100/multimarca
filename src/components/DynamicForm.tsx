@@ -220,6 +220,14 @@ function DynamicForm<T extends FieldValues>({
               />
             );
           case "select":
+            console.log(
+              "VALUE : ",
+              item?.[field.name as keyof T] ||
+                (field.getInitialValue && item
+                  ? field.getInitialValue(item).value
+                  : "")
+            );
+            console.log("NAME : ", field.name);
             return (
               <FormControl
                 key={field.name}

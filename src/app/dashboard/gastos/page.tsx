@@ -3,6 +3,7 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useState } from "react";
+import { UseFormSetValue } from "react-hook-form";
 import * as yup from "yup";
 
 interface Gasto {
@@ -49,19 +50,21 @@ const GastosPage = () => {
       field: "mecanico",
       headerName: "Mecánico",
       width: 200,
-      valueGetter: (mecanico: any) => mecanico?.name || "",
+      valueGetter: (mecanico: any) => mecanico?.name || "-",
     },
     {
       field: "ordenDeCompra",
       headerName: "Orden de Compra",
       width: 150,
       valueGetter: (ordenDeCompra: any) =>
-        `Proveedor: ${ordenDeCompra?.proveedor.name} - Orden: #${
-          ordenDeCompra?.id
-        } - Fecha: ${new Date(ordenDeCompra?.fecha).toLocaleDateString(
-          "es-ES",
-          { day: "numeric", month: "long", year: "numeric" }
-        )}`,
+        ordenDeCompra
+          ? `Proveedor: ${ordenDeCompra?.proveedor.name} - Orden: #${
+              ordenDeCompra?.id
+            } - Fecha: ${new Date(ordenDeCompra?.fecha).toLocaleDateString(
+              "es-ES",
+              { day: "numeric", month: "long", year: "numeric" }
+            )}`
+          : "-",
     },
   ];
 
@@ -130,7 +133,10 @@ const GastosPage = () => {
         };
       },
       hidden: (gasto: Gasto) => gasto.categoriaId !== 1,
-      onChange: async (value: number | null) => {
+      onChange: async (
+        value: number | null,
+        setValue: UseFormSetValue<any>
+      ) => {
         if (value) {
           const response = await fetch(
             `/api/proveedores/${value}/orden-de-compra`
@@ -145,6 +151,8 @@ const GastosPage = () => {
             })
           );
           setOptions(customOptions);
+        } else {
+          setOptions([]);
         }
       },
     },
