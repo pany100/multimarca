@@ -150,7 +150,7 @@ const OrdenDeCompraPage = () => {
       name: "items",
       label: "Items",
       type: "custom",
-      render: (value, onChange) => {
+      render: (value, onChange, error) => {
         const currentItems = (value as OrdenDeCompra["items"]) || [];
         if (currentItems.length > 0) {
           setItems(currentItems);
@@ -185,6 +185,7 @@ const OrdenDeCompraPage = () => {
                 ))}
               </TableBody>
             </Table>
+            {error && <Typography color="error">{error}</Typography>}
             <Button
               variant="contained"
               onClick={() => setOpenModal(true)}

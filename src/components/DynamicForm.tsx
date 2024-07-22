@@ -140,13 +140,26 @@ function DynamicForm<T extends FieldValues>({
           case "custom":
             if (field.render) {
               return (
-                <div key={field.name}>
-                  {field.render(
-                    item ? item[field.name as keyof T] : null,
-                    (value) => handleFieldChange(field.name as keyof T, value),
-                    errors[field.name as keyof T]?.message as string | undefined
+                <Controller
+                  key={field.name}
+                  name={field.name as Path<T>}
+                  control={control}
+                  render={({ field: { onChange, value } }) => (
+                    <div>
+                      {field.render &&
+                        field.render(
+                          value,
+                          (newValue) => {
+                            onChange(newValue);
+                            handleFieldChange(field.name as keyof T, newValue);
+                          },
+                          errors[field.name as Path<T>]?.message as
+                            | string
+                            | undefined
+                        )}
+                    </div>
                   )}
-                </div>
+                />
               );
             }
             return null;
