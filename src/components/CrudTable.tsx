@@ -308,6 +308,12 @@ function CrudTable<T extends { id: string }>({
           getRowId={(row) => row.id}
           getRowClassName={getRowClassName}
           getRowHeight={() => "auto"}
+          sx={{
+            "& .MuiDataGrid-cell": {
+              display: "flex",
+              alignItems: "center",
+            },
+          }}
         />
       )}
       <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
