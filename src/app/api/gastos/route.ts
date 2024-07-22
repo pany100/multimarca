@@ -38,8 +38,13 @@ export async function GET(request: Request) {
       }),
     ]);
 
+    const gastosConProveedor = gastos.map((gasto) => ({
+      ...gasto,
+      providerId: gasto.ordenDeCompra?.proveedor?.id || null,
+    }));
+
     return NextResponse.json({
-      items: gastos,
+      items: gastosConProveedor,
       total,
       page,
       size,

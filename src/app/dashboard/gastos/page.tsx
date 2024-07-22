@@ -109,7 +109,7 @@ const GastosPage = () => {
       }),
     },
     {
-      name: "proveedor",
+      name: "providerId",
       label: "Proveedor",
       type: "autocomplete",
       excludeFromSubmit: true,
@@ -125,7 +125,7 @@ const GastosPage = () => {
       },
       getInitialValue: (stock: Gasto) => {
         return {
-          value: stock.ordenDeCompra?.proveedor.id.toString() || "",
+          value: stock.ordenDeCompra?.proveedor.id || "",
           label: stock.ordenDeCompra?.proveedor.name || "",
         };
       },
