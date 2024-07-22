@@ -18,7 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import * as Yup from "yup";
+import * as yup from "yup";
 
 interface OrdenDeCompra {
   id: string;
@@ -38,28 +38,6 @@ interface OrdenDeCompra {
     };
   }>;
 }
-
-const ordenDeCompraSchema = Yup.object().shape({
-  fecha: Yup.date().required("La fecha es requerida"),
-  precioTotal: Yup.number()
-    .positive("El precio total debe ser mayor a 0")
-    .required("El precio total es requerido"),
-  proveedorId: Yup.number()
-    .positive("Debe seleccionar un proveedor")
-    .required("El proveedor es requerido"),
-  items: Yup.array()
-    .of(
-      Yup.object().shape({
-        stockId: Yup.number()
-          .positive("Debe seleccionar un stock")
-          .required("El stock es requerido"),
-        cantidad: Yup.number()
-          .positive("La cantidad debe ser mayor a 0")
-          .required("La cantidad es requerida"),
-      })
-    )
-    .min(1, "Debe agregar al menos un item"),
-});
 
 const OrdenDeCompraPage = () => {
   const [items, setItems] = useState<OrdenDeCompra["items"]>([]);
@@ -296,6 +274,12 @@ const OrdenDeCompraPage = () => {
       apiEndpoint="/api/orden-de-compra"
       fields={formFields}
       createNewItem={createNewOrdenDeCompra}
+      validationSchema={yup.object({
+        fecha: yup.date().required("La fecha es requerida"),
+        precioTotal: yup.number().required("El precio total es requerido"),
+        proveedorId: yup.number().required("El proveedor es requerido"),
+        items: yup.array().min(1, "Debe agregar al menos un item"),
+      })}
     />
   );
 };

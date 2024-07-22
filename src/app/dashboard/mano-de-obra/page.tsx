@@ -2,6 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import * as yup from "yup";
 
 interface ManoDeObra {
   id: string;
@@ -36,6 +37,10 @@ const ManoDeObraPage = () => {
       apiEndpoint="/api/mano-de-obra"
       createNewItem={createNewTrabajo}
       fields={formFields}
+      validationSchema={yup.object({
+        name: yup.string().required("El nombre es requerido"),
+        sellPrice: yup.number().required("El precio de venta es requerido"),
+      })}
     />
   );
 };

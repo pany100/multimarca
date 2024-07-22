@@ -16,6 +16,7 @@ import {
 } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import { useState } from "react";
+import * as yup from "yup";
 
 interface Stock {
   id: string;
@@ -186,6 +187,12 @@ const StockPage = () => {
           createNewItem={createNewStock}
           getRowClassName={getRowClassName}
           refreshTrigger={refreshTrigger}
+          validationSchema={yup.object({
+            name: yup.string().required("El nombre es requerido"),
+            brand: yup.string().required("La marca es requerida"),
+            buyPrice: yup.number().required("El precio de compra es requerido"),
+            providerId: yup.number().required("El proveedor es requerido"),
+          })}
         />
       )}
       {tabValue === 1 && (
@@ -197,6 +204,12 @@ const StockPage = () => {
           createNewItem={createNewStock}
           getRowClassName={getRowClassName}
           refreshTrigger={refreshTrigger}
+          validationSchema={yup.object({
+            name: yup.string().required("El nombre es requerido"),
+            brand: yup.string().required("La marca es requerida"),
+            buyPrice: yup.number().required("El precio de compra es requerido"),
+            providerId: yup.number().required("El proveedor es requerido"),
+          })}
         />
       )}
       <Modal open={openModal} onClose={() => setOpenModal(false)}>

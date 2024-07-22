@@ -2,6 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import * as yup from "yup";
 
 interface Proveedor {
   id: string;
@@ -56,6 +57,13 @@ const ProveedoresPage = () => {
       apiEndpoint="/api/proveedores"
       fields={formFields}
       createNewItem={createNewProveedor}
+      validationSchema={yup.object({
+        name: yup.string().required("El nombre es requerido"),
+        address: yup.string().nullable(),
+        email: yup.string().email("El email es inválido").nullable(),
+        phone: yup.string().nullable(),
+        mobile: yup.string().nullable(),
+      })}
     />
   );
 };

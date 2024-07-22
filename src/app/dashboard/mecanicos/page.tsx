@@ -2,6 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import * as yup from "yup";
 
 interface Mecanico {
   id: string;
@@ -62,6 +63,15 @@ const MecanicosPage = () => {
       apiEndpoint="/api/mecanicos"
       fields={formFields}
       createNewItem={createNewMecanico}
+      validationSchema={yup.object({
+        name: yup.string().required("El nombre es requerido"),
+        dni: yup
+          .string()
+          .matches(/^\d+$/, "El DNI debe contener solo nmeros")
+          .nullable(),
+        email: yup.string().email("El email es inválido").nullable(),
+        phone: yup.string().nullable(),
+      })}
     />
   );
 };

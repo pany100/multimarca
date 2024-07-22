@@ -6,6 +6,8 @@ import { FieldConfig } from "@/components/DynamicForm";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { IconButton, Tooltip } from "@mui/material";
 import { useState } from "react";
+import * as yup from "yup";
+
 interface Auto {
   owner?: {
     id: string;
@@ -144,6 +146,15 @@ const AutosPage = () => {
         fields={formFields}
         createNewItem={createNewAuto}
         extraActions={extraActions}
+        validationSchema={yup.object({
+          patent: yup.string().required("La patente es requerida"),
+          brand: yup.string().required("La marca es requerida"),
+          model: yup.string().required("El modelo es requerido"),
+          year: yup.number().required("El año es requerido"),
+          color: yup.string().required("El color es requerido"),
+          kms: yup.number().required("Los kilómetros son requeridos"),
+          ownerId: yup.number().required("El propietario es requerido"),
+        })}
       />
       {selectedAuto && (
         <CedulaVerdeModal

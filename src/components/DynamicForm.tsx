@@ -238,17 +238,17 @@ function DynamicForm<T extends FieldValues>({
                     options={autocompleteOptions[field.name] || []}
                     getOptionLabel={(option) => option.label}
                     value={
-                      item?.[field.name as keyof T]
+                      value
                         ? autocompleteOptions[field.name]?.find(
-                            (option) =>
-                              option.value === item[field.name as keyof T]
+                            (option) => option.value === value
                           ) || null
                         : null
                     }
                     defaultValue={field.getInitialValue?.(item) || null}
-                    onChange={(_, newValue) =>
-                      handleFieldChange(field.name as keyof T, newValue?.value)
-                    }
+                    onChange={(_, newValue) => {
+                      onChange(newValue?.value);
+                      handleFieldChange(field.name as keyof T, newValue?.value);
+                    }}
                     onInputChange={(_, newInputValue) => {
                       debouncedSearch(
                         field,

@@ -1,8 +1,10 @@
 "use client";
 
 import CrudTable from "@/components/CrudTable";
+import { FieldConfig } from "@/components/DynamicForm";
 import authFetch from "@/utils/authFetch";
 import React from "react";
+import * as yup from "yup";
 
 interface Rol {
   id: string;
@@ -33,7 +35,7 @@ const RolesPage = () => {
     { field: "permisos", headerName: "Permisos", width: 300 },
   ];
 
-  const formFields: FormField[] = [
+  const formFields: FieldConfig[] = [
     { name: "name", label: "Nombre del Rol", type: "text" },
     {
       name: "permisos",
@@ -60,6 +62,13 @@ const RolesPage = () => {
       apiEndpoint="/api/roles"
       fields={formFields}
       createNewItem={createNewRole}
+      validationSchema={yup.object({
+        name: yup.string().required("El nombre es requerido"),
+        permisos: yup
+          .array()
+          .min(1, "Seleccione al menos un permiso")
+          .required("Los permisos son requeridos"),
+      })}
     />
   );
 };

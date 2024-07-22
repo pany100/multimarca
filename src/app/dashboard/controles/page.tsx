@@ -2,6 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import * as yup from "yup";
 
 interface ControlMecanico {
   id: string;
@@ -44,6 +45,10 @@ const ControlesMecanicosPage = () => {
       apiEndpoint="/api/controles-mecanicos"
       fields={formFields}
       createNewItem={createNewControl}
+      validationSchema={yup.object({
+        name: yup.string().required("El nombre es requerido"),
+        type: yup.string().required("El tipo es requerido"),
+      })}
     />
   );
 };

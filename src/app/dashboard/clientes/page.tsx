@@ -1,6 +1,8 @@
 "use client";
 
 import CrudTable from "@/components/CrudTable";
+import { FieldConfig } from "@/components/DynamicForm";
+import * as yup from "yup";
 
 interface Cliente {
   id: string;
@@ -37,7 +39,7 @@ const ClientesPage = () => {
     },
   ];
 
-  const formFields: FormField[] = [
+  const formFields: FieldConfig[] = [
     { name: "fullName", label: "Nombre completo", type: "text" },
     { name: "email", label: "Email", type: "email" },
     { name: "phone", label: "Teléfono", type: "text" },
@@ -74,6 +76,24 @@ const ClientesPage = () => {
       apiEndpoint="/api/clientes"
       createNewItem={createNewCliente}
       fields={formFields}
+      validationSchema={yup.object({
+        fullName: yup.string().required("El nombre es requerido"),
+        email: yup.string().email("El email es inválido").nullable(),
+        phone: yup.string().nullable(),
+        dni: yup
+          .string()
+          .matches(/^\d+$/, "El DNI debe contener solo números")
+          .nullable(),
+        birthday: yup
+          .date()
+          .typeError("La fecha de nacimiento debe ser una fecha válida")
+          .nullable(),
+        address: yup.string().nullable(),
+        city: yup.string().nullable(),
+        state: yup.string().nullable(),
+        postal_code: yup.string().nullable(),
+        tax_status: yup.string().nullable(),
+      })}
     />
   );
 };
