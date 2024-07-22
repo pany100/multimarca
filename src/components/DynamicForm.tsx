@@ -20,6 +20,7 @@ import {
   FieldValues,
   Path,
   SubmitHandler,
+  UseFormSetValue,
   useForm,
 } from "react-hook-form";
 import * as yup from "yup";
@@ -48,7 +49,7 @@ export interface FieldConfig {
     onChange: (value: any) => void,
     error: string | undefined
   ) => React.ReactNode;
-  onChange?: (value: any, updateOtherFields: (updates: any) => void) => void;
+  onChange?: (value: any, setValue: UseFormSetValue<any>) => void;
 }
 
 interface DynamicFormProps<T> {
@@ -70,6 +71,7 @@ function DynamicForm<T extends FieldValues>({
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
     control,
   } = useForm<T>({
     resolver: yupResolver(validationSchema),
@@ -79,17 +81,12 @@ function DynamicForm<T extends FieldValues>({
   const [autocompleteOptions, setAutocompleteOptions] = useState<
     Record<string, { value: string; label: string }[]>
   >({});
-  const updateOtherFields = (updates: Partial<T>) => {
-    Object.entries(updates).forEach(([field, value]) => {
-      handleChange(field as keyof T, value);
-    });
-  };
 
   const handleFieldChange = (field: keyof T, value: any) => {
     handleChange(field, value);
     const fieldConfig = fields.find((f) => f.name === field);
     if (fieldConfig?.onChange) {
-      fieldConfig.onChange(value, updateOtherFields);
+      fieldConfig.onChange(value, setValue);
     }
   };
 

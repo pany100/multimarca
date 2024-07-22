@@ -18,6 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
+import { UseFormSetValue } from "react-hook-form";
 import * as yup from "yup";
 
 interface OrdenDeCompra {
@@ -138,12 +139,10 @@ const OrdenDeCompraPage = () => {
       },
       onChange: (
         value: { value: number; label: string } | null,
-        updateOtherFields: (updates: any) => void
+        setValue: UseFormSetValue<any>
       ) => {
         setProveedorId(value?.value ?? null);
-        updateOtherFields({
-          items: [],
-        });
+        setValue("items", []);
       },
     },
     {
