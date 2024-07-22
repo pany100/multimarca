@@ -150,8 +150,10 @@ const GastosPage = () => {
               } - Deuda: $${order.deuda.toFixed(2)}`,
             })
           );
+          setValue("ordenDeCompraId", null);
           setOptions(customOptions);
         } else {
+          setValue("ordenDeCompraId", null);
           setOptions([]);
         }
       },
@@ -194,8 +196,22 @@ const GastosPage = () => {
           .positive("El precio debe ser positivo"),
         fecha: yup.date().required("La fecha es requerida"),
         categoriaId: yup.number().required("La categoría es requerida"),
-        mecanicoId: yup.number().nullable(),
-        ordenDeCompraId: yup.number().nullable(),
+        mecanicoId: yup.number().when("categoriaId", ([categoriaId]) => {
+          return categoriaId === 2
+            ? yup
+                .number()
+                .required("El mecánico es requerido para esta categoría")
+            : yup.number().nullable();
+        }),
+        ordenDeCompraId: yup.number().when("categoriaId", ([categoriaId]) => {
+          return categoriaId === 1
+            ? yup
+                .number()
+                .required(
+                  "La orden de compra es requerida para Pago Proveedores"
+                )
+            : yup.number().nullable();
+        }),
       })}
     />
   );
