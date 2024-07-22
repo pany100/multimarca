@@ -1,5 +1,7 @@
 import {
   Autocomplete,
+  Box,
+  Button,
   Checkbox,
   FormControl,
   InputLabel,
@@ -38,9 +40,15 @@ interface DynamicFormProps<T> {
   item: T | null;
   fields: FieldConfig[];
   handleChange: (field: keyof T, value: any) => void;
+  onSubmit: (e: React.FormEvent) => Promise<void>;
 }
 
-function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
+function DynamicForm<T>({
+  item,
+  fields,
+  handleChange,
+  onSubmit,
+}: DynamicFormProps<T>) {
   const [autocompleteOptions, setAutocompleteOptions] = useState<
     Record<string, { value: string; label: string }[]>
   >({});
@@ -78,7 +86,7 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
     }
   }, [item, fields]);
   return (
-    <>
+    <Box component="form" onSubmit={onSubmit} sx={{ mt: 2 }}>
       {fields.map((field) => {
         switch (field.type) {
           case "custom":
@@ -236,7 +244,10 @@ function DynamicForm<T>({ item, fields, handleChange }: DynamicFormProps<T>) {
             );
         }
       })}
-    </>
+      <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+        Guardar
+      </Button>
+    </Box>
   );
 }
 

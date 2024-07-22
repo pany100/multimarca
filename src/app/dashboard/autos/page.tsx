@@ -2,7 +2,7 @@
 
 import CedulaVerdeModal from "@/components/CedulaVerdeModal";
 import CrudTable from "@/components/CrudTable";
-import DynamicForm, { FieldConfig } from "@/components/DynamicForm";
+import { FieldConfig } from "@/components/DynamicForm";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { IconButton, Tooltip } from "@mui/material";
 import { useState } from "react";
@@ -79,17 +79,6 @@ const AutosPage = () => {
     { name: "transmission_type", label: "Tipo de Transmisión", type: "text" },
   ];
 
-  const renderEditForm = (
-    auto: Auto | null,
-    handleChange: (field: keyof Auto, value: any) => void
-  ) => (
-    <DynamicForm<Auto>
-      item={auto}
-      fields={formFields}
-      handleChange={handleChange}
-    />
-  );
-
   const createNewAuto = (): Auto => {
     return {
       id: "",
@@ -152,7 +141,7 @@ const AutosPage = () => {
         title="Gestión de Autos"
         columns={columns}
         apiEndpoint="/api/autos"
-        renderEditForm={renderEditForm}
+        fields={formFields}
         createNewItem={createNewAuto}
         extraActions={extraActions}
       />

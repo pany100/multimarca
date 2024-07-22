@@ -330,16 +330,12 @@ function CrudTable<T extends { id: string }>({
           <Typography variant="h6" component="h2">
             Editar {title}
           </Typography>
-          <Box component="form" onSubmit={handleEditSubmit} sx={{ mt: 2 }}>
-            <DynamicForm<T>
-              item={editingItem}
-              fields={fields}
-              handleChange={handleChange}
-            />
-            <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-              Guardar cambios
-            </Button>
-          </Box>
+          <DynamicForm<T>
+            item={editingItem}
+            fields={fields}
+            handleChange={handleChange}
+            onSubmit={handleEditSubmit}
+          />
         </Box>
       </Modal>
       {createNewItem && (
@@ -359,16 +355,12 @@ function CrudTable<T extends { id: string }>({
             <Typography variant="h6" component="h2">
               Agregar nuevo {title}
             </Typography>
-            <Box component="form" onSubmit={handleAddSubmit} sx={{ mt: 2 }}>
-              <DynamicForm<T>
-                item={newItem}
-                fields={fields}
-                handleChange={handleNewItemChange}
-              />
-              <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-                Crear
-              </Button>
-            </Box>
+            <DynamicForm<T>
+              item={newItem}
+              fields={fields}
+              handleChange={handleNewItemChange}
+              onSubmit={handleAddSubmit}
+            />
           </Box>
         </Modal>
       )}
