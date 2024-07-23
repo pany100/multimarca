@@ -69,71 +69,76 @@ model Cliente {
 }
 
 model Auto {
-  id                Int     @id @default(autoincrement())
-  patent            String  @unique @db.VarChar(150)
-  model             String? @db.VarChar(150)
-  brand             String? @db.VarChar(150)
-  color             String? @db.VarChar(50)
+  id                Int               @id @default(autoincrement())
+  patent            String            @unique @db.VarChar(150)
+  model             String?           @db.VarChar(150)
+  brand             String?           @db.VarChar(150)
+  color             String?           @db.VarChar(50)
   year              Int?
   kms               Int?
   valves            Int?
-  owner             Cliente @relation(fields: [ownerId], references: [id])
+  owner             Cliente           @relation(fields: [ownerId], references: [id])
   ownerId           Int
-  chassis_number    String? @db.VarChar(150)
-  engine_number     String? @db.VarChar(150)
-  observations      String? @db.VarChar(255)
-  transmission_type String? @db.VarChar(20)
-  cedulaVerdePath   String? @db.VarChar(1000)
+  chassis_number    String?           @db.VarChar(150)
+  engine_number     String?           @db.VarChar(150)
+  observations      String?           @db.VarChar(255)
+  transmission_type String?           @db.VarChar(20)
+  cedulaVerdePath   String?           @db.VarChar(1000)
+  ordenesReparacion OrdenReparacion[] @relation("AutoOrdenReparacion")
 
   @@index([patent])
   @@index([ownerId])
 }
 
 model ControlMecanico {
-  id   Int    @id @default(autoincrement())
-  name String @unique @db.VarChar(150)
-  type String @db.VarChar(10)
+  id                    Int                   @id @default(autoincrement())
+  name                  String                @unique @db.VarChar(150)
+  type                  String                @db.VarChar(10)
+  controlesEnReparacion ControlEnReparacion[]
 
   @@index([name])
 }
 
 model ManoDeObra {
-  id        Int      @id @default(autoincrement())
-  name      String   @unique @db.VarChar(250)
-  sellPrice Decimal? @db.Decimal(10, 2)
+  id                 Int                @id @default(autoincrement())
+  name               String             @unique @db.VarChar(250)
+  sellPrice          Decimal?           @db.Decimal(10, 2)
+  trabajosRealizados TrabajoRealizado[]
 
   @@index([name])
 }
 
 model Proveedor {
-  id              Int             @id @default(autoincrement())
-  name            String          @unique @db.VarChar(150)
-  address         String?         @db.VarChar(150)
-  email           String?         @db.VarChar(150)
-  phone           String?         @db.VarChar(150)
-  mobile          String?         @db.VarChar(150)
-  iva             String?         @db.VarChar(150)
-  cuit            String?         @db.VarChar(150)
-  stocks          Stock[]
-  ordenesDeCompra OrdenDeCompra[]
+  id                    Int                   @id @default(autoincrement())
+  name                  String                @unique @db.VarChar(150)
+  address               String?               @db.VarChar(150)
+  email                 String?               @db.VarChar(150)
+  phone                 String?               @db.VarChar(150)
+  mobile                String?               @db.VarChar(150)
+  iva                   String?               @db.VarChar(150)
+  cuit                  String?               @db.VarChar(150)
+  stocks                Stock[]
+  ordenesDeCompra       OrdenDeCompra[]
+  reparacionesDeTercero ReparacionDeTercero[]
 
   @@index([name])
   @@index([cuit])
 }
 
 model Mecanico {
-  id               Int       @id @default(autoincrement())
-  name             String    @unique @db.VarChar(150)
-  start_date       DateTime?
-  dni              BigInt?
-  address          String?   @db.VarChar(150)
-  city             String?   @db.VarChar(150)
-  state            String?   @db.VarChar(150)
-  postal_code      String?   @db.VarChar(10)
-  email            String?   @db.VarChar(150)
-  phone            String?   @db.VarChar(150)
-  birthday         DateTime?
-  gastosRealizados Gasto[]
+  id                Int               @id @default(autoincrement())
+  name              String            @unique @db.VarChar(150)
+  start_date        DateTime?
+  dni               BigInt?
+  address           String?           @db.VarChar(150)
+  city              String?           @db.VarChar(150)
+  state             String?           @db.VarChar(150)
+  postal_code       String?           @db.VarChar(10)
+  email             String?           @db.VarChar(150)
+  phone             String?           @db.VarChar(150)
+  birthday          DateTime?
+  gastosRealizados  Gasto[]
+  ordenesReparacion OrdenReparacion[] @relation("OrdenReparacionMecanicos")
 
   @@index([name])
   @@index([dni])
@@ -152,6 +157,7 @@ model Stock {
   proveedorId        Int
   ordenDeCompraItems OrdenDeCompraItem[]
   ventas             VentaItem[]
+  repuestosUsados    RepuestoUsado[]
 
   @@index([name])
   @@index([brand])
@@ -261,4 +267,93 @@ model NotificacionWhatsapp {
 
   @@index([date])
   @@index([processed])
+}
+
+model OrdenReparacion {
+  id                     Int                   @id @default(autoincrement())
+  autoId                 Int
+  auto                   Auto                  @relation("AutoOrdenReparacion", fields: [autoId], references: [id])
+  fechaCreacion          DateTime              @default(now())
+  fechaEntradaReparacion DateTime?
+  fechaSalidaReparacion  DateTime?
+  kilometros             Int
+  observacionesCliente   String                @db.Text
+  observacionesEntrada   String                @db.Text
+  observacionesSalida    String                @db.Text
+  estado                 String                @db.VarChar(20)
+  precioManoObra         Decimal               @db.Decimal(10, 2)
+  pdfPath                String?               @db.VarChar(255)
+  mecanicos              Mecanico[]            @relation("OrdenReparacionMecanicos")
+  repuestosUsados        RepuestoUsado[]
+  reparacionesDeTercero  ReparacionDeTercero[] @relation("OrdenReparacionReparacionTercero")
+  trabajosRealizados     TrabajoRealizado[]
+  controlesEnReparacion  ControlEnReparacion[]
+  pagos                  PagoReparacion[]
+  montoTotalCliente      Decimal               @db.Decimal(10, 2)
+
+  @@index([autoId])
+  @@index([fechaCreacion])
+  @@index([estado])
+}
+
+model RepuestoUsado {
+  id                 Int             @id @default(autoincrement())
+  ordenReparacionId  Int
+  ordenReparacion    OrdenReparacion @relation(fields: [ordenReparacionId], references: [id])
+  stockId            Int
+  stock              Stock           @relation(fields: [stockId], references: [id])
+  precioCompra       Decimal         @db.Decimal(10, 2)
+  precioVenta        Decimal         @db.Decimal(10, 2)
+  unidadesConsumidas Int
+
+  @@index([ordenReparacionId])
+  @@index([stockId])
+}
+
+model ReparacionDeTercero {
+  id                Int               @id @default(autoincrement())
+  nombre            String            @db.VarChar(250)
+  precioCompra      Decimal           @db.Decimal(10, 2)
+  precioVenta       Decimal           @db.Decimal(10, 2)
+  proveedor         Proveedor         @relation(fields: [proveedorId], references: [id])
+  proveedorId       Int
+  ordenesReparacion OrdenReparacion[] @relation("OrdenReparacionReparacionTercero")
+
+  @@index([nombre])
+  @@index([proveedorId])
+}
+
+model TrabajoRealizado {
+  id                Int             @id @default(autoincrement())
+  ordenReparacion   OrdenReparacion @relation(fields: [ordenReparacionId], references: [id])
+  ordenReparacionId Int
+  manoDeObra        ManoDeObra      @relation(fields: [manoDeObraId], references: [id])
+  manoDeObraId      Int
+  precioUnitario    Decimal         @db.Decimal(10, 2)
+
+  @@index([ordenReparacionId])
+  @@index([manoDeObraId])
+}
+
+model ControlEnReparacion {
+  id                Int             @id @default(autoincrement())
+  ordenReparacion   OrdenReparacion @relation(fields: [ordenReparacionId], references: [id])
+  ordenReparacionId Int
+  controlMecanico   ControlMecanico @relation(fields: [controlMecanicoId], references: [id])
+  controlMecanicoId Int
+  valor             String          @db.VarChar(255)
+
+  @@index([ordenReparacionId])
+  @@index([controlMecanicoId])
+}
+
+model PagoReparacion {
+  id                Int             @id @default(autoincrement())
+  ordenReparacion   OrdenReparacion @relation(fields: [ordenReparacionId], references: [id])
+  ordenReparacionId Int
+  monto             Decimal         @db.Decimal(10, 2)
+  fechaPago         DateTime        @default(now())
+
+  @@index([ordenReparacionId])
+  @@index([fechaPago])
 }
