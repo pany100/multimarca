@@ -7,6 +7,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  MenuItem,
   Paper,
   Snackbar,
   TextField,
@@ -20,10 +21,35 @@ import * as yup from "yup";
 
 const schema = yup.object().shape({
   autoId: yup.string().required("Debe seleccionar un auto"),
+  fechaCreacion: yup.date().required("La fecha de creación es requerida"),
+  fechaEntradaReparacion: yup.date().nullable(),
+  fechaSalidaReparacion: yup
+    .date()
+    .nullable()
+    .min(
+      yup.ref("fechaEntradaReparacion"),
+      "La fecha de salida debe ser posterior a la fecha de entrada"
+    ),
+  kilometros: yup
+    .number()
+    .positive()
+    .integer()
+    .required("Debe ingresar los kilómetros"),
+  observacionesCliente: yup.string(),
+  estado: yup
+    .string()
+    .oneOf(["Presupuestado", "En Progreso", "Aceptado", "Terminado"])
+    .required("Debe seleccionar un estado"),
 });
 
 type OrdenReparacion = {
   autoId: string | number;
+  fechaCreacion: Date;
+  fechaEntradaReparacion: Date | null;
+  fechaSalidaReparacion: Date | null;
+  kilometros: number;
+  observacionesCliente: string;
+  estado: "Presupuestado" | "En Progreso" | "Aceptado" | "Terminado";
 };
 
 const NuevaOrdenReparacionForm = () => {
@@ -37,6 +63,12 @@ const NuevaOrdenReparacionForm = () => {
   >([]);
   const [ordenReparacion, setOrdenReparacion] = useState<OrdenReparacion>({
     autoId: "",
+    fechaCreacion: new Date(),
+    fechaEntradaReparacion: null,
+    fechaSalidaReparacion: null,
+    kilometros: 0,
+    observacionesCliente: "",
+    estado: "Presupuestado",
   });
 
   const {
@@ -159,6 +191,116 @@ const NuevaOrdenReparacionForm = () => {
               marginBottom: 2,
             }}
           />
+        )}
+      />
+      <Controller
+        name="fechaCreacion"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            type="date"
+            label="Fecha de creación"
+            InputLabelProps={{ shrink: true }}
+            fullWidth
+            margin="normal"
+            value={field.value || ""}
+            error={!!errors.fechaCreacion}
+            helperText={errors.fechaCreacion?.message as string}
+            onChange={(e) => field.onChange(e.target.value || null)}
+          />
+        )}
+      />
+      <Controller
+        name="fechaEntradaReparacion"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            type="date"
+            label="Fecha de entrada"
+            InputLabelProps={{ shrink: true }}
+            fullWidth
+            margin="normal"
+            error={!!errors.fechaEntradaReparacion}
+            helperText={errors.fechaEntradaReparacion?.message as string}
+            onChange={(e) => field.onChange(e.target.value || null)}
+          />
+        )}
+      />
+
+      <Controller
+        name="fechaSalidaReparacion"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            type="date"
+            label="Fecha de salida"
+            InputLabelProps={{ shrink: true }}
+            fullWidth
+            margin="normal"
+            error={!!errors.fechaSalidaReparacion}
+            helperText={errors.fechaSalidaReparacion?.message as string}
+            onChange={(e) => field.onChange(e.target.value || null)}
+          />
+        )}
+      />
+
+      <Controller
+        name="kilometros"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            type="number"
+            label="Kilómetros"
+            fullWidth
+            margin="normal"
+            error={!!errors.kilometros}
+            helperText={errors.kilometros?.message as string}
+          />
+        )}
+      />
+
+      <Controller
+        name="observacionesCliente"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            label="Observaciones del cliente"
+            multiline
+            rows={4}
+            fullWidth
+            margin="normal"
+            error={!!errors.observacionesCliente}
+            helperText={errors.observacionesCliente?.message as string}
+          />
+        )}
+      />
+
+      <Controller
+        name="estado"
+        control={control}
+        render={({ field }) => (
+          <TextField
+            {...field}
+            select
+            label="Estado"
+            fullWidth
+            margin="normal"
+            error={!!errors.estado}
+            helperText={errors.estado?.message as string}
+          >
+            {["Presupuestado", "En Progreso", "Aceptado", "Terminado"].map(
+              (option) => (
+                <MenuItem key={option} value={option}>
+                  {option}
+                </MenuItem>
+              )
+            )}
+          </TextField>
         )}
       />
       <Button type="submit" variant="contained" color="primary">
