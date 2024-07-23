@@ -1,0 +1,304 @@
+import authFetch from "@/utils/authFetch";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Autocomplete, MenuItem, TextField } from "@mui/material";
+import debounce from "lodash/debounce";
+import { useState } from "react";
+import { Controller, FormProvider, useForm } from "react-hook-form";
+import * as yup from "yup";
+import MecanicoFormSection from "./MecanicoFormSection";
+
+const schema = yup.object().shape({
+  autoId: yup.string().required("Debe seleccionar un auto"),
+  fechaCreacion: yup.date().required("La fecha de creación es requerida"),
+  fechaEntradaReparacion: yup.date().nullable(),
+  fechaSalidaReparacion: yup
+    .date()
+    .nullable()
+    .min(
+      yup.ref("fechaEntradaReparacion"),
+      "La fecha de salida debe ser posterior a la fecha de entrada"
+    ),
+  kilometros: yup
+    .number()
+    .positive()
+    .integer()
+    .required("Debe ingresar los kilómetros"),
+  observacionesCliente: yup.string(),
+  estado: yup
+    .string()
+    .oneOf(["Presupuestado", "En Progreso", "Aceptado", "Terminado"])
+    .required("Debe seleccionar un estado"),
+  mecanicos: yup.array(),
+  repuestosUsados: yup.array().of(
+    yup.object().shape({
+      stock: yup
+        .object()
+        .shape({
+          id: yup.number().required(),
+          name: yup.string().required(),
+        })
+        .required("El repuesto es requerido"),
+      precioCompra: yup
+        .number()
+        .positive()
+        .required("El precio de compra es requerido"),
+      precioVenta: yup
+        .number()
+        .positive()
+        .required("El precio de venta es requerido"),
+      unidadesConsumidas: yup
+        .number()
+        .positive()
+        .integer()
+        .required("Las unidades consumidas son requeridas"),
+    })
+  ),
+});
+
+const NuevaOrdenReparacionForm = () => {
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
+
+  const [autocompleteOptions, setAutocompleteOptions] = useState<
+    { value: string; label: string }[]
+  >([]);
+
+  const methods = useForm({
+    resolver: yupResolver(schema),
+  });
+  const {
+    handleSubmit,
+    formState: { errors },
+    control,
+  } = methods;
+
+  const debouncedSearch = debounce(
+    async (
+      query: string,
+      callback: (options: { value: string; label: string }[]) => void
+    ) => {
+      const response = await authFetch(
+        `/api/autos?query=${query}&limit=10&page=0`
+      );
+      const data = await response.json();
+
+      const opciones = data.items.map(
+        (auto: {
+          patent: string;
+          id: number;
+          brand: string;
+          model: string;
+        }) => ({
+          label: `${auto.patent} - ${auto.brand || ""} ${auto.model || ""}`,
+          value: auto.id.toString(),
+        })
+      );
+      callback(opciones);
+    },
+    300
+  );
+
+  const onSubmit = async (data: any) => {
+    try {
+      const response = await fetch("/api/orden-reparacion", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        setSnackbar({
+          open: true,
+          message: "Orden de reparación creada con éxito",
+          severity: "success",
+        });
+        // Aquí puedes agregar lógica adicional, como redireccionar
+      } else {
+        const errorData = await response.json();
+        setSnackbar({
+          open: true,
+          message: errorData.error || "Error al crear la orden de reparación",
+          severity: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error al enviar la solicitud:", error);
+      setSnackbar({
+        open: true,
+        message: "Error al realizar la solicitud de creación",
+        severity: "error",
+      });
+    }
+  };
+
+  return (
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Controller
+          name="autoId"
+          control={control}
+          render={({ field: { onChange, value } }) => (
+            <Autocomplete
+              options={autocompleteOptions || []}
+              getOptionLabel={(option) => option?.label || ""}
+              value={
+                value
+                  ? autocompleteOptions.find(
+                      (option) => option.value === value
+                    ) || null
+                  : null
+              }
+              onChange={(_, newValue) => {
+                onChange(newValue?.value || null);
+              }}
+              onInputChange={(event, newInputValue, reason) => {
+                if (reason === "input") {
+                  console.log("Input change", newInputValue);
+                  debouncedSearch(
+                    newInputValue,
+                    (options: { value: string; label: string }[]) =>
+                      setAutocompleteOptions(options)
+                  );
+                }
+              }}
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label="Auto"
+                  error={!!errors.autoId}
+                  helperText={errors.autoId?.message as string}
+                />
+              )}
+              isOptionEqualToValue={(option, value) =>
+                option?.value === value?.value
+              }
+              loadingText="Buscando..."
+              noOptionsText="No se encontraron resultados"
+              sx={{
+                marginBottom: 2,
+              }}
+            />
+          )}
+        />
+        <Controller
+          name="fechaCreacion"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              type="date"
+              label="Fecha de creación"
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+              margin="normal"
+              value={field.value || ""}
+              error={!!errors.fechaCreacion}
+              helperText={errors.fechaCreacion?.message as string}
+              onChange={(e) => field.onChange(e.target.value || null)}
+            />
+          )}
+        />
+        <Controller
+          name="fechaEntradaReparacion"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              type="date"
+              label="Fecha de entrada"
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+              margin="normal"
+              error={!!errors.fechaEntradaReparacion}
+              helperText={errors.fechaEntradaReparacion?.message as string}
+              onChange={(e) => field.onChange(e.target.value || null)}
+            />
+          )}
+        />
+
+        <Controller
+          name="fechaSalidaReparacion"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              type="date"
+              label="Fecha de salida"
+              InputLabelProps={{ shrink: true }}
+              fullWidth
+              margin="normal"
+              error={!!errors.fechaSalidaReparacion}
+              helperText={errors.fechaSalidaReparacion?.message as string}
+              onChange={(e) => field.onChange(e.target.value || null)}
+            />
+          )}
+        />
+
+        <Controller
+          name="kilometros"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              type="number"
+              label="Kilómetros"
+              fullWidth
+              margin="normal"
+              error={!!errors.kilometros}
+              helperText={errors.kilometros?.message as string}
+            />
+          )}
+        />
+
+        <Controller
+          name="observacionesCliente"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Observaciones del cliente"
+              multiline
+              rows={4}
+              fullWidth
+              margin="normal"
+              error={!!errors.observacionesCliente}
+              helperText={errors.observacionesCliente?.message as string}
+            />
+          )}
+        />
+
+        <Controller
+          name="estado"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              select
+              label="Estado"
+              fullWidth
+              margin="normal"
+              error={!!errors.estado}
+              helperText={errors.estado?.message as string}
+            >
+              {["Presupuestado", "En Progreso", "Aceptado", "Terminado"].map(
+                (option) => (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                )
+              )}
+            </TextField>
+          )}
+        />
+        <MecanicoFormSection />
+      </form>
+    </FormProvider>
+  );
+};
+
+export default NuevaOrdenReparacionForm;
