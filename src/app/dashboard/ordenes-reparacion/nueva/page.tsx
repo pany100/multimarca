@@ -7,9 +7,18 @@ import {
   Autocomplete,
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   MenuItem,
   Paper,
   Snackbar,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
   TextField,
   Typography,
 } from "@mui/material";
@@ -40,17 +49,8 @@ const schema = yup.object().shape({
     .string()
     .oneOf(["Presupuestado", "En Progreso", "Aceptado", "Terminado"])
     .required("Debe seleccionar un estado"),
+  mecanicos: yup.array(),
 });
-
-type OrdenReparacion = {
-  autoId: string | number;
-  fechaCreacion: Date;
-  fechaEntradaReparacion: Date | null;
-  fechaSalidaReparacion: Date | null;
-  kilometros: number;
-  observacionesCliente: string;
-  estado: "Presupuestado" | "En Progreso" | "Aceptado" | "Terminado";
-};
 
 const NuevaOrdenReparacionForm = () => {
   const [snackbar, setSnackbar] = useState({
@@ -58,24 +58,25 @@ const NuevaOrdenReparacionForm = () => {
     message: "",
     severity: "success",
   });
+  const [openMecanicoModal, setOpenMecanicoModal] = useState(false);
+  const [selectedMecanico, setSelectedMecanico] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
+  const [mecanicoOptions, setMecanicoOptions] = useState<
+    Array<{ id: number; name: string }>
+  >([]);
+
   const [autocompleteOptions, setAutocompleteOptions] = useState<
     { value: string; label: string }[]
   >([]);
-  const [ordenReparacion, setOrdenReparacion] = useState<OrdenReparacion>({
-    autoId: "",
-    fechaCreacion: new Date(),
-    fechaEntradaReparacion: null,
-    fechaSalidaReparacion: null,
-    kilometros: 0,
-    observacionesCliente: "",
-    estado: "Presupuestado",
-  });
 
   const {
-    register,
     handleSubmit,
     formState: { errors },
     control,
+    setValue,
+    getValues,
   } = useForm({
     resolver: yupResolver(schema),
   });
@@ -105,6 +106,38 @@ const NuevaOrdenReparacionForm = () => {
     },
     300
   );
+
+  const searchMecanicos = async (query: string) => {
+    const response = await authFetch(
+      `/api/mecanicos?query=${query}&limit=10&page=0`
+    );
+    const data = await response.json();
+    setMecanicoOptions(
+      data.items.map((mecanico: { name: string; id: number }) => ({
+        id: mecanico.id,
+        name: mecanico.name,
+      }))
+    );
+  };
+
+  const handleAddMecanico = () => {
+    if (selectedMecanico) {
+      const currentMecanicos = getValues("mecanicos") || [];
+      if (!currentMecanicos.some((m) => m.id === selectedMecanico.id)) {
+        const updatedMecanicos = [...currentMecanicos, selectedMecanico];
+        setValue("mecanicos", updatedMecanicos);
+        setOpenMecanicoModal(false);
+        setSelectedMecanico(null);
+      }
+    }
+  };
+
+  const handleRemoveMecanico = (id: number) => {
+    const currentMecanicos = getValues("mecanicos") || [];
+    const updatedMecanicos = currentMecanicos.filter((m) => m.id !== id);
+
+    setValue("mecanicos", updatedMecanicos);
+  };
 
   const onSubmit = async (data: any) => {
     try {
@@ -159,10 +192,6 @@ const NuevaOrdenReparacionForm = () => {
             }
             onChange={(_, newValue) => {
               onChange(newValue?.value || null);
-              setOrdenReparacion({
-                ...ordenReparacion,
-                autoId: newValue?.value || "",
-              });
             }}
             onInputChange={(event, newInputValue, reason) => {
               if (reason === "input") {
@@ -303,6 +332,74 @@ const NuevaOrdenReparacionForm = () => {
           </TextField>
         )}
       />
+      <Controller
+        name="mecanicos"
+        control={control}
+        rules={{ required: "Debe seleccionar al menos un mecánico" }}
+        render={({ field, fieldState: { error } }) => (
+          <>
+            <Button
+              onClick={() => setOpenMecanicoModal(true)}
+              variant="contained"
+              color="secondary"
+            >
+              Agregar Mecánico
+            </Button>
+            <Table>
+              <TableHead>
+                <TableRow>
+                  <TableCell>Mecánico</TableCell>
+                  <TableCell>Acciones</TableCell>
+                </TableRow>
+              </TableHead>
+              <TableBody>
+                {field.value?.map((mecanico) => (
+                  <TableRow key={mecanico.id}>
+                    <TableCell>{mecanico.name}</TableCell>
+                    <TableCell>
+                      <Button
+                        onClick={() => {
+                          handleRemoveMecanico(mecanico.id);
+                        }}
+                      >
+                        Eliminar
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+            {error && <Typography color="error">{error.message}</Typography>}
+          </>
+        )}
+      />
+      <Dialog
+        open={openMecanicoModal}
+        onClose={() => setOpenMecanicoModal(false)}
+      >
+        <DialogTitle>Agregar Mecánico</DialogTitle>
+        <DialogContent>
+          <Autocomplete
+            options={mecanicoOptions}
+            getOptionLabel={(option) => option.name}
+            renderInput={(params) => <TextField {...params} label="Mecánico" />}
+            value={selectedMecanico}
+            onChange={(_, newValue) => {
+              setSelectedMecanico(newValue);
+            }}
+            onInputChange={(_, newInputValue) => {
+              searchMecanicos(newInputValue);
+            }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setOpenMecanicoModal(false)}>Cancelar</Button>
+          <Button onClick={handleAddMecanico} disabled={!selectedMecanico}>
+            Agregar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
       <Button type="submit" variant="contained" color="primary">
         Crear Orden de Reparación
       </Button>
