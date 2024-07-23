@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
-
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
@@ -19,29 +18,48 @@ export async function PUT(
       postal_code,
       tax_status,
       dni,
+      can_receive_notifications,
     } = body;
 
-    if (!fullName) {
-      return NextResponse.json(
-        { error: "El nombre completo es obligatorio" },
-        { status: 400 }
-      );
+    const updateData: any = {};
+
+    if (phone !== undefined) {
+      updateData.phone = phone;
+    }
+    if (fullName !== undefined) {
+      updateData.fullName = fullName;
+    }
+    if (email !== undefined) {
+      updateData.email = email;
+    }
+    if (birthday !== undefined) {
+      updateData.birthday = birthday ? new Date(birthday) : null;
+    }
+    if (address !== undefined) {
+      updateData.address = address;
+    }
+    if (city !== undefined) {
+      updateData.city = city;
+    }
+    if (state !== undefined) {
+      updateData.state = state;
+    }
+    if (postal_code !== undefined) {
+      updateData.postal_code = postal_code;
+    }
+    if (tax_status !== undefined) {
+      updateData.tax_status = tax_status;
+    }
+    if (dni !== undefined) {
+      updateData.dni = dni;
+    }
+    if (can_receive_notifications !== undefined) {
+      updateData.can_receive_notifications = can_receive_notifications;
     }
 
     const clienteActualizado = await prisma.cliente.update({
       where: { id },
-      data: {
-        phone,
-        fullName,
-        email,
-        birthday: birthday ? new Date(birthday) : null,
-        address,
-        city,
-        state,
-        postal_code,
-        tax_status,
-        dni,
-      },
+      data: updateData,
       include: {
         cars: true,
       },

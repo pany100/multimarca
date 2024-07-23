@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
-import type { NextRequest } from "next/server";
-import { verifyToken } from "./lib/auth/authService";
 import { JwtPayload } from "jsonwebtoken"; // Asegúrate de importar JwtPayload
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+import { verifyToken } from "./lib/auth/authService";
 
 export async function middleware(request: NextRequest) {
   const token = request.headers.get("Authorization")?.split(" ")[1];
@@ -31,5 +31,12 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: "/api/usuarios/:path*",
+  matcher: [
+    "/api/usuarios/:path*",
+    "/api/clientes/:path*",
+    "/api/stock/:path*",
+    "/api/ventas/:path*",
+    "/api/notificaciones/:path*",
+    // Agrega aquí más rutas segn sea necesario
+  ],
 };
