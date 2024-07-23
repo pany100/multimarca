@@ -3,6 +3,7 @@
 import CedulaVerdeModal from "@/components/CedulaVerdeModal";
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import authFetch from "@/utils/authFetch";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { IconButton, Tooltip } from "@mui/material";
 import { useState } from "react";
@@ -61,7 +62,7 @@ const AutosPage = () => {
       label: "Propietario",
       type: "autocomplete",
       searchOptions: async (query: string) => {
-        const response = await fetch(
+        const response = await authFetch(
           `/api/clientes?query=${query}&limit=10&page=0`
         );
         const data = await response.json();
