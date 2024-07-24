@@ -8,6 +8,7 @@ import * as yup from "yup";
 import MecanicoFormSection from "./MecanicoFormSection";
 import ReparacionesTercerosFormSection from "./ReparacionesTercerosFormSection";
 import RepuestoUsadoFormSection from "./RepuestoUsadoFormSection";
+import TrabajosRealizadosFormSection from "./TrabajosRealizadosFormSection";
 
 const schema = yup.object().shape({
   autoId: yup.string().required("Debe seleccionar un auto"),
@@ -300,6 +301,7 @@ const NuevaOrdenReparacionForm = () => {
         <MecanicoFormSection />
         <RepuestoUsadoFormSection />
         <ReparacionesTercerosFormSection />
+        <TrabajosRealizadosFormSection />
         <Button type="submit" variant="contained" color="primary">
           Crear Orden de Reparación
         </Button>
