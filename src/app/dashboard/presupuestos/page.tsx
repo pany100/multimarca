@@ -85,11 +85,11 @@ const PresupuestosPage = () => {
   }, [paginationModel]);
 
   const handleAddClick = () => {
-    router.push("/dashboard/presupuestos/nuevo");
+    router.push("/dashboard/ordenes-reparacion/nueva");
   };
 
   const handleEditClick = (id: string) => {
-    router.push(`/dashboard/presupuestos/${id}`);
+    router.push(`/dashboard/ordenes-reparacion/${id}/editar`);
   };
 
   return (
