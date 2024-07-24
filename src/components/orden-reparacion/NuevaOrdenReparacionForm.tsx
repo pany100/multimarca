@@ -2,8 +2,8 @@ import authFetch from "@/utils/authFetch";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Autocomplete, Button, MenuItem, TextField } from "@mui/material";
 import debounce from "lodash/debounce";
-import { useState } from "react";
-import { Controller, FormProvider, useForm } from "react-hook-form";
+import { useEffect, useState } from "react";
+import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import MecanicoFormSection from "./MecanicoFormSection";
 import ReparacionesTercerosFormSection from "./ReparacionesTercerosFormSection";
@@ -31,7 +31,12 @@ const schema = yup.object().shape({
     .string()
     .oneOf(["Presupuestado", "En Progreso", "Aceptado", "Terminado"])
     .required("Debe seleccionar un estado"),
-  mecanicos: yup.array(),
+  mecanicos: yup.array().of(
+    yup.object().shape({
+      id: yup.number().required(),
+      name: yup.string().required(),
+    })
+  ),
   repuestosUsados: yup.array().of(
     yup.object().shape({
       stock: yup
@@ -56,6 +61,45 @@ const schema = yup.object().shape({
         .required("Las unidades consumidas son requeridas"),
     })
   ),
+  trabajosRealizados: yup.array().of(
+    yup.object().shape({
+      manoDeObra: yup
+        .object()
+        .shape({
+          id: yup.number().required(),
+          name: yup.string().required(),
+        })
+        .required("La mano de obra es requerida"),
+      precioUnitario: yup
+        .number()
+        .positive()
+        .required("El precio unitario es requerido"),
+    })
+  ),
+  reparacionesDeTercero: yup.array().of(
+    yup.object().shape({
+      nombre: yup.string().required("El nombre de la reparación es requerido"),
+      precioCompra: yup
+        .number()
+        .positive()
+        .required("El precio de compra es requerido"),
+      precioVenta: yup
+        .number()
+        .positive()
+        .required("El precio de venta es requerido"),
+      proveedor: yup
+        .object()
+        .shape({
+          id: yup.number().required(),
+          name: yup.string().required(),
+        })
+        .required("El proveedor es requerido"),
+    })
+  ),
+  montoTotalCliente: yup
+    .number()
+    .positive()
+    .required("El monto total es requerido"),
 });
 
 const NuevaOrdenReparacionForm = () => {
@@ -71,12 +115,41 @@ const NuevaOrdenReparacionForm = () => {
 
   const methods = useForm({
     resolver: yupResolver(schema),
+    defaultValues: {
+      montoTotalCliente: 0,
+    },
   });
   const {
     handleSubmit,
     formState: { errors },
     control,
+    setValue,
   } = methods;
+
+  const repuestosUsados = useWatch({ control, name: "repuestosUsados" });
+  const reparacionesTerceros = useWatch({
+    control,
+    name: "reparacionesDeTercero",
+  });
+  const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
+
+  useEffect(() => {
+    const calcularMontoTotal = () => {
+      const totalRepuestos =
+        repuestosUsados?.reduce(
+          (sum, r) => sum + r.precioVenta * r.unidadesConsumidas,
+          0
+        ) || 0;
+      const totalReparaciones =
+        reparacionesTerceros?.reduce((sum, r) => sum + r.precioVenta, 0) || 0;
+      const totalTrabajos =
+        trabajosRealizados?.reduce((sum, t) => sum + t.precioUnitario, 0) || 0;
+
+      return totalRepuestos + totalReparaciones + totalTrabajos;
+    };
+
+    setValue("montoTotalCliente", calcularMontoTotal());
+  }, [repuestosUsados, reparacionesTerceros, trabajosRealizados, setValue]);
 
   const debouncedSearch = debounce(
     async (
@@ -302,6 +375,22 @@ const NuevaOrdenReparacionForm = () => {
         <RepuestoUsadoFormSection />
         <ReparacionesTercerosFormSection />
         <TrabajosRealizadosFormSection />
+        <Controller
+          name="montoTotalCliente"
+          control={control}
+          render={({ field }) => (
+            <TextField
+              {...field}
+              label="Monto Total Cliente"
+              type="number"
+              InputProps={{
+                readOnly: true,
+              }}
+              fullWidth
+              margin="normal"
+            />
+          )}
+        />
         <Button type="submit" variant="contained" color="primary">
           Crear Orden de Reparación
         </Button>
