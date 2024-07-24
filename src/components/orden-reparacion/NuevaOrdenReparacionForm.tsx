@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import MecanicoFormSection from "./MecanicoFormSection";
+import ReparacionesTercerosFormSection from "./ReparacionesTercerosFormSection";
 import RepuestoUsadoFormSection from "./RepuestoUsadoFormSection";
 
 const schema = yup.object().shape({
@@ -298,6 +299,7 @@ const NuevaOrdenReparacionForm = () => {
         />
         <MecanicoFormSection />
         <RepuestoUsadoFormSection />
+        <ReparacionesTercerosFormSection />
         <Button type="submit" variant="contained" color="primary">
           Crear Orden de Reparación
         </Button>
