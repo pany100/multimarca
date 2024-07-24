@@ -31,9 +31,11 @@ function RepuestoUsadoFormSection() {
   const [selectedRepuesto, setSelectedRepuesto] = useState<{
     id: number;
     name: string;
+    buyPrice: number;
+    markup: number;
   } | null>(null);
   const [repuestoOptions, setRepuestoOptions] = useState<
-    Array<{ id: number; name: string }>
+    Array<{ id: number; name: string; buyPrice: number; markup: number }>
   >([]);
   const [precioCompra, setPrecioCompra] = useState("");
   const [precioVenta, setPrecioVenta] = useState("");
@@ -45,10 +47,19 @@ function RepuestoUsadoFormSection() {
     );
     const data = await response.json();
     setRepuestoOptions(
-      data.items.map((repuesto: { name: string; id: number }) => ({
-        id: repuesto.id,
-        name: repuesto.name,
-      }))
+      data.items.map(
+        (repuesto: {
+          name: string;
+          id: number;
+          buyPrice: number;
+          markup: number;
+        }) => ({
+          id: repuesto.id,
+          name: repuesto.name,
+          buyPrice: repuesto.buyPrice,
+          markup: repuesto.markup,
+        })
+      )
     );
   };
 
@@ -159,6 +170,15 @@ function RepuestoUsadoFormSection() {
             value={selectedRepuesto}
             onChange={(_, newValue) => {
               setSelectedRepuesto(newValue);
+              if (newValue) {
+                setPrecioCompra(newValue.buyPrice.toString());
+                const precioVentaCalculado =
+                  newValue.buyPrice * (1 + (newValue.markup || 0) / 100);
+                setPrecioVenta(precioVentaCalculado.toFixed(2));
+              } else {
+                setPrecioCompra("");
+                setPrecioVenta("");
+              }
             }}
             onInputChange={(_, newInputValue) => {
               searchRepuestos(newInputValue);
