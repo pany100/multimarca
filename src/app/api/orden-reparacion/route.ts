@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -65,24 +66,21 @@ export async function POST(request: Request) {
       fechaSalidaReparacion,
       kilometros,
       observacionesCliente,
-      observacionesEntrada,
-      observacionesSalida,
+      observacionesEntrada = "",
+      observacionesSalida = "",
       estado,
-      precioManoObra,
       pdfPath,
-      mecanicosIds,
-      repuestosUsados,
-      reparacionesDeTercero,
-      trabajosRealizados,
-      controlesEnReparacion,
-      pagos,
+      mecanicosIds = [],
+      repuestosUsados = [],
+      reparacionesDeTercero = [],
+      trabajosRealizados = [],
       montoTotalCliente,
     } = body;
 
     // Validar que los repuestos usados no excedan el stock actual
     for (const repuesto of repuestosUsados) {
       const stockActual = await prisma.stock.findUnique({
-        where: { id: repuesto.stockId },
+        where: { id: repuesto.stock.id },
         select: { units: true },
       });
 
@@ -92,16 +90,54 @@ export async function POST(request: Request) {
       ) {
         return NextResponse.json(
           {
-            error: `Stock insuficiente para el repuesto con ID ${repuesto.stockId}`,
+            error: `Stock insuficiente para el repuesto ${repuesto.stock.name} con ID ${repuesto.stock.id}`,
           },
           { status: 400 }
         );
       }
     }
+    if (!Array.isArray(repuestosUsados)) {
+      console.error("repuestosUsados no es un array:", repuestosUsados);
+      console.log("repuestosUsados:", JSON.stringify(repuestosUsados, null, 2));
+      return NextResponse.json(
+        { error: "repuestosUsados debe ser un array" },
+        { status: 400 }
+      );
+    }
+    const repuestosToPersist = repuestosUsados.map((repuesto) => ({
+      precioCompra: repuesto.precioCompra
+        ? new Prisma.Decimal(repuesto.precioCompra)
+        : new Prisma.Decimal(0),
+      precioVenta: repuesto.precioVenta
+        ? new Prisma.Decimal(repuesto.precioVenta)
+        : new Prisma.Decimal(0),
+      unidadesConsumidas: repuesto.unidadesConsumidas,
+      stock: { connect: { id: repuesto.stock.id } },
+    }));
+
+    const reparacionesDeTerceroToPersist = reparacionesDeTercero.map(
+      (reparacion: any) => ({
+        nombre: reparacion.nombre,
+        precioCompra: reparacion.precioCompra
+          ? new Prisma.Decimal(reparacion.precioCompra)
+          : new Prisma.Decimal(0),
+        precioVenta: reparacion.precioVenta
+          ? new Prisma.Decimal(reparacion.precioVenta)
+          : new Prisma.Decimal(0),
+        proveedor: { connect: { id: reparacion.proveedor.id } },
+      })
+    );
+
+    const trabajosRealizadosToPersist = trabajosRealizados.map(
+      (trabajo: any) => ({
+        descripcion: trabajo.manoDeObra.name,
+        precioUnitario: new Prisma.Decimal(trabajo.precioUnitario),
+      })
+    );
 
     const nuevaOrdenReparacion = await prisma.ordenReparacion.create({
       data: {
-        autoId,
+        autoId: parseInt(autoId),
         fechaEntradaReparacion,
         fechaSalidaReparacion,
         kilometros,
@@ -109,26 +145,19 @@ export async function POST(request: Request) {
         observacionesEntrada,
         observacionesSalida,
         estado,
-        precioManoObra,
         pdfPath,
-        montoTotalCliente,
+        montoTotalCliente: new Prisma.Decimal(montoTotalCliente),
         mecanicos: {
           connect: mecanicosIds.map((id: number) => ({ id })),
         },
         repuestosUsados: {
-          create: repuestosUsados,
+          create: repuestosToPersist,
         },
         reparacionesDeTercero: {
-          connect: reparacionesDeTercero.map((id: number) => ({ id })),
+          create: reparacionesDeTerceroToPersist,
         },
         trabajosRealizados: {
-          create: trabajosRealizados,
-        },
-        controlesEnReparacion: {
-          create: controlesEnReparacion,
-        },
-        pagos: {
-          create: pagos,
+          create: trabajosRealizadosToPersist,
         },
       },
       include: {
@@ -149,6 +178,10 @@ export async function POST(request: Request) {
     return NextResponse.json(nuevaOrdenReparacion, { status: 201 });
   } catch (error) {
     console.error("Error al crear orden de reparación:", error);
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      console.error("Prisma error code:", error.code);
+      console.error("Prisma error message:", error.message);
+    }
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Error desconocido" },
       { status: 500 }

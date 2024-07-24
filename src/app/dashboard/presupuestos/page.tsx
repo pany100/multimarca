@@ -6,10 +6,10 @@ import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-interface OrdenReparacion {
+interface Presupuesto {
   id: string;
-  fecha: string;
-  status: string;
+  fechaCreacion: string;
+  estado: string;
   auto: {
     patent: string;
     owner: {
@@ -18,8 +18,8 @@ interface OrdenReparacion {
   };
 }
 
-const OrdenesReparacionPage = () => {
-  const [ordenes, setOrdenes] = useState<OrdenReparacion[]>([]);
+const PresupuestosPage = () => {
+  const [presupuestos, setPresupuestos] = useState<Presupuesto[]>([]);
   const [loading, setLoading] = useState(true);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
@@ -30,8 +30,8 @@ const OrdenesReparacionPage = () => {
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 70 },
-    { field: "fecha", headerName: "Fecha", width: 130 },
-    { field: "status", headerName: "Estado", width: 130 },
+    { field: "fechaCreacion", headerName: "Fecha", width: 130 },
+    { field: "estado", headerName: "Estado", width: 130 },
     {
       field: "patente",
       headerName: "Patente",
@@ -62,39 +62,40 @@ const OrdenesReparacionPage = () => {
   ];
 
   useEffect(() => {
-    const fetchOrdenes = async () => {
+    const fetchPresupuestos = async () => {
       setLoading(true);
       try {
         const url = new URL("/api/orden-reparacion", window.location.origin);
         url.searchParams.append("page", paginationModel.page.toString());
         url.searchParams.append("size", paginationModel.pageSize.toString());
+        url.searchParams.append("presupuestos", "true");
 
         const response = await authFetch(url.toString());
         const data = await response.json();
-        setOrdenes(data.items);
+        setPresupuestos(data.items);
         setTotalItems(data.total);
       } catch (error) {
-        console.error("Error al obtener órdenes de reparación:", error);
+        console.error("Error al obtener presupuestos:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchOrdenes();
+    fetchPresupuestos();
   }, [paginationModel]);
 
   const handleAddClick = () => {
-    router.push("/dashboard/ordenes-reparacion/nueva");
+    router.push("/dashboard/presupuestos/nuevo");
   };
 
   const handleEditClick = (id: string) => {
-    router.push(`/dashboard/ordenes-reparacion/${id}`);
+    router.push(`/dashboard/presupuestos/${id}`);
   };
 
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
-        Órdenes de Reparación
+        Presupuestos
       </Typography>
       <Button
         variant="contained"
@@ -102,10 +103,10 @@ const OrdenesReparacionPage = () => {
         onClick={handleAddClick}
         style={{ marginBottom: "1rem" }}
       >
-        Agregar Orden de Reparación
+        Agregar Presupuesto
       </Button>
       <DataGrid
-        rows={ordenes}
+        rows={presupuestos}
         columns={columns}
         paginationModel={paginationModel}
         onPaginationModelChange={setPaginationModel}
@@ -120,4 +121,4 @@ const OrdenesReparacionPage = () => {
   );
 };
 
-export default OrdenesReparacionPage;
+export default PresupuestosPage;

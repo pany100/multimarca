@@ -165,6 +165,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                     <ListItemText primary="Ordenes de Reparación" />
                   </ListItem>
                 )}
+                {permisos.includes("Reparaciones") && (
+                  <ListItem
+                    button
+                    component={Link}
+                    href="/dashboard/presupuestos"
+                  >
+                    <ListItemText primary="Presupuesots" />
+                  </ListItem>
+                )}
               </List>
             </Drawer>
             <Box sx={{ flexGrow: 1, pl: 3 }}>{children}</Box>

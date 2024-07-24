@@ -103,7 +103,6 @@ model ManoDeObra {
   id                 Int                @id @default(autoincrement())
   name               String             @unique @db.VarChar(250)
   sellPrice          Decimal?           @db.Decimal(10, 2)
-  trabajosRealizados TrabajoRealizado[]
 
   @@index([name])
 }
@@ -281,7 +280,6 @@ model OrdenReparacion {
   observacionesEntrada   String                @db.Text
   observacionesSalida    String                @db.Text
   estado                 String                @db.VarChar(20)
-  precioManoObra         Decimal               @db.Decimal(10, 2)
   pdfPath                String?               @db.VarChar(255)
   mecanicos              Mecanico[]            @relation("OrdenReparacionMecanicos")
   repuestosUsados        RepuestoUsado[]
@@ -327,12 +325,10 @@ model TrabajoRealizado {
   id                Int             @id @default(autoincrement())
   ordenReparacion   OrdenReparacion @relation(fields: [ordenReparacionId], references: [id])
   ordenReparacionId Int
-  manoDeObra        ManoDeObra      @relation(fields: [manoDeObraId], references: [id])
-  manoDeObraId      Int
+  descripcion       String          @db.Text
   precioUnitario    Decimal         @db.Decimal(10, 2)
 
   @@index([ordenReparacionId])
-  @@index([manoDeObraId])
 }
 
 model ControlEnReparacion {

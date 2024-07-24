@@ -1,6 +1,13 @@
 import authFetch from "@/utils/authFetch";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Autocomplete, Button, MenuItem, TextField } from "@mui/material";
+import {
+  Alert,
+  Autocomplete,
+  Button,
+  MenuItem,
+  Snackbar,
+  TextField,
+} from "@mui/material";
 import debounce from "lodash/debounce";
 import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
@@ -66,7 +73,6 @@ const schema = yup.object().shape({
       manoDeObra: yup
         .object()
         .shape({
-          id: yup.number().required(),
           name: yup.string().required(),
         })
         .required("La mano de obra es requerida"),
@@ -117,6 +123,7 @@ const NuevaOrdenReparacionForm = () => {
     resolver: yupResolver(schema),
     defaultValues: {
       montoTotalCliente: 0,
+      estado: "Presupuestado",
     },
   });
   const {
@@ -206,7 +213,9 @@ const NuevaOrdenReparacionForm = () => {
       console.error("Error al enviar la solicitud:", error);
       setSnackbar({
         open: true,
-        message: "Error al realizar la solicitud de creación",
+        message: `Error al realizar la solicitud de creación: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
         severity: "error",
       });
     }
@@ -395,6 +404,15 @@ const NuevaOrdenReparacionForm = () => {
           Crear Orden de Reparación
         </Button>
       </form>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert severity={snackbar.severity as "success" | "error"}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </FormProvider>
   );
 };
