@@ -145,15 +145,18 @@ function MecanicoFormSection() {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setOpenMecanicoModal(false)}>Cancelar</Button>
-          <Button onClick={handleAddMecanico} disabled={!selectedMecanico}>
+          <Button type="button" onClick={() => setOpenMecanicoModal(false)}>
+            Cancelar
+          </Button>
+          <Button
+            type="button"
+            onClick={handleAddMecanico}
+            disabled={!selectedMecanico}
+          >
             Agregar
           </Button>
         </DialogActions>
       </Dialog>
-      <Button type="submit" variant="contained" color="primary">
-        Crear Orden de Reparación
-      </Button>
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}

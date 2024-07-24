@@ -1,11 +1,12 @@
 import authFetch from "@/utils/authFetch";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Autocomplete, MenuItem, TextField } from "@mui/material";
+import { Autocomplete, Button, MenuItem, TextField } from "@mui/material";
 import debounce from "lodash/debounce";
 import { useState } from "react";
 import { Controller, FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import MecanicoFormSection from "./MecanicoFormSection";
+import RepuestoUsadoFormSection from "./RepuestoUsadoFormSection";
 
 const schema = yup.object().shape({
   autoId: yup.string().required("Debe seleccionar un auto"),
@@ -296,6 +297,10 @@ const NuevaOrdenReparacionForm = () => {
           )}
         />
         <MecanicoFormSection />
+        <RepuestoUsadoFormSection />
+        <Button type="submit" variant="contained" color="primary">
+          Crear Orden de Reparación
+        </Button>
       </form>
     </FormProvider>
   );

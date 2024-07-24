@@ -17,7 +17,7 @@ export async function GET(request: Request) {
         { id: { equals: parseInt(query) || undefined } },
         { auto: { owner: { fullName: { contains: query } } } },
       ],
-      status: presupuestos ? "Presupuestado" : { not: "Presupuestado" },
+      estado: presupuestos ? "Presupuestado" : { not: "Presupuestado" },
     };
 
     const [ordenesReparacion, total] = await Promise.all([
