@@ -3,16 +3,20 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Alert,
   Autocomplete,
+  Box,
   Button,
   Chip,
   MenuItem,
+  Paper,
   Snackbar,
   Stack,
   TextField,
+  Typography,
 } from "@mui/material";
 import debounce from "lodash/debounce";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import { useDropzone } from "react-dropzone";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import ControlesEnReparacionForm from "./ControlesEnReparacionForm";
@@ -277,6 +281,19 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
   });
   const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+  const onDrop = useCallback((acceptedFiles: File[]) => {
+    if (acceptedFiles.length > 0) {
+      setSelectedFile(acceptedFiles[0]);
+    }
+  }, []);
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: { "application/pdf": [".pdf"] },
+    maxFiles: 1,
+  });
 
   useEffect(() => {
     if (!isEditing) return;
@@ -349,6 +366,15 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
 
   const onSubmit = async (data: any) => {
     try {
+      const formData = new FormData();
+      Object.keys(data).forEach((key) => {
+        if (key !== "pdfPath") {
+          formData.append(key, JSON.stringify(data[key]));
+        }
+      });
+      if (selectedFile) {
+        formData.append("pdfPath", selectedFile);
+      }
       const response = await fetch(
         `/api/orden-reparacion/${ordenReparacion.id}`,
         {
@@ -356,7 +382,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(data),
+          body: formData,
         }
       );
 
@@ -616,6 +642,41 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
             </>
           )}
         />
+        <Box sx={{ mt: 2, mb: 2 }}>
+          <Paper
+            {...getRootProps()}
+            sx={{
+              p: 2,
+              border: "2px dashed",
+              borderColor: isDragActive ? "primary.main" : "grey.300",
+              backgroundColor: isDragActive
+                ? "action.hover"
+                : "background.paper",
+              cursor: "pointer",
+            }}
+          >
+            <input {...getInputProps()} />
+            {selectedFile ? (
+              <Box>
+                <Typography>
+                  Archivo seleccionado: {selectedFile.name}
+                </Typography>
+                <Box
+                  component="iframe"
+                  src={URL.createObjectURL(selectedFile)}
+                  width="100%"
+                  height="300px"
+                />
+              </Box>
+            ) : (
+              <Typography>
+                {isDragActive
+                  ? "Suelta el archivo PDF aquí..."
+                  : "Arrastra y suelta un archivo PDF aquí, o haz clic para seleccionar uno"}
+              </Typography>
+            )}
+          </Paper>
+        </Box>
         <Controller
           name="montoTotalCliente"
           control={control}
