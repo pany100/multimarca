@@ -34,6 +34,11 @@ export async function GET(request: Request) {
             },
           },
           mecanicos: true,
+          controlesEnReparacion: {
+            include: {
+              controlMecanico: true,
+            },
+          },
         },
       }),
       prisma.ordenReparacion.count({
@@ -135,6 +140,17 @@ export async function POST(request: Request) {
       })
     );
 
+    // Obtener todos los controles mecánicos existentes
+    const controlesMecanicos = await prisma.controlMecanico.findMany();
+
+    // Crear los controles en reparación para cada control mecánico
+    const controlesEnReparacionToPersist = controlesMecanicos.map(
+      (control) => ({
+        controlMecanicoId: control.id,
+        valor: control.type === "checkbox" ? "false" : "",
+      })
+    );
+
     const nuevaOrdenReparacion = await prisma.ordenReparacion.create({
       data: {
         autoId: parseInt(autoId),
@@ -158,6 +174,9 @@ export async function POST(request: Request) {
         },
         trabajosRealizados: {
           create: trabajosRealizadosToPersist,
+        },
+        controlesEnReparacion: {
+          create: controlesEnReparacionToPersist,
         },
       },
       include: {

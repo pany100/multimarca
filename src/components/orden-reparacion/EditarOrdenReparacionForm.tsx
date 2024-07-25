@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
+import ControlesEnReparacionForm from "./ControlesEnReparacionForm";
 import MecanicoFormSection from "./MecanicoFormSection";
 import ReparacionesTercerosFormSection from "./ReparacionesTercerosFormSection";
 import RepuestoUsadoFormSection from "./RepuestoUsadoFormSection";
@@ -70,6 +71,12 @@ const schema = yup.object().shape({
         .positive()
         .integer()
         .required("Las unidades consumidas son requeridas"),
+    })
+  ),
+  controlesEnReparacion: yup.array().of(
+    yup.object().shape({
+      id: yup.number().required("Id es requerido"),
+      valor: yup.string().required("El valor del control es requerido"),
     })
   ),
   trabajosRealizados: yup.array().of(
@@ -165,7 +172,15 @@ type OrdenReparacion = {
     descripcion: string;
     precioUnitario: number;
   }[];
-  controlesEnReparacion: any[];
+  controlesEnReparacion: {
+    id: number;
+    valor: string;
+    controlMecanico: {
+      id: number;
+      name: string;
+      type: string;
+    };
+  }[];
 };
 
 const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
@@ -567,6 +582,25 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
         <ReparacionesTercerosFormSection />
         <TrabajosRealizadosFormSection />
         <Controller
+          name="controlesEnReparacion"
+          control={control}
+          render={({ field }) => (
+            <ControlesEnReparacionForm
+              controlesMecanicos={ordenReparacion.controlesEnReparacion.map(
+                (control) => ({
+                  id: control.id,
+                  nombre: control.controlMecanico.name,
+                  tipo:
+                    control.controlMecanico.type === "checkbox"
+                      ? "checkbox"
+                      : "texto",
+                  valor: control.valor,
+                })
+              )}
+            />
+          )}
+        />
+        <Controller
           name="montoTotalCliente"
           control={control}
           render={({ field }) => (
@@ -579,6 +613,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
             />
           )}
         />
+
         <Button type="submit" variant="contained" color="primary">
           Actualizar Orden de Reparación
         </Button>

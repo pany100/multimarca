@@ -9,6 +9,7 @@ import {
   TextField,
 } from "@mui/material";
 import debounce from "lodash/debounce";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
@@ -139,6 +140,7 @@ const NuevaOrdenReparacionForm = () => {
     name: "reparacionesDeTercero",
   });
   const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
+  const router = useRouter();
 
   useEffect(() => {
     const calcularMontoTotal = () => {
@@ -200,7 +202,7 @@ const NuevaOrdenReparacionForm = () => {
           message: "Orden de reparación creada con éxito",
           severity: "success",
         });
-        // Aquí puedes agregar lógica adicional, como redireccionar
+        router.push("/dashboard/ordenes-reparacion");
       } else {
         const errorData = await response.json();
         setSnackbar({

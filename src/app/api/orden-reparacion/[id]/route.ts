@@ -28,7 +28,11 @@ export async function GET(
           },
         },
         trabajosRealizados: true,
-        controlesEnReparacion: true,
+        controlesEnReparacion: {
+          include: {
+            controlMecanico: true,
+          },
+        },
         pagos: true,
       },
     });
