@@ -1,5 +1,6 @@
 "use client";
 
+import OrdenClientePdf from "@/components/orden-reparacion/pdf/OrdenClientePdf";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
 import authFetch from "@/utils/authFetch";
 import PrintIcon from "@mui/icons-material/Print";
@@ -18,11 +19,15 @@ import { useReactToPrint } from "react-to-print";
 
 const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
   let mechanicOrderRef = useRef(null);
+  let clientOrderRef = useRef(null);
   const [ordenReparacion, setOrdenReparacion] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   const handleMechanicOrderPrint = useReactToPrint({
     content: () => mechanicOrderRef.current,
+  });
+  const handleClientOrderPrint = useReactToPrint({
+    content: () => clientOrderRef.current,
   });
   useEffect(() => {
     const fetchOrdenReparacion = async () => {
@@ -64,6 +69,9 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
       <div style={{ display: "none" }}>
         {ordenReparacion !== null && (
           <OrdenMecanicoPdf ref={mechanicOrderRef} repair={ordenReparacion} />
+        )}
+        {ordenReparacion !== null && (
+          <OrdenClientePdf ref={clientOrderRef} repair={ordenReparacion} />
         )}
       </div>
       <Paper elevation={3} sx={{ p: 3, m: 2 }}>
@@ -108,6 +116,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
               <Button
                 variant="contained"
                 color="secondary"
+                onClick={handleClientOrderPrint}
                 startIcon={<PrintIcon />}
               >
                 Imprimir orden para el cliente
