@@ -8,7 +8,7 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 const ObservacionesEntradaForm = () => {
@@ -19,11 +19,14 @@ const ObservacionesEntradaForm = () => {
     control,
     name: "observacionesEntrada",
   });
+  const isFirstRun = useRef(true);
 
   useEffect(() => {
     const fetchReparacionesAnteriores = async () => {
-      setReparacionesAnteriores([]);
-      setValue("observacionesEntrada", "[]");
+      if (!isFirstRun.current) {
+        setReparacionesAnteriores([]);
+        setValue("observacionesEntrada", "[]");
+      }
       if (autoId) {
         try {
           const response = await authFetch(
@@ -35,28 +38,25 @@ const ObservacionesEntradaForm = () => {
           console.error("Error al obtener reparaciones anteriores:", error);
         }
       }
+      isFirstRun.current = false;
     };
 
     fetchReparacionesAnteriores();
-  }, [autoId]);
+  }, [autoId, setValue]);
 
   const agregarObservacion = (observacion: string) => {
     const prevObservaciones = getValues("observacionesEntrada");
-    const nuevasObservaciones = [
-      ...JSON.parse(prevObservaciones || "[]"),
-      observacion,
-    ];
+    const nuevasObservaciones = [...JSON.parse(prevObservaciones), observacion];
     setValue("observacionesEntrada", JSON.stringify(nuevasObservaciones));
   };
 
   const quitarObservacion = (index: number) => {
-    setValue("observacionesEntrada", (prevObservaciones: string) => {
-      const prev = JSON.parse(prevObservaciones || "[]");
-      const nuevasObservaciones = prev.filter(
-        (_: string, i: number) => i !== index
-      );
-      return JSON.stringify(nuevasObservaciones);
-    });
+    const prevObservaciones = getValues("observacionesEntrada");
+    const nuevasObservaciones = JSON.parse(prevObservaciones).filter(
+      (_: string, i: number) => i !== index
+    );
+
+    setValue("observacionesEntrada", JSON.stringify(nuevasObservaciones));
   };
 
   const estaObservacionAgregada = (observacion: string) => {

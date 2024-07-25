@@ -17,6 +17,7 @@ import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import ControlesEnReparacionForm from "./ControlesEnReparacionForm";
 import MecanicoFormSection from "./MecanicoFormSection";
+import ObservacionesEntradaForm from "./ObservacionesEntradaForm";
 import ReparacionesTercerosFormSection from "./ReparacionesTercerosFormSection";
 import RepuestoUsadoFormSection from "./RepuestoUsadoFormSection";
 import TrabajosRealizadosFormSection from "./TrabajosRealizadosFormSection";
@@ -117,6 +118,7 @@ const schema = yup.object().shape({
     .number()
     .positive()
     .required("El monto total es requerido"),
+  observacionesEntrada: yup.string(),
 });
 
 type Props = {
@@ -560,6 +562,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
             </Stack>
           )}
         />
+        <ObservacionesEntradaForm />
         <Controller
           name="estado"
           control={control}
