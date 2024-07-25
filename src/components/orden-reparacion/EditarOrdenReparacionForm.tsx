@@ -371,7 +371,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
       if (selectedFile) {
         formData.append("pdfPath", selectedFile);
       }
-      const response = await fetch(
+      const response = await authFetch(
         `/api/orden-reparacion/${ordenReparacion.id}`,
         {
           method: "PUT",

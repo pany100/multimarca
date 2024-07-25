@@ -47,16 +47,28 @@ const OrdenesReparacionPage = () => {
     {
       field: "acciones",
       headerName: "Acciones",
-      width: 120,
+      width: 200,
       renderCell: (params) => (
-        <Button
-          onClick={() => handleEditClick(params.row.id)}
-          variant="contained"
-          color="primary"
-          size="small"
-        >
-          Editar
-        </Button>
+        <>
+          <Button
+            onClick={() => handleEditClick(params.row.id)}
+            variant="contained"
+            color="primary"
+            size="small"
+          >
+            Editar
+          </Button>
+          <Button
+            onClick={() =>
+              router.push(`/dashboard/ordenes-reparacion/${params.row.id}/ver`)
+            }
+            variant="contained"
+            color="secondary"
+            size="small"
+          >
+            Ver
+          </Button>
+        </>
       ),
     },
   ];

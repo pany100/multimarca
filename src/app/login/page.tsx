@@ -1,24 +1,22 @@
 "use client";
 
-import React, { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 import {
+  Alert,
   Box,
   Button,
-  Checkbox,
   Container,
-  FormControlLabel,
+  Link,
   TextField,
   Typography,
-  Link,
-  Alert,
 } from "@mui/material";
+import { setCookie } from "cookies-next";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/hooks/useAuth";
+import React, { useState } from "react";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false);
   const router = useRouter();
   const [error, setError] = useState("");
   const { isAuthenticated, isLoading } = useAuth();
@@ -46,7 +44,12 @@ export default function LoginPage() {
 
       if (response.ok) {
         const data = await response.json();
-        localStorage.setItem("token", data.token);
+        setCookie("auth_token", data.token, {
+          maxAge: 7 * 24 * 60 * 60, // 30 días en segundos
+          path: "/",
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
+        });
         router.push("/dashboard");
       } else {
         setError(
@@ -110,12 +113,6 @@ export default function LoginPage() {
             autoComplete="current-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-          />
-          <FormControlLabel
-            control={<Checkbox value="remember" color="primary" />}
-            label="Recordarme"
-            checked={rememberMe}
-            onChange={(e) => setRememberMe(e.target.checked)}
           />
           <Button
             type="submit"
