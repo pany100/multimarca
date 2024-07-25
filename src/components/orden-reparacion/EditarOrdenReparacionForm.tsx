@@ -367,11 +367,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
   const onSubmit = async (data: any) => {
     try {
       const formData = new FormData();
-      Object.keys(data).forEach((key) => {
-        if (key !== "pdfPath") {
-          formData.append(key, JSON.stringify(data[key]));
-        }
-      });
+      formData.append("data", JSON.stringify(data));
       if (selectedFile) {
         formData.append("pdfPath", selectedFile);
       }
@@ -379,9 +375,6 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
         `/api/orden-reparacion/${ordenReparacion.id}`,
         {
           method: "PUT",
-          headers: {
-            "Content-Type": "application/json",
-          },
           body: formData,
         }
       );

@@ -1,6 +1,8 @@
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
+import { v4 as uuidv4 } from "uuid";
 
 export async function GET(
   request: Request,
@@ -60,7 +62,8 @@ export async function PUT(
 ) {
   try {
     const id = parseInt(params.id);
-    const body = await request.json();
+    const formData = await request.formData();
+    const body = JSON.parse(formData.get("data") as string);
     const {
       autoId,
       fechaEntradaReparacion,
@@ -110,6 +113,45 @@ export async function PUT(
       })
     );
 
+    const pdfFile = formData.get("pdfPath") as File | null;
+    let permanentUrl = null;
+    if (pdfFile) {
+      const fileName = pdfFile.name;
+      const fileExtension = fileName.split(".").pop()?.toLowerCase();
+
+      if (!fileExtension || !["pdf"].includes(fileExtension)) {
+        return NextResponse.json(
+          { mensaje: "Tipo de archivo no permitido" },
+          { status: 400 }
+        );
+      }
+
+      const secureFileName = `${uuidv4()}.${fileExtension}`;
+      const s3ObjectKey = `scanner/${secureFileName}`;
+
+      const uploadParams = {
+        Bucket: process.env.AWS_S3_BUCKET_NAME,
+        Key: s3ObjectKey,
+        Body: Buffer.from(await pdfFile.arrayBuffer()),
+        ContentType: pdfFile.type,
+      };
+
+      const s3Client = new S3Client({
+        region: process.env.AWS_DEFAULT_REGION,
+        credentials: {
+          accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+          secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+        },
+      });
+
+      const command = new PutObjectCommand(uploadParams);
+      await s3Client.send(command);
+
+      const bucketName = process.env.AWS_S3_BUCKET_NAME!;
+      const region = process.env.AWS_DEFAULT_REGION!;
+      permanentUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${s3ObjectKey}`;
+    }
+
     const ordenReparacionActualizada = await prisma.ordenReparacion.update({
       where: { id },
       data: {
@@ -121,7 +163,6 @@ export async function PUT(
         observacionesEntrada,
         observacionesSalida,
         estado,
-        pdfPath,
         montoTotalCliente: new Prisma.Decimal(montoTotalCliente),
         mecanicos: {
           set: mecanicosIds.map((id: number) => ({ id })),
@@ -150,6 +191,7 @@ export async function PUT(
             },
           })),
         },
+        pdfPath: permanentUrl,
       },
       include: {
         auto: {
