@@ -20,16 +20,21 @@ type Props = {
   repair: any;
 };
 
-const setPageStyles = () => {
-  return "@media print {.pagebreak {clear: both; page-break-after: always; }}";
-};
+const setPageStyles = () => `
+  @media print {
+    .pagebreak { page-break-before: always; }
+    @page { margin: 0; }
+    body { margin: 0; }
+    div { page-break-inside: avoid; }
+  }
+`;
 
 export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
   ({ repair }, ref) => {
     return (
       <div ref={ref}>
         <style>{setPageStyles()}</style>
-        <PDFPage>
+        <PDFPage style={{ height: "297mm" }}>
           <TemplateHeader />
           <div style={{ marginBottom: 30 }}>
             <Typography
@@ -142,8 +147,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
             </div>
           </div>
         </PDFPage>
-        <div className="pagebreak" />
-        <PDFPage>
+        <PDFPage style={{ height: "297mm" }}>
           <div
             style={{
               marginBottom: 10,

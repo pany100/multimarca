@@ -32,7 +32,6 @@ const authFetch = async (
 
   const headers = {
     ...options.headers,
-    "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
