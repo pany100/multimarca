@@ -1,17 +1,23 @@
 "use client";
-
 import OrdenClientePdf from "@/components/orden-reparacion/pdf/OrdenClientePdf";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
 import authFetch from "@/utils/authFetch";
 import PrintIcon from "@mui/icons-material/Print";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import {
+  Alert,
   Box,
   Button,
   Checkbox,
   CircularProgress,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   Grid,
   Paper,
+  Snackbar,
   Typography,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
@@ -22,13 +28,53 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
   let clientOrderRef = useRef(null);
   const [ordenReparacion, setOrdenReparacion] = useState<any>(null);
   const [loading, setLoading] = useState(true);
-
+  const [openConfirmModal, setOpenConfirmModal] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
   const handleMechanicOrderPrint = useReactToPrint({
     content: () => mechanicOrderRef.current,
   });
   const handleClientOrderPrint = useReactToPrint({
     content: () => clientOrderRef.current,
   });
+  const handleOpenConfirmModal = () => {
+    setOpenConfirmModal(true);
+  };
+
+  const handleCloseConfirmModal = () => {
+    setOpenConfirmModal(false);
+  };
+  const handleSendNotification = async () => {
+    try {
+      const response = await authFetch(
+        `/api/orden-reparacion/${params.id}/send-notification`,
+        {
+          method: "POST",
+        }
+      );
+      if (response.ok) {
+        setSnackbar({
+          open: true,
+          message: "Notificación enviada con éxito",
+          severity: "success",
+        });
+      } else {
+        const errorData = await response.json();
+        setSnackbar({
+          open: true,
+          message: errorData.error || "Error al enviar la notificación",
+          severity: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error:", error);
+    } finally {
+      handleCloseConfirmModal();
+    }
+  };
   useEffect(() => {
     const fetchOrdenReparacion = async () => {
       try {
@@ -124,6 +170,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
               <Button
                 variant="contained"
                 color="success"
+                onClick={handleOpenConfirmModal}
                 startIcon={<WhatsAppIcon />}
               >
                 Enviar orden por WhatsApp al cliente
@@ -257,6 +304,43 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           </Grid>
         </Grid>
       </Paper>
+      <Dialog
+        open={openConfirmModal}
+        onClose={handleCloseConfirmModal}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"¿Confirmar envío de notificación?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            ¿Está seguro de que desea enviar la notificación por WhatsApp al
+            cliente?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseConfirmModal} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleSendNotification} color="primary" autoFocus>
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+      >
+        <Alert
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
