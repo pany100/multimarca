@@ -76,7 +76,7 @@ const schema = yup.object().shape({
   controlesEnReparacion: yup.array().of(
     yup.object().shape({
       id: yup.number().required("Id es requerido"),
-      valor: yup.string().required("El valor del control es requerido"),
+      valor: yup.string(),
     })
   ),
   trabajosRealizados: yup.array().of(
@@ -251,6 +251,12 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
         })
       ),
       observacionesSalida: ordenReparacion.observacionesSalida,
+      controlesEnReparacion: ordenReparacion.controlesEnReparacion.map(
+        (control) => ({
+          id: control.id,
+          valor: control.valor,
+        })
+      ),
     },
   });
   const router = useRouter();
@@ -584,20 +590,27 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
         <Controller
           name="controlesEnReparacion"
           control={control}
-          render={({ field }) => (
-            <ControlesEnReparacionForm
-              controlesMecanicos={ordenReparacion.controlesEnReparacion.map(
-                (control) => ({
-                  id: control.id,
-                  nombre: control.controlMecanico.name,
-                  tipo:
-                    control.controlMecanico.type === "checkbox"
-                      ? "checkbox"
-                      : "texto",
-                  valor: control.valor,
-                })
+          render={() => (
+            <>
+              <ControlesEnReparacionForm
+                controlesMecanicos={ordenReparacion.controlesEnReparacion.map(
+                  (control) => ({
+                    id: control.id,
+                    nombre: control.controlMecanico.name,
+                    tipo:
+                      control.controlMecanico.type === "checkbox"
+                        ? "checkbox"
+                        : "texto",
+                    valor: control.valor,
+                  })
+                )}
+              />
+              {!!errors.controlesEnReparacion && (
+                <Alert severity="error" sx={{ mt: 1 }}>
+                  {errors.controlesEnReparacion.message}
+                </Alert>
               )}
-            />
+            </>
           )}
         />
         <Controller

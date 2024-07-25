@@ -75,6 +75,7 @@ export async function PUT(
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
+      controlesEnReparacion = [],
       montoTotalCliente,
     } = body;
 
@@ -136,6 +137,18 @@ export async function PUT(
         trabajosRealizados: {
           deleteMany: {},
           create: trabajosRealizadosToPersist,
+        },
+        controlesEnReparacion: {
+          upsert: controlesEnReparacion.map((control: any) => ({
+            where: { id: control.id },
+            update: {
+              valor: control.valor,
+            },
+            create: {
+              controlMecanicoId: control.id,
+              valor: control.valor,
+            },
+          })),
         },
       },
       include: {
