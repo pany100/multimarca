@@ -661,6 +661,21 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
                   height="300px"
                 />
               </Box>
+            ) : ordenReparacion.pdfPath ? (
+              <Box>
+                <Typography>
+                  PDF actual: {ordenReparacion.pdfPath.split("/").pop()}
+                </Typography>
+                <Box
+                  component="iframe"
+                  src={ordenReparacion.pdfPath}
+                  width="100%"
+                  height="300px"
+                />
+                <Typography variant="caption" sx={{ mt: 1 }}>
+                  Arrastra un nuevo archivo para reemplazar el PDF actual
+                </Typography>
+              </Box>
             ) : (
               <Typography>
                 {isDragActive

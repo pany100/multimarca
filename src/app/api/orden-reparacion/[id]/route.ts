@@ -114,7 +114,7 @@ export async function PUT(
     );
 
     const pdfFile = formData.get("pdfPath") as File | null;
-    let permanentUrl = null;
+    let permanentUrl = pdfPath;
     if (pdfFile) {
       const fileName = pdfFile.name;
       const fileExtension = fileName.split(".").pop()?.toLowerCase();
