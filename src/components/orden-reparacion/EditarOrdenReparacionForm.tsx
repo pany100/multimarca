@@ -11,6 +11,7 @@ import {
   TextField,
 } from "@mui/material";
 import debounce from "lodash/debounce";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
@@ -237,6 +238,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
       observacionesSalida: ordenReparacion.observacionesSalida,
     },
   });
+  const router = useRouter();
 
   const {
     handleSubmit,
@@ -341,6 +343,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
           message: "Orden de reparación actualizada con éxito",
           severity: "success",
         });
+        router.push("/dashboard/ordenes-reparacion");
       } else {
         const errorData = await response.json();
         setSnackbar({

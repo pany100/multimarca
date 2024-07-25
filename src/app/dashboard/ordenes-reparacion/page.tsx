@@ -30,8 +30,8 @@ const OrdenesReparacionPage = () => {
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 70 },
-    { field: "fecha", headerName: "Fecha", width: 130 },
-    { field: "status", headerName: "Estado", width: 130 },
+    { field: "fechaCreacion", headerName: "Fecha", width: 130 },
+    { field: "estado", headerName: "Estado", width: 130 },
     {
       field: "patente",
       headerName: "Patente",
@@ -88,7 +88,7 @@ const OrdenesReparacionPage = () => {
   };
 
   const handleEditClick = (id: string) => {
-    router.push(`/dashboard/ordenes-reparacion/${id}`);
+    router.push(`/dashboard/ordenes-reparacion/${id}/editar`);
   };
 
   return (

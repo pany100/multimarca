@@ -64,15 +64,46 @@ export async function PUT(
       kilometros,
       observacionesCliente,
       observacionesEntrada,
-      observacionesSalida = [],
+      observacionesSalida,
       estado,
       pdfPath,
-      mecanicosIds,
-      repuestosUsados,
-      reparacionesDeTercero,
-      trabajosRealizados,
+      mecanicosIds = [],
+      repuestosUsados = [],
+      reparacionesDeTercero = [],
+      trabajosRealizados = [],
       montoTotalCliente,
     } = body;
+
+    const repuestosToPersist = repuestosUsados.map((repuesto: any) => ({
+      precioCompra: repuesto.precioCompra
+        ? new Prisma.Decimal(repuesto.precioCompra)
+        : new Prisma.Decimal(0),
+      precioVenta: repuesto.precioVenta
+        ? new Prisma.Decimal(repuesto.precioVenta)
+        : new Prisma.Decimal(0),
+      unidadesConsumidas: repuesto.unidadesConsumidas,
+      stock: { connect: { id: repuesto.stock.id } },
+    }));
+
+    const reparacionesDeTerceroToPersist = reparacionesDeTercero.map(
+      (reparacion: any) => ({
+        nombre: reparacion.nombre,
+        precioCompra: reparacion.precioCompra
+          ? new Prisma.Decimal(reparacion.precioCompra)
+          : new Prisma.Decimal(0),
+        precioVenta: reparacion.precioVenta
+          ? new Prisma.Decimal(reparacion.precioVenta)
+          : new Prisma.Decimal(0),
+        proveedor: { connect: { id: reparacion.proveedor.id } },
+      })
+    );
+
+    const trabajosRealizadosToPersist = trabajosRealizados.map(
+      (trabajo: any) => ({
+        descripcion: trabajo.manoDeObra.name,
+        precioUnitario: new Prisma.Decimal(trabajo.precioUnitario),
+      })
+    );
 
     const ordenReparacionActualizada = await prisma.ordenReparacion.update({
       where: { id },
@@ -92,28 +123,15 @@ export async function PUT(
         },
         repuestosUsados: {
           deleteMany: {},
-          create: repuestosUsados.map((repuesto: any) => ({
-            precioCompra: new Prisma.Decimal(repuesto.precioCompra),
-            precioVenta: new Prisma.Decimal(repuesto.precioVenta),
-            unidadesConsumidas: repuesto.unidadesConsumidas,
-            stock: { connect: { id: repuesto.stock.id } },
-          })),
+          create: repuestosToPersist,
         },
         reparacionesDeTercero: {
           deleteMany: {},
-          create: reparacionesDeTercero.map((reparacion: any) => ({
-            nombre: reparacion.nombre,
-            precioCompra: new Prisma.Decimal(reparacion.precioCompra),
-            precioVenta: new Prisma.Decimal(reparacion.precioVenta),
-            proveedor: { connect: { id: reparacion.proveedor.id } },
-          })),
+          create: reparacionesDeTerceroToPersist,
         },
         trabajosRealizados: {
           deleteMany: {},
-          create: trabajosRealizados.map((trabajo: any) => ({
-            descripcion: trabajo.manoDeObra.name,
-            precioUnitario: new Prisma.Decimal(trabajo.precioUnitario),
-          })),
+          create: trabajosRealizadosToPersist,
         },
       },
       include: {
@@ -135,7 +153,7 @@ export async function PUT(
   } catch (error) {
     console.error("Error al actualizar orden de reparación:", error);
     return NextResponse.json(
-      { error: "Error interno del servidor" },
+      { error: error instanceof Error ? error.message : "Error desconocido" },
       { status: 500 }
     );
   }
