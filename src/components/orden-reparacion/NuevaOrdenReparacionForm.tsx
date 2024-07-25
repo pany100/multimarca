@@ -14,6 +14,7 @@ import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import MecanicoFormSection from "./MecanicoFormSection";
+import ObservacionesEntradaForm from "./ObservacionesEntradaForm";
 import ReparacionesTercerosFormSection from "./ReparacionesTercerosFormSection";
 import RepuestoUsadoFormSection from "./RepuestoUsadoFormSection";
 import TrabajosRealizadosFormSection from "./TrabajosRealizadosFormSection";
@@ -107,6 +108,7 @@ const schema = yup.object().shape({
     .number()
     .positive()
     .required("El monto total es requerido"),
+  observacionesEntrada: yup.string(),
 });
 
 const NuevaOrdenReparacionForm = () => {
@@ -245,7 +247,6 @@ const NuevaOrdenReparacionForm = () => {
               }}
               onInputChange={(event, newInputValue, reason) => {
                 if (reason === "input") {
-                  console.log("Input change", newInputValue);
                   debouncedSearch(
                     newInputValue,
                     (options: { value: string; label: string }[]) =>
@@ -358,6 +359,7 @@ const NuevaOrdenReparacionForm = () => {
             />
           )}
         />
+        <ObservacionesEntradaForm />
 
         <Controller
           name="estado"

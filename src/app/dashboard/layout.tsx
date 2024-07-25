@@ -171,7 +171,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                     component={Link}
                     href="/dashboard/presupuestos"
                   >
-                    <ListItemText primary="Presupuesots" />
+                    <ListItemText primary="Presupuestos" />
                   </ListItem>
                 )}
               </List>
