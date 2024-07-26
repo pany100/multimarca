@@ -1,3 +1,4 @@
+import { FetchProvider } from "@/contexts/FetchContext";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { initCronJobs } from "./cron";
@@ -21,7 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <FetchProvider>{children}</FetchProvider>
+      </body>
     </html>
   );
 }

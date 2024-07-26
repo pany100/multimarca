@@ -1,11 +1,13 @@
 "use client";
 
+import { useFetch } from "@/contexts/FetchContext";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Alert,
   Box,
   Button,
   Container,
+  LinearProgress,
   Link,
   TextField,
   Typography,
@@ -19,17 +21,14 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const router = useRouter();
   const [error, setError] = useState("");
-  const { isAuthenticated, isLoading } = useAuth();
+  const { isAuthenticated } = useAuth();
+  const { isLoading, fetch } = useFetch();
 
   React.useEffect(() => {
     if (!isLoading && isAuthenticated) {
       router.push("/dashboard");
     }
   }, [isLoading, isAuthenticated, router]);
-
-  if (isLoading) {
-    return <Typography>Cargando...</Typography>;
-  }
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -73,6 +72,17 @@ export default function LoginPage() {
         justifyContent: "center",
       }}
     >
+      {isLoading && (
+        <LinearProgress
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 9999,
+          }}
+        />
+      )}
       <Box
         sx={{
           marginTop: 8,
@@ -119,6 +129,7 @@ export default function LoginPage() {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            disabled={isLoading}
           >
             Ingresar
           </Button>

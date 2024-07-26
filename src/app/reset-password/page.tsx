@@ -1,15 +1,17 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import { useFetch } from "@/contexts/FetchContext";
 import {
+  Alert,
   Box,
   Button,
   Container,
+  LinearProgress,
   TextField,
   Typography,
-  Alert,
 } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
+import React, { useEffect, useState } from "react";
 
 export default function ResetPasswordPage() {
   const [newPassword, setNewPassword] = useState("");
@@ -19,6 +21,7 @@ export default function ResetPasswordPage() {
   const [error, setError] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { fetch, isLoading } = useFetch();
 
   useEffect(() => {
     const tokenFromUrl = searchParams.get("token");
@@ -52,7 +55,7 @@ export default function ResetPasswordPage() {
 
       if (response.ok) {
         setMessage("Contraseña restablecida con éxito.");
-        setTimeout(() => router.push("/login"), 3000);
+        setTimeout(() => router.push("/login"), 500);
       } else {
         setError(
           data.error || "Ha ocurrido un error al restablecer la contraseña."
@@ -75,6 +78,17 @@ export default function ResetPasswordPage() {
         justifyContent: "center",
       }}
     >
+      {isLoading && (
+        <LinearProgress
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 9999,
+          }}
+        />
+      )}
       <Box
         sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
       >
@@ -126,7 +140,7 @@ export default function ResetPasswordPage() {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            disabled={!token}
+            disabled={!token || isLoading}
           >
             Restablecer contraseña
           </Button>

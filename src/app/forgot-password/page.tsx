@@ -1,23 +1,29 @@
 "use client";
 
-import React, { useState } from "react";
+import { useFetch } from "@/contexts/FetchContext";
 import {
+  Alert,
   Box,
   Button,
   Container,
+  LinearProgress,
+  Link,
   TextField,
   Typography,
-  Link,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
+import React, { useState } from "react";
 
 export default function ForgotPasswordPage() {
+  const { fetch, isLoading } = useFetch();
   const [email, setEmail] = useState("");
-  const [message, setMessage] = useState("");
-  const router = useRouter();
+  const [message, setMessage] = useState<{
+    message: string;
+    severity: "success" | "error";
+  } | null>(null);
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setMessage(null);
     try {
       const response = await fetch("/api/auth/forgot-password", {
         method: "POST",
@@ -30,17 +36,25 @@ export default function ForgotPasswordPage() {
       const data = await response.json();
 
       if (response.ok) {
-        setMessage(
-          "Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña."
-        );
+        setMessage({
+          message:
+            "Se ha enviado un correo electrónico con instrucciones para restablecer tu contraseña.",
+          severity: "success",
+        });
       } else {
-        setMessage(
-          data.error || "Ha ocurrido un error. Por favor, inténtalo de nuevo."
-        );
+        setMessage({
+          message:
+            data.error ||
+            "Ha ocurrido un error. Por favor, inténtalo de nuevo.",
+          severity: "error",
+        });
       }
     } catch (error) {
       console.error("Error:", error);
-      setMessage("Ha ocurrido un error. Por favor, inténtalo de nuevo.");
+      setMessage({
+        message: "Ha ocurrido un error. Por favor, inténtalo de nuevo.",
+        severity: "error",
+      });
     }
   };
 
@@ -55,6 +69,17 @@ export default function ForgotPasswordPage() {
         justifyContent: "center",
       }}
     >
+      {isLoading && (
+        <LinearProgress
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 9999,
+          }}
+        />
+      )}
       <Box
         sx={{
           marginTop: 8,
@@ -84,13 +109,12 @@ export default function ForgotPasswordPage() {
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
+            disabled={isLoading}
           >
             Enviar instrucciones
           </Button>
           {message && (
-            <Typography color="primary" align="center" sx={{ mt: 2 }}>
-              {message}
-            </Typography>
+            <Alert severity={message.severity}>{message.message}</Alert>
           )}
           <Box sx={{ mt: 2, textAlign: "center" }}>
             <Link href="/login" variant="body2">
