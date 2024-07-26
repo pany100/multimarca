@@ -1,9 +1,12 @@
 "use client";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
+import ExpandLess from "@mui/icons-material/ExpandLess";
+import ExpandMore from "@mui/icons-material/ExpandMore";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
   Box,
+  Collapse,
   Container,
   Drawer,
   IconButton,
@@ -53,6 +56,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const router = useRouter();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>(
+    {}
+  );
 
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
@@ -62,127 +68,161 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     setDrawerCompressed(!drawerCompressed);
   };
 
+  const handleSectionToggle = (title: string) => {
+    setOpenSections((prev) => ({ ...prev, [title]: !prev[title] }));
+  };
+
   // Definir las opciones del menú con sus respectivos iconos
-  const menuOptions = [
+  const menuSections = [
     {
-      permiso: "Usuarios",
-      texto: "Usuarios",
-      icono: <PersonIcon />,
-      ruta: "/dashboard/usuarios",
+      title: "Gestión de Personal",
+      items: [
+        {
+          permiso: "Usuarios",
+          texto: "Usuarios",
+          icono: <PersonIcon />,
+          ruta: "/dashboard/usuarios",
+        },
+        {
+          permiso: "Roles",
+          texto: "Roles",
+          icono: <GroupIcon />,
+          ruta: "/dashboard/roles",
+        },
+        {
+          permiso: "Mecanicos",
+          texto: "Mecánicos",
+          icono: <BuildIcon />,
+          ruta: "/dashboard/mecanicos",
+        },
+      ],
     },
     {
-      permiso: "Roles",
-      texto: "Roles",
-      icono: <GroupIcon />,
-      ruta: "/dashboard/roles",
+      title: "Clientes y Vehículos",
+      items: [
+        {
+          permiso: "Clientes",
+          texto: "Clientes",
+          icono: <PersonIcon />,
+          ruta: "/dashboard/clientes",
+        },
+        {
+          permiso: "Autos",
+          texto: "Autos",
+          icono: <DirectionsCarIcon />,
+          ruta: "/dashboard/autos",
+        },
+      ],
     },
     {
-      permiso: "Clientes",
-      texto: "Clientes",
-      icono: <PersonIcon />,
-      ruta: "/dashboard/clientes",
+      title: "Operaciones del Taller",
+      items: [
+        {
+          permiso: "Controles",
+          texto: "Controles",
+          icono: <BuildIcon />,
+          ruta: "/dashboard/controles",
+        },
+        {
+          permiso: "Trabajos",
+          texto: "Mano de obra",
+          icono: <WorkIcon />,
+          ruta: "/dashboard/mano-de-obra",
+        },
+        {
+          permiso: "Reparaciones",
+          texto: "Órdenes de Reparación",
+          icono: <AssignmentIcon />,
+          ruta: "/dashboard/ordenes-reparacion",
+        },
+        {
+          permiso: "Reparaciones",
+          texto: "Presupuestos",
+          icono: <DescriptionIcon />,
+          ruta: "/dashboard/presupuestos",
+        },
+      ],
     },
     {
-      permiso: "Autos",
-      texto: "Autos",
-      icono: <DirectionsCarIcon />,
-      ruta: "/dashboard/autos",
+      title: "Inventario y Compras",
+      items: [
+        {
+          permiso: "Stock",
+          texto: "Stock",
+          icono: <InventoryIcon />,
+          ruta: "/dashboard/stock",
+        },
+        {
+          permiso: "Proveedores",
+          texto: "Proveedores",
+          icono: <LocalShippingIcon />,
+          ruta: "/dashboard/proveedores",
+        },
+        {
+          permiso: "OrdenesCompra",
+          texto: "Órdenes de Compra",
+          icono: <ReceiptIcon />,
+          ruta: "/dashboard/orden-de-compra",
+        },
+      ],
     },
     {
-      permiso: "Controles",
-      texto: "Controles",
-      icono: <BuildIcon />,
-      ruta: "/dashboard/controles",
+      title: "Finanzas",
+      items: [
+        {
+          permiso: "Ventas",
+          texto: "Ventas",
+          icono: <ShoppingCartIcon />,
+          ruta: "/dashboard/ventas",
+        },
+        {
+          permiso: "RetirosDinero",
+          texto: "Extracciones",
+          icono: <MoneyOffIcon />,
+          ruta: "/dashboard/extracciones",
+        },
+        {
+          permiso: "Gastos",
+          texto: "Gastos",
+          icono: <AttachMoneyIcon />,
+          ruta: "/dashboard/gastos",
+        },
+        {
+          permiso: "CategoriaGasto",
+          texto: "Categorías de Gasto",
+          icono: <CategoryIcon />,
+          ruta: "/dashboard/categorias-gasto",
+        },
+        {
+          permiso: "Ingresos",
+          texto: "Ingresos",
+          icono: <AccountBalanceIcon />,
+          ruta: "/dashboard/ingresos-reparacion",
+        },
+        {
+          permiso: "PagosReparaciones",
+          texto: "Pagos a Mecánicos",
+          icono: <PaymentIcon />,
+          ruta: "/dashboard/pagos-a-mecanico",
+        },
+      ],
     },
     {
-      permiso: "Trabajos",
-      texto: "Mano de obra",
-      icono: <WorkIcon />,
-      ruta: "/dashboard/mano-de-obra",
-    },
-    {
-      permiso: "Mecanicos",
-      texto: "Mecanicos",
-      icono: <BuildIcon />,
-      ruta: "/dashboard/mecanicos",
-    },
-    {
-      permiso: "Proveedores",
-      texto: "Proveedores",
-      icono: <LocalShippingIcon />,
-      ruta: "/dashboard/proveedores",
-    },
-    {
-      permiso: "Stock",
-      texto: "Stock",
-      icono: <InventoryIcon />,
-      ruta: "/dashboard/stock",
-    },
-    {
-      permiso: "OrdenesCompra",
-      texto: "OrdenesCompra",
-      icono: <ReceiptIcon />,
-      ruta: "/dashboard/orden-de-compra",
-    },
-    {
-      permiso: "RetirosDinero",
-      texto: "Extracciones",
-      icono: <MoneyOffIcon />,
-      ruta: "/dashboard/extracciones",
-    },
-    {
-      permiso: "Gastos",
-      texto: "Gastos",
-      icono: <AttachMoneyIcon />,
-      ruta: "/dashboard/gastos",
-    },
-    {
-      permiso: "CategoriaGasto",
-      texto: "Categorias de Gasto",
-      icono: <CategoryIcon />,
-      ruta: "/dashboard/categorias-gasto",
-    },
-    {
-      permiso: "Ventas",
-      texto: "Ventas",
-      icono: <ShoppingCartIcon />,
-      ruta: "/dashboard/ventas",
-    },
-    {
-      permiso: "NotificacionesClientes",
-      texto: "Notificaciones WhatsApp",
-      icono: <WhatsAppIcon />,
-      ruta: "/dashboard/notificaciones-whatsapp",
-    },
-    {
-      permiso: "NotificacionesClientes",
-      texto: "Administrador Notificaciones",
-      icono: <NotificationsIcon />,
-      ruta: "/dashboard/admin-notificaciones",
-    },
-    {
-      permiso: "Reparaciones",
-      texto: "Ordenes de Reparación",
-      icono: <AssignmentIcon />,
-      ruta: "/dashboard/ordenes-reparacion",
-    },
-    {
-      permiso: "Reparaciones",
-      texto: "Presupuestos",
-      icono: <DescriptionIcon />,
-      ruta: "/dashboard/presupuestos",
-    },
-    {
-      permiso: "PagosReparaciones",
-      texto: "PagosReparaciones",
-      icono: <PaymentIcon />,
-      ruta: "/dashboard/pagos-a-mecanico",
-    },
-    {
-      permiso: "Ingresos",
-      texto: "Ingresos",
-      icono: <AccountBalanceIcon />,
-      ruta: "/dashboard/ingresos-reparacion",
+      title: "Comunicación y Notificaciones",
+      items: [
+        {
+          permiso: "NotificacionesClientes",
+          texto: "Notificaciones WhatsApp",
+          icono: <WhatsAppIcon />,
+          ruta: "/dashboard/notificaciones-whatsapp",
+        },
+        {
+          permiso: "NotificacionesClientes",
+          texto: "Administrador Notificaciones",
+          icono: <NotificationsIcon />,
+          ruta: "/dashboard/admin-notificaciones",
+        },
+      ],
     },
   ];
 
@@ -252,68 +292,60 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             </IconButton>
           </Box>
           <List>
-            {menuOptions.map(
-              (option, index) =>
-                permisos.includes(option.permiso) && (
-                  <Tooltip
-                    key={index}
-                    title={drawerCompressed ? option.texto : ""}
-                    placement="right"
-                  >
-                    <ListItem
-                      button
-                      component={Link}
-                      href={option.ruta}
-                      sx={{
-                        justifyContent: drawerCompressed
-                          ? "center"
-                          : "flex-start",
-                        px: drawerCompressed ? 0 : 2,
-                        transition: theme.transitions.create(
-                          ["padding", "justify-content"],
-                          {
-                            easing: theme.transitions.easing.sharp,
-                            duration: theme.transitions.duration.enteringScreen,
-                          }
-                        ),
-                      }}
-                    >
-                      <ListItemIcon
-                        sx={{
-                          minWidth: drawerCompressed ? 0 : 40,
-                          mr: drawerCompressed ? 0 : 2,
-                          justifyContent: "center",
-                          transition: theme.transitions.create(
-                            ["min-width", "margin-right"],
-                            {
-                              easing: theme.transitions.easing.sharp,
-                              duration:
-                                theme.transitions.duration.enteringScreen,
-                            }
-                          ),
-                        }}
-                      >
-                        {option.icono}
-                      </ListItemIcon>
-                      <ListItemText
-                        primary={option.texto}
-                        sx={{
-                          opacity: drawerCompressed ? 0 : 1,
-                          display: drawerCompressed ? "none" : "block",
-                          transition: theme.transitions.create(
-                            ["opacity", "display"],
-                            {
-                              easing: theme.transitions.easing.sharp,
-                              duration:
-                                theme.transitions.duration.enteringScreen,
-                            }
-                          ),
-                        }}
-                      />
-                    </ListItem>
-                  </Tooltip>
-                )
-            )}
+            {menuSections.map((section, index) => (
+              <React.Fragment key={index}>
+                <ListItem
+                  button
+                  onClick={() => handleSectionToggle(section.title)}
+                >
+                  <ListItemText primary={section.title} />
+                  {openSections[section.title] ? (
+                    <ExpandLess />
+                  ) : (
+                    <ExpandMore />
+                  )}
+                </ListItem>
+                <Collapse
+                  in={openSections[section.title]}
+                  timeout="auto"
+                  unmountOnExit
+                >
+                  <List component="div" disablePadding>
+                    {section.items.map(
+                      (item, itemIndex) =>
+                        permisos.includes(item.permiso) && (
+                          <Tooltip
+                            key={itemIndex}
+                            title={drawerCompressed ? item.texto : ""}
+                            placement="right"
+                          >
+                            <ListItem
+                              button
+                              component={Link}
+                              href={item.ruta}
+                              sx={{
+                                pl: 4,
+                                justifyContent: drawerCompressed
+                                  ? "center"
+                                  : "flex-start",
+                              }}
+                            >
+                              <ListItemIcon
+                                sx={{ minWidth: drawerCompressed ? 0 : 40 }}
+                              >
+                                {item.icono}
+                              </ListItemIcon>
+                              {!drawerCompressed && (
+                                <ListItemText primary={item.texto} />
+                              )}
+                            </ListItem>
+                          </Tooltip>
+                        )
+                    )}
+                  </List>
+                </Collapse>
+              </React.Fragment>
+            ))}
           </List>
         </Drawer>
         <Box
