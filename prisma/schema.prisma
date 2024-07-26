@@ -62,6 +62,8 @@ model Cliente {
   can_receive_notifications Boolean   @default(true)
   cars                      Auto[]
   ventas                    Venta[]
+  pagosDeReparaciones       IngresoPorReparacion[]
+
 
   @@index([fullName])
   @@index([email])
@@ -286,8 +288,9 @@ model OrdenReparacion {
   reparacionesDeTercero  ReparacionDeTercero[] @relation("OrdenReparacionReparacionTercero")
   trabajosRealizados     TrabajoRealizado[]
   controlesEnReparacion  ControlEnReparacion[]
-  pagos                  PagoReparacion[]
+  pagos                  PagoAMecanico[]
   montoTotalCliente      Decimal               @db.Decimal(10, 2)
+  ingresos               IngresoPorReparacion[]
 
   @@index([autoId])
   @@index([fechaCreacion])
@@ -343,13 +346,29 @@ model ControlEnReparacion {
   @@index([controlMecanicoId])
 }
 
-model PagoReparacion {
+model PagoAMecanico {
   id                Int             @id @default(autoincrement())
   ordenReparacion   OrdenReparacion @relation(fields: [ordenReparacionId], references: [id])
   ordenReparacionId Int
-  monto             Decimal         @db.Decimal(10, 2)
-  fechaPago         DateTime        @default(now())
+  monto             Decimal?        @db.Decimal(10, 2)
+  fechaPago         DateTime?
 
   @@index([ordenReparacionId])
   @@index([fechaPago])
 }
+
+model IngresoPorReparacion {
+  id                Int             @id @default(autoincrement())
+  fecha             DateTime        @default(now())
+  cliente           Cliente         @relation(fields: [clienteId], references: [id])
+  clienteId         Int
+  monto             Decimal         @db.Decimal(10, 2)
+  descripcion       String          @db.Text
+  ordenReparacion   OrdenReparacion @relation(fields: [ordenReparacionId], references: [id])
+  ordenReparacionId Int
+
+  @@index([fecha])
+  @@index([clienteId])
+  @@index([ordenReparacionId])
+}
+

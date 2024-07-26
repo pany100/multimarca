@@ -30,6 +30,8 @@ interface CrudTableProps<T> {
   refreshTrigger?: number;
   validationSchema: yup.ObjectSchema<any>;
   nonEditableItems?: number[];
+  shouldRenderEdit?: (item: T) => boolean;
+  shouldRenderDelete?: (item: T) => boolean;
 }
 
 function CrudTable<T extends { id: string }>({
@@ -43,6 +45,8 @@ function CrudTable<T extends { id: string }>({
   fields,
   validationSchema,
   nonEditableItems = [],
+  shouldRenderEdit,
+  shouldRenderDelete,
 }: CrudTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -250,23 +254,32 @@ function CrudTable<T extends { id: string }>({
     headerName: "Acciones",
     width: 120,
     renderCell: (params) => {
+      const showEdit = shouldRenderEdit ? shouldRenderEdit(params.row) : true;
+      const showDelete = shouldRenderDelete
+        ? shouldRenderDelete(params.row)
+        : true;
+
       if (nonEditableItems.includes(params.row.id)) {
         return null;
       }
       return (
         <Box>
-          <IconButton
-            onClick={() => handleEditClick(params.row.id)}
-            size="small"
-          >
-            <EditIcon />
-          </IconButton>
-          <IconButton
-            onClick={() => handleDeleteClick(params.row.id)}
-            size="small"
-          >
-            <DeleteIcon />
-          </IconButton>
+          {showEdit && (
+            <IconButton
+              onClick={() => handleEditClick(params.row.id)}
+              size="small"
+            >
+              <EditIcon />
+            </IconButton>
+          )}
+          {showDelete && (
+            <IconButton
+              onClick={() => handleDeleteClick(params.row.id)}
+              size="small"
+            >
+              <DeleteIcon />
+            </IconButton>
+          )}
           {extraActions && extraActions(params.row)}
         </Box>
       );

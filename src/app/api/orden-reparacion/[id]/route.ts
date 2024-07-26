@@ -151,7 +151,6 @@ export async function PUT(
       const region = process.env.AWS_DEFAULT_REGION!;
       permanentUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${s3ObjectKey}`;
     }
-
     const ordenReparacionActualizada = await prisma.ordenReparacion.update({
       where: { id },
       data: {
@@ -207,6 +206,22 @@ export async function PUT(
         pagos: true,
       },
     });
+
+    if (estado === "Terminado") {
+      const existePago = await prisma.pagoAMecanico.findFirst({
+        where: {
+          ordenReparacionId: id,
+        },
+      });
+
+      if (!existePago) {
+        await prisma.pagoAMecanico.create({
+          data: {
+            ordenReparacionId: id,
+          },
+        });
+      }
+    }
 
     return NextResponse.json(ordenReparacionActualizada);
   } catch (error) {
