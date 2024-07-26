@@ -365,6 +365,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             },
           }}
         >
+          <Toolbar />
           {drawer}
         </Drawer>
         <Box
@@ -390,6 +391,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               <MenuIcon />
             </IconButton>
           )}
+          <Toolbar />
           <Container maxWidth="lg">
             <Typography variant="h4" component="h1" gutterBottom>
               Dashboard
