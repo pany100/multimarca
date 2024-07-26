@@ -1,6 +1,5 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import * as jose from "jose";
 
 const prisma = new PrismaClient();
@@ -44,5 +43,32 @@ export async function verifyToken(token: string) {
   } catch (error) {
     console.error("Error al verificar el token:", error);
     throw error;
+  }
+}
+
+import { cookies } from "next/headers";
+
+export async function getSession() {
+  try {
+    const cookieStore = cookies();
+    const token = cookieStore.get("auth_token");
+
+    if (!token) {
+      return null;
+    }
+
+    const payload = await verifyToken(token.value);
+
+    if (!payload) {
+      return null;
+    }
+
+    return {
+      userId: payload.userId,
+      email: payload.email,
+    };
+  } catch (error) {
+    console.error("Error al obtener la sesión:", error);
+    return null;
   }
 }

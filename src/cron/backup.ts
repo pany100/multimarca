@@ -73,7 +73,7 @@ async function realizarBackup() {
 }
 
 export function initBackupCron() {
-  cron.schedule("* * * * *", realizarBackup, {
+  cron.schedule("0 23 * * *", realizarBackup, {
     scheduled: true,
     timezone: "America/Argentina/Buenos_Aires",
   });
