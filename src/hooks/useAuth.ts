@@ -1,5 +1,6 @@
-import { useState, useEffect } from "react";
 import authFetch from "@/utils/authFetch";
+import { deleteCookie } from "cookies-next";
+import { useEffect, useState } from "react";
 
 interface UserData {
   permisos: string[];
@@ -29,5 +30,11 @@ export const useAuth = () => {
     checkAuth();
   }, []);
 
-  return { isAuthenticated, isLoading, userData };
+  const logout = () => {
+    deleteCookie("auth_token");
+    setIsAuthenticated(false);
+    setUserData(null);
+  };
+
+  return { isAuthenticated, isLoading, userData, logout };
 };

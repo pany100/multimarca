@@ -13,13 +13,15 @@ import {
   Typography,
 } from "@mui/material";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import React, { useState } from "react";
 import "src/app/globals.css";
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
-  const { userData } = useAuth();
+  const { userData, logout } = useAuth();
   const permisos = userData?.permisos || [];
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const router = useRouter();
 
   return (
     <ProtectedRoute>
@@ -36,6 +38,17 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               sx={{ cursor: "pointer", textDecoration: "underline" }}
             >
               Volver
+            </Typography>
+            <Typography
+              variant="body2"
+              component="a"
+              onClick={() => {
+                logout();
+                router.push("/login");
+              }}
+              sx={{ cursor: "pointer", textDecoration: "underline" }}
+            >
+              Logout
             </Typography>
           </Box>
           <Box sx={{ display: "flex" }}>
