@@ -2,6 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import authFetch from "@/utils/authFetch";
 import {
   Autocomplete,
   Button,
@@ -100,7 +101,7 @@ const OrdenDeCompraPage = () => {
 
   const searchStock = async (query: string) => {
     if (proveedorId) {
-      const response = await fetch(
+      const response = await authFetch(
         `/api/proveedores/${proveedorId}/stock?query=${query}&page=0&size=10`
       );
       const data = await response.json();
@@ -120,7 +121,7 @@ const OrdenDeCompraPage = () => {
       label: "Proveedor",
       type: "autocomplete",
       searchOptions: async (query: string) => {
-        const response = await fetch(
+        const response = await authFetch(
           `/api/proveedores?query=${query}&limit=10&page=0`
         );
         const data = await response.json();

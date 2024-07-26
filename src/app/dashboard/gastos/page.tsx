@@ -2,6 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import authFetch from "@/utils/authFetch";
 import { useRef, useState } from "react";
 import { UseFormSetValue } from "react-hook-form";
 import * as yup from "yup";
@@ -80,7 +81,7 @@ const GastosPage = () => {
       label: "Categoría",
       type: "autocomplete",
       searchOptions: async (query: string) => {
-        const response = await fetch(
+        const response = await authFetch(
           `/api/categorias-gasto?query=${query}&limit=10&page=0`
         );
         const data = await response.json();
@@ -100,7 +101,7 @@ const GastosPage = () => {
       type: "autocomplete",
       hidden: (gasto: Gasto) => gasto.categoriaId !== 2,
       searchOptions: async (query: string) => {
-        const response = await fetch(
+        const response = await authFetch(
           `/api/mecanicos?query=${query}&limit=10&page=0`
         );
         const data = await response.json();
@@ -120,7 +121,7 @@ const GastosPage = () => {
       type: "autocomplete",
       excludeFromSubmit: true,
       searchOptions: async (query: string) => {
-        const response = await fetch(
+        const response = await authFetch(
           `/api/proveedores?query=${query}&limit=10&page=0`
         );
         const data = await response.json();
@@ -142,7 +143,7 @@ const GastosPage = () => {
       ) => {
         initializedRef.current = true;
         if (value) {
-          const response = await fetch(
+          const response = await authFetch(
             `/api/proveedores/${value}/orden-de-compra`
           );
           const data = await response.json();

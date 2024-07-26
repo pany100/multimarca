@@ -190,7 +190,7 @@ const NuevaOrdenReparacionForm = () => {
 
   const onSubmit = async (data: any) => {
     try {
-      const response = await fetch("/api/orden-reparacion", {
+      const response = await authFetch("/api/orden-reparacion", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

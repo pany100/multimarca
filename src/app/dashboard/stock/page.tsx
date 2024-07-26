@@ -2,6 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import authFetch from "@/utils/authFetch";
 import {
   Alert,
   Autocomplete,
@@ -57,7 +58,7 @@ const StockPage = () => {
     if (!selectedProveedor || !porcentajeAumento) return;
 
     try {
-      const response = await fetch("/api/stock/updateByProvider", {
+      const response = await authFetch("/api/stock/updateByProvider", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -127,7 +128,7 @@ const StockPage = () => {
       label: "Proveedor",
       type: "autocomplete",
       searchOptions: async (query: string) => {
-        const response = await fetch(
+        const response = await authFetch(
           `/api/proveedores?query=${query}&limit=10&page=0`
         );
         const data = await response.json();

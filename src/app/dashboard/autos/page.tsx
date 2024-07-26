@@ -119,10 +119,13 @@ const AutosPage = () => {
         const formData = new FormData();
         formData.append("file", file);
 
-        const response = await fetch(`/api/autos/${selectedAuto.id}/cedula`, {
-          method: "PUT",
-          body: formData,
-        });
+        const response = await authFetch(
+          `/api/autos/${selectedAuto.id}/cedula`,
+          {
+            method: "PUT",
+            body: formData,
+          }
+        );
 
         if (!response.ok) {
           throw new Error("Error al guardar la cédula verde");
