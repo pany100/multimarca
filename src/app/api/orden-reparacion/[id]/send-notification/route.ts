@@ -1,7 +1,6 @@
+import { sendWhatsAppMessage, uploadMedia } from "@/services/whatsappService";
 import generateClientOrderHtml from "@/utils/generateClientOrderHtml";
-import fs from "fs/promises";
 import { NextResponse } from "next/server";
-import path from "path";
 import puppeteer from "puppeteer";
 import prisma from "src/lib/prisma";
 
@@ -59,17 +58,15 @@ export async function POST(
   }
 }
 
-async function sendPdfViaWhatsApp(repair: any, pdfBuffer: Buffer) {
-  // Guardar el PDF en un archivo
-  const pdfPath = path.join(
-    process.cwd(),
-    "public",
-    "temp",
-    `orden_${repair.id}.pdf`
+async function sendPdfViaWhatsApp(ordenReparacion: any, pdfBuffer: Buffer) {
+  const mediaId = await uploadMedia(pdfBuffer);
+  const message = await sendWhatsAppMessage(
+    "1156007307",
+    "reparacion_terminada_pdf",
+    [ordenReparacion.auto.patent],
+    mediaId
   );
-  await fs.writeFile(pdfPath, pdfBuffer);
-
-  console.log(`PDF guardado en: ${pdfPath}`);
+  return message;
 }
 
 async function generatePdf(repair: any): Promise<Buffer> {
