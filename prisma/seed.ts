@@ -345,6 +345,31 @@ async function main() {
     });
   }
   console.log("Carga de Categorías de Gasto completada.");
+
+  console.log("Iniciando carga de datos de Dólar...");
+  const dolarData = fs.readFileSync("data/dolar.csv", {
+    encoding: "utf-8",
+  });
+  const dolarRecords = parse(dolarData, {
+    columns: true,
+    skip_empty_lines: true,
+  });
+
+  for (const record of dolarRecords) {
+    await prismaClient.dolar.upsert({
+      where: { fecha: new Date(record.fecha) },
+      update: {
+        oficial: parseFloat(record.oficial),
+        blue: parseFloat(record.blue),
+      },
+      create: {
+        fecha: new Date(record.fecha),
+        oficial: parseFloat(record.oficial),
+        blue: parseFloat(record.blue),
+      },
+    });
+  }
+  console.log("Carga de datos de Dólar completada.");
 }
 
 main()

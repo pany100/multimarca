@@ -372,3 +372,13 @@ model IngresoPorReparacion {
   @@index([ordenReparacionId])
 }
 
+model Dolar {
+  id      Int      @id @default(autoincrement())
+  fecha   DateTime @unique
+  oficial Decimal  @db.Decimal(10, 2)
+  blue    Decimal  @db.Decimal(10, 2)
+
+  @@index([fecha])
+}
+
+
