@@ -38,6 +38,7 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupIcon from "@mui/icons-material/Group";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import LogoutIcon from "@mui/icons-material/Logout";
 import MoneyOffIcon from "@mui/icons-material/MoneyOff";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import PaymentIcon from "@mui/icons-material/Payment";
@@ -53,6 +54,7 @@ import "src/app/globals.css";
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { userData, logout } = useAuth();
   const permisos = userData?.permisos || [];
+  const userName = userData?.fullName || "Usuario";
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [drawerCompressed, setDrawerCompressed] = useState(false);
   const router = useRouter();
@@ -332,19 +334,37 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           position="fixed"
           sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
         >
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2, display: { md: "none" } }}
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" noWrap component="div">
-              Dashboard
-            </Typography>
+          <Toolbar sx={{ justifyContent: "space-between" }}>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <IconButton
+                color="inherit"
+                aria-label="open drawer"
+                edge="start"
+                onClick={handleDrawerToggle}
+                sx={{ mr: 2, display: { md: "none" } }}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Typography variant="h6" noWrap component="div">
+                Dashboard
+              </Typography>
+            </Box>
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              <Typography variant="body1" sx={{ mr: 2 }}>
+                {userName}
+              </Typography>
+              <Tooltip title="Cerrar sesión">
+                <IconButton
+                  color="inherit"
+                  onClick={() => {
+                    logout();
+                    router.push("/login");
+                  }}
+                >
+                  <LogoutIcon />
+                </IconButton>
+              </Tooltip>
+            </Box>
           </Toolbar>
         </AppBar>
         <Drawer
@@ -404,17 +424,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 sx={{ cursor: "pointer", textDecoration: "underline", mr: 2 }}
               >
                 Volver
-              </Typography>
-              <Typography
-                variant="body2"
-                component="a"
-                onClick={() => {
-                  logout();
-                  router.push("/login");
-                }}
-                sx={{ cursor: "pointer", textDecoration: "underline" }}
-              >
-                Logout
               </Typography>
             </Box>
             {children}
