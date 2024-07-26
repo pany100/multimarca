@@ -1,6 +1,11 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import "./cron";
+import { initCronJobs } from "./cron";
+
+// Ejecutamos la función de inicialización
+if (typeof window === "undefined") {
+  initCronJobs();
+}
 
 const inter = Inter({ subsets: ["latin"] });
 

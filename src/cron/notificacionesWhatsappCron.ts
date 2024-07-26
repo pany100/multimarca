@@ -57,10 +57,12 @@ async function enviarNotificacionesWhatsApp() {
   }
 }
 
-// Programar el cronjob para que se ejecute todos los días a las 9:00 AM
-cron.schedule("0 9 * * *", () => {
-  console.log("Ejecutando cronjob de notificaciones WhatsApp");
-  enviarNotificacionesWhatsApp();
-});
+export function initNotificacionesWhatsappCron() {
+  // Programar el cronjob para que se ejecute todos los días a las 9:00 AM
+  cron.schedule("0 9 * * *", () => {
+    console.log("Ejecutando cronjob de notificaciones WhatsApp");
+    enviarNotificacionesWhatsApp();
+  });
 
-export default enviarNotificacionesWhatsApp;
+  console.log("Cron job para notificaciones de whatsapp");
+}

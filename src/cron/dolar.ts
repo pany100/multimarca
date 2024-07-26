@@ -59,10 +59,12 @@ async function obtenerDatosYActualizarDB() {
   }
 }
 
-// Programar el cron job para que se ejecute a las 10:00, 14:00, 18:00 y 22:00 hora de Argentina
-cron.schedule("0 10,18,23 * * *", obtenerDatosYActualizarDB, {
-  scheduled: true,
-  timezone: "America/Argentina/Buenos_Aires",
-});
+export function initDolarCron() {
+  // Programar el cron job para que se ejecute a las 10:00, 14:00, 18:00 y 22:00 hora de Argentina
+  cron.schedule("0 10,18,23 * * *", obtenerDatosYActualizarDB, {
+    scheduled: true,
+    timezone: "America/Argentina/Buenos_Aires",
+  });
 
-console.log("Cron job para actualización de datos del dólar iniciado");
+  console.log("Cron job para actualización de datos del dólar iniciado");
+}
