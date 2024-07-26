@@ -5,6 +5,7 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
+  AppBar,
   Box,
   Collapse,
   Container,
@@ -14,13 +15,14 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Toolbar,
   Typography,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import "src/app/globals.css";
 
 // Importa los iconos necesarios
@@ -60,16 +62,28 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     {}
   );
 
+  useEffect(() => {
+    setDrawerOpen(!isMobile);
+  }, [isMobile]);
+
   const handleDrawerToggle = () => {
     setDrawerOpen(!drawerOpen);
   };
 
   const handleDrawerCompress = () => {
-    setDrawerCompressed(!drawerCompressed);
+    if (!isMobile) {
+      setDrawerCompressed(!drawerCompressed);
+    }
   };
 
   const handleSectionToggle = (title: string) => {
     setOpenSections((prev) => ({ ...prev, [title]: !prev[title] }));
+  };
+
+  const handleMenuItemClick = () => {
+    if (isMobile) {
+      setDrawerOpen(false);
+    }
   };
 
   // Definir las opciones del menú con sus respectivos iconos
@@ -226,18 +240,122 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     },
   ];
 
+  const drawer = (
+    <>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          p: 2,
+          justifyContent: "space-between",
+        }}
+      >
+        {(!drawerCompressed || isMobile) && (
+          <>
+            <Image
+              src="/mtservice-icon.png"
+              alt="MT Service"
+              width={40}
+              height={40}
+            />
+            <Typography variant="h6" noWrap sx={{ flexGrow: 1, ml: 2 }}>
+              MT Service Multimarca
+            </Typography>
+          </>
+        )}
+        {!isMobile && (
+          <IconButton onClick={handleDrawerCompress}>
+            {drawerCompressed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+          </IconButton>
+        )}
+      </Box>
+      <List>
+        {menuSections.map((section, index) => (
+          <React.Fragment key={index}>
+            <ListItem button onClick={() => handleSectionToggle(section.title)}>
+              <ListItemText primary={section.title} />
+              {openSections[section.title] ? <ExpandLess /> : <ExpandMore />}
+            </ListItem>
+            <Collapse
+              in={openSections[section.title]}
+              timeout="auto"
+              unmountOnExit
+            >
+              <List component="div" disablePadding>
+                {section.items.map(
+                  (item, itemIndex) =>
+                    permisos.includes(item.permiso) && (
+                      <Tooltip
+                        key={itemIndex}
+                        title={drawerCompressed && !isMobile ? item.texto : ""}
+                        placement="right"
+                      >
+                        <ListItem
+                          button
+                          component={Link}
+                          href={item.ruta}
+                          onClick={handleMenuItemClick}
+                          sx={{
+                            pl: 4,
+                            justifyContent:
+                              drawerCompressed && !isMobile
+                                ? "center"
+                                : "flex-start",
+                          }}
+                        >
+                          <ListItemIcon
+                            sx={{
+                              minWidth: drawerCompressed && !isMobile ? 0 : 40,
+                            }}
+                          >
+                            {item.icono}
+                          </ListItemIcon>
+                          {(!drawerCompressed || isMobile) && (
+                            <ListItemText primary={item.texto} />
+                          )}
+                        </ListItem>
+                      </Tooltip>
+                    )
+                )}
+              </List>
+            </Collapse>
+          </React.Fragment>
+        ))}
+      </List>
+    </>
+  );
+
   return (
     <ProtectedRoute>
       <Box sx={{ display: "flex" }}>
+        <AppBar
+          position="fixed"
+          sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        >
+          <Toolbar>
+            <IconButton
+              color="inherit"
+              aria-label="open drawer"
+              edge="start"
+              onClick={handleDrawerToggle}
+              sx={{ mr: 2, display: { md: "none" } }}
+            >
+              <MenuIcon />
+            </IconButton>
+            <Typography variant="h6" noWrap component="div">
+              Dashboard
+            </Typography>
+          </Toolbar>
+        </AppBar>
         <Drawer
-          variant={isMobile ? "temporary" : "persistent"}
-          open={isMobile ? drawerOpen : true}
+          variant={isMobile ? "temporary" : "permanent"}
+          open={drawerOpen}
           onClose={handleDrawerToggle}
           sx={{
-            width: drawerCompressed ? 60 : 240,
+            width: drawerCompressed && !isMobile ? 60 : 240,
             flexShrink: 0,
             "& .MuiDrawer-paper": {
-              width: drawerCompressed ? 60 : 240,
+              width: drawerCompressed && !isMobile ? 60 : 240,
               boxSizing: "border-box",
               overflowX: "hidden",
               transition: theme.transitions.create("width", {
@@ -247,106 +365,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             },
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              p: 2,
-              justifyContent: "space-between",
-              transition: theme.transitions.create("padding", {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.enteringScreen,
-              }),
-            }}
-          >
-            {!drawerCompressed && (
-              <>
-                <Image
-                  src="/mtservice-icon.png"
-                  alt="MT Service"
-                  width={40}
-                  height={40}
-                />
-                <Typography
-                  variant="h6"
-                  noWrap
-                  sx={{
-                    flexGrow: 1,
-                    ml: 2,
-                    transition: theme.transitions.create(
-                      ["margin", "opacity"],
-                      {
-                        easing: theme.transitions.easing.sharp,
-                        duration: theme.transitions.duration.enteringScreen,
-                      }
-                    ),
-                    opacity: drawerCompressed ? 0 : 1,
-                  }}
-                >
-                  MT Service Multimarca
-                </Typography>
-              </>
-            )}
-            <IconButton onClick={handleDrawerCompress}>
-              {drawerCompressed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-            </IconButton>
-          </Box>
-          <List>
-            {menuSections.map((section, index) => (
-              <React.Fragment key={index}>
-                <ListItem
-                  button
-                  onClick={() => handleSectionToggle(section.title)}
-                >
-                  <ListItemText primary={section.title} />
-                  {openSections[section.title] ? (
-                    <ExpandLess />
-                  ) : (
-                    <ExpandMore />
-                  )}
-                </ListItem>
-                <Collapse
-                  in={openSections[section.title]}
-                  timeout="auto"
-                  unmountOnExit
-                >
-                  <List component="div" disablePadding>
-                    {section.items.map(
-                      (item, itemIndex) =>
-                        permisos.includes(item.permiso) && (
-                          <Tooltip
-                            key={itemIndex}
-                            title={drawerCompressed ? item.texto : ""}
-                            placement="right"
-                          >
-                            <ListItem
-                              button
-                              component={Link}
-                              href={item.ruta}
-                              sx={{
-                                pl: 4,
-                                justifyContent: drawerCompressed
-                                  ? "center"
-                                  : "flex-start",
-                              }}
-                            >
-                              <ListItemIcon
-                                sx={{ minWidth: drawerCompressed ? 0 : 40 }}
-                              >
-                                {item.icono}
-                              </ListItemIcon>
-                              {!drawerCompressed && (
-                                <ListItemText primary={item.texto} />
-                              )}
-                            </ListItem>
-                          </Tooltip>
-                        )
-                    )}
-                  </List>
-                </Collapse>
-              </React.Fragment>
-            ))}
-          </List>
+          {drawer}
         </Drawer>
         <Box
           component="main"
