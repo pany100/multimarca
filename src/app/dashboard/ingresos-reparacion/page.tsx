@@ -2,6 +2,9 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import authFetch from "@/utils/authFetch";
+import { useRef, useState } from "react";
+import { UseFormSetValue } from "react-hook-form";
 import * as yup from "yup";
 
 interface IngresoPorReparacion {
@@ -25,6 +28,11 @@ interface IngresoPorReparacion {
 }
 
 const IngresosPorReparacionPage = () => {
+  const [options, setOptions] = useState<{ label: string; value: number }[]>(
+    []
+  );
+  const initializedRef = useRef(false);
+
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "fecha", headerName: "Fecha", width: 120 },
@@ -54,7 +62,7 @@ const IngresosPorReparacionPage = () => {
       label: "Cliente",
       type: "autocomplete",
       searchOptions: async (query: string) => {
-        const response = await fetch(
+        const response = await authFetch(
           `/api/clientes?query=${query}&limit=10&page=0`
         );
         const data = await response.json();
@@ -63,25 +71,73 @@ const IngresosPorReparacionPage = () => {
           value: cliente.id,
         }));
       },
+      getInitialValue: (ingreso: any) => {
+        const value = {
+          value: ingreso.cliente.id,
+          label: ingreso.cliente.fullName,
+        };
+        return value;
+      },
+      onChange: async (
+        value: number | null,
+        setValue: UseFormSetValue<any>
+      ) => {
+        initializedRef.current = true;
+
+        if (!value) {
+          setValue("ordenReparacionId", null);
+          return;
+        }
+        const response = await authFetch(
+          `/api/clientes/${value}/orden-reparacion?limit=10&page=0`
+        );
+        const data = await response.json();
+        setOptions(
+          data.map(
+            (orden: {
+              id: number;
+              auto: { patent: string; brand: string; model: string };
+              fechaEntradaReparacion: string;
+            }) => ({
+              label: `#${orden.id} - ${orden.auto.patent} ${orden.auto.brand} ${
+                orden.auto.model
+              } - ${
+                orden.fechaEntradaReparacion
+                  ? new Date(orden.fechaEntradaReparacion).toLocaleDateString()
+                  : "-"
+              }`,
+              value: orden.id,
+            })
+          )
+        );
+        setValue("ordenReparacionId", null);
+      },
     },
     {
       name: "ordenReparacionId",
       label: "Orden de Reparación",
-      type: "autocomplete",
-      searchOptions: async (query: string) => {
-        const response = await fetch(
-          `/api/orden-reparacion?query=${query}&limit=10&page=0`
-        );
-        const data = await response.json();
-        return data.items.map(
-          (orden: {
-            id: number;
-            auto: { patent: string; brand: string; model: string };
-          }) => ({
-            label: `#${orden.id} - ${orden.auto.patent} ${orden.auto.brand} ${orden.auto.model}`,
-            value: orden.id,
-          })
-        );
+      type: "select",
+      options: (ingreso: any) => {
+        if (ingreso.ordenReparacionId && !initializedRef.current) {
+          const init = [
+            {
+              label: `#${ingreso.ordenReparacionId} - ${
+                ingreso.ordenReparacion.auto.patent
+              } ${ingreso.ordenReparacion.auto.brand} ${
+                ingreso.ordenReparacion.auto.model
+              } - ${
+                ingreso.ordenReparacion.fechaEntradaReparacion
+                  ? new Date(
+                      ingreso.ordenReparacion.fechaEntradaReparacion
+                    ).toLocaleDateString()
+                  : "-"
+              }`,
+              value: ingreso.ordenReparacionId,
+            },
+          ];
+          return init;
+        }
+        return options;
       },
     },
   ];
