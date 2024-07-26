@@ -1,6 +1,9 @@
 import { FetchProvider } from "@/contexts/FetchContext";
+import CssBaseline from "@mui/material/CssBaseline";
+import { ThemeProvider } from "@mui/material/styles";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import theme from "../theme";
 import { initCronJobs } from "./cron";
 
 // Ejecutamos la función de inicialización
@@ -23,7 +26,10 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <FetchProvider>{children}</FetchProvider>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <FetchProvider>{children}</FetchProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
