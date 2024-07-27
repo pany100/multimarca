@@ -21,14 +21,14 @@ interface Cliente {
 
 const ClientesPage = () => {
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "fullName", headerName: "Nombre completo", width: 200 },
-    { field: "email", headerName: "Email", width: 200 },
-    { field: "phone", headerName: "Teléfono", width: 150 },
+    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "fullName", headerName: "Nombre completo", flex: 1.5 },
+    { field: "email", headerName: "Email", flex: 1.5 },
+    { field: "phone", headerName: "Teléfono", flex: 1 },
     {
       field: "cars",
       headerName: "Vehículos",
-      width: 300,
+      flex: 3,
       renderCell: (params: any) => (
         <ul>
           {params.row.cars.map((car: any) => (
@@ -40,16 +40,86 @@ const ClientesPage = () => {
   ];
 
   const formFields: FieldConfig[] = [
-    { name: "fullName", label: "Nombre completo", type: "text" },
-    { name: "email", label: "Email", type: "email" },
-    { name: "phone", label: "Teléfono", type: "text" },
-    { name: "birthday", label: "Fecha de nacimiento", type: "date" },
-    { name: "address", label: "Dirección", type: "text" },
-    { name: "city", label: "Ciudad", type: "text" },
-    { name: "state", label: "Estado/Provincia", type: "text" },
-    { name: "postal_code", label: "Código postal", type: "text" },
-    { name: "tax_status", label: "Estado fiscal", type: "text" },
-    { name: "dni", label: "DNI", type: "text" },
+    {
+      name: "fullName",
+      label: "Nombre completo",
+      type: "text",
+      layout: {
+        xs: 6,
+      },
+    },
+    {
+      name: "email",
+      label: "Email",
+      type: "email",
+      layout: {
+        xs: 6,
+      },
+    },
+    {
+      name: "phone",
+      label: "Teléfono",
+      type: "text",
+      layout: {
+        xs: 6,
+      },
+    },
+    {
+      name: "birthday",
+      label: "Fecha de nacimiento",
+      type: "date",
+      layout: {
+        xs: 6,
+      },
+    },
+    {
+      name: "tax_status",
+      label: "Estado fiscal",
+      type: "text",
+      layout: {
+        xs: 6,
+      },
+    },
+    {
+      name: "dni",
+      label: "DNI",
+      type: "text",
+      layout: {
+        xs: 6,
+      },
+    },
+    {
+      name: "address",
+      label: "Dirección",
+      type: "text",
+      layout: {
+        xs: 6,
+      },
+    },
+    {
+      name: "city",
+      label: "Ciudad",
+      type: "text",
+      layout: {
+        xs: 6,
+      },
+    },
+    {
+      name: "state",
+      label: "Estado/Provincia",
+      type: "text",
+      layout: {
+        xs: 6,
+      },
+    },
+    {
+      name: "postal_code",
+      label: "Código postal",
+      type: "text",
+      layout: {
+        xs: 6,
+      },
+    },
   ];
 
   const createNewCliente = (): Cliente => {
@@ -71,7 +141,7 @@ const ClientesPage = () => {
 
   return (
     <CrudTable<Cliente>
-      title="Gestión de Clientes"
+      title="Clientes"
       columns={columns}
       apiEndpoint="/api/clientes"
       createNewItem={createNewCliente}

@@ -261,7 +261,7 @@ function CrudTable<T extends { id: string }>({
   const actionColumn: GridColDef = {
     field: "acciones",
     headerName: "Acciones",
-    width: 120,
+    width: 150,
     renderCell: (params) => {
       const showEdit = shouldRenderEdit ? shouldRenderEdit(params.row) : true;
       const showDelete = shouldRenderDelete

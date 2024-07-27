@@ -261,52 +261,54 @@ function DynamicForm<T extends FieldValues>({
             name={field.name as Path<T>}
             control={control}
             render={({ field: { onChange, value } }) => (
-              <Autocomplete
-                options={autocompleteOptions[field.name] || []}
-                getOptionLabel={(option) => option?.label || ""}
-                value={
-                  value
-                    ? autocompleteOptions[field.name]?.find(
-                        (option) => option.value === value
-                      ) || null
-                    : null
-                }
-                defaultValue={field.getInitialValue?.(item) || null}
-                onChange={(_, newValue) => {
-                  onChange(newValue?.value || null);
-                  handleFieldChange(
-                    field.name as keyof T,
-                    newValue?.value || null
-                  );
-                }}
-                onInputChange={(_, newInputValue) => {
-                  debouncedSearch(
-                    field,
-                    newInputValue,
-                    (options: { value: string; label: string }[]) => {
-                      setAutocompleteOptions((prev) => ({
-                        ...prev,
-                        [field.name]: options,
-                      }));
-                    }
-                  );
-                }}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label={field.label}
-                    error={!!errors[field.name as Path<T>]}
-                    helperText={
-                      errors[field.name as Path<T>]?.message as string
-                    }
-                  />
-                )}
-                isOptionEqualToValue={(option, value) =>
-                  option?.value === value?.value
-                }
-                loadingText="Buscando..."
-                noOptionsText="No se encontraron resultados"
-              />
+              <FormControl fullWidth margin="normal">
+                <Autocomplete
+                  options={autocompleteOptions[field.name] || []}
+                  getOptionLabel={(option) => option?.label || ""}
+                  value={
+                    value
+                      ? autocompleteOptions[field.name]?.find(
+                          (option) => option.value === value
+                        ) || null
+                      : null
+                  }
+                  defaultValue={field.getInitialValue?.(item) || null}
+                  onChange={(_, newValue) => {
+                    onChange(newValue?.value || null);
+                    handleFieldChange(
+                      field.name as keyof T,
+                      newValue?.value || null
+                    );
+                  }}
+                  onInputChange={(_, newInputValue) => {
+                    debouncedSearch(
+                      field,
+                      newInputValue,
+                      (options: { value: string; label: string }[]) => {
+                        setAutocompleteOptions((prev) => ({
+                          ...prev,
+                          [field.name]: options,
+                        }));
+                      }
+                    );
+                  }}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label={field.label}
+                      error={!!errors[field.name as Path<T>]}
+                      helperText={
+                        errors[field.name as Path<T>]?.message as string
+                      }
+                    />
+                  )}
+                  isOptionEqualToValue={(option, value) =>
+                    option?.value === value?.value
+                  }
+                  loadingText="Buscando..."
+                  noOptionsText="No se encontraron resultados"
+                />
+              </FormControl>
             )}
           />
         );

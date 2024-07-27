@@ -3,7 +3,7 @@
 import CedulaVerdeModal from "@/components/CedulaVerdeModal";
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import { IconButton, Tooltip } from "@mui/material";
 import { useState } from "react";
@@ -32,31 +32,81 @@ interface Auto {
 const AutosPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAuto, setSelectedAuto] = useState<Auto | null>(null);
+  const { authFetch } = useFetch();
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "patent", headerName: "Patente", width: 120 },
-    { field: "brand", headerName: "Marca", width: 120 },
-    { field: "model", headerName: "Modelo", width: 120 },
-    { field: "year", headerName: "Año", width: 80 },
-    { field: "color", headerName: "Color", width: 100 },
-    { field: "kms", headerName: "Kilómetros", width: 100 },
+    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "patent", headerName: "Patente", flex: 0.7 },
+    { field: "brand", headerName: "Marca", flex: 1 },
+    { field: "model", headerName: "Modelo", flex: 1.5 },
+    { field: "year", headerName: "Año", flex: 0.5 },
+    { field: "color", headerName: "Color", flex: 0.7 },
+    { field: "kms", headerName: "Kilómetros", flex: 0.7 },
     {
       field: "owner",
       headerName: "Propietario",
-      width: 200,
+      flex: 2,
       renderCell: (params: any) => params.row.owner.fullName,
     },
   ];
 
   const formFields: FieldConfig[] = [
-    { name: "patent", label: "Patente", type: "text" },
-    { name: "brand", label: "Marca", type: "text" },
-    { name: "model", label: "Modelo", type: "text" },
-    { name: "year", label: "Año", type: "number" },
-    { name: "color", label: "Color", type: "text" },
-    { name: "kms", label: "Kilómetros", type: "number" },
-    { name: "valves", label: "Válvulas", type: "number" },
+    {
+      name: "patent",
+      label: "Patente",
+      type: "text",
+      layout: {
+        xs: 4,
+      },
+    },
+    {
+      name: "brand",
+      label: "Marca",
+      type: "text",
+      layout: {
+        xs: 4,
+      },
+    },
+    {
+      name: "model",
+      label: "Modelo",
+      type: "text",
+      layout: {
+        xs: 4,
+      },
+    },
+    {
+      name: "year",
+      label: "Año",
+      type: "number",
+      layout: {
+        xs: 4,
+      },
+    },
+    {
+      name: "color",
+      label: "Color",
+      type: "text",
+      layout: {
+        xs: 4,
+      },
+    },
+    {
+      name: "kms",
+      label: "Kilómetros",
+      type: "number",
+      layout: {
+        xs: 4,
+      },
+    },
+    {
+      name: "valves",
+      label: "Válvulas",
+      type: "number",
+      layout: {
+        xs: 6,
+      },
+    },
     {
       name: "ownerId",
       label: "Propietario",
@@ -75,11 +125,36 @@ const AutosPage = () => {
         value: auto.owner?.id || auto.ownerId,
         label: auto.owner?.fullName || "",
       }),
+      layout: {
+        xs: 6,
+      },
     },
-    { name: "chassis_number", label: "Número de Chasis", type: "text" },
-    { name: "engine_number", label: "Número de Motor", type: "text" },
+    {
+      name: "chassis_number",
+      label: "Número de Chasis",
+      type: "text",
+      layout: {
+        xs: 6,
+      },
+    },
+    {
+      name: "engine_number",
+      label: "Número de Motor",
+      type: "text",
+      layout: {
+        xs: 6,
+      },
+    },
+    {
+      name: "transmission_type",
+      label: "Tipo de Transmisión",
+      type: "select",
+      options: [
+        { value: "Automático", label: "Automático" },
+        { value: "Manual", label: "Manual" },
+      ],
+    },
     { name: "observations", label: "Observaciones", type: "text" },
-    { name: "transmission_type", label: "Tipo de Transmisión", type: "text" },
   ];
 
   const createNewAuto = (): Auto => {
@@ -144,7 +219,7 @@ const AutosPage = () => {
   return (
     <>
       <CrudTable<Auto>
-        title="Gestión de Autos"
+        title="Autos"
         columns={columns}
         apiEndpoint="/api/autos"
         fields={formFields}
