@@ -22,6 +22,14 @@ const MecanicosPage = () => {
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "name", headerName: "Nombre", flex: 1 },
+    {
+      field: "start_date",
+      headerName: "Fecha de comienzo",
+      flex: 1,
+      valueGetter: (start_date: string) => {
+        return new Date(start_date).toLocaleDateString("es-ES");
+      },
+    },
     { field: "dni", headerName: "DNI", flex: 1 },
     { field: "email", headerName: "Email", flex: 1.5 },
     { field: "phone", headerName: "Teléfono", flex: 1 },
