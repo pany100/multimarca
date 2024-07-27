@@ -275,7 +275,18 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         {menuSections.map((section, index) => (
           <React.Fragment key={index}>
             <ListItem button onClick={() => handleSectionToggle(section.title)}>
-              <ListItemText primary={section.title} />
+              <Tooltip key={index} title={section.title} placement="right">
+                <ListItemText
+                  primary={section.title}
+                  sx={{
+                    "& .MuiListItemText-primary": {
+                      whiteSpace: "nowrap",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                    },
+                  }}
+                />
+              </Tooltip>
               {openSections[section.title] ? <ExpandLess /> : <ExpandMore />}
             </ListItem>
             <Collapse
@@ -289,7 +300,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                     permisos.includes(item.permiso) && (
                       <Tooltip
                         key={itemIndex}
-                        title={drawerCompressed && !isMobile ? item.texto : ""}
+                        title={item.texto}
                         placement="right"
                       >
                         <ListItem
@@ -313,7 +324,16 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                             {item.icono}
                           </ListItemIcon>
                           {(!drawerCompressed || isMobile) && (
-                            <ListItemText primary={item.texto} />
+                            <ListItemText
+                              primary={item.texto}
+                              sx={{
+                                "& .MuiListItemText-primary": {
+                                  whiteSpace: "nowrap",
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                },
+                              }}
+                            />
                           )}
                         </ListItem>
                       </Tooltip>
