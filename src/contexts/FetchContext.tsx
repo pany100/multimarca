@@ -14,7 +14,7 @@ interface FetchContextType {
   fetch: (input: RequestInfo, init?: RequestInit) => Promise<Response>;
   authFetch: (
     url: string,
-    options: RequestInit,
+    options?: RequestInit,
     req?: any,
     res?: any
   ) => Promise<Response>;

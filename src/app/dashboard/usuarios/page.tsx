@@ -2,7 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import React from "react";
 import * as yup from "yup";
 
@@ -18,6 +18,7 @@ const UsuariosPage = () => {
   const [roles, setRoles] = React.useState<{ value: number; label: string }[]>(
     []
   );
+  const { authFetch } = useFetch();
 
   React.useEffect(() => {
     const fetchRoles = async () => {
@@ -36,7 +37,7 @@ const UsuariosPage = () => {
       }
     };
     fetchRoles();
-  }, []);
+  }, [authFetch]);
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },

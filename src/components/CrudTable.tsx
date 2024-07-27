@@ -1,4 +1,4 @@
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -70,6 +70,7 @@ function CrudTable<T extends { id: string }>({
   });
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [newItem, setNewItem] = useState<T | null>(null);
+  const { authFetch } = useFetch();
 
   const handleAddClick = () => {
     setNewItem(createNewItem ? createNewItem() : null);
@@ -100,7 +101,13 @@ function CrudTable<T extends { id: string }>({
     } finally {
       setLoading(false);
     }
-  }, [apiEndpoint, paginationModel.page, paginationModel.pageSize, searchTerm]);
+  }, [
+    apiEndpoint,
+    paginationModel.page,
+    paginationModel.pageSize,
+    authFetch,
+    searchTerm,
+  ]);
 
   useEffect(() => {
     fetchItems();
@@ -312,7 +319,16 @@ function CrudTable<T extends { id: string }>({
         fullWidth
         margin="normal"
       />
-      {loading && <CircularProgress />}
+      {loading && (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="200px" // Ajusta esta altura según sea necesario
+        >
+          <CircularProgress />
+        </Box>
+      )}
       {!loading && items.length === 0 ? (
         <Typography>No hay datos para mostrar</Typography>
       ) : (

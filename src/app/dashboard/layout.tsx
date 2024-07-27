@@ -11,6 +11,7 @@ import {
   Container,
   Drawer,
   IconButton,
+  LinearProgress,
   List,
   ListItem,
   ListItemIcon,
@@ -21,11 +22,12 @@ import {
   useTheme,
 } from "@mui/material";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import React, { useEffect, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useEffect, useMemo, useState } from "react";
 import "src/app/globals.css";
 
 // Importa los iconos necesarios
+import { useFetch } from "@/contexts/FetchContext";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
@@ -63,6 +65,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>(
     {}
   );
+  const pathname = usePathname();
+  const { isLoading } = useFetch();
 
   useEffect(() => {
     setDrawerOpen(!isMobile);
@@ -88,159 +92,169 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  // Definir las opciones del menú con sus respectivos iconos
-  const menuSections = [
-    {
-      title: "Gestión de Personal",
-      items: [
-        {
-          permiso: "Usuarios",
-          texto: "Usuarios",
-          icono: <PersonIcon />,
-          ruta: "/dashboard/usuarios",
-        },
-        {
-          permiso: "Roles",
-          texto: "Roles",
-          icono: <GroupIcon />,
-          ruta: "/dashboard/roles",
-        },
-        {
-          permiso: "Mecanicos",
-          texto: "Mecánicos",
-          icono: <BuildIcon />,
-          ruta: "/dashboard/mecanicos",
-        },
-      ],
-    },
-    {
-      title: "Clientes y Vehículos",
-      items: [
-        {
-          permiso: "Clientes",
-          texto: "Clientes",
-          icono: <PersonIcon />,
-          ruta: "/dashboard/clientes",
-        },
-        {
-          permiso: "Autos",
-          texto: "Autos",
-          icono: <DirectionsCarIcon />,
-          ruta: "/dashboard/autos",
-        },
-      ],
-    },
-    {
-      title: "Operaciones del Taller",
-      items: [
-        {
-          permiso: "Controles",
-          texto: "Controles",
-          icono: <BuildIcon />,
-          ruta: "/dashboard/controles",
-        },
-        {
-          permiso: "Trabajos",
-          texto: "Mano de obra",
-          icono: <WorkIcon />,
-          ruta: "/dashboard/mano-de-obra",
-        },
-        {
-          permiso: "Reparaciones",
-          texto: "Órdenes de Reparación",
-          icono: <AssignmentIcon />,
-          ruta: "/dashboard/ordenes-reparacion",
-        },
-        {
-          permiso: "Reparaciones",
-          texto: "Presupuestos",
-          icono: <DescriptionIcon />,
-          ruta: "/dashboard/presupuestos",
-        },
-      ],
-    },
-    {
-      title: "Inventario y Compras",
-      items: [
-        {
-          permiso: "Stock",
-          texto: "Stock",
-          icono: <InventoryIcon />,
-          ruta: "/dashboard/stock",
-        },
-        {
-          permiso: "Proveedores",
-          texto: "Proveedores",
-          icono: <LocalShippingIcon />,
-          ruta: "/dashboard/proveedores",
-        },
-        {
-          permiso: "OrdenesCompra",
-          texto: "Órdenes de Compra",
-          icono: <ReceiptIcon />,
-          ruta: "/dashboard/orden-de-compra",
-        },
-      ],
-    },
-    {
-      title: "Finanzas",
-      items: [
-        {
-          permiso: "Ventas",
-          texto: "Ventas",
-          icono: <ShoppingCartIcon />,
-          ruta: "/dashboard/ventas",
-        },
-        {
-          permiso: "RetirosDinero",
-          texto: "Extracciones",
-          icono: <MoneyOffIcon />,
-          ruta: "/dashboard/extracciones",
-        },
-        {
-          permiso: "Gastos",
-          texto: "Gastos",
-          icono: <AttachMoneyIcon />,
-          ruta: "/dashboard/gastos",
-        },
-        {
-          permiso: "CategoriaGasto",
-          texto: "Categorías de Gasto",
-          icono: <CategoryIcon />,
-          ruta: "/dashboard/categorias-gasto",
-        },
-        {
-          permiso: "Ingresos",
-          texto: "Ingresos",
-          icono: <AccountBalanceIcon />,
-          ruta: "/dashboard/ingresos-reparacion",
-        },
-        {
-          permiso: "PagosReparaciones",
-          texto: "Pagos a Mecánicos",
-          icono: <PaymentIcon />,
-          ruta: "/dashboard/pagos-a-mecanico",
-        },
-      ],
-    },
-    {
-      title: "Comunicación y Notificaciones",
-      items: [
-        {
-          permiso: "NotificacionesClientes",
-          texto: "Notificaciones WhatsApp",
-          icono: <WhatsAppIcon />,
-          ruta: "/dashboard/notificaciones-whatsapp",
-        },
-        {
-          permiso: "NotificacionesClientes",
-          texto: "Administrador Notificaciones",
-          icono: <NotificationsIcon />,
-          ruta: "/dashboard/admin-notificaciones",
-        },
-      ],
-    },
-  ];
+  const menuSections = useMemo(
+    () => [
+      {
+        title: "Gestión de Personal",
+        items: [
+          {
+            permiso: "Usuarios",
+            texto: "Usuarios",
+            icono: <PersonIcon />,
+            ruta: "/dashboard/usuarios",
+          },
+          {
+            permiso: "Roles",
+            texto: "Roles",
+            icono: <GroupIcon />,
+            ruta: "/dashboard/roles",
+          },
+          {
+            permiso: "Mecanicos",
+            texto: "Mecánicos",
+            icono: <BuildIcon />,
+            ruta: "/dashboard/mecanicos",
+          },
+        ],
+      },
+      {
+        title: "Clientes y Vehículos",
+        items: [
+          {
+            permiso: "Clientes",
+            texto: "Clientes",
+            icono: <PersonIcon />,
+            ruta: "/dashboard/clientes",
+          },
+          {
+            permiso: "Autos",
+            texto: "Autos",
+            icono: <DirectionsCarIcon />,
+            ruta: "/dashboard/autos",
+          },
+        ],
+      },
+      {
+        title: "Operaciones del Taller",
+        items: [
+          {
+            permiso: "Controles",
+            texto: "Controles",
+            icono: <BuildIcon />,
+            ruta: "/dashboard/controles",
+          },
+          {
+            permiso: "Trabajos",
+            texto: "Mano de obra",
+            icono: <WorkIcon />,
+            ruta: "/dashboard/mano-de-obra",
+          },
+          {
+            permiso: "Reparaciones",
+            texto: "Órdenes de Reparación",
+            icono: <AssignmentIcon />,
+            ruta: "/dashboard/ordenes-reparacion",
+          },
+          {
+            permiso: "Reparaciones",
+            texto: "Presupuestos",
+            icono: <DescriptionIcon />,
+            ruta: "/dashboard/presupuestos",
+          },
+        ],
+      },
+      {
+        title: "Inventario y Compras",
+        items: [
+          {
+            permiso: "Stock",
+            texto: "Stock",
+            icono: <InventoryIcon />,
+            ruta: "/dashboard/stock",
+          },
+          {
+            permiso: "Proveedores",
+            texto: "Proveedores",
+            icono: <LocalShippingIcon />,
+            ruta: "/dashboard/proveedores",
+          },
+          {
+            permiso: "OrdenesCompra",
+            texto: "Órdenes de Compra",
+            icono: <ReceiptIcon />,
+            ruta: "/dashboard/orden-de-compra",
+          },
+        ],
+      },
+      {
+        title: "Finanzas",
+        items: [
+          {
+            permiso: "Ventas",
+            texto: "Ventas",
+            icono: <ShoppingCartIcon />,
+            ruta: "/dashboard/ventas",
+          },
+          {
+            permiso: "RetirosDinero",
+            texto: "Extracciones",
+            icono: <MoneyOffIcon />,
+            ruta: "/dashboard/extracciones",
+          },
+          {
+            permiso: "Gastos",
+            texto: "Gastos",
+            icono: <AttachMoneyIcon />,
+            ruta: "/dashboard/gastos",
+          },
+          {
+            permiso: "CategoriaGasto",
+            texto: "Categorías de Gasto",
+            icono: <CategoryIcon />,
+            ruta: "/dashboard/categorias-gasto",
+          },
+          {
+            permiso: "Ingresos",
+            texto: "Ingresos",
+            icono: <AccountBalanceIcon />,
+            ruta: "/dashboard/ingresos-reparacion",
+          },
+          {
+            permiso: "PagosReparaciones",
+            texto: "Pagos a Mecánicos",
+            icono: <PaymentIcon />,
+            ruta: "/dashboard/pagos-a-mecanico",
+          },
+        ],
+      },
+      {
+        title: "Comunicación y Notificaciones",
+        items: [
+          {
+            permiso: "NotificacionesClientes",
+            texto: "Notificaciones WhatsApp",
+            icono: <WhatsAppIcon />,
+            ruta: "/dashboard/notificaciones-whatsapp",
+          },
+          {
+            permiso: "NotificacionesClientes",
+            texto: "Administrador Notificaciones",
+            icono: <NotificationsIcon />,
+            ruta: "/dashboard/admin-notificaciones",
+          },
+        ],
+      },
+    ],
+    []
+  );
+
+  useEffect(() => {
+    const newOpenSections = menuSections.reduce((acc, section) => {
+      const isOpen = section.items.some((item) => item.ruta === pathname);
+      return { ...acc, [section.title]: isOpen };
+    }, {});
+    setOpenSections(newOpenSections);
+  }, [pathname, menuSections]);
 
   const drawer = (
     <>
@@ -274,7 +288,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <List>
         {menuSections.map((section, index) => (
           <React.Fragment key={index}>
-            <ListItem button onClick={() => handleSectionToggle(section.title)}>
+            <ListItem
+              button
+              onClick={() => handleSectionToggle(section.title)}
+              sx={{
+                bgcolor: openSections[section.title]
+                  ? "action.selected"
+                  : "inherit",
+              }}
+            >
               <Tooltip key={index} title={section.title} placement="right">
                 <ListItemText
                   primary={section.title}
@@ -283,6 +305,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                       whiteSpace: "nowrap",
                       overflow: "hidden",
                       textOverflow: "ellipsis",
+                      fontWeight: openSections[section.title]
+                        ? "bold"
+                        : "normal",
                     },
                   }}
                 />
@@ -314,11 +339,22 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                               drawerCompressed && !isMobile
                                 ? "center"
                                 : "flex-start",
+                            bgcolor:
+                              pathname === item.ruta
+                                ? "action.selected"
+                                : "inherit",
+                            "&:hover": {
+                              bgcolor: "action.hover",
+                            },
                           }}
                         >
                           <ListItemIcon
                             sx={{
                               minWidth: drawerCompressed && !isMobile ? 0 : 40,
+                              color:
+                                pathname === item.ruta
+                                  ? "primary.main"
+                                  : "inherit",
                             }}
                           >
                             {item.icono}
@@ -331,6 +367,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                                   whiteSpace: "nowrap",
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
+                                  fontWeight:
+                                    pathname === item.ruta ? "bold" : "normal",
+                                  color:
+                                    pathname === item.ruta
+                                      ? "primary.main"
+                                      : "inherit",
                                 },
                               }}
                             />
@@ -349,10 +391,24 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <ProtectedRoute>
+      {isLoading && (
+        <LinearProgress
+          sx={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            zIndex: 9999,
+          }}
+        />
+      )}
       <Box sx={{ display: "flex" }}>
         <AppBar
           position="fixed"
-          sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}
+          sx={{
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            backgroundColor: theme.palette.grey[800],
+          }}
         >
           <Toolbar sx={{ justifyContent: "space-between" }}>
             <Box sx={{ display: "flex", alignItems: "center" }}>
