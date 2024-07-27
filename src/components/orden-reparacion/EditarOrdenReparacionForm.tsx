@@ -6,6 +6,8 @@ import {
   Box,
   Button,
   Chip,
+  FormControl,
+  Grid,
   MenuItem,
   Paper,
   Snackbar,
@@ -411,298 +413,324 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} onChange={handleFormChange}>
-        <Controller
-          name="autoId"
-          control={control}
-          render={({ field: { onChange, value } }) => (
-            <Autocomplete
-              options={autocompleteOptions || []}
-              getOptionLabel={(option) => option?.label || ""}
-              value={
-                value
-                  ? autocompleteOptions.find(
-                      (option) => option.value === value.toString()
-                    ) || null
-                  : null
-              }
-              onChange={(_, newValue) => {
-                onChange(newValue?.value || null);
-              }}
-              onInputChange={(event, newInputValue, reason) => {
-                if (reason === "input") {
-                  debouncedSearch(
-                    newInputValue,
-                    (options: { value: string; label: string }[]) =>
-                      setAutocompleteOptions(options)
-                  );
-                }
-              }}
-              renderInput={(params) => (
+        <Grid container spacing={2}>
+          <Grid item xs={4}>
+            <Controller
+              name="autoId"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <FormControl fullWidth margin="normal">
+                  <Autocomplete
+                    options={autocompleteOptions || []}
+                    getOptionLabel={(option) => option?.label || ""}
+                    value={
+                      value
+                        ? autocompleteOptions.find(
+                            (option) => option.value === value.toString()
+                          ) || null
+                        : null
+                    }
+                    onChange={(_, newValue) => {
+                      onChange(newValue?.value || null);
+                    }}
+                    onInputChange={(event, newInputValue, reason) => {
+                      if (reason === "input") {
+                        debouncedSearch(
+                          newInputValue,
+                          (options: { value: string; label: string }[]) =>
+                            setAutocompleteOptions(options)
+                        );
+                      }
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Auto"
+                        error={!!errors.autoId}
+                        helperText={errors.autoId?.message as string}
+                      />
+                    )}
+                    isOptionEqualToValue={(option, value) =>
+                      option?.value === value?.value
+                    }
+                    loadingText="Buscando..."
+                    noOptionsText="No se encontraron resultados"
+                    sx={{
+                      marginBottom: 2,
+                    }}
+                  />
+                </FormControl>
+              )}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Controller
+              name="kilometros"
+              control={control}
+              render={({ field }) => (
                 <TextField
-                  {...params}
-                  label="Auto"
-                  error={!!errors.autoId}
-                  helperText={errors.autoId?.message as string}
+                  {...field}
+                  type="number"
+                  label="Kilómetros"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.kilometros}
+                  helperText={errors.kilometros?.message as string}
                 />
               )}
-              isOptionEqualToValue={(option, value) =>
-                option?.value === value?.value
-              }
-              loadingText="Buscando..."
-              noOptionsText="No se encontraron resultados"
-              sx={{
-                marginBottom: 2,
-              }}
             />
-          )}
-        />
-        <Controller
-          name="fechaCreacion"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              type="date"
-              label="Fecha de creación"
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-              margin="normal"
-              value={
-                field.value
-                  ? new Date(field.value).toISOString().split("T")[0]
-                  : ""
-              }
-              error={!!errors.fechaCreacion}
-              helperText={errors.fechaCreacion?.message as string}
-              onChange={(e) => field.onChange(e.target.value || null)}
-            />
-          )}
-        />
-        <Controller
-          name="fechaEntradaReparacion"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              type="date"
-              label="Fecha de entrada"
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-              margin="normal"
-              value={
-                field.value
-                  ? new Date(field.value).toISOString().split("T")[0]
-                  : ""
-              }
-              error={!!errors.fechaEntradaReparacion}
-              helperText={errors.fechaEntradaReparacion?.message as string}
-              onChange={(e) => field.onChange(e.target.value || null)}
-            />
-          )}
-        />
-
-        <Controller
-          name="fechaSalidaReparacion"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              type="date"
-              label="Fecha de salida"
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-              margin="normal"
-              value={
-                field.value
-                  ? new Date(field.value).toISOString().split("T")[0]
-                  : ""
-              }
-              error={!!errors.fechaSalidaReparacion}
-              helperText={errors.fechaSalidaReparacion?.message as string}
-              onChange={(e) => field.onChange(e.target.value || null)}
-            />
-          )}
-        />
-
-        <Controller
-          name="kilometros"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              type="number"
-              label="Kilómetros"
-              fullWidth
-              margin="normal"
-              error={!!errors.kilometros}
-              helperText={errors.kilometros?.message as string}
-            />
-          )}
-        />
-
-        <Controller
-          name="observacionesCliente"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              label="Observaciones del cliente"
-              multiline
-              rows={4}
-              fullWidth
-              margin="normal"
-              error={!!errors.observacionesCliente}
-              helperText={errors.observacionesCliente?.message as string}
-            />
-          )}
-        />
-        <TextField
-          label="Nueva observación de salida"
-          value={observacionSalida}
-          onChange={(e) => setObservacionSalida(e.target.value)}
-          fullWidth
-          margin="normal"
-        />
-        <Button onClick={handleAddObservacionSalida} variant="outlined">
-          Agregar observación
-        </Button>
-
-        <Controller
-          name="observacionesSalida"
-          control={control}
-          render={({ field }) => (
-            <Stack direction="row" spacing={1} flexWrap="wrap" marginTop={2}>
-              {JSON.parse(field.value)?.map((obs: string, index: number) => (
-                <Chip
-                  key={index}
-                  label={obs}
-                  onDelete={() => handleDeleteObservacionSalida(index)}
+          </Grid>
+          <Grid item xs={4}>
+            <Controller
+              name="fechaCreacion"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  type="date"
+                  label="Fecha de creación"
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  margin="normal"
+                  value={
+                    field.value
+                      ? new Date(field.value).toISOString().split("T")[0]
+                      : ""
+                  }
+                  error={!!errors.fechaCreacion}
+                  helperText={errors.fechaCreacion?.message as string}
+                  onChange={(e) => field.onChange(e.target.value || null)}
                 />
-              ))}
-            </Stack>
-          )}
-        />
-        <ObservacionesEntradaForm />
-        <Controller
-          name="estado"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              select
-              label="Estado"
-              fullWidth
-              margin="normal"
-              error={!!errors.estado}
-              helperText={errors.estado?.message as string}
-            >
-              {["Presupuestado", "En Progreso", "Aceptado", "Terminado"].map(
-                (option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                )
               )}
-            </TextField>
-          )}
-        />
-        <MecanicoFormSection />
-        <RepuestoUsadoFormSection />
-        <ReparacionesTercerosFormSection />
-        <TrabajosRealizadosFormSection />
-        <Controller
-          name="controlesEnReparacion"
-          control={control}
-          render={() => (
-            <>
-              <ControlesEnReparacionForm
-                controlesMecanicos={ordenReparacion.controlesEnReparacion.map(
-                  (control) => ({
-                    id: control.id,
-                    nombre: control.controlMecanico.name,
-                    tipo:
-                      control.controlMecanico.type === "checkbox"
-                        ? "checkbox"
-                        : "texto",
-                    valor: control.valor,
-                  })
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Controller
+              name="fechaEntradaReparacion"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  type="date"
+                  label="Fecha de entrada"
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  value={
+                    field.value
+                      ? new Date(field.value).toISOString().split("T")[0]
+                      : ""
+                  }
+                  error={!!errors.fechaEntradaReparacion}
+                  helperText={errors.fechaEntradaReparacion?.message as string}
+                  onChange={(e) => field.onChange(e.target.value || null)}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Controller
+              name="fechaSalidaReparacion"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  type="date"
+                  label="Fecha de salida"
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  value={
+                    field.value
+                      ? new Date(field.value).toISOString().split("T")[0]
+                      : ""
+                  }
+                  error={!!errors.fechaSalidaReparacion}
+                  helperText={errors.fechaSalidaReparacion?.message as string}
+                  onChange={(e) => field.onChange(e.target.value || null)}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Controller
+              name="estado"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  select
+                  label="Estado"
+                  fullWidth
+                  error={!!errors.estado}
+                  helperText={errors.estado?.message as string}
+                >
+                  {[
+                    "Presupuestado",
+                    "En Progreso",
+                    "Aceptado",
+                    "Terminado",
+                  ].map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
+              name="observacionesCliente"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Observaciones del cliente"
+                  multiline
+                  rows={4}
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.observacionesCliente}
+                  helperText={errors.observacionesCliente?.message as string}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <ObservacionesEntradaForm />
+          </Grid>
+
+          <Grid item xs={12}>
+            <MecanicoFormSection />
+          </Grid>
+          <Grid item xs={12}>
+            <RepuestoUsadoFormSection />
+          </Grid>
+          <Grid item xs={12}>
+            <ReparacionesTercerosFormSection />
+          </Grid>
+          <Grid item xs={12}>
+            <TrabajosRealizadosFormSection />
+          </Grid>
+          <Controller
+            name="controlesEnReparacion"
+            control={control}
+            render={() => (
+              <>
+                <ControlesEnReparacionForm
+                  controlesMecanicos={ordenReparacion.controlesEnReparacion.map(
+                    (control) => ({
+                      id: control.id,
+                      nombre: control.controlMecanico.name,
+                      tipo:
+                        control.controlMecanico.type === "checkbox"
+                          ? "checkbox"
+                          : "texto",
+                      valor: control.valor,
+                    })
+                  )}
+                />
+                {!!errors.controlesEnReparacion && (
+                  <Alert severity="error" sx={{ mt: 1 }}>
+                    {errors.controlesEnReparacion.message}
+                  </Alert>
                 )}
-              />
-              {!!errors.controlesEnReparacion && (
-                <Alert severity="error" sx={{ mt: 1 }}>
-                  {errors.controlesEnReparacion.message}
-                </Alert>
-              )}
-            </>
-          )}
-        />
-        <Box sx={{ mt: 2, mb: 2 }}>
-          <Paper
-            {...getRootProps()}
-            sx={{
-              p: 2,
-              border: "2px dashed",
-              borderColor: isDragActive ? "primary.main" : "grey.300",
-              backgroundColor: isDragActive
-                ? "action.hover"
-                : "background.paper",
-              cursor: "pointer",
-            }}
-          >
-            <input {...getInputProps()} />
-            {selectedFile ? (
-              <Box>
-                <Typography>
-                  Archivo seleccionado: {selectedFile.name}
-                </Typography>
-                <Box
-                  component="iframe"
-                  src={URL.createObjectURL(selectedFile)}
-                  width="100%"
-                  height="300px"
-                />
-              </Box>
-            ) : ordenReparacion.pdfPath ? (
-              <Box>
-                <Typography>
-                  PDF actual: {ordenReparacion.pdfPath.split("/").pop()}
-                </Typography>
-                <Box
-                  component="iframe"
-                  src={ordenReparacion.pdfPath}
-                  width="100%"
-                  height="300px"
-                />
-                <Typography variant="caption" sx={{ mt: 1 }}>
-                  Arrastra un nuevo archivo para reemplazar el PDF actual
-                </Typography>
-              </Box>
-            ) : (
-              <Typography>
-                {isDragActive
-                  ? "Suelta el archivo PDF aquí..."
-                  : "Arrastra y suelta un archivo PDF aquí, o haz clic para seleccionar uno"}
-              </Typography>
+              </>
             )}
-          </Paper>
-        </Box>
-        <Controller
-          name="montoTotalCliente"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              label="Monto Total Cliente"
-              type="number"
-              fullWidth
-              margin="normal"
-            />
-          )}
-        />
+          />
+          <Box sx={{ mt: 2, mb: 2 }}>
+            <Paper
+              {...getRootProps()}
+              sx={{
+                p: 2,
+                border: "2px dashed",
+                borderColor: isDragActive ? "primary.main" : "grey.300",
+                backgroundColor: isDragActive
+                  ? "action.hover"
+                  : "background.paper",
+                cursor: "pointer",
+              }}
+            >
+              <input {...getInputProps()} />
+              {selectedFile ? (
+                <Box>
+                  <Typography>
+                    Archivo seleccionado: {selectedFile.name}
+                  </Typography>
+                  <Box
+                    component="iframe"
+                    src={URL.createObjectURL(selectedFile)}
+                    width="100%"
+                    height="300px"
+                  />
+                </Box>
+              ) : ordenReparacion.pdfPath ? (
+                <Box>
+                  <Typography>
+                    PDF actual: {ordenReparacion.pdfPath.split("/").pop()}
+                  </Typography>
+                  <Box
+                    component="iframe"
+                    src={ordenReparacion.pdfPath}
+                    width="100%"
+                    height="300px"
+                  />
+                  <Typography variant="caption" sx={{ mt: 1 }}>
+                    Arrastra un nuevo archivo para reemplazar el PDF actual
+                  </Typography>
+                </Box>
+              ) : (
+                <Typography>
+                  {isDragActive
+                    ? "Suelta el archivo PDF aquí..."
+                    : "Arrastra y suelta un archivo PDF aquí, o haz clic para seleccionar uno"}
+                </Typography>
+              )}
+            </Paper>
+          </Box>
+          <TextField
+            label="Nueva observación de salida"
+            value={observacionSalida}
+            onChange={(e) => setObservacionSalida(e.target.value)}
+            fullWidth
+            margin="normal"
+          />
+          <Button onClick={handleAddObservacionSalida} variant="outlined">
+            Agregar observación
+          </Button>
 
-        <Button type="submit" variant="contained" color="primary">
-          Actualizar Orden de Reparación
-        </Button>
+          <Controller
+            name="observacionesSalida"
+            control={control}
+            render={({ field }) => (
+              <Stack direction="row" spacing={1} flexWrap="wrap" marginTop={2}>
+                {JSON.parse(field.value)?.map((obs: string, index: number) => (
+                  <Chip
+                    key={index}
+                    label={obs}
+                    onDelete={() => handleDeleteObservacionSalida(index)}
+                  />
+                ))}
+              </Stack>
+            )}
+          />
+          <Controller
+            name="montoTotalCliente"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Monto Total Cliente"
+                type="number"
+                fullWidth
+                margin="normal"
+              />
+            )}
+          />
+
+          <Button type="submit" variant="contained" color="primary">
+            Actualizar Orden de Reparación
+          </Button>
+        </Grid>
       </form>
       <Snackbar
         open={snackbar.open}
