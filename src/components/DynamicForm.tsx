@@ -327,6 +327,7 @@ function DynamicForm<T extends FieldValues>({
                   onChange={(e) =>
                     handleFieldChange(field.name as keyof T, e.target.value)
                   }
+                  label={field.label}
                   renderValue={(selected) => (selected as string[]).join(", ")}
                 >
                   {(typeof field.options === "function"

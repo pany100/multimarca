@@ -30,9 +30,20 @@ const RolesPage = () => {
   }, []);
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "name", headerName: "Nombre del Rol", width: 200 },
-    { field: "permisos", headerName: "Permisos", width: 300 },
+    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "name", headerName: "Nombre del Rol", flex: 1 },
+    {
+      field: "permisos",
+      headerName: "Permisos",
+      flex: 4,
+      renderCell: (params: any) => {
+        return (
+          <div style={{ whiteSpace: "normal", wordWrap: "break-word" }}>
+            {params.row.permisos.join(", ")}
+          </div>
+        );
+      },
+    },
   ];
 
   const formFields: FieldConfig[] = [
