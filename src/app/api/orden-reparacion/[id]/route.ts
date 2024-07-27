@@ -79,7 +79,7 @@ export async function PUT(
       reparacionesDeTercero = [],
       trabajosRealizados = [],
       controlesEnReparacion = [],
-      montoTotalCliente,
+      manoDeObra,
     } = body;
 
     const repuestosToPersist = repuestosUsados.map((repuesto: any) => ({
@@ -162,7 +162,7 @@ export async function PUT(
         observacionesEntrada,
         observacionesSalida,
         estado,
-        montoTotalCliente: new Prisma.Decimal(montoTotalCliente),
+        manoDeObra: new Prisma.Decimal(manoDeObra),
         mecanicos: {
           set: mecanicos.map(({ id }: { id: number }) => ({ id })),
         },

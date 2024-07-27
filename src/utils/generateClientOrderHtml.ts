@@ -1,3 +1,5 @@
+import { calcularTotalOrdenReparacion } from "./ordenHelper";
+
 export default function generateClientOrderHtml(repair: any): string {
   return `
   <!DOCTYPE html>
@@ -374,11 +376,7 @@ export default function generateClientOrderHtml(repair: any): string {
                     line-height: 1.5;
                     letter-spacing: 0.15px;
                     text-align: right;
-                    '>$${repair.trabajosRealizados.reduce(
-                      (acc: any, curr: any) =>
-                        acc + parseInt(curr.precioUnitario),
-                      0
-                    )}</p>
+                    '>$${repair.manoDeObra}</p>
           <p style='   margin: 0 !important;
             font-family: Inter, sans-serif;
             font-weight: 400;
@@ -398,7 +396,7 @@ export default function generateClientOrderHtml(repair: any): string {
             letter-spacing: 0.15px;
             text-align: right;
             padding-top: 0.5rem;
-            '>$${repair.montoTotalCliente}</p>
+            '>$${calcularTotalOrdenReparacion(repair)}</p>
         </div>
         <div style='
             border-bottom: 2px solid #000;

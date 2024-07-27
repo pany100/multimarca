@@ -124,10 +124,7 @@ const schema = yup.object().shape({
         .required("El proveedor es requerido"),
     })
   ),
-  montoTotalCliente: yup
-    .number()
-    .positive()
-    .required("El monto total es requerido"),
+  manoDeObra: yup.number().positive().required("La mano de obra es requerida"),
   observacionesEntrada: yup.string(),
 });
 
@@ -147,7 +144,7 @@ type OrdenReparacion = {
   observacionesSalida: string;
   estado: "Presupuestado" | "En Progreso" | "Aceptado" | "Terminado";
   pdfPath: string | null;
-  montoTotalCliente: number;
+  manoDeObra: number;
   auto: {
     id: number;
     patent: string;
@@ -241,7 +238,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
     resolver: yupResolver(schema),
     defaultValues: {
       ...ordenReparacion,
-      montoTotalCliente: ordenReparacion.montoTotalCliente,
+      manoDeObra: ordenReparacion.manoDeObra,
       trabajosRealizados: ordenReparacion.trabajosRealizados.map((trabajo) => ({
         manoDeObra: { name: trabajo.descripcion },
         precioUnitario: Number(trabajo.precioUnitario),
@@ -301,41 +298,6 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
     accept: { "application/pdf": [".pdf"] },
     maxFiles: 1,
   });
-
-  useEffect(() => {
-    if (!isEditing) return;
-
-    const calcularMontoTotal = () => {
-      const totalRepuestos =
-        repuestosUsados?.reduce(
-          (sum: any, r: any) => sum + r.precioVenta * r.unidadesConsumidas,
-          0
-        ) || 0;
-      console.log("totalRepuestos", totalRepuestos);
-      const totalReparaciones =
-        reparacionesTerceros?.reduce(
-          (sum: any, r: any) => sum + r.precioVenta,
-          0
-        ) || 0;
-      console.log("totalReparaciones", totalReparaciones);
-      const totalTrabajos =
-        trabajosRealizados?.reduce(
-          (sum: any, t: any) => sum + t.precioUnitario,
-          0
-        ) || 0;
-      console.log("totalTrabajos", totalTrabajos);
-
-      return totalRepuestos + totalReparaciones + totalTrabajos;
-    };
-
-    setValue("montoTotalCliente", calcularMontoTotal());
-  }, [
-    isEditing,
-    repuestosUsados,
-    reparacionesTerceros,
-    trabajosRealizados,
-    setValue,
-  ]);
 
   useEffect(() => {
     setIsEditing(true);
@@ -745,12 +707,12 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
           </Grid>
           <Grid item xs={12}>
             <Controller
-              name="montoTotalCliente"
+              name="manoDeObra"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Monto Total Cliente"
+                  label="Mano de obra"
                   type="number"
                   fullWidth
                   margin="normal"

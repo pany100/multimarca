@@ -300,8 +300,8 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           </Grid>
 
           <Grid item xs={12}>
-            <Typography variant="h6">Monto Total para el Cliente</Typography>
-            <Typography>${ordenReparacion.montoTotalCliente}</Typography>
+            <Typography variant="h6">Mano de obra</Typography>
+            <Typography>${ordenReparacion.manoDeObra}</Typography>
           </Grid>
         </Grid>
       </Paper>

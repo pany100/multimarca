@@ -138,7 +138,7 @@ function TrabajosRealizadosFormSection() {
                 <TableHead>
                   <TableRow>
                     <TableCell>Trabajo</TableCell>
-                    <TableCell>Precio Unitario</TableCell>
+                    <TableCell>Precio sugerido</TableCell>
                     <TableCell>Acciones</TableCell>
                   </TableRow>
                 </TableHead>

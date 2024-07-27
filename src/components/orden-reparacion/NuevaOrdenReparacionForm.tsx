@@ -108,10 +108,7 @@ const schema = yup.object().shape({
         .required("El proveedor es requerido"),
     })
   ),
-  montoTotalCliente: yup
-    .number()
-    .positive()
-    .required("El monto total es requerido"),
+  manoDeObra: yup.number().positive().required("El monto total es requerido"),
   observacionesEntrada: yup.string(),
 });
 
@@ -131,7 +128,7 @@ const NuevaOrdenReparacionForm = () => {
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      montoTotalCliente: 0,
+      manoDeObra: 0,
       estado: "Presupuestado",
       fechaCreacion: new Date().toISOString().split("T")[0],
     },
@@ -153,20 +150,13 @@ const NuevaOrdenReparacionForm = () => {
 
   useEffect(() => {
     const calcularMontoTotal = () => {
-      const totalRepuestos =
-        repuestosUsados?.reduce(
-          (sum, r) => sum + r.precioVenta * r.unidadesConsumidas,
-          0
-        ) || 0;
-      const totalReparaciones =
-        reparacionesTerceros?.reduce((sum, r) => sum + r.precioVenta, 0) || 0;
       const totalTrabajos =
         trabajosRealizados?.reduce((sum, t) => sum + t.precioUnitario, 0) || 0;
 
-      return totalRepuestos + totalReparaciones + totalTrabajos;
+      return totalTrabajos;
     };
 
-    setValue("montoTotalCliente", calcularMontoTotal());
+    setValue("manoDeObra", calcularMontoTotal());
   }, [repuestosUsados, reparacionesTerceros, trabajosRealizados, setValue]);
 
   const debouncedSearch = debounce(
@@ -420,12 +410,12 @@ const NuevaOrdenReparacionForm = () => {
           </Grid>
           <Grid item xs={12}>
             <Controller
-              name="montoTotalCliente"
+              name="manoDeObra"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Monto Total Cliente"
+                  label="Mano de obra Cliente"
                   type="number"
                   InputProps={{
                     readOnly: true,

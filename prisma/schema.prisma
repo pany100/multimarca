@@ -288,7 +288,7 @@ model OrdenReparacion {
   trabajosRealizados     TrabajoRealizado[]
   controlesEnReparacion  ControlEnReparacion[]
   pagos                  PagoAMecanico[]
-  montoTotalCliente      Decimal               @db.Decimal(10, 2)
+  manoDeObra             Decimal               @db.Decimal(10, 2)
   ingresos               IngresoPorReparacion[]
 
   @@index([autoId])

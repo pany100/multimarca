@@ -75,7 +75,7 @@ function WorkDescription({ repair }: Props) {
         variant="body1"
         sx={{ color: "common.black", textAlign: "right" }}
       >
-        ${repair.montoTotalCliente}
+        ${repair.manoDeObra}
       </Typography>
     </Box>
   );

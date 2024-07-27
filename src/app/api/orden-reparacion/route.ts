@@ -79,7 +79,7 @@ export async function POST(request: Request) {
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
-      montoTotalCliente,
+      manoDeObra,
     } = body;
 
     // Validar que los repuestos usados no excedan el stock actual
@@ -162,7 +162,7 @@ export async function POST(request: Request) {
         observacionesSalida,
         estado,
         pdfPath,
-        montoTotalCliente: new Prisma.Decimal(montoTotalCliente),
+        manoDeObra: new Prisma.Decimal(manoDeObra),
         mecanicos: {
           connect: mecanicos.map(({ id }: { id: number }) => ({ id })),
         },
