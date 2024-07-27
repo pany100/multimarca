@@ -4,13 +4,16 @@ import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
 import {
-  Autocomplete,
   Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
   Table,
   TableBody,
   TableCell,
@@ -33,10 +36,9 @@ interface OrdenDeCompra {
   };
   items: Array<{
     id: string;
-    cantidad: number;
-    stockId: number;
+    cantidad: number | null;
+    stockId: number | string;
     stock: {
-      id: number; // Añadir esta línea
       name: string;
     };
   }>;
@@ -45,11 +47,18 @@ interface OrdenDeCompra {
 const OrdenDeCompraPage = () => {
   const [items, setItems] = useState<OrdenDeCompra["items"]>([]);
   const [openModal, setOpenModal] = useState(false);
-  const [newItem, setNewItem] = useState({
+  const [newItem, setNewItem] = useState<{
+    id: string;
+    cantidad: number | null;
+    stockId: number | string;
+    stock: {
+      name: string;
+    };
+  }>({
     id: "",
     stockId: 0,
-    stock: { id: 0, name: "" },
-    cantidad: 0,
+    stock: { name: "" },
+    cantidad: null,
   });
   const [proveedorId, setProveedorId] = useState<number | null>(null);
   const [stockOptions, setStockOptions] = useState<
@@ -58,8 +67,25 @@ const OrdenDeCompraPage = () => {
   const { authFetch } = useFetch();
 
   useEffect(() => {
+    const searchStock = async () => {
+      if (proveedorId) {
+        const response = await authFetch(
+          `/api/proveedores/${proveedorId}/stock?&page=0&size=100`
+        );
+        const data = await response.json();
+        const results = data.items.map(
+          (stock: { name: string; id: number }) => ({
+            id: stock.id,
+            name: stock.name,
+          })
+        );
+        setStockOptions(results);
+      }
+    };
+
     setItems([]);
-  }, [proveedorId]);
+    searchStock();
+  }, [proveedorId, authFetch]);
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
@@ -108,20 +134,6 @@ const OrdenDeCompraPage = () => {
       flex: 1.5,
     },
   ];
-
-  const searchStock = async (query: string) => {
-    if (proveedorId) {
-      const response = await authFetch(
-        `/api/proveedores/${proveedorId}/stock?query=${query}&page=0&size=10`
-      );
-      const data = await response.json();
-      const results = data.items.map((stock: { name: string; id: number }) => ({
-        id: stock.id,
-        name: stock.name,
-      }));
-      setStockOptions(results);
-    }
-  };
 
   const formFields: FieldConfig[] = [
     { name: "fecha", label: "Fecha", type: "date" },
@@ -220,7 +232,7 @@ const OrdenDeCompraPage = () => {
               <Button
                 variant="outlined"
                 onClick={() => setOpenModal(true)}
-                disabled={proveedorId === 0}
+                disabled={!proveedorId}
               >
                 Agregar Item
               </Button>
@@ -238,26 +250,44 @@ const OrdenDeCompraPage = () => {
               <DialogTitle>Agregar Nuevo Item</DialogTitle>
               <DialogContent>
                 <Box sx={{ mb: 3 }}>
-                  <Autocomplete
-                    options={stockOptions || []}
-                    getOptionLabel={(option: { name: string; id: number }) =>
-                      option.name
-                    }
-                    renderInput={(params) => (
-                      <TextField {...params} label="Stock" />
-                    )}
-                    value={newItem.stock}
-                    onChange={(_, newValue) => {
-                      setNewItem({
-                        ...newItem,
-                        stockId: newValue?.id ?? 0,
-                        stock: newValue ?? { id: 0, name: "" },
-                      });
-                    }}
-                    onInputChange={(_, newInputValue) => {
-                      searchStock(newInputValue);
-                    }}
-                  />
+                  <FormControl key="stockId" fullWidth margin="normal">
+                    <InputLabel>Stock</InputLabel>
+                    <Select
+                      label="Stock"
+                      value={newItem.stockId}
+                      onChange={(e) => {
+                        const selectedOption = stockOptions.find(
+                          (option) => option.id === e.target.value
+                        );
+                        setNewItem({
+                          ...newItem,
+                          stockId: Number(e.target.value),
+                          stock: {
+                            name: selectedOption ? selectedOption.name : "",
+                          },
+                        });
+                      }}
+                      fullWidth
+                      displayEmpty
+                      renderValue={(selected) => {
+                        if (selected === 0) {
+                          return <em>Seleccionar elemento</em>;
+                        }
+                        return stockOptions.find(
+                          (option) => option.id === selected
+                        )?.name;
+                      }}
+                    >
+                      <MenuItem disabled value={0}>
+                        <em>Elemento</em>
+                      </MenuItem>
+                      {stockOptions.map((option) => (
+                        <MenuItem key={option.id} value={option.id}>
+                          {option.name}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Box>
                 <TextField
                   label="Unidades"
@@ -283,12 +313,12 @@ const OrdenDeCompraPage = () => {
                     setNewItem({
                       id: "",
                       stockId: 0,
-                      stock: { id: 0, name: "" },
-                      cantidad: 0,
+                      stock: { name: "" },
+                      cantidad: null,
                     });
                   }}
                   variant="contained"
-                  disabled={newItem.stockId === 0 || newItem.cantidad === 0}
+                  disabled={newItem.stockId === 0 || newItem.cantidad === null}
                 >
                   Agregar
                 </Button>
