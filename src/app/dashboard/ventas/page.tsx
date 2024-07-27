@@ -5,6 +5,7 @@ import { FieldConfig } from "@/components/DynamicForm";
 import authFetch from "@/utils/authFetch";
 import {
   Autocomplete,
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -31,7 +32,7 @@ interface Venta {
   };
   items: Array<{
     id: string;
-    cantidad: number;
+    cantidad: number | null;
     stockId: number;
     stock: {
       id: number;
@@ -44,11 +45,16 @@ interface Venta {
 const VentasPage = () => {
   const [items, setItems] = useState<Venta["items"]>([]);
   const [openModal, setOpenModal] = useState(false);
-  const [newItem, setNewItem] = useState({
+  const [newItem, setNewItem] = useState<{
+    id: string;
+    stockId: number;
+    stock: { id: number; name: string; price: number };
+    cantidad: number | null;
+  }>({
     id: "",
     stockId: 0,
     stock: { id: 0, name: "", price: 0 },
-    cantidad: 0,
+    cantidad: null,
   });
   const [stockOptions, setStockOptions] = useState<
     Array<{ id: number; name: string; price: number }>
@@ -110,8 +116,15 @@ const VentasPage = () => {
   };
 
   const formFields: FieldConfig[] = [
-    { name: "fecha", label: "Fecha", type: "date" },
-    { name: "total", label: "Total", type: "number" },
+    {
+      name: "fecha",
+      label: "Fecha",
+      type: "date",
+      layout: {
+        xs: 6,
+      },
+    },
+
     {
       name: "clienteId",
       label: "Cliente",
@@ -130,6 +143,9 @@ const VentasPage = () => {
         value: venta.clienteId,
         label: venta.cliente?.fullName || "",
       }),
+      layout: {
+        xs: 6,
+      },
     },
     {
       name: "items",
@@ -147,59 +163,85 @@ const VentasPage = () => {
                 <TableRow>
                   <TableCell>Stock</TableCell>
                   <TableCell>Cantidad</TableCell>
+                  <TableCell>Acciones</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.stock.name}</TableCell>
-                    <TableCell>{item.cantidad}</TableCell>
-                    <TableCell>
-                      <Button
-                        onClick={() => {
-                          const newItems = items.filter((i) => i !== item);
-                          setItems(newItems);
-                          onChange(newItems);
-                        }}
-                      >
-                        Eliminar
-                      </Button>
-                    </TableCell>
+                {items.length > 0 ? (
+                  items.map((item) => (
+                    <TableRow key={item.id}>
+                      <TableCell>{item.stock.name}</TableCell>
+                      <TableCell>{item.cantidad}</TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => {
+                            const newItems = items.filter((i) => i !== item);
+                            setItems(newItems);
+                            onChange(newItems);
+                          }}
+                        >
+                          Eliminar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell>---</TableCell>
+                    <TableCell>---</TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
             {error && <Typography color="error">{error}</Typography>}
-            <Button variant="contained" onClick={() => setOpenModal(true)}>
-              Agregar Item
-            </Button>
-            <Dialog open={openModal} onClose={() => setOpenModal(false)}>
+            <Box
+              sx={{ display: "flex", justifyContent: "flex-end", mt: 2, mb: 2 }}
+            >
+              <Button variant="contained" onClick={() => setOpenModal(true)}>
+                Agregar Item
+              </Button>
+            </Box>
+            <Dialog
+              open={openModal}
+              onClose={() => setOpenModal(false)}
+              PaperProps={{
+                sx: {
+                  width: "400px",
+                  maxWidth: "100%",
+                },
+              }}
+            >
               <DialogTitle>Agregar Nuevo Item</DialogTitle>
               <DialogContent>
-                <Autocomplete
-                  options={stockOptions || []}
-                  getOptionLabel={(option: { name: string; id: number }) =>
-                    option.name
-                  }
-                  renderInput={(params) => (
-                    <TextField {...params} label="Stock" />
-                  )}
-                  value={newItem.stock}
-                  onChange={(_, newValue) => {
-                    setNewItem({
-                      ...newItem,
-                      stockId: newValue?.id ?? 0,
-                      stock: newValue ?? { id: 0, name: "", price: 0 },
-                    });
-                  }}
-                  onInputChange={(_, newInputValue) => {
-                    searchStock(newInputValue);
-                  }}
-                />
+                <Box sx={{ mb: 3, mt: 1 }}>
+                  <Autocomplete
+                    options={stockOptions || []}
+                    getOptionLabel={(option: { name: string; id: number }) =>
+                      option.name
+                    }
+                    renderInput={(params) => (
+                      <TextField {...params} label="Stock" />
+                    )}
+                    value={newItem.stock}
+                    onChange={(_, newValue) => {
+                      setNewItem({
+                        ...newItem,
+                        stockId: newValue?.id ?? 0,
+                        stock: newValue ?? { id: 0, name: "", price: 0 },
+                      });
+                    }}
+                    onInputChange={(_, newInputValue) => {
+                      searchStock(newInputValue);
+                    }}
+                  />
+                </Box>
                 <TextField
                   label="Unidades"
                   type="number"
                   value={newItem.cantidad}
+                  fullWidth
                   onChange={(e) => {
                     setNewItem({
                       ...newItem,
@@ -220,10 +262,10 @@ const VentasPage = () => {
                       id: "",
                       stockId: 0,
                       stock: { id: 0, name: "", price: 0 },
-                      cantidad: 0,
+                      cantidad: null,
                     });
                   }}
-                  disabled={newItem.stockId === 0 || newItem.cantidad === 0}
+                  disabled={newItem.stockId === 0 || !newItem.cantidad}
                 >
                   Agregar
                 </Button>
@@ -231,6 +273,14 @@ const VentasPage = () => {
             </Dialog>
           </>
         );
+      },
+    },
+    {
+      name: "total",
+      label: "Total",
+      type: "number",
+      layout: {
+        xs: 12,
       },
     },
   ];
