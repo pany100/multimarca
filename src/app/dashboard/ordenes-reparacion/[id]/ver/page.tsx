@@ -2,6 +2,7 @@
 import OrdenClientePdf from "@/components/orden-reparacion/pdf/OrdenClientePdf";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
 import { useFetch } from "@/contexts/FetchContext";
+import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import PrintIcon from "@mui/icons-material/Print";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import {
@@ -18,6 +19,7 @@ import {
   Grid,
   Paper,
   Snackbar,
+  TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
@@ -127,7 +129,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
         </Typography>
 
         <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Typography variant="h6">Información del Auto</Typography>
             <Box>
               <Typography>Marca: {ordenReparacion.auto.brand}</Typography>
@@ -137,7 +139,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
             </Box>
           </Grid>
 
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12} md={4}>
             <Typography variant="h6">Información del Cliente</Typography>
             <Box>
               <Typography>
@@ -149,37 +151,44 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
               <Typography>Email: {ordenReparacion.auto.owner.email}</Typography>
             </Box>
           </Grid>
-          <Grid item xs={12}>
-            <Typography variant="h6">Acciones</Typography>
-            <Box sx={{ display: "flex", gap: 2, mt: 2 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={handleMechanicOrderPrint}
-                startIcon={<PrintIcon />}
-              >
-                Imprimir orden para el mecánico
-              </Button>
-              <Button
-                variant="contained"
-                color="secondary"
-                onClick={handleClientOrderPrint}
-                startIcon={<PrintIcon />}
-              >
-                Imprimir orden para el cliente
-              </Button>
-              <Button
-                variant="contained"
-                color="success"
-                onClick={handleOpenConfirmModal}
-                startIcon={<WhatsAppIcon />}
-              >
-                Enviar orden por WhatsApp al cliente
-              </Button>
-            </Box>
+          <Grid item xs={12} md={4}>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <Button
+                  variant="contained"
+                  color="primary"
+                  onClick={handleMechanicOrderPrint}
+                  startIcon={<PrintIcon />}
+                >
+                  Imprimir orden para el mecánico
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  variant="contained"
+                  color="secondary"
+                  onClick={handleClientOrderPrint}
+                  startIcon={<PrintIcon />}
+                >
+                  Imprimir orden para el cliente
+                </Button>
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  variant="contained"
+                  color="success"
+                  onClick={handleOpenConfirmModal}
+                  startIcon={<WhatsAppIcon />}
+                >
+                  Enviar orden por WhatsApp al cliente
+                </Button>
+              </Grid>
+            </Grid>
           </Grid>
           <Grid item xs={12}>
-            <Typography variant="h6">Detalles de la Reparación</Typography>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Detalles de la Reparación
+            </Typography>
             <Box>
               <Typography>Estado: {ordenReparacion.estado}</Typography>
               <Typography>
@@ -196,22 +205,34 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                     ).toLocaleDateString()
                   : "N/A"}
               </Typography>
-              <Typography>Kilómetros: {ordenReparacion.kilometros}</Typography>
+              <Typography>
+                Kilómetros al entrar al taller: {ordenReparacion.kilometros}
+              </Typography>
               <Typography>
                 Observaciones del Cliente:{" "}
                 {ordenReparacion.observacionesCliente}
               </Typography>
               <Typography>
-                Observaciones de Entrada: {ordenReparacion.observacionesEntrada}
+                Observaciones de Entrada:{" "}
+                {JSON.parse(ordenReparacion.observacionesEntrada).join(", ")}
               </Typography>
               <Typography>
-                Observaciones de Salida: {ordenReparacion.observacionesSalida}
+                Observaciones de Salida:{" "}
+                {JSON.parse(ordenReparacion.observacionesSalida).join(", ")}
+              </Typography>
+              <Typography>
+                Mano de obra: ${ordenReparacion.manoDeObra}
+              </Typography>
+              <Typography>
+                Monto total: ${calcularTotalOrdenReparacion(ordenReparacion)}
               </Typography>
             </Box>
           </Grid>
 
           <Grid item xs={12}>
-            <Typography variant="h6">Mecánicos Asignados</Typography>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Mecánicos Asignados
+            </Typography>
             <Box>
               {ordenReparacion.mecanicos.map(
                 (mecanico: { id: string; name: string }) => (
@@ -222,17 +243,21 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           </Grid>
 
           <Grid item xs={12}>
-            <Typography variant="h6">Repuestos Usados</Typography>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Repuestos Usados
+            </Typography>
             <Box>
               {ordenReparacion.repuestosUsados.map(
                 (repuesto: {
                   id: string;
                   stock: { name: string };
                   unidadesConsumidas: number;
+                  precioVenta: number;
                 }) => (
                   <Typography key={repuesto.id}>
                     {repuesto.stock.name} - Cantidad:{" "}
-                    {repuesto.unidadesConsumidas}
+                    {repuesto.unidadesConsumidas} - Precio:{" "}
+                    {repuesto.precioVenta}
                   </Typography>
                 )
               )}
@@ -240,7 +265,9 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           </Grid>
 
           <Grid item xs={12}>
-            <Typography variant="h6">Reparaciones de Terceros</Typography>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Reparaciones de Terceros
+            </Typography>
             <Box>
               {ordenReparacion.reparacionesDeTercero.map(
                 (reparacion: {
@@ -257,7 +284,9 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           </Grid>
 
           <Grid item xs={12}>
-            <Typography variant="h6">Trabajos Realizados</Typography>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Trabajos Realizados
+            </Typography>
             <Box>
               {ordenReparacion.trabajosRealizados.map(
                 (trabajo: {
@@ -274,34 +303,72 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           </Grid>
 
           <Grid item xs={12}>
-            <Typography variant="h6">Controles en Reparación</Typography>
-            <Box>
-              {ordenReparacion.controlesEnReparacion.map(
-                (control: {
-                  id: string;
-                  controlMecanico: { name: string; type: string };
-                  valor: string;
-                }) => (
-                  <Box key={control.id} display="flex" alignItems="center">
-                    <Typography>{control.controlMecanico.name}:</Typography>
-                    {control.controlMecanico.type === "checkbox" ? (
-                      <Checkbox
-                        checked={Boolean(control.valor === "true")}
-                        disabled
-                        sx={{ ml: 1 }}
-                      />
-                    ) : (
-                      <Typography sx={{ ml: 1 }}>{control.valor}</Typography>
-                    )}
-                  </Box>
+            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+              Controles en Reparación
+            </Typography>
+            <Grid container spacing={2}>
+              {ordenReparacion.controlesEnReparacion
+                .filter(
+                  (control: { controlMecanico: { type: string } }) =>
+                    control.controlMecanico.type === "checkbox"
                 )
-              )}
-            </Box>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Typography variant="h6">Mano de obra</Typography>
-            <Typography>${ordenReparacion.manoDeObra}</Typography>
+                .map(
+                  (control: {
+                    id: string;
+                    controlMecanico: { name: string };
+                    valor: string;
+                  }) => (
+                    <Grid
+                      item
+                      xs={6}
+                      key={control.id}
+                      sx={{ pt: "0 !important" }}
+                    >
+                      <Box
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="space-between"
+                      >
+                        <Typography>{control.controlMecanico.name}</Typography>
+                        <Checkbox checked={control.valor === "true"} disabled />
+                      </Box>
+                    </Grid>
+                  )
+                )}
+              {ordenReparacion.controlesEnReparacion
+                .filter(
+                  (control: { controlMecanico: { type: string } }) =>
+                    control.controlMecanico.type !== "checkbox"
+                )
+                .map(
+                  (control: {
+                    id: string;
+                    controlMecanico: { name: string };
+                    valor: string;
+                  }) => (
+                    <Grid
+                      item
+                      xs={12}
+                      key={control.id}
+                      sx={{ pt: "0 !important" }}
+                    >
+                      <Box display="flex" alignItems="center">
+                        <Typography
+                          style={{ marginRight: "16px", minWidth: "120px" }}
+                        >
+                          {control.controlMecanico.name}
+                        </Typography>
+                        <TextField
+                          fullWidth
+                          value={control.valor || ""}
+                          disabled
+                          size="small"
+                        />
+                      </Box>
+                    </Grid>
+                  )
+                )}
+            </Grid>
           </Grid>
         </Grid>
       </Paper>

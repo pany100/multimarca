@@ -1,3 +1,4 @@
+import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import { Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { Fragment } from "react";
@@ -61,12 +62,7 @@ function WorkDescription({ repair }: Props) {
         variant="body1"
         sx={{ color: "common.black", textAlign: "right" }}
       >
-        $
-        {repair.trabajosRealizados.reduce(
-          (acc: number, curr: { precioUnitario: string }) =>
-            acc + parseInt(curr.precioUnitario),
-          0
-        )}
+        ${repair.manoDeObra}
       </Typography>
       <Typography variant="body1" sx={{ color: "common.black" }}>
         Importe Total:
@@ -75,7 +71,7 @@ function WorkDescription({ repair }: Props) {
         variant="body1"
         sx={{ color: "common.black", textAlign: "right" }}
       >
-        ${repair.manoDeObra}
+        ${calcularTotalOrdenReparacion(repair)}
       </Typography>
     </Box>
   );
