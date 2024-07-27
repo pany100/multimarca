@@ -20,24 +20,39 @@ interface Mecanico {
 
 const MecanicosPage = () => {
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "name", headerName: "Nombre", width: 150 },
-    { field: "dni", headerName: "DNI", width: 120 },
-    { field: "email", headerName: "Email", width: 200 },
-    { field: "phone", headerName: "Teléfono", width: 150 },
+    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "name", headerName: "Nombre", flex: 1 },
+    { field: "dni", headerName: "DNI", flex: 1 },
+    { field: "email", headerName: "Email", flex: 1.5 },
+    { field: "phone", headerName: "Teléfono", flex: 1 },
   ];
 
   const formFields: FieldConfig[] = [
-    { name: "name", label: "Nombre", type: "text" },
-    { name: "start_date", label: "Fecha de comienzo", type: "date" },
-    { name: "dni", label: "DNI", type: "text" },
-    { name: "address", label: "Dirección", type: "text" },
-    { name: "city", label: "Ciudad", type: "text" },
-    { name: "state", label: "Provincia", type: "text" },
-    { name: "postal_code", label: "Código Postal", type: "text" },
-    { name: "email", label: "Email", type: "email" },
-    { name: "phone", label: "Teléfono", type: "tel" },
-    { name: "birthday", label: "Fecha de Nacimiento", type: "date" },
+    { name: "name", label: "Nombre", type: "text", layout: { xs: 6 } },
+    { name: "dni", label: "DNI", type: "text", layout: { xs: 6 } },
+    {
+      name: "start_date",
+      label: "Fecha de comienzo",
+      type: "date",
+      layout: { xs: 4 },
+    },
+    { name: "address", label: "Dirección", type: "text", layout: { xs: 4 } },
+    { name: "city", label: "Ciudad", type: "text", layout: { xs: 4 } },
+    { name: "state", label: "Provincia", type: "text", layout: { xs: 4 } },
+    {
+      name: "postal_code",
+      label: "Código Postal",
+      type: "text",
+      layout: { xs: 4 },
+    },
+    { name: "phone", label: "Teléfono", type: "tel", layout: { xs: 4 } },
+    { name: "email", label: "Email", type: "email", layout: { xs: 6 } },
+    {
+      name: "birthday",
+      label: "Fecha de Nacimiento",
+      type: "date",
+      layout: { xs: 6 },
+    },
   ];
 
   const createNewMecanico = (): Mecanico => {

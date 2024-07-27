@@ -6,6 +6,7 @@ import {
   Checkbox,
   FormControl,
   FormHelperText,
+  Grid,
   InputLabel,
   ListItemText,
   MenuItem,
@@ -13,7 +14,7 @@ import {
   TextField,
 } from "@mui/material";
 import debounce from "lodash/debounce";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Controller,
   DefaultValues,
@@ -54,6 +55,13 @@ export interface FieldConfig {
   onChange?: (value: any, setValue: UseFormSetValue<any>) => void;
   hidden?: (item: any) => boolean;
   excludeFromSubmit?: boolean;
+  layout?: {
+    xs?: number;
+    sm?: number;
+    md?: number;
+    lg?: number;
+    xl?: number;
+  };
 }
 
 interface DynamicFormProps<T> {
@@ -138,244 +146,256 @@ function DynamicForm<T extends FieldValues>({
       initializedRef.current = true;
     }
   }, [item, fields]);
+  const renderField = (field: FieldConfig) => {
+    switch (field.type) {
+      case "custom":
+        if (field.render) {
+          return (
+            <Controller
+              key={field.name}
+              name={field.name as Path<T>}
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <div>
+                  {field.render &&
+                    field.render(
+                      value,
+                      (newValue) => {
+                        onChange(newValue);
+                        handleFieldChange(field.name as keyof T, newValue);
+                      },
+                      errors[field.name as Path<T>]?.message as
+                        | string
+                        | undefined
+                    )}
+                </div>
+              )}
+            />
+          );
+        }
+        return null;
+      case "date":
+        return (
+          <TextField
+            key={field.name}
+            fullWidth
+            margin="normal"
+            label={field.label}
+            {...register(field.name as Path<T>)}
+            error={!!errors[field.name as keyof T]}
+            helperText={errors[field.name as keyof T]?.message as string}
+            type="date"
+            InputLabelProps={{ shrink: true }}
+            value={
+              item?.[field.name as keyof T]
+                ? new Date(item[field.name as keyof T] as string)
+                    .toISOString()
+                    .split("T")[0]
+                : ""
+            }
+            onChange={(e) =>
+              handleFieldChange(field.name as keyof T, e.target.value)
+            }
+          />
+        );
+      case "tel":
+        return (
+          <TextField
+            key={field.name}
+            fullWidth
+            margin="normal"
+            label={field.label}
+            {...register(field.name as Path<T>)}
+            error={!!errors[field.name as keyof T]}
+            helperText={errors[field.name as keyof T]?.message as string}
+            type="tel"
+            value={item?.[field.name as keyof T] || ""}
+            onChange={(e) =>
+              handleFieldChange(field.name as keyof T, e.target.value)
+            }
+            inputProps={{
+              pattern: "[0-9]{9,12}", // Patrón para números de teléfono entre 9 y 12 dígitos
+              inputMode: "numeric",
+            }}
+          />
+        );
+      case "select":
+        return (
+          <FormControl
+            key={field.name}
+            fullWidth
+            margin="normal"
+            error={!!errors[field.name as Path<T>]}
+          >
+            <InputLabel>{field.label}</InputLabel>
+            <Select
+              value={
+                item?.[field.name as keyof T] ||
+                (field.getInitialValue && item
+                  ? field.getInitialValue(item).value
+                  : "")
+              }
+              {...register(field.name as Path<T>)}
+              onChange={(e) =>
+                handleFieldChange(field.name as keyof T, e.target.value)
+              }
+              label={field.label}
+            >
+              {(typeof field.options === "function"
+                ? field.options(item)
+                : field.options
+              )?.map((option) => (
+                <MenuItem key={option.value} value={option.value}>
+                  {option.label}
+                </MenuItem>
+              ))}
+            </Select>
+            <FormHelperText>
+              {errors[field.name as Path<T>]?.message as string}
+            </FormHelperText>
+          </FormControl>
+        );
+      case "autocomplete":
+        return (
+          <Controller
+            name={field.name as Path<T>}
+            control={control}
+            render={({ field: { onChange, value } }) => (
+              <Autocomplete
+                options={autocompleteOptions[field.name] || []}
+                getOptionLabel={(option) => option?.label || ""}
+                value={
+                  value
+                    ? autocompleteOptions[field.name]?.find(
+                        (option) => option.value === value
+                      ) || null
+                    : null
+                }
+                defaultValue={field.getInitialValue?.(item) || null}
+                onChange={(_, newValue) => {
+                  onChange(newValue?.value || null);
+                  handleFieldChange(
+                    field.name as keyof T,
+                    newValue?.value || null
+                  );
+                }}
+                onInputChange={(_, newInputValue) => {
+                  debouncedSearch(
+                    field,
+                    newInputValue,
+                    (options: { value: string; label: string }[]) => {
+                      setAutocompleteOptions((prev) => ({
+                        ...prev,
+                        [field.name]: options,
+                      }));
+                    }
+                  );
+                }}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label={field.label}
+                    error={!!errors[field.name as Path<T>]}
+                    helperText={
+                      errors[field.name as Path<T>]?.message as string
+                    }
+                  />
+                )}
+                isOptionEqualToValue={(option, value) =>
+                  option?.value === value?.value
+                }
+                loadingText="Buscando..."
+                noOptionsText="No se encontraron resultados"
+              />
+            )}
+          />
+        );
+      case "multiselect":
+        return (
+          <FormControl
+            key={field.name}
+            fullWidth
+            margin="normal"
+            error={!!errors[field.name as Path<T>]}
+          >
+            <InputLabel>{field.label}</InputLabel>
+            <Select
+              multiple
+              {...register(field.name as Path<T>)}
+              value={item?.[field.name as keyof T] || []}
+              onChange={(e) =>
+                handleFieldChange(field.name as keyof T, e.target.value)
+              }
+              label={field.label}
+              renderValue={(selected) => (selected as string[]).join(", ")}
+            >
+              {(typeof field.options === "function"
+                ? field.options(item)
+                : field.options
+              )?.map((option: Record<string, string | number>) => {
+                const value = option[field.valueKey || "value"];
+                const label = option[field.labelKey || "label"];
+                return (
+                  <MenuItem key={value} value={value}>
+                    <Checkbox
+                      checked={
+                        Array.isArray(item?.[field.name as keyof T]) &&
+                        (item?.[field.name as keyof T] as any[]).some(
+                          (itemValue) =>
+                            itemValue.toString() === value.toString()
+                        )
+                      }
+                    />
+                    <ListItemText primary={label} />
+                  </MenuItem>
+                );
+              })}
+            </Select>
+            <FormHelperText>
+              {errors[field.name as Path<T>]?.message as string}
+            </FormHelperText>
+          </FormControl>
+        );
+      default:
+        return (
+          <TextField
+            key={field.name}
+            fullWidth
+            margin="normal"
+            {...register(field.name as Path<T>)}
+            error={!!errors[field.name as keyof T]}
+            helperText={errors[field.name as keyof T]?.message as string}
+            label={field.label}
+            type={field.type}
+            value={item?.[field.name as keyof T] || ""}
+            onChange={(e) =>
+              handleFieldChange(field.name as keyof T, e.target.value)
+            }
+          />
+        );
+    }
+  };
   return (
     <Box
       component="form"
       onSubmit={handleSubmit(onSubmitHandler)}
       sx={{ mt: 2 }}
     >
-      {fields.map((field) => {
-        if (field.hidden && typeof field.hidden === "function" && item) {
-          if (field.hidden(item)) return null;
-        }
-        switch (field.type) {
-          case "custom":
-            if (field.render) {
-              return (
-                <Controller
-                  key={field.name}
-                  name={field.name as Path<T>}
-                  control={control}
-                  render={({ field: { onChange, value } }) => (
-                    <div>
-                      {field.render &&
-                        field.render(
-                          value,
-                          (newValue) => {
-                            onChange(newValue);
-                            handleFieldChange(field.name as keyof T, newValue);
-                          },
-                          errors[field.name as Path<T>]?.message as
-                            | string
-                            | undefined
-                        )}
-                    </div>
-                  )}
-                />
-              );
-            }
-            return null;
-          case "date":
-            return (
-              <TextField
-                key={field.name}
-                fullWidth
-                margin="normal"
-                label={field.label}
-                {...register(field.name as Path<T>)}
-                error={!!errors[field.name as keyof T]}
-                helperText={errors[field.name as keyof T]?.message as string}
-                type="date"
-                InputLabelProps={{ shrink: true }}
-                value={
-                  item?.[field.name as keyof T]
-                    ? new Date(item[field.name as keyof T] as string)
-                        .toISOString()
-                        .split("T")[0]
-                    : ""
-                }
-                onChange={(e) =>
-                  handleFieldChange(field.name as keyof T, e.target.value)
-                }
-              />
-            );
-          case "tel":
-            return (
-              <TextField
-                key={field.name}
-                fullWidth
-                margin="normal"
-                label={field.label}
-                {...register(field.name as Path<T>)}
-                error={!!errors[field.name as keyof T]}
-                helperText={errors[field.name as keyof T]?.message as string}
-                type="tel"
-                value={item?.[field.name as keyof T] || ""}
-                onChange={(e) =>
-                  handleFieldChange(field.name as keyof T, e.target.value)
-                }
-                inputProps={{
-                  pattern: "[0-9]{9,12}", // Patrón para números de teléfono entre 9 y 12 dígitos
-                  inputMode: "numeric",
-                }}
-              />
-            );
-          case "select":
-            return (
-              <FormControl
-                key={field.name}
-                fullWidth
-                margin="normal"
-                error={!!errors[field.name as Path<T>]}
-              >
-                <InputLabel>{field.label}</InputLabel>
-                <Select
-                  value={
-                    item?.[field.name as keyof T] ||
-                    (field.getInitialValue && item
-                      ? field.getInitialValue(item).value
-                      : "")
-                  }
-                  {...register(field.name as Path<T>)}
-                  onChange={(e) =>
-                    handleFieldChange(field.name as keyof T, e.target.value)
-                  }
-                  label={field.label}
-                >
-                  {(typeof field.options === "function"
-                    ? field.options(item)
-                    : field.options
-                  )?.map((option) => (
-                    <MenuItem key={option.value} value={option.value}>
-                      {option.label}
-                    </MenuItem>
-                  ))}
-                </Select>
-                <FormHelperText>
-                  {errors[field.name as Path<T>]?.message as string}
-                </FormHelperText>
-              </FormControl>
-            );
-          case "autocomplete":
-            return (
-              <Controller
-                name={field.name as Path<T>}
-                control={control}
-                render={({ field: { onChange, value } }) => (
-                  <Autocomplete
-                    options={autocompleteOptions[field.name] || []}
-                    getOptionLabel={(option) => option?.label || ""}
-                    value={
-                      value
-                        ? autocompleteOptions[field.name]?.find(
-                            (option) => option.value === value
-                          ) || null
-                        : null
-                    }
-                    defaultValue={field.getInitialValue?.(item) || null}
-                    onChange={(_, newValue) => {
-                      onChange(newValue?.value || null);
-                      handleFieldChange(
-                        field.name as keyof T,
-                        newValue?.value || null
-                      );
-                    }}
-                    onInputChange={(_, newInputValue) => {
-                      debouncedSearch(
-                        field,
-                        newInputValue,
-                        (options: { value: string; label: string }[]) => {
-                          setAutocompleteOptions((prev) => ({
-                            ...prev,
-                            [field.name]: options,
-                          }));
-                        }
-                      );
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label={field.label}
-                        error={!!errors[field.name as Path<T>]}
-                        helperText={
-                          errors[field.name as Path<T>]?.message as string
-                        }
-                      />
-                    )}
-                    isOptionEqualToValue={(option, value) =>
-                      option?.value === value?.value
-                    }
-                    loadingText="Buscando..."
-                    noOptionsText="No se encontraron resultados"
-                  />
-                )}
-              />
-            );
-          case "multiselect":
-            return (
-              <FormControl
-                key={field.name}
-                fullWidth
-                margin="normal"
-                error={!!errors[field.name as Path<T>]}
-              >
-                <InputLabel>{field.label}</InputLabel>
-                <Select
-                  multiple
-                  {...register(field.name as Path<T>)}
-                  value={item?.[field.name as keyof T] || []}
-                  onChange={(e) =>
-                    handleFieldChange(field.name as keyof T, e.target.value)
-                  }
-                  label={field.label}
-                  renderValue={(selected) => (selected as string[]).join(", ")}
-                >
-                  {(typeof field.options === "function"
-                    ? field.options(item)
-                    : field.options
-                  )?.map((option: Record<string, string | number>) => {
-                    const value = option[field.valueKey || "value"];
-                    const label = option[field.labelKey || "label"];
-                    return (
-                      <MenuItem key={value} value={value}>
-                        <Checkbox
-                          checked={
-                            Array.isArray(item?.[field.name as keyof T]) &&
-                            (item?.[field.name as keyof T] as any[]).some(
-                              (itemValue) =>
-                                itemValue.toString() === value.toString()
-                            )
-                          }
-                        />
-                        <ListItemText primary={label} />
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-                <FormHelperText>
-                  {errors[field.name as Path<T>]?.message as string}
-                </FormHelperText>
-              </FormControl>
-            );
-          default:
-            return (
-              <TextField
-                key={field.name}
-                fullWidth
-                margin="normal"
-                {...register(field.name as Path<T>)}
-                error={!!errors[field.name as keyof T]}
-                helperText={errors[field.name as keyof T]?.message as string}
-                label={field.label}
-                type={field.type}
-                value={item?.[field.name as keyof T] || ""}
-                onChange={(e) =>
-                  handleFieldChange(field.name as keyof T, e.target.value)
-                }
-              />
-            );
-        }
-      })}
+      <Grid container spacing={2}>
+        {fields.map((field) => {
+          if (field.hidden && typeof field.hidden === "function" && item) {
+            if (field.hidden(item)) return null;
+          }
+          const gridProps = field.layout || { xs: 12 };
+          return (
+            <React.Fragment key={field.name}>
+              <Grid item {...gridProps} sx={{ pt: "0 !important" }}>
+                {renderField(field)}
+              </Grid>
+            </React.Fragment>
+          );
+        })}
+      </Grid>
       <Button type="submit" variant="contained" sx={{ mt: 2 }}>
         Guardar
       </Button>
