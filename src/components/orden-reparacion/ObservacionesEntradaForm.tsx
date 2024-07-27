@@ -2,7 +2,7 @@ import { useFetch } from "@/contexts/FetchContext";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Button,
-  Grid,
+  Divider,
   IconButton,
   List,
   ListItem,
@@ -69,7 +69,7 @@ const ObservacionesEntradaForm = () => {
     return null;
   }
   return (
-    <Grid item xs={12} sx={{ mb: 2 }}>
+    <>
       <Typography variant="h6" sx={{ mb: 0 }}>
         Observaciones de entrada
       </Typography>
@@ -169,9 +169,10 @@ const ObservacionesEntradaForm = () => {
               )
             )}
           </List>
+          <Divider sx={{ mt: 2 }} />
         </>
       )}
-    </Grid>
+    </>
   );
 };
 

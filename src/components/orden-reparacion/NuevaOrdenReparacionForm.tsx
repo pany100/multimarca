@@ -401,9 +401,15 @@ const NuevaOrdenReparacionForm = () => {
               )}
             />
           </Grid>
-          <ObservacionesEntradaForm />
-          <MecanicoFormSection />
-          <RepuestoUsadoFormSection />
+          <Grid item xs={12}>
+            <ObservacionesEntradaForm />
+          </Grid>
+          <Grid item xs={12}>
+            <MecanicoFormSection />
+          </Grid>
+          <Grid item xs={12}>
+            <RepuestoUsadoFormSection />
+          </Grid>
           <ReparacionesTercerosFormSection />
           <TrabajosRealizadosFormSection />
           <Controller

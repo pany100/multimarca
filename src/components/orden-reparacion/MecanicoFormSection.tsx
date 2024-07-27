@@ -2,11 +2,13 @@ import { useFetch } from "@/contexts/FetchContext";
 import {
   Alert,
   Autocomplete,
+  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Snackbar,
   Table,
   TableBody,
@@ -21,7 +23,6 @@ import { Controller, useFormContext } from "react-hook-form";
 
 function MecanicoFormSection() {
   const { control, getValues, setValue } = useFormContext();
-  const { authFetch } = useFetch();
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -36,6 +37,7 @@ function MecanicoFormSection() {
   const [mecanicoOptions, setMecanicoOptions] = useState<
     Array<{ id: number; name: string }>
   >([]);
+  const { authFetch } = useFetch();
 
   const searchMecanicos = async (query: string) => {
     const response = await authFetch(
@@ -91,44 +93,54 @@ function MecanicoFormSection() {
         rules={{ required: "Debe seleccionar al menos un mecánico" }}
         render={({ field, fieldState: { error } }) => (
           <>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Mecánico</TableCell>
-                  <TableCell>Acciones</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {field.value?.map((mecanico: { id: number; name: string }) => (
-                  <TableRow key={mecanico.id}>
-                    <TableCell>{mecanico.name}</TableCell>
-                    <TableCell>
-                      <Button
-                        onClick={() => {
-                          handleRemoveMecanico(mecanico.id);
-                        }}
-                      >
-                        Eliminar
-                      </Button>
-                    </TableCell>
+            {field.value && field.value.length > 0 ? (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Mecánico</TableCell>
+                    <TableCell>Acciones</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {field.value.map((mecanico: { id: number; name: string }) => (
+                    <TableRow key={mecanico.id}>
+                      <TableCell>{mecanico.name}</TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => {
+                            handleRemoveMecanico(mecanico.id);
+                          }}
+                        >
+                          Eliminar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <Typography>No hay mecánicos asignados</Typography>
+            )}
             {error && <Typography color="error">{error.message}</Typography>}
-            <Button
-              onClick={() => setOpenMecanicoModal(true)}
-              variant="contained"
-              color="secondary"
-            >
-              Agregar Mecánico
-            </Button>
+            <Box display="flex" justifyContent="flex-end" mt={2}>
+              <Button
+                onClick={() => setOpenMecanicoModal(true)}
+                variant="contained"
+              >
+                Agregar Mecánico
+              </Button>
+            </Box>
           </>
         )}
       />
       <Dialog
         open={openMecanicoModal}
         onClose={() => setOpenMecanicoModal(false)}
+        PaperProps={{
+          style: {
+            minWidth: "350px",
+          },
+        }}
       >
         <DialogTitle>Agregar Mecánico</DialogTitle>
         <DialogContent>
@@ -143,6 +155,7 @@ function MecanicoFormSection() {
             onInputChange={(_, newInputValue) => {
               searchMecanicos(newInputValue);
             }}
+            sx={{ mt: 2 }}
           />
         </DialogContent>
         <DialogActions>
@@ -167,6 +180,7 @@ function MecanicoFormSection() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <Divider sx={{ mt: 2 }} />
     </>
   );
 }
