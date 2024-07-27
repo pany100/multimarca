@@ -1,17 +1,21 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { yupResolver } from "@hookform/resolvers/yup";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Alert,
   Autocomplete,
   Box,
   Button,
-  Chip,
+  Divider,
   FormControl,
   Grid,
+  IconButton,
+  List,
+  ListItem,
+  ListItemText,
   MenuItem,
   Paper,
   Snackbar,
-  Stack,
   TextField,
   Typography,
 } from "@mui/material";
@@ -611,125 +615,154 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
           <Grid item xs={12}>
             <TrabajosRealizadosFormSection />
           </Grid>
-          <Controller
-            name="controlesEnReparacion"
-            control={control}
-            render={() => (
-              <>
-                <ControlesEnReparacionForm
-                  controlesMecanicos={ordenReparacion.controlesEnReparacion.map(
-                    (control) => ({
-                      id: control.id,
-                      nombre: control.controlMecanico.name,
-                      tipo:
-                        control.controlMecanico.type === "checkbox"
-                          ? "checkbox"
-                          : "texto",
-                      valor: control.valor,
-                    })
+          <Grid item xs={12}>
+            <Controller
+              name="controlesEnReparacion"
+              control={control}
+              render={() => (
+                <>
+                  <ControlesEnReparacionForm
+                    controlesMecanicos={ordenReparacion.controlesEnReparacion.map(
+                      (control) => ({
+                        id: control.id,
+                        nombre: control.controlMecanico.name,
+                        tipo:
+                          control.controlMecanico.type === "checkbox"
+                            ? "checkbox"
+                            : "texto",
+                        valor: control.valor,
+                      })
+                    )}
+                  />
+                  {!!errors.controlesEnReparacion && (
+                    <Alert severity="error" sx={{ mt: 1 }}>
+                      {errors.controlesEnReparacion.message}
+                    </Alert>
                   )}
-                />
-                {!!errors.controlesEnReparacion && (
-                  <Alert severity="error" sx={{ mt: 1 }}>
-                    {errors.controlesEnReparacion.message}
-                  </Alert>
-                )}
-              </>
-            )}
-          />
-          <Box sx={{ mt: 2, mb: 2 }}>
-            <Paper
-              {...getRootProps()}
-              sx={{
-                p: 2,
-                border: "2px dashed",
-                borderColor: isDragActive ? "primary.main" : "grey.300",
-                backgroundColor: isDragActive
-                  ? "action.hover"
-                  : "background.paper",
-                cursor: "pointer",
-              }}
-            >
-              <input {...getInputProps()} />
-              {selectedFile ? (
-                <Box>
-                  <Typography>
-                    Archivo seleccionado: {selectedFile.name}
-                  </Typography>
-                  <Box
-                    component="iframe"
-                    src={URL.createObjectURL(selectedFile)}
-                    width="100%"
-                    height="300px"
-                  />
-                </Box>
-              ) : ordenReparacion.pdfPath ? (
-                <Box>
-                  <Typography>
-                    PDF actual: {ordenReparacion.pdfPath.split("/").pop()}
-                  </Typography>
-                  <Box
-                    component="iframe"
-                    src={ordenReparacion.pdfPath}
-                    width="100%"
-                    height="300px"
-                  />
-                  <Typography variant="caption" sx={{ mt: 1 }}>
-                    Arrastra un nuevo archivo para reemplazar el PDF actual
-                  </Typography>
-                </Box>
-              ) : (
-                <Typography>
-                  {isDragActive
-                    ? "Suelta el archivo PDF aquí..."
-                    : "Arrastra y suelta un archivo PDF aquí, o haz clic para seleccionar uno"}
-                </Typography>
+                </>
               )}
-            </Paper>
-          </Box>
-          <TextField
-            label="Nueva observación de salida"
-            value={observacionSalida}
-            onChange={(e) => setObservacionSalida(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
-          <Button onClick={handleAddObservacionSalida} variant="outlined">
-            Agregar observación
-          </Button>
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Box>
+              <Paper
+                {...getRootProps()}
+                sx={{
+                  p: 2,
+                  border: "2px dashed",
+                  borderColor: isDragActive ? "primary.main" : "grey.300",
+                  backgroundColor: isDragActive
+                    ? "action.hover"
+                    : "background.paper",
+                  cursor: "pointer",
+                }}
+              >
+                <input {...getInputProps()} />
+                {selectedFile ? (
+                  <Box>
+                    <Typography>
+                      Archivo seleccionado: {selectedFile.name}
+                    </Typography>
+                    <Box
+                      component="iframe"
+                      src={URL.createObjectURL(selectedFile)}
+                      width="100%"
+                      height="300px"
+                    />
+                  </Box>
+                ) : ordenReparacion.pdfPath ? (
+                  <Box>
+                    <Typography>
+                      PDF actual: {ordenReparacion.pdfPath.split("/").pop()}
+                    </Typography>
+                    <Box
+                      component="iframe"
+                      src={ordenReparacion.pdfPath}
+                      width="100%"
+                      height="300px"
+                    />
+                    <Typography variant="caption" sx={{ mt: 1 }}>
+                      Arrastra un nuevo archivo para reemplazar el PDF actual
+                    </Typography>
+                  </Box>
+                ) : (
+                  <Typography>
+                    {isDragActive
+                      ? "Suelta el archivo PDF aquí..."
+                      : "Arrastra y suelta un archivo PDF aquí, o haz clic para seleccionar uno"}
+                  </Typography>
+                )}
+              </Paper>
+            </Box>
+            <Divider sx={{ mt: 2 }} />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Nueva observación de salida"
+              value={observacionSalida}
+              onChange={(e) => setObservacionSalida(e.target.value)}
+              fullWidth
+              margin="normal"
+            />
 
-          <Controller
-            name="observacionesSalida"
-            control={control}
-            render={({ field }) => (
-              <Stack direction="row" spacing={1} flexWrap="wrap" marginTop={2}>
-                {JSON.parse(field.value)?.map((obs: string, index: number) => (
-                  <Chip
-                    key={index}
-                    label={obs}
-                    onDelete={() => handleDeleteObservacionSalida(index)}
-                  />
-                ))}
-              </Stack>
-            )}
-          />
-          <Controller
-            name="montoTotalCliente"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Monto Total Cliente"
-                type="number"
-                fullWidth
-                margin="normal"
-              />
-            )}
-          />
-
-          <Button type="submit" variant="contained" color="primary">
-            Actualizar Orden de Reparación
-          </Button>
+            <Button onClick={handleAddObservacionSalida} variant="outlined">
+              Agregar observación
+            </Button>
+            <Controller
+              name="observacionesSalida"
+              control={control}
+              render={({ field }) => (
+                <List sx={{ mt: 0, py: 0 }}>
+                  {JSON.parse(field.value || "[]").map(
+                    (obs: string, index: number) => (
+                      <ListItem
+                        key={index}
+                        secondaryAction={
+                          <IconButton
+                            edge="end"
+                            aria-label="delete"
+                            onClick={() => handleDeleteObservacionSalida(index)}
+                          >
+                            <DeleteIcon />
+                          </IconButton>
+                        }
+                        sx={{ py: 0.0 }}
+                      >
+                        <ListItemText
+                          primary={
+                            <Typography variant="body2" sx={{ my: 0 }}>
+                              ◦ {obs}
+                            </Typography>
+                          }
+                        />
+                      </ListItem>
+                    )
+                  )}
+                </List>
+              )}
+            />
+            <Divider sx={{ mt: 2 }} />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
+              name="montoTotalCliente"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Monto Total Cliente"
+                  type="number"
+                  fullWidth
+                  margin="normal"
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Button type="submit" variant="contained" color="primary">
+              Actualizar Orden de Reparación
+            </Button>
+          </Grid>
         </Grid>
       </form>
       <Snackbar
