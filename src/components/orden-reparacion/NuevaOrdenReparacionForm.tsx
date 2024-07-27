@@ -4,6 +4,8 @@ import {
   Alert,
   Autocomplete,
   Button,
+  FormControl,
+  Grid,
   MenuItem,
   Snackbar,
   TextField,
@@ -21,7 +23,7 @@ import TrabajosRealizadosFormSection from "./TrabajosRealizadosFormSection";
 
 const schema = yup.object().shape({
   autoId: yup.string().required("Debe seleccionar un auto"),
-  fechaCreacion: yup.date().required("La fecha de creación es requerida"),
+  fechaCreacion: yup.string().required("La fecha de creación es requerida"),
   fechaEntradaReparacion: yup.date().nullable(),
   fechaSalidaReparacion: yup
     .date()
@@ -129,6 +131,7 @@ const NuevaOrdenReparacionForm = () => {
     defaultValues: {
       montoTotalCliente: 0,
       estado: "Presupuestado",
+      fechaCreacion: new Date().toISOString().split("T")[0],
     },
   });
   const {
@@ -230,182 +233,196 @@ const NuevaOrdenReparacionForm = () => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Controller
-          name="autoId"
-          control={control}
-          render={({ field: { onChange, value } }) => (
-            <Autocomplete
-              options={autocompleteOptions || []}
-              getOptionLabel={(option) => option?.label || ""}
-              value={
-                value
-                  ? autocompleteOptions.find(
-                      (option) => option.value === value
-                    ) || null
-                  : null
-              }
-              onChange={(_, newValue) => {
-                onChange(newValue?.value || null);
-              }}
-              onInputChange={(event, newInputValue, reason) => {
-                if (reason === "input") {
-                  debouncedSearch(
-                    newInputValue,
-                    (options: { value: string; label: string }[]) =>
-                      setAutocompleteOptions(options)
-                  );
-                }
-              }}
-              renderInput={(params) => (
+        <Grid container spacing={2}>
+          <Grid item xs={4}>
+            <Controller
+              name="autoId"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <FormControl fullWidth margin="normal">
+                  <Autocomplete
+                    options={autocompleteOptions || []}
+                    getOptionLabel={(option) => option?.label || ""}
+                    value={
+                      value
+                        ? autocompleteOptions.find(
+                            (option) => option.value === value
+                          ) || null
+                        : null
+                    }
+                    onChange={(_, newValue) => {
+                      onChange(newValue?.value || null);
+                    }}
+                    onInputChange={(event, newInputValue, reason) => {
+                      if (reason === "input") {
+                        debouncedSearch(
+                          newInputValue,
+                          (options: { value: string; label: string }[]) =>
+                            setAutocompleteOptions(options)
+                        );
+                      }
+                    }}
+                    renderInput={(params) => (
+                      <TextField
+                        {...params}
+                        label="Auto"
+                        error={!!errors.autoId}
+                        helperText={errors.autoId?.message as string}
+                      />
+                    )}
+                    isOptionEqualToValue={(option, value) =>
+                      option?.value === value?.value
+                    }
+                    loadingText="Buscando..."
+                    noOptionsText="No se encontraron resultados"
+                    sx={{
+                      marginBottom: 2,
+                    }}
+                  />
+                </FormControl>
+              )}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Controller
+              name="kilometros"
+              control={control}
+              render={({ field }) => (
                 <TextField
-                  {...params}
-                  label="Auto"
-                  error={!!errors.autoId}
-                  helperText={errors.autoId?.message as string}
+                  {...field}
+                  type="number"
+                  label="Kilómetros"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.kilometros}
+                  helperText={errors.kilometros?.message as string}
                 />
               )}
-              isOptionEqualToValue={(option, value) =>
-                option?.value === value?.value
-              }
-              loadingText="Buscando..."
-              noOptionsText="No se encontraron resultados"
-              sx={{
-                marginBottom: 2,
-              }}
             />
-          )}
-        />
-        <Controller
-          name="fechaCreacion"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              type="date"
-              label="Fecha de creación"
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-              margin="normal"
-              value={field.value || ""}
-              error={!!errors.fechaCreacion}
-              helperText={errors.fechaCreacion?.message as string}
-              onChange={(e) => field.onChange(e.target.value || null)}
-            />
-          )}
-        />
-        <Controller
-          name="fechaEntradaReparacion"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              type="date"
-              label="Fecha de entrada"
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-              margin="normal"
-              error={!!errors.fechaEntradaReparacion}
-              helperText={errors.fechaEntradaReparacion?.message as string}
-              onChange={(e) => field.onChange(e.target.value || null)}
-            />
-          )}
-        />
-
-        <Controller
-          name="fechaSalidaReparacion"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              type="date"
-              label="Fecha de salida"
-              InputLabelProps={{ shrink: true }}
-              fullWidth
-              margin="normal"
-              error={!!errors.fechaSalidaReparacion}
-              helperText={errors.fechaSalidaReparacion?.message as string}
-              onChange={(e) => field.onChange(e.target.value || null)}
-            />
-          )}
-        />
-
-        <Controller
-          name="kilometros"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              type="number"
-              label="Kilómetros"
-              fullWidth
-              margin="normal"
-              error={!!errors.kilometros}
-              helperText={errors.kilometros?.message as string}
-            />
-          )}
-        />
-
-        <Controller
-          name="observacionesCliente"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              label="Observaciones del cliente"
-              multiline
-              rows={4}
-              fullWidth
-              margin="normal"
-              error={!!errors.observacionesCliente}
-              helperText={errors.observacionesCliente?.message as string}
-            />
-          )}
-        />
-        <ObservacionesEntradaForm />
-
-        <Controller
-          name="estado"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              select
-              label="Estado"
-              fullWidth
-              margin="normal"
-              error={!!errors.estado}
-              helperText={errors.estado?.message as string}
-            >
-              {["Presupuestado", "En Progreso", "Aceptado", "Terminado"].map(
-                (option) => (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                )
+          </Grid>
+          <Grid item xs={4}>
+            <Controller
+              name="fechaCreacion"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  type="date"
+                  label="Fecha de creación"
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  margin="normal"
+                  value={field.value || ""}
+                  error={!!errors.fechaCreacion}
+                  helperText={errors.fechaCreacion?.message as string}
+                  onChange={(e) => field.onChange(e.target.value || null)}
+                />
               )}
-            </TextField>
-          )}
-        />
-        <MecanicoFormSection />
-        <RepuestoUsadoFormSection />
-        <ReparacionesTercerosFormSection />
-        <TrabajosRealizadosFormSection />
-        <Controller
-          name="montoTotalCliente"
-          control={control}
-          render={({ field }) => (
-            <TextField
-              {...field}
-              label="Monto Total Cliente"
-              type="number"
-              InputProps={{
-                readOnly: true,
-              }}
-              fullWidth
-              margin="normal"
             />
-          )}
-        />
+          </Grid>
+          <Grid item xs={4}>
+            <Controller
+              name="fechaEntradaReparacion"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  type="date"
+                  label="Fecha de entrada"
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  error={!!errors.fechaEntradaReparacion}
+                  helperText={errors.fechaEntradaReparacion?.message as string}
+                  onChange={(e) => field.onChange(e.target.value || null)}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Controller
+              name="fechaSalidaReparacion"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  type="date"
+                  label="Fecha de salida"
+                  InputLabelProps={{ shrink: true }}
+                  fullWidth
+                  error={!!errors.fechaSalidaReparacion}
+                  helperText={errors.fechaSalidaReparacion?.message as string}
+                  onChange={(e) => field.onChange(e.target.value || null)}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={4}>
+            <Controller
+              name="estado"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  select
+                  label="Estado"
+                  fullWidth
+                  error={!!errors.estado}
+                  helperText={errors.estado?.message as string}
+                >
+                  {[
+                    "Presupuestado",
+                    "En Progreso",
+                    "Aceptado",
+                    "Terminado",
+                  ].map((option) => (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  ))}
+                </TextField>
+              )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
+              name="observacionesCliente"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Observaciones del cliente"
+                  multiline
+                  rows={4}
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.observacionesCliente}
+                  helperText={errors.observacionesCliente?.message as string}
+                />
+              )}
+            />
+          </Grid>
+          <ObservacionesEntradaForm />
+          <MecanicoFormSection />
+          <RepuestoUsadoFormSection />
+          <ReparacionesTercerosFormSection />
+          <TrabajosRealizadosFormSection />
+          <Controller
+            name="montoTotalCliente"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Monto Total Cliente"
+                type="number"
+                InputProps={{
+                  readOnly: true,
+                }}
+                fullWidth
+                margin="normal"
+              />
+            )}
+          />
+        </Grid>
         <Button type="submit" variant="contained" color="primary">
           Crear Orden de Reparación
         </Button>

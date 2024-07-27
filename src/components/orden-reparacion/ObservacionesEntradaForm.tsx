@@ -3,6 +3,7 @@ import {
   Box,
   Button,
   Chip,
+  Grid,
   List,
   ListItem,
   ListItemText,
@@ -64,48 +65,71 @@ const ObservacionesEntradaForm = () => {
     const observaciones = JSON.parse(observacionesEntrada || "[]");
     return observaciones.includes(observacion);
   };
-
+  if (reparacionesAnteriores.length === 0) {
+    return null;
+  }
   return (
-    <div>
-      <Typography variant="h6">Observaciones de entrada</Typography>
-      <List>
+    <Grid item xs={12}>
+      <Typography variant="h6" sx={{ mb: 0 }}>
+        Observaciones de entrada
+      </Typography>
+      <Typography variant="subtitle1" sx={{ mb: 0 }}>
+        Reparaciones Previas
+      </Typography>
+      <List sx={{ mt: 0 }}>
         {reparacionesAnteriores.map(
           (
             reparacion: { fechaCreacion: Date; observacionesSalida: string },
             index
           ) => (
-            <ListItem key={index}>
+            <ListItem key={index} sx={{ py: 0.0 }}>
               <ListItemText
-                primary={`Reparación del ${reparacion.fechaCreacion}`}
+                primary={
+                  <Typography
+                    variant="subtitle1"
+                    component="div"
+                    sx={{ mb: 0 }}
+                  >
+                    • Reparación del{" "}
+                    {new Date(reparacion.fechaCreacion).toLocaleDateString()}
+                  </Typography>
+                }
                 secondary={
                   reparacion.observacionesSalida ? (
                     JSON.parse(reparacion.observacionesSalida).length > 0 ? (
-                      JSON.parse(reparacion.observacionesSalida).map(
-                        (obs: string, obsIndex: number) => (
-                          <Box
-                            key={obsIndex}
-                            display="flex"
-                            alignItems="center"
-                            mb={1}
-                          >
-                            <Typography variant="body2">{obs}</Typography>
-                            {!estaObservacionAgregada(obs) && (
-                              <Button
-                                size="small"
-                                onClick={() => agregarObservacion(obs)}
-                                sx={{ ml: 1 }}
-                              >
-                                Agregar
-                              </Button>
-                            )}
-                          </Box>
-                        )
-                      )
+                      <List dense sx={{ py: 0 }}>
+                        {JSON.parse(reparacion.observacionesSalida).map(
+                          (obs: string, obsIndex: number) => (
+                            <ListItem key={obsIndex} sx={{ py: 0 }}>
+                              <ListItemText
+                                primary={
+                                  <Typography variant="body2" sx={{ my: 0 }}>
+                                    ◦ {obs}
+                                  </Typography>
+                                }
+                              />
+                              {!estaObservacionAgregada(obs) && (
+                                <Button
+                                  size="small"
+                                  onClick={() => agregarObservacion(obs)}
+                                  sx={{ ml: 1, py: 0 }}
+                                >
+                                  Agregar
+                                </Button>
+                              )}
+                            </ListItem>
+                          )
+                        )}
+                      </List>
                     ) : (
-                      <Typography variant="body2">Sin observaciones</Typography>
+                      <Typography variant="body2" sx={{ mt: 0 }}>
+                        Sin observaciones
+                      </Typography>
                     )
                   ) : (
-                    <Typography variant="body2">Sin observaciones</Typography>
+                    <Typography variant="body2" sx={{ mt: 0 }}>
+                      Sin observaciones
+                    </Typography>
                   )
                 }
               />
@@ -125,7 +149,7 @@ const ObservacionesEntradaForm = () => {
           )
         )}
       </Box>
-    </div>
+    </Grid>
   );
 };
 
