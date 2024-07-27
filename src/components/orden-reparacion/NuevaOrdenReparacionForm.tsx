@@ -410,8 +410,12 @@ const NuevaOrdenReparacionForm = () => {
           <Grid item xs={12}>
             <RepuestoUsadoFormSection />
           </Grid>
-          <ReparacionesTercerosFormSection />
-          <TrabajosRealizadosFormSection />
+          <Grid item xs={12}>
+            <ReparacionesTercerosFormSection />
+          </Grid>
+          <Grid item xs={12}>
+            <TrabajosRealizadosFormSection />
+          </Grid>
           <Controller
             name="montoTotalCliente"
             control={control}

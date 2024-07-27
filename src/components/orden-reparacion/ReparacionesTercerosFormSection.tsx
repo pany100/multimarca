@@ -2,11 +2,13 @@ import { useFetch } from "@/contexts/FetchContext";
 import {
   Alert,
   Autocomplete,
+  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Snackbar,
   Table,
   TableBody,
@@ -81,10 +83,7 @@ function ReparacionesTercerosFormSection() {
           newReparacion,
         ]);
         setOpenReparacionModal(false);
-        setSelectedProveedor(null);
-        setNombre("");
-        setPrecioCompra("");
-        setPrecioVenta("");
+        resetFields();
         setSnackbar({
           open: true,
           message: "Reparación agregada correctamente",
@@ -103,6 +102,13 @@ function ReparacionesTercerosFormSection() {
     setValue("reparacionesDeTercero", updatedReparaciones);
   };
 
+  const resetFields = () => {
+    setSelectedProveedor(null);
+    setNombre("");
+    setPrecioCompra("");
+    setPrecioVenta("");
+  };
+
   return (
     <>
       <Typography variant="h6" gutterBottom>
@@ -113,55 +119,68 @@ function ReparacionesTercerosFormSection() {
         control={control}
         render={({ field, fieldState: { error } }) => (
           <>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Proveedor</TableCell>
-                  <TableCell>Nombre</TableCell>
-                  <TableCell>Precio Compra</TableCell>
-                  <TableCell>Precio Venta</TableCell>
-                  <TableCell>Acciones</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {field.value?.map((reparacion: any) => (
-                  <TableRow
-                    key={`${reparacion.nombre}-${reparacion.proveedor.id}`}
-                  >
-                    <TableCell>{reparacion.proveedor.name}</TableCell>
-                    <TableCell>{reparacion.nombre}</TableCell>
-                    <TableCell>{reparacion.precioCompra}</TableCell>
-                    <TableCell>{reparacion.precioVenta}</TableCell>
-                    <TableCell>
-                      <Button
-                        onClick={() => {
-                          handleRemoveReparacion(
-                            reparacion.nombre,
-                            reparacion.proveedor.id
-                          );
-                        }}
-                      >
-                        Eliminar
-                      </Button>
-                    </TableCell>
+            {field.value && field.value.length > 0 ? (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Proveedor</TableCell>
+                    <TableCell>Descripción</TableCell>
+                    <TableCell>Precio Compra</TableCell>
+                    <TableCell>Precio Venta</TableCell>
+                    <TableCell>Acciones</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {field.value.map((reparacion: any) => (
+                    <TableRow
+                      key={`${reparacion.nombre}-${reparacion.proveedor.id}`}
+                    >
+                      <TableCell>{reparacion.proveedor.name}</TableCell>
+                      <TableCell>{reparacion.nombre}</TableCell>
+                      <TableCell>{reparacion.precioCompra}</TableCell>
+                      <TableCell>{reparacion.precioVenta}</TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => {
+                            handleRemoveReparacion(
+                              reparacion.nombre,
+                              reparacion.proveedor.id
+                            );
+                          }}
+                        >
+                          Eliminar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <Typography>No hay reparaciones de terceros asignadas</Typography>
+            )}
             {error && <Typography color="error">{error.message}</Typography>}
-            <Button
-              onClick={() => setOpenReparacionModal(true)}
-              variant="contained"
-              color="secondary"
-            >
-              Agregar Reparación
-            </Button>
+            <Box display="flex" justifyContent="flex-end" mt={2}>
+              <Button
+                onClick={() => setOpenReparacionModal(true)}
+                variant="contained"
+              >
+                Agregar Reparación
+              </Button>
+            </Box>
           </>
         )}
       />
       <Dialog
         open={openReparacionModal}
-        onClose={() => setOpenReparacionModal(false)}
+        onClose={() => {
+          setOpenReparacionModal(false);
+          resetFields();
+        }}
+        PaperProps={{
+          style: {
+            minWidth: "350px",
+          },
+        }}
       >
         <DialogTitle>Agregar Reparación de Tercero</DialogTitle>
         <DialogContent>
@@ -178,9 +197,10 @@ function ReparacionesTercerosFormSection() {
             onInputChange={(_, newInputValue) => {
               searchProveedores(newInputValue);
             }}
+            sx={{ mt: 2 }}
           />
           <TextField
-            label="Nombre"
+            label="Descripción"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             fullWidth
@@ -204,7 +224,13 @@ function ReparacionesTercerosFormSection() {
           />
         </DialogContent>
         <DialogActions>
-          <Button type="button" onClick={() => setOpenReparacionModal(false)}>
+          <Button
+            type="button"
+            onClick={() => {
+              setOpenReparacionModal(false);
+              resetFields();
+            }}
+          >
             Cancelar
           </Button>
           <Button
@@ -227,6 +253,7 @@ function ReparacionesTercerosFormSection() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <Divider sx={{ mt: 2 }} />
     </>
   );
 }
