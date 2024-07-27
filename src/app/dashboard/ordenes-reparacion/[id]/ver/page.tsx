@@ -1,7 +1,7 @@
 "use client";
 import OrdenClientePdf from "@/components/orden-reparacion/pdf/OrdenClientePdf";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import PrintIcon from "@mui/icons-material/Print";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import {
@@ -34,6 +34,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
     message: "",
     severity: "success" as "success" | "error",
   });
+  const { authFetch } = useFetch();
   const handleMechanicOrderPrint = useReactToPrint({
     content: () => mechanicOrderRef.current,
   });
@@ -93,7 +94,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
     };
 
     fetchOrdenReparacion();
-  }, [params.id]);
+  }, [params.id, authFetch]);
 
   if (loading) {
     return (

@@ -40,7 +40,7 @@ const PagosAMecanicoPage = () => {
         `#${ordenReparacion.id} - ${ordenReparacion.auto.patent} ${
           ordenReparacion.auto.brand || ""
         } ${ordenReparacion.auto.model || ""}
-        } - ${ordenReparacion.auto.owner.name || ""} ${
+        - ${ordenReparacion.auto.owner.name || ""} ${
           ordenReparacion.auto.owner.fullName || ""
         } - ${
           ordenReparacion.fechaEntradaReparacion

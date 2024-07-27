@@ -1,4 +1,4 @@
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import {
   Box,
   Button,
@@ -20,6 +20,7 @@ const ObservacionesEntradaForm = () => {
     name: "observacionesEntrada",
   });
   const isFirstRun = useRef(true);
+  const { authFetch } = useFetch();
 
   useEffect(() => {
     const fetchReparacionesAnteriores = async () => {
@@ -42,7 +43,7 @@ const ObservacionesEntradaForm = () => {
     };
 
     fetchReparacionesAnteriores();
-  }, [autoId, setValue]);
+  }, [autoId, setValue, authFetch]);
 
   const agregarObservacion = (observacion: string) => {
     const prevObservaciones = getValues("observacionesEntrada");

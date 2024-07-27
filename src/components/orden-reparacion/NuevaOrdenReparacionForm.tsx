@@ -1,4 +1,4 @@
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Alert,
@@ -117,6 +117,8 @@ const NuevaOrdenReparacionForm = () => {
     message: "",
     severity: "success",
   });
+
+  const { authFetch } = useFetch();
 
   const [autocompleteOptions, setAutocompleteOptions] = useState<
     { value: string; label: string }[]

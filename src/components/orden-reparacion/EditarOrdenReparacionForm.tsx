@@ -1,4 +1,4 @@
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Alert,
@@ -190,6 +190,7 @@ type OrdenReparacion = {
 };
 
 const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
+  const { authFetch } = useFetch();
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",

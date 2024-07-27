@@ -1,6 +1,6 @@
 "use client";
 
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import {
   Box,
   CircularProgress,
@@ -33,6 +33,7 @@ const AdminNotificaciones = () => {
     pageSize: 10,
   });
   const [totalItems, setTotalItems] = useState(0);
+  const { authFetch } = useFetch();
 
   const fetchClientes = useCallback(
     async (
@@ -58,7 +59,7 @@ const AdminNotificaciones = () => {
         setLoading(false);
       }
     },
-    [paginationModel.page, paginationModel.pageSize, searchTerm]
+    [paginationModel.page, paginationModel.pageSize, searchTerm, authFetch]
   );
 
   useEffect(() => {

@@ -1,7 +1,7 @@
 "use client";
 
 import EditarOrdenReparacionForm from "@/components/orden-reparacion/EditarOrdenReparacionForm";
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import { Box, CircularProgress, Paper, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -10,6 +10,7 @@ const EditarOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
   const router = useRouter();
   const [ordenReparacion, setOrdenReparacion] = useState(null);
   const [loading, setLoading] = useState(true);
+  const { authFetch } = useFetch();
 
   useEffect(() => {
     const fetchOrdenReparacion = async () => {
@@ -29,7 +30,7 @@ const EditarOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
     };
 
     fetchOrdenReparacion();
-  }, [params.id]);
+  }, [params.id, authFetch]);
 
   if (loading) {
     return (

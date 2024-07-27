@@ -2,7 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import { useRef, useState } from "react";
 import { UseFormSetValue } from "react-hook-form";
 import * as yup from "yup";
@@ -32,6 +32,7 @@ const IngresosPorReparacionPage = () => {
     []
   );
   const initializedRef = useRef(false);
+  const { authFetch } = useFetch();
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },

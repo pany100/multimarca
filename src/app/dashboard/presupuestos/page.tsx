@@ -1,6 +1,6 @@
 "use client";
 
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import { Box, Button, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
@@ -27,6 +27,7 @@ const PresupuestosPage = () => {
   });
   const [totalItems, setTotalItems] = useState(0);
   const router = useRouter();
+  const { authFetch } = useFetch();
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", width: 70 },
@@ -94,7 +95,7 @@ const PresupuestosPage = () => {
     };
 
     fetchPresupuestos();
-  }, [paginationModel]);
+  }, [paginationModel, authFetch]);
 
   const handleAddClick = () => {
     router.push("/dashboard/ordenes-reparacion/nueva");

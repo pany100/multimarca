@@ -1,4 +1,4 @@
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import {
   Alert,
   Autocomplete,
@@ -21,6 +21,7 @@ import { Controller, useFormContext } from "react-hook-form";
 
 function MecanicoFormSection() {
   const { control, getValues, setValue } = useFormContext();
+  const { authFetch } = useFetch();
 
   const [snackbar, setSnackbar] = useState({
     open: false,

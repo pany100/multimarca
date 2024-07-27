@@ -1,4 +1,4 @@
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import {
   Alert,
   Autocomplete,
@@ -22,8 +22,8 @@ import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
 function TrabajosRealizadosFormSection() {
+  const { authFetch } = useFetch();
   const { control, getValues, setValue } = useFormContext();
-
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
