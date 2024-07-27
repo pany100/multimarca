@@ -12,9 +12,9 @@ interface ControlMecanico {
 
 const ControlesMecanicosPage = () => {
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "name", headerName: "Nombre del Control", width: 200 },
-    { field: "type", headerName: "Tipo", width: 150 },
+    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "name", headerName: "Nombre del Control", flex: 1 },
+    { field: "type", headerName: "Tipo", flex: 1 },
   ];
 
   const formFields: FieldConfig[] = [

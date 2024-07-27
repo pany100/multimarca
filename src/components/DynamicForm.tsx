@@ -377,6 +377,7 @@ function DynamicForm<T extends FieldValues>({
         );
     }
   };
+  console.log(errors);
   return (
     <Box
       component="form"

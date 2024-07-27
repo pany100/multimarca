@@ -107,9 +107,9 @@ a {
 }
 
 .low-stock-row {
-  background-color: #ffcccb !important;
+  background-color: #efb6a9 !important;
 }
 
 .low-stock-row:hover {
-  background-color: #ffb3b3 !important;
+  background-color: #efb6a9 !important;
 }

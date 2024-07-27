@@ -12,9 +12,9 @@ interface ManoDeObra {
 
 const ManoDeObraPage = () => {
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "name", headerName: "Nombre del Trabajo", width: 200 },
-    { field: "sellPrice", headerName: "Precio de Venta", width: 150 },
+    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "name", headerName: "Nombre del Trabajo", flex: 2 },
+    { field: "sellPrice", headerName: "Precio de Venta", flex: 1 },
   ];
 
   const formFields: FieldConfig[] = [

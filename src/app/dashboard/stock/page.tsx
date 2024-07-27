@@ -2,12 +2,13 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import {
   Alert,
   Autocomplete,
   Box,
   Button,
+  Grid,
   Modal,
   Snackbar,
   Tab,
@@ -23,12 +24,12 @@ interface Stock {
   id: string;
   name: string;
   brand: string;
-  buyPrice: number;
+  buyPrice: number | null;
   units?: number | null;
   restockValue: number | null;
   label: string | null;
   markup: number | null;
-  proveedorId: number;
+  proveedorId: number | null;
   proveedor?: {
     id: number;
     name: string;
@@ -37,6 +38,7 @@ interface Stock {
 
 const StockPage = () => {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const { authFetch } = useFetch();
 
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -93,10 +95,10 @@ const StockPage = () => {
   };
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "name", headerName: "Nombre", width: 200 },
-    { field: "brand", headerName: "Marca", width: 150 },
-    { field: "buyPrice", headerName: "Precio de compra", width: 150 },
+    { field: "id", headerName: "ID", flex: 0.2 },
+    { field: "name", headerName: "Nombre", flex: 0.6 },
+    { field: "brand", headerName: "Marca", flex: 0.5 },
+    { field: "buyPrice", headerName: "Precio de compra", flex: 0.8 },
     {
       field: "units",
       headerName: "Unidades",
@@ -104,25 +106,38 @@ const StockPage = () => {
       valueGetter: (units: any) => {
         return units === null || units === undefined ? 0 : units;
       },
+      flex: 0.5,
     },
-    { field: "restockValue", headerName: "Valor de reposición", width: 150 },
-    { field: "label", headerName: "Etiqueta", width: 150 },
-    { field: "markup", headerName: "Margen", width: 100 },
+    { field: "restockValue", headerName: "Valor de reposición", flex: 0.5 },
+    { field: "label", headerName: "Etiqueta", flex: 0.5 },
+    { field: "markup", headerName: "Margen", flex: 0.5 },
     {
       field: "proveedor",
       headerName: "Proveedor",
-      width: 200,
+      flex: 1.5,
       renderCell: (params: any) => params.row.proveedor?.name || "",
     },
   ];
 
   const formFields: FieldConfig[] = [
-    { name: "name", label: "Nombre", type: "text" },
-    { name: "brand", label: "Marca", type: "text" },
-    { name: "buyPrice", label: "Precio de compra", type: "number" },
-    { name: "restockValue", label: "Valor de reposición", type: "number" },
-    { name: "label", label: "Etiqueta", type: "text" },
-    { name: "markup", label: "Margen", type: "number" },
+    { name: "name", label: "Nombre", type: "text", layout: { xs: 6 } },
+    { name: "brand", label: "Marca", type: "text", layout: { xs: 6 } },
+    {
+      name: "buyPrice",
+      label: "Precio de compra",
+      type: "number",
+      layout: { xs: 4 },
+    },
+    {
+      name: "restockValue",
+      label: "Valor de reposición",
+      type: "number",
+      layout: {
+        xs: 4,
+      },
+    },
+    { name: "label", label: "Etiqueta", type: "text", layout: { xs: 4 } },
+    { name: "markup", label: "Margen", type: "number", layout: { xs: 6 } },
     {
       name: "proveedorId",
       label: "Proveedor",
@@ -141,6 +156,7 @@ const StockPage = () => {
         value: stock.proveedor?.id || stock.proveedorId,
         label: stock.proveedor?.name || "",
       }),
+      layout: { xs: 6 },
     },
   ];
 
@@ -149,11 +165,11 @@ const StockPage = () => {
       id: "",
       name: "",
       brand: "",
-      buyPrice: 0,
+      buyPrice: null,
       restockValue: null,
       label: null,
       markup: null,
-      proveedorId: 0,
+      proveedorId: null,
     };
   };
   const getRowClassName = (params: GridRowParams) => {
@@ -170,11 +186,11 @@ const StockPage = () => {
           value={tabValue}
           onChange={(_, newValue) => setTabValue(newValue)}
         >
-          <Tab label="Stock" />
-          <Tab label="Restock" />
+          <Tab label="Todos" />
+          <Tab label="A Reponer" />
         </Tabs>
       </Box>
-      <Box sx={{ width: "100%", mb: 2 }}>
+      <Box sx={{ width: "100%", mb: 2, mt: 2 }}>
         <Button variant="contained" onClick={() => setOpenModal(true)}>
           Actualizar precios por proveedor
         </Button>
@@ -192,7 +208,7 @@ const StockPage = () => {
             name: yup.string().required("El nombre es requerido"),
             brand: yup.string().required("La marca es requerida"),
             buyPrice: yup.number().required("El precio de compra es requerido"),
-            providerId: yup.number().required("El proveedor es requerido"),
+            proveedorId: yup.number().required("El proveedor es requerido"),
           })}
         />
       )}
@@ -209,7 +225,7 @@ const StockPage = () => {
             name: yup.string().required("El nombre es requerido"),
             brand: yup.string().required("La marca es requerida"),
             buyPrice: yup.number().required("El precio de compra es requerido"),
-            providerId: yup.number().required("El proveedor es requerido"),
+            proveedorId: yup.number().required("El proveedor es requerido"),
           })}
         />
       )}
@@ -233,46 +249,60 @@ const StockPage = () => {
             Buscar proveedor y poner el % de aumento que se le va a aplicar a
             todos los repuestos provenientes del mismo
           </Typography>
-          <Autocomplete
-            options={proveedorOptions}
-            getOptionLabel={(option: { name: string; id: number }) =>
-              option.name
-            }
-            renderInput={(params) => (
-              <TextField {...params} label="Proveedor" />
-            )}
-            onChange={(_, newValue) =>
-              setSelectedProveedor(
-                newValue ? { id: newValue.id, name: newValue.name } : null
-              )
-            }
-            sx={{ mt: 2 }}
-            onInputChange={(_, newInputValue) => {
-              if (newInputValue) {
-                fetch(`/api/proveedores?query=${newInputValue}&limit=10&page=0`)
-                  .then((response) => response.json())
-                  .then((data) => {
-                    const options = data.items.map(
-                      (proveedor: { name: string; id: number }) => ({
-                        id: proveedor.id,
-                        name: proveedor.name,
-                      })
-                    );
-                    setProveedorOptions(options);
-                  });
-              }
-            }}
-          />
-          <TextField
-            label="Porcentaje de aumento"
-            type="number"
-            value={porcentajeAumento}
-            onChange={(e) => setPorcentajeAumento(e.target.value)}
-            sx={{ mt: 2 }}
-          />
+          <Grid container>
+            <Grid item xs={12}>
+              <Autocomplete
+                options={proveedorOptions}
+                getOptionLabel={(option: { name: string; id: number }) =>
+                  option.name
+                }
+                renderInput={(params) => (
+                  <TextField {...params} label="Proveedor" />
+                )}
+                onChange={(_, newValue) =>
+                  setSelectedProveedor(
+                    newValue ? { id: newValue.id, name: newValue.name } : null
+                  )
+                }
+                sx={{ mt: 2 }}
+                onInputChange={(_, newInputValue) => {
+                  if (newInputValue) {
+                    fetch(
+                      `/api/proveedores?query=${newInputValue}&limit=10&page=0`
+                    )
+                      .then((response) => response.json())
+                      .then((data) => {
+                        const options = data.items.map(
+                          (proveedor: { name: string; id: number }) => ({
+                            id: proveedor.id,
+                            name: proveedor.name,
+                          })
+                        );
+                        setProveedorOptions(options);
+                      });
+                  }
+                }}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Porcentaje de aumento"
+                type="number"
+                value={porcentajeAumento}
+                onChange={(e) => setPorcentajeAumento(e.target.value)}
+                sx={{ mt: 2, width: "100%" }}
+              />
+            </Grid>
+          </Grid>
           <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}>
-            <Button onClick={() => setOpenModal(false)}>Descartar</Button>
-            <Button onClick={handleUpdatePrices} variant="contained">
+            <Button onClick={() => setOpenModal(false)} variant="outlined">
+              Descartar
+            </Button>
+            <Button
+              onClick={handleUpdatePrices}
+              variant="contained"
+              disabled={!selectedProveedor || !porcentajeAumento}
+            >
               Guardar
             </Button>
           </Box>
