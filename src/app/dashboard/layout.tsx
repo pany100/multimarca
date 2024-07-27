@@ -215,7 +215,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "Ingresos",
-            texto: "Ingresos",
+            texto: "Pagos de reparación",
             icono: <AccountBalanceIcon />,
             ruta: "/dashboard/ingresos-reparacion",
           },

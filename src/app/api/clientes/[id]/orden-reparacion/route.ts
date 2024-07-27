@@ -22,15 +22,6 @@ export async function GET(
       },
     });
 
-    if (!ordenesReparacion || ordenesReparacion.length === 0) {
-      return NextResponse.json(
-        {
-          mensaje: "No se encontraron órdenes de reparación para este cliente",
-        },
-        { status: 404 }
-      );
-    }
-
     return NextResponse.json(ordenesReparacion);
   } catch (error) {
     console.error("Error al obtener las órdenes de reparación:", error);

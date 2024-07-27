@@ -34,28 +34,58 @@ const IngresosPorReparacionPage = () => {
   const initializedRef = useRef(false);
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "fecha", headerName: "Fecha", width: 120 },
-    { field: "monto", headerName: "Monto", width: 100 },
-    { field: "descripcion", headerName: "Descripción", width: 200 },
+    { field: "id", headerName: "ID", flex: 0.5 },
+    {
+      field: "fecha",
+      headerName: "Fecha",
+      flex: 1,
+      valueGetter: (fecha: string) =>
+        new Date(fecha).toLocaleDateString("es-AR"),
+    },
+    { field: "monto", headerName: "Monto", flex: 1 },
+    { field: "descripcion", headerName: "Descripción", flex: 2 },
     {
       field: "cliente",
       headerName: "Cliente",
       width: 150,
       valueGetter: (cliente: any) => cliente?.fullName || "",
+      flex: 1.5,
     },
     {
       field: "ordenReparacion",
       headerName: "Orden de Reparación",
       width: 200,
       valueGetter: (ordenReparacion: any) =>
-        `#${ordenReparacion.id} - ${ordenReparacion.auto.patent} ${ordenReparacion.auto.brand} ${ordenReparacion.auto.model}`,
+        `#${ordenReparacion.id} - ${ordenReparacion.auto.patent} ${
+          ordenReparacion.auto.brand
+        } ${ordenReparacion.auto.model}: ${
+          ordenReparacion.fechaEntradaReparacion
+            ? new Date(
+                ordenReparacion.fechaEntradaReparacion
+              ).toLocaleDateString("es-AR")
+            : "Sin Fecha de entrada"
+        }`,
+      flex: 2,
     },
   ];
 
   const formFields: FieldConfig[] = [
-    { name: "fecha", label: "Fecha", type: "date" },
-    { name: "monto", label: "Monto", type: "number" },
+    {
+      name: "fecha",
+      label: "Fecha",
+      type: "date",
+      layout: {
+        xs: 6,
+      },
+    },
+    {
+      name: "monto",
+      label: "Monto",
+      type: "number",
+      layout: {
+        xs: 6,
+      },
+    },
     { name: "descripcion", label: "Descripción", type: "text" },
     {
       name: "clienteId",
