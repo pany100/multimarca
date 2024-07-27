@@ -11,8 +11,8 @@ interface CategoriaGasto {
 
 const CategoriasGastoPage = () => {
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "nombre", headerName: "Nombre", width: 200 },
+    { field: "id", headerName: "ID", flex: 1 },
+    { field: "nombre", headerName: "Nombre", flex: 2 },
   ];
 
   const formFields: FieldConfig[] = [

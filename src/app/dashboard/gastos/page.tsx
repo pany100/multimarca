@@ -39,26 +39,32 @@ const GastosPage = () => {
   const initializedRef = useRef(false);
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "nombre", headerName: "Nombre", width: 200 },
-    { field: "precio", headerName: "Precio", width: 150 },
-    { field: "fecha", headerName: "Fecha", width: 150 },
+    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "nombre", headerName: "Descripción", flex: 1.5 },
+    { field: "precio", headerName: "Monto", flex: 1 },
+    {
+      field: "fecha",
+      headerName: "Fecha",
+      flex: 1,
+      valueGetter: (fecha: string) =>
+        new Date(fecha).toLocaleDateString("es-ES"),
+    },
     {
       field: "categoria",
       headerName: "Categoría",
-      width: 200,
+      flex: 1.5,
       valueGetter: (categoria: any) => categoria?.nombre || "",
     },
     {
       field: "mecanico",
       headerName: "Mecánico",
-      width: 200,
+      flex: 1,
       valueGetter: (mecanico: any) => mecanico?.name || "-",
     },
     {
       field: "ordenDeCompra",
       headerName: "Orden de Compra",
-      width: 150,
+      flex: 2.5,
       valueGetter: (ordenDeCompra: any) => {
         return ordenDeCompra
           ? `Proveedor: ${ordenDeCompra?.proveedor.name} - Orden: #${
@@ -150,9 +156,11 @@ const GastosPage = () => {
           const customOptions = data.map(
             (order: { id: number; fecha: string; deuda: number }) => ({
               value: order.id,
-              label: `ID: ${order.id} - ${
+              label: `ID: ${order.id} - ${new Date(
                 order.fecha
-              } - Deuda: $${order.deuda.toFixed(2)}`,
+              ).toLocaleDateString("es-AR")} - Deuda: $${order.deuda.toFixed(
+                2
+              )}`,
             })
           );
           setValue("ordenDeCompraId", null);
@@ -173,7 +181,9 @@ const GastosPage = () => {
           const init = [
             {
               value: gasto.ordenDeCompra?.id || 0,
-              label: `ID: ${gasto.ordenDeCompra?.id} - ${gasto.ordenDeCompra?.fecha}`,
+              label: `ID: ${gasto.ordenDeCompra?.id} - ${new Date(
+                gasto.ordenDeCompra?.fecha || ""
+              ).toLocaleDateString("es-AR")}`,
             },
           ];
           return init;

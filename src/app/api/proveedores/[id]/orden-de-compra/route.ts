@@ -16,44 +16,35 @@ export async function GET(
       },
     });
 
-    // Filtrar las órdenes de compra que no están pagadas completamente
-    const ordenesPendientes = ordenesDeCompra.filter((orden) => {
-      const totalPagado = orden.gastos.reduce(
-        (sum, gasto) => sum + Number(gasto.precio),
-        0
-      );
-      return Number(orden.precioTotal) > totalPagado;
-    });
-
-    if (ordenesPendientes.length > 0) {
-      // Mapear las órdenes pendientes a un formato más adecuado para la respuesta
-      const resultado = ordenesPendientes.map((orden) => ({
-        id: orden.id,
-        fecha: orden.fecha,
-        precioTotal: orden.precioTotal,
-        totalPagado: orden.gastos.reduce(
+    if (ordenesDeCompra.length > 0) {
+      // Mapear todas las órdenes a un formato más adecuado para la respuesta
+      const resultado = ordenesDeCompra.map((orden) => {
+        const totalPagado = orden.gastos.reduce(
           (sum, gasto) => sum + Number(gasto.precio),
           0
-        ),
-        deuda:
-          Number(orden.precioTotal) -
-          orden.gastos.reduce((sum, gasto) => sum + Number(gasto.precio), 0),
-      }));
+        );
+        return {
+          id: orden.id,
+          fecha: orden.fecha,
+          precioTotal: orden.precioTotal,
+          totalPagado: totalPagado,
+          deuda: Number(orden.precioTotal) - totalPagado,
+        };
+      });
 
       return NextResponse.json(resultado);
     } else {
       return NextResponse.json(
         {
-          message:
-            "No se encontraron órdenes de compra pendientes para este proveedor",
+          message: "No se encontraron órdenes de compra para este proveedor",
         },
         { status: 404 }
       );
     }
   } catch (error) {
-    console.error("Error al obtener órdenes de compra pendientes:", error);
+    console.error("Error al obtener órdenes de compra:", error);
     return NextResponse.json(
-      { error: "Error al obtener órdenes de compra pendientes" },
+      { error: "Error al obtener órdenes de compra" },
       { status: 500 }
     );
   }
