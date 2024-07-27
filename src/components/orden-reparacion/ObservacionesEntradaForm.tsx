@@ -1,9 +1,9 @@
 import { useFetch } from "@/contexts/FetchContext";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
-  Box,
   Button,
-  Chip,
   Grid,
+  IconButton,
   List,
   ListItem,
   ListItemText,
@@ -69,7 +69,7 @@ const ObservacionesEntradaForm = () => {
     return null;
   }
   return (
-    <Grid item xs={12}>
+    <Grid item xs={12} sx={{ mb: 2 }}>
       <Typography variant="h6" sx={{ mb: 0 }}>
         Observaciones de entrada
       </Typography>
@@ -137,18 +137,40 @@ const ObservacionesEntradaForm = () => {
           )
         )}
       </List>
-      <Box sx={{ mb: 2 }}>
-        {JSON.parse(observacionesEntrada || "[]").map(
-          (obs: string, index: number) => (
-            <Chip
-              key={index}
-              label={obs}
-              onDelete={() => quitarObservacion(index)}
-              sx={{ m: 0.5 }}
-            />
-          )
-        )}
-      </Box>
+      {JSON.parse(observacionesEntrada || "[]").length > 0 && (
+        <>
+          <Typography variant="subtitle1" sx={{ mb: 0 }}>
+            Observaciones Agregadas
+          </Typography>
+          <List sx={{ mt: 0, py: 0 }}>
+            {JSON.parse(observacionesEntrada || "[]").map(
+              (obs: string, index: number) => (
+                <ListItem
+                  key={index}
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => quitarObservacion(index)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  }
+                  sx={{ py: 0.0 }}
+                >
+                  <ListItemText
+                    primary={
+                      <Typography variant="body2" sx={{ my: 0 }}>
+                        ◦ {obs}
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+              )
+            )}
+          </List>
+        </>
+      )}
     </Grid>
   );
 };
