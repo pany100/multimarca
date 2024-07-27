@@ -17,24 +17,22 @@ interface Proveedor {
 
 const ProveedoresPage = () => {
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "name", headerName: "Nombre", width: 200 },
-    { field: "address", headerName: "Dirección", width: 200 },
-    { field: "email", headerName: "Email", width: 200 },
-    { field: "phone", headerName: "Teléfono", width: 150 },
-    { field: "mobile", headerName: "Móvil", width: 150 },
-    { field: "iva", headerName: "IVA", width: 100 },
-    { field: "cuit", headerName: "CUIT", width: 150 },
+    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "name", headerName: "Nombre", flex: 1 },
+    { field: "email", headerName: "Email", flex: 2 },
+    { field: "phone", headerName: "Teléfono", flex: 1 },
+    { field: "mobile", headerName: "Móvil", flex: 1 },
+    { field: "cuit", headerName: "CUIT", flex: 1 },
   ];
 
   const formFields: FieldConfig[] = [
-    { name: "name", label: "Nombre", type: "text" },
-    { name: "address", label: "Dirección", type: "text" },
-    { name: "email", label: "Email", type: "email" },
-    { name: "phone", label: "Teléfono", type: "tel" },
-    { name: "mobile", label: "Móvil", type: "tel" },
-    { name: "iva", label: "IVA", type: "text" },
-    { name: "cuit", label: "CUIT", type: "text" },
+    { name: "name", label: "Nombre", type: "text", layout: { xs: 12 } },
+    { name: "address", label: "Dirección", type: "text", layout: { xs: 6 } },
+    { name: "email", label: "Email", type: "email", layout: { xs: 6 } },
+    { name: "phone", label: "Teléfono", type: "tel", layout: { xs: 6 } },
+    { name: "mobile", label: "Móvil", type: "tel", layout: { xs: 6 } },
+    { name: "iva", label: "IVA", type: "text", layout: { xs: 6 } },
+    { name: "cuit", label: "CUIT", type: "text", layout: { xs: 6 } },
   ];
 
   const createNewProveedor = (): Proveedor => {
