@@ -15,15 +15,22 @@ interface NotificacionWhatsapp {
 
 const NotificacionesWhatsappPage = () => {
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "description", headerName: "Descripción", width: 200 },
-    { field: "date", headerName: "Fecha", width: 150 },
-    { field: "whatsappKey", headerName: "Clave WhatsApp", width: 150 },
-    { field: "informacion", headerName: "Información", width: 200 },
+    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "description", headerName: "Descripción", flex: 1 },
+    {
+      field: "date",
+      headerName: "Fecha",
+      flex: 1,
+      valueGetter: (date: any) => {
+        return new Date(date).toLocaleDateString("es-AR");
+      },
+    },
+    { field: "whatsappKey", headerName: "Clave WhatsApp", flex: 1 },
+    { field: "informacion", headerName: "Información", flex: 2 },
     {
       field: "processed",
       headerName: "Procesado",
-      width: 100,
+      flex: 1,
     },
   ];
 
@@ -51,6 +58,12 @@ const NotificacionesWhatsappPage = () => {
       apiEndpoint="/api/notificaciones-whatsapp"
       fields={formFields}
       createNewItem={createNewNotificacion}
+      shouldRenderDelete={(item: NotificacionWhatsapp) =>
+        !item.processed && new Date(item.date) > new Date()
+      }
+      shouldRenderEdit={(item: NotificacionWhatsapp) =>
+        !item.processed && new Date(item.date) > new Date()
+      }
       validationSchema={yup.object({
         description: yup.string().required("La descripción es requerida"),
         date: yup.date().required("La fecha es requerida"),
