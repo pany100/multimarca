@@ -70,6 +70,7 @@ interface DynamicFormProps<T> {
   handleChange: (field: keyof T, value: any) => void;
   onSubmit: (data: T) => Promise<void>;
   validationSchema: yup.ObjectSchema<any>;
+  cancel: () => void;
 }
 
 function DynamicForm<T extends FieldValues>({
@@ -78,6 +79,7 @@ function DynamicForm<T extends FieldValues>({
   handleChange,
   onSubmit,
   validationSchema,
+  cancel,
 }: DynamicFormProps<T>) {
   const {
     register,
@@ -377,7 +379,6 @@ function DynamicForm<T extends FieldValues>({
         );
     }
   };
-  console.log(errors);
   return (
     <Box
       component="form"
@@ -399,9 +400,14 @@ function DynamicForm<T extends FieldValues>({
           );
         })}
       </Grid>
-      <Button type="submit" variant="contained" sx={{ mt: 2 }}>
-        Guardar
-      </Button>
+      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+        <Button variant="outlined" onClick={() => cancel()} sx={{ mr: 1 }}>
+          Cancelar
+        </Button>
+        <Button type="submit" variant="contained">
+          Guardar
+        </Button>
+      </Box>
     </Box>
   );
 }

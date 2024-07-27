@@ -368,6 +368,7 @@ function CrudTable<T extends { id: string }>({
             handleChange={handleChange}
             onSubmit={handleEditSubmit}
             validationSchema={validationSchema}
+            cancel={() => setEditModalOpen(false)}
           />
         </Box>
       </Modal>
@@ -394,6 +395,7 @@ function CrudTable<T extends { id: string }>({
               handleChange={handleNewItemChange}
               onSubmit={handleAddSubmit}
               validationSchema={validationSchema}
+              cancel={() => setAddModalOpen(false)}
             />
           </Box>
         </Modal>

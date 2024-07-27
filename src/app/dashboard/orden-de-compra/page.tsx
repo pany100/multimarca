@@ -2,9 +2,10 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import {
   Autocomplete,
+  Box,
   Button,
   Dialog,
   DialogActions,
@@ -25,8 +26,8 @@ import * as yup from "yup";
 interface OrdenDeCompra {
   id: string;
   fecha: string;
-  precioTotal: number;
-  proveedorId: number;
+  precioTotal: number | null;
+  proveedorId: number | null;
   proveedor: {
     name: string;
   };
@@ -54,20 +55,28 @@ const OrdenDeCompraPage = () => {
   const [stockOptions, setStockOptions] = useState<
     Array<{ id: number; name: string }>
   >([]);
+  const { authFetch } = useFetch();
 
   useEffect(() => {
     setItems([]);
   }, [proveedorId]);
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "fecha", headerName: "Fecha", width: 200 },
-    { field: "precioTotal", headerName: "Precio Total", width: 150 },
+    { field: "id", headerName: "ID", flex: 0.5 },
+    {
+      field: "fecha",
+      headerName: "Fecha",
+      flex: 1,
+      valueGetter: (fecha: string) =>
+        new Date(fecha).toLocaleDateString("es-AR"),
+    },
+    { field: "precioTotal", headerName: "Precio Total", flex: 0.5 },
     {
       field: "proveedor",
       headerName: "Proveedor",
       width: 200,
       valueGetter: (proveedor: any) => proveedor?.name || "",
+      flex: 1,
     },
     {
       field: "detalle",
@@ -96,6 +105,7 @@ const OrdenDeCompraPage = () => {
           </div>
         );
       },
+      flex: 1.5,
     },
   ];
 
@@ -115,7 +125,6 @@ const OrdenDeCompraPage = () => {
 
   const formFields: FieldConfig[] = [
     { name: "fecha", label: "Fecha", type: "date" },
-    { name: "precioTotal", label: "Precio Total", type: "number" },
     {
       name: "proveedorId",
       label: "Proveedor",
@@ -166,60 +175,95 @@ const OrdenDeCompraPage = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {items.map((item) => (
-                  <TableRow key={item.id}>
-                    <TableCell>{item.stock.name}</TableCell>
-                    <TableCell>{item.cantidad}</TableCell>
-                    <TableCell>
-                      <Button
-                        onClick={() => {
-                          const newItems = items.filter((i) => i !== item);
-                          setItems(newItems);
-                          onChange(newItems);
-                        }}
-                      >
-                        Eliminar
-                      </Button>
-                    </TableCell>
+                {items.length > 0 ? (
+                  items.map((item, index) => (
+                    <TableRow
+                      key={item.id}
+                      sx={
+                        index === items.length - 1
+                          ? {
+                              "&:last-child td, &:last-child th": { border: 0 },
+                            }
+                          : {}
+                      }
+                    >
+                      <TableCell>{item.stock.name}</TableCell>
+                      <TableCell>{item.cantidad}</TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => {
+                            const newItems = items.filter((i) => i !== item);
+                            setItems(newItems);
+                            onChange(newItems);
+                          }}
+                        >
+                          Eliminar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow
+                    sx={{ "&:last-child td, &:last-child th": { border: 0 } }}
+                  >
+                    <TableCell>---</TableCell>
+                    <TableCell>---</TableCell>
+                    <TableCell>---</TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
             {error && <Typography color="error">{error}</Typography>}
-            <Button
-              variant="contained"
-              onClick={() => setOpenModal(true)}
-              disabled={proveedorId === 0}
+            <Box
+              sx={{ display: "flex", justifyContent: "flex-end", mt: 2, mb: 2 }}
             >
-              Agregar Item
-            </Button>
-            <Dialog open={openModal} onClose={() => setOpenModal(false)}>
+              <Button
+                variant="outlined"
+                onClick={() => setOpenModal(true)}
+                disabled={proveedorId === 0}
+              >
+                Agregar Item
+              </Button>
+            </Box>
+            <Dialog
+              open={openModal}
+              onClose={() => setOpenModal(false)}
+              PaperProps={{
+                sx: {
+                  width: "400px",
+                  maxWidth: "100%",
+                },
+              }}
+            >
               <DialogTitle>Agregar Nuevo Item</DialogTitle>
               <DialogContent>
-                <Autocomplete
-                  options={stockOptions || []}
-                  getOptionLabel={(option: { name: string; id: number }) =>
-                    option.name
-                  }
-                  renderInput={(params) => (
-                    <TextField {...params} label="Stock" />
-                  )}
-                  value={newItem.stock}
-                  onChange={(_, newValue) => {
-                    setNewItem({
-                      ...newItem,
-                      stockId: newValue?.id ?? 0,
-                      stock: newValue ?? { id: 0, name: "" },
-                    });
-                  }}
-                  onInputChange={(_, newInputValue) => {
-                    searchStock(newInputValue);
-                  }}
-                />
+                <Box sx={{ mb: 3 }}>
+                  <Autocomplete
+                    options={stockOptions || []}
+                    getOptionLabel={(option: { name: string; id: number }) =>
+                      option.name
+                    }
+                    renderInput={(params) => (
+                      <TextField {...params} label="Stock" />
+                    )}
+                    value={newItem.stock}
+                    onChange={(_, newValue) => {
+                      setNewItem({
+                        ...newItem,
+                        stockId: newValue?.id ?? 0,
+                        stock: newValue ?? { id: 0, name: "" },
+                      });
+                    }}
+                    onInputChange={(_, newInputValue) => {
+                      searchStock(newInputValue);
+                    }}
+                  />
+                </Box>
                 <TextField
                   label="Unidades"
                   type="number"
                   value={newItem.cantidad}
+                  fullWidth
                   onChange={(e) => {
                     setNewItem({
                       ...newItem,
@@ -228,7 +272,7 @@ const OrdenDeCompraPage = () => {
                   }}
                 />
               </DialogContent>
-              <DialogActions>
+              <DialogActions sx={{ mr: 2, mb: 2 }}>
                 <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
                 <Button
                   onClick={() => {
@@ -243,6 +287,7 @@ const OrdenDeCompraPage = () => {
                       cantidad: 0,
                     });
                   }}
+                  variant="contained"
                   disabled={newItem.stockId === 0 || newItem.cantidad === 0}
                 >
                   Agregar
@@ -253,14 +298,15 @@ const OrdenDeCompraPage = () => {
         );
       },
     },
+    { name: "precioTotal", label: "Precio Total", type: "number" },
   ];
 
   const createNewOrdenDeCompra = (): OrdenDeCompra => {
     return {
       id: "",
       fecha: new Date().toISOString().split("T")[0],
-      precioTotal: 0,
-      proveedorId: 0,
+      precioTotal: null,
+      proveedorId: null,
       proveedor: {
         name: "",
       },
