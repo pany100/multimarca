@@ -2,7 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import {
   Autocomplete,
   Box,
@@ -59,6 +59,7 @@ const VentasPage = () => {
   const [stockOptions, setStockOptions] = useState<
     Array<{ id: number; name: string; price: number }>
   >([]);
+  const { authFetch } = useFetch();
 
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
