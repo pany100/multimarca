@@ -29,16 +29,22 @@ const MecanicosPage = () => {
 
   const formFields: FieldConfig[] = [
     { name: "name", label: "Nombre", type: "text", layout: { xs: 6 } },
-    { name: "dni", label: "DNI", type: "text", layout: { xs: 6 } },
+    { name: "email", label: "Email", type: "email", layout: { xs: 6 } },
     {
       name: "start_date",
       label: "Fecha de comienzo",
       type: "date",
       layout: { xs: 4 },
     },
-    { name: "address", label: "Dirección", type: "text", layout: { xs: 4 } },
-    { name: "city", label: "Ciudad", type: "text", layout: { xs: 4 } },
-    { name: "state", label: "Provincia", type: "text", layout: { xs: 4 } },
+    {
+      name: "birthday",
+      label: "Fecha de Nacimiento",
+      type: "date",
+      layout: { xs: 4 },
+    },
+    { name: "dni", label: "DNI", type: "text", layout: { xs: 4 } },
+    { name: "address", label: "Dirección", type: "text", layout: { xs: 6 } },
+    { name: "state", label: "Provincia", type: "text", layout: { xs: 6 } },
     {
       name: "postal_code",
       label: "Código Postal",
@@ -46,13 +52,7 @@ const MecanicosPage = () => {
       layout: { xs: 4 },
     },
     { name: "phone", label: "Teléfono", type: "tel", layout: { xs: 4 } },
-    { name: "email", label: "Email", type: "email", layout: { xs: 6 } },
-    {
-      name: "birthday",
-      label: "Fecha de Nacimiento",
-      type: "date",
-      layout: { xs: 6 },
-    },
+    { name: "city", label: "Ciudad", type: "text", layout: { xs: 4 } },
   ];
 
   const createNewMecanico = (): Mecanico => {
