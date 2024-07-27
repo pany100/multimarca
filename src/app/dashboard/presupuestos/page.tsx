@@ -1,7 +1,9 @@
 "use client";
 
 import { useFetch } from "@/contexts/FetchContext";
-import { Box, Button, Typography } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Box, Button, IconButton, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -30,20 +32,59 @@ const PresupuestosPage = () => {
   const { authFetch } = useFetch();
 
   const columns: GridColDef[] = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "fechaCreacion", headerName: "Fecha", width: 130 },
-    { field: "estado", headerName: "Estado", width: 130 },
+    { field: "id", headerName: "ID", flex: 0.3 },
     {
-      field: "patente",
-      headerName: "Patente",
-      width: 130,
-      renderCell: (params: any) => params.row.auto.patent,
+      field: "fechaCreacion",
+      headerName: "Fecha",
+      flex: 1,
+      valueGetter: (fechaCreacion: string) =>
+        new Date(fechaCreacion).toLocaleDateString("es-AR"),
     },
+    {
+      field: "vehículo",
+      headerName: "Auto",
+      flex: 2,
+      renderCell: (params: any) => (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            height: "100%",
+          }}
+        >
+          <Typography variant="body2">
+            {params.row.auto.brand} {params.row.auto.model}
+          </Typography>
+          <Typography>{params.row.auto.patent}</Typography>
+        </Box>
+      ),
+    },
+    { field: "estado", headerName: "Estado", flex: 1 },
     {
       field: "cliente",
       headerName: "Cliente",
-      width: 200,
+      flex: 1,
       renderCell: (params: any) => params.row.auto.owner.fullName,
+    },
+    {
+      field: "observacionesCliente",
+      headerName: "Observaciones",
+      flex: 2,
+      renderCell: (params: any) => (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            height: "100%",
+          }}
+        >
+          <Typography variant="body2">
+            {params.row.observacionesCliente}
+          </Typography>
+        </Box>
+      ),
     },
     {
       field: "acciones",
@@ -51,24 +92,20 @@ const PresupuestosPage = () => {
       width: 200,
       renderCell: (params) => (
         <>
-          <Button
+          <IconButton
             onClick={() => handleEditClick(params.row.id)}
-            variant="contained"
-            color="primary"
             size="small"
           >
-            Editar
-          </Button>
-          <Button
+            <EditIcon />
+          </IconButton>
+          <IconButton
             onClick={() =>
               router.push(`/dashboard/ordenes-reparacion/${params.row.id}/ver`)
             }
-            variant="contained"
-            color="secondary"
             size="small"
           >
-            Ver
-          </Button>
+            <VisibilityIcon />
+          </IconButton>
         </>
       ),
     },
