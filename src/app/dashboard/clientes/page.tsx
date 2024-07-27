@@ -149,7 +149,7 @@ const ClientesPage = () => {
       validationSchema={yup.object({
         fullName: yup.string().required("El nombre es requerido"),
         email: yup.string().email("El email es inválido").nullable(),
-        phone: yup.string().nullable(),
+        phone: yup.string().required("El teléfono es requerido"),
         dni: yup
           .string()
           .matches(/^\d+$/, "El DNI debe contener solo números")
