@@ -37,7 +37,9 @@ const schema = yup.object().shape({
     .positive()
     .integer()
     .required("Debe ingresar los kilómetros"),
-  observacionesCliente: yup.string(),
+  observacionesCliente: yup
+    .string()
+    .required("Debe ingresar las observaciones"),
   estado: yup
     .string()
     .oneOf(["Presupuestado", "En Progreso", "Aceptado", "Terminado"])
@@ -416,24 +418,33 @@ const NuevaOrdenReparacionForm = () => {
           <Grid item xs={12}>
             <TrabajosRealizadosFormSection />
           </Grid>
-          <Controller
-            name="montoTotalCliente"
-            control={control}
-            render={({ field }) => (
-              <TextField
-                {...field}
-                label="Monto Total Cliente"
-                type="number"
-                InputProps={{
-                  readOnly: true,
-                }}
-                fullWidth
-                margin="normal"
-              />
-            )}
-          />
+          <Grid item xs={12}>
+            <Controller
+              name="montoTotalCliente"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Monto Total Cliente"
+                  type="number"
+                  InputProps={{
+                    readOnly: true,
+                  }}
+                  fullWidth
+                  margin="normal"
+                />
+              )}
+            />
+          </Grid>
         </Grid>
-        <Button type="submit" variant="contained" color="primary">
+        <Button
+          type="submit"
+          variant="contained"
+          color="primary"
+          sx={{
+            my: 2,
+          }}
+        >
           Crear Orden de Reparación
         </Button>
       </form>
