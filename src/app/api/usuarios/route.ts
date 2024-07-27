@@ -25,7 +25,6 @@ export async function GET(request: Request) {
           email: true,
           fullName: true,
           username: true,
-          avatar: true,
           rol: {
             select: {
               name: true,

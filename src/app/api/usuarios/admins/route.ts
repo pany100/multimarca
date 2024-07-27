@@ -11,7 +11,6 @@ export async function GET(request: Request) {
         fullName: true,
         username: true,
         email: true,
-        avatar: true,
         rol: true,
       },
     });

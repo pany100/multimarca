@@ -96,7 +96,6 @@ async function main() {
       username: "Admin",
       email: "pany100@gmail.com",
       rolId: 1,
-      avatar: "/images/avatars/1.png",
       password: "Probando01",
     },
     {
@@ -104,7 +103,6 @@ async function main() {
       username: "Liso",
       email: "liso.troglio@gmail.com",
       rolId: 1,
-      avatar: "/images/avatars/7.png",
       password: "7yXLuicGpE7FxQ",
     },
     {
@@ -112,7 +110,6 @@ async function main() {
       username: "Nano",
       email: "mot024@hotmail.com",
       rolId: 1,
-      avatar: "/images/avatars/5.png",
       password: "Fvx2NfEZCg6tFz",
     },
     {
@@ -120,7 +117,6 @@ async function main() {
       username: "Gaby",
       email: "gabriela.ateca@gmail.com",
       rolId: 6,
-      avatar: "/images/avatars/2.png",
       password: "8nD3xZoKmu32zK",
     },
   ];

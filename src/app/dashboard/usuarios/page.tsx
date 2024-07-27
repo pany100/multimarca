@@ -11,7 +11,6 @@ interface Usuario {
   fullName: string;
   email: string;
   username: string;
-  avatar: string;
   rolId: number;
 }
 
@@ -40,11 +39,11 @@ const UsuariosPage = () => {
   }, []);
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "fullName", headerName: "Nombre completo", width: 200 },
-    { field: "email", headerName: "Email", width: 200 },
-    { field: "username", headerName: "Usuario", width: 150 },
-    { field: "rol", headerName: "Rol", width: 150 },
+    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "fullName", headerName: "Nombre completo", flex: 2 },
+    { field: "email", headerName: "Email", flex: 2 },
+    { field: "username", headerName: "Usuario", flex: 1.5 },
+    { field: "rol", headerName: "Rol", flex: 1.5 },
   ];
 
   const formFields: FieldConfig[] = [
@@ -64,12 +63,11 @@ const UsuariosPage = () => {
         };
       },
     },
-    { name: "avatar", label: "Avatar URL", type: "text" },
   ];
 
   return (
     <CrudTable<Usuario>
-      title="Gestión de Usuarios"
+      title="Usuarios"
       columns={columns}
       fields={formFields}
       apiEndpoint="/api/usuarios"

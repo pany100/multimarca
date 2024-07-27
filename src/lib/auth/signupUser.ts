@@ -1,12 +1,11 @@
-import prisma from "src/lib/prisma";
 import bcrypt from "bcryptjs";
+import prisma from "src/lib/prisma";
 
 interface SignupData {
   email: string;
   fullName: string;
   username: string;
   password: string;
-  avatar?: string;
   rolId: number; // Asumimos que el rol se identifica por un ID
 }
 
@@ -15,7 +14,6 @@ export async function signupUser({
   fullName,
   username,
   password,
-  avatar,
   rolId,
 }: SignupData) {
   try {
@@ -32,7 +30,6 @@ export async function signupUser({
         fullName,
         username,
         password: hashedPassword,
-        avatar,
         rol: {
           connect: { id: rolId },
         },

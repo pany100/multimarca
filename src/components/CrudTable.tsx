@@ -8,6 +8,9 @@ import {
   Button,
   CircularProgress,
   Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
   Modal,
   Snackbar,
@@ -394,13 +397,29 @@ function CrudTable<T extends { id: string }>({
         open={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
       >
-        <Typography>
-          ¿Estás seguro de que quieres eliminar este {title}?
-        </Typography>
-        <Button onClick={() => setDeleteConfirmOpen(false)}>Cancelar</Button>
-        <Button onClick={handleDeleteConfirm} autoFocus>
-          Eliminar
-        </Button>
+        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Estás seguro de que quieres eliminar este {title}?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center", pb: 2, px: 3 }}>
+          <Button
+            onClick={() => setDeleteConfirmOpen(false)}
+            variant="outlined"
+            sx={{ mr: 1 }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            color="error"
+            autoFocus
+          >
+            Eliminar
+          </Button>
+        </DialogActions>
       </Dialog>
       <Snackbar
         open={snackbar.open}

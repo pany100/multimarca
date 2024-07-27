@@ -240,6 +240,7 @@ function DynamicForm<T extends FieldValues>({
                   onChange={(e) =>
                     handleFieldChange(field.name as keyof T, e.target.value)
                   }
+                  label={field.label}
                 >
                   {(typeof field.options === "function"
                     ? field.options(item)

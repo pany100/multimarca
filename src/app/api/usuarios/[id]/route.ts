@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
@@ -13,7 +13,6 @@ export async function GET(
         email: true,
         fullName: true,
         username: true,
-        avatar: true,
         rol: {
           select: {
             id: true,
@@ -55,7 +54,7 @@ export async function PUT(
         { status: 404 }
       );
     }
-    const { fullName, username, email, rolId, avatar } = await request.json();
+    const { fullName, username, email, rolId } = await request.json();
     const updatedUser = await prisma.usuario.update({
       where: { id: user.id },
       data: {
@@ -65,7 +64,6 @@ export async function PUT(
         rol: {
           connect: { id: rolId },
         },
-        avatar: avatar,
       },
       select: {
         id: true,
@@ -73,7 +71,6 @@ export async function PUT(
         username: true,
         email: true,
         rol: true,
-        avatar: true,
       },
     });
     const usuarioConRol = {

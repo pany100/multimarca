@@ -1,6 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
 import { verifyToken } from "@/lib/auth/authService";
 import prisma from "@/lib/prisma";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {
   const authHeader = request.headers.get("authorization");
@@ -22,7 +22,6 @@ export async function GET(request: NextRequest) {
         email: true,
         fullName: true,
         username: true,
-        avatar: true,
         rol: {
           select: {
             name: true,

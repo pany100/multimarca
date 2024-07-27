@@ -20,7 +20,6 @@ model Usuario {
   username                     String       @db.VarChar(150)
   email                        String       @unique @db.VarChar(150)
   password                     String       @db.VarChar(300)
-  avatar                       String?      @db.VarChar(150)
   reset_password_token         String?      @db.VarChar(255)
   reset_password_token_expired DateTime?
   rol                          Rol          @relation(fields: [rolId], references: [id])
