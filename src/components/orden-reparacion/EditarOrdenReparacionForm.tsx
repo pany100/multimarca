@@ -21,9 +21,9 @@ import {
 } from "@mui/material";
 import debounce from "lodash/debounce";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
+import { Controller, FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import ControlesEnReparacionForm from "./ControlesEnReparacionForm";
 import MecanicoFormSection from "./MecanicoFormSection";
@@ -278,15 +278,21 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
     setValue,
   } = methods;
 
-  const repuestosUsados = useWatch({ control, name: "repuestosUsados" });
-  const reparacionesTerceros = useWatch({
-    control,
-    name: "reparacionesDeTercero",
-  });
-  const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
   const [isEditing, setIsEditing] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
+  const fileUrl = useMemo(() => {
+    if (selectedFile) {
+      return URL.createObjectURL(selectedFile);
+    }
+    return null;
+  }, [selectedFile]);
+  useEffect(() => {
+    return () => {
+      if (fileUrl) {
+        URL.revokeObjectURL(fileUrl);
+      }
+    };
+  }, [fileUrl]);
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (acceptedFiles.length > 0) {
       setSelectedFile(acceptedFiles[0]);
@@ -627,7 +633,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
                     </Typography>
                     <Box
                       component="iframe"
-                      src={URL.createObjectURL(selectedFile)}
+                      src={fileUrl}
                       width="100%"
                       height="300px"
                     />
