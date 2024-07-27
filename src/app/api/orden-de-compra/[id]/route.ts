@@ -101,7 +101,7 @@ export async function PUT(
   } catch (error) {
     console.error("Error al actualizar orden de compra:", error);
     return NextResponse.json(
-      { error: "Error al actualizar la orden de compra" },
+      { error: `Error al actualizar la orden de compra: ${error}` },
       { status: 500 }
     );
   }

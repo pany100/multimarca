@@ -2,7 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import { useEffect, useState } from "react";
 import * as yup from "yup";
 
@@ -22,6 +22,7 @@ const ExtraccionesPage = () => {
   const [usuarios, setUsuarios] = useState<{ value: number; label: string }[]>(
     []
   );
+  const { authFetch } = useFetch();
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
@@ -39,7 +40,7 @@ const ExtraccionesPage = () => {
       }
     };
     fetchUsuarios();
-  }, []);
+  }, [authFetch]);
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
     { field: "monto", headerName: "Monto", width: 130 },
@@ -55,13 +56,27 @@ const ExtraccionesPage = () => {
       width: 180,
       renderCell: (value: any) => value.value.fullName,
     },
-    { field: "motivo", headerName: "Motivo", width: 250 },
+    { field: "motivo", headerName: "Descripción", width: 250 },
     { field: "tipoExtraccion", headerName: "Tipo de Extracción", width: 180 },
   ];
 
   const formFields: FieldConfig[] = [
-    { name: "monto", label: "Monto", type: "number" },
-    { name: "fecha", label: "Fecha", type: "date" },
+    {
+      name: "monto",
+      label: "Monto",
+      type: "number",
+      layout: {
+        xs: 6,
+      },
+    },
+    {
+      name: "fecha",
+      label: "Fecha",
+      type: "date",
+      layout: {
+        xs: 6,
+      },
+    },
     {
       name: "usuarioId",
       label: "Usuario",
@@ -75,7 +90,7 @@ const ExtraccionesPage = () => {
         };
       },
     },
-    { name: "motivo", label: "Motivo", type: "text" },
+    { name: "motivo", label: "Descripción", type: "text" },
     {
       name: "tipoExtraccion",
       label: "Tipo de Extracción",

@@ -52,7 +52,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { monto, usuarioId, motivo, tipoExtraccion } = body;
+    const { monto, usuarioId, motivo, fecha, tipoExtraccion } = body;
 
     if (!monto || typeof monto !== "number" || monto <= 0) {
       return NextResponse.json(
@@ -91,6 +91,14 @@ export async function POST(request: Request) {
         usuarioId,
         motivo,
         tipoExtraccion,
+        fecha,
+      },
+      include: {
+        usuario: {
+          select: {
+            fullName: true,
+          },
+        },
       },
     });
 

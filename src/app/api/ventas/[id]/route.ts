@@ -8,7 +8,7 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { clienteId, items, total } = body;
+    const { clienteId, items, total, fecha } = body;
 
     if (!clienteId || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -59,6 +59,7 @@ export async function PUT(
         data: {
           clienteId,
           total,
+          fecha,
           items: {
             deleteMany: {},
             create: items.map((item) => ({
@@ -85,9 +86,7 @@ export async function PUT(
         });
 
         if (!stock || (stock.units ?? 0) - item.cantidad < 0) {
-          throw new Error(
-            `Stock insuficiente para el ítem con ID ${item.stockId}`
-          );
+          throw new Error(`Stock insuficiente para el ítem ${item.stock.name}`);
         }
 
         await prisma.stock.update({
@@ -107,7 +106,11 @@ export async function PUT(
   } catch (error) {
     console.error("Error al actualizar venta:", error);
     return NextResponse.json(
-      { error: "Error al actualizar la venta" },
+      {
+        error: `Error al actualizar la venta: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      },
       { status: 500 }
     );
   }

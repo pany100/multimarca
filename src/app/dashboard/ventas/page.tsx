@@ -62,19 +62,24 @@ const VentasPage = () => {
   const { authFetch } = useFetch();
 
   const columns = [
-    { field: "id", headerName: "ID", width: 70 },
-    { field: "fecha", headerName: "Fecha", width: 200 },
-    { field: "total", headerName: "Total", width: 150 },
+    { field: "id", headerName: "ID", flex: 0.3 },
+    {
+      field: "fecha",
+      headerName: "Fecha",
+      flex: 0.8,
+      valueGetter: (fecha: string) => new Date(fecha).toLocaleDateString(),
+    },
+    { field: "total", headerName: "Total", flex: 1 },
     {
       field: "cliente",
       headerName: "Cliente",
-      width: 200,
       valueGetter: (cliente: any) => cliente?.fullName || "",
+      flex: 1.5,
     },
     {
       field: "detalle",
       headerName: "Detalle",
-      width: 300,
+      flex: 1.5,
       renderCell: (params: any) => {
         const items = params.row.items || [];
         return (
@@ -154,9 +159,7 @@ const VentasPage = () => {
       type: "custom",
       render: (value, onChange, error) => {
         const currentItems = (value as Venta["items"]) || [];
-        if (currentItems.length > 0) {
-          setItems(currentItems);
-        }
+        setItems(currentItems);
         return (
           <>
             <Table>

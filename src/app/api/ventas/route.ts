@@ -52,12 +52,13 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { clienteId, items, total } = body;
+    const { clienteId, items, total, fecha } = body;
 
     const venta = await prisma.venta.create({
       data: {
         clienteId,
         total,
+        fecha,
         items: {
           create: items.map((item: { stockId: number; cantidad: number }) => ({
             stockId: item.stockId,
@@ -83,9 +84,7 @@ export async function POST(request: Request) {
       });
 
       if (!stock || (stock.units ?? 0) - item.cantidad < 0) {
-        throw new Error(
-          `Stock insuficiente para el ítem con ID ${item.stockId}`
-        );
+        throw new Error(`Stock insuficiente para el ítem ${item.stock.name}`);
       }
 
       await prisma.stock.update({
@@ -102,7 +101,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error("Error al crear venta:", error);
     return NextResponse.json(
-      { error: "Error al crear venta" },
+      { error: `Error al crear venta: ${error}` },
       { status: 500 }
     );
   }
