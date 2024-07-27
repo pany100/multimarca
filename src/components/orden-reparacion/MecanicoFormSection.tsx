@@ -135,7 +135,10 @@ function MecanicoFormSection() {
       />
       <Dialog
         open={openMecanicoModal}
-        onClose={() => setOpenMecanicoModal(false)}
+        onClose={() => {
+          setOpenMecanicoModal(false);
+          setSelectedMecanico(null);
+        }}
         PaperProps={{
           style: {
             minWidth: "350px",
@@ -159,7 +162,13 @@ function MecanicoFormSection() {
           />
         </DialogContent>
         <DialogActions>
-          <Button type="button" onClick={() => setOpenMecanicoModal(false)}>
+          <Button
+            type="button"
+            onClick={() => {
+              setOpenMecanicoModal(false);
+              setSelectedMecanico(null);
+            }}
+          >
             Cancelar
           </Button>
           <Button

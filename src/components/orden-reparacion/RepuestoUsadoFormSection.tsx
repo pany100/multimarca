@@ -2,11 +2,13 @@ import { useFetch } from "@/contexts/FetchContext";
 import {
   Alert,
   Autocomplete,
+  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Snackbar,
   Table,
   TableBody,
@@ -117,50 +119,66 @@ function RepuestoUsadoFormSection() {
         control={control}
         render={({ field, fieldState: { error } }) => (
           <>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Repuesto</TableCell>
-                  <TableCell>Precio Compra</TableCell>
-                  <TableCell>Precio Venta</TableCell>
-                  <TableCell>Unidades Consumidas</TableCell>
-                  <TableCell>Acciones</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {field.value?.map((repuesto: any) => (
-                  <TableRow key={repuesto.stock.id}>
-                    <TableCell>{repuesto.stock.name}</TableCell>
-                    <TableCell>{repuesto.precioCompra}</TableCell>
-                    <TableCell>{repuesto.precioVenta}</TableCell>
-                    <TableCell>{repuesto.unidadesConsumidas}</TableCell>
-                    <TableCell>
-                      <Button
-                        onClick={() => {
-                          handleRemoveRepuesto(repuesto.stock.id);
-                        }}
-                      >
-                        Eliminar
-                      </Button>
-                    </TableCell>
+            {field.value && field.value.length > 0 ? (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Repuesto</TableCell>
+                    <TableCell>Precio Compra</TableCell>
+                    <TableCell>Precio Venta</TableCell>
+                    <TableCell>Unidades Consumidas</TableCell>
+                    <TableCell>Acciones</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {field.value.map((repuesto: any) => (
+                    <TableRow key={repuesto.stock.id}>
+                      <TableCell>{repuesto.stock.name}</TableCell>
+                      <TableCell>{repuesto.precioCompra}</TableCell>
+                      <TableCell>{repuesto.precioVenta}</TableCell>
+                      <TableCell>{repuesto.unidadesConsumidas}</TableCell>
+                      <TableCell>
+                        <Button
+                          onClick={() => {
+                            handleRemoveRepuesto(repuesto.stock.id);
+                          }}
+                        >
+                          Eliminar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <Typography>No hay repuestos asignados</Typography>
+            )}
             {error && <Typography color="error">{error.message}</Typography>}
-            <Button
-              onClick={() => setOpenRepuestoModal(true)}
-              variant="contained"
-              color="secondary"
-            >
-              Agregar Repuesto
-            </Button>
+            <Box display="flex" justifyContent="flex-end" mt={2}>
+              <Button
+                onClick={() => setOpenRepuestoModal(true)}
+                variant="contained"
+              >
+                Agregar Repuesto
+              </Button>
+            </Box>
           </>
         )}
       />
       <Dialog
         open={openRepuestoModal}
-        onClose={() => setOpenRepuestoModal(false)}
+        onClose={() => {
+          setOpenRepuestoModal(false);
+          setSelectedRepuesto(null);
+          setPrecioCompra("");
+          setPrecioVenta("");
+          setUnidadesConsumidas("");
+        }}
+        PaperProps={{
+          style: {
+            minWidth: "350px",
+          },
+        }}
       >
         <DialogTitle>Agregar Repuesto</DialogTitle>
         <DialogContent>
@@ -184,6 +202,7 @@ function RepuestoUsadoFormSection() {
             onInputChange={(_, newInputValue) => {
               searchRepuestos(newInputValue);
             }}
+            sx={{ mt: 2 }}
           />
           <TextField
             label="Precio Compra"
@@ -211,7 +230,16 @@ function RepuestoUsadoFormSection() {
           />
         </DialogContent>
         <DialogActions>
-          <Button type="button" onClick={() => setOpenRepuestoModal(false)}>
+          <Button
+            type="button"
+            onClick={() => {
+              setOpenRepuestoModal(false);
+              setSelectedRepuesto(null);
+              setPrecioCompra("");
+              setPrecioVenta("");
+              setUnidadesConsumidas("");
+            }}
+          >
             Cancelar
           </Button>
           <Button
@@ -237,6 +265,7 @@ function RepuestoUsadoFormSection() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <Divider sx={{ mt: 2 }} />
     </>
   );
 }
