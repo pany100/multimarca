@@ -633,7 +633,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
                     </Typography>
                     <Box
                       component="iframe"
-                      src={fileUrl}
+                      src={fileUrl || ""}
                       width="100%"
                       height="300px"
                     />
