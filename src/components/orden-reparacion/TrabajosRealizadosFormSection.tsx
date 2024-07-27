@@ -2,11 +2,13 @@ import { useFetch } from "@/contexts/FetchContext";
 import {
   Alert,
   Autocomplete,
+  Box,
   Button,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   Snackbar,
   Table,
   TableBody,
@@ -87,9 +89,7 @@ function TrabajosRealizadosFormSection() {
     } else {
       setValue("trabajosRealizados", [...currentTrabajos, newTrabajo]);
       setOpenTrabajoModal(false);
-      setSelectedTrabajo(null);
-      setNombreTrabajo("");
-      setPrecioUnitario("");
+      resetFields();
       setSnackbar({
         open: true,
         message: "Trabajo agregado correctamente",
@@ -107,6 +107,22 @@ function TrabajosRealizadosFormSection() {
     setValue("trabajosRealizados", updatedTrabajos);
   };
 
+  const resetFields = () => {
+    setSelectedTrabajo(null);
+    setNombreTrabajo("");
+    setPrecioUnitario("");
+  };
+
+  const handleTipoTrabajoChange = (
+    _: React.MouseEvent<HTMLElement>,
+    newTipoTrabajo: "lista" | "otros" | null
+  ) => {
+    if (newTipoTrabajo !== null) {
+      setTipoTrabajo(newTipoTrabajo);
+      resetFields();
+    }
+  };
+
   return (
     <>
       <Typography variant="h6" gutterBottom>
@@ -117,56 +133,62 @@ function TrabajosRealizadosFormSection() {
         control={control}
         render={({ field, fieldState: { error } }) => (
           <>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>Trabajo</TableCell>
-                  <TableCell>Precio Unitario</TableCell>
-                  <TableCell>Acciones</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {field.value?.map((trabajo: any, index: number) => (
-                  <TableRow key={index}>
-                    <TableCell>{trabajo.manoDeObra.name}</TableCell>
-                    <TableCell>{trabajo.precioUnitario}</TableCell>
-                    <TableCell>
-                      <Button onClick={() => handleRemoveTrabajo(index)}>
-                        Eliminar
-                      </Button>
-                    </TableCell>
+            {field.value && field.value.length > 0 ? (
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>Trabajo</TableCell>
+                    <TableCell>Precio Unitario</TableCell>
+                    <TableCell>Acciones</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
+                </TableHead>
+                <TableBody>
+                  {field.value.map((trabajo: any, index: number) => (
+                    <TableRow key={index}>
+                      <TableCell>{trabajo.manoDeObra.name}</TableCell>
+                      <TableCell>{trabajo.precioUnitario}</TableCell>
+                      <TableCell>
+                        <Button onClick={() => handleRemoveTrabajo(index)}>
+                          Eliminar
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <Typography>No hay trabajos realizados asignados</Typography>
+            )}
             {error && <Typography color="error">{error.message}</Typography>}
-            <Button
-              onClick={() => setOpenTrabajoModal(true)}
-              variant="contained"
-              color="secondary"
-            >
-              Agregar Trabajo
-            </Button>
+            <Box display="flex" justifyContent="flex-end" mt={2}>
+              <Button
+                onClick={() => setOpenTrabajoModal(true)}
+                variant="contained"
+              >
+                Agregar Trabajo
+              </Button>
+            </Box>
           </>
         )}
       />
       <Dialog
         open={openTrabajoModal}
-        onClose={() => setOpenTrabajoModal(false)}
+        onClose={() => {
+          setOpenTrabajoModal(false);
+          resetFields();
+        }}
+        PaperProps={{
+          style: {
+            width: "450px",
+          },
+        }}
       >
         <DialogTitle>Agregar Trabajo Realizado</DialogTitle>
         <DialogContent>
           <ToggleButtonGroup
             value={tipoTrabajo}
             exclusive
-            onChange={(_, newValue) => {
-              if (newValue !== null) {
-                setTipoTrabajo(newValue);
-                setSelectedTrabajo(null);
-                setNombreTrabajo("");
-                setPrecioUnitario("");
-              }
-            }}
+            onChange={handleTipoTrabajoChange}
             aria-label="tipo de trabajo"
           >
             <ToggleButton value="lista" aria-label="trabajo de lista">
@@ -195,6 +217,7 @@ function TrabajosRealizadosFormSection() {
               onInputChange={(_, newInputValue) => {
                 searchTrabajos(newInputValue);
               }}
+              sx={{ mt: 2 }}
             />
           ) : (
             <TextField
@@ -203,6 +226,7 @@ function TrabajosRealizadosFormSection() {
               onChange={(e) => setNombreTrabajo(e.target.value)}
               fullWidth
               margin="normal"
+              sx={{ mt: 2 }}
             />
           )}
           <TextField
@@ -215,7 +239,13 @@ function TrabajosRealizadosFormSection() {
           />
         </DialogContent>
         <DialogActions>
-          <Button type="button" onClick={() => setOpenTrabajoModal(false)}>
+          <Button
+            type="button"
+            onClick={() => {
+              setOpenTrabajoModal(false);
+              resetFields();
+            }}
+          >
             Cancelar
           </Button>
           <Button
@@ -240,6 +270,7 @@ function TrabajosRealizadosFormSection() {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <Divider sx={{ mt: 2 }} />
     </>
   );
 }
