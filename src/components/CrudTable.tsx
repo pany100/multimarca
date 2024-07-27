@@ -6,7 +6,6 @@ import {
   Alert,
   Box,
   Button,
-  CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
@@ -319,16 +318,6 @@ function CrudTable<T extends { id: string }>({
         fullWidth
         margin="normal"
       />
-      {loading && (
-        <Box
-          display="flex"
-          justifyContent="center"
-          alignItems="center"
-          height="200px" // Ajusta esta altura según sea necesario
-        >
-          <CircularProgress />
-        </Box>
-      )}
       {!loading && items.length === 0 ? (
         <Typography>No hay datos para mostrar</Typography>
       ) : (
