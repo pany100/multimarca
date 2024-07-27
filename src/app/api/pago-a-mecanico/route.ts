@@ -39,6 +39,7 @@ export async function GET(request: Request) {
                   owner: true,
                 },
               },
+              mecanicos: true,
             },
           },
         },

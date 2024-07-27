@@ -184,6 +184,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             icono: <ReceiptIcon />,
             ruta: "/dashboard/orden-de-compra",
           },
+
+          {
+            permiso: "PagosReparaciones",
+            texto: "Pagos a Mecánicos",
+            icono: <PaymentIcon />,
+            ruta: "/dashboard/pagos-a-mecanico",
+          },
         ],
       },
       {
@@ -218,12 +225,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Pagos de reparación",
             icono: <AccountBalanceIcon />,
             ruta: "/dashboard/ingresos-reparacion",
-          },
-          {
-            permiso: "PagosReparaciones",
-            texto: "Pagos a Mecánicos",
-            icono: <PaymentIcon />,
-            ruta: "/dashboard/pagos-a-mecanico",
           },
         ],
       },

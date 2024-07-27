@@ -32,6 +32,7 @@ export async function PUT(
                 owner: true,
               },
             },
+            mecanicos: true,
           },
         },
       },

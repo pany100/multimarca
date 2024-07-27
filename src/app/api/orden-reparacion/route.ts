@@ -75,7 +75,7 @@ export async function POST(request: Request) {
       observacionesSalida = "[]",
       estado,
       pdfPath,
-      mecanicosIds = [],
+      mecanicos = [],
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
@@ -164,7 +164,7 @@ export async function POST(request: Request) {
         pdfPath,
         montoTotalCliente: new Prisma.Decimal(montoTotalCliente),
         mecanicos: {
-          connect: mecanicosIds.map((id: number) => ({ id })),
+          connect: mecanicos.map(({ id }: { id: number }) => ({ id })),
         },
         repuestosUsados: {
           create: repuestosToPersist,

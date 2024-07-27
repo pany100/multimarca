@@ -74,7 +74,7 @@ export async function PUT(
       observacionesSalida,
       estado,
       pdfPath,
-      mecanicosIds = [],
+      mecanicos = [],
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
@@ -164,7 +164,7 @@ export async function PUT(
         estado,
         montoTotalCliente: new Prisma.Decimal(montoTotalCliente),
         mecanicos: {
-          set: mecanicosIds.map((id: number) => ({ id })),
+          set: mecanicos.map(({ id }: { id: number }) => ({ id })),
         },
         repuestosUsados: {
           deleteMany: {},
