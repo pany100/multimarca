@@ -5,7 +5,9 @@ import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { IconButton, Tooltip } from "@mui/material";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import * as yup from "yup";
 
@@ -33,6 +35,7 @@ const AutosPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedAuto, setSelectedAuto] = useState<Auto | null>(null);
   const { authFetch } = useFetch();
+  const router = useRouter();
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
@@ -176,11 +179,21 @@ const AutosPage = () => {
   };
 
   const extraActions = (auto: Auto) => (
-    <Tooltip title="Agregar cédula verde">
-      <IconButton onClick={() => handleExtraAction(auto)} size="small">
-        <DirectionsCarIcon />
-      </IconButton>
-    </Tooltip>
+    <>
+      <Tooltip title="Ver detalles">
+        <IconButton
+          onClick={() => router.push(`/dashboard/autos/${auto.id}/ver`)}
+          size="small"
+        >
+          <VisibilityIcon />
+        </IconButton>
+      </Tooltip>
+      <Tooltip title="Agregar cédula verde">
+        <IconButton onClick={() => handleExtraAction(auto)} size="small">
+          <DirectionsCarIcon />
+        </IconButton>
+      </Tooltip>
+    </>
   );
 
   const handleExtraAction = (auto: Auto) => {

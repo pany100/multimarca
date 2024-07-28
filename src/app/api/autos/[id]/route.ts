@@ -88,3 +88,43 @@ export async function DELETE(
     );
   }
 }
+
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+
+    const auto = await prisma.auto.findUnique({
+      where: { id },
+      include: {
+        owner: true,
+        ordenesReparacion: {
+          orderBy: {
+            fechaCreacion: "desc",
+          },
+          include: {
+            reparacionesDeTercero: true,
+            repuestosUsados: true,
+          },
+        },
+      },
+    });
+
+    if (!auto) {
+      return NextResponse.json(
+        { error: "Auto no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(auto);
+  } catch (error) {
+    console.error("Error al obtener el auto:", error);
+    return NextResponse.json(
+      { error: "Error al obtener el auto" },
+      { status: 500 }
+    );
+  }
+}
