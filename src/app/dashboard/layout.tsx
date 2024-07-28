@@ -31,6 +31,7 @@ import { useFetch } from "@/contexts/FetchContext";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import BarChartIcon from "@mui/icons-material/BarChart";
 import BuildIcon from "@mui/icons-material/Build";
 import CategoryIcon from "@mui/icons-material/Category";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -190,6 +191,17 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Pagos a Mecánicos",
             icono: <PaymentIcon />,
             ruta: "/dashboard/pagos-a-mecanico",
+          },
+        ],
+      },
+      {
+        title: "Estadísticas y Reportes",
+        items: [
+          {
+            permiso: "Estadisticas",
+            texto: "Estadísticas Generales",
+            icono: <BarChartIcon />,
+            ruta: "/dashboard/estadisticas",
           },
         ],
       },
