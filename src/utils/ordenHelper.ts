@@ -1,4 +1,6 @@
-export function calcularTotalOrdenReparacion(ordenReparacion: {
+import { ChipProps } from "@mui/material";
+
+function calcularTotalOrdenReparacion(ordenReparacion: {
   repuestosUsados: { precioVenta: number; unidadesConsumidas: number }[];
   reparacionesDeTercero: { precioVenta: number }[];
   manoDeObra: number;
@@ -23,3 +25,20 @@ export function calcularTotalOrdenReparacion(ordenReparacion: {
   // Suma total
   return totalRepuestos + totalReparacionesTerceros + manoDeObra;
 }
+
+function getStatusColor(estado: string): ChipProps["color"] {
+  switch (estado.toLowerCase()) {
+    case "en progreso":
+      return "primary";
+    case "terminado":
+      return "success";
+    case "aceptado":
+      return "warning";
+    case "presupuestado":
+      return "error";
+    default:
+      return "default";
+  }
+}
+
+export { calcularTotalOrdenReparacion, getStatusColor };

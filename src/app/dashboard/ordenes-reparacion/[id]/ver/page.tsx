@@ -2,7 +2,13 @@
 import OrdenClientePdf from "@/components/orden-reparacion/pdf/OrdenClientePdf";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
 import { useFetch } from "@/contexts/FetchContext";
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
+import {
+  calcularTotalOrdenReparacion,
+  getStatusColor,
+} from "@/utils/ordenHelper";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import PersonIcon from "@mui/icons-material/Person";
 import PrintIcon from "@mui/icons-material/Print";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import {
@@ -10,22 +16,28 @@ import {
   Box,
   Button,
   Checkbox,
+  Chip,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogContentText,
   DialogTitle,
+  Divider,
   Grid,
   Paper,
   Snackbar,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
+
 import { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 
 const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
+  const theme = useTheme();
+
   let mechanicOrderRef = useRef(null);
   let clientOrderRef = useRef(null);
   const [ordenReparacion, setOrdenReparacion] = useState<any>(null);
@@ -114,71 +126,89 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
   }
 
   return (
-    <>
+    <Box sx={{ p: 3 }}>
       <Paper elevation={3} sx={{ p: 3, m: 2 }}>
-        <Typography variant="h4" gutterBottom>
-          Orden de Reparación #{ordenReparacion.id}
-        </Typography>
-        <Grid item xs={12}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mb: 3,
+          }}
+        >
           <Box>
-            <Typography>Estado: {ordenReparacion.estado}</Typography>
+            <Typography variant="h4" gutterBottom>
+              Orden de Reparación #{ordenReparacion.id}
+            </Typography>
+            <Chip
+              label={ordenReparacion.estado}
+              color={getStatusColor(ordenReparacion.estado)}
+              size="medium"
+            />
+          </Box>
+          <Box sx={{ textAlign: "right" }}>
+            <Typography variant="h4">
+              ${calcularTotalOrdenReparacion(ordenReparacion)}
+            </Typography>
+          </Box>
+        </Box>
+        <Divider sx={{ my: 3 }} />
+        <Grid container spacing={3}>
+          <Grid item xs={12} md={4}>
+            <Typography variant="h6" gutterBottom>
+              <DirectionsCarIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+              Información del Vehículo
+            </Typography>
             <Typography>
-              Fecha de Entrada:{" "}
+              <strong>Marca:</strong> {ordenReparacion.auto.brand}
+            </Typography>
+            <Typography>
+              <strong>Modelo:</strong> {ordenReparacion.auto.model}
+            </Typography>
+            <Typography>
+              <strong>Patente:</strong> {ordenReparacion.auto.patent}
+            </Typography>
+            <Typography>
+              <strong>Kilómetros:</strong> {ordenReparacion.kilometros}
+            </Typography>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Typography variant="h6" gutterBottom>
+              <PersonIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+              Información del Cliente
+            </Typography>
+            <Typography>
+              <strong>Nombre:</strong> {ordenReparacion.auto.owner.fullName}
+            </Typography>
+            <Typography>
+              <strong>Teléfono:</strong> {ordenReparacion.auto.owner.phone}
+            </Typography>
+          </Grid>
+
+          <Grid item xs={12} md={4}>
+            <Typography variant="h6" gutterBottom>
+              <CalendarTodayIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+              Fechas
+            </Typography>
+            <Typography>
+              <strong>Entrada a taller:</strong>{" "}
               {new Date(
                 ordenReparacion.fechaEntradaReparacion
               ).toLocaleDateString()}
             </Typography>
             <Typography>
-              Fecha de Salida:{" "}
+              <strong>Salida de taller:</strong>{" "}
               {ordenReparacion.fechaSalidaReparacion
                 ? new Date(
                     ordenReparacion.fechaSalidaReparacion
                   ).toLocaleDateString()
                 : "N/A"}
             </Typography>
-            <Typography>
-              Kilómetros al entrar al taller: {ordenReparacion.kilometros}
-            </Typography>
-            <Typography>
-              Observaciones del Cliente: {ordenReparacion.observacionesCliente}
-            </Typography>
-            <Typography>
-              Observaciones de Entrada:{" "}
-              {JSON.parse(ordenReparacion.observacionesEntrada).join(", ")}
-            </Typography>
-            <Typography>
-              Observaciones de Salida:{" "}
-              {JSON.parse(ordenReparacion.observacionesSalida).join(", ")}
-            </Typography>
-            <Typography>Mano de obra: ${ordenReparacion.manoDeObra}</Typography>
-            <Typography>
-              Monto total: ${calcularTotalOrdenReparacion(ordenReparacion)}
-            </Typography>
-          </Box>
+          </Grid>
         </Grid>
 
         <Grid container spacing={3}>
-          <Grid item xs={12} md={4}>
-            <Typography variant="h6">Información del Auto</Typography>
-            <Box>
-              <Typography>Marca: {ordenReparacion.auto.brand}</Typography>
-              <Typography>Modelo: {ordenReparacion.auto.model}</Typography>
-              <Typography>Patente: {ordenReparacion.auto.patent}</Typography>
-            </Box>
-          </Grid>
-
-          <Grid item xs={12} md={4}>
-            <Typography variant="h6">Información del Cliente</Typography>
-            <Box>
-              <Typography>
-                Nombre: {ordenReparacion.auto.owner.fullName}
-              </Typography>
-              <Typography>
-                Teléfono: {ordenReparacion.auto.owner.phone}
-              </Typography>
-            </Box>
-          </Grid>
-
           <Grid item xs={12}>
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
               Mecánicos Asignados
@@ -401,7 +431,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           <OrdenClientePdf ref={clientOrderRef} repair={ordenReparacion} />
         )}
       </div>
-    </>
+    </Box>
   );
 };
 
