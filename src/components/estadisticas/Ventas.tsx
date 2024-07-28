@@ -8,6 +8,7 @@ import {
   MenuItem,
   Select,
   TextField,
+  Typography,
 } from "@mui/material";
 import {
   BarElement,
@@ -148,7 +149,13 @@ const Ventas = () => {
       >
         Actualizar
       </Button>
-      <Bar options={opciones} data={datosGrafico} />
+      {datos.length > 0 ? (
+        <Bar options={opciones} data={datosGrafico} />
+      ) : (
+        <Typography variant="h6" align="center" sx={{ mt: 4 }}>
+          Sin datos
+        </Typography>
+      )}
     </Box>
   );
 };

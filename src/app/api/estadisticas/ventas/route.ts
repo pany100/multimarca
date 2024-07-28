@@ -31,10 +31,16 @@ export async function GET(request: NextRequest) {
       SELECT 
         c.id, 
         c.fullName, 
-        SUM(CASE 
-          WHEN ? = 'USD' THEN v.total / COALESCE(d.blue, 1)
+        ROUND(SUM(CASE 
+          WHEN ? = 'USD' THEN v.total / COALESCE(
+            (SELECT d.blue 
+             FROM Dolar d 
+             WHERE DATE(d.fecha) <= DATE(v.fecha) 
+             ORDER BY d.fecha DESC 
+             LIMIT 1), 
+            1)
           ELSE v.total 
-        END) as totalVentas
+        END)) as totalVentas
       FROM Cliente c
       LEFT JOIN Venta v ON c.id = v.clienteId
       LEFT JOIN Dolar d ON DATE(v.fecha) = DATE(d.fecha)
@@ -60,6 +66,9 @@ export async function GET(request: NextRequest) {
     `;
     queryParams.push(limite);
 
+    console.log("Consulta SQL:", sqlQuery);
+    console.log("Parámetros:", queryParams);
+
     const clientesDetallados = await prisma.$queryRawUnsafe<ClienteDetallado[]>(
       sqlQuery,
       ...queryParams
@@ -68,7 +77,7 @@ export async function GET(request: NextRequest) {
     const clientesFormateados = clientesDetallados.map((cliente: any) => ({
       id: cliente.id,
       fullName: cliente.fullName,
-      totalVentas: parseFloat(cliente.totalVentas.toFixed(2)),
+      totalVentas: parseInt(cliente.totalVentas),
     }));
 
     return NextResponse.json(clientesFormateados);
