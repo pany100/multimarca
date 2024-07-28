@@ -10,6 +10,7 @@ import {
 } from "@/utils/ordenHelper";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import BuildIcon from "@mui/icons-material/Build";
+import BuildCircleIcon from "@mui/icons-material/BuildCircle";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
 import CommentIcon from "@mui/icons-material/Comment";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
@@ -20,6 +21,7 @@ import PrintIcon from "@mui/icons-material/Print";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import {
   Alert,
+  Avatar,
   Box,
   Button,
   Checkbox,
@@ -392,149 +394,83 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
             </TableBody>
           </Table>
         </TableContainer>
-        <Grid container spacing={3}>
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Mecánicos Asignados
-            </Typography>
-            <Box>
-              {ordenReparacion.mecanicos.map(
-                (mecanico: { id: string; name: string }) => (
-                  <Typography key={mecanico.id}>{mecanico.name}</Typography>
-                )
-              )}
-            </Box>
-          </Grid>
+        <Divider sx={{ my: 2 }} />
 
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Repuestos Usados
-            </Typography>
-            <Box>
-              {ordenReparacion.repuestosUsados.map(
-                (repuesto: {
-                  id: string;
-                  stock: { name: string };
-                  unidadesConsumidas: number;
-                  precioVenta: number;
-                }) => (
-                  <Typography key={repuesto.id}>
-                    {repuesto.stock.name} - Cantidad:{" "}
-                    {repuesto.unidadesConsumidas} - Precio:{" "}
-                    {repuesto.precioVenta}
-                  </Typography>
-                )
-              )}
-            </Box>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Reparaciones de Terceros
-            </Typography>
-            <Box>
-              {ordenReparacion.reparacionesDeTercero.map(
-                (reparacion: {
-                  id: string;
-                  nombre: string;
-                  proveedor: { name: string };
-                }) => (
-                  <Typography key={reparacion.id}>
-                    {reparacion.nombre} - Proveedor: {reparacion.proveedor.name}
-                  </Typography>
-                )
-              )}
-            </Box>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Trabajos Realizados
-            </Typography>
-            <Box>
-              {ordenReparacion.trabajosRealizados.map(
-                (trabajo: {
-                  id: string;
-                  descripcion: string;
-                  precioUnitario: number;
-                }) => (
-                  <Typography key={trabajo.id}>
-                    {trabajo.descripcion} - Precio: ${trabajo.precioUnitario}
-                  </Typography>
-                )
-              )}
-            </Box>
-          </Grid>
-
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Controles en Reparación
-            </Typography>
-            <Grid container spacing={2}>
-              {ordenReparacion.controlesEnReparacion
-                .filter(
-                  (control: { controlMecanico: { type: string } }) =>
-                    control.controlMecanico.type === "checkbox"
-                )
-                .map(
-                  (control: {
-                    id: string;
-                    controlMecanico: { name: string };
-                    valor: string;
-                  }) => (
-                    <Grid
-                      item
-                      xs={6}
-                      key={control.id}
-                      sx={{ pt: "0 !important" }}
-                    >
-                      <Box
-                        display="flex"
-                        alignItems="center"
-                        justifyContent="space-between"
-                      >
-                        <Typography>{control.controlMecanico.name}</Typography>
-                        <Checkbox checked={control.valor === "true"} disabled />
-                      </Box>
-                    </Grid>
-                  )
-                )}
-              {ordenReparacion.controlesEnReparacion
-                .filter(
-                  (control: { controlMecanico: { type: string } }) =>
-                    control.controlMecanico.type !== "checkbox"
-                )
-                .map(
-                  (control: {
-                    id: string;
-                    controlMecanico: { name: string };
-                    valor: string;
-                  }) => (
-                    <Grid
-                      item
-                      xs={12}
-                      key={control.id}
-                      sx={{ pt: "0 !important" }}
-                    >
-                      <Box display="flex" alignItems="center">
-                        <Typography
-                          style={{ marginRight: "16px", minWidth: "120px" }}
-                        >
-                          {control.controlMecanico.name}
-                        </Typography>
-                        <TextField
-                          fullWidth
-                          value={control.valor || ""}
-                          disabled
-                          size="small"
-                        />
-                      </Box>
-                    </Grid>
-                  )
-                )}
-            </Grid>
-          </Grid>
+        <Typography variant="h6" gutterBottom>
+          <BuildCircleIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+          Controles en Reparación
+        </Typography>
+        <Grid container spacing={2}>
+          {ordenReparacion.controlesEnReparacion
+            .filter(
+              (control: { controlMecanico: { type: string } }) =>
+                control.controlMecanico.type === "checkbox"
+            )
+            .map(
+              (control: {
+                id: string;
+                controlMecanico: { name: string };
+                valor: string;
+              }) => (
+                <Grid item xs={12} sm={6} md={4} key={control.id}>
+                  <Box display="flex" alignItems="center">
+                    <Checkbox
+                      checked={control.valor === "true"}
+                      disabled
+                      sx={{ mr: 1 }}
+                    />
+                    <Typography>{control.controlMecanico.name}</Typography>
+                  </Box>
+                </Grid>
+              )
+            )}
         </Grid>
+        <Grid container spacing={2} sx={{ mt: 2 }}>
+          {ordenReparacion.controlesEnReparacion
+            .filter(
+              (control: { controlMecanico: { type: string } }) =>
+                control.controlMecanico.type !== "checkbox"
+            )
+            .map(
+              (control: {
+                id: string;
+                controlMecanico: { name: string };
+                valor: string;
+              }) => (
+                <Grid item xs={12} sm={6} md={4} key={control.id}>
+                  <TextField
+                    label={control.controlMecanico.name}
+                    value={control.valor || ""}
+                    fullWidth
+                    disabled
+                    variant="outlined"
+                    size="small"
+                    sx={{ mb: 2 }}
+                  />
+                </Grid>
+              )
+            )}
+        </Grid>
+        <Divider sx={{ my: 2 }} />
+
+        <Typography variant="h6" gutterBottom>
+          <EngineeringIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+          Mecánicos Asignados
+        </Typography>
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+          {ordenReparacion.mecanicos.map(
+            (mecanico: { id: string; name: string }) => (
+              <Chip
+                key={mecanico.id}
+                avatar={<Avatar alt={mecanico.name} />}
+                label={mecanico.name}
+                variant="outlined"
+                sx={{ m: 0.5 }}
+              />
+            )
+          )}
+        </Box>
+
         <Grid item container xs={12} spacing={2} sx={{ mt: 2 }}>
           <Grid item xs={4}>
             <Button
