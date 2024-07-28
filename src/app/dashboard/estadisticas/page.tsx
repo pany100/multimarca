@@ -1,6 +1,7 @@
 "use client";
 
 import { Box, Grid, Paper, Typography } from "@mui/material";
+import { useEffect, useState } from "react";
 import {
   Bar,
   BarChart,
@@ -12,16 +13,28 @@ import {
   YAxis,
 } from "recharts";
 
-const data = [
-  { name: "Ene", ventas: 4000, reparaciones: 2400 },
-  { name: "Feb", ventas: 3000, reparaciones: 1398 },
-  { name: "Mar", ventas: 2000, reparaciones: 9800 },
-  { name: "Abr", ventas: 2780, reparaciones: 3908 },
-  { name: "May", ventas: 1890, reparaciones: 4800 },
-  { name: "Jun", ventas: 2390, reparaciones: 3800 },
-];
-
 const EstadisticasPage = () => {
+  const [clientesGastos, setClientesGastos] = useState([]);
+
+  useEffect(() => {
+    const fetchClientesGastos = async () => {
+      try {
+        const response = await fetch(
+          "/api/estadisticas/clientes-gastos?meses=1&limite=10"
+        );
+        if (!response.ok) {
+          throw new Error("Error al obtener los datos");
+        }
+        const data = await response.json();
+        setClientesGastos(data);
+      } catch (error) {
+        console.error("Error al cargar los datos de clientes y gastos:", error);
+      }
+    };
+
+    fetchClientesGastos();
+  }, []);
+
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
       <Typography variant="h4" gutterBottom>
@@ -30,14 +43,14 @@ const EstadisticasPage = () => {
       <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
           <Paper
-            sx={{ p: 2, display: "flex", flexDirection: "column", height: 240 }}
+            sx={{ p: 2, display: "flex", flexDirection: "column", height: 400 }}
           >
             <Typography variant="h6" gutterBottom component="div">
-              Ventas vs Reparaciones
+              Clientes que más gastaron en el último mes
             </Typography>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
-                data={data}
+                data={clientesGastos}
                 margin={{
                   top: 5,
                   right: 30,
@@ -46,19 +59,33 @@ const EstadisticasPage = () => {
                 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis
+                  dataKey="nombreCliente"
+                  angle={-45}
+                  textAnchor="end"
+                  interval={0}
+                  height={100}
+                />
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Bar dataKey="ventas" fill="#8884d8" />
-                <Bar dataKey="reparaciones" fill="#82ca9d" />
+                <Bar
+                  dataKey="gastoTotal"
+                  fill="#8884d8"
+                  name="Gasto Total (ARS)"
+                />
+                <Bar
+                  dataKey="gastoTotalUSD"
+                  fill="#82ca9d"
+                  name="Gasto Total (USD)"
+                />
               </BarChart>
             </ResponsiveContainer>
           </Paper>
         </Grid>
         <Grid item xs={12} md={6}>
           <Paper
-            sx={{ p: 2, display: "flex", flexDirection: "column", height: 240 }}
+            sx={{ p: 2, display: "flex", flexDirection: "column", height: 400 }}
           >
             <Typography variant="h6" gutterBottom component="div">
               Estadísticas Adicionales

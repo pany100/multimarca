@@ -102,3 +102,47 @@ export async function DELETE(
     );
   }
 }
+
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+
+    const cliente = await prisma.cliente.findUnique({
+      where: { id },
+      include: {
+        cars: {
+          include: {
+            ordenesReparacion: {
+              include: {
+                repuestosUsados: true,
+                reparacionesDeTercero: true,
+                trabajosRealizados: true,
+              },
+              orderBy: {
+                fechaCreacion: "desc",
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!cliente) {
+      return NextResponse.json(
+        { error: "Cliente no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(cliente);
+  } catch (error) {
+    console.error("Error al obtener el cliente:", error);
+    return NextResponse.json(
+      { error: "Error al obtener el cliente" },
+      { status: 500 }
+    );
+  }
+}

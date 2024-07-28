@@ -2,6 +2,10 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { IconButton, Tooltip } from "@mui/material";
+import { useRouter } from "next/navigation";
+
 import * as yup from "yup";
 
 interface Cliente {
@@ -20,6 +24,8 @@ interface Cliente {
 }
 
 const ClientesPage = () => {
+  const router = useRouter();
+
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "fullName", headerName: "Nombre completo", flex: 1.5 },
@@ -139,6 +145,19 @@ const ClientesPage = () => {
     };
   };
 
+  const extraActions = (cliente: Cliente) => (
+    <>
+      <Tooltip title="Ver detalles">
+        <IconButton
+          onClick={() => router.push(`/dashboard/clientes/${cliente.id}/ver`)}
+          size="small"
+        >
+          <VisibilityIcon />
+        </IconButton>
+      </Tooltip>
+    </>
+  );
+
   return (
     <CrudTable<Cliente>
       title="Clientes"
@@ -146,6 +165,7 @@ const ClientesPage = () => {
       apiEndpoint="/api/clientes"
       createNewItem={createNewCliente}
       fields={formFields}
+      extraActions={extraActions}
       validationSchema={yup.object({
         fullName: yup.string().required("El nombre es requerido"),
         email: yup.string().email("El email es inválido").nullable(),
