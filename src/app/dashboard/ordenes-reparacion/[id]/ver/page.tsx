@@ -48,6 +48,7 @@ import {
   TableRow,
   Tabs,
   TextField,
+  Tooltip,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -198,6 +199,57 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
             </Typography>
           </Box>
         </Box>
+        <Grid container spacing={2} sx={{ mt: 2 }}>
+          <Grid item xs={12} sm={4}>
+            <Button
+              variant="contained"
+              color="primary"
+              startIcon={<PrintIcon />}
+              onClick={handleMechanicOrderPrint}
+              fullWidth
+            >
+              Imprimir orden para el mecánico
+            </Button>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Button
+              variant="contained"
+              color="secondary"
+              startIcon={<PrintIcon />}
+              onClick={handleClientOrderPrint}
+              fullWidth
+            >
+              Imprimir orden para el cliente
+            </Button>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            {ordenReparacion.estado !== "Terminado" ? (
+              <Tooltip title="Solo disponible para reparaciones terminadas">
+                <span>
+                  <Button
+                    variant="contained"
+                    color="success"
+                    startIcon={<WhatsAppIcon />}
+                    fullWidth
+                    disabled
+                  >
+                    Enviar orden por WhatsApp al cliente
+                  </Button>
+                </span>
+              </Tooltip>
+            ) : (
+              <Button
+                variant="contained"
+                color="success"
+                startIcon={<WhatsAppIcon />}
+                onClick={handleSendNotification}
+                fullWidth
+              >
+                Enviar orden por WhatsApp al cliente
+              </Button>
+            )}
+          </Grid>
+        </Grid>
         <Divider sx={{ my: 3 }} />
         <Grid container spacing={3}>
           <Grid item xs={12} md={4}>
@@ -470,45 +522,6 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
             </TableBody>
           </Table>
         </TableContainer>
-        <Divider sx={{ my: 2 }} />
-        <Typography variant="h6" gutterBottom>
-          Acciones
-        </Typography>
-        <Grid container spacing={2} sx={{ mt: 2 }}>
-          <Grid item xs={12} sm={4}>
-            <Button
-              variant="contained"
-              color="primary"
-              startIcon={<PrintIcon />}
-              onClick={handleMechanicOrderPrint}
-              fullWidth
-            >
-              Imprimir orden para el mecánico
-            </Button>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Button
-              variant="contained"
-              color="secondary"
-              startIcon={<PrintIcon />}
-              onClick={handleClientOrderPrint}
-              fullWidth
-            >
-              Imprimir orden para el cliente
-            </Button>
-          </Grid>
-          <Grid item xs={12} sm={4}>
-            <Button
-              variant="contained"
-              color="success"
-              startIcon={<WhatsAppIcon />}
-              onClick={handleSendNotification}
-              fullWidth
-            >
-              Enviar orden por WhatsApp al cliente
-            </Button>
-          </Grid>
-        </Grid>
       </Paper>
       <Dialog
         open={openConfirmModal}
