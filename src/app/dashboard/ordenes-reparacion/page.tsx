@@ -133,7 +133,7 @@ const OrdenesReparacionPage = () => {
     };
 
     fetchOrdenes();
-  }, [paginationModel]);
+  }, [paginationModel, authFetch]);
 
   const handleAddClick = () => {
     router.push("/dashboard/ordenes-reparacion/nueva");
