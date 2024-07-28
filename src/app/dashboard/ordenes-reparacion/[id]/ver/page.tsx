@@ -470,36 +470,40 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
             )
           )}
         </Box>
-
-        <Grid item container xs={12} spacing={2} sx={{ mt: 2 }}>
-          <Grid item xs={4}>
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="h6" gutterBottom>
+          Acciones
+        </Typography>
+        <Grid container spacing={2} sx={{ mt: 2 }}>
+          <Grid item xs={12} sm={4}>
             <Button
               variant="contained"
               color="primary"
-              onClick={handleMechanicOrderPrint}
               startIcon={<PrintIcon />}
+              onClick={handleMechanicOrderPrint}
+              fullWidth
             >
               Imprimir orden para el mecánico
             </Button>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={12} sm={4}>
             <Button
               variant="contained"
               color="secondary"
-              onClick={handleClientOrderPrint}
               startIcon={<PrintIcon />}
+              onClick={handleClientOrderPrint}
               fullWidth
-              sx={{ height: "100%" }}
             >
               Imprimir orden para el cliente
             </Button>
           </Grid>
-          <Grid item xs={4}>
+          <Grid item xs={12} sm={4}>
             <Button
               variant="contained"
               color="success"
-              onClick={handleOpenConfirmModal}
               startIcon={<WhatsAppIcon />}
+              onClick={handleSendNotification}
+              fullWidth
             >
               Enviar orden por WhatsApp al cliente
             </Button>
