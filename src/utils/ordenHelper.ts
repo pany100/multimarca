@@ -1,28 +1,39 @@
 import { ChipProps } from "@mui/material";
 
+function calcularTotalRepuestos(ordenReparacion: {
+  repuestosUsados: {
+    precioVenta: number;
+    unidadesConsumidas: number;
+  }[];
+}): number {
+  return ordenReparacion.repuestosUsados.reduce(
+    (total, repuesto) => total + parseFloat(repuesto.precioVenta.toString()),
+    0
+  );
+}
+
+function calcularTotalReparacionesTerceros(ordenReparacion: {
+  reparacionesDeTercero: { precioVenta: number }[];
+}): number {
+  return ordenReparacion.reparacionesDeTercero.reduce(
+    (total, reparacion) =>
+      total + parseFloat(reparacion.precioVenta.toString()),
+    0
+  );
+}
+
 function calcularTotalOrdenReparacion(ordenReparacion: {
   repuestosUsados: { precioVenta: number; unidadesConsumidas: number }[];
   reparacionesDeTercero: { precioVenta: number }[];
   manoDeObra: number;
 }): number {
-  // 1. Suma del precio de venta de cada repuesto usado
-  const totalRepuestos = ordenReparacion.repuestosUsados.reduce(
-    (total, repuesto) => total + parseFloat(repuesto.precioVenta.toString()),
-    0
-  );
+  const totalRepuestos = calcularTotalRepuestos(ordenReparacion);
 
-  // 2. Suma del precio de venta de todas las reparaciones de terceros
   const totalReparacionesTerceros =
-    ordenReparacion.reparacionesDeTercero.reduce(
-      (total, reparacion) =>
-        total + parseFloat(reparacion.precioVenta.toString()),
-      0
-    );
-
+    calcularTotalReparacionesTerceros(ordenReparacion);
   // 3. Mano de obra
   const manoDeObra = parseFloat(ordenReparacion.manoDeObra.toString());
 
-  // Suma total
   return totalRepuestos + totalReparacionesTerceros + manoDeObra;
 }
 
@@ -41,4 +52,9 @@ function getStatusColor(estado: string): ChipProps["color"] {
   }
 }
 
-export { calcularTotalOrdenReparacion, getStatusColor };
+export {
+  calcularTotalOrdenReparacion,
+  calcularTotalReparacionesTerceros,
+  calcularTotalRepuestos,
+  getStatusColor,
+};
