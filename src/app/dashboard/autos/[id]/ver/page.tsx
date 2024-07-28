@@ -22,6 +22,7 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
+import Image from "next/image";
 import { useEffect, useState } from "react";
 
 const VerAutoPage = ({ params }: { params: { id: string } }) => {
@@ -132,8 +133,24 @@ const VerAutoPage = ({ params }: { params: { id: string } }) => {
               <strong>Email:</strong> {auto.owner.email}
             </Typography>
           </Grid>
+          <Grid item xs={12}>
+            {auto.cedulaVerdePath && (
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  Cédula Verde
+                </Typography>
+                <Image
+                  src={auto.cedulaVerdePath}
+                  alt="Cédula Verde"
+                  width={300}
+                  height={200}
+                  style={{ width: "300px", height: "auto" }}
+                />
+              </Box>
+            )}
+          </Grid>
         </Grid>
-        <Divider sx={{ my: 2 }} />
+        <Divider sx={{ mb: 2 }} />
         <Typography variant="h6" gutterBottom>
           <BuildIcon sx={{ mr: 1, verticalAlign: "middle" }} />
           Órdenes de Reparación Previas
