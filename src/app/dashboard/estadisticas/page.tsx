@@ -15,12 +15,13 @@ import {
 
 const EstadisticasPage = () => {
   const [clientesGastos, setClientesGastos] = useState([]);
+  const [moneda, setMoneda] = useState("ARS");
 
   useEffect(() => {
     const fetchClientesGastos = async () => {
       try {
         const response = await fetch(
-          "/api/estadisticas/clientes-gastos?meses=1&limite=10"
+          "/api/estadisticas/clientes-gastos?limit=5"
         );
         if (!response.ok) {
           throw new Error("Error al obtener los datos");
@@ -35,6 +36,10 @@ const EstadisticasPage = () => {
     fetchClientesGastos();
   }, []);
 
+  const handleMonedaChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    setMoneda(event.target.value);
+  };
+
   return (
     <Box sx={{ flexGrow: 1, p: 3 }}>
       <Typography variant="h4" gutterBottom>
@@ -45,39 +50,42 @@ const EstadisticasPage = () => {
           <Paper
             sx={{ p: 2, display: "flex", flexDirection: "column", height: 400 }}
           >
-            <Typography variant="h6" gutterBottom component="div">
-              Clientes que más gastaron en el último mes
-            </Typography>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                mb: 2,
+              }}
+            >
+              <Typography variant="h6" component="div">
+                Clientes que más gastaron en ventas
+              </Typography>
+              <select value={moneda} onChange={handleMonedaChange}>
+                <option value="ARS">Pesos (ARS)</option>
+                <option value="USD">Dólares (USD)</option>
+              </select>
+            </Box>
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={clientesGastos}
                 margin={{
-                  top: 5,
+                  top: 20,
                   right: 30,
                   left: 20,
                   bottom: 5,
                 }}
+                layout="vertical"
               >
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis
-                  dataKey="nombreCliente"
-                  angle={-45}
-                  textAnchor="end"
-                  interval={0}
-                  height={100}
-                />
-                <YAxis />
+                <XAxis type="number" />
+                <YAxis dataKey="nombreCliente" type="category" width={150} />
                 <Tooltip />
-                <Legend />
+                <Legend verticalAlign="top" height={36} />
                 <Bar
-                  dataKey="gastoTotal"
-                  fill="#8884d8"
-                  name="Gasto Total (ARS)"
-                />
-                <Bar
-                  dataKey="gastoTotalUSD"
-                  fill="#82ca9d"
-                  name="Gasto Total (USD)"
+                  dataKey={moneda === "ARS" ? "gastoTotalARS" : "gastoTotalUSD"}
+                  fill={moneda === "USD" ? "#006400" : "#8884d8"}
+                  name={`Gasto Total (${moneda})`}
                 />
               </BarChart>
             </ResponsiveContainer>
