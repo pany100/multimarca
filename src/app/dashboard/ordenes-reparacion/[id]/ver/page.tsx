@@ -115,18 +115,47 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
 
   return (
     <>
-      <div style={{ display: "none" }}>
-        {ordenReparacion !== null && (
-          <OrdenMecanicoPdf ref={mechanicOrderRef} repair={ordenReparacion} />
-        )}
-        {ordenReparacion !== null && (
-          <OrdenClientePdf ref={clientOrderRef} repair={ordenReparacion} />
-        )}
-      </div>
       <Paper elevation={3} sx={{ p: 3, m: 2 }}>
         <Typography variant="h4" gutterBottom>
           Orden de Reparación #{ordenReparacion.id}
         </Typography>
+        <Grid item xs={12}>
+          <Box>
+            <Typography>Estado: {ordenReparacion.estado}</Typography>
+            <Typography>
+              Fecha de Entrada:{" "}
+              {new Date(
+                ordenReparacion.fechaEntradaReparacion
+              ).toLocaleDateString()}
+            </Typography>
+            <Typography>
+              Fecha de Salida:{" "}
+              {ordenReparacion.fechaSalidaReparacion
+                ? new Date(
+                    ordenReparacion.fechaSalidaReparacion
+                  ).toLocaleDateString()
+                : "N/A"}
+            </Typography>
+            <Typography>
+              Kilómetros al entrar al taller: {ordenReparacion.kilometros}
+            </Typography>
+            <Typography>
+              Observaciones del Cliente: {ordenReparacion.observacionesCliente}
+            </Typography>
+            <Typography>
+              Observaciones de Entrada:{" "}
+              {JSON.parse(ordenReparacion.observacionesEntrada).join(", ")}
+            </Typography>
+            <Typography>
+              Observaciones de Salida:{" "}
+              {JSON.parse(ordenReparacion.observacionesSalida).join(", ")}
+            </Typography>
+            <Typography>Mano de obra: ${ordenReparacion.manoDeObra}</Typography>
+            <Typography>
+              Monto total: ${calcularTotalOrdenReparacion(ordenReparacion)}
+            </Typography>
+          </Box>
+        </Grid>
 
         <Grid container spacing={3}>
           <Grid item xs={12} md={4}>
@@ -134,7 +163,6 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
             <Box>
               <Typography>Marca: {ordenReparacion.auto.brand}</Typography>
               <Typography>Modelo: {ordenReparacion.auto.model}</Typography>
-              <Typography>Año: {ordenReparacion.auto.year}</Typography>
               <Typography>Patente: {ordenReparacion.auto.patent}</Typography>
             </Box>
           </Grid>
@@ -147,84 +175,6 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
               </Typography>
               <Typography>
                 Teléfono: {ordenReparacion.auto.owner.phone}
-              </Typography>
-              <Typography>Email: {ordenReparacion.auto.owner.email}</Typography>
-            </Box>
-          </Grid>
-          <Grid item xs={12} md={4}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  onClick={handleMechanicOrderPrint}
-                  startIcon={<PrintIcon />}
-                >
-                  Imprimir orden para el mecánico
-                </Button>
-              </Grid>
-              <Grid item xs={12}>
-                <Button
-                  variant="contained"
-                  color="secondary"
-                  onClick={handleClientOrderPrint}
-                  startIcon={<PrintIcon />}
-                >
-                  Imprimir orden para el cliente
-                </Button>
-              </Grid>
-              <Grid item xs={12}>
-                <Button
-                  variant="contained"
-                  color="success"
-                  onClick={handleOpenConfirmModal}
-                  startIcon={<WhatsAppIcon />}
-                >
-                  Enviar orden por WhatsApp al cliente
-                </Button>
-              </Grid>
-            </Grid>
-          </Grid>
-          <Grid item xs={12}>
-            <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-              Detalles de la Reparación
-            </Typography>
-            <Box>
-              <Typography>Estado: {ordenReparacion.estado}</Typography>
-              <Typography>
-                Fecha de Entrada:{" "}
-                {new Date(
-                  ordenReparacion.fechaEntradaReparacion
-                ).toLocaleDateString()}
-              </Typography>
-              <Typography>
-                Fecha de Salida:{" "}
-                {ordenReparacion.fechaSalidaReparacion
-                  ? new Date(
-                      ordenReparacion.fechaSalidaReparacion
-                    ).toLocaleDateString()
-                  : "N/A"}
-              </Typography>
-              <Typography>
-                Kilómetros al entrar al taller: {ordenReparacion.kilometros}
-              </Typography>
-              <Typography>
-                Observaciones del Cliente:{" "}
-                {ordenReparacion.observacionesCliente}
-              </Typography>
-              <Typography>
-                Observaciones de Entrada:{" "}
-                {JSON.parse(ordenReparacion.observacionesEntrada).join(", ")}
-              </Typography>
-              <Typography>
-                Observaciones de Salida:{" "}
-                {JSON.parse(ordenReparacion.observacionesSalida).join(", ")}
-              </Typography>
-              <Typography>
-                Mano de obra: ${ordenReparacion.manoDeObra}
-              </Typography>
-              <Typography>
-                Monto total: ${calcularTotalOrdenReparacion(ordenReparacion)}
               </Typography>
             </Box>
           </Grid>
@@ -371,6 +321,40 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
             </Grid>
           </Grid>
         </Grid>
+        <Grid item container xs={12} spacing={2} sx={{ mt: 2 }}>
+          <Grid item xs={4}>
+            <Button
+              variant="contained"
+              color="primary"
+              onClick={handleMechanicOrderPrint}
+              startIcon={<PrintIcon />}
+            >
+              Imprimir orden para el mecánico
+            </Button>
+          </Grid>
+          <Grid item xs={4}>
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={handleClientOrderPrint}
+              startIcon={<PrintIcon />}
+              fullWidth
+              sx={{ height: "100%" }}
+            >
+              Imprimir orden para el cliente
+            </Button>
+          </Grid>
+          <Grid item xs={4}>
+            <Button
+              variant="contained"
+              color="success"
+              onClick={handleOpenConfirmModal}
+              startIcon={<WhatsAppIcon />}
+            >
+              Enviar orden por WhatsApp al cliente
+            </Button>
+          </Grid>
+        </Grid>
       </Paper>
       <Dialog
         open={openConfirmModal}
@@ -409,6 +393,14 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <div style={{ display: "none" }}>
+        {ordenReparacion !== null && (
+          <OrdenMecanicoPdf ref={mechanicOrderRef} repair={ordenReparacion} />
+        )}
+        {ordenReparacion !== null && (
+          <OrdenClientePdf ref={clientOrderRef} repair={ordenReparacion} />
+        )}
+      </div>
     </>
   );
 };
