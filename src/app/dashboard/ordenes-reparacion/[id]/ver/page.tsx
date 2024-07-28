@@ -350,51 +350,6 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           </TabPanel>
         </Box>
         <Divider sx={{ my: 2 }} />
-        <Typography variant="h6" gutterBottom>
-          <AttachMoneyIcon sx={{ mr: 1, verticalAlign: "middle" }} />
-          Facturación Detallada
-        </Typography>
-        <TableContainer component={Paper} elevation={0}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Concepto</TableCell>
-                <TableCell align="right">Subtotal</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              <TableRow>
-                <TableCell>Repuestos</TableCell>
-                <TableCell align="right">
-                  ${calcularTotalRepuestos(ordenReparacion)}
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Reparaciones de Terceros</TableCell>
-                <TableCell align="right">
-                  ${calcularTotalReparacionesTerceros(ordenReparacion)}
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>Mano de Obra</TableCell>
-                <TableCell align="right">
-                  ${ordenReparacion.manoDeObra}
-                </TableCell>
-              </TableRow>
-              <TableRow>
-                <TableCell>
-                  <strong>Total</strong>
-                </TableCell>
-                <TableCell align="right">
-                  <strong>
-                    ${calcularTotalOrdenReparacion(ordenReparacion)}
-                  </strong>
-                </TableCell>
-              </TableRow>
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <Divider sx={{ my: 2 }} />
 
         <Typography variant="h6" gutterBottom>
           <BuildCircleIcon sx={{ mr: 1, verticalAlign: "middle" }} />
@@ -470,6 +425,51 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
             )
           )}
         </Box>
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="h6" gutterBottom>
+          <AttachMoneyIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+          Facturación Detallada
+        </Typography>
+        <TableContainer component={Paper} elevation={0}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>Concepto</TableCell>
+                <TableCell align="right">Subtotal</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell>Repuestos</TableCell>
+                <TableCell align="right">
+                  ${calcularTotalRepuestos(ordenReparacion)}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Reparaciones de Terceros</TableCell>
+                <TableCell align="right">
+                  ${calcularTotalReparacionesTerceros(ordenReparacion)}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>Mano de Obra</TableCell>
+                <TableCell align="right">
+                  ${ordenReparacion.manoDeObra}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>
+                  <strong>Total</strong>
+                </TableCell>
+                <TableCell align="right">
+                  <strong>
+                    ${calcularTotalOrdenReparacion(ordenReparacion)}
+                  </strong>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
         <Divider sx={{ my: 2 }} />
         <Typography variant="h6" gutterBottom>
           Acciones
