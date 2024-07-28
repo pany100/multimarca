@@ -1,5 +1,6 @@
 "use client";
 
+import Reparaciones from "@/components/estadisticas/Reparaciones";
 import Ventas from "@/components/estadisticas/Ventas";
 import { Card, Grid, Typography } from "@mui/material";
 
@@ -9,13 +10,21 @@ const EstadisticasPage = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         Estadísticas
       </Typography>
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
-          <Card>
+      <Grid container spacing={2} sx={{ height: "100%" }}>
+        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
+          <Card
+            sx={{ width: "100%", display: "flex", flexDirection: "column" }}
+          >
             <Ventas />
           </Card>
         </Grid>
-        {/* Aquí puedes agregar más componentes de estadísticas */}
+        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
+          <Card
+            sx={{ width: "100%", display: "flex", flexDirection: "column" }}
+          >
+            <Reparaciones />
+          </Card>
+        </Grid>
       </Grid>
     </div>
   );
