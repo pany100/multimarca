@@ -6,8 +6,12 @@ import {
   calcularTotalOrdenReparacion,
   getStatusColor,
 } from "@/utils/ordenHelper";
+import BuildIcon from "@mui/icons-material/Build";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import CommentIcon from "@mui/icons-material/Comment";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import EngineeringIcon from "@mui/icons-material/Engineering";
+import InventoryIcon from "@mui/icons-material/Inventory";
 import PersonIcon from "@mui/icons-material/Person";
 import PrintIcon from "@mui/icons-material/Print";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
@@ -25,8 +29,13 @@ import {
   DialogTitle,
   Divider,
   Grid,
+  List,
+  ListItem,
+  ListItemText,
   Paper,
   Snackbar,
+  Tab,
+  Tabs,
   TextField,
   Typography,
   useTheme,
@@ -35,8 +44,31 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+    </div>
+  );
+}
+
 const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
   const theme = useTheme();
+  const [tabValue, setTabValue] = useState(0);
 
   let mechanicOrderRef = useRef(null);
   let clientOrderRef = useRef(null);
@@ -48,6 +80,9 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
     message: "",
     severity: "success" as "success" | "error",
   });
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
   const { authFetch } = useFetch();
   const handleMechanicOrderPrint = useReactToPrint({
     content: () => mechanicOrderRef.current,
@@ -207,7 +242,103 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
             </Typography>
           </Grid>
         </Grid>
+        <Divider sx={{ my: 2 }} />
+        <Box>
+          <Typography variant="h6" gutterBottom>
+            Detalles de la Reparación
+          </Typography>
+          <Tabs
+            value={tabValue}
+            onChange={handleTabChange}
+            aria-label="detalles de reparación tabs"
+          >
+            <Tab icon={<BuildIcon />} label="Trabajos Realizados" />
+            <Tab icon={<InventoryIcon />} label="Repuestos Utilizados" />
+            <Tab icon={<EngineeringIcon />} label="Reparaciones de Terceros" />
+            <Tab icon={<CommentIcon />} label="Observaciones" />
+          </Tabs>
+          <TabPanel value={tabValue} index={0}>
+            <List>
+              {ordenReparacion.trabajosRealizados.map(
+                (trabajo: {
+                  id: string;
+                  descripcion: string;
+                  precioUnitario: number;
+                }) => (
+                  <ListItem key={trabajo.id}>
+                    <ListItemText
+                      primary={trabajo.descripcion}
+                      secondary={`Precio: $${trabajo.precioUnitario}`}
+                    />
+                  </ListItem>
+                )
+              )}
+            </List>
+          </TabPanel>
 
+          <TabPanel value={tabValue} index={1}>
+            <List>
+              {ordenReparacion.repuestosUsados.map(
+                (repuesto: {
+                  id: string;
+                  stock: { name: string };
+                  unidadesConsumidas: number;
+                  precioVenta: number;
+                }) => (
+                  <ListItem key={repuesto.id}>
+                    <ListItemText
+                      primary={repuesto.stock.name}
+                      secondary={`Cantidad: ${repuesto.unidadesConsumidas} - Precio: $${repuesto.precioVenta}`}
+                    />
+                  </ListItem>
+                )
+              )}
+            </List>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={2}>
+            <List>
+              {ordenReparacion.reparacionesDeTercero.map(
+                (reparacion: {
+                  id: string;
+                  nombre: string;
+                  proveedor: { name: string };
+                }) => (
+                  <ListItem key={reparacion.id}>
+                    <ListItemText
+                      primary={reparacion.nombre}
+                      secondary={`Proveedor: ${reparacion.proveedor.name}`}
+                    />
+                  </ListItem>
+                )
+              )}
+            </List>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={3}>
+            <Typography variant="subtitle2" gutterBottom>
+              Observaciones del Cliente:
+            </Typography>
+            <Typography paragraph>
+              {ordenReparacion.observacionesCliente}
+            </Typography>
+
+            <Typography variant="subtitle2" gutterBottom>
+              Observaciones de Entrada:
+            </Typography>
+            <Typography paragraph>
+              {JSON.parse(ordenReparacion.observacionesEntrada).join(", ")}
+            </Typography>
+
+            <Typography variant="subtitle2" gutterBottom>
+              Observaciones de Salida:
+            </Typography>
+            <Typography paragraph>
+              {JSON.parse(ordenReparacion.observacionesSalida).join(", ")}
+            </Typography>
+          </TabPanel>
+        </Box>
+        <Divider sx={{ my: 2 }} />
         <Grid container spacing={3}>
           <Grid item xs={12}>
             <Typography variant="h6" sx={{ fontWeight: "bold" }}>
