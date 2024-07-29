@@ -10,17 +10,26 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
 import {
-  Bar,
-  BarChart,
-  CartesianGrid,
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
   Legend,
-  ResponsiveContainer,
+  LinearScale,
+  Title,
   Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
+} from "chart.js";
+import { useCallback, useEffect, useState } from "react";
+import { Bar } from "react-chartjs-2";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
 
 const Reparaciones = () => {
   const [moneda, setMoneda] = useState("ARS");
@@ -58,6 +67,35 @@ const Reparaciones = () => {
     obtenerEstadisticas();
   };
 
+  const opciones = {
+    responsive: true,
+    plugins: {
+      legend: {
+        position: "top" as const,
+      },
+      title: {
+        display: true,
+        text: "Estadísticas de Reparaciones por Cliente",
+      },
+    },
+  };
+
+  const datosGrafico = {
+    labels: datos.map((cliente: { fullName: string }) => cliente.fullName),
+    datasets: [
+      {
+        label: `Gastos totales (${moneda})`,
+        data: datos.map(
+          (cliente: { totalGastos: number }) => cliente.totalGastos
+        ),
+        backgroundColor:
+          moneda === "USD"
+            ? "rgba(255, 159, 64, 0.7)"
+            : "rgba(75, 192, 192, 0.7)",
+      },
+    ],
+  };
+
   const meses = [
     { valor: "1", nombre: "Enero" },
     { valor: "2", nombre: "Febrero" },
@@ -75,70 +113,50 @@ const Reparaciones = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box sx={{ mb: 3 }}>
-        <FormControl fullWidth sx={{ mb: 2 }}>
-          <InputLabel>Moneda</InputLabel>
-          <Select
-            value={moneda}
-            label="Moneda"
-            onChange={(e) => setMoneda(e.target.value)}
-          >
-            <MenuItem value="ARS">ARS</MenuItem>
-            <MenuItem value="USD">USD</MenuItem>
-          </Select>
-        </FormControl>
-        <FormControl sx={{ mr: 2, mb: 2, minWidth: 120 }}>
-          <InputLabel>Mes</InputLabel>
-          <Select
-            value={mesInput}
-            label="Mes"
-            onChange={(e) => setMesInput(e.target.value)}
-          >
-            {meses.map((mes) => (
-              <MenuItem key={mes.valor} value={mes.valor}>
-                {mes.nombre}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <TextField
-          label="Año"
-          type="number"
-          value={anioInput}
-          onChange={(e) => setAnioInput(e.target.value)}
-          sx={{ mb: 2, mr: 2 }}
-        />
-        <Button
-          variant="contained"
-          onClick={actualizarEstadisticas}
-          sx={{ mb: 2, mt: 1 }}
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel>Moneda</InputLabel>
+        <Select
+          value={moneda}
+          label="Moneda"
+          onChange={(e) => setMoneda(e.target.value)}
         >
-          Actualizar
-        </Button>
-      </Box>
+          <MenuItem value="ARS">ARS</MenuItem>
+          <MenuItem value="USD">USD</MenuItem>
+        </Select>
+      </FormControl>
+      <FormControl sx={{ mr: 2, mb: 2, minWidth: 120 }}>
+        <InputLabel>Mes</InputLabel>
+        <Select
+          value={mesInput}
+          label="Mes"
+          onChange={(e) => setMesInput(e.target.value)}
+        >
+          <MenuItem value="">
+            <em>Todos los meses</em>
+          </MenuItem>
+          {meses.map((mes) => (
+            <MenuItem key={mes.valor} value={mes.valor}>
+              {mes.nombre}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <TextField
+        label="Año"
+        type="number"
+        value={anioInput}
+        onChange={(e) => setAnioInput(e.target.value)}
+        sx={{ mb: 2, mr: 2 }}
+      />
+      <Button
+        variant="contained"
+        onClick={actualizarEstadisticas}
+        sx={{ mb: 2, mt: 1 }}
+      >
+        Actualizar
+      </Button>
       {datos.length > 0 ? (
-        <ResponsiveContainer width="100%" height={400}>
-          <BarChart
-            data={datos}
-            margin={{
-              top: 5,
-              right: 30,
-              left: 20,
-              bottom: 5,
-            }}
-          >
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="fullName" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar
-              dataKey="totalGastos"
-              fill={moneda === "USD" ? "#82ca9d" : "#8884d8"}
-              name={`Gastos totales (${moneda})`}
-            />
-          </BarChart>
-        </ResponsiveContainer>
+        <Bar options={opciones} data={datosGrafico} />
       ) : (
         <Typography variant="h6" align="center" sx={{ mt: 4 }}>
           Sin datos
