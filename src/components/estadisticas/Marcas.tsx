@@ -92,11 +92,15 @@ const Marcas = () => {
     }
 
     return {
-      labels: datos.map((marca: { marca: string }) => marca.marca),
+      labels: Array.isArray(datos)
+        ? datos.map((marca: { marca: string }) => marca.marca)
+        : [],
       datasets: [
         {
           label: "Cantidad de Atenciones",
-          data: datos.map((marca: { cantidad: number }) => marca.cantidad),
+          data: Array.isArray(datos)
+            ? datos.map((marca: { cantidad: number }) => marca.cantidad)
+            : [],
           backgroundColor: [
             "rgba(255, 99, 132, 0.7)",
             "rgba(54, 162, 235, 0.7)",

@@ -51,11 +51,10 @@ const Stock = () => {
 
     try {
       const respuesta = await fetch(url);
-      const datosRecibidos = await respuesta.json();
-      setDatos(datosRecibidos);
+      const datos = await respuesta.json();
+      setDatos(datos);
     } catch (error) {
       console.error("Error al obtener estadísticas:", error);
-      setDatos([]);
     } finally {
       setCargando(false);
     }
@@ -102,16 +101,20 @@ const Stock = () => {
     }
 
     return {
-      labels: datos.map(
-        (stock: { nombre: string; marca: string }) =>
-          `${stock.nombre} (${stock.marca})`
-      ),
+      labels: Array.isArray(datos)
+        ? datos.map(
+            (stock: { nombre: string; marca: string }) =>
+              `${stock.nombre} (${stock.marca})`
+          )
+        : [],
       datasets: [
         {
           label: `Ganancia Total (${moneda})`,
-          data: datos.map(
-            (stock: { gananciaTotal: number }) => stock.gananciaTotal
-          ),
+          data: Array.isArray(datos)
+            ? datos.map(
+                (stock: { gananciaTotal: number }) => stock.gananciaTotal
+              )
+            : [],
           backgroundColor: [
             "rgba(255, 99, 132, 0.7)",
             "rgba(54, 162, 235, 0.7)",

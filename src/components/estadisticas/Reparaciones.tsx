@@ -103,13 +103,17 @@ const Reparaciones = () => {
     }
 
     return {
-      labels: datos.map((cliente: { fullName: string }) => cliente.fullName),
+      labels: Array.isArray(datos)
+        ? datos.map((cliente: { fullName: string }) => cliente.fullName)
+        : [],
       datasets: [
         {
           label: `Gastos totales (${moneda})`,
-          data: datos.map(
-            (cliente: { totalGastos: number }) => cliente.totalGastos
-          ),
+          data: Array.isArray(datos)
+            ? datos.map(
+                (cliente: { totalGastos: number }) => cliente.totalGastos
+              )
+            : [],
           backgroundColor:
             moneda === "USD"
               ? "rgba(255, 159, 64, 0.7)"

@@ -95,14 +95,18 @@ const Extracciones = () => {
     }
 
     return {
-      labels: datos.map((usuario: { fullName: string }) => usuario.fullName),
+      labels: Array.isArray(datos)
+        ? datos.map((usuario: { fullName: string }) => usuario.fullName)
+        : [],
       datasets: [
         {
           label: `Extracciones totales (${moneda})`,
-          data: datos.map(
-            (usuario: { totalExtracciones: number }) =>
-              usuario.totalExtracciones
-          ),
+          data: Array.isArray(datos)
+            ? datos.map(
+                (usuario: { totalExtracciones: number }) =>
+                  usuario.totalExtracciones
+              )
+            : [],
           backgroundColor: [
             "rgba(255, 99, 132, 0.7)",
             "rgba(54, 162, 235, 0.7)",

@@ -92,13 +92,15 @@ const Gastos = () => {
     }
 
     return {
-      labels: datos.map((gasto: { nombre: string }) => gasto.nombre),
+      labels: Array.isArray(datos)
+        ? datos.map((gasto: { nombre: string }) => gasto.nombre)
+        : [],
       datasets: [
         {
           label: `Gasto total (${moneda})`,
-          data: datos.map(
-            (gasto: { totalGastos: number }) => gasto.totalGastos
-          ),
+          data: Array.isArray(datos)
+            ? datos.map((gasto: { totalGastos: number }) => gasto.totalGastos)
+            : [],
           backgroundColor: [
             "rgba(255, 159, 64, 0.7)",
             "rgba(75, 192, 192, 0.7)",

@@ -100,13 +100,17 @@ const Ventas = () => {
     }
 
     return {
-      labels: datos.map((cliente: { fullName: string }) => cliente.fullName),
+      labels: Array.isArray(datos)
+        ? datos.map((cliente: { fullName: string }) => cliente.fullName)
+        : [],
       datasets: [
         {
           label: `Ventas totales (${moneda})`,
-          data: datos.map(
-            (cliente: { totalVentas: number }) => cliente.totalVentas
-          ),
+          data: Array.isArray(datos)
+            ? datos.map(
+                (cliente: { totalVentas: number }) => cliente.totalVentas
+              )
+            : [],
           backgroundColor:
             moneda === "USD"
               ? "rgba(85, 140, 90, 0.7)"
