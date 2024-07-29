@@ -192,6 +192,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             icono: <PaymentIcon />,
             ruta: "/dashboard/pagos-a-mecanico",
           },
+          {
+            permiso: "Ventas",
+            texto: "Ventas",
+            icono: <ShoppingCartIcon />,
+            ruta: "/dashboard/ventas",
+          },
         ],
       },
       {
@@ -208,12 +214,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       {
         title: "Finanzas",
         items: [
-          {
-            permiso: "Ventas",
-            texto: "Ventas",
-            icono: <ShoppingCartIcon />,
-            ruta: "/dashboard/ventas",
-          },
           {
             permiso: "RetirosDinero",
             texto: "Extracciones",
