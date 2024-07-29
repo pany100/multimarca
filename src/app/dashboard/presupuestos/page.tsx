@@ -3,7 +3,7 @@
 import { useFetch } from "@/contexts/FetchContext";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -23,6 +23,8 @@ interface Presupuesto {
 const PresupuestosPage = () => {
   const [presupuestos, setPresupuestos] = useState<Presupuesto[]>([]);
   const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState("");
+
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 10,
@@ -119,6 +121,9 @@ const PresupuestosPage = () => {
         url.searchParams.append("page", paginationModel.page.toString());
         url.searchParams.append("size", paginationModel.pageSize.toString());
         url.searchParams.append("presupuestos", "true");
+        if (searchTerm) {
+          url.searchParams.append("query", searchTerm);
+        }
 
         const response = await authFetch(url.toString());
         const data = await response.json();
@@ -132,7 +137,7 @@ const PresupuestosPage = () => {
     };
 
     fetchPresupuestos();
-  }, [paginationModel, authFetch]);
+  }, [paginationModel, authFetch, searchTerm]);
 
   const handleAddClick = () => {
     router.push("/dashboard/ordenes-reparacion/nueva");
@@ -140,6 +145,11 @@ const PresupuestosPage = () => {
 
   const handleEditClick = (id: string) => {
     router.push(`/dashboard/ordenes-reparacion/${id}/editar`);
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setPaginationModel({ ...paginationModel, page: 0 }); // Reset to first page on new search
   };
 
   return (
@@ -155,6 +165,14 @@ const PresupuestosPage = () => {
       >
         Agregar Presupuesto
       </Button>
+      <TextField
+        label="Buscar"
+        variant="outlined"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        fullWidth
+        margin="normal"
+      />
       <DataGrid
         rows={presupuestos}
         columns={columns}
