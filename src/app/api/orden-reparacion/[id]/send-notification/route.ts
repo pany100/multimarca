@@ -91,5 +91,3 @@ async function generatePdf(repair: any): Promise<Buffer> {
 
   return pdfBuffer;
 }
-
-export { generatePdf };
