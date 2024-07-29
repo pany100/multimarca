@@ -38,7 +38,6 @@ export const config = {
     "/api/ventas/:path*",
     "/api/notificaciones/:path*",
     "/api/estadisticas/:path*",
-    "/api/auth/:path*",
     "/api/categorias-gasto/:path*",
     "/api/controles-mecanicos/:path*",
     "/api/extracciones/:path*",
