@@ -41,10 +41,11 @@ const Marcas = () => {
 
     try {
       const respuesta = await fetch(url);
-      const datos = await respuesta.json();
-      setDatos(datos);
+      const datosRecibidos = await respuesta.json();
+      setDatos(datosRecibidos);
     } catch (error) {
       console.error("Error al obtener estadísticas:", error);
+      setDatos([]);
     } finally {
       setCargando(false);
     }
@@ -70,7 +71,7 @@ const Marcas = () => {
         display: true,
         text: "Estadísticas de Marcas más Atendidas",
         font: {
-          size: 20, // Aumenta el tamaño de la fuente a 20px
+          size: 20,
         },
       },
     },

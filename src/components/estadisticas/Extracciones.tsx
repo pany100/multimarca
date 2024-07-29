@@ -12,27 +12,29 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  BarElement,
   CategoryScale,
   Chart as ChartJS,
   Legend,
+  LineElement,
   LinearScale,
+  PointElement,
   Title,
   Tooltip,
 } from "chart.js";
 import React, { useCallback, useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2";
+import { Line } from "react-chartjs-2";
 
 ChartJS.register(
   CategoryScale,
   LinearScale,
-  BarElement,
+  PointElement,
+  LineElement,
   Title,
   Tooltip,
   Legend
 );
 
-const Reparaciones = () => {
+const Extracciones = () => {
   const [moneda, setMoneda] = useState("ARS");
   const [mesInput, setMesInput] = useState("");
   const [anioInput, setAnioInput] = useState("");
@@ -44,7 +46,7 @@ const Reparaciones = () => {
   const obtenerEstadisticas = useCallback(async () => {
     setCargando(true);
     const url = new URL(
-      "/api/estadisticas/reparaciones",
+      "/api/estadisticas/extracciones",
       window.location.origin
     );
     url.searchParams.append("moneda", moneda);
@@ -80,7 +82,7 @@ const Reparaciones = () => {
       },
       title: {
         display: true,
-        text: "Estadísticas de Reparaciones por Cliente",
+        text: "Estadísticas de Extracciones por Usuario",
         font: {
           size: 20,
         },
@@ -94,26 +96,26 @@ const Reparaciones = () => {
         labels: [],
         datasets: [
           {
-            label: `Gastos totales (${moneda})`,
+            label: `Extracciones totales (${moneda})`,
             data: [],
-            backgroundColor: [],
+            borderColor: "rgb(75, 192, 192)",
+            tension: 0.1,
           },
         ],
       };
     }
 
     return {
-      labels: datos.map((cliente: { fullName: string }) => cliente.fullName),
+      labels: datos.map((usuario: { fullName: string }) => usuario.fullName),
       datasets: [
         {
-          label: `Gastos totales (${moneda})`,
+          label: `Extracciones totales (${moneda})`,
           data: datos.map(
-            (cliente: { totalGastos: number }) => cliente.totalGastos
+            (usuario: { totalExtracciones: number }) =>
+              usuario.totalExtracciones
           ),
-          backgroundColor:
-            moneda === "USD"
-              ? "rgba(255, 159, 64, 0.7)"
-              : "rgba(75, 192, 192, 0.7)",
+          borderColor: "rgb(75, 192, 192)",
+          tension: 0.1,
         },
       ],
     };
@@ -183,7 +185,7 @@ const Reparaciones = () => {
           <CircularProgress />
         </Box>
       ) : datos.length > 0 ? (
-        <Bar options={opciones} data={datosGrafico} />
+        <Line options={opciones} data={datosGrafico} />
       ) : (
         <Typography variant="h6" align="center" sx={{ mt: 4 }}>
           Sin datos
@@ -193,4 +195,4 @@ const Reparaciones = () => {
   );
 };
 
-export default Reparaciones;
+export default Extracciones;
