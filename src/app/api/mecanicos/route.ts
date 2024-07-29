@@ -74,7 +74,7 @@ export async function POST(request: Request) {
       data: {
         name,
         start_date: start_date ? new Date(start_date) : null,
-        dni: dni ? BigInt(dni) : null,
+        dni: dni ? dni.toString() : null,
         address,
         city,
         state,
