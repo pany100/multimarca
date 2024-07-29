@@ -1,8 +1,8 @@
-import { NextResponse } from "next/server";
-import prisma from "src/lib/prisma";
+import { sendEmail } from "@/lib/email"; // Asume que tienes una función para enviar emails
 import { randomBytes } from "crypto";
 import { addHours } from "date-fns";
-import { sendEmail } from "@/lib/email"; // Asume que tienes una función para enviar emails
+import { NextResponse } from "next/server";
+import prisma from "src/lib/prisma";
 
 export async function POST(request: Request) {
   try {
@@ -27,7 +27,10 @@ export async function POST(request: Request) {
         reset_password_token_expired: resetPasswordTokenExpired,
       },
     });
-    const frontendUrl = process.env.NEXT_PUBLIC_FRONTEND_URL;
+    const frontendUrl =
+      process.env.NODE_ENV === "production"
+        ? "https://mtsmintranet.com.ar"
+        : process.env.NEXT_PUBLIC_FRONTEND_URL;
 
     const resetPasswordUrl = `${frontendUrl}/reset-password?token=${resetPasswordToken}`;
 
