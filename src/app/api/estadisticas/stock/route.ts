@@ -3,6 +3,8 @@ import { NextRequest, NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
+export const dynamic = "force-dynamic";
+
 interface StockRentable {
   id: number;
   name: string;
