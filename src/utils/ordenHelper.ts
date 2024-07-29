@@ -5,21 +5,25 @@ function calcularTotalRepuestos(ordenReparacion: {
     precioVenta: number;
     unidadesConsumidas: number;
   }[];
-}): number {
-  return ordenReparacion.repuestosUsados.reduce(
-    (total, repuesto) => total + parseFloat(repuesto.precioVenta.toString()),
-    0
-  );
+}): string {
+  return ordenReparacion.repuestosUsados
+    .reduce(
+      (total, repuesto) => total + parseFloat(repuesto.precioVenta.toString()),
+      0
+    )
+    .toFixed(2);
 }
 
 function calcularTotalReparacionesTerceros(ordenReparacion: {
   reparacionesDeTercero: { precioVenta: number }[];
-}): number {
-  return ordenReparacion.reparacionesDeTercero.reduce(
-    (total, reparacion) =>
-      total + parseFloat(reparacion.precioVenta.toString()),
-    0
-  );
+}): string {
+  return ordenReparacion.reparacionesDeTercero
+    .reduce(
+      (total, reparacion) =>
+        total + parseFloat(reparacion.precioVenta.toString()),
+      0
+    )
+    .toFixed(2);
 }
 
 function calcularTotalOrdenReparacion(ordenReparacion: {
@@ -27,10 +31,11 @@ function calcularTotalOrdenReparacion(ordenReparacion: {
   reparacionesDeTercero: { precioVenta: number }[];
   manoDeObra: number;
 }): number {
-  const totalRepuestos = calcularTotalRepuestos(ordenReparacion);
+  const totalRepuestos = Number(calcularTotalRepuestos(ordenReparacion));
 
-  const totalReparacionesTerceros =
-    calcularTotalReparacionesTerceros(ordenReparacion);
+  const totalReparacionesTerceros = Number(
+    calcularTotalReparacionesTerceros(ordenReparacion)
+  );
   // 3. Mano de obra
   const manoDeObra = parseFloat(ordenReparacion.manoDeObra.toString());
 
