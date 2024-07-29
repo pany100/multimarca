@@ -12,27 +12,17 @@ import {
   Typography,
 } from "@mui/material";
 import {
+  ArcElement,
   CategoryScale,
   Chart as ChartJS,
   Legend,
-  LineElement,
-  LinearScale,
-  PointElement,
   Title,
   Tooltip,
 } from "chart.js";
 import React, { useCallback, useEffect, useState } from "react";
-import { Line } from "react-chartjs-2";
+import { Pie } from "react-chartjs-2";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  PointElement,
-  LineElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, ArcElement, Title, Tooltip, Legend);
 
 const Extracciones = () => {
   const [moneda, setMoneda] = useState("ARS");
@@ -98,8 +88,7 @@ const Extracciones = () => {
           {
             label: `Extracciones totales (${moneda})`,
             data: [],
-            borderColor: "rgb(75, 192, 192)",
-            tension: 0.1,
+            backgroundColor: [],
           },
         ],
       };
@@ -114,8 +103,15 @@ const Extracciones = () => {
             (usuario: { totalExtracciones: number }) =>
               usuario.totalExtracciones
           ),
-          borderColor: "rgb(75, 192, 192)",
-          tension: 0.1,
+          backgroundColor: [
+            "rgba(255, 99, 132, 0.7)",
+            "rgba(54, 162, 235, 0.7)",
+            "rgba(255, 206, 86, 0.7)",
+            "rgba(75, 192, 192, 0.7)",
+            "rgba(153, 102, 255, 0.7)",
+            "rgba(255, 159, 64, 0.7)",
+            "rgba(201, 203, 207, 0.7)",
+          ],
         },
       ],
     };
@@ -185,7 +181,7 @@ const Extracciones = () => {
           <CircularProgress />
         </Box>
       ) : datos.length > 0 ? (
-        <Line options={opciones} data={datosGrafico} />
+        <Pie options={opciones} data={datosGrafico} />
       ) : (
         <Typography variant="h6" align="center" sx={{ mt: 4 }}>
           Sin datos
