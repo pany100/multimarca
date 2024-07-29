@@ -3,6 +3,7 @@
 import {
   Box,
   Button,
+  CircularProgress,
   FormControl,
   InputLabel,
   MenuItem,
@@ -32,14 +33,18 @@ ChartJS.register(
 );
 
 const Stock = () => {
+  const [moneda, setMoneda] = useState("ARS");
   const [mesInput, setMesInput] = useState("");
   const [anioInput, setAnioInput] = useState("");
   const [mes, setMes] = useState("");
   const [anio, setAnio] = useState("");
   const [datos, setDatos] = useState([]);
+  const [cargando, setCargando] = useState(true);
 
   const obtenerEstadisticas = useCallback(async () => {
+    setCargando(true);
     const url = new URL("/api/estadisticas/stock", window.location.origin);
+    url.searchParams.append("moneda", moneda);
     if (mes) url.searchParams.append("mes", mes);
     if (anio) url.searchParams.append("año", anio);
     url.searchParams.append("limite", "5");
@@ -50,8 +55,10 @@ const Stock = () => {
       setDatos(datos);
     } catch (error) {
       console.error("Error al obtener estadísticas:", error);
+    } finally {
+      setCargando(false);
     }
-  }, [mes, anio]);
+  }, [moneda, mes, anio]);
 
   useEffect(() => {
     obtenerEstadisticas();
@@ -72,6 +79,9 @@ const Stock = () => {
       title: {
         display: true,
         text: "Estadísticas de Stock más Rentable",
+        font: {
+          size: 20,
+        },
       },
     },
   };
@@ -97,7 +107,7 @@ const Stock = () => {
       ),
       datasets: [
         {
-          label: "Ganancia Total",
+          label: `Ganancia Total (${moneda})`,
           data: datos.map(
             (stock: { gananciaTotal: number }) => stock.gananciaTotal
           ),
@@ -111,7 +121,7 @@ const Stock = () => {
         },
       ],
     };
-  }, [datos]);
+  }, [datos, moneda]);
 
   const meses = [
     { valor: "1", nombre: "Enero" },
@@ -130,6 +140,17 @@ const Stock = () => {
 
   return (
     <Box sx={{ p: 3 }}>
+      <FormControl fullWidth sx={{ mb: 2 }}>
+        <InputLabel>Moneda</InputLabel>
+        <Select
+          value={moneda}
+          label="Moneda"
+          onChange={(e) => setMoneda(e.target.value)}
+        >
+          <MenuItem value="ARS">ARS</MenuItem>
+          <MenuItem value="USD">USD</MenuItem>
+        </Select>
+      </FormControl>
       <FormControl sx={{ mr: 2, mb: 2, minWidth: 120 }}>
         <InputLabel>Mes</InputLabel>
         <Select
@@ -161,7 +182,11 @@ const Stock = () => {
       >
         Actualizar
       </Button>
-      {datos.length > 0 ? (
+      {cargando ? (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : datos.length > 0 ? (
         <Pie options={opciones} data={datosGrafico} />
       ) : (
         <Typography variant="h6" align="center" sx={{ mt: 4 }}>

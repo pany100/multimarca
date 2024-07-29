@@ -1,5 +1,6 @@
 "use client";
 
+import Marcas from "@/components/estadisticas/Marcas";
 import Reparaciones from "@/components/estadisticas/Reparaciones";
 import Stock from "@/components/estadisticas/Stock";
 import Ventas from "@/components/estadisticas/Ventas";
@@ -31,6 +32,13 @@ const EstadisticasPage = () => {
             sx={{ width: "100%", display: "flex", flexDirection: "column" }}
           >
             <Stock />
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
+          <Card
+            sx={{ width: "100%", display: "flex", flexDirection: "column" }}
+          >
+            <Marcas />
           </Card>
         </Grid>
       </Grid>

@@ -13,23 +13,45 @@ interface StockRentable {
 export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
+    const moneda = url.searchParams.get("moneda") || "ARS";
     const mes = url.searchParams.get("mes");
     const año = url.searchParams.get("año");
     const limite = parseInt(url.searchParams.get("limite") || "5", 10);
+
+    if (moneda !== "ARS" && moneda !== "USD") {
+      return NextResponse.json(
+        { error: "La moneda debe ser ARS o USD" },
+        { status: 400 }
+      );
+    }
 
     let sqlQuery = `
       SELECT 
         s.id,
         s.name,
         s.brand,
-        ROUND(SUM(ru.unidadesConsumidas * (ru.precioVenta - ru.precioCompra)), 2) as gananciaTotal
+        ROUND(SUM(
+          CASE 
+            WHEN ? = 'USD' THEN 
+              (ru.unidadesConsumidas * (ru.precioVenta - ru.precioCompra)) / 
+              COALESCE(
+                (SELECT d.blue 
+                 FROM Dolar d 
+                 WHERE DATE(d.fecha) <= DATE(orep.fechaCreacion) 
+                 ORDER BY d.fecha DESC 
+                 LIMIT 1), 
+                1)
+            ELSE 
+              (ru.unidadesConsumidas * (ru.precioVenta - ru.precioCompra))
+          END
+        ), 2) as gananciaTotal
       FROM Stock s
       JOIN RepuestoUsado ru ON s.id = ru.stockId
       JOIN OrdenReparacion orep ON ru.ordenReparacionId = orep.id
       WHERE orep.estado != 'Presupuestado'
     `;
 
-    const queryParams: any[] = [];
+    const queryParams: any[] = [moneda];
 
     if (año && mes) {
       sqlQuery += ` AND orep.fechaCreacion >= ? AND orep.fechaCreacion < ?`;

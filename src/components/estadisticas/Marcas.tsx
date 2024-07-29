@@ -12,28 +12,19 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  BarElement,
+  ArcElement,
   CategoryScale,
   Chart as ChartJS,
   Legend,
   LinearScale,
-  Title,
   Tooltip,
 } from "chart.js";
 import React, { useCallback, useEffect, useState } from "react";
-import { Bar } from "react-chartjs-2";
+import { Doughnut } from "react-chartjs-2";
 
-ChartJS.register(
-  CategoryScale,
-  LinearScale,
-  BarElement,
-  Title,
-  Tooltip,
-  Legend
-);
+ChartJS.register(CategoryScale, LinearScale, ArcElement, Tooltip, Legend);
 
-const Reparaciones = () => {
-  const [moneda, setMoneda] = useState("ARS");
+const Marcas = () => {
   const [mesInput, setMesInput] = useState("");
   const [anioInput, setAnioInput] = useState("");
   const [mes, setMes] = useState("");
@@ -43,13 +34,10 @@ const Reparaciones = () => {
 
   const obtenerEstadisticas = useCallback(async () => {
     setCargando(true);
-    const url = new URL(
-      "/api/estadisticas/reparaciones",
-      window.location.origin
-    );
-    url.searchParams.append("moneda", moneda);
+    const url = new URL("/api/estadisticas/autos", window.location.origin);
     if (mes) url.searchParams.append("mes", mes);
     if (anio) url.searchParams.append("año", anio);
+    url.searchParams.append("limite", "5");
 
     try {
       const respuesta = await fetch(url);
@@ -60,7 +48,7 @@ const Reparaciones = () => {
     } finally {
       setCargando(false);
     }
-  }, [moneda, mes, anio]);
+  }, [mes, anio]);
 
   useEffect(() => {
     obtenerEstadisticas();
@@ -80,7 +68,7 @@ const Reparaciones = () => {
       },
       title: {
         display: true,
-        text: "Estadísticas de Reparaciones por Cliente",
+        text: "Estadísticas de Marcas más Atendidas",
         font: {
           size: 20, // Aumenta el tamaño de la fuente a 20px
         },
@@ -94,7 +82,7 @@ const Reparaciones = () => {
         labels: [],
         datasets: [
           {
-            label: `Gastos totales (${moneda})`,
+            label: "Cantidad de Atenciones",
             data: [],
             backgroundColor: [],
           },
@@ -103,21 +91,22 @@ const Reparaciones = () => {
     }
 
     return {
-      labels: datos.map((cliente: { fullName: string }) => cliente.fullName),
+      labels: datos.map((marca: { marca: string }) => marca.marca),
       datasets: [
         {
-          label: `Gastos totales (${moneda})`,
-          data: datos.map(
-            (cliente: { totalGastos: number }) => cliente.totalGastos
-          ),
-          backgroundColor:
-            moneda === "USD"
-              ? "rgba(255, 159, 64, 0.7)"
-              : "rgba(75, 192, 192, 0.7)",
+          label: "Cantidad de Atenciones",
+          data: datos.map((marca: { cantidad: number }) => marca.cantidad),
+          backgroundColor: [
+            "rgba(255, 99, 132, 0.7)",
+            "rgba(54, 162, 235, 0.7)",
+            "rgba(255, 206, 86, 0.7)",
+            "rgba(75, 192, 192, 0.7)",
+            "rgba(153, 102, 255, 0.7)",
+          ],
         },
       ],
     };
-  }, [datos, moneda]);
+  }, [datos]);
 
   const meses = [
     { valor: "1", nombre: "Enero" },
@@ -136,17 +125,6 @@ const Reparaciones = () => {
 
   return (
     <Box sx={{ p: 3 }}>
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel>Moneda</InputLabel>
-        <Select
-          value={moneda}
-          label="Moneda"
-          onChange={(e) => setMoneda(e.target.value)}
-        >
-          <MenuItem value="ARS">ARS</MenuItem>
-          <MenuItem value="USD">USD</MenuItem>
-        </Select>
-      </FormControl>
       <FormControl sx={{ mr: 2, mb: 2, minWidth: 120 }}>
         <InputLabel>Mes</InputLabel>
         <Select
@@ -183,7 +161,7 @@ const Reparaciones = () => {
           <CircularProgress />
         </Box>
       ) : datos.length > 0 ? (
-        <Bar options={opciones} data={datosGrafico} />
+        <Doughnut options={opciones} data={datosGrafico} />
       ) : (
         <Typography variant="h6" align="center" sx={{ mt: 4 }}>
           Sin datos
@@ -193,4 +171,4 @@ const Reparaciones = () => {
   );
 };
 
-export default Reparaciones;
+export default Marcas;

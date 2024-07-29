@@ -3,6 +3,7 @@
 import {
   Box,
   Button,
+  CircularProgress,
   FormControl,
   InputLabel,
   MenuItem,
@@ -19,7 +20,7 @@ import {
   Title,
   Tooltip,
 } from "chart.js";
-import { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Bar } from "react-chartjs-2";
 
 ChartJS.register(
@@ -38,8 +39,10 @@ const Ventas = () => {
   const [mes, setMes] = useState("");
   const [anio, setAnio] = useState("");
   const [datos, setDatos] = useState([]);
+  const [cargando, setCargando] = useState(true);
 
   const obtenerEstadisticas = useCallback(async () => {
+    setCargando(true);
     const url = new URL("/api/estadisticas/ventas", window.location.origin);
     url.searchParams.append("moneda", moneda);
     if (mes) url.searchParams.append("mes", mes);
@@ -51,6 +54,8 @@ const Ventas = () => {
       setDatos(datos);
     } catch (error) {
       console.error("Error al obtener estadísticas:", error);
+    } finally {
+      setCargando(false);
     }
   }, [moneda, mes, anio]);
 
@@ -73,25 +78,43 @@ const Ventas = () => {
       title: {
         display: true,
         text: "Estadísticas de Ventas por Cliente",
+        font: {
+          size: 20, // Aumenta el tamaño de la fuente a 20px
+        },
       },
     },
   };
 
-  const datosGrafico = {
-    labels: datos.map((cliente: { fullName: string }) => cliente.fullName),
-    datasets: [
-      {
-        label: `Ventas totales (${moneda})`,
-        data: datos.map(
-          (cliente: { totalVentas: number }) => cliente.totalVentas
-        ),
-        backgroundColor:
-          moneda === "USD"
-            ? "rgba(85, 140, 90, 0.7)"
-            : "rgba(53, 162, 235, 0.5)",
-      },
-    ],
-  };
+  const datosGrafico = React.useMemo(() => {
+    if (datos.length === 0) {
+      return {
+        labels: [],
+        datasets: [
+          {
+            label: `Ventas totales (${moneda})`,
+            data: [],
+            backgroundColor: [],
+          },
+        ],
+      };
+    }
+
+    return {
+      labels: datos.map((cliente: { fullName: string }) => cliente.fullName),
+      datasets: [
+        {
+          label: `Ventas totales (${moneda})`,
+          data: datos.map(
+            (cliente: { totalVentas: number }) => cliente.totalVentas
+          ),
+          backgroundColor:
+            moneda === "USD"
+              ? "rgba(85, 140, 90, 0.7)"
+              : "rgba(53, 162, 235, 0.5)",
+        },
+      ],
+    };
+  }, [datos, moneda]);
 
   const meses = [
     { valor: "1", nombre: "Enero" },
@@ -128,6 +151,9 @@ const Ventas = () => {
           label="Mes"
           onChange={(e) => setMesInput(e.target.value)}
         >
+          <MenuItem value="">
+            <em>Todos los meses</em>
+          </MenuItem>
           {meses.map((mes) => (
             <MenuItem key={mes.valor} value={mes.valor}>
               {mes.nombre}
@@ -149,7 +175,11 @@ const Ventas = () => {
       >
         Actualizar
       </Button>
-      {datos.length > 0 ? (
+      {cargando ? (
+        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
+          <CircularProgress />
+        </Box>
+      ) : datos.length > 0 ? (
         <Bar options={opciones} data={datosGrafico} />
       ) : (
         <Typography variant="h6" align="center" sx={{ mt: 4 }}>
