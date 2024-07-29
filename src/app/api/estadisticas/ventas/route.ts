@@ -66,9 +66,6 @@ export async function GET(request: NextRequest) {
     `;
     queryParams.push(limite);
 
-    console.log("Consulta SQL:", sqlQuery);
-    console.log("Parámetros:", queryParams);
-
     const clientesDetallados = await prisma.$queryRawUnsafe<ClienteDetallado[]>(
       sqlQuery,
       ...queryParams

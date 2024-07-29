@@ -1,6 +1,7 @@
 "use client";
 
 import Reparaciones from "@/components/estadisticas/Reparaciones";
+import Stock from "@/components/estadisticas/Stock";
 import Ventas from "@/components/estadisticas/Ventas";
 import { Card, Grid, Typography } from "@mui/material";
 
@@ -23,6 +24,13 @@ const EstadisticasPage = () => {
             sx={{ width: "100%", display: "flex", flexDirection: "column" }}
           >
             <Reparaciones />
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
+          <Card
+            sx={{ width: "100%", display: "flex", flexDirection: "column" }}
+          >
+            <Stock />
           </Card>
         </Grid>
       </Grid>
