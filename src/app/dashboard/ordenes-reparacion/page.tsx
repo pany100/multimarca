@@ -3,7 +3,7 @@
 import { useFetch } from "@/contexts/FetchContext";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Box, Button, IconButton, Typography } from "@mui/material";
+import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -28,6 +28,7 @@ const OrdenesReparacionPage = () => {
     pageSize: 10,
   });
   const [totalItems, setTotalItems] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
   const { authFetch } = useFetch();
   const columns: GridColDef[] = [
@@ -120,6 +121,7 @@ const OrdenesReparacionPage = () => {
         const url = new URL("/api/orden-reparacion", window.location.origin);
         url.searchParams.append("page", paginationModel.page.toString());
         url.searchParams.append("size", paginationModel.pageSize.toString());
+        if (searchTerm) url.searchParams.append("query", searchTerm);
 
         const response = await authFetch(url.toString());
         const data = await response.json();
@@ -143,6 +145,11 @@ const OrdenesReparacionPage = () => {
     router.push(`/dashboard/ordenes-reparacion/${id}/editar`);
   };
 
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setPaginationModel({ ...paginationModel, page: 0 }); // Reset to first page on new search
+  };
+
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
@@ -156,6 +163,14 @@ const OrdenesReparacionPage = () => {
       >
         Agregar Orden de Reparación
       </Button>
+      <TextField
+        label="Buscar"
+        variant="outlined"
+        value={searchTerm}
+        onChange={handleSearchChange}
+        fullWidth
+        margin="normal"
+      />
       <DataGrid
         rows={ordenes}
         columns={columns}
