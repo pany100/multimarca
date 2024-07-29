@@ -116,7 +116,7 @@ async function main() {
       fullName: "Gabriela Ateca",
       username: "Gaby",
       email: "gabriela.ateca@gmail.com",
-      rolId: 6,
+      rolId: 2,
       password: "8nD3xZoKmu32zK",
     },
   ];
