@@ -1,6 +1,7 @@
 "use client";
 
 import Extracciones from "@/components/estadisticas/Extracciones";
+import Gastos from "@/components/estadisticas/Gastos";
 import Marcas from "@/components/estadisticas/Marcas";
 import Reparaciones from "@/components/estadisticas/Reparaciones";
 import Stock from "@/components/estadisticas/Stock";
@@ -47,6 +48,13 @@ const EstadisticasPage = () => {
             sx={{ width: "100%", display: "flex", flexDirection: "column" }}
           >
             <Extracciones />
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
+          <Card
+            sx={{ width: "100%", display: "flex", flexDirection: "column" }}
+          >
+            <Gastos />
           </Card>
         </Grid>
       </Grid>

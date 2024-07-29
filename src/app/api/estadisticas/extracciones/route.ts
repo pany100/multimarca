@@ -15,6 +15,7 @@ export async function GET(request: NextRequest) {
     const moneda = url.searchParams.get("moneda") || "ARS";
     const fechaInicio = url.searchParams.get("fechaInicio");
     const fechaFin = url.searchParams.get("fechaFin");
+    const limit = url.searchParams.get("limit") || "10";
 
     if (moneda !== "ARS" && moneda !== "USD") {
       return NextResponse.json(
@@ -53,7 +54,9 @@ export async function GET(request: NextRequest) {
     sqlQuery += `
       GROUP BY u.id, u.fullName
       ORDER BY totalExtracciones DESC
-    `;
+      LIMIT ?
+      `;
+    queryParams.push(parseInt(limit));
 
     const usuariosExtracciones = await prisma.$queryRawUnsafe<
       UsuarioExtraccion[]
