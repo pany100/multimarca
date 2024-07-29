@@ -1,7 +1,7 @@
 const { Faker, es, en } = require("@faker-js/faker");
 const { PrismaClient } = require("@prisma/client");
 
-const prisma = new PrismaClient();
+const generateTestPrisma = new PrismaClient();
 const fakerES = new Faker({ locale: [es, en] });
 
 function calcularTotalRepuestos(ordenReparacion: {
@@ -427,7 +427,7 @@ async function generateTestData({
   ingresos = false,
 }) {
   try {
-    await prisma.$transaction(async (tx: any) => {
+    await generateTestPrisma.$transaction(async (tx: any) => {
       if (stock) {
         await generateStockData(tx, 100); // Número de elementos de stock a generar
       }
@@ -459,7 +459,7 @@ async function generateTestData({
     console.error("Error al generar datos de prueba:", error);
     process.exit(1);
   } finally {
-    await prisma.$disconnect();
+    await generateTestPrisma.$disconnect();
   }
 }
 

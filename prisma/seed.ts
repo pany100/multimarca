@@ -1,9 +1,9 @@
-const { PrismaClient } = require("@prisma/client");
+const { PrismaClient: Cliente } = require("@prisma/client");
 const fs = require("fs") as typeof import("fs");
 const path = require("path");
 const { parse } = require("csv-parse/sync");
 
-const prismaClient = new PrismaClient();
+const prismaClient = new Cliente();
 
 const permisos = [
   "Usuarios",
