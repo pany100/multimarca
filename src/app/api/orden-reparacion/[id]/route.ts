@@ -1,5 +1,9 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { Prisma, TipoNotificacionInterna } from "@prisma/client";
+import {
+  EstadoOrdenReparacion,
+  Prisma,
+  TipoNotificacionInterna,
+} from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
@@ -131,6 +135,26 @@ export async function PUT(
             { status: 400 }
           );
         }
+      }
+    }
+
+    // Validación adicional para el estado Terminado
+    if (estado === EstadoOrdenReparacion.Terminado) {
+      if (
+        mecanicos.length === 0 ||
+        !fechaEntradaReparacion ||
+        !fechaSalidaReparacion ||
+        (repuestosUsados.length === 0 &&
+          reparacionesDeTercero.length === 0 &&
+          trabajosRealizados.length === 0)
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Para finalizar la orden, se requieren mecánicos, fechas de entrada y salida, y al menos un trabajo realizado, reparación de tercero o repuesto usado.",
+          },
+          { status: 400 }
+        );
       }
     }
 

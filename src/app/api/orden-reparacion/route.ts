@@ -88,6 +88,25 @@ export async function POST(request: Request) {
       manoDeObra,
     } = body;
 
+    if (estado === EstadoOrdenReparacion.Terminado) {
+      if (
+        mecanicos.length === 0 ||
+        !fechaEntradaReparacion ||
+        !fechaSalidaReparacion ||
+        (repuestosUsados.length === 0 &&
+          reparacionesDeTercero.length === 0 &&
+          trabajosRealizados.length === 0)
+      ) {
+        return NextResponse.json(
+          {
+            error:
+              "Para finalizar la orden, se requieren mecánicos, fechas de entrada y salida, y al menos un trabajo realizado, reparación de tercero o repuesto usado.",
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     if (estado !== EstadoOrdenReparacion.Presupuestado) {
       for (const repuesto of repuestosUsados) {
         const stockActual = await prisma.stock.findUnique({
