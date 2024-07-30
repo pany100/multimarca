@@ -109,9 +109,32 @@ const NotificacionesInternas = () => {
   };
 
   const columns: GridColDef[] = [
-    { field: "fecha", headerName: "Fecha", flex: 1 },
-    { field: "titulo", headerName: "Título", flex: 2 },
-    { field: "texto", headerName: "Texto", flex: 3 },
+    {
+      field: "fecha",
+      headerName: "Fecha",
+      flex: 1,
+      valueGetter: (value) => new Date(value).toLocaleDateString(),
+    },
+    {
+      field: "titulo",
+      headerName: "Título",
+      flex: 2,
+      renderCell: (params) => (
+        <div style={{ whiteSpace: "normal", wordWrap: "break-word" }}>
+          {params.value}
+        </div>
+      ),
+    },
+    {
+      field: "texto",
+      headerName: "Texto",
+      flex: 3,
+      renderCell: (params) => (
+        <div style={{ whiteSpace: "normal", wordWrap: "break-word" }}>
+          {params.value}
+        </div>
+      ),
+    },
     {
       field: "leida",
       headerName: "Leída",
@@ -140,9 +163,9 @@ const NotificacionesInternas = () => {
       </Typography>
       <Box sx={{ width: "100%" }}>
         <Tabs value={tabValue} onChange={handleTabChange}>
-          <Tab label="Todas" />
           <Tab label="No leídas" />
           <Tab label="Leídas" />
+          <Tab label="Todas" />
         </Tabs>
       </Box>
       <Box sx={{ height: 400, width: "100%", mt: 2 }}>
@@ -156,8 +179,20 @@ const NotificacionesInternas = () => {
             pageSizeOptions={[10, 20, 30]}
             rowCount={totalItems}
             paginationMode="server"
+            filterMode="server"
             loading={loading}
             getRowId={(row) => row.id}
+            getRowHeight={() => "auto"}
+            sx={{
+              "& .MuiDataGrid-cell": {
+                display: "flex",
+                alignItems: "center",
+                minHeight: "50px",
+              },
+              "& .MuiDataGrid-row": {
+                minHeight: "50px !important",
+              },
+            }}
           />
         )}
       </Box>
