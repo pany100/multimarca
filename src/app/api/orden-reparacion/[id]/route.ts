@@ -305,6 +305,26 @@ export async function PUT(
           },
         });
       }
+
+      const existeNotificacion = await prisma.notificacionInterna.findFirst({
+        where: {
+          ordenReparacionId: id,
+          tipo: TipoNotificacionInterna.REPARACION_TERMINADA,
+        },
+      });
+
+      if (!existeNotificacion) {
+        await prisma.notificacionInterna.create({
+          data: {
+            fecha: new Date(),
+            titulo: "Reparación Terminada",
+            texto: `La reparación del auto ${ordenReparacionActualizada.auto.brand} ${ordenReparacionActualizada.auto.patent} se encuentra terminada. Tiene que pagar la mano de obra correspondiente.`,
+            leida: false,
+            ordenReparacionId: id,
+            tipo: TipoNotificacionInterna.REPARACION_TERMINADA,
+          },
+        });
+      }
     }
 
     return NextResponse.json(ordenReparacionActualizada);
