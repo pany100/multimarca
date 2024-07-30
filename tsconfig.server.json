@@ -1,9 +1,10 @@
 {
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "es2015", // o "esnext" para la versión más reciente
     "outDir": "dist",
-    "noEmit": false
+    "noEmit": false,
+    "isolatedModules": false
   },
   "include": ["server.ts"]
 }
