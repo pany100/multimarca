@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { TipoNotificacionInterna } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function PUT(
@@ -82,14 +83,14 @@ export async function PUT(
       for (const item of items) {
         const stock = await prisma.stock.findUnique({
           where: { id: item.stockId },
-          select: { units: true },
+          select: { id: true, name: true, units: true, restockValue: true },
         });
 
         if (!stock || (stock.units ?? 0) - item.cantidad < 0) {
-          throw new Error(`Stock insuficiente para el ítem ${item.stock.name}`);
+          throw new Error(`Stock insuficiente para el ítem ${stock?.name}`);
         }
 
-        await prisma.stock.update({
+        const stockActualizado = await prisma.stock.update({
           where: { id: item.stockId },
           data: {
             units: {
@@ -97,6 +98,21 @@ export async function PUT(
             },
           },
         });
+
+        if (
+          (stockActualizado.units ?? 0) < (stockActualizado.restockValue ?? 0)
+        ) {
+          await prisma.notificacionInterna.create({
+            data: {
+              fecha: new Date(),
+              titulo: `${stockActualizado.name} necesita reposición`,
+              texto: `El elemento ${stockActualizado.name} quedó con ${stockActualizado.units} unidades. Necesita reponer stock.`,
+              leida: false,
+              tipo: TipoNotificacionInterna.REPOSICION_STOCK,
+              stockId: stockActualizado.id,
+            },
+          });
+        }
       }
 
       return ventaActualizada;
@@ -149,7 +165,7 @@ export async function DELETE(
 
       // Restaurar el stock
       for (const item of venta.items) {
-        await prisma.stock.update({
+        const stockActualizado = await prisma.stock.update({
           where: { id: item.stockId },
           data: {
             units: {
@@ -157,6 +173,21 @@ export async function DELETE(
             },
           },
         });
+
+        if (
+          (stockActualizado.units ?? 0) < (stockActualizado.restockValue ?? 0)
+        ) {
+          await prisma.notificacionInterna.create({
+            data: {
+              fecha: new Date(),
+              titulo: `${stockActualizado.name} necesita reposición`,
+              texto: `El elemento ${stockActualizado.name} quedó con ${stockActualizado.units} unidades. Necesita reponer stock.`,
+              leida: false,
+              tipo: TipoNotificacionInterna.REPOSICION_STOCK,
+              stockId: stockActualizado.id,
+            },
+          });
+        }
       }
 
       // Eliminar la venta
