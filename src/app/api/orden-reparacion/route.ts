@@ -1,4 +1,8 @@
-import { EstadoOrdenReparacion, Prisma } from "@prisma/client";
+import {
+  EstadoOrdenReparacion,
+  Prisma,
+  TipoNotificacionInterna,
+} from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -154,47 +158,88 @@ export async function POST(request: Request) {
       })
     );
 
-    const nuevaOrdenReparacion = await prisma.ordenReparacion.create({
-      data: {
-        autoId: parseInt(autoId),
-        fechaEntradaReparacion,
-        fechaSalidaReparacion,
-        kilometros,
-        observacionesCliente,
-        observacionesEntrada,
-        observacionesSalida,
-        estado,
-        pdfPath,
-        manoDeObra: new Prisma.Decimal(manoDeObra),
-        mecanicos: {
-          connect: mecanicos.map(({ id }: { id: number }) => ({ id })),
-        },
-        repuestosUsados: {
-          create: repuestosToPersist,
-        },
-        reparacionesDeTercero: {
-          create: reparacionesDeTerceroToPersist,
-        },
-        trabajosRealizados: {
-          create: trabajosRealizadosToPersist,
-        },
-        controlesEnReparacion: {
-          create: controlesEnReparacionToPersist,
-        },
-      },
-      include: {
-        auto: {
-          include: {
-            owner: true,
+    const [nuevaOrdenReparacion] = await prisma.$transaction(async (prisma) => {
+      const ordenCreada = await prisma.ordenReparacion.create({
+        data: {
+          autoId: parseInt(autoId),
+          fechaEntradaReparacion,
+          fechaSalidaReparacion,
+          kilometros,
+          observacionesCliente,
+          observacionesEntrada,
+          observacionesSalida,
+          estado,
+          pdfPath,
+          manoDeObra: new Prisma.Decimal(manoDeObra),
+          mecanicos: {
+            connect: mecanicos.map(({ id }: { id: number }) => ({ id })),
+          },
+          repuestosUsados: {
+            create: repuestosToPersist,
+          },
+          reparacionesDeTercero: {
+            create: reparacionesDeTerceroToPersist,
+          },
+          trabajosRealizados: {
+            create: trabajosRealizadosToPersist,
+          },
+          controlesEnReparacion: {
+            create: controlesEnReparacionToPersist,
           },
         },
-        mecanicos: true,
-        repuestosUsados: true,
-        reparacionesDeTercero: true,
-        trabajosRealizados: true,
-        controlesEnReparacion: true,
-        pagos: true,
-      },
+        include: {
+          auto: {
+            include: {
+              owner: true,
+            },
+          },
+          mecanicos: true,
+          repuestosUsados: true,
+          reparacionesDeTercero: true,
+          trabajosRealizados: true,
+          controlesEnReparacion: true,
+          pagos: true,
+        },
+      });
+
+      if (estado !== EstadoOrdenReparacion.Presupuestado) {
+        for (const repuesto of repuestosUsados) {
+          const stockActualizado = await prisma.stock.update({
+            where: { id: repuesto.stock.id },
+            data: { units: { decrement: repuesto.unidadesConsumidas } },
+          });
+
+          if (
+            (stockActualizado.units ?? 0) < (stockActualizado.restockValue ?? 0)
+          ) {
+            await prisma.notificacionInterna.create({
+              data: {
+                fecha: new Date(),
+                titulo: `${stockActualizado.name} necesita reposición`,
+                texto: `El elemento ${stockActualizado.name} quedó con ${stockActualizado.units} unidades. Necesita reponer stock.`,
+                leida: false,
+                tipo: TipoNotificacionInterna.REPOSICION_STOCK,
+                stockId: stockActualizado.id,
+              },
+            });
+          }
+        }
+      }
+
+      if (estado === EstadoOrdenReparacion.Terminado) {
+        await prisma.notificacionInterna.create({
+          data: {
+            fecha: new Date(),
+            titulo: "Reparación Terminada",
+            texto: `La reparación del auto ${ordenCreada.auto.brand} ${ordenCreada.auto.patent} se encuentra terminada. Tiene que pagar la mano de obra correspondiente.`,
+            leida: false,
+            ordenReparacionId: ordenCreada.id,
+            tipo: TipoNotificacionInterna.REPARACION_TERMINADA,
+          },
+        });
+      }
+
+      return [ordenCreada];
     });
 
     return NextResponse.json(nuevaOrdenReparacion, { status: 201 });
