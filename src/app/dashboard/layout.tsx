@@ -244,6 +244,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         title: "Comunicación y Notificaciones",
         items: [
           {
+            permiso: "Notificaciones",
+            texto: "Notificaciones Internas",
+            icono: <NotificationsIcon />,
+            ruta: "/dashboard/notificaciones-internas",
+          },
+          {
             permiso: "NotificacionesClientes",
             texto: "Notificaciones WhatsApp",
             icono: <WhatsAppIcon />,
