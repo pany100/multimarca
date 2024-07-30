@@ -52,7 +52,7 @@ const schema = yup.object().shape({
   observacionesSalida: yup.string().required(),
   estado: yup
     .string()
-    .oneOf(["Presupuestado", "En Progreso", "Aceptado", "Terminado"])
+    .oneOf(["Presupuestado", "EnProgreso", "Aceptado", "Terminado"])
     .required("Debe seleccionar un estado"),
   mecanicos: yup.array().of(
     yup.object().shape({
@@ -142,7 +142,7 @@ type OrdenReparacion = {
   observacionesCliente: string;
   observacionesEntrada: string;
   observacionesSalida: string;
-  estado: "Presupuestado" | "En Progreso" | "Aceptado" | "Terminado";
+  estado: "Presupuestado" | "EnProgreso" | "Aceptado" | "Terminado";
   pdfPath: string | null;
   manoDeObra: number;
   auto: {
@@ -535,16 +535,13 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
                   error={!!errors.estado}
                   helperText={errors.estado?.message as string}
                 >
-                  {[
-                    "Presupuestado",
-                    "En Progreso",
-                    "Aceptado",
-                    "Terminado",
-                  ].map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
+                  {["Presupuestado", "EnProgreso", "Aceptado", "Terminado"].map(
+                    (option) => (
+                      <MenuItem key={option} value={option}>
+                        {option}
+                      </MenuItem>
+                    )
+                  )}
                 </TextField>
               )}
             />

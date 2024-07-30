@@ -44,7 +44,7 @@ function calcularTotalOrdenReparacion(ordenReparacion: {
 
 function getStatusColor(estado: string): ChipProps["color"] {
   switch (estado.toLowerCase()) {
-    case "en progreso":
+    case "enprogreso":
       return "primary";
     case "terminado":
       return "success";

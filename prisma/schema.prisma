@@ -158,6 +158,7 @@ model Stock {
   ordenDeCompraItems OrdenDeCompraItem[]
   ventas             VentaItem[]
   repuestosUsados    RepuestoUsado[]
+  notificacionesInternas NotificacionInterna[]
 
   @@index([name])
   @@index([brand])
@@ -269,6 +270,13 @@ model NotificacionWhatsapp {
   @@index([processed])
 }
 
+enum EstadoOrdenReparacion {
+  Presupuestado
+  EnProgreso
+  Aceptado
+  Terminado
+}
+
 model OrdenReparacion {
   id                     Int                   @id @default(autoincrement())
   autoId                 Int
@@ -280,7 +288,7 @@ model OrdenReparacion {
   observacionesCliente   String                @db.Text
   observacionesEntrada   String                @db.Text
   observacionesSalida    String                @db.Text
-  estado                 String                @db.VarChar(20)
+  estado                 EstadoOrdenReparacion
   pdfPath                String?               @db.VarChar(255)
   mecanicos              Mecanico[]            @relation("OrdenReparacionMecanicos")
   repuestosUsados        RepuestoUsado[]
@@ -290,6 +298,7 @@ model OrdenReparacion {
   pagos                  PagoAMecanico[]
   manoDeObra             Decimal               @db.Decimal(10, 2)
   ingresos               IngresoPorReparacion[]
+  notificacionesInternas NotificacionInterna[]
 
   @@index([autoId])
   @@index([fechaCreacion])
@@ -378,6 +387,33 @@ model Dolar {
   blue    Decimal  @db.Decimal(10, 2)
 
   @@index([fecha])
+}
+
+model NotificacionInterna {
+  id        Int      @id @default(autoincrement())
+  fecha     DateTime @default(now())
+  titulo    String   @db.VarChar(255)
+  texto     String   @db.Text
+  leida     Boolean  @default(false)
+  tipo      TipoNotificacionInterna
+
+  // Relaciones opcionales dependiendo del tipo de notificación
+  stockId   Int?
+  stock     Stock?   @relation(fields: [stockId], references: [id])
+  
+  ordenReparacionId Int?
+  ordenReparacion   OrdenReparacion? @relation(fields: [ordenReparacionId], references: [id])
+
+  @@index([fecha])
+  @@index([leida])
+  @@index([tipo])
+  @@index([stockId])
+  @@index([ordenReparacionId])
+}
+
+enum TipoNotificacionInterna {
+  REPOSICION_STOCK
+  REPARACION_TERMINADA
 }
 
 

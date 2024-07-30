@@ -42,7 +42,7 @@ const schema = yup.object().shape({
     .required("Debe ingresar las observaciones"),
   estado: yup
     .string()
-    .oneOf(["Presupuestado", "En Progreso", "Aceptado", "Terminado"])
+    .oneOf(["Presupuestado", "EnProgreso", "Aceptado", "Terminado"])
     .required("Debe seleccionar un estado"),
   mecanicos: yup.array().of(
     yup.object().shape({
@@ -361,16 +361,13 @@ const NuevaOrdenReparacionForm = () => {
                   error={!!errors.estado}
                   helperText={errors.estado?.message as string}
                 >
-                  {[
-                    "Presupuestado",
-                    "En Progreso",
-                    "Aceptado",
-                    "Terminado",
-                  ].map((option) => (
-                    <MenuItem key={option} value={option}>
-                      {option}
-                    </MenuItem>
-                  ))}
+                  {["Presupuestado", "EnProgreso", "Aceptado", "Terminado"].map(
+                    (option) => (
+                      <MenuItem key={option} value={option}>
+                        {option}
+                      </MenuItem>
+                    )
+                  )}
                 </TextField>
               )}
             />

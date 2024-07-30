@@ -142,7 +142,7 @@ async function generateOrdenesDeReparacion(tx: any, ordenesCount: number) {
         ? "Terminado"
         : fakerES.helpers.arrayElement([
             "Aceptado",
-            "En Progreso",
+            "EnProgreso",
             "Presupuestado",
           ]);
     const manoDeObra = fakerES.number.float({

@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import { EstadoOrdenReparacion, Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -18,7 +18,9 @@ export async function GET(request: Request) {
         { id: { equals: parseInt(query) || undefined } },
         { auto: { owner: { fullName: { contains: query } } } },
       ],
-      estado: presupuestos ? "Presupuestado" : { not: "Presupuestado" },
+      estado: presupuestos
+        ? EstadoOrdenReparacion.Presupuestado
+        : { not: EstadoOrdenReparacion.Presupuestado },
     };
 
     const [ordenesReparacion, total] = await Promise.all([
@@ -82,23 +84,24 @@ export async function POST(request: Request) {
       manoDeObra,
     } = body;
 
-    // Validar que los repuestos usados no excedan el stock actual
-    for (const repuesto of repuestosUsados) {
-      const stockActual = await prisma.stock.findUnique({
-        where: { id: repuesto.stock.id },
-        select: { units: true },
-      });
+    if (estado !== EstadoOrdenReparacion.Presupuestado) {
+      for (const repuesto of repuestosUsados) {
+        const stockActual = await prisma.stock.findUnique({
+          where: { id: repuesto.stock.id },
+          select: { units: true },
+        });
 
-      if (
-        !stockActual ||
-        (stockActual.units ?? 0) < repuesto.unidadesConsumidas
-      ) {
-        return NextResponse.json(
-          {
-            error: `Stock insuficiente para el repuesto ${repuesto.stock.name} con ID ${repuesto.stock.id}`,
-          },
-          { status: 400 }
-        );
+        if (
+          !stockActual ||
+          (stockActual.units ?? 0) < repuesto.unidadesConsumidas
+        ) {
+          return NextResponse.json(
+            {
+              error: `Stock insuficiente para el repuesto ${repuesto.stock.name} con ID ${repuesto.stock.id}`,
+            },
+            { status: 400 }
+          );
+        }
       }
     }
     if (!Array.isArray(repuestosUsados)) {
