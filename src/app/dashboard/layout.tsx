@@ -97,7 +97,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         setCantidadNotificaciones((prev) => prev + 1);
       });
 
-      socket.on("deletedNotification", () => {
+      socket.on("readNotification", () => {
         setCantidadNotificaciones((prev) => Math.max(0, prev - 1));
       });
 

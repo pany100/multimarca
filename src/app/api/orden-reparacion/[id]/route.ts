@@ -1,3 +1,4 @@
+import { getIO } from "@/lib/socketio";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import {
   EstadoOrdenReparacion,
@@ -308,6 +309,10 @@ export async function PUT(
                 stockId: stockActualizado.id,
               },
             });
+            const io = getIO();
+            if (io) {
+              io.emit("newNotification");
+            }
           }
         }
 
@@ -348,6 +353,10 @@ export async function PUT(
             tipo: TipoNotificacionInterna.REPARACION_TERMINADA,
           },
         });
+        const io = getIO();
+        if (io) {
+          io.emit("newNotification");
+        }
       }
     }
 

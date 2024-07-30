@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { getIO } from "@/lib/socketio";
 import { TipoNotificacionInterna } from "@prisma/client";
 import { NextResponse } from "next/server";
 
@@ -112,6 +113,10 @@ export async function PUT(
               stockId: stockActualizado.id,
             },
           });
+          const io = getIO();
+          if (io) {
+            io.emit("newNotification");
+          }
         }
       }
 
@@ -187,6 +192,10 @@ export async function DELETE(
               stockId: stockActualizado.id,
             },
           });
+          const io = getIO();
+          if (io) {
+            io.emit("newNotification");
+          }
         }
       }
 

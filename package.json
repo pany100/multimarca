@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "ts-node --project tsconfig.server.json server.ts",
     "build": "node --max-old-space-size=4096 node_modules/.bin/next build",
     "start": "next start",
     "build-and-start": "npm run build && npm start",

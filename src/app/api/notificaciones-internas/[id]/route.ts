@@ -1,3 +1,4 @@
+import { getIO } from "@/lib/socketio";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -21,6 +22,17 @@ export async function PUT(
       where: { id },
       data: { leida },
     });
+
+    const io = getIO();
+    if (leida === false) {
+      if (io) {
+        io.emit("newNotification");
+      }
+    } else {
+      if (io) {
+        io.emit("readNotification");
+      }
+    }
 
     return NextResponse.json(notificacionActualizada);
   } catch (error) {

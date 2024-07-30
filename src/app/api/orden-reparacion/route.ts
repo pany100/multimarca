@@ -1,3 +1,4 @@
+import { getIO } from "@/lib/socketio";
 import {
   EstadoOrdenReparacion,
   Prisma,
@@ -241,6 +242,10 @@ export async function POST(request: Request) {
                 stockId: stockActualizado.id,
               },
             });
+            const io = getIO();
+            if (io) {
+              io.emit("newNotification");
+            }
           }
         }
       }
@@ -256,6 +261,10 @@ export async function POST(request: Request) {
             tipo: TipoNotificacionInterna.REPARACION_TERMINADA,
           },
         });
+        const io = getIO();
+        if (io) {
+          io.emit("newNotification");
+        }
       }
 
       return [ordenCreada];
