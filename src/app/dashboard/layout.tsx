@@ -6,6 +6,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
   AppBar,
+  Badge,
   Box,
   Collapse,
   Container,
@@ -70,15 +71,45 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const pathname = usePathname();
   const { isLoading } = useFetch();
   const socket = useSocket();
+  const [cantidadNotificaciones, setCantidadNotificaciones] = useState(0);
+
+  useEffect(() => {
+    const fetchNotificaciones = async () => {
+      try {
+        const response = await fetch(
+          "/api/notificaciones-internas/cant-no-leidas"
+        );
+        if (response.ok) {
+          const data = await response.json();
+          setCantidadNotificaciones(data.cantidadNoLeidas);
+        }
+      } catch (error) {
+        console.error("Error al obtener notificaciones:", error);
+      }
+    };
+
+    fetchNotificaciones();
+  }, []);
 
   useEffect(() => {
     if (socket) {
-      socket.on("message", (data: string) => {
-        console.log(data);
+      socket.on("newNotification", () => {
+        setCantidadNotificaciones((prev) => prev + 1);
       });
-      socket.on("connect", () => {
-        console.log("CONECTADO");
+
+      socket.on("deletedNotification", () => {
+        setCantidadNotificaciones((prev) => Math.max(0, prev - 1));
       });
+
+      return () => {
+        socket.off("newNotification");
+        socket.off("deletedNotification");
+      };
+    }
+  }, [socket]);
+
+  useEffect(() => {
+    if (socket) {
     }
   }, [socket]);
 
@@ -255,11 +286,19 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       },
       {
         title: "Comunicación y Notificaciones",
+        icono:
+          cantidadNotificaciones > 0 ? (
+            <Badge badgeContent={cantidadNotificaciones} color="error" />
+          ) : null,
         items: [
           {
             permiso: "Notificaciones",
             texto: "Notificaciones Internas",
-            icono: <NotificationsIcon />,
+            icono: (
+              <Badge badgeContent={cantidadNotificaciones} color="error">
+                <NotificationsIcon />
+              </Badge>
+            ),
             ruta: "/dashboard/notificaciones-internas",
           },
           {
@@ -277,7 +316,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         ],
       },
     ],
-    []
+    [cantidadNotificaciones]
   );
 
   useEffect(() => {
@@ -329,6 +368,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                   : "inherit",
               }}
             >
+              {section.icono && (
+                <ListItemIcon
+                  sx={{ position: "absolute", top: 0, left: 0, margin: "8px" }}
+                >
+                  {section.icono}
+                </ListItemIcon>
+              )}
               <Tooltip key={index} title={section.title} placement="right">
                 <ListItemText
                   primary={section.title}

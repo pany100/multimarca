@@ -12,13 +12,8 @@ export const useSocket = () => {
         addTrailingSlash: false,
       }
     );
-    console.log(socketInstance);
     socketInstance.on("connect", () => {
       console.log("Conectado al socket");
-    });
-
-    socketInstance.on("connect_error", (err) => {
-      console.log("Error al conectar al socket", JSON.stringify(err));
     });
 
     socketInstance.on("disconnect", () => {
