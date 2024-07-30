@@ -1,5 +1,5 @@
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { Prisma } from "@prisma/client";
+import { Prisma, TipoNotificacionInterna } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 import { v4 as uuidv4 } from "uuid";
@@ -206,75 +206,90 @@ export async function PUT(
     }
 
     // Actualizar la orden de reparación y el stock en una transacción
-    const [ordenReparacionActualizada] = await prisma.$transaction([
-      prisma.ordenReparacion.update({
-        where: { id },
-        data: {
-          autoId: parseInt(autoId),
-          fechaEntradaReparacion,
-          fechaSalidaReparacion,
-          kilometros,
-          observacionesCliente,
-          observacionesEntrada,
-          observacionesSalida,
-          estado,
-          manoDeObra: new Prisma.Decimal(manoDeObra),
-          mecanicos: {
-            set: mecanicos.map(({ id }: { id: number }) => ({ id })),
-          },
-          repuestosUsados: {
-            deleteMany: {},
-            create: repuestosToPersist,
-          },
-          reparacionesDeTercero: {
-            deleteMany: {},
-            create: reparacionesDeTerceroToPersist,
-          },
-          trabajosRealizados: {
-            deleteMany: {},
-            create: trabajosRealizadosToPersist,
-          },
-          controlesEnReparacion: {
-            upsert: controlesEnReparacion.map((control: any) => ({
-              where: { id: control.id },
-              update: {
-                valor: control.valor,
-              },
-              create: {
-                controlMecanicoId: control.id,
-                valor: control.valor,
-              },
-            })),
-          },
-          pdfPath: permanentUrl,
-        },
-        include: {
-          auto: {
-            include: {
-              owner: true,
+    const [ordenReparacionActualizada] = await prisma.$transaction(
+      async (prisma) => {
+        const ordenActualizada = await prisma.ordenReparacion.update({
+          where: { id },
+          data: {
+            autoId: parseInt(autoId),
+            fechaEntradaReparacion,
+            fechaSalidaReparacion,
+            kilometros,
+            observacionesCliente,
+            observacionesEntrada,
+            observacionesSalida,
+            estado,
+            manoDeObra: new Prisma.Decimal(manoDeObra),
+            mecanicos: {
+              set: mecanicos.map(({ id }: { id: number }) => ({ id })),
             },
+            repuestosUsados: {
+              deleteMany: {},
+              create: repuestosToPersist,
+            },
+            reparacionesDeTercero: {
+              deleteMany: {},
+              create: reparacionesDeTerceroToPersist,
+            },
+            trabajosRealizados: {
+              deleteMany: {},
+              create: trabajosRealizadosToPersist,
+            },
+            controlesEnReparacion: {
+              upsert: controlesEnReparacion.map((control: any) => ({
+                where: { id: control.id },
+                update: {
+                  valor: control.valor,
+                },
+                create: {
+                  controlMecanicoId: control.id,
+                  valor: control.valor,
+                },
+              })),
+            },
+            pdfPath: permanentUrl,
           },
-          mecanicos: true,
-          repuestosUsados: true,
-          reparacionesDeTercero: true,
-          trabajosRealizados: true,
-          controlesEnReparacion: true,
-          pagos: true,
-        },
-      }),
-      ...ordenActual.repuestosUsados.map((repuesto) =>
-        prisma.stock.update({
-          where: { id: repuesto.stock.id },
-          data: { units: { increment: repuesto.unidadesConsumidas } },
-        })
-      ),
-      ...repuestosUsados.map((repuesto: any) =>
-        prisma.stock.update({
-          where: { id: repuesto.stock.id },
-          data: { units: { decrement: repuesto.unidadesConsumidas } },
-        })
-      ),
-    ]);
+          include: {
+            auto: {
+              include: {
+                owner: true,
+              },
+            },
+            mecanicos: true,
+            repuestosUsados: true,
+            reparacionesDeTercero: true,
+            trabajosRealizados: true,
+            controlesEnReparacion: true,
+            pagos: true,
+          },
+        });
+
+        // Actualizar stock y crear notificaciones si es necesario
+        for (const repuesto of repuestosUsados) {
+          const stockActualizado = await prisma.stock.update({
+            where: { id: repuesto.stock.id },
+            data: { units: { decrement: repuesto.unidadesConsumidas } },
+          });
+
+          if (
+            (stockActualizado.units ?? 0) < (stockActualizado.restockValue ?? 0)
+          ) {
+            await prisma.notificacionInterna.create({
+              data: {
+                fecha: new Date(),
+                titulo: `${stockActualizado.name} necesita reposición`,
+                texto: `El elemento ${stockActualizado.name} quedó con ${stockActualizado.units} unidades. Necesita reponer stock.`,
+                leida: false,
+                tipo: TipoNotificacionInterna.REPOSICION_STOCK,
+                stockId: stockActualizado.id,
+              },
+            });
+          }
+        }
+
+        return [ordenActualizada];
+      }
+    );
 
     if (estado === "Terminado") {
       const existePago = await prisma.pagoAMecanico.findFirst({
