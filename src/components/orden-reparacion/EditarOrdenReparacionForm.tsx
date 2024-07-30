@@ -49,7 +49,9 @@ const schema = yup.object().shape({
     .integer()
     .required("Debe ingresar los kilómetros"),
   observacionesCliente: yup.string(),
-  observacionesSalida: yup.string().required(),
+  observacionesSalida: yup
+    .string()
+    .required("Debe ingresar las observaciones de salida"),
   estado: yup
     .string()
     .oneOf(["Presupuestado", "EnProgreso", "Aceptado", "Terminado"])
@@ -124,7 +126,11 @@ const schema = yup.object().shape({
         .required("El proveedor es requerido"),
     })
   ),
-  manoDeObra: yup.number().positive().required("La mano de obra es requerida"),
+  manoDeObra: yup
+    .number()
+    .typeError("La mano de obra debe ser un nmero")
+    .positive()
+    .required("La mano de obra es requerida"),
   observacionesEntrada: yup.string(),
 });
 
@@ -381,7 +387,6 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
       });
     }
   };
-
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} onChange={handleFormChange}>
@@ -677,33 +682,42 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
               name="observacionesSalida"
               control={control}
               render={({ field }) => (
-                <List sx={{ mt: 0, py: 0 }}>
-                  {JSON.parse(field.value || "[]").map(
-                    (obs: string, index: number) => (
-                      <ListItem
-                        key={index}
-                        secondaryAction={
-                          <IconButton
-                            edge="end"
-                            aria-label="delete"
-                            onClick={() => handleDeleteObservacionSalida(index)}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        }
-                        sx={{ py: 0.0 }}
-                      >
-                        <ListItemText
-                          primary={
-                            <Typography variant="body2" sx={{ my: 0 }}>
-                              ◦ {obs}
-                            </Typography>
+                <>
+                  <List sx={{ mt: 0, py: 0 }}>
+                    {JSON.parse(field.value || "[]").map(
+                      (obs: string, index: number) => (
+                        <ListItem
+                          key={index}
+                          secondaryAction={
+                            <IconButton
+                              edge="end"
+                              aria-label="delete"
+                              onClick={() =>
+                                handleDeleteObservacionSalida(index)
+                              }
+                            >
+                              <DeleteIcon />
+                            </IconButton>
                           }
-                        />
-                      </ListItem>
-                    )
+                          sx={{ py: 0.0 }}
+                        >
+                          <ListItemText
+                            primary={
+                              <Typography variant="body2" sx={{ my: 0 }}>
+                                ◦ {obs}
+                              </Typography>
+                            }
+                          />
+                        </ListItem>
+                      )
+                    )}
+                  </List>
+                  {!!errors.observacionesSalida && (
+                    <Alert severity="error" sx={{ mt: 1 }}>
+                      {errors.observacionesSalida.message}
+                    </Alert>
                   )}
-                </List>
+                </>
               )}
             />
             <Divider sx={{ mt: 2 }} />
@@ -713,13 +727,20 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
               name="manoDeObra"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Mano de obra"
-                  type="number"
-                  fullWidth
-                  margin="normal"
-                />
+                <>
+                  <TextField
+                    {...field}
+                    label="Mano de obra"
+                    type="number"
+                    fullWidth
+                    margin="normal"
+                  />
+                  {!!errors.manoDeObra && (
+                    <Alert severity="error" sx={{ mt: 1 }}>
+                      {errors.manoDeObra.message}
+                    </Alert>
+                  )}
+                </>
               )}
             />
           </Grid>

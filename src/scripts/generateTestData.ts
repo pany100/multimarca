@@ -170,7 +170,7 @@ async function generateOrdenesDeReparacion(tx: any, ordenesCount: number) {
               fakerES.lorem.paragraph(),
               fakerES.lorem.paragraph(),
             ])
-          : "",
+          : "[]",
       estado: estado,
       manoDeObra: manoDeObra,
       mecanicos: {
