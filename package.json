@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "ts-node --project tsconfig.server.json server.ts",
+    "prebuild": "rm -rf .next",
     "build": "node --max-old-space-size=4096 node_modules/.bin/next build",
     "start": "next start",
     "build-and-start": "npm run build && npm start",
