@@ -28,6 +28,7 @@ import "src/app/globals.css";
 
 // Importa los iconos necesarios
 import { useFetch } from "@/contexts/FetchContext";
+import { useSocket } from "@/hooks/useSocket";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
@@ -68,6 +69,18 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   );
   const pathname = usePathname();
   const { isLoading } = useFetch();
+  const socket = useSocket();
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("message", (data: string) => {
+        console.log(data);
+      });
+      socket.on("connect", () => {
+        console.log("CONECTADO");
+      });
+    }
+  }, [socket]);
 
   useEffect(() => {
     setDrawerOpen(!isMobile);
