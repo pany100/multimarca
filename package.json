@@ -5,8 +5,8 @@
   "scripts": {
     "dev": "ts-node --project tsconfig.server.json server.ts",
     "prebuild": "rm -rf .next",
-    "build": "node --max-old-space-size=4096 node_modules/.bin/next build",
-    "start": "next start",
+    "build": "node --max-old-space-size=4096 node_modules/.bin/next build && tsc --project tsconfig.server.json",
+    "start": "NODE_ENV=production node dist/server.js",
     "build-and-start": "npm run build && npm start",
     "lint": "next lint"
   },
