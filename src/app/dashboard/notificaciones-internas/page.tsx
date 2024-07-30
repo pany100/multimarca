@@ -1,11 +1,16 @@
 "use client";
 
 import { useFetch } from "@/contexts/FetchContext";
+import CheckIcon from "@mui/icons-material/Check";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   Box,
+  Button,
   CircularProgress,
-  FormControlLabel,
-  Switch,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   Tab,
   Tabs,
   Typography,
@@ -34,6 +39,9 @@ const NotificacionesInternas = () => {
   });
   const [totalItems, setTotalItems] = useState(0);
   const { authFetch } = useFetch();
+  const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
+  const [notificacionToUpdate, setNotificacionToUpdate] =
+    useState<NotificacionInterna | null>(null);
 
   const fetchNotificaciones = useCallback(async () => {
     setLoading(true);
@@ -73,16 +81,30 @@ const NotificacionesInternas = () => {
     setPaginationModel({ ...paginationModel, page: 0 });
   };
 
-  const handleLeidaChange = async (id: number, newValue: boolean) => {
+  const handleLeidaChange = (notificacion: NotificacionInterna) => {
+    setNotificacionToUpdate(notificacion);
+    setConfirmDialogOpen(true);
+  };
+
+  const handleConfirmLeidaChange = async () => {
+    if (!notificacionToUpdate) return;
+
+    const newValue = !notificacionToUpdate.leida;
     try {
-      await authFetch(`/api/notificaciones-internas/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ leida: newValue }),
-      });
+      await authFetch(
+        `/api/notificaciones-internas/${notificacionToUpdate.id}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ leida: newValue }),
+        }
+      );
       fetchNotificaciones();
     } catch (error) {
       console.error("Error al actualizar notificación:", error);
+    } finally {
+      setConfirmDialogOpen(false);
+      setNotificacionToUpdate(null);
     }
   };
 
@@ -94,18 +116,19 @@ const NotificacionesInternas = () => {
       field: "leida",
       headerName: "Leída",
       flex: 1,
+      renderCell: (params) => (params.row.leida ? "Sí" : "No"),
+    },
+    {
+      field: "accion",
+      headerName: "Acción",
+      flex: 2,
       renderCell: (params) => (
-        <FormControlLabel
-          control={
-            <Switch
-              checked={params.row.leida}
-              onChange={(e) =>
-                handleLeidaChange(params.row.id, e.target.checked)
-              }
-            />
-          }
-          label={params.row.leida ? "Sí" : "No"}
-        />
+        <Button
+          onClick={() => handleLeidaChange(params.row)}
+          startIcon={params.row.leida ? <CloseIcon /> : <CheckIcon />}
+        >
+          {params.row.leida ? "Marcar como no leída" : "Marcar como leída"}
+        </Button>
       ),
     },
   ];
@@ -138,6 +161,34 @@ const NotificacionesInternas = () => {
           />
         )}
       </Box>
+      <Dialog
+        open={confirmDialogOpen}
+        onClose={() => setConfirmDialogOpen(false)}
+      >
+        <DialogTitle>Confirmar cambio de estado</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Está seguro de que desea cambiar el estado de esta notificación?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center", pb: 2, px: 3 }}>
+          <Button
+            onClick={() => setConfirmDialogOpen(false)}
+            variant="outlined"
+            sx={{ mr: 1 }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleConfirmLeidaChange}
+            variant="contained"
+            color="primary"
+            autoFocus
+          >
+            Confirmar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
