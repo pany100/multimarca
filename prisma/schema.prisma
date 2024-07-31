@@ -183,7 +183,7 @@ model OrdenDeCompraItem {
   cantidad        Int
   stock           Stock         @relation(fields: [stockId], references: [id])
   stockId         Int
-  ordenDeCompra   OrdenDeCompra @relation(fields: [ordenDeCompraId], references: [id])
+  ordenDeCompra   OrdenDeCompra @relation(fields: [ordenDeCompraId], references: [id], onDelete: Cascade)
   ordenDeCompraId Int
 
   @@index([stockId])
