@@ -61,16 +61,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const {
-      name,
-      brand,
-      buyPrice,
-      units,
-      restockValue,
-      label,
-      markup,
-      proveedorId,
-    } = body;
+    const { name, brand, buyPrice, restockValue, label, markup, proveedorId } =
+      body;
 
     if (
       !name ||
@@ -89,7 +81,7 @@ export async function POST(request: Request) {
         name,
         brand,
         buyPrice,
-        units,
+        units: 0,
         restockValue: restockValue ? parseInt(restockValue, 10) : null,
         label,
         markup: markup ? parseFloat(markup) : null,
