@@ -144,7 +144,7 @@ function CrudTable<T extends { id: string }>({
 
       if (response.ok) {
         const createdItem = await response.json();
-        setItems((prevItems) => [...prevItems, createdItem]);
+        setItems((prevItems) => [createdItem, ...prevItems]);
         setSnackbar({
           open: true,
           message: `${title} creado con éxito`,
