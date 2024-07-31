@@ -89,12 +89,20 @@ export async function POST(request: Request) {
       });
 
       for (const item of items) {
+        const stock = await prisma.stock.findUnique({
+          where: { id: item.stockId },
+          select: { units: true },
+        });
+
         await prisma.stock.update({
           where: { id: item.stockId },
           data: {
-            units: {
-              increment: item.cantidad,
-            },
+            units:
+              stock?.units === null
+                ? item.cantidad
+                : {
+                    increment: item.cantidad,
+                  },
           },
         });
       }
