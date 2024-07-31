@@ -297,7 +297,8 @@ export async function PUT(
           });
 
           if (
-            (stockActualizado.units ?? 0) < (stockActualizado.restockValue ?? 0)
+            (stockActualizado.units ?? 0) <=
+            (stockActualizado.restockValue ?? 0)
           ) {
             await prisma.notificacionInterna.create({
               data: {
