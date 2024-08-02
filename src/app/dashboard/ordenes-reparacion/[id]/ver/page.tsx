@@ -83,7 +83,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
   const theme = useTheme();
   const [tabValue, setTabValue] = useState(0);
   const router = useRouter();
-  const { userData } = useAuth();
+  const { userData, isLoading } = useAuth();
   let mechanicOrderRef = useRef(null);
   let clientOrderRef = useRef(null);
   const [ordenReparacion, setOrdenReparacion] = useState<any>(null);
@@ -95,11 +95,13 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
     severity: "success" as "success" | "error",
   });
   useEffect(() => {
-    const permisos = userData?.permisos || [];
-    if (!permisos.includes("Reparaciones")) {
-      router.push("/dashboard");
+    if (!isLoading) {
+      const permisos = userData?.permisos || [];
+      if (!permisos.includes("Reparaciones")) {
+        router.push("/dashboard");
+      }
     }
-  }, [userData, router]);
+  }, [userData, router, isLoading]);
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };

@@ -29,14 +29,16 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
     pageSize: 10,
   });
   const router = useRouter();
-  const { userData } = useAuth();
+  const { userData, isLoading } = useAuth();
 
   useEffect(() => {
-    const permisos = userData?.permisos || [];
-    if (!permisos.includes("Clientes")) {
-      router.push("/dashboard");
+    if (!isLoading) {
+      const permisos = userData?.permisos || [];
+      if (!permisos.includes("Clientes")) {
+        router.push("/dashboard");
+      }
     }
-  }, [userData, router]);
+  }, [userData, router, isLoading]);
 
   useEffect(() => {
     const fetchCliente = async () => {

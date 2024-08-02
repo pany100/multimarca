@@ -42,6 +42,7 @@ function TrabajosRealizadosFormSection() {
   >([]);
   const [nombreTrabajo, setNombreTrabajo] = useState("");
   const [precioUnitario, setPrecioUnitario] = useState("");
+  const [diasParaRecordatorio, setDiasParaRecordatorio] = useState("");
   const [tipoTrabajo, setTipoTrabajo] = useState<"lista" | "otros">("lista");
 
   const searchTrabajos = async (query: string) => {
@@ -67,10 +68,16 @@ function TrabajosRealizadosFormSection() {
         ? {
             manoDeObra: selectedTrabajo,
             precioUnitario: Number(precioUnitario),
+            diasParaRecordatorio: diasParaRecordatorio
+              ? Number(diasParaRecordatorio)
+              : "-",
           }
         : {
             manoDeObra: { name: nombreTrabajo },
             precioUnitario: Number(precioUnitario),
+            diasParaRecordatorio: diasParaRecordatorio
+              ? Number(diasParaRecordatorio)
+              : "-",
           };
 
     if (
@@ -111,6 +118,7 @@ function TrabajosRealizadosFormSection() {
     setSelectedTrabajo(null);
     setNombreTrabajo("");
     setPrecioUnitario("");
+    setDiasParaRecordatorio("");
   };
 
   const handleTipoTrabajoChange = (
@@ -139,6 +147,7 @@ function TrabajosRealizadosFormSection() {
                   <TableRow>
                     <TableCell>Trabajo</TableCell>
                     <TableCell>Precio sugerido</TableCell>
+                    <TableCell>Días para Recordatorio</TableCell>
                     <TableCell>Acciones</TableCell>
                   </TableRow>
                 </TableHead>
@@ -147,6 +156,9 @@ function TrabajosRealizadosFormSection() {
                     <TableRow key={index}>
                       <TableCell>{trabajo.manoDeObra.name}</TableCell>
                       <TableCell>{trabajo.precioUnitario}</TableCell>
+                      <TableCell>
+                        {trabajo.diasParaRecordatorio || "-"}
+                      </TableCell>
                       <TableCell>
                         <Button onClick={() => handleRemoveTrabajo(index)}>
                           Eliminar
@@ -230,10 +242,18 @@ function TrabajosRealizadosFormSection() {
             />
           )}
           <TextField
-            label="Precio Unitario"
+            label="Precio Unitario Sugerido"
             type="number"
             value={precioUnitario}
             onChange={(e) => setPrecioUnitario(e.target.value)}
+            fullWidth
+            margin="normal"
+          />
+          <TextField
+            label="Días para Recordatorio"
+            type="number"
+            value={diasParaRecordatorio}
+            onChange={(e) => setDiasParaRecordatorio(e.target.value)}
             fullWidth
             margin="normal"
           />

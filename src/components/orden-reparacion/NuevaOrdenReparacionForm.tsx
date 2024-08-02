@@ -80,6 +80,7 @@ const schema = yup.object().shape({
         .object()
         .shape({
           name: yup.string().required(),
+          diasParaRecordatorio: yup.number().positive().integer().nullable(),
         })
         .required("La mano de obra es requerida"),
       precioUnitario: yup

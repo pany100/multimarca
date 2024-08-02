@@ -32,13 +32,15 @@ const VerAutoPage = ({ params }: { params: { id: string } }) => {
   const [loading, setLoading] = useState(true);
   const { authFetch } = useFetch();
   const router = useRouter();
-  const { userData } = useAuth();
+  const { userData, isLoading } = useAuth();
   useEffect(() => {
-    const permisos = userData?.permisos || [];
-    if (!permisos.includes("Autos")) {
-      router.push("/dashboard");
+    if (!isLoading) {
+      const permisos = userData?.permisos || [];
+      if (!permisos.includes("Autos")) {
+        router.push("/dashboard");
+      }
     }
-  }, [userData, router]);
+  }, [userData, router, isLoading]);
 
   useEffect(() => {
     const fetchAuto = async () => {

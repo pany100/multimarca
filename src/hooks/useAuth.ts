@@ -27,7 +27,6 @@ export const useAuth = () => {
         setIsLoading(false);
       }
     };
-
     checkAuth();
   }, []);
 

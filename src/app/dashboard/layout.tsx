@@ -321,7 +321,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     const newOpenSections = menuSections.reduce((acc, section) => {
-      const isOpen = section.items.some((item) => item.ruta === pathname);
+      const isOpen = section.items.some((item) =>
+        pathname.startsWith(item.ruta)
+      );
       return { ...acc, [section.title]: isOpen };
     }, {});
     setOpenSections(newOpenSections);
@@ -417,10 +419,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                               drawerCompressed && !isMobile
                                 ? "center"
                                 : "flex-start",
-                            bgcolor:
-                              pathname === item.ruta
-                                ? "action.selected"
-                                : "inherit",
+                            bgcolor: pathname.startsWith(item.ruta)
+                              ? "action.selected"
+                              : "inherit",
                             "&:hover": {
                               bgcolor: "action.hover",
                             },
@@ -429,10 +430,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                           <ListItemIcon
                             sx={{
                               minWidth: drawerCompressed && !isMobile ? 0 : 40,
-                              color:
-                                pathname === item.ruta
-                                  ? "primary.main"
-                                  : "inherit",
+                              color: pathname.startsWith(item.ruta)
+                                ? "primary.main"
+                                : "inherit",
                             }}
                           >
                             {item.icono}
@@ -445,12 +445,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                                   whiteSpace: "nowrap",
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
-                                  fontWeight:
-                                    pathname === item.ruta ? "bold" : "normal",
-                                  color:
-                                    pathname === item.ruta
-                                      ? "primary.main"
-                                      : "inherit",
+                                  fontWeight: pathname.startsWith(item.ruta)
+                                    ? "bold"
+                                    : "normal",
+                                  color: pathname.startsWith(item.ruta)
+                                    ? "primary.main"
+                                    : "inherit",
                                 },
                               }}
                             />

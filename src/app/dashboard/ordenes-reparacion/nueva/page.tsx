@@ -8,14 +8,16 @@ import { useEffect } from "react";
 
 const NuevaOrdenReparacionPage = () => {
   const router = useRouter();
-  const { userData } = useAuth();
+  const { userData, isLoading } = useAuth();
 
   useEffect(() => {
-    const permisos = userData?.permisos || [];
-    if (!permisos.includes("Reparaciones")) {
-      router.push("/dashboard");
+    if (!isLoading) {
+      const permisos = userData?.permisos || [];
+      if (!permisos.includes("Reparaciones")) {
+        router.push("/dashboard");
+      }
     }
-  }, [userData, router]);
+  }, [userData, router, isLoading]);
 
   return (
     <Box sx={{ maxWidth: 800, margin: "0 auto", padding: 2 }}>
