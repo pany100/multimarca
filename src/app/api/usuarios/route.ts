@@ -92,7 +92,11 @@ export async function POST(request: Request) {
       );
     }
     const nuevoUsuario = await signupUser(body);
-    return NextResponse.json(nuevoUsuario, { status: 201 });
+    const nuevoUsuarioConRolName = {
+      ...nuevoUsuario,
+      rol: nuevoUsuario.rol?.name,
+    };
+    return NextResponse.json(nuevoUsuarioConRolName, { status: 201 });
   } catch (error) {
     console.error("Error al crear usuario:", error);
     return NextResponse.json(

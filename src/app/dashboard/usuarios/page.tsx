@@ -39,6 +39,16 @@ const UsuariosPage = () => {
     fetchRoles();
   }, [authFetch]);
 
+  const createNewUser = (): Usuario => {
+    return {
+      id: "", // El id generalmente se asigna en el backend
+      fullName: "",
+      email: "",
+      username: "",
+      rolId: 0,
+    };
+  };
+
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "fullName", headerName: "Nombre completo", flex: 2 },
@@ -51,6 +61,7 @@ const UsuariosPage = () => {
     { name: "fullName", label: "Nombre completo", type: "text" },
     { name: "username", label: "Nombre de usuario", type: "text" },
     { name: "email", label: "Email", type: "email" },
+    { name: "password", label: "Password", type: "text" },
     {
       name: "rolId",
       label: "Rol",
@@ -72,6 +83,7 @@ const UsuariosPage = () => {
       columns={columns}
       fields={formFields}
       apiEndpoint="/api/usuarios"
+      createNewItem={createNewUser}
       validationSchema={yup.object().shape({
         fullName: yup.string().required("El nombre es requerido"),
         username: yup.string().required("El nombre de usuario es requerido"),
