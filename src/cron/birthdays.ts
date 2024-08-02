@@ -13,7 +13,8 @@ async function enviarFelicitacionesCumpleaños() {
     const diaHoy = hoy.getDate();
     const mesHoy = hoy.getMonth() + 1; // Los meses en JavaScript son 0-11, así que sumamos 1
 
-    const clientesCumpleañeros: { fullName: string }[] = await prisma.$queryRaw`
+    const clientesCumpleañeros: { fullName: string; phone: string }[] =
+      await prisma.$queryRaw`
       SELECT * FROM Cliente
       WHERE can_receive_notifications = true
       AND EXTRACT(DAY FROM birthday) = ${diaHoy}
@@ -21,8 +22,7 @@ async function enviarFelicitacionesCumpleaños() {
     `;
 
     for (const cliente of clientesCumpleañeros) {
-      // Enviar mensaje de WhatsApp de felicitación
-      // await sendWhatsAppMessage("1156007307", "feliz_cumple");
+      // await sendWhatsAppMessage(cliente.phone, "feliz_cumple");
       console.log(`Felicitación de cumpleaños enviada a ${cliente.fullName}`);
     }
 

@@ -1,4 +1,3 @@
-import { sendWhatsAppMessage } from "@/services/whatsappService";
 import { PrismaClient } from "@prisma/client";
 import cron from "node-cron";
 
@@ -35,11 +34,12 @@ async function enviarNotificacionesWhatsApp() {
     for (const notificacion of notificaciones) {
       for (const cliente of clientesNoSilenciados) {
         // Aquí iría la lógica para enviar el mensaje de WhatsApp
-        await sendWhatsAppMessage("1156007307", notificacion.whatsappKey);
-        console.log(
-          `Notificación enviada a ${cliente.fullName}: ${notificacion.description}`
-        );
-        break;
+        if (cliente.phone) {
+          // await sendWhatsAppMessage(cliente.phone, notificacion.whatsappKey);
+          console.log(
+            `Notificación enviada a ${cliente.fullName}: ${notificacion.description}`
+          );
+        }
       }
 
       // Marcar la notificación como procesada

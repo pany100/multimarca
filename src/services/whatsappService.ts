@@ -1,7 +1,7 @@
 import axios from "axios";
 
 async function sendWhatsAppMessage(
-  numeroDestino: string = "1156007307",
+  numeroDestino: string,
   nombreDelTemplate: string,
   args?: string[],
   mediaId?: string
@@ -42,7 +42,7 @@ async function sendWhatsAppMessage(
 
   const data = {
     messaging_product: "whatsapp",
-    to: numeroDestino,
+    to: "1156007307",
     type: "template",
     template: {
       name: nombreDelTemplate,
