@@ -47,3 +47,53 @@ export async function signupUser({
     throw new Error("No se pudo crear el usuario");
   }
 }
+
+interface UpdateData extends SignupData {
+  id: number;
+}
+
+export async function updateUser({
+  id,
+  email,
+  fullName,
+  username,
+  password,
+  rolId,
+}: UpdateData) {
+  try {
+    const dataToUpdate: any = {
+      email,
+      fullName,
+      username,
+    };
+
+    if (password) {
+      const hashedPassword = await bcrypt.hash(
+        password,
+        parseInt(process.env.SALT_ROUNDS || "10")
+      );
+      dataToUpdate.password = hashedPassword;
+    }
+
+    if (rolId) {
+      dataToUpdate.rol = {
+        connect: { id: rolId },
+      };
+    }
+
+    const updatedUser = await prisma.usuario.update({
+      where: { id },
+      data: dataToUpdate,
+      include: {
+        rol: true,
+      },
+    });
+
+    const { password: _, ...usuarioSinPassword } = updatedUser;
+
+    return usuarioSinPassword;
+  } catch (error) {
+    console.error("Error al actualizar usuario:", error);
+    throw new Error("No se pudo actualizar el usuario");
+  }
+}

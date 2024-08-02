@@ -1,3 +1,4 @@
+import { updateUser } from "@/lib/auth/userService";
 import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -54,29 +55,22 @@ export async function PUT(
         { status: 404 }
       );
     }
-    const { fullName, username, email, rolId } = await request.json();
-    const updatedUser = await prisma.usuario.update({
-      where: { id: user.id },
-      data: {
-        fullName: fullName,
-        username: username,
-        email: email,
-        rol: {
-          connect: { id: rolId },
-        },
-      },
-      select: {
-        id: true,
-        fullName: true,
-        username: true,
-        email: true,
-        rol: true,
-      },
+    const { fullName, username, email, rolId, password } = await request.json();
+
+    const updatedUser = await updateUser({
+      id: user.id,
+      fullName,
+      username,
+      email,
+      rolId,
+      password,
     });
+
     const usuarioConRol = {
       ...updatedUser,
       rol: updatedUser.rol?.name,
     };
+
     return NextResponse.json(usuarioConRol);
   } catch (error) {
     console.error("Error al obtener información del usuario:", error);

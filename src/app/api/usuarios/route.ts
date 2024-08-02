@@ -1,4 +1,4 @@
-import { signupUser } from "@/lib/auth/signupUser";
+import { signupUser } from "@/lib/auth/userService";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 

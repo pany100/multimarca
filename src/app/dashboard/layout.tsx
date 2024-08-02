@@ -359,110 +359,123 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         )}
       </Box>
       <List>
-        {menuSections.map((section, index) => (
-          <React.Fragment key={index}>
-            <ListItem
-              button
-              onClick={() => handleSectionToggle(section.title)}
-              sx={{
-                bgcolor: openSections[section.title]
-                  ? "action.selected"
-                  : "inherit",
-              }}
-            >
-              {section.icono && (
-                <ListItemIcon
-                  sx={{ position: "absolute", top: 0, left: 0, margin: "8px" }}
-                >
-                  {section.icono}
-                </ListItemIcon>
-              )}
-              <Tooltip key={index} title={section.title} placement="right">
-                <ListItemText
-                  primary={section.title}
+        {menuSections.map(
+          (section, index) =>
+            section.items.some((item) => permisos.includes(item.permiso)) && (
+              <React.Fragment key={index}>
+                <ListItem
+                  button
+                  onClick={() => handleSectionToggle(section.title)}
                   sx={{
-                    "& .MuiListItemText-primary": {
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      fontWeight: openSections[section.title]
-                        ? "bold"
-                        : "normal",
-                    },
+                    bgcolor: openSections[section.title]
+                      ? "action.selected"
+                      : "inherit",
                   }}
-                />
-              </Tooltip>
-              {openSections[section.title] ? <ExpandLess /> : <ExpandMore />}
-            </ListItem>
-            <Collapse
-              in={openSections[section.title]}
-              timeout="auto"
-              unmountOnExit
-            >
-              <List component="div" disablePadding>
-                {section.items.map(
-                  (item, itemIndex) =>
-                    permisos.includes(item.permiso) && (
-                      <Tooltip
-                        key={itemIndex}
-                        title={item.texto}
-                        placement="right"
-                      >
-                        <ListItem
-                          button
-                          component={Link}
-                          href={item.ruta}
-                          onClick={handleMenuItemClick}
-                          sx={{
-                            pl: 4,
-                            justifyContent:
-                              drawerCompressed && !isMobile
-                                ? "center"
-                                : "flex-start",
-                            bgcolor: pathname.startsWith(item.ruta)
-                              ? "action.selected"
-                              : "inherit",
-                            "&:hover": {
-                              bgcolor: "action.hover",
-                            },
-                          }}
-                        >
-                          <ListItemIcon
-                            sx={{
-                              minWidth: drawerCompressed && !isMobile ? 0 : 40,
-                              color: pathname.startsWith(item.ruta)
-                                ? "primary.main"
-                                : "inherit",
-                            }}
+                >
+                  {section.icono && (
+                    <ListItemIcon
+                      sx={{
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        margin: "8px",
+                      }}
+                    >
+                      {section.icono}
+                    </ListItemIcon>
+                  )}
+                  <Tooltip key={index} title={section.title} placement="right">
+                    <ListItemText
+                      primary={section.title}
+                      sx={{
+                        "& .MuiListItemText-primary": {
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontWeight: openSections[section.title]
+                            ? "bold"
+                            : "normal",
+                        },
+                      }}
+                    />
+                  </Tooltip>
+                  {openSections[section.title] ? (
+                    <ExpandLess />
+                  ) : (
+                    <ExpandMore />
+                  )}
+                </ListItem>
+                <Collapse
+                  in={openSections[section.title]}
+                  timeout="auto"
+                  unmountOnExit
+                >
+                  <List component="div" disablePadding>
+                    {section.items.map(
+                      (item, itemIndex) =>
+                        permisos.includes(item.permiso) && (
+                          <Tooltip
+                            key={itemIndex}
+                            title={item.texto}
+                            placement="right"
                           >
-                            {item.icono}
-                          </ListItemIcon>
-                          {(!drawerCompressed || isMobile) && (
-                            <ListItemText
-                              primary={item.texto}
+                            <ListItem
+                              button
+                              component={Link}
+                              href={item.ruta}
+                              onClick={handleMenuItemClick}
                               sx={{
-                                "& .MuiListItemText-primary": {
-                                  whiteSpace: "nowrap",
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  fontWeight: pathname.startsWith(item.ruta)
-                                    ? "bold"
-                                    : "normal",
+                                pl: 4,
+                                justifyContent:
+                                  drawerCompressed && !isMobile
+                                    ? "center"
+                                    : "flex-start",
+                                bgcolor: pathname.startsWith(item.ruta)
+                                  ? "action.selected"
+                                  : "inherit",
+                                "&:hover": {
+                                  bgcolor: "action.hover",
+                                },
+                              }}
+                            >
+                              <ListItemIcon
+                                sx={{
+                                  minWidth:
+                                    drawerCompressed && !isMobile ? 0 : 40,
                                   color: pathname.startsWith(item.ruta)
                                     ? "primary.main"
                                     : "inherit",
-                                },
-                              }}
-                            />
-                          )}
-                        </ListItem>
-                      </Tooltip>
-                    )
-                )}
-              </List>
-            </Collapse>
-          </React.Fragment>
-        ))}
+                                }}
+                              >
+                                {item.icono}
+                              </ListItemIcon>
+                              {(!drawerCompressed || isMobile) && (
+                                <ListItemText
+                                  primary={item.texto}
+                                  sx={{
+                                    "& .MuiListItemText-primary": {
+                                      whiteSpace: "nowrap",
+                                      overflow: "hidden",
+                                      textOverflow: "ellipsis",
+                                      fontWeight: pathname.startsWith(item.ruta)
+                                        ? "bold"
+                                        : "normal",
+                                      color: pathname.startsWith(item.ruta)
+                                        ? "primary.main"
+                                        : "inherit",
+                                    },
+                                  }}
+                                />
+                              )}
+                            </ListItem>
+                          </Tooltip>
+                        )
+                    )}
+                  </List>
+                </Collapse>
+              </React.Fragment>
+            )
+        )}
       </List>
     </>
   );
