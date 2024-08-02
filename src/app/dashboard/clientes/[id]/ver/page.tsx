@@ -1,5 +1,6 @@
 "use client";
 import { useFetch } from "@/contexts/FetchContext";
+import { useAuth } from "@/hooks/useAuth";
 import {
   calcularTotalOrdenReparacion,
   getStatusColor,
@@ -28,6 +29,14 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
     pageSize: 10,
   });
   const router = useRouter();
+  const { userData } = useAuth();
+
+  useEffect(() => {
+    const permisos = userData?.permisos || [];
+    if (!permisos.includes("Clientes")) {
+      router.push("/dashboard");
+    }
+  }, [userData, router]);
 
   useEffect(() => {
     const fetchCliente = async () => {

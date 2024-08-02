@@ -338,6 +338,7 @@ model TrabajoRealizado {
   ordenReparacionId Int
   descripcion       String          @db.Text
   precioUnitario    Decimal         @db.Decimal(10, 2)
+  diasParaRecordatorio  Int?
 
   @@index([ordenReparacionId])
 }

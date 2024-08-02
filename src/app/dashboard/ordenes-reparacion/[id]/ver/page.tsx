@@ -2,6 +2,7 @@
 import OrdenClientePdf from "@/components/orden-reparacion/pdf/OrdenClientePdf";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
 import { useFetch } from "@/contexts/FetchContext";
+import { useAuth } from "@/hooks/useAuth";
 import {
   calcularTotalOrdenReparacion,
   calcularTotalReparacionesTerceros,
@@ -52,7 +53,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
-
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 
@@ -81,7 +82,8 @@ function TabPanel(props: TabPanelProps) {
 const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
   const theme = useTheme();
   const [tabValue, setTabValue] = useState(0);
-
+  const router = useRouter();
+  const { userData } = useAuth();
   let mechanicOrderRef = useRef(null);
   let clientOrderRef = useRef(null);
   const [ordenReparacion, setOrdenReparacion] = useState<any>(null);
@@ -92,6 +94,12 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
     message: "",
     severity: "success" as "success" | "error",
   });
+  useEffect(() => {
+    const permisos = userData?.permisos || [];
+    if (!permisos.includes("Reparaciones")) {
+      router.push("/dashboard");
+    }
+  }, [userData, router]);
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };

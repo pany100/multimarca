@@ -1,5 +1,6 @@
 "use client";
 import { useFetch } from "@/contexts/FetchContext";
+import { useAuth } from "@/hooks/useAuth";
 import {
   calcularTotalOrdenReparacion,
   getStatusColor,
@@ -23,12 +24,21 @@ import {
   Typography,
 } from "@mui/material";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const VerAutoPage = ({ params }: { params: { id: string } }) => {
   const [auto, setAuto] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const { authFetch } = useFetch();
+  const router = useRouter();
+  const { userData } = useAuth();
+  useEffect(() => {
+    const permisos = userData?.permisos || [];
+    if (!permisos.includes("Autos")) {
+      router.push("/dashboard");
+    }
+  }, [userData, router]);
 
   useEffect(() => {
     const fetchAuto = async () => {

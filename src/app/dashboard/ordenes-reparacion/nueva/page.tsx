@@ -1,11 +1,21 @@
 "use client";
 
 import NuevaOrdenReparacionForm from "@/components/orden-reparacion/NuevaOrdenReparacionForm";
+import { useAuth } from "@/hooks/useAuth";
 import { Box, Paper, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 const NuevaOrdenReparacionPage = () => {
   const router = useRouter();
+  const { userData } = useAuth();
+
+  useEffect(() => {
+    const permisos = userData?.permisos || [];
+    if (!permisos.includes("Reparaciones")) {
+      router.push("/dashboard");
+    }
+  }, [userData, router]);
 
   return (
     <Box sx={{ maxWidth: 800, margin: "0 auto", padding: 2 }}>
