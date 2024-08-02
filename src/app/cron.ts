@@ -19,6 +19,7 @@ export function initCronJobs() {
   require("src/cron/backup").initBackupCron();
   require("src/cron/dolar").initDolarCron();
   require("src/cron/notificacionesWhatsappCron").initNotificacionesWhatsappCron();
+  require("src/cron/birthdays").initCumpleañosCron();
 
   // Marcamos que los cron jobs se han iniciado
   global.cronJobsStarted = true;
