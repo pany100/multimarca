@@ -164,7 +164,7 @@ export async function POST(request: Request) {
       (trabajo: any) => ({
         descripcion: trabajo.manoDeObra.name,
         precioUnitario: new Prisma.Decimal(trabajo.precioUnitario),
-        diasParaRecordatorio: trabajo.diasParaRecordatorio,
+        diasParaRecordatorio: null,
       })
     );
 
