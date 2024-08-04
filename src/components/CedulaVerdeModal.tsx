@@ -1,5 +1,5 @@
 import { Box, Button, Modal, Paper, Typography } from "@mui/material";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
 interface CedulaVerdeModalProps {
@@ -16,6 +16,7 @@ const CedulaVerdeModal: React.FC<CedulaVerdeModalProps> = ({
   patente,
 }) => {
   const [file, setFile] = useState<File | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFile(acceptedFiles[0]);
@@ -28,6 +29,12 @@ const CedulaVerdeModal: React.FC<CedulaVerdeModalProps> = ({
     },
     multiple: false,
   });
+
+  const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setFile(event.target.files[0]);
+    }
+  };
 
   const handleSave = () => {
     onSave(file);
@@ -52,28 +59,48 @@ const CedulaVerdeModal: React.FC<CedulaVerdeModalProps> = ({
           Agregar o actualizar cédula verde para el vehículo con patente:{" "}
           {patente}
         </Typography>
-        <Paper
-          {...getRootProps()}
-          sx={{
-            p: 2,
-            mt: 2,
-            mb: 2,
-            textAlign: "center",
-            cursor: "pointer",
-            bgcolor: isDragActive ? "action.hover" : "background.paper",
-          }}
-        >
-          <input {...getInputProps()} />
-          {file ? (
-            <Typography>Archivo seleccionado: {file.name}</Typography>
-          ) : (
-            <Typography>
-              {isDragActive
-                ? "Suelta el archivo aquí"
-                : "Arrastra y suelta una imagen aquí, o haz clic para seleccionar"}
-            </Typography>
-          )}
-        </Paper>
+        {file ? (
+          <Typography>Archivo seleccionado: {file.name}</Typography>
+        ) : (
+          <>
+            <Paper
+              {...getRootProps()}
+              sx={{
+                p: 2,
+                mt: 2,
+                mb: 2,
+                textAlign: "center",
+                cursor: "pointer",
+                bgcolor: isDragActive ? "action.hover" : "background.paper",
+              }}
+            >
+              <input {...getInputProps()} />
+              <Typography>
+                {isDragActive
+                  ? "Suelta el archivo aquí"
+                  : "Arrastra y suelta una imagen aquí, o haz clic para seleccionar"}
+              </Typography>
+            </Paper>
+            <Box sx={{ mt: 2, mb: 2, textAlign: "center" }}>
+              <Typography>O</Typography>
+              <Button
+                onClick={() => fileInputRef.current?.click()}
+                variant="outlined"
+                sx={{ mt: 1 }}
+              >
+                Usar cámara
+              </Button>
+              <input
+                type="file"
+                accept="image/*"
+                capture="environment"
+                onChange={handleCameraCapture}
+                style={{ display: "none" }}
+                ref={fileInputRef}
+              />
+            </Box>
+          </>
+        )}
         <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
           <Button onClick={onClose} sx={{ mr: 1 }}>
             Descartar
