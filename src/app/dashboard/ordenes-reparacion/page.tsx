@@ -1,10 +1,18 @@
 "use client";
-
 import { useFetch } from "@/contexts/FetchContext";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Box, Button, IconButton, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  Tab,
+  Tabs,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { EstadoOrdenReparacion } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -27,6 +35,11 @@ const OrdenesReparacionPage = () => {
     page: 0,
     pageSize: 10,
   });
+  const [tabValue, setTabValue] = useState(0);
+  const [estadoActual, setEstadoActual] = useState<
+    EstadoOrdenReparacion | string | null
+  >(null);
+
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
@@ -113,6 +126,13 @@ const OrdenesReparacionPage = () => {
       ),
     },
   ];
+  const estados = [
+    "TODOS",
+    EstadoOrdenReparacion.Presupuestado,
+    EstadoOrdenReparacion.Aceptado,
+    EstadoOrdenReparacion.EnProgreso,
+    EstadoOrdenReparacion.Terminado,
+  ];
 
   useEffect(() => {
     const fetchOrdenes = async () => {
@@ -122,6 +142,9 @@ const OrdenesReparacionPage = () => {
         url.searchParams.append("page", paginationModel.page.toString());
         url.searchParams.append("size", paginationModel.pageSize.toString());
         if (searchTerm) url.searchParams.append("query", searchTerm);
+        if (estadoActual && estadoActual !== "TODOS") {
+          url.searchParams.append("estado", estadoActual);
+        }
 
         const response = await authFetch(url.toString());
         const data = await response.json();
@@ -135,7 +158,7 @@ const OrdenesReparacionPage = () => {
     };
 
     fetchOrdenes();
-  }, [paginationModel, authFetch, searchTerm]);
+  }, [paginationModel, authFetch, searchTerm, estadoActual]);
 
   const handleAddClick = () => {
     router.push("/dashboard/ordenes-reparacion/nueva");
@@ -148,6 +171,15 @@ const OrdenesReparacionPage = () => {
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setPaginationModel({ ...paginationModel, page: 0 }); // Reset to first page on new search
+  };
+
+  const handleTabChange = (
+    event: React.SyntheticEvent,
+    newValue: number
+  ): any => {
+    setTabValue(newValue);
+    setEstadoActual(estados[newValue]);
+    setPaginationModel({ ...paginationModel, page: 0 }); // Reset to first page on tab change
   };
 
   return (
@@ -163,6 +195,11 @@ const OrdenesReparacionPage = () => {
       >
         Agregar Orden de Reparación
       </Button>
+      <Tabs value={tabValue} onChange={handleTabChange}>
+        {estados.map((estado) => (
+          <Tab key={estado} label={estado} />
+        ))}
+      </Tabs>
       <TextField
         label="Buscar"
         variant="outlined"

@@ -6,27 +6,27 @@ import {
 } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "0");
     const size = parseInt(searchParams.get("size") || "10");
     const query = searchParams.get("query") || "";
-    const presupuestos = searchParams.get("presupuestos") === "true";
+    const estado = searchParams.get("estado");
 
     const skip = page * size;
 
-    const whereClause = {
+    const whereClause: any = {
       OR: [
         { auto: { patent: { contains: query } } },
         { id: { equals: parseInt(query) || undefined } },
         { auto: { owner: { fullName: { contains: query } } } },
       ],
-      estado: presupuestos
-        ? EstadoOrdenReparacion.Presupuestado
-        : { not: EstadoOrdenReparacion.Presupuestado },
     };
+
+    if (estado) {
+      whereClause.estado = estado;
+    }
 
     const [ordenesReparacion, total] = await Promise.all([
       prisma.ordenReparacion.findMany({

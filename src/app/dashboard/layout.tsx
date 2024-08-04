@@ -38,7 +38,6 @@ import BuildIcon from "@mui/icons-material/Build";
 import CategoryIcon from "@mui/icons-material/Category";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import DescriptionIcon from "@mui/icons-material/Description";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupIcon from "@mui/icons-material/Group";
 import InventoryIcon from "@mui/icons-material/Inventory";
@@ -199,12 +198,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Órdenes de Reparación",
             icono: <AssignmentIcon />,
             ruta: "/dashboard/ordenes-reparacion",
-          },
-          {
-            permiso: "Reparaciones",
-            texto: "Presupuestos",
-            icono: <DescriptionIcon />,
-            ruta: "/dashboard/presupuestos",
           },
           {
             permiso: "PagosReparaciones",
