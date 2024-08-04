@@ -560,7 +560,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           sx={{
             flexGrow: 1,
             p: 3,
-            width: { sm: `calc(100% - ${drawerCompressed ? 60 : 240}px)` },
+            width: "100%", // Cambiado para usar todo el ancho disponible
+            overflowX: "auto", // Permite desplazamiento horizontal si es necesario
             transition: theme.transitions.create(["margin", "width"], {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
