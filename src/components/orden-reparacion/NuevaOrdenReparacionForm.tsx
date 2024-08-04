@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import debounce from "lodash/debounce";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import MecanicoFormSection from "./MecanicoFormSection";
@@ -148,17 +148,6 @@ const NuevaOrdenReparacionForm = () => {
   });
   const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
   const router = useRouter();
-
-  useEffect(() => {
-    const calcularMontoTotal = () => {
-      const totalTrabajos =
-        trabajosRealizados?.reduce((sum, t) => sum + t.precioUnitario, 0) || 0;
-
-      return totalTrabajos;
-    };
-
-    setValue("manoDeObra", calcularMontoTotal());
-  }, [repuestosUsados, reparacionesTerceros, trabajosRealizados, setValue]);
 
   const debouncedSearch = debounce(
     async (
@@ -415,9 +404,6 @@ const NuevaOrdenReparacionForm = () => {
                   {...field}
                   label="Mano de obra Cliente"
                   type="number"
-                  InputProps={{
-                    readOnly: true,
-                  }}
                   fullWidth
                   margin="normal"
                 />

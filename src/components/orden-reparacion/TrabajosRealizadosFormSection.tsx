@@ -95,6 +95,11 @@ function TrabajosRealizadosFormSection() {
       });
     } else {
       setValue("trabajosRealizados", [...currentTrabajos, newTrabajo]);
+
+      // Sumar el precio unitario al campo manoObra del formulario
+      const currentManoObra = getValues("manoDeObra") || 0;
+      setValue("manoDeObra", currentManoObra + Number(precioUnitario));
+
       setOpenTrabajoModal(false);
       resetFields();
       setSnackbar({
@@ -107,11 +112,16 @@ function TrabajosRealizadosFormSection() {
 
   const handleRemoveTrabajo = (index: number) => {
     const currentTrabajos = getValues("trabajosRealizados") || [];
+    const trabajoARemover = currentTrabajos[index];
+    const currentManoObra = getValues("manoDeObra") || 0;
+    const precioARestar = Number(trabajoARemover.precioUnitario);
+
     const updatedTrabajos = currentTrabajos.filter(
       (_: any, i: number) => i !== index
     );
 
     setValue("trabajosRealizados", updatedTrabajos);
+    setValue("manoDeObra", currentManoObra - precioARestar);
   };
 
   const resetFields = () => {
