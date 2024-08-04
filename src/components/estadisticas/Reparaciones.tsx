@@ -1,5 +1,6 @@
 "use client";
 
+import { useFetch } from "@/contexts/FetchContext";
 import {
   Box,
   Button,
@@ -40,6 +41,7 @@ const Reparaciones = () => {
   const [anio, setAnio] = useState("");
   const [datos, setDatos] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const { authFetch } = useFetch();
 
   const obtenerEstadisticas = useCallback(async () => {
     setCargando(true);
@@ -52,7 +54,7 @@ const Reparaciones = () => {
     if (anio) url.searchParams.append("año", anio);
 
     try {
-      const respuesta = await fetch(url);
+      const respuesta = await authFetch(url.toString());
       const datos = await respuesta.json();
       setDatos(datos);
     } catch (error) {
@@ -60,7 +62,7 @@ const Reparaciones = () => {
     } finally {
       setCargando(false);
     }
-  }, [moneda, mes, anio]);
+  }, [moneda, mes, anio, authFetch]);
 
   useEffect(() => {
     obtenerEstadisticas();

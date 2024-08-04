@@ -1,5 +1,6 @@
 "use client";
 
+import { useFetch } from "@/contexts/FetchContext";
 import {
   Box,
   Button,
@@ -31,7 +32,7 @@ const Marcas = () => {
   const [anio, setAnio] = useState("");
   const [datos, setDatos] = useState([]);
   const [cargando, setCargando] = useState(true);
-
+  const { authFetch } = useFetch();
   const obtenerEstadisticas = useCallback(async () => {
     setCargando(true);
     const url = new URL("/api/estadisticas/autos", window.location.origin);
@@ -40,7 +41,7 @@ const Marcas = () => {
     url.searchParams.append("limite", "5");
 
     try {
-      const respuesta = await fetch(url);
+      const respuesta = await authFetch(url.toString());
       const datosRecibidos = await respuesta.json();
       setDatos(datosRecibidos);
     } catch (error) {

@@ -60,7 +60,7 @@ async function obtenerDatosYActualizarDB() {
 }
 
 export function initDolarCron() {
-  // Programar el cron job para que se ejecute a las 10:00, 14:00, 18:00 y 22:00 hora de Argentina
+  // Programar el cron job para que se ejecute a las 10:00, 14:00, 18:00 y 23:00 hora de Argentina
   cron.schedule("0 10,18,23 * * *", obtenerDatosYActualizarDB, {
     scheduled: true,
     timezone: "America/Argentina/Buenos_Aires",

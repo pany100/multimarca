@@ -1,6 +1,6 @@
 "use client";
 
-import authFetch from "@/utils/authFetch";
+import { useFetch } from "@/contexts/FetchContext";
 import {
   Box,
   Button,
@@ -49,6 +49,7 @@ const Balance = () => {
   const [anioInput, setAnioInput] = useState("");
   const [mes, setMes] = useState("");
   const [anio, setAnio] = useState("");
+  const { authFetch } = useFetch();
 
   const obtenerBalance = useCallback(async () => {
     setLoading(true);

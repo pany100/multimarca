@@ -1,5 +1,6 @@
 "use client";
 
+import { useFetch } from "@/contexts/FetchContext";
 import {
   Box,
   Button,
@@ -40,6 +41,7 @@ const Stock = () => {
   const [anio, setAnio] = useState("");
   const [datos, setDatos] = useState([]);
   const [cargando, setCargando] = useState(true);
+  const { authFetch } = useFetch();
 
   const obtenerEstadisticas = useCallback(async () => {
     setCargando(true);
@@ -50,7 +52,7 @@ const Stock = () => {
     url.searchParams.append("limite", "5");
 
     try {
-      const respuesta = await fetch(url);
+      const respuesta = await authFetch(url.toString());
       const datos = await respuesta.json();
       setDatos(datos);
     } catch (error) {

@@ -6,7 +6,7 @@ import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { IconButton, Tooltip } from "@mui/material";
+import { Alert, IconButton, Snackbar, Tooltip } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import * as yup from "yup";
@@ -36,6 +36,11 @@ const AutosPage = () => {
   const [selectedAuto, setSelectedAuto] = useState<Auto | null>(null);
   const { authFetch } = useFetch();
   const router = useRouter();
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
@@ -223,8 +228,18 @@ const AutosPage = () => {
         console.log("Cédula verde guardada exitosamente", updatedAuto);
 
         setModalOpen(false);
+        setSnackbar({
+          open: true,
+          message: "Cédula verde guardada exitosamente",
+          severity: "success",
+        });
       } catch (error) {
         console.error("Error al guardar la cédula verde:", error);
+        setSnackbar({
+          open: true,
+          message: "Error al guardar la cédula verde",
+          severity: "error",
+        });
       }
     }
   };
@@ -256,6 +271,18 @@ const AutosPage = () => {
           patente={selectedAuto.patent}
         />
       )}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 };
