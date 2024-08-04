@@ -4,14 +4,13 @@ import { styled } from "@mui/material/styles";
 type Props = {
   repair: {
     id: number;
-    startDate: string;
-    kms: number;
-    outputDate: string;
+    fechaEntradaReparacion: string;
+    kilometros: number;
+    fechaSalidaReparacion: string;
   };
 };
 
 const HeaderBox = styled("div")(() => ({
-  marginLeft: "50px",
   display: "grid",
   gridTemplateColumns: "30% 70%",
 }));
@@ -27,17 +26,19 @@ function ServiceHeader({ repair }: Props) {
   return (
     <HeaderBox>
       <Typography variant="h5" sx={{ color: "common.black" }}>
-        Service N° {repair.id}
+        Orden Reparación Nro: {repair.id}
       </Typography>
       <Info>
         <Typography variant="body1" sx={{ color: "common.black" }}>
-          Fecha Ingreso {repair.startDate}
+          Fecha Ingreso{" "}
+          {new Date(repair.fechaEntradaReparacion).toLocaleDateString("es-AR")}
         </Typography>
         <Typography variant="body1" sx={{ color: "common.black" }}>
-          Kilometraje {repair.kms}
+          Kilometraje {repair.kilometros}
         </Typography>
         <Typography variant="body1" sx={{ color: "common.black" }}>
-          Fecha Egreso {repair.outputDate}
+          Fecha Egreso{" "}
+          {new Date(repair.fechaSalidaReparacion).toLocaleDateString("es-AR")}
         </Typography>
       </Info>
     </HeaderBox>

@@ -57,7 +57,12 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
           >
             <div>
               <Typography variant="h6" sx={{ color: "common.black" }}>
-                Fecha: {repair.fechaCreacion}
+                Fecha:{" "}
+                {new Date(repair.fechaCreacion).toLocaleDateString("es-AR", {
+                  day: "2-digit",
+                  month: "2-digit",
+                  year: "numeric",
+                })}
               </Typography>
               <Typography variant="h6" sx={{ color: "common.black" }}>
                 Titular: {repair.auto.owner.fullName}
