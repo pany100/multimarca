@@ -97,7 +97,7 @@ function TrabajosRealizadosFormSection() {
       setValue("trabajosRealizados", [...currentTrabajos, newTrabajo]);
 
       // Sumar el precio unitario al campo manoObra del formulario
-      const currentManoObra = getValues("manoDeObra") || 0;
+      const currentManoObra = Number(getValues("manoDeObra")) || 0;
       setValue("manoDeObra", currentManoObra + Number(precioUnitario));
 
       setOpenTrabajoModal(false);
@@ -113,7 +113,7 @@ function TrabajosRealizadosFormSection() {
   const handleRemoveTrabajo = (index: number) => {
     const currentTrabajos = getValues("trabajosRealizados") || [];
     const trabajoARemover = currentTrabajos[index];
-    const currentManoObra = getValues("manoDeObra") || 0;
+    const currentManoObra = Number(getValues("manoDeObra")) || 0;
     const precioARestar = Number(trabajoARemover.precioUnitario);
 
     const updatedTrabajos = currentTrabajos.filter(
@@ -121,7 +121,7 @@ function TrabajosRealizadosFormSection() {
     );
 
     setValue("trabajosRealizados", updatedTrabajos);
-    setValue("manoDeObra", currentManoObra - precioARestar);
+    setValue("manoDeObra", Math.max(0, currentManoObra - precioARestar));
   };
 
   const resetFields = () => {

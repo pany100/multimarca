@@ -1,4 +1,5 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
@@ -23,7 +24,7 @@ import debounce from "lodash/debounce";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { Controller, FormProvider, useForm } from "react-hook-form";
+import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import ControlesEnReparacionForm from "./ControlesEnReparacionForm";
 import MecanicoFormSection from "./MecanicoFormSection";
@@ -387,6 +388,18 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
       });
     }
   };
+  const repuestosUsados = useWatch({ control, name: "repuestosUsados" });
+  const reparacionesTerceros = useWatch({
+    control,
+    name: "reparacionesDeTercero",
+  });
+  const manoDeObra = useWatch({ control, name: "manoDeObra" });
+  const totalOrdenReparacion = calcularTotalOrdenReparacion({
+    repuestosUsados: repuestosUsados ?? [],
+    reparacionesDeTercero: reparacionesTerceros ?? [],
+    manoDeObra,
+  });
+
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} onChange={handleFormChange}>
@@ -587,6 +600,39 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
           </Grid>
           <Grid item xs={12}>
             <Controller
+              name="manoDeObra"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <TextField
+                    {...field}
+                    label="Mano de obra"
+                    type="number"
+                    fullWidth
+                    margin="normal"
+                  />
+                  {!!errors.manoDeObra && (
+                    <Alert severity="error" sx={{ mt: 1 }}>
+                      {errors.manoDeObra.message}
+                    </Alert>
+                  )}
+                </>
+              )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Total Orden de Reparación"
+              value={Number(totalOrdenReparacion.toFixed(2))}
+              fullWidth
+              margin="normal"
+              InputProps={{
+                readOnly: true,
+              }}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
               name="controlesEnReparacion"
               control={control}
               render={() => (
@@ -722,28 +768,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
             />
             <Divider sx={{ mt: 2 }} />
           </Grid>
-          <Grid item xs={12}>
-            <Controller
-              name="manoDeObra"
-              control={control}
-              render={({ field }) => (
-                <>
-                  <TextField
-                    {...field}
-                    label="Mano de obra"
-                    type="number"
-                    fullWidth
-                    margin="normal"
-                  />
-                  {!!errors.manoDeObra && (
-                    <Alert severity="error" sx={{ mt: 1 }}>
-                      {errors.manoDeObra.message}
-                    </Alert>
-                  )}
-                </>
-              )}
-            />
-          </Grid>
+
           <Grid item xs={12}>
             <Button type="submit" variant="contained" color="primary">
               Actualizar Orden de Reparación
