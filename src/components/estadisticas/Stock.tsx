@@ -60,7 +60,7 @@ const Stock = () => {
     } finally {
       setCargando(false);
     }
-  }, [moneda, mes, anio]);
+  }, [moneda, mes, anio, authFetch]);
 
   useEffect(() => {
     obtenerEstadisticas();

@@ -50,7 +50,7 @@ const Marcas = () => {
     } finally {
       setCargando(false);
     }
-  }, [mes, anio]);
+  }, [mes, anio, authFetch]);
 
   useEffect(() => {
     obtenerEstadisticas();

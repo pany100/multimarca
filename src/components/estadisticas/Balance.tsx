@@ -70,7 +70,7 @@ const Balance = () => {
     } finally {
       setLoading(false);
     }
-  }, [moneda, mes, anio]);
+  }, [moneda, mes, anio, authFetch]);
 
   useEffect(() => {
     obtenerBalance();
