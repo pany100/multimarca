@@ -46,6 +46,9 @@ export async function GET(request: Request) {
               controlMecanico: true,
             },
           },
+          repuestosUsados: true,
+          reparacionesDeTercero: true,
+          ingresos: true,
         },
       }),
       prisma.ordenReparacion.count({

@@ -1,5 +1,6 @@
 "use client";
 import { useFetch } from "@/contexts/FetchContext";
+import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
@@ -104,23 +105,20 @@ const OrdenesReparacionPage = () => {
       renderCell: (params: any) => params.row.auto.owner.fullName,
     },
     {
-      field: "observacionesCliente",
-      headerName: "Observaciones",
-      flex: 2,
-      renderCell: (params: any) => (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            height: "100%",
-          }}
-        >
-          <Typography variant="body2">
-            {params.row.observacionesCliente}
-          </Typography>
-        </Box>
-      ),
+      field: "totalAPagar",
+      headerName: "Total a Pagar",
+      flex: 1,
+      renderCell: (params: any) =>
+        calcularTotalOrdenReparacion(params.row).toFixed(2),
+    },
+    {
+      field: "totalPagado",
+      headerName: "Total Pagado",
+      flex: 1,
+      renderCell: (params: any) =>
+        params.row.ingresos
+          .reduce((sum: number, ingreso: any) => sum + Number(ingreso.monto), 0)
+          .toFixed(2),
     },
     {
       field: "acciones",
