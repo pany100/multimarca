@@ -5,6 +5,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Box,
   Button,
+  Chip,
   IconButton,
   Tab,
   Tabs,
@@ -76,7 +77,26 @@ const OrdenesReparacionPage = () => {
         </Box>
       ),
     },
-    { field: "estado", headerName: "Estado", flex: 1 },
+    {
+      field: "estado",
+      headerName: "Estado",
+      flex: 1,
+      renderCell: (params) => (
+        <Chip
+          label={
+            estadosDisplay[params.value as EstadoOrdenReparacion] ||
+            params.value
+          }
+          sx={{
+            backgroundColor:
+              estadoColors[params.value as EstadoOrdenReparacion] ||
+              "transparent",
+            color: "white",
+            fontWeight: "bold",
+          }}
+        />
+      ),
+    },
     {
       field: "cliente",
       headerName: "Cliente",
@@ -133,6 +153,18 @@ const OrdenesReparacionPage = () => {
     EstadoOrdenReparacion.EnProgreso,
     EstadoOrdenReparacion.Terminado,
   ];
+  const estadosDisplay: Record<EstadoOrdenReparacion, string> = {
+    [EstadoOrdenReparacion.Presupuestado]: "Presupuestado",
+    [EstadoOrdenReparacion.Aceptado]: "Aceptado",
+    [EstadoOrdenReparacion.EnProgreso]: "En Progreso",
+    [EstadoOrdenReparacion.Terminado]: "Terminado",
+  };
+  const estadoColors = {
+    [EstadoOrdenReparacion.Presupuestado]: "#FFA500",
+    [EstadoOrdenReparacion.Aceptado]: "#FFD700",
+    [EstadoOrdenReparacion.EnProgreso]: "#4169E1",
+    [EstadoOrdenReparacion.Terminado]: "#32CD32",
+  };
 
   useEffect(() => {
     const fetchOrdenes = async () => {
@@ -197,7 +229,14 @@ const OrdenesReparacionPage = () => {
       </Button>
       <Tabs value={tabValue} onChange={handleTabChange}>
         {estados.map((estado) => (
-          <Tab key={estado} label={estado} />
+          <Tab
+            key={estado}
+            label={
+              estado === EstadoOrdenReparacion.EnProgreso
+                ? "En Progreso"
+                : estado
+            }
+          />
         ))}
       </Tabs>
       <TextField
