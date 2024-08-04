@@ -1,4 +1,5 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Alert,
@@ -146,7 +147,13 @@ const NuevaOrdenReparacionForm = () => {
     control,
     name: "reparacionesDeTercero",
   });
-  const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
+  const manoDeObra = useWatch({ control, name: "manoDeObra" });
+  const totalOrdenReparacion = calcularTotalOrdenReparacion({
+    repuestosUsados: repuestosUsados ?? [],
+    reparacionesDeTercero: reparacionesTerceros ?? [],
+    manoDeObra,
+  });
+
   const router = useRouter();
 
   const debouncedSearch = debounce(
@@ -408,6 +415,17 @@ const NuevaOrdenReparacionForm = () => {
                   margin="normal"
                 />
               )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="Total Orden de Reparación"
+              value={totalOrdenReparacion.toFixed(2)}
+              fullWidth
+              margin="normal"
+              InputProps={{
+                readOnly: true,
+              }}
             />
           </Grid>
         </Grid>
