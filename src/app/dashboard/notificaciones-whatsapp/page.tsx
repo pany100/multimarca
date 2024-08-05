@@ -66,7 +66,10 @@ const NotificacionesWhatsappPage = () => {
       }
       validationSchema={yup.object({
         description: yup.string().required("La descripción es requerida"),
-        date: yup.date().required("La fecha es requerida"),
+        date: yup
+          .date()
+          .required("La fecha es requerida")
+          .min(new Date(), "La fecha debe ser futura"),
         whatsappKey: yup.string().required("La clave de WhatsApp es requerida"),
       })}
     />
