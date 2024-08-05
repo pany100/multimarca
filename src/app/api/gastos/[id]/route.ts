@@ -8,8 +8,15 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { nombre, precio, fecha, categoriaId, mecanicoId, ordenDeCompraId } =
-      body;
+    const {
+      nombre,
+      precio,
+      fecha,
+      categoriaId,
+      mecanicoId,
+      proveedorId,
+      detalle,
+    } = body;
 
     if (!nombre || !precio || !fecha || !categoriaId) {
       return NextResponse.json(
@@ -26,25 +33,17 @@ export async function PUT(
         fecha: new Date(fecha),
         categoriaId,
         mecanicoId,
-        ordenDeCompraId,
+        proveedorId,
+        detalle,
       },
       include: {
         categoria: true,
         mecanico: true,
-        ordenDeCompra: {
-          include: {
-            proveedor: true,
-          },
-        },
+        proveedor: true,
       },
     });
 
-    const gastosConProveedor = {
-      ...gastoActualizado,
-      providerId: gastoActualizado.ordenDeCompra?.proveedor?.id || null,
-    };
-
-    return NextResponse.json(gastosConProveedor);
+    return NextResponse.json(gastoActualizado);
   } catch (error) {
     console.error("Error al actualizar gasto:", error);
     return NextResponse.json(

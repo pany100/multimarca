@@ -14,6 +14,7 @@ export async function GET(request: Request) {
       OR: [
         { nombre: { contains: query } },
         { categoria: { nombre: { contains: query } } },
+        { mecanico: { name: { contains: query } } },
       ],
     };
 
@@ -26,11 +27,7 @@ export async function GET(request: Request) {
         include: {
           categoria: true,
           mecanico: true,
-          ordenDeCompra: {
-            include: {
-              proveedor: true,
-            },
-          },
+          proveedor: true,
         },
       }),
       prisma.gasto.count({
@@ -38,13 +35,8 @@ export async function GET(request: Request) {
       }),
     ]);
 
-    const gastosConProveedor = gastos.map((gasto) => ({
-      ...gasto,
-      providerId: gasto.ordenDeCompra?.proveedor?.id || null,
-    }));
-
     return NextResponse.json({
-      items: gastosConProveedor,
+      items: gastos,
       total,
       page,
       size,
@@ -62,8 +54,15 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { nombre, precio, fecha, categoriaId, mecanicoId, ordenDeCompraId } =
-      body;
+    const {
+      nombre,
+      precio,
+      fecha,
+      categoriaId,
+      mecanicoId,
+      proveedorId,
+      detalle,
+    } = body;
 
     if (!nombre || !precio || !fecha || !categoriaId) {
       return NextResponse.json(
@@ -79,25 +78,17 @@ export async function POST(request: Request) {
         fecha: new Date(fecha),
         categoriaId,
         mecanicoId,
-        ordenDeCompraId,
+        proveedorId,
+        detalle,
       },
       include: {
         categoria: true,
         mecanico: true,
-        ordenDeCompra: {
-          include: {
-            proveedor: true,
-          },
-        },
+        proveedor: true,
       },
     });
 
-    const gastosConProveedor = {
-      ...nuevoGasto,
-      providerId: nuevoGasto.ordenDeCompra?.proveedor?.id || null,
-    };
-
-    return NextResponse.json(gastosConProveedor, { status: 201 });
+    return NextResponse.json(nuevoGasto, { status: 201 });
   } catch (error) {
     console.error("Error al crear gasto:", error);
     return NextResponse.json(

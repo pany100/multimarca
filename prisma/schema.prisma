@@ -120,6 +120,7 @@ model Proveedor {
   stocks                Stock[]
   ordenesDeCompra       OrdenDeCompra[]
   reparacionesDeTercero ReparacionDeTercero[]
+  gastos                Gasto[]
 
   @@index([name])
   @@index([cuit])
@@ -172,7 +173,6 @@ model OrdenDeCompra {
   proveedor   Proveedor           @relation(fields: [proveedorId], references: [id])
   proveedorId Int
   items       OrdenDeCompraItem[]
-  gastos      Gasto[]
 
   @@index([proveedorId])
   @@index([fecha])
@@ -213,16 +213,17 @@ model Gasto {
   nombre          String         @db.VarChar(150)
   precio          Decimal        @db.Decimal(10, 2)
   fecha           DateTime
+  detalle         String?        @db.Text
   categoriaId     Int
   categoria       CategoriaGasto @relation(fields: [categoriaId], references: [id])
   mecanicoId      Int?
   mecanico        Mecanico?      @relation(fields: [mecanicoId], references: [id])
-  ordenDeCompraId Int?
-  ordenDeCompra   OrdenDeCompra? @relation(fields: [ordenDeCompraId], references: [id])
+  proveedorId     Int?
+  proveedor       Proveedor?     @relation(fields: [proveedorId], references: [id])
 
   @@index([categoriaId])
   @@index([mecanicoId])
-  @@index([ordenDeCompraId])
+  @@index([proveedorId])
   @@index([fecha])
 }
 

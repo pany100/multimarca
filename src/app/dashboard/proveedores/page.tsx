@@ -22,7 +22,6 @@ const ProveedoresPage = () => {
     { field: "email", headerName: "Email", flex: 2 },
     { field: "phone", headerName: "Teléfono", flex: 1 },
     { field: "mobile", headerName: "Móvil", flex: 1 },
-    { field: "cuit", headerName: "CUIT", flex: 1 },
   ];
 
   const formFields: FieldConfig[] = [

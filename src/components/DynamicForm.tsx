@@ -39,6 +39,7 @@ export interface FieldConfig {
     | "number"
     | "autocomplete"
     | "tel"
+    | "textarea"
     | "custom";
   options?:
     | Record<string, string | number>[]
@@ -148,6 +149,7 @@ function DynamicForm<T extends FieldValues>({
       initializedRef.current = true;
     }
   }, [item, fields]);
+
   const renderField = (field: FieldConfig) => {
     switch (field.type) {
       case "custom":
@@ -359,6 +361,25 @@ function DynamicForm<T extends FieldValues>({
               {errors[field.name as Path<T>]?.message as string}
             </FormHelperText>
           </FormControl>
+        );
+      case "textarea":
+        return (
+          <TextField
+            key={field.name}
+            fullWidth
+            margin="normal"
+            multiline
+            rows={4}
+            {...register(field.name as Path<T>)}
+            error={!!errors[field.name as keyof T]}
+            helperText={errors[field.name as keyof T]?.message as string}
+            label={field.label}
+            type={field.type}
+            value={item?.[field.name as keyof T] || ""}
+            onChange={(e) =>
+              handleFieldChange(field.name as keyof T, e.target.value)
+            }
+          />
         );
       default:
         return (

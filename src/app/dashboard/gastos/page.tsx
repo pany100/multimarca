@@ -3,8 +3,6 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
-import { useRef, useState } from "react";
-import { UseFormSetValue } from "react-hook-form";
 import * as yup from "yup";
 
 interface Gasto {
@@ -22,26 +20,20 @@ interface Gasto {
     id: number;
     name: string;
   };
-  ordenDeCompraId?: number;
-  ordenDeCompra?: {
+  proveedorId?: number;
+  proveedor?: {
     id: number;
-    fecha: string;
-    proveedorId: number;
-    proveedor: {
-      id: number;
-      name: string;
-    };
+    name: string;
   };
 }
 
 const GastosPage = () => {
-  const [options, setOptions] = useState([]);
-  const initializedRef = useRef(false);
   const { authFetch } = useFetch();
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "nombre", headerName: "Descripción", flex: 1.5 },
+    { field: "detalle", headerName: "Detalle", flex: 1.5 },
     { field: "precio", headerName: "Monto", flex: 1 },
     {
       field: "fecha",
@@ -63,26 +55,20 @@ const GastosPage = () => {
       valueGetter: (mecanico: any) => mecanico?.name || "-",
     },
     {
-      field: "ordenDeCompra",
-      headerName: "Orden de Compra",
+      field: "proveedor",
+      headerName: "Proveedor",
       flex: 2.5,
-      valueGetter: (ordenDeCompra: any) => {
-        return ordenDeCompra
-          ? `Proveedor: ${ordenDeCompra?.proveedor.name} - Orden: #${
-              ordenDeCompra?.id
-            } - Fecha: ${new Date(ordenDeCompra?.fecha).toLocaleDateString(
-              "es-ES",
-              { day: "numeric", month: "long", year: "numeric" }
-            )}`
-          : "-";
+      valueGetter: (proveedor: any) => {
+        return proveedor?.name || "-";
       },
     },
   ];
 
   const formFields: FieldConfig[] = [
     { name: "nombre", label: "Nombre", type: "text" },
-    { name: "precio", label: "Precio", type: "number" },
+    { name: "precio", label: "Monto", type: "number" },
     { name: "fecha", label: "Fecha", type: "date" },
+    { name: "detalle", label: "Detalle", type: "textarea" },
     {
       name: "categoriaId",
       label: "Categoría",
@@ -123,10 +109,9 @@ const GastosPage = () => {
       }),
     },
     {
-      name: "providerId",
+      name: "proveedorId",
       label: "Proveedor",
       type: "autocomplete",
-      excludeFromSubmit: true,
       searchOptions: async (query: string) => {
         const response = await authFetch(
           `/api/proveedores?query=${query}&limit=10&page=0`
@@ -139,58 +124,11 @@ const GastosPage = () => {
       },
       getInitialValue: (gasto: Gasto) => {
         return {
-          value: gasto.ordenDeCompra?.proveedor.id || "",
-          label: gasto.ordenDeCompra?.proveedor.name || "",
+          value: gasto.proveedor?.id || "",
+          label: gasto.proveedor?.name || "",
         };
       },
       hidden: (gasto: Gasto) => gasto.categoriaId !== 1,
-      onChange: async (
-        value: number | null,
-        setValue: UseFormSetValue<any>
-      ) => {
-        initializedRef.current = true;
-        if (value) {
-          const response = await authFetch(
-            `/api/proveedores/${value}/orden-de-compra`
-          );
-          const data = await response.json();
-          const customOptions = data.map(
-            (order: { id: number; fecha: string; deuda: number }) => ({
-              value: order.id,
-              label: `ID: ${order.id} - ${new Date(
-                order.fecha
-              ).toLocaleDateString("es-AR")} - Deuda: $${order.deuda.toFixed(
-                2
-              )}`,
-            })
-          );
-          setValue("ordenDeCompraId", null);
-          setOptions(customOptions);
-        } else {
-          setValue("ordenDeCompraId", null);
-          setOptions([]);
-        }
-      },
-    },
-    {
-      name: "ordenDeCompraId",
-      label: "Orden de Compra",
-      type: "select",
-      hidden: (gasto: Gasto) => gasto.categoriaId !== 1,
-      options: (gasto: Gasto) => {
-        if (gasto.ordenDeCompraId && !initializedRef.current) {
-          const init = [
-            {
-              value: gasto.ordenDeCompra?.id || 0,
-              label: `ID: ${gasto.ordenDeCompra?.id} - ${new Date(
-                gasto.ordenDeCompra?.fecha || ""
-              ).toLocaleDateString("es-AR")}`,
-            },
-          ];
-          return init;
-        }
-        return options;
-      },
     },
   ];
 
@@ -230,13 +168,11 @@ const GastosPage = () => {
                 .required("El mecánico es requerido para esta categoría")
             : yup.number().nullable();
         }),
-        ordenDeCompraId: yup.number().when("categoriaId", ([categoriaId]) => {
+        proveedorId: yup.number().when("categoriaId", ([categoriaId]) => {
           return categoriaId === 1
             ? yup
                 .number()
-                .required(
-                  "La orden de compra es requerida para Pago Proveedores"
-                )
+                .required("El proveedor es requerido para Pago Proveedores")
             : yup.number().nullable();
         }),
       })}
