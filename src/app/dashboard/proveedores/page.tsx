@@ -13,6 +13,7 @@ interface Proveedor {
   mobile: string;
   iva: string;
   cuit: string;
+  estadoCuenta?: string;
 }
 
 const ProveedoresPage = () => {
@@ -22,6 +23,12 @@ const ProveedoresPage = () => {
     { field: "email", headerName: "Email", flex: 2 },
     { field: "phone", headerName: "Teléfono", flex: 1 },
     { field: "mobile", headerName: "Móvil", flex: 1 },
+    {
+      field: "estadoCuenta",
+      headerName: "Estado de cuenta",
+      flex: 1,
+      valueGetter: (value: number) => (value ? `$${value}` : "-"),
+    },
   ];
 
   const formFields: FieldConfig[] = [

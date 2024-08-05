@@ -18,6 +18,26 @@ export async function GET(request: Request) {
         skip,
         take: size,
         orderBy: { name: "asc" },
+        select: {
+          id: true,
+          name: true,
+          address: true,
+          email: true,
+          phone: true,
+          mobile: true,
+          iva: true,
+          cuit: true,
+          gastos: {
+            select: {
+              precio: true,
+            },
+          },
+          ordenesDeCompra: {
+            select: {
+              precioTotal: true,
+            },
+          },
+        },
       }),
       prisma.proveedor.count({
         where: {
@@ -26,8 +46,25 @@ export async function GET(request: Request) {
       }),
     ]);
 
+    const proveedoresConEstadoCuenta = proveedores.map((proveedor) => {
+      const totalGastos = proveedor.gastos.reduce(
+        (sum, gasto) => sum + Number(gasto.precio),
+        0
+      );
+      const totalOrdenesCompra = proveedor.ordenesDeCompra.reduce(
+        (sum, orden) => sum + Number(orden.precioTotal),
+        0
+      );
+      const estadoCuenta = totalGastos - totalOrdenesCompra;
+
+      return {
+        ...proveedor,
+        estadoCuenta,
+      };
+    });
+
     return NextResponse.json({
-      items: proveedores,
+      items: proveedoresConEstadoCuenta,
       total,
       page,
       size,
