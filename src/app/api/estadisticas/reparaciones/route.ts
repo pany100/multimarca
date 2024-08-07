@@ -35,9 +35,7 @@ export async function GET(request: NextRequest) {
         WHEN ? = 'USD' THEN 
           (orep.manoDeObra + 
            COALESCE((SELECT SUM(ru.precioVenta) FROM RepuestoUsado ru WHERE ru.ordenReparacionId = orep.id), 0) + 
-           COALESCE((SELECT SUM(rt.precioVenta) FROM _OrdenReparacionReparacionTercero orrt 
-                     JOIN ReparacionDeTercero rt ON orrt.B = rt.id 
-                     WHERE orrt.A = orep.id), 0)
+           COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0)
           ) / 
           COALESCE(
             (SELECT d.blue 
@@ -49,9 +47,7 @@ export async function GET(request: NextRequest) {
         ELSE 
           (orep.manoDeObra + 
            COALESCE((SELECT SUM(ru.precioVenta) FROM RepuestoUsado ru WHERE ru.ordenReparacionId = orep.id), 0) + 
-           COALESCE((SELECT SUM(rt.precioVenta) FROM _OrdenReparacionReparacionTercero orrt 
-                     JOIN ReparacionDeTercero rt ON orrt.B = rt.id 
-                     WHERE orrt.A = orep.id), 0)
+           COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0)
           )
       END
     )) as totalGastos,
