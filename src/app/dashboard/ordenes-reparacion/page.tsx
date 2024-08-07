@@ -1,13 +1,20 @@
 "use client";
 import { useFetch } from "@/contexts/FetchContext";
 import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
+import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
+  Alert,
   Box,
   Button,
   Chip,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
   IconButton,
+  Snackbar,
   Tab,
   Tabs,
   TextField,
@@ -32,6 +39,13 @@ interface OrdenReparacion {
 
 const OrdenesReparacionPage = () => {
   const [ordenes, setOrdenes] = useState<OrdenReparacion[]>([]);
+  const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
   const [loading, setLoading] = useState(true);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
@@ -41,6 +55,10 @@ const OrdenesReparacionPage = () => {
   const [estadoActual, setEstadoActual] = useState<
     EstadoOrdenReparacion | string | null
   >(null);
+  const handleDeleteClick = (id: string) => {
+    setItemToDelete(id);
+    setDeleteConfirmOpen(true);
+  };
 
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
@@ -140,6 +158,12 @@ const OrdenesReparacionPage = () => {
           >
             <VisibilityIcon />
           </IconButton>
+          <IconButton
+            onClick={() => handleDeleteClick(params.row.id)}
+            size="small"
+          >
+            <DeleteIcon />
+          </IconButton>
         </>
       ),
     },
@@ -162,6 +186,44 @@ const OrdenesReparacionPage = () => {
     [EstadoOrdenReparacion.Aceptado]: "#FFD700",
     [EstadoOrdenReparacion.EnProgreso]: "#4169E1",
     [EstadoOrdenReparacion.Terminado]: "#32CD32",
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      const url = new URL("/api/orden-reparacion", window.location.origin);
+      const baseUrl = `${url.origin}${url.pathname}`;
+
+      const response = await authFetch(`${baseUrl}/${itemToDelete}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setOrdenes((prevItems) =>
+          prevItems.filter((item) => item.id !== itemToDelete)
+        );
+        setSnackbar({
+          open: true,
+          message: `Orden de reparación eliminada con éxito`,
+          severity: "success",
+        });
+      } else {
+        setSnackbar({
+          open: true,
+          message: `Error al eliminar la orden de reparación`,
+          severity: "error",
+        });
+      }
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: `Error al realizar la solicitud DELETE`,
+        severity: "error",
+      });
+    } finally {
+      setDeleteConfirmOpen(false);
+      setItemToDelete(null);
+    }
   };
 
   useEffect(() => {
@@ -257,6 +319,47 @@ const OrdenesReparacionPage = () => {
         getRowId={(row) => row.id}
         autoHeight
       />
+      <Dialog
+        open={deleteConfirmOpen}
+        onClose={() => setDeleteConfirmOpen(false)}
+      >
+        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogContent>
+          <Typography>
+            ¿Estás seguro de que quieres eliminar esta orden de reparación?
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center", pb: 2, px: 3 }}>
+          <Button
+            onClick={() => setDeleteConfirmOpen(false)}
+            variant="outlined"
+            sx={{ mr: 1 }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleDeleteConfirm}
+            variant="contained"
+            color="error"
+            autoFocus
+          >
+            Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+      >
+        <Alert
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
