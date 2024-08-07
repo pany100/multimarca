@@ -136,7 +136,18 @@ const StockPage = () => {
         xs: 4,
       },
     },
-    { name: "label", label: "Etiqueta", type: "text", layout: { xs: 4 } },
+    {
+      name: "label",
+      label: "Etiqueta",
+      type: "autocomplete",
+      layout: { xs: 4 },
+      freeSolo: true,
+      searchOptions: async (query: string) => {
+        const response = await authFetch(`/api/rotulo?query=${query}`);
+        const data = await response.json();
+        return data.items;
+      },
+    },
     { name: "markup", label: "Margen", type: "number", layout: { xs: 6 } },
     {
       name: "proveedorId",

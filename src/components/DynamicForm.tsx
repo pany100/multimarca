@@ -44,6 +44,7 @@ export interface FieldConfig {
   options?:
     | Record<string, string | number>[]
     | ((data: any) => Record<string, string | number>[]);
+  freeSolo?: boolean;
   valueKey?: string;
   labelKey?: string;
   searchOptions?: (query: string) => Promise<any[]>;
@@ -268,7 +269,10 @@ function DynamicForm<T extends FieldValues>({
               <FormControl fullWidth margin="normal">
                 <Autocomplete
                   options={autocompleteOptions[field.name] || []}
-                  getOptionLabel={(option) => option?.label || ""}
+                  getOptionLabel={(option) => {
+                    if (typeof option === "string") return option;
+                    return option?.label || "";
+                  }}
                   value={
                     value
                       ? autocompleteOptions[field.name]?.find(
@@ -276,15 +280,25 @@ function DynamicForm<T extends FieldValues>({
                         ) || null
                       : null
                   }
+                  freeSolo={field.freeSolo || false}
                   defaultValue={field.getInitialValue?.(item) || null}
                   onChange={(_, newValue) => {
-                    onChange(newValue?.value || null);
-                    handleFieldChange(
-                      field.name as keyof T,
-                      newValue?.value || null
-                    );
+                    let finalValue;
+                    if (typeof newValue === "string") {
+                      finalValue = newValue;
+                    } else if (newValue && typeof newValue === "object") {
+                      finalValue = newValue.value;
+                    } else {
+                      finalValue = "";
+                    }
+                    onChange(finalValue);
+                    handleFieldChange(field.name as keyof T, finalValue);
                   }}
                   onInputChange={(_, newInputValue) => {
+                    if (field.freeSolo) {
+                      onChange(newInputValue);
+                      handleFieldChange(field.name as keyof T, newInputValue);
+                    }
                     debouncedSearch(
                       field,
                       newInputValue,
