@@ -196,7 +196,7 @@ export async function POST(request: Request) {
           pdfPath,
           manoDeObra: new Prisma.Decimal(manoDeObra),
           mecanicos: {
-            connect: mecanicos.map(({ id }: { id: number }) => ({ id })),
+            connect: mecanicos.map(({ id }: { id: number }) => id),
           },
           repuestosUsados: {
             create: repuestosToPersist,

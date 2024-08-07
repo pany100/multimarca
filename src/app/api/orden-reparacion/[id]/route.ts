@@ -23,7 +23,11 @@ export async function GET(
             owner: true,
           },
         },
-        mecanicos: true,
+        mecanicos: {
+          include: {
+            mecanico: true,
+          },
+        },
         repuestosUsados: {
           include: {
             stock: true,
@@ -50,8 +54,18 @@ export async function GET(
         { status: 404 }
       );
     }
+    const { mecanicos, ...ordenReparacionWithoutMecanicos } = ordenReparacion;
+    const mecanicosWithoutMecanico = mecanicos.map(
+      (el: { mecanico: { id: number; name: string } }) => ({
+        id: el.mecanico.id,
+        name: el.mecanico.name,
+      })
+    );
 
-    return NextResponse.json(ordenReparacion);
+    return NextResponse.json({
+      ...ordenReparacionWithoutMecanicos,
+      mecanicos: mecanicosWithoutMecanico,
+    });
   } catch (error) {
     console.error("Error al obtener orden de reparación:", error);
     return NextResponse.json(
@@ -192,6 +206,10 @@ export async function PUT(
       })
     );
 
+    const mecanicosToPersist = mecanicos.map((mecanico: any) => ({
+      mecanicoId: mecanico.id,
+    }));
+
     const pdfFile = formData.get("pdfPath") as File | null;
     let permanentUrl = pdfPath;
     if (pdfFile) {
@@ -247,7 +265,8 @@ export async function PUT(
             estado,
             manoDeObra: new Prisma.Decimal(manoDeObra),
             mecanicos: {
-              set: mecanicos.map(({ id }: { id: number }) => ({ id })),
+              deleteMany: {},
+              create: mecanicosToPersist,
             },
             repuestosUsados: {
               deleteMany: {},
