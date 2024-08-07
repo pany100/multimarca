@@ -182,6 +182,10 @@ export async function POST(request: Request) {
       })
     );
 
+    const mecanicosToPersist = mecanicos.map((mecanico: any) => ({
+      mecanicoId: mecanico.id,
+    }));
+
     const [nuevaOrdenReparacion] = await prisma.$transaction(async (prisma) => {
       const ordenCreada = await prisma.ordenReparacion.create({
         data: {
@@ -196,7 +200,7 @@ export async function POST(request: Request) {
           pdfPath,
           manoDeObra: new Prisma.Decimal(manoDeObra),
           mecanicos: {
-            connect: mecanicos.map(({ id }: { id: number }) => id),
+            create: mecanicosToPersist,
           },
           repuestosUsados: {
             create: repuestosToPersist,
@@ -256,6 +260,11 @@ export async function POST(request: Request) {
       }
 
       if (estado === EstadoOrdenReparacion.Terminado) {
+        await prisma.pagoAMecanico.create({
+          data: {
+            ordenReparacionId: ordenCreada.id,
+          },
+        });
         await prisma.notificacionInterna.create({
           data: {
             fecha: new Date(),

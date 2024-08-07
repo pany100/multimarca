@@ -376,17 +376,13 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                   id: string;
                   nombre: string;
                   proveedor: { name: string };
-                  previoCompra: string;
+                  precioCompra: string;
                   precioVenta: string;
                 }) => (
                   <ListItem key={reparacion.id}>
                     <ListItemText
-                      primary={reparacion.nombre}
-                      secondary={`Proveedor: ${reparacion.proveedor.name}`}
-                    />
-                    <ListItemText
-                      primary={`Precio de compra: ${reparacion.precioCompra}`}
-                      secondary={`Precio de venta: ${reparacion.precioVenta}`}
+                      primary={`${reparacion.nombre} - Proveedor: ${reparacion.proveedor.name}`}
+                      secondary={`Precio de compra: $${reparacion.precioCompra} - Precio de venta: $${reparacion.precioVenta}`}
                     />
                   </ListItem>
                 )
@@ -399,21 +395,25 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
               Observaciones del Cliente:
             </Typography>
             <Typography paragraph>
-              {ordenReparacion.observacionesCliente}
+              {ordenReparacion.observacionesCliente || "-"}
             </Typography>
 
             <Typography variant="subtitle2" gutterBottom>
               Observaciones de Entrada:
             </Typography>
             <Typography paragraph>
-              {JSON.parse(ordenReparacion.observacionesEntrada).join(", ")}
+              {JSON.parse(ordenReparacion.observacionesEntrada || "[]").join(
+                ", "
+              ) || "-"}
             </Typography>
 
             <Typography variant="subtitle2" gutterBottom>
               Observaciones de Salida:
             </Typography>
             <Typography paragraph>
-              {JSON.parse(ordenReparacion.observacionesSalida).join(", ")}
+              {JSON.parse(ordenReparacion.observacionesSalida || "[]").join(
+                ", "
+              ) || "-"}
             </Typography>
           </TabPanel>
         </Box>
