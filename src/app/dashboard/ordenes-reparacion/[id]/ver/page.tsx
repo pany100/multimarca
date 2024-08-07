@@ -376,11 +376,17 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                   id: string;
                   nombre: string;
                   proveedor: { name: string };
+                  previoCompra: string;
+                  precioVenta: string;
                 }) => (
                   <ListItem key={reparacion.id}>
                     <ListItemText
                       primary={reparacion.nombre}
                       secondary={`Proveedor: ${reparacion.proveedor.name}`}
+                    />
+                    <ListItemText
+                      primary={`Precio de compra: ${reparacion.precioCompra}`}
+                      secondary={`Precio de venta: ${reparacion.precioVenta}`}
                     />
                   </ListItem>
                 )
