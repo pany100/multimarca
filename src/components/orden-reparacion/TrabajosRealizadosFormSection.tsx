@@ -70,14 +70,14 @@ function TrabajosRealizadosFormSection() {
             precioUnitario: Number(precioUnitario),
             diasParaRecordatorio: diasParaRecordatorio
               ? Number(diasParaRecordatorio)
-              : "-",
+              : null,
           }
         : {
             manoDeObra: { name: nombreTrabajo },
             precioUnitario: Number(precioUnitario),
             diasParaRecordatorio: diasParaRecordatorio
               ? Number(diasParaRecordatorio)
-              : "-",
+              : null,
           };
 
     if (

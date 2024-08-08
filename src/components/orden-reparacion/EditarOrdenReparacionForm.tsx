@@ -187,6 +187,7 @@ type OrdenReparacion = {
     ordenReparacionId: number;
     descripcion: string;
     precioUnitario: number;
+    diasParaRecordatorio?: number;
   }[];
   controlesEnReparacion: {
     id: number;
@@ -249,6 +250,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
       trabajosRealizados: ordenReparacion.trabajosRealizados.map((trabajo) => ({
         manoDeObra: { name: trabajo.descripcion },
         precioUnitario: Number(trabajo.precioUnitario),
+        diasParaRecordatorio: trabajo.diasParaRecordatorio,
       })),
       repuestosUsados: ordenReparacion.repuestosUsados.map((repuesto) => ({
         stock: { id: repuesto.stockId, name: repuesto.stock.name },
