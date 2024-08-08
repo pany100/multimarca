@@ -12,7 +12,11 @@ export async function GET(request: Request) {
     const skip = page * size;
 
     let whereClause: any = {
-      OR: [{ name: { contains: query } }, { brand: { contains: query } }],
+      OR: [
+        { name: { contains: query } },
+        { brand: { contains: query } },
+        { label: { contains: query } },
+      ],
     };
 
     if (needsRestock) {

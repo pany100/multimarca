@@ -1,6 +1,5 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -17,6 +16,7 @@ export async function GET(request: Request) {
             { patent: { contains: query } },
             { brand: { contains: query } },
             { model: { contains: query } },
+            { owner: { fullName: { contains: query } } },
           ],
         },
         include: {
@@ -32,6 +32,7 @@ export async function GET(request: Request) {
             { patent: { contains: query } },
             { brand: { contains: query } },
             { model: { contains: query } },
+            { owner: { fullName: { contains: query } } },
           ],
         },
       }),

@@ -149,7 +149,7 @@ const VerAutoPage = ({ params }: { params: { id: string } }) => {
             {auto.cedulaVerdePath && (
               <Box>
                 <Typography variant="h6" gutterBottom>
-                  Cédula Verde
+                  Cédula de identificación automotor
                 </Typography>
                 <Image
                   src={auto.cedulaVerdePath}

@@ -109,7 +109,7 @@ const StockPage = () => {
       flex: 0.5,
     },
     { field: "restockValue", headerName: "Valor de reposición", flex: 0.5 },
-    { field: "label", headerName: "Etiqueta", flex: 0.5 },
+    { field: "label", headerName: "Rótulo", flex: 0.5 },
     { field: "markup", headerName: "Margen", flex: 0.5 },
     {
       field: "proveedor",
@@ -138,7 +138,7 @@ const StockPage = () => {
     },
     {
       name: "label",
-      label: "Etiqueta",
+      label: "Rótulo",
       type: "autocomplete",
       layout: { xs: 4 },
       freeSolo: true,

@@ -10,19 +10,25 @@ export async function GET(request: Request) {
 
     const skip = page * size;
 
+    let whereClause = {};
+    if (query) {
+      whereClause = {
+        OR: [
+          { name: { contains: query } },
+          { id: isNaN(parseInt(query)) ? undefined : parseInt(query) },
+        ],
+      };
+    }
+
     const [trabajos, total] = await Promise.all([
       prisma.manoDeObra.findMany({
-        where: {
-          name: { contains: query },
-        },
+        where: whereClause,
         skip,
         take: size,
         orderBy: { name: "asc" },
       }),
       prisma.manoDeObra.count({
-        where: {
-          name: { contains: query },
-        },
+        where: whereClause,
       }),
     ]);
 

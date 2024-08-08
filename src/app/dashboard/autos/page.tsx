@@ -193,7 +193,7 @@ const AutosPage = () => {
           <VisibilityIcon />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Agregar cédula verde">
+      <Tooltip title="Agregar cédula de identificación automotor">
         <IconButton onClick={() => handleExtraAction(auto)} size="small">
           <DirectionsCarIcon />
         </IconButton>

@@ -56,8 +56,8 @@ const CedulaVerdeModal: React.FC<CedulaVerdeModalProps> = ({
         }}
       >
         <Typography variant="h6" component="h2" gutterBottom>
-          Agregar o actualizar cédula verde para el vehículo con patente:{" "}
-          {patente}
+          Agregar o actualizar cédula de identificación para el vehículo con
+          patente: {patente}
         </Typography>
         {file ? (
           <Typography>Archivo seleccionado: {file.name}</Typography>
