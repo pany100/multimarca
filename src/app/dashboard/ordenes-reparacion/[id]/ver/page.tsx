@@ -327,7 +327,10 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           >
             <Tab icon={<BuildIcon />} label="Trabajos Realizados" />
             <Tab icon={<InventoryIcon />} label="Repuestos Utilizados" />
-            <Tab icon={<EngineeringIcon />} label="Reparaciones de Terceros" />
+            <Tab
+              icon={<EngineeringIcon />}
+              label="Reparación / Repuestos de terceros"
+            />
             <Tab icon={<CommentIcon />} label="Observaciones" />
           </Tabs>
           <TabPanel value={tabValue} index={0}>
@@ -514,7 +517,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                 </TableCell>
               </TableRow>
               <TableRow>
-                <TableCell>Reparaciones de Terceros</TableCell>
+                <TableCell>Reparaciones / Repuestos de terceros</TableCell>
                 <TableCell align="right">
                   ${calcularTotalReparacionesTerceros(ordenReparacion)}
                 </TableCell>

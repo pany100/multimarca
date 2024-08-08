@@ -112,7 +112,7 @@ function ReparacionesTercerosFormSection() {
   return (
     <>
       <Typography variant="h6" gutterBottom>
-        Reparaciones de Terceros
+        Reparación / Repuestos de terceros
       </Typography>
       <Controller
         name="reparacionesDeTercero"
@@ -156,7 +156,9 @@ function ReparacionesTercerosFormSection() {
                 </TableBody>
               </Table>
             ) : (
-              <Typography>No hay reparaciones de terceros asignadas</Typography>
+              <Typography>
+                No hay repuestos / reparaciones de terceros asignadas
+              </Typography>
             )}
             {error && <Typography color="error">{error.message}</Typography>}
             <Box display="flex" justifyContent="flex-end" mt={2}>
@@ -164,7 +166,7 @@ function ReparacionesTercerosFormSection() {
                 onClick={() => setOpenReparacionModal(true)}
                 variant="contained"
               >
-                Agregar Reparación
+                Agregar Reparación / Repuesto
               </Button>
             </Box>
           </>

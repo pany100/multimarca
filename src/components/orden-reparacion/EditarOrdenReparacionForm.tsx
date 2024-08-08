@@ -130,7 +130,7 @@ const schema = yup.object().shape({
   manoDeObra: yup
     .number()
     .typeError("La mano de obra debe ser un nmero")
-    .positive()
+    .positive("El monto total debe ser positivo")
     .required("La mano de obra es requerida"),
   observacionesEntrada: yup.string(),
 });
