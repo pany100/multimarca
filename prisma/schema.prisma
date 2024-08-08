@@ -357,7 +357,7 @@ model ControlEnReparacion {
   id                Int             @id @default(autoincrement())
   ordenReparacion   OrdenReparacion @relation("OrdenReparacionControlesEnReparacion", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   ordenReparacionId Int
-  controlMecanico   ControlMecanico @relation(fields: [controlMecanicoId], references: [id])
+  controlMecanico   ControlMecanico @relation(fields: [controlMecanicoId], references: [id], onDelete: Cascade)
   controlMecanicoId Int
   valor             String          @db.VarChar(255)
 
