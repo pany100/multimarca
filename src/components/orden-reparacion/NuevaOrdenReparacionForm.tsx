@@ -110,7 +110,10 @@ const schema = yup.object().shape({
         .required("El proveedor es requerido"),
     })
   ),
-  manoDeObra: yup.number().positive().required("El monto total es requerido"),
+  manoDeObra: yup
+    .number()
+    .positive("El monto total debe ser positivo")
+    .required("El monto total es requerido"),
   observacionesEntrada: yup.string(),
 });
 
@@ -218,7 +221,7 @@ const NuevaOrdenReparacionForm = () => {
       });
     }
   };
-
+  console.log(JSON.stringify(errors));
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -413,6 +416,8 @@ const NuevaOrdenReparacionForm = () => {
                   type="number"
                   fullWidth
                   margin="normal"
+                  error={!!errors.manoDeObra}
+                  helperText={errors.manoDeObra?.message as string}
                 />
               )}
             />
