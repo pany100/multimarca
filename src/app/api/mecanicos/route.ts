@@ -7,6 +7,7 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get("page") || "0");
     const size = parseInt(searchParams.get("size") || "10");
     const query = searchParams.get("query") || "";
+    const soloMecanicos = searchParams.get("mecanicos") === "true";
 
     const skip = page * size;
 
@@ -14,6 +15,7 @@ export async function GET(request: Request) {
       prisma.empleado.findMany({
         where: {
           name: { contains: query },
+          tipo: soloMecanicos ? "Mecanico" : undefined,
         },
         skip,
         take: size,
@@ -22,6 +24,7 @@ export async function GET(request: Request) {
       prisma.empleado.count({
         where: {
           name: { contains: query },
+          tipo: soloMecanicos ? "Mecanico" : undefined,
         },
       }),
     ]);
@@ -60,6 +63,7 @@ export async function POST(request: Request) {
       postal_code,
       email,
       phone,
+      tipo,
       birthday,
     } = body;
 
@@ -81,6 +85,7 @@ export async function POST(request: Request) {
         postal_code,
         email,
         phone,
+        tipo,
         birthday: birthday ? new Date(birthday) : null,
       },
     });

@@ -41,7 +41,7 @@ function MecanicoFormSection() {
 
   const searchMecanicos = async (query: string) => {
     const response = await authFetch(
-      `/api/mecanicos?query=${query}&limit=10&page=0`
+      `/api/mecanicos?mecanicos=true&query=${query}&limit=10&page=0`
     );
     const data = await response.json();
     setMecanicoOptions(

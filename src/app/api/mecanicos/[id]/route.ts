@@ -19,6 +19,7 @@ export async function PUT(
       email,
       phone,
       birthday,
+      tipo,
     } = body;
 
     if (!name || typeof name !== "string") {
@@ -28,7 +29,7 @@ export async function PUT(
       );
     }
 
-    const mecanicoActualizado = await prisma.mecanico.update({
+    const mecanicoActualizado = await prisma.empleado.update({
       where: { id },
       data: {
         name,
@@ -40,6 +41,7 @@ export async function PUT(
         postal_code,
         email,
         phone,
+        tipo,
         birthday: birthday ? new Date(birthday) : null,
       },
     });
@@ -61,7 +63,7 @@ export async function DELETE(
   try {
     const id = parseInt(params.id);
 
-    const mecanicoEliminado = await prisma.mecanico.delete({
+    const mecanicoEliminado = await prisma.empleado.delete({
       where: { id },
     });
 
