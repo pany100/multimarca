@@ -23,6 +23,10 @@ import { Controller, useFormContext } from "react-hook-form";
 
 function RepuestoUsadoFormSection() {
   const { control, getValues, setValue } = useFormContext();
+  const [editingRepuestoId, setEditingRepuestoId] = useState<number | null>(
+    null
+  );
+
   const { authFetch } = useFetch();
 
   const [snackbar, setSnackbar] = useState({
@@ -43,7 +47,14 @@ function RepuestoUsadoFormSection() {
   const [precioCompra, setPrecioCompra] = useState("");
   const [precioVenta, setPrecioVenta] = useState("");
   const [unidadesConsumidas, setUnidadesConsumidas] = useState("");
-
+  const handleEditRepuesto = (repuesto: any) => {
+    setSelectedRepuesto(repuesto.stock);
+    setPrecioCompra(repuesto.precioCompra.toString());
+    setPrecioVenta(repuesto.precioVenta.toString());
+    setUnidadesConsumidas(repuesto.unidadesConsumidas.toString());
+    setEditingRepuestoId(repuesto.stock.id);
+    setOpenRepuestoModal(true);
+  };
   const searchRepuestos = async (query: string) => {
     const response = await authFetch(
       `/api/stock?query=${query}&limit=10&page=0`
@@ -66,7 +77,7 @@ function RepuestoUsadoFormSection() {
     );
   };
 
-  const handleAddRepuesto = () => {
+  const handleAddOrUpdateRepuesto = () => {
     if (selectedRepuesto) {
       const currentRepuestos = getValues("repuestosUsados") || [];
       const newRepuesto = {
@@ -75,8 +86,23 @@ function RepuestoUsadoFormSection() {
         precioVenta: Number(precioVenta),
         unidadesConsumidas: Number(unidadesConsumidas),
       };
-
-      if (
+      if (editingRepuestoId) {
+        const updatedRepuestos = currentRepuestos.map((r: any) =>
+          r.stock.id === editingRepuestoId ? newRepuesto : r
+        );
+        setValue("repuestosUsados", updatedRepuestos);
+        setSnackbar({
+          open: true,
+          message: "Repuesto actualizado correctamente",
+          severity: "success",
+        });
+        setOpenRepuestoModal(false);
+        setSelectedRepuesto(null);
+        setPrecioCompra("");
+        setPrecioVenta("");
+        setUnidadesConsumidas("");
+        setEditingRepuestoId(null);
+      } else if (
         currentRepuestos.some((r: any) => r.stock.id === selectedRepuesto.id)
       ) {
         setSnackbar({
@@ -138,6 +164,9 @@ function RepuestoUsadoFormSection() {
                       <TableCell>{repuesto.precioVenta}</TableCell>
                       <TableCell>{repuesto.unidadesConsumidas}</TableCell>
                       <TableCell>
+                        <Button onClick={() => handleEditRepuesto(repuesto)}>
+                          Editar
+                        </Button>
                         <Button
                           onClick={() => {
                             handleRemoveRepuesto(repuesto.stock.id);
@@ -244,7 +273,7 @@ function RepuestoUsadoFormSection() {
           </Button>
           <Button
             type="button"
-            onClick={handleAddRepuesto}
+            onClick={handleAddOrUpdateRepuesto}
             disabled={
               !selectedRepuesto ||
               !precioCompra ||
@@ -252,7 +281,7 @@ function RepuestoUsadoFormSection() {
               !unidadesConsumidas
             }
           >
-            Agregar
+            {editingRepuestoId ? "Actualizar" : "Agregar"}
           </Button>
         </DialogActions>
       </Dialog>
