@@ -10,6 +10,7 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -116,6 +117,20 @@ const VerEmpleadoPage = ({ params }: { params: { id: string } }) => {
                 ? new Date(empleado.birthday).toLocaleDateString()
                 : "-"}
             </Typography>
+            {empleado.dniImagePath && (
+              <Box mt={2}>
+                <Typography variant="h6" gutterBottom>
+                  Imagen del DNI
+                </Typography>
+                <Image
+                  src={empleado.dniImagePath}
+                  alt="DNI del empleado"
+                  width={300}
+                  height={200}
+                  style={{ width: "300px", height: "auto" }}
+                />
+              </Box>
+            )}
           </Grid>
         </Grid>
       </Paper>

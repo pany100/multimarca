@@ -2,9 +2,13 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import UploadImageModal from "@/components/UploadImageModal";
+import { useFetch } from "@/contexts/FetchContext";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { IconButton, Tooltip } from "@mui/material";
+import { Alert, IconButton, Snackbar, Tooltip } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import * as yup from "yup";
 
 interface Mecanico {
@@ -24,6 +28,21 @@ interface Mecanico {
 
 const MecanicosPage = () => {
   const router = useRouter();
+  const [selectedEmpleado, setSelectedEmpleado] = useState<Mecanico | null>(
+    null
+  );
+  const [modalOpen, setModalOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
+  const { authFetch } = useFetch();
+
+  const handleExtraAction = (empleado: Mecanico) => {
+    setSelectedEmpleado(empleado);
+    setModalOpen(true);
+  };
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
@@ -107,27 +126,92 @@ const MecanicosPage = () => {
           <VisibilityIcon />
         </IconButton>
       </Tooltip>
+      <Tooltip title="Agregar Foto DNI">
+        <IconButton onClick={() => handleExtraAction(mecanico)} size="small">
+          <CameraAltIcon />
+        </IconButton>
+      </Tooltip>
     </>
   );
 
+  const handleSaveDNIImage = async (file: File | null) => {
+    if (file && selectedEmpleado) {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
+
+        const response = await authFetch(
+          `/api/mecanicos/${selectedEmpleado.id}/dni`,
+          {
+            method: "PUT",
+            body: formData,
+          }
+        );
+
+        if (!response.ok) {
+          throw new Error("Error al guardar el dni");
+        }
+
+        const updatedAuto = await response.json();
+        console.log("DNI guardado exitosamente", updatedAuto);
+
+        setModalOpen(false);
+        setSnackbar({
+          open: true,
+          message: "DNI guardado exitosamente",
+          severity: "success",
+        });
+      } catch (error) {
+        console.error("Error al guardar el dni:", error);
+        setSnackbar({
+          open: true,
+          message: "Error al guardar el dni",
+          severity: "error",
+        });
+      }
+    }
+  };
+
   return (
-    <CrudTable<Mecanico>
-      title="Empleados"
-      columns={columns}
-      apiEndpoint="/api/mecanicos"
-      fields={formFields}
-      createNewItem={createNewMecanico}
-      validationSchema={yup.object({
-        name: yup.string().required("El nombre es requerido"),
-        dni: yup
-          .string()
-          .matches(/^\d+$/, "El DNI debe contener solo nmeros")
-          .nullable(),
-        email: yup.string().email("El email es inválido").nullable(),
-        phone: yup.string().nullable(),
-      })}
-      extraActions={extraActions}
-    />
+    <>
+      <CrudTable<Mecanico>
+        title="Empleados"
+        columns={columns}
+        apiEndpoint="/api/mecanicos"
+        fields={formFields}
+        createNewItem={createNewMecanico}
+        validationSchema={yup.object({
+          name: yup.string().required("El nombre es requerido"),
+          dni: yup
+            .string()
+            .matches(/^\d+$/, "El DNI debe contener solo nmeros")
+            .nullable(),
+          email: yup.string().email("El email es inválido").nullable(),
+          phone: yup.string().nullable(),
+        })}
+        extraActions={extraActions}
+      />
+      {selectedEmpleado && (
+        <UploadImageModal
+          open={modalOpen}
+          onClose={() => setModalOpen(false)}
+          onSave={handleSaveDNIImage}
+          title="Agregar Foto DNI"
+        />
+      )}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
   );
 };
 

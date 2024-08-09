@@ -1,8 +1,8 @@
 "use client";
 
-import CedulaVerdeModal from "@/components/CedulaVerdeModal";
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import CedulaVerdeModal from "@/components/UploadImageModal";
 import { useFetch } from "@/contexts/FetchContext";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import VisibilityIcon from "@mui/icons-material/Visibility";
@@ -268,7 +268,7 @@ const AutosPage = () => {
           open={modalOpen}
           onClose={() => setModalOpen(false)}
           onSave={handleSaveCedulaVerde}
-          patente={selectedAuto.patent}
+          title="Cédula de Indentificación"
         />
       )}
       <Snackbar

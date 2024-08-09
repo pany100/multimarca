@@ -2,18 +2,18 @@ import { Box, Button, Modal, Paper, Typography } from "@mui/material";
 import React, { useCallback, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
-interface CedulaVerdeModalProps {
+interface UploadImageModalProps {
   open: boolean;
   onClose: () => void;
   onSave: (file: File | null) => void;
-  patente: string;
+  title: string;
 }
 
-const CedulaVerdeModal: React.FC<CedulaVerdeModalProps> = ({
+const UploadImageModal: React.FC<UploadImageModalProps> = ({
   open,
   onClose,
   onSave,
-  patente,
+  title,
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -56,8 +56,7 @@ const CedulaVerdeModal: React.FC<CedulaVerdeModalProps> = ({
         }}
       >
         <Typography variant="h6" component="h2" gutterBottom>
-          Agregar o actualizar cédula de identificación para el vehículo con
-          patente: {patente}
+          {title}
         </Typography>
         {file ? (
           <Typography>Archivo seleccionado: {file.name}</Typography>
@@ -119,4 +118,4 @@ const CedulaVerdeModal: React.FC<CedulaVerdeModalProps> = ({
   );
 };
 
-export default CedulaVerdeModal;
+export default UploadImageModal;
