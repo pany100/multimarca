@@ -1,9 +1,12 @@
-const { PrismaClient: Cliente } = require("@prisma/client");
-const fs = require("fs") as typeof import("fs");
-const path = require("path");
-const { parse } = require("csv-parse/sync");
+import { PrismaClient as Cliente } from "@prisma/client";
+import { parse } from "csv-parse/sync";
+import fs from "fs";
+import path, { dirname } from "path";
+import { fileURLToPath } from "url";
 
 const prismaClient = new Cliente();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 const permisos = [
   "Usuarios",
@@ -192,39 +195,43 @@ async function main() {
         continue;
       }
     }
-    await prismaClient.auto.upsert({
-      where: { patent: record.patente },
-      update: {
-        patent: record.patente === "" ? null : record.patente,
-        brand: record.marca === "" ? null : record.marca,
-        model: record.modelo === "" ? null : record.modelo,
-        valves: record.valvulas === "" ? null : parseInt(record.valvulas),
-        color: record.color === "" ? null : record.color,
-        year: record.anio === "" ? null : parseInt(record.anio),
-        kms: record.kilometros === "" ? null : parseInt(record.kilometros),
-        owner: owner,
-        chassis_number: record.chasis === "" ? null : record.chasis,
-        engine_number: record.motor === "" ? null : record.motor,
-        observations: record.observaciones === "" ? null : record.observaciones,
-        transmission_type:
-          record.transmision === "" ? null : record.transmision,
-      },
-      create: {
-        patent: record.patente === "" ? null : record.patente,
-        brand: record.marca === "" ? null : record.marca,
-        model: record.modelo === "" ? null : record.modelo,
-        valves: record.valvulas === "" ? null : parseInt(record.valvulas),
-        color: record.color === "" ? null : record.color,
-        year: record.anio === "" ? null : parseInt(record.anio),
-        kms: record.kilometros === "" ? null : parseInt(record.kilometros),
-        owner: owner,
-        chassis_number: record.chasis === "" ? null : record.chasis,
-        engine_number: record.motor === "" ? null : record.motor,
-        observations: record.observaciones === "" ? null : record.observaciones,
-        transmission_type:
-          record.transmision === "" ? null : record.transmision,
-      },
-    });
+    if (owner) {
+      await prismaClient.auto.upsert({
+        where: { patent: record.patente },
+        update: {
+          patent: record.patente === "" ? null : record.patente,
+          brand: record.marca === "" ? null : record.marca,
+          model: record.modelo === "" ? null : record.modelo,
+          valves: record.valvulas === "" ? null : parseInt(record.valvulas),
+          color: record.color === "" ? null : record.color,
+          year: record.anio === "" ? null : parseInt(record.anio),
+          kms: record.kilometros === "" ? null : parseInt(record.kilometros),
+          owner: owner,
+          chassis_number: record.chasis === "" ? null : record.chasis,
+          engine_number: record.motor === "" ? null : record.motor,
+          observations:
+            record.observaciones === "" ? null : record.observaciones,
+          transmission_type:
+            record.transmision === "" ? null : record.transmision,
+        },
+        create: {
+          patent: record.patente === "" ? null : record.patente,
+          brand: record.marca === "" ? null : record.marca,
+          model: record.modelo === "" ? null : record.modelo,
+          valves: record.valvulas === "" ? null : parseInt(record.valvulas),
+          color: record.color === "" ? null : record.color,
+          year: record.anio === "" ? null : parseInt(record.anio),
+          kms: record.kilometros === "" ? null : parseInt(record.kilometros),
+          owner: owner,
+          chassis_number: record.chasis === "" ? null : record.chasis,
+          engine_number: record.motor === "" ? null : record.motor,
+          observations:
+            record.observaciones === "" ? null : record.observaciones,
+          transmission_type:
+            record.transmision === "" ? null : record.transmision,
+        },
+      });
+    }
   }
   console.log("Carga de Autos completada.");
 
@@ -262,11 +269,11 @@ async function main() {
   });
 
   for (const record of mecanicosRecords) {
-    await prismaClient.mecanico.upsert({
+    await prismaClient.empleado.upsert({
       where: { name: record.nombre },
       update: {
         name: record.nombre,
-        dni: record.dni === "" ? null : BigInt(record.dni),
+        dni: record.dni === "" ? null : record.dni,
         address: record.dirección === "" ? null : record.dirección,
         city: record.ciudad === "" ? null : record.ciudad,
         state: record.provincia === "" ? null : record.provincia,
@@ -278,7 +285,7 @@ async function main() {
       },
       create: {
         name: record.nombre,
-        dni: record.dni === "" ? null : BigInt(record.dni),
+        dni: record.dni === "" ? null : record.dni,
         address: record.dirección === "" ? null : record.dirección,
         city: record.ciudad === "" ? null : record.ciudad,
         state: record.provincia === "" ? null : record.provincia,

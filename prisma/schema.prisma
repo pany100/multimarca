@@ -125,9 +125,10 @@ model Proveedor {
   @@index([cuit])
 }
 
-model Mecanico {
+model Empleado {
   id                Int                       @id @default(autoincrement())
   name              String                    @unique @db.VarChar(150)
+  tipo              TipoEmpleado              @default(Mecanico)
   start_date        DateTime?
   dni               String?
   address           String?                   @db.VarChar(150)
@@ -137,6 +138,7 @@ model Mecanico {
   email             String?                   @db.VarChar(150)
   phone             String?                   @db.VarChar(150)
   birthday          DateTime?
+  dniImagePath      String?                   @db.VarChar(1000)
   gastosRealizados  Gasto[]
   ordenesReparacion OrdenReparacionMecanico[]
 
@@ -144,10 +146,15 @@ model Mecanico {
   @@index([dni])
 }
 
+enum TipoEmpleado {
+  Mecanico
+  Administrativo
+}
+
 model OrdenReparacionMecanico {
   ordenReparacion   OrdenReparacion @relation(fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   ordenReparacionId Int
-  mecanico          Mecanico        @relation(fields: [mecanicoId], references: [id], onDelete: Cascade)
+  mecanico          Empleado        @relation(fields: [mecanicoId], references: [id], onDelete: Cascade)
   mecanicoId        Int
 
   @@id([ordenReparacionId, mecanicoId])
@@ -225,7 +232,7 @@ model Gasto {
   categoriaId Int
   categoria   CategoriaGasto @relation(fields: [categoriaId], references: [id])
   mecanicoId  Int?
-  mecanico    Mecanico?      @relation(fields: [mecanicoId], references: [id])
+  mecanico    Empleado?      @relation(fields: [mecanicoId], references: [id])
   proveedorId Int?
   proveedor   Proveedor?     @relation(fields: [proveedorId], references: [id])
 
