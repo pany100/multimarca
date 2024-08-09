@@ -13,30 +13,15 @@ ALTER TABLE `OrdenReparacionMecanico` DROP FOREIGN KEY `OrdenReparacionMecanico_
 -- AlterTable
 ALTER TABLE `Dolar` ALTER COLUMN `fecha` DROP DEFAULT;
 
--- DropTable
-DROP TABLE `Mecanico`;
+RENAME TABLE `Mecanico` TO `Empleado`;
 
--- CreateTable
-CREATE TABLE `Empleado` (
-    `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `name` VARCHAR(150) NOT NULL,
-    `tipo` ENUM('Mecanico', 'Administrativo') NOT NULL DEFAULT 'Mecanico',
-    `start_date` DATETIME(3) NULL,
-    `dni` VARCHAR(191) NULL,
-    `address` VARCHAR(150) NULL,
-    `city` VARCHAR(150) NULL,
-    `state` VARCHAR(150) NULL,
-    `postal_code` VARCHAR(10) NULL,
-    `email` VARCHAR(150) NULL,
-    `phone` VARCHAR(150) NULL,
-    `birthday` DATETIME(3) NULL,
-    `dniImagePath` VARCHAR(1000) NULL,
+ADD COLUMN `tipo` ENUM('Mecanico', 'Administrativo') NOT NULL DEFAULT 'Mecanico',
+ADD COLUMN `dniImagePath` VARCHAR(1000) NULL;
 
-    UNIQUE INDEX `Empleado_name_key`(`name`),
-    INDEX `Empleado_name_idx`(`name`),
-    INDEX `Empleado_dni_idx`(`dni`),
-    PRIMARY KEY (`id`)
-) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- Crear índices
+CREATE UNIQUE INDEX `Empleado_name_key` ON `Empleado`(`name`);
+CREATE INDEX `Empleado_name_idx` ON `Empleado`(`name`);
+CREATE INDEX `Empleado_dni_idx` ON `Empleado`(`dni`);
 
 -- AddForeignKey
 ALTER TABLE `OrdenReparacionMecanico` ADD CONSTRAINT `OrdenReparacionMecanico_mecanicoId_fkey` FOREIGN KEY (`mecanicoId`) REFERENCES `Empleado`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
