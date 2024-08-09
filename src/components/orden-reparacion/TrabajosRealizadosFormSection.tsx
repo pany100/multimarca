@@ -44,6 +44,7 @@ function TrabajosRealizadosFormSection() {
   const [precioUnitario, setPrecioUnitario] = useState("");
   const [diasParaRecordatorio, setDiasParaRecordatorio] = useState("");
   const [tipoTrabajo, setTipoTrabajo] = useState<"lista" | "otros">("lista");
+  const [editingTrabajoId, setEditingTrabajoId] = useState<string | null>(null);
 
   const searchTrabajos = async (query: string) => {
     const response = await authFetch(
@@ -61,64 +62,84 @@ function TrabajosRealizadosFormSection() {
     );
   };
 
-  const handleAddTrabajo = () => {
+  const handleAddOrUpdateTrabajo = () => {
     const currentTrabajos = getValues("trabajosRealizados") || [];
-    const newTrabajo =
-      tipoTrabajo === "lista"
-        ? {
-            manoDeObra: selectedTrabajo,
-            precioUnitario: Number(precioUnitario),
-            diasParaRecordatorio: diasParaRecordatorio
-              ? Number(diasParaRecordatorio)
-              : null,
-          }
-        : {
-            manoDeObra: { name: nombreTrabajo },
-            precioUnitario: Number(precioUnitario),
-            diasParaRecordatorio: diasParaRecordatorio
-              ? Number(diasParaRecordatorio)
-              : null,
-          };
+    const newTrabajo = {
+      id:
+        editingTrabajoId ||
+        `${selectedTrabajo?.id || "otros"}-${nombreTrabajo}`,
+      manoDeObra:
+        tipoTrabajo === "lista" ? selectedTrabajo : { name: nombreTrabajo },
+      precioUnitario: Number(precioUnitario),
+      diasParaRecordatorio: diasParaRecordatorio
+        ? Number(diasParaRecordatorio)
+        : null,
+    };
 
-    if (
-      currentTrabajos.some(
+    if (editingTrabajoId) {
+      const updatedTrabajos = currentTrabajos.map((t: any) =>
+        t.id === editingTrabajoId ? newTrabajo : t
+      );
+      setValue("trabajosRealizados", updatedTrabajos);
+      setSnackbar({
+        open: true,
+        message: "Trabajo actualizado correctamente",
+        severity: "success",
+      });
+      setOpenTrabajoModal(false);
+      resetFields();
+    } else {
+      const trabajoExistente = currentTrabajos.find(
         (t: any) =>
           (tipoTrabajo === "lista" &&
             t.manoDeObra.id === selectedTrabajo?.id) ||
           (tipoTrabajo === "otros" && t.manoDeObra.name === nombreTrabajo)
-      )
-    ) {
-      setSnackbar({
-        open: true,
-        message: "Este trabajo ya ha sido agregado al formulario",
-        severity: "error",
-      });
-    } else {
-      setValue("trabajosRealizados", [...currentTrabajos, newTrabajo]);
+      );
 
-      // Sumar el precio unitario al campo manoObra del formulario
-      const currentManoObra = Number(getValues("manoDeObra")) || 0;
-      setValue("manoDeObra", currentManoObra + Number(precioUnitario));
+      if (trabajoExistente && !editingTrabajoId) {
+        setSnackbar({
+          open: true,
+          message: "Este trabajo ya ha sido agregado al formulario",
+          severity: "error",
+        });
+      } else {
+        setValue("trabajosRealizados", [...currentTrabajos, newTrabajo]);
 
-      setOpenTrabajoModal(false);
-      resetFields();
-      setSnackbar({
-        open: true,
-        message: "Trabajo agregado correctamente",
-        severity: "success",
-      });
+        // Sumar el precio unitario al campo manoObra del formulario
+        const currentManoObra = Number(getValues("manoDeObra")) || 0;
+        setValue("manoDeObra", currentManoObra + Number(precioUnitario));
+
+        setOpenTrabajoModal(false);
+        resetFields();
+        setSnackbar({
+          open: true,
+          message: "Trabajo agregado correctamente",
+          severity: "success",
+        });
+      }
     }
   };
 
-  const handleRemoveTrabajo = (index: number) => {
+  const handleEditTrabajo = (trabajo: any) => {
+    setTipoTrabajo(trabajo.manoDeObra.id ? "lista" : "otros");
+    if (trabajo.manoDeObra.id) {
+      setSelectedTrabajo(trabajo.manoDeObra);
+    } else {
+      setNombreTrabajo(trabajo.manoDeObra.name);
+    }
+    setPrecioUnitario(trabajo.precioUnitario.toString());
+    setDiasParaRecordatorio(trabajo.diasParaRecordatorio?.toString() || "");
+    setEditingTrabajoId(trabajo.id);
+    setOpenTrabajoModal(true);
+  };
+
+  const handleRemoveTrabajo = (id: string) => {
     const currentTrabajos = getValues("trabajosRealizados") || [];
-    const trabajoARemover = currentTrabajos[index];
+    const trabajoARemover = currentTrabajos.find((t: any) => t.id === id);
     const currentManoObra = Number(getValues("manoDeObra")) || 0;
     const precioARestar = Number(trabajoARemover.precioUnitario);
 
-    const updatedTrabajos = currentTrabajos.filter(
-      (_: any, i: number) => i !== index
-    );
+    const updatedTrabajos = currentTrabajos.filter((t: any) => t.id !== id);
 
     setValue("trabajosRealizados", updatedTrabajos);
     setValue("manoDeObra", Math.max(0, currentManoObra - precioARestar));
@@ -129,6 +150,7 @@ function TrabajosRealizadosFormSection() {
     setNombreTrabajo("");
     setPrecioUnitario("");
     setDiasParaRecordatorio("");
+    setEditingTrabajoId(null);
   };
 
   const handleTipoTrabajoChange = (
@@ -137,6 +159,8 @@ function TrabajosRealizadosFormSection() {
   ) => {
     if (newTipoTrabajo !== null) {
       setTipoTrabajo(newTipoTrabajo);
+    }
+    if (!editingTrabajoId) {
       resetFields();
     }
   };
@@ -162,15 +186,18 @@ function TrabajosRealizadosFormSection() {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {field.value.map((trabajo: any, index: number) => (
-                    <TableRow key={index}>
+                  {field.value.map((trabajo: any) => (
+                    <TableRow key={trabajo.id}>
                       <TableCell>{trabajo.manoDeObra.name}</TableCell>
                       <TableCell>{trabajo.precioUnitario}</TableCell>
                       <TableCell>
                         {trabajo.diasParaRecordatorio || "-"}
                       </TableCell>
                       <TableCell>
-                        <Button onClick={() => handleRemoveTrabajo(index)}>
+                        <Button onClick={() => handleEditTrabajo(trabajo)}>
+                          Editar
+                        </Button>
+                        <Button onClick={() => handleRemoveTrabajo(trabajo.id)}>
                           Eliminar
                         </Button>
                       </TableCell>
@@ -205,7 +232,9 @@ function TrabajosRealizadosFormSection() {
           },
         }}
       >
-        <DialogTitle>Agregar Trabajo Realizado</DialogTitle>
+        <DialogTitle>
+          {editingTrabajoId ? "Editar" : "Agregar"} Trabajo Realizado
+        </DialogTitle>
         <DialogContent>
           <ToggleButtonGroup
             value={tipoTrabajo}
@@ -280,14 +309,14 @@ function TrabajosRealizadosFormSection() {
           </Button>
           <Button
             type="button"
-            onClick={handleAddTrabajo}
+            onClick={handleAddOrUpdateTrabajo}
             disabled={
               (tipoTrabajo === "lista" && !selectedTrabajo) ||
               (tipoTrabajo === "otros" && !nombreTrabajo) ||
               !precioUnitario
             }
           >
-            Agregar
+            {editingTrabajoId ? "Actualizar" : "Agregar"}
           </Button>
         </DialogActions>
       </Dialog>
