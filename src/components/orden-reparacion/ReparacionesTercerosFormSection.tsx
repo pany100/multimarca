@@ -71,7 +71,11 @@ function ReparacionesTercerosFormSection() {
 
       if (editingReparacionId) {
         const updatedReparaciones = currentReparaciones.map((r: any) =>
-          r.id === editingReparacionId ? newReparacion : r
+          r.id === editingReparacionId ||
+          `${r.proveedor.id}-${r.nombre}` ===
+            `${selectedProveedor.id}-${nombre}`
+            ? newReparacion
+            : r
         );
         setValue("reparacionesDeTercero", updatedReparaciones);
         setSnackbar({
@@ -111,7 +115,10 @@ function ReparacionesTercerosFormSection() {
     setNombre(reparacion.nombre);
     setPrecioCompra(reparacion.precioCompra.toString());
     setPrecioVenta(reparacion.precioVenta.toString());
-    setEditingReparacionId(reparacion.id);
+    setEditingReparacionId(
+      reparacion.id || `${reparacion.proveedor.id}-${reparacion.nombre}`
+    );
+
     setOpenReparacionModal(true);
   };
 
