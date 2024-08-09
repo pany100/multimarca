@@ -5,16 +5,17 @@
 
 */
 -- DropForeignKey
-ALTER TABLE `Gasto` DROP FOREIGN KEY `Gasto_mecanicoId_fkey`;
+-- ALTER TABLE `Gasto` DROP FOREIGN KEY `Gasto_mecanicoId_fkey`;
 
 -- DropForeignKey
-ALTER TABLE `OrdenReparacionMecanico` DROP FOREIGN KEY `OrdenReparacionMecanico_mecanicoId_fkey`;
+-- ALTER TABLE `OrdenReparacionMecanico` DROP FOREIGN KEY `OrdenReparacionMecanico_mecanicoId_fkey`;
 
 -- AlterTable
-ALTER TABLE `Dolar` ALTER COLUMN `fecha` DROP DEFAULT;
+-- ALTER TABLE `Dolar` ALTER COLUMN `fecha` DROP DEFAULT;
 
-RENAME TABLE `Mecanico` TO `Empleado`;
+-- RENAME TABLE `Mecanico` TO `Empleado`;
 
+ALTER TABLE `Empleado`
 ADD COLUMN `tipo` ENUM('Mecanico', 'Administrativo') NOT NULL DEFAULT 'Mecanico',
 ADD COLUMN `dniImagePath` VARCHAR(1000) NULL;
 
