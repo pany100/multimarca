@@ -110,10 +110,7 @@ const schema = yup.object().shape({
         .required("El proveedor es requerido"),
     })
   ),
-  manoDeObra: yup
-    .number()
-    .positive("El monto total debe ser positivo")
-    .required("El monto total es requerido"),
+  manoDeObra: yup.number().required("El monto total es requerido"),
   observacionesEntrada: yup.string(),
 });
 
