@@ -41,6 +41,9 @@ function ReparacionesTercerosFormSection() {
   const [nombre, setNombre] = useState("");
   const [precioCompra, setPrecioCompra] = useState("");
   const [precioVenta, setPrecioVenta] = useState("");
+  const [editingReparacionId, setEditingReparacionId] = useState<string | null>(
+    null
+  );
 
   const searchProveedores = async (query: string) => {
     const response = await authFetch(
@@ -55,21 +58,31 @@ function ReparacionesTercerosFormSection() {
     );
   };
 
-  const handleAddReparacion = () => {
+  const handleAddOrUpdateReparacion = () => {
     if (selectedProveedor) {
       const currentReparaciones = getValues("reparacionesDeTercero") || [];
       const newReparacion = {
+        id: editingReparacionId || `${selectedProveedor.id}-${nombre}`,
         proveedor: selectedProveedor,
         nombre,
         precioCompra: Number(precioCompra),
         precioVenta: Number(precioVenta),
       };
 
-      if (
-        currentReparaciones.some(
-          (r: any) =>
-            r.nombre === nombre && r.proveedor.id === selectedProveedor.id
-        )
+      if (editingReparacionId) {
+        const updatedReparaciones = currentReparaciones.map((r: any) =>
+          r.id === editingReparacionId ? newReparacion : r
+        );
+        setValue("reparacionesDeTercero", updatedReparaciones);
+        setSnackbar({
+          open: true,
+          message: "Reparación actualizada correctamente",
+          severity: "success",
+        });
+        setOpenReparacionModal(false);
+        resetFields();
+      } else if (
+        currentReparaciones.some((r: any) => r.id === newReparacion.id)
       ) {
         setSnackbar({
           open: true,
@@ -93,10 +106,19 @@ function ReparacionesTercerosFormSection() {
     }
   };
 
-  const handleRemoveReparacion = (nombre: string, proveedorId: number) => {
+  const handleEditReparacion = (reparacion: any) => {
+    setSelectedProveedor(reparacion.proveedor);
+    setNombre(reparacion.nombre);
+    setPrecioCompra(reparacion.precioCompra.toString());
+    setPrecioVenta(reparacion.precioVenta.toString());
+    setEditingReparacionId(reparacion.id);
+    setOpenReparacionModal(true);
+  };
+
+  const handleRemoveReparacion = (id: string) => {
     const currentReparaciones = getValues("reparacionesDeTercero") || [];
     const updatedReparaciones = currentReparaciones.filter(
-      (r: any) => !(r.nombre === nombre && r.proveedor.id === proveedorId)
+      (r: any) => r.id !== id
     );
 
     setValue("reparacionesDeTercero", updatedReparaciones);
@@ -107,6 +129,7 @@ function ReparacionesTercerosFormSection() {
     setNombre("");
     setPrecioCompra("");
     setPrecioVenta("");
+    setEditingReparacionId(null);
   };
 
   return (
@@ -132,20 +155,20 @@ function ReparacionesTercerosFormSection() {
                 </TableHead>
                 <TableBody>
                   {field.value.map((reparacion: any) => (
-                    <TableRow
-                      key={`${reparacion.nombre}-${reparacion.proveedor.id}`}
-                    >
+                    <TableRow key={reparacion.id}>
                       <TableCell>{reparacion.proveedor.name}</TableCell>
                       <TableCell>{reparacion.nombre}</TableCell>
                       <TableCell>{reparacion.precioCompra}</TableCell>
                       <TableCell>{reparacion.precioVenta}</TableCell>
                       <TableCell>
                         <Button
+                          onClick={() => handleEditReparacion(reparacion)}
+                        >
+                          Editar
+                        </Button>
+                        <Button
                           onClick={() => {
-                            handleRemoveReparacion(
-                              reparacion.nombre,
-                              reparacion.proveedor.id
-                            );
+                            handleRemoveReparacion(reparacion.id);
                           }}
                         >
                           Eliminar
@@ -184,7 +207,9 @@ function ReparacionesTercerosFormSection() {
           },
         }}
       >
-        <DialogTitle>Agregar Reparación de Tercero</DialogTitle>
+        <DialogTitle>
+          {editingReparacionId ? "Editar" : "Agregar"} Reparación de Tercero
+        </DialogTitle>
         <DialogContent>
           <Autocomplete
             options={proveedorOptions}
@@ -237,12 +262,12 @@ function ReparacionesTercerosFormSection() {
           </Button>
           <Button
             type="button"
-            onClick={handleAddReparacion}
+            onClick={handleAddOrUpdateReparacion}
             disabled={
               !selectedProveedor || !nombre || !precioCompra || !precioVenta
             }
           >
-            Agregar
+            {editingReparacionId ? "Actualizar" : "Agregar"}
           </Button>
         </DialogActions>
       </Dialog>
