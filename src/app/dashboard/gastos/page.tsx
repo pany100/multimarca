@@ -95,7 +95,7 @@ const GastosPage = () => {
       hidden: (gasto: Gasto) => gasto.categoriaId !== 2,
       searchOptions: async (query: string) => {
         const response = await authFetch(
-          `/api/mecanicos?query=${query}&limit=10&page=0`
+          `/api/mecanicos?mecanicos=true&query=${query}&limit=10&page=0`
         );
         const data = await response.json();
         return data.items.map((mecanico: { name: string; id: number }) => ({
