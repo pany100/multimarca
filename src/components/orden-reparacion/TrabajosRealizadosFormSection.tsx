@@ -86,6 +86,13 @@ function TrabajosRealizadosFormSection() {
         message: "Trabajo actualizado correctamente",
         severity: "success",
       });
+      // Actualizar el campo manoDeObra del formulario
+      const currentManoObra = Number(getValues("manoDeObra")) || 0;
+      const oldPrecioUnitario =
+        currentTrabajos.find((t: any) => t.id === editingTrabajoId)
+          ?.precioUnitario || 0;
+      const diferencia = Number(precioUnitario) - oldPrecioUnitario;
+      setValue("manoDeObra", currentManoObra + diferencia);
       setOpenTrabajoModal(false);
       resetFields();
     } else {
