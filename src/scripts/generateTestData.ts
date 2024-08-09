@@ -1,8 +1,54 @@
-const { Faker, es, en } = require("@faker-js/faker");
-const { PrismaClient } = require("@prisma/client");
+import { Faker, en, es } from "@faker-js/faker";
+import { PrismaClient } from "@prisma/client";
 
 const generateTestPrisma = new PrismaClient();
 const fakerES = new Faker({ locale: [es, en] });
+
+interface Stock {
+  id: string;
+  units: number;
+  buyPrice: number;
+  markup?: number;
+}
+
+interface Categoria {
+  id: string;
+  nombre: string;
+}
+
+interface Cliente {
+  id: string;
+}
+
+interface Auto {
+  id: string;
+}
+
+interface Usuario {
+  id: string;
+}
+
+interface Empleado {
+  id: string;
+}
+
+interface OrdenCompra {
+  id: string;
+}
+
+interface OrdenReparacion {
+  id: string;
+  fechaCreacion: Date;
+  auto: {
+    owner: {
+      id: string;
+    };
+    patent: string;
+  };
+  repuestosUsados: { precioVenta: number; unidadesConsumidas: number }[];
+  reparacionesDeTercero: { precioVenta: number }[];
+  manoDeObra: number;
+}
 
 function calcularTotalRepuestos(ordenReparacion: {
   repuestosUsados: {
@@ -126,12 +172,16 @@ async function generateOrdenesDeReparacion(tx: any, ordenesCount: number) {
   console.log(`Generando ${ordenesCount} órdenes de reparación de prueba...`);
 
   const autos = await tx.auto.findMany();
-  const mecanicos = await tx.mecanico.findMany();
+  const mecanicos = await tx.empleado.findMany({
+    where: {
+      tipo: "Mecanico",
+    },
+  });
   const stocks = await tx.stock.findMany();
   const proveedores = await tx.proveedor.findMany();
 
   for (let i = 0; i < ordenesCount; i++) {
-    const auto = fakerES.helpers.arrayElement(autos);
+    const auto = fakerES.helpers.arrayElement(autos) as Auto;
     const fechaEntrada = fakerES.date.past();
     const fechaSalida = fakerES.date.between({
       from: fechaEntrada,
@@ -174,9 +224,9 @@ async function generateOrdenesDeReparacion(tx: any, ordenesCount: number) {
       estado: estado,
       manoDeObra: manoDeObra,
       mecanicos: {
-        connect: fakerES.helpers
+        create: fakerES.helpers
           .arrayElements(mecanicos, { min: 1, max: 3 })
-          .map((m: any) => ({ id: m.id })),
+          .map((m: any) => ({ mecanicoId: m.id })),
       },
       repuestosUsados: {
         create: fakerES.datatype.boolean()
@@ -298,7 +348,9 @@ async function generateExtracciones(tx: any, extraccionesCount: number) {
   const fechaFin = new Date();
 
   for (let i = 0; i < extraccionesCount; i++) {
-    const usuarioAleatorio = fakerES.helpers.arrayElement(administradores);
+    const usuarioAleatorio = fakerES.helpers.arrayElement(
+      administradores
+    ) as Usuario;
     const tipoExtraccion = fakerES.helpers.arrayElement([
       "EFECTIVO",
       "TRANSFERENCIA",
@@ -326,11 +378,17 @@ async function generateGastos(tx: any, gastosCount: number) {
   console.log(`Generando ${gastosCount} gastos de prueba...`);
 
   const categorias = await tx.categoriaGasto.findMany();
-  const mecanicos = await tx.mecanico.findMany();
+  const mecanicos = await tx.empleado.findMany({
+    where: {
+      tipo: "Mecanico",
+    },
+  });
   const ordenesDeCompra = await tx.ordenDeCompra.findMany();
 
   for (let i = 0; i < gastosCount; i++) {
-    const categoriaAleatoria = fakerES.helpers.arrayElement(categorias);
+    const categoriaAleatoria = fakerES.helpers.arrayElement(
+      categorias
+    ) as Categoria;
     const fechaAleatoria = fakerES.date.between({
       from: "2024-01-01T00:00:00.000Z",
       to: "2024-07-31T23:59:59.999Z",
@@ -341,21 +399,22 @@ async function generateGastos(tx: any, gastosCount: number) {
       precio: fakerES.number.float({ min: 100, max: 10000, precision: 0.01 }),
       fecha: fechaAleatoria,
       categoriaId: categoriaAleatoria.id,
+      detalle: fakerES.lorem.sentence(),
     };
 
     if (
       categoriaAleatoria.nombre === "Pago Mecánicos" &&
       mecanicos.length > 0
     ) {
-      const mecanicoAleatorio = fakerES.helpers.arrayElement(mecanicos);
+      const mecanicoAleatorio = fakerES.helpers.arrayElement(
+        mecanicos
+      ) as Empleado;
       gastoData = { ...gastoData, mecanicoId: mecanicoAleatorio.id };
     } else if (
       categoriaAleatoria.nombre === "Pago Proveedores" &&
       ordenesDeCompra.length > 0
     ) {
-      const ordenDeCompraAleatoria =
-        fakerES.helpers.arrayElement(ordenesDeCompra);
-      gastoData = { ...gastoData, ordenDeCompraId: ordenDeCompraAleatoria.id };
+      gastoData = { ...gastoData };
     }
 
     await tx.gasto.create({ data: gastoData });
@@ -382,7 +441,9 @@ async function generateIngresos(tx: any, ingresosCount: number) {
   });
 
   for (let i = 0; i < ingresosCount; i++) {
-    const ordenAleatoria = fakerES.helpers.arrayElement(ordenesReparacion);
+    const ordenAleatoria = fakerES.helpers.arrayElement(
+      ordenesReparacion
+    ) as OrdenReparacion;
 
     const totalOrden = calcularTotalOrdenReparacion(ordenAleatoria);
 
@@ -427,7 +488,7 @@ async function generateTestData({
   ingresos = false,
 }) {
   try {
-    await generateTestPrisma.$transaction(async (tx: any) => {
+    await generateTestPrisma.$transaction(async (tx) => {
       if (stock) {
         await generateStockData(tx, 100); // Número de elementos de stock a generar
       }
@@ -470,13 +531,13 @@ async function generateVentas(tx: any, ventasCount: number) {
   const stocks = await tx.stock.findMany();
 
   for (let i = 0; i < ventasCount; i++) {
-    const randomCliente = fakerES.helpers.arrayElement(clientes);
+    const randomCliente = fakerES.helpers.arrayElement(clientes) as Cliente;
     const itemCount = fakerES.number.int({ min: 1, max: 4 });
     const items = [];
     let total = 0;
 
     for (let j = 0; j < itemCount; j++) {
-      const randomStock = fakerES.helpers.arrayElement(stocks);
+      const randomStock = fakerES.helpers.arrayElement(stocks) as Stock;
       const cantidad = fakerES.number.int({ min: 1, max: 5 });
 
       if (randomStock.units && randomStock.units >= cantidad) {
