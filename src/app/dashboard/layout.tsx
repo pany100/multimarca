@@ -155,7 +155,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "Mecanicos",
-            texto: "Mecánicos",
+            texto: "Empleados",
             icono: <BuildIcon />,
             ruta: "/dashboard/mecanicos",
           },

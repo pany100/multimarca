@@ -13,6 +13,7 @@ interface Mecanico {
   city: string;
   state: string;
   postal_code: string;
+  tipo: string;
   email: string;
   phone: string;
   birthday: string;
@@ -32,6 +33,7 @@ const MecanicosPage = () => {
     },
     { field: "dni", headerName: "DNI", flex: 1 },
     { field: "email", headerName: "Email", flex: 1.5 },
+    { field: "tipo", headerName: "Tipo", flex: 1 },
     { field: "phone", headerName: "Teléfono", flex: 1 },
   ];
 
@@ -54,13 +56,23 @@ const MecanicosPage = () => {
     { name: "address", label: "Dirección", type: "text", layout: { xs: 6 } },
     { name: "state", label: "Provincia", type: "text", layout: { xs: 6 } },
     {
+      name: "tipo",
+      label: "Tipo",
+      type: "select",
+      options: [
+        { value: "Mecanico", label: "Mecánico" },
+        { value: "Administrativo", label: "Administrativo" },
+      ],
+      layout: { xs: 6 },
+    },
+    {
       name: "postal_code",
       label: "Código Postal",
       type: "text",
-      layout: { xs: 4 },
+      layout: { xs: 6 },
     },
-    { name: "phone", label: "Teléfono", type: "tel", layout: { xs: 4 } },
-    { name: "city", label: "Ciudad", type: "text", layout: { xs: 4 } },
+    { name: "phone", label: "Teléfono", type: "tel", layout: { xs: 6 } },
+    { name: "city", label: "Ciudad", type: "text", layout: { xs: 6 } },
   ];
 
   const createNewMecanico = (): Mecanico => {
@@ -74,6 +86,7 @@ const MecanicosPage = () => {
       state: "",
       postal_code: "",
       email: "",
+      tipo: "Mecanico",
       phone: "",
       birthday: "",
     };
@@ -81,7 +94,7 @@ const MecanicosPage = () => {
 
   return (
     <CrudTable<Mecanico>
-      title="Mecánicos"
+      title="Empleados"
       columns={columns}
       apiEndpoint="/api/mecanicos"
       fields={formFields}

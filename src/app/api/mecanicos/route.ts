@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     const skip = page * size;
 
     const [mecanicos, total] = await Promise.all([
-      prisma.mecanico.findMany({
+      prisma.empleado.findMany({
         where: {
           name: { contains: query },
         },
@@ -19,7 +19,7 @@ export async function GET(request: Request) {
         take: size,
         orderBy: { name: "asc" },
       }),
-      prisma.mecanico.count({
+      prisma.empleado.count({
         where: {
           name: { contains: query },
         },
@@ -70,7 +70,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const nuevoMecanico = await prisma.mecanico.create({
+    const nuevoMecanico = await prisma.empleado.create({
       data: {
         name,
         start_date: start_date ? new Date(start_date) : null,
