@@ -77,8 +77,15 @@ function TrabajosRealizadosFormSection() {
     };
 
     if (editingTrabajoId) {
+      console.log(currentTrabajos);
+      console.log(newTrabajo);
+      console.log(editingTrabajoId);
       const updatedTrabajos = currentTrabajos.map((t: any) =>
-        t.id === editingTrabajoId ? newTrabajo : t
+        t.id === editingTrabajoId ||
+        `${selectedTrabajo?.id || "otros"}-${t.manoDeObra.name}` ===
+          editingTrabajoId
+          ? newTrabajo
+          : t
       );
       setValue("trabajosRealizados", updatedTrabajos);
       setSnackbar({
@@ -136,7 +143,11 @@ function TrabajosRealizadosFormSection() {
     }
     setPrecioUnitario(trabajo.precioUnitario.toString());
     setDiasParaRecordatorio(trabajo.diasParaRecordatorio?.toString() || "");
-    setEditingTrabajoId(trabajo.id);
+
+    setEditingTrabajoId(
+      trabajo.id ||
+        `${selectedTrabajo?.id || "otros"}-${trabajo.manoDeObra.name}`
+    );
     setOpenTrabajoModal(true);
   };
 
