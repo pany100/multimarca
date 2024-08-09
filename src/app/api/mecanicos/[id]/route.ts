@@ -1,6 +1,40 @@
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+
+    const empleado = await prisma.empleado.findUnique({
+      where: { id },
+    });
+
+    if (!empleado) {
+      return NextResponse.json(
+        { error: "Empleado no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    // Convertir BigInt a string para serialización
+    const empleadoSerializable = {
+      ...empleado,
+      dni: empleado.dni ? empleado.dni.toString() : null,
+    };
+
+    return NextResponse.json(empleadoSerializable);
+  } catch (error) {
+    console.error("Error al obtener empleado:", error);
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }

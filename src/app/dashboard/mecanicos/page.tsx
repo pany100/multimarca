@@ -2,6 +2,9 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { IconButton, Tooltip } from "@mui/material";
+import { useRouter } from "next/navigation";
 import * as yup from "yup";
 
 interface Mecanico {
@@ -20,6 +23,8 @@ interface Mecanico {
 }
 
 const MecanicosPage = () => {
+  const router = useRouter();
+
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "name", headerName: "Nombre", flex: 1 },
@@ -92,6 +97,19 @@ const MecanicosPage = () => {
     };
   };
 
+  const extraActions = (mecanico: Mecanico) => (
+    <>
+      <Tooltip title="Ver detalles">
+        <IconButton
+          onClick={() => router.push(`/dashboard/mecanicos/${mecanico.id}/ver`)}
+          size="small"
+        >
+          <VisibilityIcon />
+        </IconButton>
+      </Tooltip>
+    </>
+  );
+
   return (
     <CrudTable<Mecanico>
       title="Empleados"
@@ -108,6 +126,7 @@ const MecanicosPage = () => {
         email: yup.string().email("El email es inválido").nullable(),
         phone: yup.string().nullable(),
       })}
+      extraActions={extraActions}
     />
   );
 };
