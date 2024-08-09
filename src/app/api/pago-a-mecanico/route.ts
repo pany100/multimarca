@@ -41,7 +41,11 @@ export async function GET(request: Request) {
                   owner: true,
                 },
               },
-              mecanicos: true,
+              mecanicos: {
+                include: {
+                  mecanico: true,
+                },
+              },
             },
           },
         },

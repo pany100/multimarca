@@ -57,7 +57,7 @@ const PagosAMecanicoPage = () => {
       renderCell: (params: any) => {
         const mecanicos = params.row.ordenReparacion?.mecanicos || [];
         return mecanicos.length > 0
-          ? mecanicos.map((m: any) => `${m.name}`).join(", ")
+          ? mecanicos.map((m: any) => `${m.mecanico.name}`).join(", ")
           : "NO ASIGNADO";
       },
       flex: 2,
