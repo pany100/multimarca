@@ -3,11 +3,12 @@
 import NuevoPresupuestoForm from "@/components/orden-reparacion/NuevoPresupuestoForm";
 import { useAuth } from "@/hooks/useAuth";
 import { Box, Paper, Typography } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 const NuevaOrdenReparacionPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { userData, isLoading } = useAuth();
 
   useEffect(() => {
@@ -19,14 +20,17 @@ const NuevaOrdenReparacionPage = () => {
     }
   }, [userData, router, isLoading]);
 
+  const templateId = searchParams.get("templateId");
+  const templateIdInt = templateId ? parseInt(templateId, 10) : null;
+
   return (
     <Box sx={{ maxWidth: 800, margin: "0 auto", padding: 2 }}>
       <Paper elevation={3} sx={{ padding: 3 }}>
         <Typography variant="h4" component="h1" gutterBottom>
-          Nueva Presupuesto
+          Nuevo Presupuesto
         </Typography>
 
-        <NuevoPresupuestoForm />
+        <NuevoPresupuestoForm templateId={templateIdInt} />
 
         <Typography
           variant="body2"

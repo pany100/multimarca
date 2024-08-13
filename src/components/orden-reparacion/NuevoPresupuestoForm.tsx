@@ -87,7 +87,11 @@ const schema = yup.object().shape({
   observacionesEntrada: yup.string(),
 });
 
-const NuevoPresupuestoForm = () => {
+const NuevoPresupuestoForm = ({
+  templateId,
+}: {
+  templateId: number | null | undefined;
+}) => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
