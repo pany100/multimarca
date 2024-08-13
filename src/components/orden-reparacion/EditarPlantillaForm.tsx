@@ -36,13 +36,18 @@ const schema = yup.object().shape({
         .required("Las unidades consumidas son requeridas"),
     })
   ),
+  controlesEnReparacion: yup.array().of(
+    yup.object().shape({
+      id: yup.number().required("Id es requerido"),
+      valor: yup.string(),
+    })
+  ),
   trabajosRealizados: yup.array().of(
     yup.object().shape({
       manoDeObra: yup
         .object()
         .shape({
           name: yup.string().required(),
-          diasParaRecordatorio: yup.number().positive().integer().nullable(),
         })
         .required("La mano de obra es requerida"),
       precioUnitario: yup
@@ -71,24 +76,91 @@ const schema = yup.object().shape({
         .required("El proveedor es requerido"),
     })
   ),
-  manoDeObra: yup.number().required("El monto total es requerido"),
+  manoDeObra: yup
+    .number()
+    .typeError("La mano de obra debe ser un nmero")
+    .required("La mano de obra es requerida"),
 });
 
-const NuevaPlantillaForm = () => {
+type PlantillaPresupuesto = {
+  id: number;
+  nombre: string;
+  repuestosUsados: {
+    id: number;
+    ordenReparacionId: number;
+    stockId: number;
+    stock: {
+      id: number;
+      name: string;
+    };
+    precioCompra: number;
+    precioVenta: number;
+    unidadesConsumidas: number;
+  }[];
+  reparacionesDeTercero: {
+    id: number;
+    nombre: string;
+    precioCompra: number;
+    precioVenta: number;
+    proveedorId: number;
+    proveedor: {
+      id: number;
+      name: string;
+    };
+  }[];
+  trabajosRealizados: {
+    id: number;
+    ordenReparacionId: number;
+    descripcion: string;
+    precioUnitario: number;
+    diasParaRecordatorio?: number;
+  }[];
+  manoDeObra: number;
+};
+
+type Props = {
+  plantilla: PlantillaPresupuesto;
+};
+
+const EditarOrdenReparacionForm = ({ plantilla }: Props) => {
+  const { authFetch } = useFetch();
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success",
   });
 
-  const { authFetch } = useFetch();
-
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      manoDeObra: 0,
+      ...plantilla,
+      manoDeObra: plantilla.manoDeObra,
+      trabajosRealizados: plantilla.trabajosRealizados.map((trabajo) => ({
+        manoDeObra: { name: trabajo.descripcion },
+        precioUnitario: Number(trabajo.precioUnitario),
+        diasParaRecordatorio: trabajo.diasParaRecordatorio,
+      })),
+      repuestosUsados: plantilla.repuestosUsados.map((repuesto) => ({
+        stock: { id: repuesto.stockId, name: repuesto.stock.name },
+        precioCompra: Number(repuesto.precioCompra),
+        precioVenta: Number(repuesto.precioVenta),
+        unidadesConsumidas: repuesto.unidadesConsumidas,
+      })),
+      reparacionesDeTercero: plantilla.reparacionesDeTercero.map(
+        (reparacion) => ({
+          nombre: reparacion.nombre,
+          precioCompra: Number(reparacion.precioCompra),
+          precioVenta: Number(reparacion.precioVenta),
+          proveedor: {
+            id: reparacion.proveedorId,
+            name: reparacion.proveedor.name,
+          },
+        })
+      ),
     },
   });
+  const router = useRouter();
+
   const {
     handleSubmit,
     formState: { errors },
@@ -96,6 +168,47 @@ const NuevaPlantillaForm = () => {
     setValue,
   } = methods;
 
+  const onSubmit = async (data: any) => {
+    try {
+      const response = await authFetch(
+        `/api/plantilla-presupuesto/${plantilla.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(data),
+        }
+      );
+
+      if (response.ok) {
+        setSnackbar({
+          open: true,
+          message: "Plantilla de presupuesto actualizada con éxito",
+          severity: "success",
+        });
+        router.push("/dashboard/plantilla-presupuesto");
+      } else {
+        const errorData = await response.json();
+        setSnackbar({
+          open: true,
+          message:
+            errorData.error ||
+            "Error al actualizar la plantilla de presupuesto",
+          severity: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error al enviar la solicitud:", error);
+      setSnackbar({
+        open: true,
+        message: `Error al realizar la solicitud de actualización: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
+        severity: "error",
+      });
+    }
+  };
   const repuestosUsados = useWatch({ control, name: "repuestosUsados" });
   const reparacionesTerceros = useWatch({
     control,
@@ -108,44 +221,6 @@ const NuevaPlantillaForm = () => {
     manoDeObra,
   });
 
-  const router = useRouter();
-
-  const onSubmit = async (data: any) => {
-    try {
-      const response = await authFetch("/api/plantilla-presupuesto", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        setSnackbar({
-          open: true,
-          message: "Plantilla creada con éxito",
-          severity: "success",
-        });
-        router.push("/dashboard/plantilla-presupuesto");
-      } else {
-        const errorData = await response.json();
-        setSnackbar({
-          open: true,
-          message: errorData.error || "Error al crear la plantilla",
-          severity: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error al enviar la solicitud:", error);
-      setSnackbar({
-        open: true,
-        message: `Error al realizar la solicitud de creación: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
-        severity: "error",
-      });
-    }
-  };
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -180,50 +255,40 @@ const NuevaPlantillaForm = () => {
               name="manoDeObra"
               control={control}
               render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Mano de obra Cliente"
-                  type="number"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.manoDeObra}
-                  helperText={errors.manoDeObra?.message as string}
-                />
+                <>
+                  <TextField
+                    {...field}
+                    label="Mano de obra"
+                    type="number"
+                    fullWidth
+                    margin="normal"
+                  />
+                  {!!errors.manoDeObra && (
+                    <Alert severity="error" sx={{ mt: 1 }}>
+                      {errors.manoDeObra.message}
+                    </Alert>
+                  )}
+                </>
               )}
             />
           </Grid>
           <Grid item xs={12}>
             <TextField
               label="Total Orden de Reparación"
-              value={
-                isNaN(totalOrdenReparacion)
-                  ? "0"
-                  : totalOrdenReparacion.toFixed(2)
-              }
+              value={Number(totalOrdenReparacion.toFixed(2))}
               fullWidth
               margin="normal"
               InputProps={{
                 readOnly: true,
               }}
-              sx={{
-                backgroundColor: "action.disabledBackground",
-                "& .MuiInputBase-input": {
-                  color: "text.secondary",
-                },
-              }}
             />
           </Grid>
+          <Grid item xs={12}>
+            <Button type="submit" variant="contained" color="primary">
+              Actualizar Orden de Reparación
+            </Button>
+          </Grid>
         </Grid>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
-          sx={{
-            my: 2,
-          }}
-        >
-          Crear Plantilla
-        </Button>
       </form>
       <Snackbar
         open={snackbar.open}
@@ -238,4 +303,4 @@ const NuevaPlantillaForm = () => {
   );
 };
 
-export default NuevaPlantillaForm;
+export default EditarOrdenReparacionForm;
