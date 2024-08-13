@@ -304,7 +304,7 @@ model OrdenReparacion {
   observacionesCliente   String                    @db.Text
   observacionesEntrada   String                    @db.Text
   observacionesSalida    String                    @db.Text
-  estado                 EstadoOrdenReparacion
+  estado                 EstadoOrdenReparacion @default(Presupuestado)
   pdfPath                String?                   @db.VarChar(255)
   mecanicos              OrdenReparacionMecanico[]
   repuestosUsados        RepuestoUsado[]           @relation("OrdenReparacionRepuestos")
