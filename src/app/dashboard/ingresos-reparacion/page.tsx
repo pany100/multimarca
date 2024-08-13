@@ -3,6 +3,16 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
+import SendIcon from "@mui/icons-material/Send";
+import {
+  Box,
+  Button,
+  IconButton,
+  Modal,
+  Snackbar,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { useRef, useState } from "react";
 import { UseFormSetValue } from "react-hook-form";
 import * as yup from "yup";
@@ -33,6 +43,15 @@ const IngresosPorReparacionPage = () => {
   );
   const initializedRef = useRef(false);
   const { authFetch } = useFetch();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [selectedIngreso, setSelectedIngreso] =
+    useState<IngresoPorReparacion | null>(null);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success",
+  });
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
@@ -67,6 +86,12 @@ const IngresosPorReparacionPage = () => {
             : "Sin Fecha de entrada"
         }`,
       flex: 2,
+    },
+    {
+      field: "reciboEnviado",
+      headerName: "Recibo Enviado",
+      flex: 1,
+      valueGetter: (reciboEnviado: boolean) => (reciboEnviado ? "Sí" : "No"),
     },
   ];
 
@@ -195,26 +220,135 @@ const IngresosPorReparacionPage = () => {
     };
   };
 
+  const handleExtraAction = async (ingreso: IngresoPorReparacion) => {
+    try {
+      const response = await authFetch(
+        `/api/ingresos-reparacion/${ingreso.id}/generar-recibo`
+      );
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      setPdfUrl(`${url}#zoom=100`);
+      setSelectedIngreso(ingreso);
+      setModalOpen(true);
+    } catch (error) {
+      console.error("Error al generar el recibo:", error);
+      setSnackbar({
+        open: true,
+        message: "Error al generar el recibo",
+        severity: "error",
+      });
+    }
+  };
+
+  const handleSendRecibo = async () => {
+    if (!selectedIngreso) return;
+    try {
+      const response = await authFetch(
+        `/api/ingresos-reparacion/${selectedIngreso.id}/enviar-recibo`,
+        {
+          method: "POST",
+        }
+      );
+      if (response.ok) {
+        setSnackbar({
+          open: true,
+          message: "Recibo enviado con éxito",
+          severity: "success",
+        });
+      } else {
+        throw new Error("Error al enviar el recibo");
+      }
+    } catch (error) {
+      console.error("Error al enviar el recibo:", error);
+      setSnackbar({
+        open: true,
+        message: "Error al enviar el recibo",
+        severity: "error",
+      });
+    } finally {
+      setModalOpen(false);
+    }
+  };
+
+  const extraActions = (ingreso: IngresoPorReparacion) => (
+    <>
+      <Tooltip title="Enviar Recibo">
+        <IconButton onClick={() => handleExtraAction(ingreso)} size="small">
+          <SendIcon />
+        </IconButton>
+      </Tooltip>
+    </>
+  );
+
   return (
-    <CrudTable<IngresoPorReparacion>
-      title="Ingresos por Reparación"
-      columns={columns}
-      apiEndpoint="/api/ingresos-reparacion"
-      fields={formFields}
-      createNewItem={createNewIngresoPorReparacion}
-      validationSchema={yup.object({
-        fecha: yup.date().required("La fecha es requerida"),
-        monto: yup
-          .number()
-          .required("El monto es requerido")
-          .positive("El monto debe ser positivo"),
-        descripcion: yup.string().required("La descripción es requerida"),
-        clienteId: yup.number().required("El cliente es requerido"),
-        ordenReparacionId: yup
-          .number()
-          .required("La orden de reparación es requerida"),
-      })}
-    />
+    <>
+      <CrudTable<IngresoPorReparacion>
+        title="Ingresos por Reparación"
+        columns={columns}
+        apiEndpoint="/api/ingresos-reparacion"
+        fields={formFields}
+        createNewItem={createNewIngresoPorReparacion}
+        extraActions={extraActions}
+        validationSchema={yup.object({
+          fecha: yup.date().required("La fecha es requerida"),
+          monto: yup
+            .number()
+            .required("El monto es requerido")
+            .positive("El monto debe ser positivo"),
+          descripcion: yup.string().required("La descripción es requerida"),
+          clienteId: yup.number().required("El cliente es requerido"),
+          ordenReparacionId: yup
+            .number()
+            .required("La orden de reparación es requerida"),
+        })}
+      />
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box
+          sx={{
+            position: "absolute",
+            top: "50%",
+            left: "50%",
+            transform: "translate(-50%, -50%)",
+            width: "80%", // Aumenta el ancho del modal
+            maxWidth: 900, // Establece un ancho máximo
+            height: "90%", // Aumenta la altura del modal
+            bgcolor: "background.paper",
+            border: "2px solid #000",
+            boxShadow: 24,
+            p: 4,
+            display: "flex",
+            flexDirection: "column",
+          }}
+        >
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Vista previa del recibo
+          </Typography>
+          <iframe
+            src={pdfUrl}
+            width="100%"
+            height="100%"
+            style={{ flexGrow: 1 }}
+          />
+          <Box sx={{ mt: 2, display: "flex", justifyContent: "space-between" }}>
+            <Button onClick={() => setModalOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSendRecibo} variant="contained">
+              Enviar
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        message={snackbar.message}
+      />
+    </>
   );
 };
 

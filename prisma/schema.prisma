@@ -392,6 +392,7 @@ model IngresoPorReparacion {
   descripcion       String          @db.Text
   ordenReparacion   OrdenReparacion @relation("OrdenReparacionIngresos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   ordenReparacionId Int
+  reciboEnviado     Boolean         @default(false)
 
   @@index([fecha])
   @@index([clienteId])
