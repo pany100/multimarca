@@ -330,7 +330,7 @@ model RepuestoUsado {
   precioCompra       Decimal         @db.Decimal(10, 2)
   precioVenta        Decimal         @db.Decimal(10, 2)
   unidadesConsumidas Int
-  plantillaPresupuesto   PlantillaPresupuesto?   @relation("PlantillaPresupuestoRepuestos", fields: [plantillaPresupuestoId], references: [id])
+  plantillaPresupuesto   PlantillaPresupuesto?   @relation("PlantillaPresupuestoRepuestos", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   plantillaPresupuestoId Int?
 
   @@index([ordenReparacionId])
@@ -346,7 +346,7 @@ model ReparacionDeTercero {
   proveedorId       Int
   ordenReparacion   OrdenReparacion? @relation("OrdenReparacionReparacionTercero", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   ordenReparacionId Int?
-  plantillaPresupuesto   PlantillaPresupuesto?   @relation("PlantillaPresupuestoReparacionTercero", fields: [plantillaPresupuestoId], references: [id])
+  plantillaPresupuesto   PlantillaPresupuesto?   @relation("PlantillaPresupuestoReparacionTercero", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   plantillaPresupuestoId Int?
 
   @@index([nombre])
@@ -360,7 +360,7 @@ model TrabajoRealizado {
   descripcion          String          @db.Text
   precioUnitario       Decimal         @db.Decimal(10, 2)
   diasParaRecordatorio Int?
-  plantillaPresupuesto   PlantillaPresupuesto?   @relation("PlantillaPresupuestoTrabajosRealizados", fields: [plantillaPresupuestoId], references: [id])
+  plantillaPresupuesto   PlantillaPresupuesto?   @relation("PlantillaPresupuestoTrabajosRealizados", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   plantillaPresupuestoId Int?
 
   @@index([ordenReparacionId])
