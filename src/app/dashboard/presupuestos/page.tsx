@@ -39,6 +39,7 @@ const OrdenesReparacionPage = () => {
   const [ordenes, setOrdenes] = useState<OrdenReparacion[]>([]);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [addModalOpen, setAddModalOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -238,7 +239,12 @@ const OrdenesReparacionPage = () => {
   }, [paginationModel, authFetch, searchTerm]);
 
   const handleAddClick = () => {
+    setAddModalOpen(true);
+  };
+
+  const handleAddTemplateBlank = () => {
     router.push("/dashboard/presupuestos/nuevo");
+    setAddModalOpen(false);
   };
 
   const handleEditClick = (id: string) => {
@@ -308,6 +314,41 @@ const OrdenesReparacionPage = () => {
             autoFocus
           >
             Eliminar
+          </Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
+        <DialogTitle>Agregar Presupuesto</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Seleccione una opción para agregar un nuevo presupuesto:
+          </Typography>
+        </DialogContent>
+        <DialogActions sx={{ justifyContent: "center", pb: 2, px: 3 }}>
+          <Button
+            onClick={() => setAddModalOpen(false)}
+            variant="outlined"
+            sx={{ mr: 1 }}
+          >
+            Cancelar
+          </Button>
+          <Button
+            onClick={handleAddTemplateBlank}
+            variant="contained"
+            color="primary"
+            sx={{ mr: 1 }}
+          >
+            Agregar Template en Blanco
+          </Button>
+          <Button
+            onClick={() => {
+              // Aquí iría la lógica para "Aceptar"
+              setAddModalOpen(false);
+            }}
+            variant="contained"
+            color="success"
+          >
+            Aceptar
           </Button>
         </DialogActions>
       </Dialog>
