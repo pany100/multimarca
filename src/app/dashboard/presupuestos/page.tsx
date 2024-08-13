@@ -289,6 +289,15 @@ const OrdenesReparacionPage = () => {
     setPaginationModel({ ...paginationModel, page: 0 });
   };
 
+  const handleAddWithTemplate = () => {
+    if (selectedTemplate) {
+      router.push(
+        `/dashboard/presupuestos/nuevo?templateId=${selectedTemplate}`
+      );
+    }
+    setAddModalOpen(false);
+  };
+
   return (
     <Box>
       <Typography variant="h4" component="h1" gutterBottom>
@@ -392,11 +401,10 @@ const OrdenesReparacionPage = () => {
             Cancelar
           </Button>
           <Button
-            onClick={() => {
-              setAddModalOpen(false);
-            }}
+            onClick={handleAddWithTemplate}
             variant="contained"
             color="success"
+            disabled={!selectedTemplate}
           >
             Aceptar
           </Button>
