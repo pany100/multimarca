@@ -300,7 +300,7 @@ model OrdenReparacion {
   fechaCreacion          DateTime                  @default(now())
   fechaEntradaReparacion DateTime?
   fechaSalidaReparacion  DateTime?
-  kilometros             Int
+  kilometros             Int?
   observacionesCliente   String                    @db.Text
   observacionesEntrada   String                    @db.Text
   observacionesSalida    String                    @db.Text

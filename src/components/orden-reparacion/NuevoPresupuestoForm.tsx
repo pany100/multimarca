@@ -7,7 +7,6 @@ import {
   Button,
   FormControl,
   Grid,
-  MenuItem,
   Snackbar,
   TextField,
 } from "@mui/material";
@@ -16,41 +15,15 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
-import MecanicoFormSection from "./MecanicoFormSection";
-import ObservacionesEntradaForm from "./ObservacionesEntradaForm";
 import ReparacionesTercerosFormSection from "./ReparacionesTercerosFormSection";
 import RepuestoUsadoFormSection from "./RepuestoUsadoFormSection";
 import TrabajosRealizadosFormSection from "./TrabajosRealizadosFormSection";
 
 const schema = yup.object().shape({
   autoId: yup.string().required("Debe seleccionar un auto"),
-  fechaCreacion: yup.string().required("La fecha de creación es requerida"),
-  fechaEntradaReparacion: yup.date().nullable(),
-  fechaSalidaReparacion: yup
-    .date()
-    .nullable()
-    .min(
-      yup.ref("fechaEntradaReparacion"),
-      "La fecha de salida debe ser posterior a la fecha de entrada"
-    ),
-  kilometros: yup
-    .number()
-    .positive()
-    .integer()
-    .required("Debe ingresar los kilómetros"),
   observacionesCliente: yup
     .string()
     .required("Debe ingresar las observaciones"),
-  estado: yup
-    .string()
-    .oneOf(["Presupuestado", "EnProgreso", "Aceptado", "Terminado"])
-    .required("Debe seleccionar un estado"),
-  mecanicos: yup.array().of(
-    yup.object().shape({
-      id: yup.number().required(),
-      name: yup.string().required(),
-    })
-  ),
   repuestosUsados: yup.array().of(
     yup.object().shape({
       stock: yup
@@ -114,7 +87,7 @@ const schema = yup.object().shape({
   observacionesEntrada: yup.string(),
 });
 
-const NuevaOrdenReparacionForm = () => {
+const NuevoPresupuestoForm = () => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -131,8 +104,6 @@ const NuevaOrdenReparacionForm = () => {
     resolver: yupResolver(schema),
     defaultValues: {
       manoDeObra: 0,
-      estado: "Presupuestado",
-      fechaCreacion: new Date().toISOString().split("T")[0],
     },
   });
   const {
@@ -195,10 +166,10 @@ const NuevaOrdenReparacionForm = () => {
       if (response.ok) {
         setSnackbar({
           open: true,
-          message: "Orden de reparación creada con éxito",
+          message: "Presupuesto creado con éxito",
           severity: "success",
         });
-        router.push("/dashboard/ordenes-reparacion");
+        router.push("/dashboard/presupuestos");
       } else {
         const errorData = await response.json();
         setSnackbar({
@@ -223,7 +194,7 @@ const NuevaOrdenReparacionForm = () => {
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2}>
-          <Grid item xs={4}>
+          <Grid item xs={6}>
             <Controller
               name="autoId"
               control={control}
@@ -272,104 +243,7 @@ const NuevaOrdenReparacionForm = () => {
               )}
             />
           </Grid>
-          <Grid item xs={4}>
-            <Controller
-              name="kilometros"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  type="number"
-                  label="Kilómetros"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.kilometros}
-                  helperText={errors.kilometros?.message as string}
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <Controller
-              name="fechaCreacion"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  type="date"
-                  label="Fecha de creación"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  margin="normal"
-                  value={field.value || ""}
-                  error={!!errors.fechaCreacion}
-                  helperText={errors.fechaCreacion?.message as string}
-                  onChange={(e) => field.onChange(e.target.value || null)}
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <Controller
-              name="fechaEntradaReparacion"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  type="date"
-                  label="Fecha de entrada"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  error={!!errors.fechaEntradaReparacion}
-                  helperText={errors.fechaEntradaReparacion?.message as string}
-                  onChange={(e) => field.onChange(e.target.value || null)}
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <Controller
-              name="fechaSalidaReparacion"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  type="date"
-                  label="Fecha de salida"
-                  InputLabelProps={{ shrink: true }}
-                  fullWidth
-                  error={!!errors.fechaSalidaReparacion}
-                  helperText={errors.fechaSalidaReparacion?.message as string}
-                  onChange={(e) => field.onChange(e.target.value || null)}
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={4}>
-            <Controller
-              name="estado"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  select
-                  label="Estado"
-                  fullWidth
-                  error={!!errors.estado}
-                  helperText={errors.estado?.message as string}
-                >
-                  {["Presupuestado", "EnProgreso", "Aceptado", "Terminado"].map(
-                    (option) => (
-                      <MenuItem key={option} value={option}>
-                        {option}
-                      </MenuItem>
-                    )
-                  )}
-                </TextField>
-              )}
-            />
-          </Grid>
-          <Grid item xs={12}>
+          <Grid item xs={6}>
             <Controller
               name="observacionesCliente"
               control={control}
@@ -386,12 +260,6 @@ const NuevaOrdenReparacionForm = () => {
                 />
               )}
             />
-          </Grid>
-          <Grid item xs={12}>
-            <ObservacionesEntradaForm />
-          </Grid>
-          <Grid item xs={12}>
-            <MecanicoFormSection />
           </Grid>
           <Grid item xs={12}>
             <RepuestoUsadoFormSection />
@@ -465,4 +333,4 @@ const NuevaOrdenReparacionForm = () => {
   );
 };
 
-export default NuevaOrdenReparacionForm;
+export default NuevoPresupuestoForm;

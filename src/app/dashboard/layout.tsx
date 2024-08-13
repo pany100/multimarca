@@ -1,6 +1,7 @@
 "use client";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
+import CalculateIcon from "@mui/icons-material/Calculate";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -192,6 +193,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Mano de obra",
             icono: <WorkIcon />,
             ruta: "/dashboard/mano-de-obra",
+          },
+          {
+            permiso: "Reparaciones",
+            texto: "Presupuestos",
+            icono: <CalculateIcon />,
+            ruta: "/dashboard/presupuestos",
           },
           {
             permiso: "Reparaciones",
