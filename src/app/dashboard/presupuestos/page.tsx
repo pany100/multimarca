@@ -13,11 +13,16 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControl,
   IconButton,
+  InputLabel,
+  MenuItem,
+  Select,
   Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
+import { SelectChangeEvent } from "@mui/material/Select";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { EstadoOrdenReparacion } from "@prisma/client";
 import { useRouter } from "next/navigation";
@@ -35,6 +40,11 @@ interface OrdenReparacion {
   };
 }
 
+interface Template {
+  id: number;
+  nombre: string;
+}
+
 const OrdenesReparacionPage = () => {
   const [ordenes, setOrdenes] = useState<OrdenReparacion[]>([]);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
@@ -50,6 +60,9 @@ const OrdenesReparacionPage = () => {
     page: 0,
     pageSize: 10,
   });
+  const [templates, setTemplates] = useState<Template[]>([]);
+  const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
+
   const handleDeleteClick = (id: string) => {
     setItemToDelete(id);
     setDeleteConfirmOpen(true);
@@ -59,6 +72,26 @@ const OrdenesReparacionPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const router = useRouter();
   const { authFetch } = useFetch();
+
+  useEffect(() => {
+    const fetchTemplates = async () => {
+      try {
+        const response = await authFetch("/api/plantilla-presupuesto");
+        const data = await response.json();
+        setTemplates(data.items);
+      } catch (error) {
+        console.error("Error al cargar los templates:", error);
+      }
+    };
+
+    fetchTemplates();
+  }, [authFetch]);
+
+  const handleTemplateChange = (event: SelectChangeEvent<number | null>) => {
+    const templateId = event.target.value as number | null;
+    setSelectedTemplate(templateId);
+  };
+
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", flex: 0.3 },
     {
@@ -318,11 +351,37 @@ const OrdenesReparacionPage = () => {
         </DialogActions>
       </Dialog>
       <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
-        <DialogTitle>Agregar Presupuesto</DialogTitle>
+        <DialogTitle>Nuevo Presupuesto</DialogTitle>
         <DialogContent>
           <Typography>
             Seleccione una opción para agregar un nuevo presupuesto:
           </Typography>
+          <Button
+            onClick={handleAddTemplateBlank}
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ mt: 2, mb: 2 }}
+          >
+            Agregar Template en Blanco
+          </Button>
+          <FormControl fullWidth sx={{ mt: 2 }}>
+            <InputLabel>Seleccionar Template</InputLabel>
+            <Select
+              labelId="template-select-label"
+              value={selectedTemplate || ""}
+              fullWidth
+              onChange={handleTemplateChange}
+              label="Seleccionar Template"
+            >
+              <MenuItem value="">Ninguno</MenuItem>
+              {templates.map((template) => (
+                <MenuItem key={template.id} value={template.id}>
+                  {template.nombre}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
         </DialogContent>
         <DialogActions sx={{ justifyContent: "center", pb: 2, px: 3 }}>
           <Button
@@ -333,16 +392,7 @@ const OrdenesReparacionPage = () => {
             Cancelar
           </Button>
           <Button
-            onClick={handleAddTemplateBlank}
-            variant="contained"
-            color="primary"
-            sx={{ mr: 1 }}
-          >
-            Agregar Template en Blanco
-          </Button>
-          <Button
             onClick={() => {
-              // Aquí iría la lógica para "Aceptar"
               setAddModalOpen(false);
             }}
             variant="contained"
