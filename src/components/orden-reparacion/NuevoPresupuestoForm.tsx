@@ -12,7 +12,7 @@ import {
 } from "@mui/material";
 import debounce from "lodash/debounce";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import ReparacionesTercerosFormSection from "./ReparacionesTercerosFormSection";
@@ -116,6 +116,57 @@ const NuevoPresupuestoForm = ({
     control,
     setValue,
   } = methods;
+
+  useEffect(() => {
+    const fetchTemplateData = async () => {
+      if (templateId) {
+        try {
+          const response = await authFetch(
+            `/api/plantilla-presupuesto/${templateId}`
+          );
+          if (response.ok) {
+            const templateData = await response.json();
+            setValue(
+              "repuestosUsados",
+              templateData.repuestosUsados.map((repuesto: any) => ({
+                stock: { id: repuesto.stockId, name: repuesto.stock.name },
+                precioCompra: Number(repuesto.precioCompra),
+                precioVenta: Number(repuesto.precioVenta),
+                unidadesConsumidas: repuesto.unidadesConsumidas,
+              }))
+            );
+            setValue(
+              "reparacionesDeTercero",
+              templateData.reparacionesDeTercero.map((reparacion: any) => ({
+                nombre: reparacion.nombre,
+                precioCompra: Number(reparacion.precioCompra),
+                precioVenta: Number(reparacion.precioVenta),
+                proveedor: {
+                  id: reparacion.proveedorId,
+                  name: reparacion.proveedor.name,
+                },
+              }))
+            );
+            setValue(
+              "trabajosRealizados",
+              templateData.trabajosRealizados.map((trabajo: any) => ({
+                manoDeObra: { name: trabajo.descripcion },
+                precioUnitario: Number(trabajo.precioUnitario),
+                diasParaRecordatorio: trabajo.diasParaRecordatorio,
+              }))
+            );
+            setValue("manoDeObra", templateData.manoDeObra);
+          } else {
+            console.error("Error al obtener datos de la plantilla");
+          }
+        } catch (error) {
+          console.error("Error al obtener datos de la plantilla:", error);
+        }
+      }
+    };
+
+    fetchTemplateData();
+  }, [templateId, authFetch, setValue]);
 
   const repuestosUsados = useWatch({ control, name: "repuestosUsados" });
   const reparacionesTerceros = useWatch({
