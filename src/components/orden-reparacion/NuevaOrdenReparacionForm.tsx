@@ -218,7 +218,6 @@ const NuevaOrdenReparacionForm = () => {
       });
     }
   };
-  console.log(JSON.stringify(errors));
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>

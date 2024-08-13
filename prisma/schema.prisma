@@ -323,13 +323,15 @@ model OrdenReparacion {
 
 model RepuestoUsado {
   id                 Int             @id @default(autoincrement())
-  ordenReparacionId  Int
-  ordenReparacion    OrdenReparacion @relation("OrdenReparacionRepuestos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
+  ordenReparacionId  Int?
+  ordenReparacion    OrdenReparacion? @relation("OrdenReparacionRepuestos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   stockId            Int
   stock              Stock           @relation(fields: [stockId], references: [id])
   precioCompra       Decimal         @db.Decimal(10, 2)
   precioVenta        Decimal         @db.Decimal(10, 2)
   unidadesConsumidas Int
+  plantillaPresupuesto   PlantillaPresupuesto?   @relation("PlantillaPresupuestoRepuestos", fields: [plantillaPresupuestoId], references: [id])
+  plantillaPresupuestoId Int?
 
   @@index([ordenReparacionId])
   @@index([stockId])
@@ -342,8 +344,10 @@ model ReparacionDeTercero {
   precioVenta       Decimal         @db.Decimal(10, 2)
   proveedor         Proveedor       @relation(fields: [proveedorId], references: [id])
   proveedorId       Int
-  ordenReparacion   OrdenReparacion @relation("OrdenReparacionReparacionTercero", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
-  ordenReparacionId Int
+  ordenReparacion   OrdenReparacion? @relation("OrdenReparacionReparacionTercero", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
+  ordenReparacionId Int?
+  plantillaPresupuesto   PlantillaPresupuesto?   @relation("PlantillaPresupuestoReparacionTercero", fields: [plantillaPresupuestoId], references: [id])
+  plantillaPresupuestoId Int?
 
   @@index([nombre])
   @@index([proveedorId])
@@ -351,13 +355,24 @@ model ReparacionDeTercero {
 
 model TrabajoRealizado {
   id                   Int             @id @default(autoincrement())
-  ordenReparacion      OrdenReparacion @relation("OrdenReparacionTrabajosRealizados", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
-  ordenReparacionId    Int
+  ordenReparacion      OrdenReparacion? @relation("OrdenReparacionTrabajosRealizados", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
+  ordenReparacionId    Int?
   descripcion          String          @db.Text
   precioUnitario       Decimal         @db.Decimal(10, 2)
   diasParaRecordatorio Int?
+  plantillaPresupuesto   PlantillaPresupuesto?   @relation("PlantillaPresupuestoTrabajosRealizados", fields: [plantillaPresupuestoId], references: [id])
+  plantillaPresupuestoId Int?
 
   @@index([ordenReparacionId])
+}
+
+model PlantillaPresupuesto {
+  id                    Int                   @id @default(autoincrement())
+  nombre                String                @db.VarChar(255)
+  repuestosUsados       RepuestoUsado[]       @relation("PlantillaPresupuestoRepuestos")
+  reparacionesDeTercero ReparacionDeTercero[] @relation("PlantillaPresupuestoReparacionTercero")
+  trabajosRealizados    TrabajoRealizado[]    @relation("PlantillaPresupuestoTrabajosRealizados")
+  manoDeObra            Decimal               @db.Decimal(10, 2)
 }
 
 model ControlEnReparacion {

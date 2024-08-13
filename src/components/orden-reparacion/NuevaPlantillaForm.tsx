@@ -1,16 +1,7 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import {
-  Alert,
-  Autocomplete,
-  Button,
-  FormControl,
-  Grid,
-  Snackbar,
-  TextField,
-} from "@mui/material";
-import debounce from "lodash/debounce";
+import { Alert, Button, Grid, Snackbar, TextField } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
@@ -20,10 +11,7 @@ import RepuestoUsadoFormSection from "./RepuestoUsadoFormSection";
 import TrabajosRealizadosFormSection from "./TrabajosRealizadosFormSection";
 
 const schema = yup.object().shape({
-  autoId: yup.string().required("Debe seleccionar un auto"),
-  observacionesCliente: yup
-    .string()
-    .required("Debe ingresar las observaciones"),
+  nombre: yup.string().required("Debe ingresar un nombre"),
   repuestosUsados: yup.array().of(
     yup.object().shape({
       stock: yup
@@ -84,10 +72,9 @@ const schema = yup.object().shape({
     })
   ),
   manoDeObra: yup.number().required("El monto total es requerido"),
-  observacionesEntrada: yup.string(),
 });
 
-const NuevoPresupuestoForm = () => {
+const NuevaPlantillaForm = () => {
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -127,35 +114,9 @@ const NuevoPresupuestoForm = () => {
 
   const router = useRouter();
 
-  const debouncedSearch = debounce(
-    async (
-      query: string,
-      callback: (options: { value: string; label: string }[]) => void
-    ) => {
-      const response = await authFetch(
-        `/api/autos?query=${query}&limit=10&page=0`
-      );
-      const data = await response.json();
-
-      const opciones = data.items.map(
-        (auto: {
-          patent: string;
-          id: number;
-          brand: string;
-          model: string;
-        }) => ({
-          label: `${auto.patent} - ${auto.brand || ""} ${auto.model || ""}`,
-          value: auto.id.toString(),
-        })
-      );
-      callback(opciones);
-    },
-    300
-  );
-
   const onSubmit = async (data: any) => {
     try {
-      const response = await authFetch("/api/orden-reparacion", {
+      const response = await authFetch("/api/plantilla-presupuesto", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -166,15 +127,15 @@ const NuevoPresupuestoForm = () => {
       if (response.ok) {
         setSnackbar({
           open: true,
-          message: "Presupuesto creado con éxito",
+          message: "Plantilla creada con éxito",
           severity: "success",
         });
-        router.push("/dashboard/presupuestos");
+        router.push("/dashboard/plantilla-presupuesto");
       } else {
         const errorData = await response.json();
         setSnackbar({
           open: true,
-          message: errorData.error || "Error al crear la orden de reparación",
+          message: errorData.error || "Error al crear la plantilla",
           severity: "error",
         });
       }
@@ -193,69 +154,18 @@ const NuevoPresupuestoForm = () => {
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
         <Grid container spacing={2}>
-          <Grid item xs={6}>
+          <Grid item xs={12}>
             <Controller
-              name="autoId"
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <FormControl fullWidth margin="normal">
-                  <Autocomplete
-                    options={autocompleteOptions || []}
-                    getOptionLabel={(option) => option?.label || ""}
-                    value={
-                      value
-                        ? autocompleteOptions.find(
-                            (option) => option.value === value
-                          ) || null
-                        : null
-                    }
-                    onChange={(_, newValue) => {
-                      onChange(newValue?.value || null);
-                    }}
-                    onInputChange={(event, newInputValue, reason) => {
-                      if (reason === "input") {
-                        debouncedSearch(
-                          newInputValue,
-                          (options: { value: string; label: string }[]) =>
-                            setAutocompleteOptions(options)
-                        );
-                      }
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Auto"
-                        error={!!errors.autoId}
-                        helperText={errors.autoId?.message as string}
-                      />
-                    )}
-                    isOptionEqualToValue={(option, value) =>
-                      option?.value === value?.value
-                    }
-                    loadingText="Buscando..."
-                    noOptionsText="No se encontraron resultados"
-                    sx={{
-                      marginBottom: 2,
-                    }}
-                  />
-                </FormControl>
-              )}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <Controller
-              name="observacionesCliente"
+              name="nombre"
               control={control}
               render={({ field }) => (
                 <TextField
                   {...field}
-                  label="Observaciones del cliente"
-                  multiline
-                  rows={4}
+                  label="Nombre de la plantilla"
                   fullWidth
                   margin="normal"
-                  error={!!errors.observacionesCliente}
-                  helperText={errors.observacionesCliente?.message as string}
+                  error={!!errors.nombre}
+                  helperText={errors.nombre?.message as string}
                 />
               )}
             />
@@ -316,7 +226,7 @@ const NuevoPresupuestoForm = () => {
             my: 2,
           }}
         >
-          Crear Presupuesto
+          Crear Plantilla
         </Button>
       </form>
       <Snackbar
@@ -332,4 +242,4 @@ const NuevoPresupuestoForm = () => {
   );
 };
 
-export default NuevoPresupuestoForm;
+export default NuevaPlantillaForm;

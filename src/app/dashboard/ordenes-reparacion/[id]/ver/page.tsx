@@ -205,7 +205,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           </Box>
           <Box sx={{ textAlign: "right" }}>
             <Typography variant="h4">
-              ${calcularTotalOrdenReparacion(ordenReparacion)}
+              ${calcularTotalOrdenReparacion(ordenReparacion).toFixed(2)}
             </Typography>
           </Box>
         </Box>

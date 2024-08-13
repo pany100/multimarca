@@ -2,6 +2,7 @@
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import CalculateIcon from "@mui/icons-material/Calculate";
+import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -199,6 +200,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Presupuestos",
             icono: <CalculateIcon />,
             ruta: "/dashboard/presupuestos",
+          },
+          {
+            permiso: "Reparaciones",
+            texto: "Plantilla Presupuesto",
+            icono: <ContentPasteIcon />,
+            ruta: "/dashboard/plantilla-presupuesto",
           },
           {
             permiso: "Reparaciones",
