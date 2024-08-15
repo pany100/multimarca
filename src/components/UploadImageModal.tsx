@@ -1,4 +1,11 @@
-import { Box, Button, Modal, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  Modal,
+  Paper,
+  Typography,
+} from "@mui/material";
 import React, { useCallback, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 
@@ -17,6 +24,9 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
 }) => {
   const [file, setFile] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [stream, setStream] = useState<MediaStream | null>(null);
+  const [isVideoReady, setIsVideoReady] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFile(acceptedFiles[0]);
@@ -29,6 +39,60 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
     },
     multiple: false,
   });
+
+  const startCamera = async () => {
+    try {
+      console.log("Iniciando cámara...");
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
+      console.log("Stream obtenido:", mediaStream);
+      setStream(mediaStream);
+      if (videoRef.current) {
+        console.log("Asignando stream al video...");
+        videoRef.current.srcObject = mediaStream;
+        videoRef.current.onloadedmetadata = () => {
+          console.log("Metadata del video cargada");
+          videoRef.current
+            ?.play()
+            .then(() => {
+              console.log("Video iniciado");
+              setIsVideoReady(true);
+            })
+            .catch((error) => {
+              console.error("Error al iniciar el video:", error);
+            });
+        };
+      } else {
+        console.error("Referencia de video no disponible");
+      }
+    } catch (error) {
+      console.error("Error al acceder a la cámara:", error);
+    }
+  };
+
+  const capturePhoto = () => {
+    if (videoRef.current) {
+      const canvas = document.createElement("canvas");
+      canvas.width = videoRef.current.videoWidth;
+      canvas.height = videoRef.current.videoHeight;
+      canvas.getContext("2d")?.drawImage(videoRef.current, 0, 0);
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
+          setFile(file);
+        }
+      }, "image/jpeg");
+    }
+    stopCamera();
+  };
+
+  const stopCamera = () => {
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+      setStream(null);
+    }
+  };
 
   const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -82,13 +146,32 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
             </Paper>
             <Box sx={{ mt: 2, mb: 2, textAlign: "center" }}>
               <Typography>O</Typography>
-              <Button
-                onClick={() => fileInputRef.current?.click()}
-                variant="outlined"
-                sx={{ mt: 1 }}
-              >
-                Usar cámara
-              </Button>
+              {!file && !stream && (
+                <Button onClick={startCamera} variant="outlined" sx={{ mt: 1 }}>
+                  Usar cámara web
+                </Button>
+              )}
+              <video
+                ref={videoRef}
+                autoPlay
+                playsInline
+                style={{
+                  width: "100%",
+                  height: "100%",
+                  objectFit: "cover",
+                  display: isVideoReady ? "block" : "none",
+                }}
+              />
+              {stream && !isVideoReady && <CircularProgress sx={{ mt: 2 }} />}
+              {stream && (
+                <Button
+                  onClick={capturePhoto}
+                  variant="contained"
+                  sx={{ mt: 1 }}
+                >
+                  Capturar foto
+                </Button>
+              )}
               <input
                 type="file"
                 accept="image/*"
