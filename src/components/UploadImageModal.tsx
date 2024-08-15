@@ -30,8 +30,14 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
   const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    setFile(acceptedFiles[0]);
+    handleFileSelection(acceptedFiles[0]);
   }, []);
+
+  const handleFileSelection = (selectedFile: File) => {
+    setFile(selectedFile);
+    const imageUrl = URL.createObjectURL(selectedFile);
+    setCapturedImageUrl(imageUrl);
+  };
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -43,21 +49,16 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
 
   const startCamera = async () => {
     try {
-      console.log("Iniciando cámara...");
       const mediaStream = await navigator.mediaDevices.getUserMedia({
         video: true,
       });
-      console.log("Stream obtenido:", mediaStream);
       setStream(mediaStream);
       if (videoRef.current) {
-        console.log("Asignando stream al video...");
         videoRef.current.srcObject = mediaStream;
         videoRef.current.onloadedmetadata = () => {
-          console.log("Metadata del video cargada");
           videoRef.current
             ?.play()
             .then(() => {
-              console.log("Video iniciado");
               setIsVideoReady(true);
             })
             .catch((error) => {
@@ -99,7 +100,7 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
 
   const handleCameraCapture = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
-      setFile(event.target.files[0]);
+      handleFileSelection(event.target.files[0]);
     }
   };
 
@@ -190,7 +191,11 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
                   display: isVideoReady ? "block" : "none",
                 }}
               />
-              {stream && !isVideoReady && <CircularProgress sx={{ mt: 2 }} />}
+              {stream && !isVideoReady && (
+                <Box sx={{ mt: 2 }}>
+                  <CircularProgress />
+                </Box>
+              )}
               {stream && (
                 <Button
                   onClick={capturePhoto}
