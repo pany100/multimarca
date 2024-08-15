@@ -37,6 +37,8 @@ const MecanicosPage = () => {
     message: "",
     severity: "success" as "success" | "error",
   });
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
   const { authFetch } = useFetch();
 
   const handleExtraAction = (empleado: Mecanico) => {
@@ -177,6 +179,7 @@ const MecanicosPage = () => {
           message: "DNI guardado exitosamente",
           severity: "success",
         });
+        setRefreshTrigger((prev) => prev + 1);
       } catch (error) {
         console.error("Error al guardar el dni:", error);
         setSnackbar({
@@ -196,6 +199,7 @@ const MecanicosPage = () => {
         apiEndpoint="/api/mecanicos"
         fields={formFields}
         createNewItem={createNewMecanico}
+        refreshTrigger={refreshTrigger}
         validationSchema={yup.object({
           name: yup.string().required("El nombre es requerido"),
           dni: yup

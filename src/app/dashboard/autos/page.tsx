@@ -42,6 +42,7 @@ const AutosPage = () => {
     message: "",
     severity: "success" as "success" | "error",
   });
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
@@ -250,6 +251,7 @@ const AutosPage = () => {
           message: "Cédula verde guardada exitosamente",
           severity: "success",
         });
+        setRefreshTrigger((prev) => prev + 1);
       } catch (error) {
         console.error("Error al guardar la cédula verde:", error);
         setSnackbar({
@@ -279,6 +281,7 @@ const AutosPage = () => {
           kms: yup.number().required("Los kilómetros son requeridos"),
           ownerId: yup.number().required("El propietario es requerido"),
         })}
+        refreshTrigger={refreshTrigger}
       />
       {selectedAuto && (
         <CedulaVerdeModal
