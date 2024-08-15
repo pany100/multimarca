@@ -6,9 +6,9 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
+import Image from "next/image";
 import React, { useCallback, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-
 interface UploadImageModalProps {
   open: boolean;
   onClose: () => void;
@@ -27,6 +27,7 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
   const videoRef = useRef<HTMLVideoElement>(null);
   const [stream, setStream] = useState<MediaStream | null>(null);
   const [isVideoReady, setIsVideoReady] = useState(false);
+  const [capturedImageUrl, setCapturedImageUrl] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     setFile(acceptedFiles[0]);
@@ -81,6 +82,8 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
         if (blob) {
           const file = new File([blob], "photo.jpg", { type: "image/jpeg" });
           setFile(file);
+          const imageUrl = URL.createObjectURL(blob);
+          setCapturedImageUrl(imageUrl);
         }
       }, "image/jpeg");
     }
@@ -105,8 +108,22 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
     onClose();
   };
 
+  const resetModal = () => {
+    setFile(null);
+    setCapturedImageUrl(null);
+    setStream(null);
+    setIsVideoReady(false);
+    if (stream) {
+      stream.getTracks().forEach((track) => track.stop());
+    }
+  };
+  const handleClose = () => {
+    resetModal();
+    onClose();
+  };
+
   return (
-    <Modal open={open} onClose={onClose}>
+    <Modal open={open} onClose={handleClose}>
       <Box
         sx={{
           position: "absolute",
@@ -123,7 +140,18 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
           {title}
         </Typography>
         {file ? (
-          <Typography>Archivo seleccionado: {file.name}</Typography>
+          <Box sx={{ mt: 2, textAlign: "center" }}>
+            <Typography>Archivo seleccionado: {file.name}</Typography>
+            {capturedImageUrl && (
+              <Image
+                src={capturedImageUrl}
+                alt="Captured"
+                width={400}
+                height={300}
+                style={{ width: "100%", height: "auto", marginTop: "10px" }}
+              />
+            )}
+          </Box>
         ) : (
           <>
             <Paper
@@ -184,7 +212,7 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
           </>
         )}
         <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
-          <Button onClick={onClose} sx={{ mr: 1 }}>
+          <Button onClick={handleClose} sx={{ mr: 1 }}>
             Descartar
           </Button>
           <Button
