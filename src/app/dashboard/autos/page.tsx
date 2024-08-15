@@ -7,6 +7,7 @@ import { useFetch } from "@/contexts/FetchContext";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Alert, IconButton, Snackbar, Tooltip } from "@mui/material";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import * as yup from "yup";
@@ -55,6 +56,22 @@ const AutosPage = () => {
       headerName: "Propietario",
       flex: 2,
       renderCell: (params: any) => params.row.owner.fullName,
+    },
+    {
+      field: "cedulaVerdePath",
+      headerName: "Cédula Verde",
+      flex: 0.7,
+      renderCell: (params: any) =>
+        params.row.cedulaVerdePath ? (
+          <Image
+            src={params.row.cedulaVerdePath}
+            alt="Cédula Verde"
+            width={100}
+            height={50}
+          />
+        ) : (
+          "-"
+        ),
     },
   ];
 

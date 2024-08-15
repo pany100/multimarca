@@ -7,10 +7,10 @@ import { useFetch } from "@/contexts/FetchContext";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Alert, IconButton, Snackbar, Tooltip } from "@mui/material";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import * as yup from "yup";
-
 interface Mecanico {
   id: string;
   start_date: string;
@@ -59,6 +59,22 @@ const MecanicosPage = () => {
     { field: "email", headerName: "Email", flex: 1.5 },
     { field: "tipo", headerName: "Tipo", flex: 1 },
     { field: "phone", headerName: "Teléfono", flex: 1 },
+    {
+      field: "dniImagePath",
+      headerName: "Foto DNI",
+      flex: 0.7,
+      renderCell: (params: any) =>
+        params.row.dniImagePath ? (
+          <Image
+            src={params.row.dniImagePath}
+            alt="DNI"
+            width={100}
+            height={50}
+          />
+        ) : (
+          "-"
+        ),
+    },
   ];
 
   const formFields: FieldConfig[] = [

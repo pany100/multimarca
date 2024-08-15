@@ -106,7 +106,7 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
 
   const handleSave = () => {
     onSave(file);
-    onClose();
+    handleClose();
   };
 
   const resetModal = () => {
