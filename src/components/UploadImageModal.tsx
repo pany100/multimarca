@@ -49,9 +49,14 @@ const UploadImageModal: React.FC<UploadImageModalProps> = ({
 
   const startCamera = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-      });
+      const constraints = {
+        video: {
+          facingMode: { ideal: "environment" },
+        },
+      };
+      const mediaStream = await navigator.mediaDevices.getUserMedia(
+        constraints
+      );
       setStream(mediaStream);
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
