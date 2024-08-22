@@ -175,6 +175,7 @@ async function saveMessage(
         tipo,
         to,
         conversacion: { connect: { id: conversacion.id } },
+        read: from === "me" ? true : false,
       },
     });
 

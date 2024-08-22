@@ -2,8 +2,10 @@
 
 import { useFetch } from "@/contexts/FetchContext";
 import DeleteIcon from "@mui/icons-material/Delete";
+import NotificationsIcon from "@mui/icons-material/Notifications";
 import SendIcon from "@mui/icons-material/Send";
 import {
+  Badge,
   Box,
   Button,
   Dialog,
@@ -18,6 +20,7 @@ import {
 import DialogContentText from "@mui/material/DialogContentText";
 import IconButton from "@mui/material/IconButton";
 import { useEffect, useState } from "react";
+
 interface Mensaje {
   id: number;
   from: string;
@@ -149,13 +152,31 @@ function WhatsAppPage() {
               onClick={() => handleConversacionClick(conversacion)}
               sx={{ bgcolor: "background.paper", mb: 1, borderRadius: 1 }}
               secondaryAction={
-                <IconButton
-                  edge="end"
-                  aria-label="delete"
-                  onClick={(e) => handleDeleteClick(e, conversacion)}
-                >
-                  <DeleteIcon />
-                </IconButton>
+                <>
+                  {conversacion.mensajes.reduce((acc, mensaje) => {
+                    return acc + (mensaje.read === false ? 1 : 0);
+                  }, 0) > 0 && (
+                    <Badge
+                      badgeContent={conversacion.mensajes.reduce(
+                        (acc, mensaje) => {
+                          return acc + (mensaje.read === false ? 1 : 0);
+                        },
+                        0
+                      )}
+                      color="error"
+                      sx={{ mr: 2 }}
+                    >
+                      <NotificationsIcon color="action" />
+                    </Badge>
+                  )}
+                  <IconButton
+                    edge="end"
+                    aria-label="delete"
+                    onClick={(e) => handleDeleteClick(e, conversacion)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </>
               }
             >
               <ListItemText
