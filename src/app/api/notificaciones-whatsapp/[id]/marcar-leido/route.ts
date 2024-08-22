@@ -1,3 +1,4 @@
+import { getIO } from "@/lib/socketio";
 import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
 
@@ -47,6 +48,10 @@ export async function PUT(
         { error: "No se pudo obtener la conversación actualizada" },
         { status: 404 }
       );
+    }
+    const io = getIO();
+    if (io) {
+      io.emit("whatsappNotification");
     }
 
     return NextResponse.json(conversacionActualizada, { status: 200 });

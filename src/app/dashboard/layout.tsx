@@ -26,7 +26,7 @@ import {
 } from "@mui/material";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "src/app/globals.css";
 
 // Importa los iconos necesarios
@@ -71,14 +71,16 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     {}
   );
   const pathname = usePathname();
-  const { isLoading } = useFetch();
+  const { isLoading, authFetch } = useFetch();
   const socket = useSocket();
   const [cantidadNotificaciones, setCantidadNotificaciones] = useState(0);
+  const [notificacionesWhatsappNoLeidas, setNotificacionesWhatsappNoLeidas] =
+    useState(0);
 
   useEffect(() => {
     const fetchNotificaciones = async () => {
       try {
-        const response = await fetch(
+        const response = await authFetch(
           "/api/notificaciones-internas/cant-no-leidas"
         );
         if (response.ok) {
@@ -91,12 +93,34 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     };
 
     fetchNotificaciones();
-  }, []);
+  }, [authFetch]);
+
+  const fetchWhatsappNoLeido = useCallback(async () => {
+    try {
+      const response = await authFetch(
+        "/api/notificaciones-whatsapp/no-leidas"
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setNotificacionesWhatsappNoLeidas(data.cantidadNoLeidas);
+      }
+    } catch (error) {
+      console.error("Error al obtener notificaciones:", error);
+    }
+  }, [authFetch]);
+
+  useEffect(() => {
+    fetchWhatsappNoLeido();
+  }, [fetchWhatsappNoLeido]);
 
   useEffect(() => {
     if (socket) {
       socket.on("newNotification", () => {
         setCantidadNotificaciones((prev) => prev + 1);
+      });
+
+      socket.on("whatsappNotification", () => {
+        fetchWhatsappNoLeido();
       });
 
       socket.on("readNotification", () => {
@@ -106,9 +130,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       return () => {
         socket.off("newNotification");
         socket.off("deletedNotification");
+        socket.off("whatsappNotification");
       };
     }
-  }, [socket]);
+  }, [socket, fetchWhatsappNoLeido]);
 
   useEffect(() => {
     if (socket) {
@@ -294,8 +319,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       {
         title: "Comunicación y Notificaciones",
         icono:
-          cantidadNotificaciones > 0 ? (
-            <Badge badgeContent={cantidadNotificaciones} color="error" />
+          cantidadNotificaciones + notificacionesWhatsappNoLeidas > 0 ? (
+            <Badge
+              badgeContent={
+                cantidadNotificaciones + notificacionesWhatsappNoLeidas
+              }
+              color="error"
+            />
           ) : null,
         items: [
           {
@@ -311,7 +341,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           {
             permiso: "NotificacionesClientes",
             texto: "WhatsApp",
-            icono: <WhatsAppIcon />,
+            icono: (
+              <Badge
+                badgeContent={notificacionesWhatsappNoLeidas}
+                color="error"
+              >
+                <WhatsAppIcon />
+              </Badge>
+            ),
             ruta: "/dashboard/whatsapp",
           },
           {
@@ -329,7 +366,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         ],
       },
     ],
-    [cantidadNotificaciones]
+    [cantidadNotificaciones, notificacionesWhatsappNoLeidas]
   );
 
   useEffect(() => {
