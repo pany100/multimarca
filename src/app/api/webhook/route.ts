@@ -56,8 +56,8 @@ async function handleIncomingMessage(message: any) {
     tipo = "documento";
     body = `${message.document.filename} - ${message.document.url}`;
   }
-
-  if (await saveMessage(from, "me", body, tipo)) {
+  const response = await saveMessage(from, "me", body, tipo);
+  if (response) {
     const io = getIO();
     if (io) {
       io.emit("whatsappNotification");

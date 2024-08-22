@@ -72,6 +72,7 @@ function WhatsAppPage() {
       if (response.ok) {
         const data = await response.json();
         setConversaciones(data);
+        return data;
       } else {
         console.error("Error al obtener las conversaciones");
       }
@@ -103,15 +104,24 @@ function WhatsAppPage() {
 
   useEffect(() => {
     if (socket) {
-      socket.on("whatsappNotification", () => {
-        fetchConversaciones();
+      socket.on("whatsappNotification", async () => {
+        const updatedConversaciones: Conversacion[] =
+          await fetchConversaciones();
+        if (updatedConversaciones && selectedConversacion) {
+          const updatedConversacion = updatedConversaciones.find(
+            (conv) => conv.id === selectedConversacion.id
+          );
+          if (updatedConversacion) {
+            setSelectedConversacion(updatedConversacion);
+          }
+        }
       });
 
       return () => {
         socket.off("whatsappNotification");
       };
     }
-  }, [socket, fetchConversaciones]);
+  }, [socket, fetchConversaciones, selectedConversacion, conversaciones]);
 
   const handleSendMessage = async () => {
     if (!selectedConversacion || !replyMessage.trim()) return;
