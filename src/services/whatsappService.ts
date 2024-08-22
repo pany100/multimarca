@@ -15,7 +15,7 @@ async function sendWhatsappTextMessage(numeroDestino: string, body: string) {
 
   const data = {
     messaging_product: "whatsapp",
-    to: numeroDestino,
+    to: "5491156007307",
     type: "text",
     text: { body: body },
   };
