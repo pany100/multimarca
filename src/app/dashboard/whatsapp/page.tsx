@@ -2,6 +2,7 @@
 
 import { useFetch } from "@/contexts/FetchContext";
 import DeleteIcon from "@mui/icons-material/Delete";
+import SendIcon from "@mui/icons-material/Send";
 import {
   Box,
   Button,
@@ -17,7 +18,6 @@ import {
 import DialogContentText from "@mui/material/DialogContentText";
 import IconButton from "@mui/material/IconButton";
 import { useEffect, useState } from "react";
-
 interface Mensaje {
   id: number;
   from: string;
@@ -50,7 +50,7 @@ function WhatsAppPage() {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [conversacionToDelete, setConversacionToDelete] =
     useState<Conversacion | null>(null);
-
+  const [replyMessage, setReplyMessage] = useState("");
   const handleDeleteClick = (
     event: React.MouseEvent,
     conversacion: Conversacion
@@ -77,6 +77,30 @@ function WhatsAppPage() {
 
     fetchConversaciones();
   }, [authFetch]);
+
+  const handleSendMessage = async () => {
+    if (!selectedConversacion || !replyMessage.trim()) return;
+
+    try {
+      const response = await authFetch(
+        `/api/notificaciones-whatsapp/${selectedConversacion.id}`,
+        {
+          method: "PUT",
+          body: JSON.stringify({ mensaje: replyMessage }),
+        }
+      );
+
+      if (response.ok) {
+        const updatedConversacion = await response.json();
+        setSelectedConversacion(updatedConversacion);
+        setReplyMessage("");
+      } else {
+        console.error("Error al enviar el mensaje");
+      }
+    } catch (error) {
+      console.error("Error al enviar el mensaje:", error);
+    }
+  };
 
   const handleDeleteConfirm = async () => {
     if (conversacionToDelete) {
@@ -199,7 +223,38 @@ function WhatsAppPage() {
             ))}
           </List>
         </DialogContent>
-        <DialogActions>
+        <DialogActions
+          sx={{ flexDirection: "column", alignItems: "stretch", padding: 2 }}
+        >
+          <Box sx={{ display: "flex", width: "100%", mb: 1 }}>
+            <input
+              type="text"
+              value={replyMessage}
+              onChange={(e) => setReplyMessage(e.target.value)}
+              style={{
+                flexGrow: 1,
+                marginRight: "8px",
+                padding: "8px",
+                borderRadius: "4px",
+                border: "1px solid #ccc",
+              }}
+              placeholder="Escribe un mensaje..."
+            />
+            <Button
+              onClick={handleSendMessage}
+              variant="contained"
+              endIcon={<SendIcon />}
+              sx={{
+                bgcolor: "green",
+                color: "white",
+                "&:hover": {
+                  bgcolor: "darkgreen",
+                },
+              }}
+            >
+              Enviar
+            </Button>
+          </Box>
           <Button onClick={() => setIsModalOpen(false)}>Cerrar</Button>
         </DialogActions>
       </Dialog>
