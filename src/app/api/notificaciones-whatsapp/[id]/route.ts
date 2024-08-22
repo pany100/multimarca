@@ -39,10 +39,7 @@ export async function DELETE(
   }
 }
 
-import {
-  saveMessage,
-  sendWhatsappTextMessage,
-} from "@/services/whatsappService";
+import { sendWhatsappTextMessage } from "@/services/whatsappService";
 import { NextRequest } from "next/server";
 
 export async function PUT(
@@ -92,10 +89,6 @@ export async function PUT(
     // Enviar mensaje de WhatsApp
     await sendWhatsappTextMessage(numeroDestino, mensaje);
 
-    // Guardar mensaje en la base de datos
-    await saveMessage("me", numeroDestino, mensaje, "texto");
-
-    // Obtener la conversación actualizada
     const conversacionActualizada =
       await prisma.conversacionWhatsApp.findUnique({
         where: { id },
