@@ -59,7 +59,7 @@ async function handleIncomingMessage(message: any) {
     body = `${message.document.filename} - ${message.document.url}`;
   }
 
-  if (await saveMessage(from, body, tipo)) {
+  if (await saveMessage(from, "me", body, tipo)) {
     // notify new message
   }
 }

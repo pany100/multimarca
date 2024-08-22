@@ -473,11 +473,13 @@ enum EstadoConversacion {
 model MensajeWhatsApp {
   id              Int                   @id @default(autoincrement())
   from            String                @db.VarChar(50)
+  to              String                @db.VarChar(50)
   body            String                @db.Text
   tipo            String                @db.VarChar(20)
   timestamp       DateTime              @default(now())
   conversacionId  Int
   conversacion    ConversacionWhatsApp  @relation(fields: [conversacionId], references: [id])
+  read            Boolean               @default(false)
 
   @@index([from])
   @@index([timestamp])

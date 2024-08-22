@@ -64,7 +64,7 @@ async function sendWhatsAppMessage(
   try {
     const response = await axios.post(url, data, { headers });
     console.log("Mensaje enviado con éxito:", response.data);
-    await saveMessage("5491156007307", bodyText, "template_enviado");
+    await saveMessage("me", "5491156007307", bodyText, "template_enviado");
     return response.data;
   } catch (error) {
     console.error("Error al enviar mensaje:", error);
@@ -100,8 +100,14 @@ async function uploadMedia(pdfBuffer: Buffer): Promise<string> {
   }
 }
 
-async function saveMessage(from: string, body: string, tipo: string) {
-  const ultimosOchoDigitos = from.slice(-8);
+async function saveMessage(
+  from: string,
+  to: string,
+  body: string,
+  tipo: string
+) {
+  const clientNumber = to === "me" ? from : to;
+  const ultimosOchoDigitos = clientNumber.slice(-8);
   const cliente = await prisma.cliente.findFirst({
     where: {
       phone: {
@@ -138,6 +144,7 @@ async function saveMessage(from: string, body: string, tipo: string) {
         from,
         body,
         tipo,
+        to,
         conversacion: { connect: { id: conversacion.id } },
       },
     });
