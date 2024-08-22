@@ -2,6 +2,35 @@ import { PrismaClient } from "@prisma/client";
 import axios from "axios";
 const prisma = new PrismaClient();
 
+async function sendWhatsappTextMessage(numeroDestino: string, body: string) {
+  const numberId = process.env.NUMBER_ID;
+  const apiVersion = process.env.API_VERSION || "v18.0";
+  const url = `https://graph.facebook.com/${apiVersion}/${numberId}/messages`;
+  const authToken = process.env.AUTH_TOKEN;
+
+  const headers = {
+    "Content-Type": "application/json; charset=utf-8",
+    Authorization: `Bearer ${authToken}`,
+  };
+
+  const data = {
+    messaging_product: "whatsapp",
+    to: numeroDestino,
+    type: "text",
+    text: { body: body },
+  };
+
+  try {
+    const response = await axios.post(url, data, { headers });
+    console.log("Mensaje enviado con éxito:", response.data);
+    await saveMessage("me", "5491156007307", body, "texto");
+    return response.data;
+  } catch (error) {
+    console.error("Error al enviar mensaje:", error);
+    throw error;
+  }
+}
+
 async function sendWhatsAppMessage(
   numeroDestino: string,
   nombreDelTemplate: string,
@@ -163,4 +192,9 @@ async function saveMessage(
   }
 }
 
-export { saveMessage, sendWhatsAppMessage, uploadMedia };
+export {
+  saveMessage,
+  sendWhatsAppMessage,
+  sendWhatsappTextMessage,
+  uploadMedia,
+};

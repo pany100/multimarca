@@ -453,8 +453,8 @@ enum TipoNotificacionInterna {
 
 model ConversacionWhatsApp {
   id        Int               @id @default(autoincrement())
-  clienteId Int?
-  cliente   Cliente?          @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  clienteId Int
+  cliente   Cliente          @relation(fields: [clienteId], references: [id], onDelete: Cascade)
   mensajes  MensajeWhatsApp[]
   iniciada  DateTime          @default(now())
   ultimoMensaje DateTime      @default(now())

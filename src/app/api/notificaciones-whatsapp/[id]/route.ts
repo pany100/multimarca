@@ -38,3 +38,90 @@ export async function DELETE(
     );
   }
 }
+
+import {
+  saveMessage,
+  sendWhatsappTextMessage,
+} from "@/services/whatsappService";
+import { NextRequest } from "next/server";
+
+export async function PUT(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id, 10);
+
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: "ID de conversación inválido" },
+        { status: 400 }
+      );
+    }
+
+    const body = await request.json();
+    const { mensaje } = body;
+
+    if (!mensaje) {
+      return NextResponse.json(
+        { error: "El mensaje es requerido" },
+        { status: 400 }
+      );
+    }
+
+    const conversacion = await prisma.conversacionWhatsApp.findUnique({
+      where: { id },
+      include: { cliente: true },
+    });
+
+    if (!conversacion) {
+      return NextResponse.json(
+        { error: "Conversación no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    const numeroDestino = conversacion.cliente.phone;
+    if (!numeroDestino) {
+      return NextResponse.json(
+        { error: "El cliente no tiene un número de teléfono asignado" },
+        { status: 400 }
+      );
+    }
+
+    // Enviar mensaje de WhatsApp
+    await sendWhatsappTextMessage(numeroDestino, mensaje);
+
+    // Guardar mensaje en la base de datos
+    await saveMessage("me", numeroDestino, mensaje, "texto");
+
+    // Obtener la conversación actualizada
+    const conversacionActualizada =
+      await prisma.conversacionWhatsApp.findUnique({
+        where: { id },
+        include: {
+          cliente: true,
+          mensajes: {
+            orderBy: {
+              timestamp: "asc",
+            },
+          },
+        },
+      });
+
+    if (!conversacionActualizada) {
+      return NextResponse.json(
+        { error: "No se pudo obtener la conversación actualizada" },
+        { status: 500 }
+      );
+    }
+
+    return NextResponse.json(conversacionActualizada, { status: 200 });
+  } catch (error) {
+    console.error("Error al enviar y guardar el mensaje:", error);
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
+  }
+}
