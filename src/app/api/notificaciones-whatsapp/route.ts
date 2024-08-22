@@ -8,7 +8,7 @@ export async function GET() {
         cliente: true,
         mensajes: {
           orderBy: {
-            timestamp: "desc",
+            timestamp: "asc",
           },
         },
       },

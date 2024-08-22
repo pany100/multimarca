@@ -101,7 +101,6 @@ function WhatsAppPage() {
           </ListItem>
         ))}
       </List>
-
       <Dialog
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -112,7 +111,14 @@ function WhatsAppPage() {
           Conversación con {selectedConversacion?.cliente.fullName}
         </DialogTitle>
         <DialogContent dividers>
-          <List sx={{ maxHeight: "60vh", overflow: "auto" }}>
+          <List
+            sx={{
+              maxHeight: "60vh",
+              overflow: "auto",
+              display: "flex",
+              flexDirection: "column",
+            }}
+          >
             {selectedConversacion?.mensajes.map((mensaje) => (
               <ListItem
                 key={mensaje.id}
