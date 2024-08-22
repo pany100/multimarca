@@ -1,6 +1,7 @@
 "use client";
 
 import { useFetch } from "@/contexts/FetchContext";
+import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Box,
   Button,
@@ -13,6 +14,8 @@ import {
   ListItemText,
   Typography,
 } from "@mui/material";
+import DialogContentText from "@mui/material/DialogContentText";
+import IconButton from "@mui/material/IconButton";
 import { useEffect, useState } from "react";
 
 interface Mensaje {
@@ -44,6 +47,18 @@ function WhatsAppPage() {
     useState<Conversacion | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const { authFetch } = useFetch();
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [conversacionToDelete, setConversacionToDelete] =
+    useState<Conversacion | null>(null);
+
+  const handleDeleteClick = (
+    event: React.MouseEvent,
+    conversacion: Conversacion
+  ) => {
+    event.stopPropagation();
+    setConversacionToDelete(conversacion);
+    setDeleteDialogOpen(true);
+  };
 
   useEffect(() => {
     const fetchConversaciones = async () => {
@@ -63,6 +78,30 @@ function WhatsAppPage() {
     fetchConversaciones();
   }, [authFetch]);
 
+  const handleDeleteConfirm = async () => {
+    if (conversacionToDelete) {
+      try {
+        const response = await authFetch(
+          `/api/notificaciones-whatsapp/${conversacionToDelete.id}`,
+          {
+            method: "DELETE",
+          }
+        );
+        if (response.ok) {
+          setConversaciones(
+            conversaciones.filter((c) => c.id !== conversacionToDelete.id)
+          );
+        } else {
+          console.error("Error al eliminar la conversación");
+        }
+      } catch (error) {
+        console.error("Error al eliminar la conversación:", error);
+      }
+    }
+    setDeleteDialogOpen(false);
+    setConversacionToDelete(null);
+  };
+
   const handleConversacionClick = (conversacion: Conversacion) => {
     setSelectedConversacion(conversacion);
     setIsModalOpen(true);
@@ -73,34 +112,49 @@ function WhatsAppPage() {
       <Typography variant="h4" gutterBottom>
         Conversaciones de WhatsApp
       </Typography>
-      <List>
-        {conversaciones.map((conversacion) => (
-          <ListItem
-            key={conversacion.id}
-            button
-            onClick={() => handleConversacionClick(conversacion)}
-            sx={{ bgcolor: "background.paper", mb: 1, borderRadius: 1 }}
-          >
-            <ListItemText
-              primary={`${conversacion.cliente.fullName}`}
-              secondary={
-                <>
-                  <Typography
-                    component="span"
-                    variant="body2"
-                    color="text.primary"
-                  >
-                    {conversacion.cliente.phone}
-                  </Typography>
-                  {" — " +
-                    conversacion.mensajes[0]?.body.substring(0, 50) +
-                    "..."}
-                </>
+      {conversaciones.length === 0 ? (
+        <Typography variant="body1" sx={{ textAlign: "center", mt: 4 }}>
+          No hay conversaciones disponibles.
+        </Typography>
+      ) : (
+        <List>
+          {conversaciones.map((conversacion) => (
+            <ListItem
+              key={conversacion.id}
+              button
+              onClick={() => handleConversacionClick(conversacion)}
+              sx={{ bgcolor: "background.paper", mb: 1, borderRadius: 1 }}
+              secondaryAction={
+                <IconButton
+                  edge="end"
+                  aria-label="delete"
+                  onClick={(e) => handleDeleteClick(e, conversacion)}
+                >
+                  <DeleteIcon />
+                </IconButton>
               }
-            />
-          </ListItem>
-        ))}
-      </List>
+            >
+              <ListItemText
+                primary={`${conversacion.cliente.fullName}`}
+                secondary={
+                  <>
+                    <Typography
+                      component="span"
+                      variant="body2"
+                      color="text.primary"
+                    >
+                      {conversacion.cliente.phone}
+                    </Typography>
+                    {" — " +
+                      conversacion.mensajes[0]?.body.substring(0, 50) +
+                      "..."}
+                  </>
+                }
+              />
+            </ListItem>
+          ))}
+        </List>
+      )}
       <Dialog
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -147,6 +201,23 @@ function WhatsAppPage() {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setIsModalOpen(false)}>Cerrar</Button>
+        </DialogActions>
+      </Dialog>
+      <Dialog
+        open={deleteDialogOpen}
+        onClose={() => setDeleteDialogOpen(false)}
+      >
+        <DialogTitle>Confirmar eliminación</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            ¿Estás seguro de que quieres eliminar esta conversación?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteDialogOpen(false)}>Cancelar</Button>
+          <Button onClick={handleDeleteConfirm} color="error">
+            Eliminar
+          </Button>
         </DialogActions>
       </Dialog>
     </Box>
