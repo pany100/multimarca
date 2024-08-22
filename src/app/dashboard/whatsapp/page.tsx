@@ -1,6 +1,7 @@
 "use client";
 
 import { useFetch } from "@/contexts/FetchContext";
+import { useSocket } from "@/hooks/useSocket";
 import DeleteIcon from "@mui/icons-material/Delete";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import SendIcon from "@mui/icons-material/Send";
@@ -19,7 +20,7 @@ import {
 } from "@mui/material";
 import DialogContentText from "@mui/material/DialogContentText";
 import IconButton from "@mui/material/IconButton";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 interface Mensaje {
   id: number;
@@ -62,24 +63,37 @@ function WhatsAppPage() {
     setConversacionToDelete(conversacion);
     setDeleteDialogOpen(true);
   };
+  const socket = useSocket();
+
+  const fetchConversaciones = useCallback(async () => {
+    try {
+      const response = await authFetch("/api/notificaciones-whatsapp");
+      if (response.ok) {
+        const data = await response.json();
+        setConversaciones(data);
+      } else {
+        console.error("Error al obtener las conversaciones");
+      }
+    } catch (error) {
+      console.error("Error al obtener las conversaciones:", error);
+    }
+  }, [authFetch]);
 
   useEffect(() => {
-    const fetchConversaciones = async () => {
-      try {
-        const response = await authFetch("/api/notificaciones-whatsapp");
-        if (response.ok) {
-          const data = await response.json();
-          setConversaciones(data);
-        } else {
-          console.error("Error al obtener las conversaciones");
-        }
-      } catch (error) {
-        console.error("Error al obtener las conversaciones:", error);
-      }
-    };
-
     fetchConversaciones();
-  }, [authFetch]);
+  }, [fetchConversaciones]);
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("whatsappNotification", () => {
+        fetchConversaciones();
+      });
+
+      return () => {
+        socket.off("whatsappNotification");
+      };
+    }
+  }, [socket, fetchConversaciones]);
 
   const handleSendMessage = async () => {
     if (!selectedConversacion || !replyMessage.trim()) return;
