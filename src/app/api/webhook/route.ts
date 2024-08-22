@@ -48,7 +48,7 @@ async function handleIncomingMessage(message: any) {
     body = message.text.body;
   } else if (message.type === "audio") {
     tipo = "audio";
-    body = message.audio.url;
+    body = message.audio.id;
   } else if (message.type === "image") {
     tipo = "imagen";
     body = message.image.url;

@@ -129,6 +129,33 @@ async function uploadMedia(pdfBuffer: Buffer): Promise<string> {
   }
 }
 
+async function getMedia(mediaId: string) {
+  const numeroId = process.env.NUMBER_ID || "148065758386723";
+  const apiVersion = process.env.API_VERSION || "v18.0";
+  const mediaUrl = `https://graph.facebook.com/${apiVersion}/${mediaId}?phone_number_id=${numeroId}`;
+  const authToken = process.env.AUTH_TOKEN;
+  const headers = {
+    Authorization: `Bearer ${authToken}`,
+  };
+
+  try {
+    const response = await axios.get(mediaUrl, { headers });
+    const imageUrl = response.data.url;
+    const mediaResponse = await axios.get(imageUrl, {
+      headers,
+      responseType: "arraybuffer",
+    });
+
+    return {
+      data: Buffer.from(mediaResponse.data),
+      contentType: mediaResponse.headers["content-type"],
+    };
+  } catch (error) {
+    console.error("Error al obtener el archivo:", error);
+    throw error;
+  }
+}
+
 async function saveMessage(
   from: string,
   to: string,
@@ -194,6 +221,7 @@ async function saveMessage(
 }
 
 export {
+  getMedia,
   saveMessage,
   sendWhatsAppMessage,
   sendWhatsappTextMessage,

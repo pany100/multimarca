@@ -1,5 +1,7 @@
 "use client";
 
+import AudioMessage from "@/components/whatsapp/AudioMessage";
+import TextMessage from "@/components/whatsapp/TextMessage";
 import { useFetch } from "@/contexts/FetchContext";
 import { useSocket } from "@/hooks/useSocket";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -284,20 +286,11 @@ function WhatsAppPage() {
                   alignItems: mensaje.from === "me" ? "flex-end" : "flex-start",
                 }}
               >
-                <Box
-                  sx={{
-                    bgcolor:
-                      mensaje.from === "me" ? "primary.light" : "grey.200",
-                    p: 1,
-                    borderRadius: 1,
-                    maxWidth: "80%",
-                  }}
-                >
-                  <Typography variant="body1">{mensaje.body}</Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {new Date(mensaje.timestamp).toLocaleString()}
-                  </Typography>
-                </Box>
+                {mensaje.tipo === "audio" ? (
+                  <AudioMessage mensaje={mensaje} />
+                ) : (
+                  <TextMessage mensaje={mensaje} />
+                )}
               </ListItem>
             ))}
             <div ref={messagesEndRef} />
