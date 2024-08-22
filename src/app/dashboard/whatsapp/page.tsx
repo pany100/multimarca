@@ -162,9 +162,24 @@ function WhatsAppPage() {
     setConversacionToDelete(null);
   };
 
-  const handleConversacionClick = (conversacion: Conversacion) => {
+  const handleConversacionClick = async (conversacion: Conversacion) => {
     setSelectedConversacion(conversacion);
     setIsModalOpen(true);
+
+    try {
+      const response = await authFetch(
+        `/api/notificaciones-whatsapp/${conversacion.id}/marcar-leido`,
+        {
+          method: "PUT",
+        }
+      );
+
+      if (!response.ok) {
+        console.error("Error al marcar la conversación como leída");
+      }
+    } catch (error) {
+      console.error("Error al llamar a la API:", error);
+    }
   };
 
   return (
