@@ -45,7 +45,7 @@ export const config = {
     "/api/ingresos-reparacion/:path*",
     "/api/mano-de-obra/:path*",
     "/api/mecanicos/:path*",
-    "/api/notificaciones-whatsapp/:path*",
+    "/api/recordatorios-whatsapp/:path*",
     "/api/orden-de-compra/:path*",
     "/api/orden-reparacion/:path*",
     "/api/pago-a-mecanico/:path*",

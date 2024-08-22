@@ -55,7 +55,7 @@ const NotificacionesWhatsappPage = () => {
     <CrudTable<NotificacionWhatsapp>
       title="Notificaciones WhatsApp"
       columns={columns}
-      apiEndpoint="/api/notificaciones-whatsapp"
+      apiEndpoint="/api/recordatorios-whatsapp"
       fields={formFields}
       createNewItem={createNewNotificacion}
       shouldRenderDelete={(item: NotificacionWhatsapp) =>
