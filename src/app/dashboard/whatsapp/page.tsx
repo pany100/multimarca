@@ -20,7 +20,7 @@ import {
 } from "@mui/material";
 import DialogContentText from "@mui/material/DialogContentText";
 import IconButton from "@mui/material/IconButton";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 interface Mensaje {
   id: number;
@@ -55,6 +55,7 @@ function WhatsAppPage() {
   const [conversacionToDelete, setConversacionToDelete] =
     useState<Conversacion | null>(null);
   const [replyMessage, setReplyMessage] = useState("");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
   const handleDeleteClick = (
     event: React.MouseEvent,
     conversacion: Conversacion
@@ -82,6 +83,23 @@ function WhatsAppPage() {
   useEffect(() => {
     fetchConversaciones();
   }, [fetchConversaciones]);
+
+  const scrollToBottom = useCallback(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, []);
+
+  useEffect(() => {
+    if (selectedConversacion) {
+      setTimeout(scrollToBottom, 100);
+    }
+  }, [selectedConversacion, scrollToBottom]);
+
+  const handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      event.preventDefault();
+      handleSendMessage();
+    }
+  };
 
   useEffect(() => {
     if (socket) {
@@ -111,6 +129,7 @@ function WhatsAppPage() {
         const updatedConversacion = await response.json();
         setSelectedConversacion(updatedConversacion);
         setReplyMessage("");
+        setTimeout(scrollToBottom, 100);
       } else {
         console.error("Error al enviar el mensaje");
       }
@@ -256,6 +275,7 @@ function WhatsAppPage() {
                 </Box>
               </ListItem>
             ))}
+            <div ref={messagesEndRef} />
           </List>
         </DialogContent>
         <DialogActions
@@ -266,6 +286,7 @@ function WhatsAppPage() {
               type="text"
               value={replyMessage}
               onChange={(e) => setReplyMessage(e.target.value)}
+              onKeyPress={handleKeyPress}
               style={{
                 flexGrow: 1,
                 marginRight: "8px",
