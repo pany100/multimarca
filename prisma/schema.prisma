@@ -62,6 +62,7 @@ model Cliente {
   cars                      Auto[]
   ventas                    Venta[]
   pagosDeReparaciones       IngresoPorReparacion[]
+  conversacionesWhatsApp    ConversacionWhatsApp[]
 
   @@index([fullName])
   @@index([email])
@@ -448,4 +449,37 @@ model NotificacionInterna {
 enum TipoNotificacionInterna {
   REPOSICION_STOCK
   REPARACION_TERMINADA
+}
+
+model ConversacionWhatsApp {
+  id        Int               @id @default(autoincrement())
+  clienteId Int?
+  cliente   Cliente?          @relation(fields: [clienteId], references: [id])
+  mensajes  MensajeWhatsApp[]
+  iniciada  DateTime          @default(now())
+  ultimoMensaje DateTime      @default(now())
+  estado    EstadoConversacion @default(Activa)
+
+  @@index([clienteId])
+  @@index([iniciada])
+  @@index([ultimoMensaje])
+}
+
+enum EstadoConversacion {
+  Activa
+  Cerrada
+}
+
+model MensajeWhatsApp {
+  id              Int                   @id @default(autoincrement())
+  from            String                @db.VarChar(50)
+  body            String                @db.Text
+  tipo            String                @db.VarChar(20)
+  timestamp       DateTime              @default(now())
+  conversacionId  Int
+  conversacion    ConversacionWhatsApp  @relation(fields: [conversacionId], references: [id])
+
+  @@index([from])
+  @@index([timestamp])
+  @@index([conversacionId])
 }

@@ -1,13 +1,14 @@
+import { saveMessage } from "@/services/whatsappService";
+import { PrismaClient } from "@prisma/client";
 import { NextResponse } from "next/server";
+
+const prisma = new PrismaClient();
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const mode = searchParams.get("hub.mode");
   const token = searchParams.get("hub.verify_token");
   const challenge = searchParams.get("hub.challenge");
-  console.log("mode", mode);
-  console.log("token", token);
-  console.log("challenge", challenge);
 
   if (mode === "subscribe" && token === process.env.VERIFY_TOKEN) {
     return new NextResponse(challenge, { status: 200 });
@@ -18,13 +19,19 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   const body = await request.json();
+  console.log("Received webhook body:", JSON.stringify(body, null, 2));
 
   if (body.object === "whatsapp_business_account") {
-    for (const entry of body.entry) {
-      for (const change of entry.changes) {
+    for (const entry of body.entry || []) {
+      for (const change of entry.changes || []) {
         if (change.field === "messages") {
-          for (const message of change.value.messages) {
-            await handleIncomingMessage(message);
+          const messages = change.value?.messages || [];
+          if (Array.isArray(messages)) {
+            for (const message of messages) {
+              await handleIncomingMessage(message);
+            }
+          } else if (typeof messages === "object" && messages !== null) {
+            await handleIncomingMessage(messages);
           }
         }
       }
@@ -33,10 +40,26 @@ export async function POST(request: Request) {
 
   return new NextResponse("OK", { status: 200 });
 }
-
 async function handleIncomingMessage(message: any) {
   const from = message.from;
-  const text = message.text?.body;
+  let tipo = "desconocido";
+  let body = "";
 
-  console.log(`Mensaje recibido de ${from}: ${text}`);
+  if (message.type === "text") {
+    tipo = "texto";
+    body = message.text.body;
+  } else if (message.type === "audio") {
+    tipo = "audio";
+    body = message.audio.url;
+  } else if (message.type === "image") {
+    tipo = "imagen";
+    body = message.image.url;
+  } else if (message.type === "document") {
+    tipo = "documento";
+    body = `${message.document.filename} - ${message.document.url}`;
+  }
+
+  if (await saveMessage(from, body, tipo)) {
+    // notify new message
+  }
 }

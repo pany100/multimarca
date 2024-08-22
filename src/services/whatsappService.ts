@@ -1,4 +1,6 @@
+import { PrismaClient } from "@prisma/client";
 import axios from "axios";
+const prisma = new PrismaClient();
 
 async function sendWhatsAppMessage(
   numeroDestino: string,
@@ -42,7 +44,7 @@ async function sendWhatsAppMessage(
 
   const data = {
     messaging_product: "whatsapp",
-    to: "1156007307",
+    to: "5491156007307",
     type: "template",
     template: {
       name: nombreDelTemplate,
@@ -51,9 +53,18 @@ async function sendWhatsAppMessage(
     },
   };
 
+  let bodyText = `Template: ${nombreDelTemplate}\n`;
+  if (args) {
+    bodyText += `Argumentos: ${args.join(", ")}\n`;
+  }
+  if (mediaId) {
+    bodyText += `Documento adjunto: ${mediaId}\n`;
+  }
+
   try {
     const response = await axios.post(url, data, { headers });
     console.log("Mensaje enviado con éxito:", response.data);
+    await saveMessage("5491156007307", bodyText, "template_enviado");
     return response.data;
   } catch (error) {
     console.error("Error al enviar mensaje:", error);
@@ -89,4 +100,60 @@ async function uploadMedia(pdfBuffer: Buffer): Promise<string> {
   }
 }
 
-export { sendWhatsAppMessage, uploadMedia };
+async function saveMessage(from: string, body: string, tipo: string) {
+  const ultimosOchoDigitos = from.slice(-8);
+  const cliente = await prisma.cliente.findFirst({
+    where: {
+      phone: {
+        endsWith: ultimosOchoDigitos,
+      },
+    },
+  });
+
+  if (!cliente) {
+    console.log(`No se encontró cliente para el número: ${from}`);
+    return false;
+  }
+
+  try {
+    let conversacion = await prisma.conversacionWhatsApp.findFirst({
+      where: {
+        cliente: { id: cliente.id },
+        estado: "Activa",
+      },
+    });
+
+    if (!conversacion) {
+      conversacion = await prisma.conversacionWhatsApp.create({
+        data: {
+          cliente: { connect: { id: cliente.id } },
+          estado: "Activa",
+        },
+      });
+    }
+
+    // Crear el mensaje y asociarlo a la conversación
+    await prisma.mensajeWhatsApp.create({
+      data: {
+        from,
+        body,
+        tipo,
+        conversacion: { connect: { id: conversacion.id } },
+      },
+    });
+
+    // Actualizar la fecha del último mensaje en la conversación
+    await prisma.conversacionWhatsApp.update({
+      where: { id: conversacion.id },
+      data: { ultimoMensaje: new Date() },
+    });
+
+    console.log(`Mensaje guardado en la conversación: ${tipo} de ${from}`);
+    return true;
+  } catch (error) {
+    console.error("Error al guardar el mensaje en la base de datos:", error);
+    return false;
+  }
+}
+
+export { saveMessage, sendWhatsAppMessage, uploadMedia };

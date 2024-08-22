@@ -33,6 +33,7 @@ import "src/app/globals.css";
 import { useFetch } from "@/contexts/FetchContext";
 import { useSocket } from "@/hooks/useSocket";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import AlarmIcon from "@mui/icons-material/Alarm";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import BarChartIcon from "@mui/icons-material/BarChart";
@@ -309,9 +310,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "NotificacionesClientes",
-            texto: "Notificaciones WhatsApp",
+            texto: "WhatsApp",
             icono: <WhatsAppIcon />,
-            ruta: "/dashboard/notificaciones-whatsapp",
+            ruta: "/dashboard/whatsapp",
+          },
+          {
+            permiso: "NotificacionesClientes",
+            texto: "Recordatorios WhatsApp",
+            icono: <AlarmIcon />,
+            ruta: "/dashboard/recordatorios-whatsapp",
           },
           {
             permiso: "NotificacionesClientes",
