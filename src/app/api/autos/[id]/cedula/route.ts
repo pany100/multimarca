@@ -3,16 +3,6 @@ import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 
-const prisma = new PrismaClient();
-
-const s3Client = new S3Client({
-  region: process.env.AWS_DEFAULT_REGION,
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
-
 const allowedExtensions = ["jpg", "jpeg", "png"];
 
 export async function PUT(
@@ -52,12 +42,19 @@ export async function PUT(
     };
 
     const command = new PutObjectCommand(uploadParams);
+    const s3Client = new S3Client({
+      region: process.env.AWS_DEFAULT_REGION,
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+      },
+    });
     await s3Client.send(command);
 
     const bucketName = process.env.AWS_S3_BUCKET_NAME!;
     const region = process.env.AWS_DEFAULT_REGION!;
     const permanentUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${s3ObjectKey}`;
-
+    const prisma = new PrismaClient();
     const updatedCar = await prisma.auto.update({
       where: { id: carId },
       data: { cedulaVerdePath: permanentUrl },
