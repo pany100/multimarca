@@ -26,7 +26,6 @@ jest.mock("next/server", () => ({
 }));
 
 beforeAll(async () => {
-  console.log("DATABASE_URL:", process.env.DATABASE_URL);
   await prisma.$connect();
 });
 
