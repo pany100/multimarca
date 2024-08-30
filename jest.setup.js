@@ -1,4 +1,15 @@
-const prisma = require("@/lib/prisma");
+const { config } = require("dotenv");
+const { resolve } = require("path");
+const { PrismaClient } = require("@prisma/client");
+
+const result = config({
+  path: resolve(process.cwd(), ".env.test"),
+  override: true,
+});
+
+Object.assign(process.env, result.parsed);
+
+const prisma = new PrismaClient();
 
 jest.mock("next/server", () => ({
   NextResponse: {
@@ -15,20 +26,27 @@ jest.mock("next/server", () => ({
 }));
 
 beforeAll(async () => {
-  console.log(prisma.$disconnect);
+  console.log("DATABASE_URL:", process.env.DATABASE_URL);
   await prisma.$connect();
 });
 
 afterAll(async () => {
   await prisma.$disconnect();
 });
-
 beforeEach(async () => {
-  const models = Reflect.ownKeys(prisma).filter(
-    (key) => typeof prisma[key].deleteMany === "function"
-  );
+  // Lista de todos los modelos en tu schema de Prisma
+  const models = [
+    "stock",
+    "proveedor",
+    // Agrega aquí todos los demás modelos de tu schema
+  ];
 
-  await prisma.$transaction(
-    models.map((modelKey) => prisma[modelKey].deleteMany())
-  );
+  // Elimina todos los registros de cada modelo
+  for (const model of models) {
+    if (prisma[model] && typeof prisma[model].deleteMany === "function") {
+      await prisma[model].deleteMany();
+    } else {
+      console.warn(`Model ${model} not found or deleteMany is not a function`);
+    }
+  }
 });
