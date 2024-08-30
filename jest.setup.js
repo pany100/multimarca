@@ -1,3 +1,5 @@
+const prisma = require("@/lib/prisma");
+
 jest.mock("next/server", () => ({
   NextResponse: {
     json: jest.fn((body, init) => ({
@@ -11,3 +13,22 @@ jest.mock("next/server", () => ({
     json: () => Promise.resolve(init.body ? JSON.parse(init.body) : {}),
   })),
 }));
+
+beforeAll(async () => {
+  console.log(prisma.$disconnect);
+  await prisma.$connect();
+});
+
+afterAll(async () => {
+  await prisma.$disconnect();
+});
+
+beforeEach(async () => {
+  const models = Reflect.ownKeys(prisma).filter(
+    (key) => typeof prisma[key].deleteMany === "function"
+  );
+
+  await prisma.$transaction(
+    models.map((modelKey) => prisma[modelKey].deleteMany())
+  );
+});

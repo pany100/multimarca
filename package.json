@@ -10,7 +10,8 @@
     "start": "NODE_ENV=production node dist/server.js",
     "build-and-start": "npm run build && npm start",
     "lint": "next lint",
-    "test": "jest"
+    "setup-test-db": "NODE_ENV=test node --experimental-specifier-resolution=node --loader ts-node/esm tests/setupTestDb.ts",
+    "test": "yarn setup-test-db && jest"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.616.0",
