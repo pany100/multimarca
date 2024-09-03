@@ -35,6 +35,9 @@ afterAll(async () => {
 beforeEach(async () => {
   // Lista de todos los modelos en tu schema de Prisma
   const models = [
+    "ventaItem",
+    "venta",
+    "ordenDeCompra",
     "stock",
     "proveedor",
     // Agrega aquí todos los demás modelos de tu schema
