@@ -309,6 +309,17 @@ export async function PUT(
           },
         });
 
+        for (const repuestoUsado of ordenActual.repuestosUsados) {
+          await prisma.stock.update({
+            where: { id: repuestoUsado.stockId },
+            data: {
+              units: {
+                increment: repuestoUsado.unidadesConsumidas,
+              },
+            },
+          });
+        }
+
         // Actualizar stock y crear notificaciones si es necesario
         for (const repuesto of repuestosUsados) {
           const stockActualizado = await prisma.stock.update({
@@ -419,9 +430,6 @@ export async function DELETE(
 
     // Restaurar las unidades de stock de repuestos usados
     for (const repuestoUsado of ordenExistente.repuestosUsados) {
-      const stockFinal = await prisma.stock.findUnique({
-        where: { id: repuestoUsado.stockId },
-      });
       await prisma.stock.update({
         where: { id: repuestoUsado.stockId },
         data: {
