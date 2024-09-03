@@ -11,7 +11,7 @@
     "build-and-start": "npm run build && npm start",
     "lint": "next lint",
     "setup-test-db": "NODE_ENV=test node --experimental-specifier-resolution=node --loader ts-node/esm tests/setupTestDb.ts",
-    "test": "yarn setup-test-db && jest",
+    "test": "yarn setup-test-db && jest --runInBand",
     "prepare": "husky"
   },
   "dependencies": {
