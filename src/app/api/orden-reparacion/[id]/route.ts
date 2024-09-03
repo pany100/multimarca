@@ -397,11 +397,49 @@ export async function DELETE(
 ) {
   try {
     const id = parseInt(params.id);
+
+    // Verificar si existe la orden de reparación
+    const ordenExistente = await prisma.ordenReparacion.findUnique({
+      where: { id },
+      include: {
+        repuestosUsados: {
+          include: {
+            stock: true,
+          },
+        },
+      },
+    });
+
+    if (!ordenExistente) {
+      return NextResponse.json(
+        { error: "Orden de reparación no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    // Restaurar las unidades de stock de repuestos usados
+    for (const repuestoUsado of ordenExistente.repuestosUsados) {
+      const stockFinal = await prisma.stock.findUnique({
+        where: { id: repuestoUsado.stockId },
+      });
+      await prisma.stock.update({
+        where: { id: repuestoUsado.stockId },
+        data: {
+          units: {
+            increment: repuestoUsado.unidadesConsumidas,
+          },
+        },
+      });
+    }
+
+    // Proceder con la eliminación de la orden
     await prisma.ordenReparacion.delete({
       where: { id },
     });
 
-    return NextResponse.json({ message: "Orden de reparación eliminada" });
+    return NextResponse.json({
+      mensaje: "Orden de reparación eliminada y stock restaurado",
+    });
   } catch (error) {
     console.error("Error al eliminar orden de reparación:", error);
     return NextResponse.json(
