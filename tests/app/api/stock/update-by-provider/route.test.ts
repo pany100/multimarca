@@ -36,15 +36,20 @@ describe("POST /api/stock/update-by-provider", () => {
     expect(data.error).toBe("Faltan datos requeridos");
   });
 
-  it("debería actualizar correctamente los precios de compra del stock de un proveedor", async () => {
-    // Crear un proveedor de prueba
-    const proveedor = await createProveedor();
+  it("debería actualizar correctamente los precios de compra del stock solo del proveedor especificado", async () => {
+    // Crear dos proveedores de prueba
+    const proveedor1 = await createProveedor();
+    const proveedor2 = await createProveedor();
 
-    // Crear elementos de stock para el proveedor
-    const stockItems = await Promise.all([
-      createStock(proveedor.id, { buyPrice: 100 }),
-      createStock(proveedor.id, { buyPrice: 200 }),
-      createStock(proveedor.id, { buyPrice: 300 }),
+    // Crear elementos de stock para ambos proveedores
+    const stockItemsProveedor1 = await Promise.all([
+      createStock(proveedor1.id, { buyPrice: 100 }),
+      createStock(proveedor1.id, { buyPrice: 200 }),
+    ]);
+
+    const stockItemsProveedor2 = await Promise.all([
+      createStock(proveedor2.id, { buyPrice: 300 }),
+      createStock(proveedor2.id, { buyPrice: 400 }),
     ]);
 
     const porcentajeAumento = 10;
@@ -52,7 +57,7 @@ describe("POST /api/stock/update-by-provider", () => {
       "http://localhost:3000/api/stock/update-by-provider",
       {
         method: "POST",
-        body: JSON.stringify({ proveedorId: proveedor.id, porcentajeAumento }),
+        body: JSON.stringify({ proveedorId: proveedor1.id, porcentajeAumento }),
       }
     );
 
@@ -62,7 +67,8 @@ describe("POST /api/stock/update-by-provider", () => {
     expect(response.status).toBe(200);
     expect(data.message).toBe("Precios actualizados con éxito");
 
-    for (const item of stockItems) {
+    // Verificar que los precios del proveedor1 se actualizaron
+    for (const item of stockItemsProveedor1) {
       const updatedItem = await prisma.stock.findUnique({
         where: { id: item.id },
       });
@@ -70,6 +76,14 @@ describe("POST /api/stock/update-by-provider", () => {
       expect(Math.round(Number(updatedItem?.buyPrice || 0))).toBe(
         expectedPrice
       );
+    }
+
+    // Verificar que los precios del proveedor2 no cambiaron
+    for (const item of stockItemsProveedor2) {
+      const unchangedItem = await prisma.stock.findUnique({
+        where: { id: item.id },
+      });
+      expect(Number(unchangedItem?.buyPrice)).toBe(Number(item.buyPrice));
     }
   });
 });
