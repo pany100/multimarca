@@ -32,7 +32,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await prisma.$disconnect();
 });
-afterEach(async () => {
+beforeEach(async () => {
   // Lista de todos los modelos en tu schema de Prisma
   const models = [
     "ordenReparacion",
