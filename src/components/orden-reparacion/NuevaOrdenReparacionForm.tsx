@@ -33,11 +33,7 @@ const schema = yup.object().shape({
       yup.ref("fechaEntradaReparacion"),
       "La fecha de salida debe ser posterior a la fecha de entrada"
     ),
-  kilometros: yup
-    .number()
-    .positive()
-    .integer()
-    .required("Debe ingresar los kilómetros"),
+  kilometros: yup.number().min(0).integer(),
   observacionesCliente: yup
     .string()
     .required("Debe ingresar las observaciones"),
