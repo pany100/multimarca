@@ -62,7 +62,7 @@ const OrdenDeCompraPage = () => {
   });
   const [proveedorId, setProveedorId] = useState<number | null>(null);
   const [stockOptions, setStockOptions] = useState<
-    Array<{ id: number; name: string }>
+    Array<{ id: number; name: string; label: string }>
   >([]);
   const { authFetch } = useFetch();
 
@@ -74,9 +74,10 @@ const OrdenDeCompraPage = () => {
         );
         const data = await response.json();
         const results = data.items.map(
-          (stock: { name: string; id: number }) => ({
+          (stock: { name: string; id: number; label: string }) => ({
             id: stock.id,
             name: stock.name,
+            label: stock.label,
           })
         );
         setStockOptions(results);
@@ -263,7 +264,9 @@ const OrdenDeCompraPage = () => {
                           ...newItem,
                           stockId: Number(e.target.value),
                           stock: {
-                            name: selectedOption ? selectedOption.name : "",
+                            name: selectedOption
+                              ? `${selectedOption.name} - ${selectedOption.label}`
+                              : "",
                           },
                         });
                       }}
@@ -283,7 +286,7 @@ const OrdenDeCompraPage = () => {
                       </MenuItem>
                       {stockOptions.map((option) => (
                         <MenuItem key={option.id} value={option.id}>
-                          {option.name}
+                          {option.name} [{option.label}]
                         </MenuItem>
                       ))}
                     </Select>
