@@ -70,6 +70,12 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
               <Typography variant="h6" sx={{ color: "common.black" }}>
                 Vehículo: {repair.auto.brand} {repair.auto.model}
               </Typography>
+              <Typography variant="h6" sx={{ color: "common.black" }}>
+                Válvulas: {repair.auto.valves}
+              </Typography>
+              <Typography variant="h6" sx={{ color: "common.black" }}>
+                Transmisión: {repair.auto.transmission_type}
+              </Typography>
               <div>
                 <Typography
                   variant="h6"
