@@ -110,6 +110,7 @@ model ManoDeObra {
 
 model Proveedor {
   id                    Int                   @id @default(autoincrement())
+  numeroProveedor       Int                   @unique
   name                  String                @unique @db.VarChar(150)
   address               String?               @db.VarChar(150)
   email                 String?               @db.VarChar(150)

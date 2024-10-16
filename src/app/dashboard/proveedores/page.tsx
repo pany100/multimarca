@@ -14,11 +14,13 @@ interface Proveedor {
   iva: string;
   cuit: string;
   estadoCuenta?: string;
+  numeroProveedor?: string;
 }
 
 const ProveedoresPage = () => {
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "numeroProveedor", headerName: "Número de proveedor", flex: 1 },
     { field: "name", headerName: "Nombre", flex: 1 },
     { field: "email", headerName: "Email", flex: 2 },
     { field: "phone", headerName: "Teléfono", flex: 1 },
@@ -33,6 +35,12 @@ const ProveedoresPage = () => {
 
   const formFields: FieldConfig[] = [
     { name: "name", label: "Nombre", type: "text", layout: { xs: 12 } },
+    {
+      name: "numeroProveedor",
+      label: "Número de proveedor",
+      type: "text",
+      layout: { xs: 6 },
+    },
     { name: "address", label: "Dirección", type: "text", layout: { xs: 6 } },
     { name: "email", label: "Email", type: "email", layout: { xs: 6 } },
     { name: "phone", label: "Teléfono", type: "tel", layout: { xs: 6 } },
@@ -67,6 +75,11 @@ const ProveedoresPage = () => {
         email: yup.string().email("El email es inválido").nullable(),
         phone: yup.string().nullable(),
         mobile: yup.string().nullable(),
+        numeroProveedor: yup
+          .number()
+          .typeError("El número de proveedor debe ser un número válido")
+          .min(1)
+          .nullable(),
       })}
     />
   );

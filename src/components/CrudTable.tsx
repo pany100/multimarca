@@ -151,9 +151,10 @@ function CrudTable<T extends { id: string }>({
           severity: "success",
         });
       } else {
+        const errorMessage = await response.json();
         setSnackbar({
           open: true,
-          message: `Error al crear ${title}`,
+          message: `Error al crear ${title}: ${errorMessage.error}`,
           severity: "error",
         });
       }
@@ -183,7 +184,6 @@ function CrudTable<T extends { id: string }>({
         method: "PUT",
         body: JSON.stringify(data),
       });
-
       if (response.ok) {
         const updatedItem = await response.json();
         setItems((prevItems) =>
@@ -197,9 +197,10 @@ function CrudTable<T extends { id: string }>({
           severity: "success",
         });
       } else {
+        const errorMessage = await response.json();
         setSnackbar({
           open: true,
-          message: `Error al actualizar ${title}`,
+          message: `Error al actualizar ${title}: ${errorMessage.error}`,
           severity: "error",
         });
       }

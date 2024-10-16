@@ -8,11 +8,26 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { name, address, email, phone, mobile, iva, cuit } = body;
+    const { name, address, email, phone, mobile, iva, cuit, numeroProveedor } =
+      body;
 
     if (!name || typeof name !== "string") {
       return NextResponse.json(
         { error: "Nombre de proveedor inválido o faltante" },
+        { status: 400 }
+      );
+    }
+
+    const cantProveedores = await prisma.proveedor.count({
+      where: {
+        numeroProveedor: parseInt(numeroProveedor),
+        NOT: { id: id },
+      },
+    });
+
+    if (cantProveedores > 0) {
+      return NextResponse.json(
+        { error: "Nombre de proveedor repetido" },
         { status: 400 }
       );
     }
@@ -27,6 +42,7 @@ export async function PUT(
         mobile,
         iva,
         cuit,
+        numeroProveedor,
       },
     });
 

@@ -27,6 +27,7 @@ export async function GET(request: Request) {
           mobile: true,
           iva: true,
           cuit: true,
+          numeroProveedor: true,
           gastos: {
             select: {
               precio: true,
@@ -82,11 +83,23 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, address, email, phone, mobile, iva, cuit } = body;
+    const { name, address, email, phone, mobile, iva, cuit, numeroProveedor } =
+      body;
 
     if (!name || typeof name !== "string") {
       return NextResponse.json(
         { error: "Nombre de proveedor inválido o faltante" },
+        { status: 400 }
+      );
+    }
+    // Verificar si ya existe un proveedor con el mismo numeroProveedor
+    const cantProveedores = await prisma.proveedor.count({
+      where: { numeroProveedor: parseInt(numeroProveedor) },
+    });
+
+    if (cantProveedores > 0) {
+      return NextResponse.json(
+        { error: "Nombre de proveedor repetido" },
         { status: 400 }
       );
     }
@@ -100,6 +113,7 @@ export async function POST(request: Request) {
         mobile,
         iva,
         cuit,
+        numeroProveedor,
       },
     });
 

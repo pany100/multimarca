@@ -307,7 +307,7 @@ async function main() {
     columns: true,
     skip_empty_lines: true,
   });
-
+  let proveedoresCount = 1;
   for (const record of proveedoresRecords) {
     await prismaClient.proveedor.upsert({
       where: { name: record.nombre },
@@ -328,8 +328,10 @@ async function main() {
         mobile: record.celular === "" ? null : record.celular,
         iva: record.iva === "" ? null : record.iva,
         cuit: record.CUIT === "" ? null : record.CUIT,
+        numeroProveedor: proveedoresCount,
       },
     });
+    proveedoresCount++;
   }
   console.log("Carga de Proveedores completada.");
 
