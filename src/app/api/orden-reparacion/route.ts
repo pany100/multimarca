@@ -83,7 +83,7 @@ export async function POST(request: Request) {
       observacionesCliente,
       observacionesEntrada = "[]",
       observacionesSalida = "[]",
-      estado,
+      estado = EstadoOrdenReparacion.Presupuestado,
       pdfPath,
       mecanicos = [],
       repuestosUsados = [],
