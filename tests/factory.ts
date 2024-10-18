@@ -7,6 +7,7 @@ export async function createProveedor(overrides = {}) {
   return prisma.proveedor.create({
     data: {
       name: faker.company.name(),
+      numeroProveedor: faker.number.int({ min: 1000, max: 9999 }),
       ...overrides,
     },
   });
