@@ -1,10 +1,7 @@
-import { FetchProvider } from "@/contexts/FetchContext";
-import CssBaseline from "@mui/material/CssBaseline";
-import { ThemeProvider } from "@mui/material/styles";
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import theme from "../theme";
 import { initCronJobs } from "./cron";
+import ClientLayout from "./layout-client";
 
 // Ejecutamos la función de inicialización
 if (typeof window === "undefined") {
@@ -24,12 +21,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body className={inter.className}>
-        <ThemeProvider theme={theme}>
-          <CssBaseline />
-          <FetchProvider>{children}</FetchProvider>
-        </ThemeProvider>
+        <ClientLayout>{children}</ClientLayout>
       </body>
     </html>
   );
