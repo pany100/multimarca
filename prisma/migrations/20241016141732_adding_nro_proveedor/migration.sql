@@ -8,4 +8,4 @@
 ALTER TABLE `Dolar` ALTER COLUMN `fecha` DROP DEFAULT;
 
 -- AlterTable
-ALTER TABLE `Proveedor` ADD COLUMN `numeroProveedor` INTEGER NOT NULL;
+ALTER TABLE `Proveedor` ADD COLUMN `numeroProveedor` INTEGER  NULL;
