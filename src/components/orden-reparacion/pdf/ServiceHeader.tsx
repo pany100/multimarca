@@ -1,5 +1,6 @@
 import { Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
+import { EstadoOrdenReparacion } from "@prisma/client";
 
 type Props = {
   repair: {
@@ -7,6 +8,7 @@ type Props = {
     fechaEntradaReparacion: string;
     kilometros: number;
     fechaSalidaReparacion: string;
+    estado: string;
   };
 };
 
@@ -26,7 +28,10 @@ function ServiceHeader({ repair }: Props) {
   return (
     <HeaderBox>
       <Typography variant="h5" sx={{ color: "common.black" }}>
-        Orden Reparación Nro: {repair.id}
+        {repair.estado === EstadoOrdenReparacion.Presupuestado
+          ? "Presupuesto Nro: "
+          : "Orden Reparación Nro: "}
+        {repair.id}
       </Typography>
       <Info>
         <Typography variant="body1" sx={{ color: "common.black" }}>
