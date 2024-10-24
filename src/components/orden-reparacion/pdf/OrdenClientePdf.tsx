@@ -14,7 +14,17 @@ type Props = {
 };
 
 const setPageStyles = () => {
-  return "@media print {.pagebreak {clear: both; page-break-after: always; }}";
+  return `
+    @media print {
+      @page {
+        margin: 10mm;
+      }
+      .pagebreak {
+        clear: both;
+        page-break-after: always;
+      }
+    }
+  `;
 };
 
 export const OrdenClientePdf = React.forwardRef<any, Props>(
@@ -22,7 +32,7 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
     return (
       <div ref={ref}>
         <style>{setPageStyles()}</style>
-        <PDFPage>
+        <PDFPage style={{ height: "auto" }}>
           <TemplateHeader />
           <CarHeader car={repair.auto} owner={repair.auto.owner} />
           <ServiceHeader repair={repair} />
