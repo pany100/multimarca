@@ -20,14 +20,19 @@ type Props = {
   repair: any;
 };
 
-const setPageStyles = () => `
-  @media print {
-    .pagebreak { page-break-before: always; }
-    @page { margin: 0; }
-    body { margin: 0; }
-    div { page-break-inside: avoid; }
-  }
-`;
+const setPageStyles = () => {
+  return `
+    @media print {
+      @page {
+        margin: 10mm;
+      }
+      .pagebreak {
+        clear: both;
+        page-break-after: always;
+      }
+    }
+  `;
+};
 
 export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
   ({ repair }, ref) => {
