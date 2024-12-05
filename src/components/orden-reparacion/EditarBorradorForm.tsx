@@ -226,7 +226,6 @@ const EditarBorradorForm = ({ borrador }: Props) => {
   });
   const esBorrador = watch("esBorrador") || false;
   console.log(esBorrador);
-
   const onSubmit = async (data: any) => {
     try {
       const endpoint = data.esBorrador
@@ -243,6 +242,13 @@ const EditarBorradorForm = ({ borrador }: Props) => {
       });
 
       if (response.ok) {
+        if (!data.esBorrador) {
+          // Si estamos creando un presupuesto, borramos el borrador
+          await authFetch(`/api/borradores/${borrador.id}`, {
+            method: "DELETE",
+          });
+        }
+
         setSnackbar({
           open: true,
           message: data.esBorrador
@@ -250,7 +256,12 @@ const EditarBorradorForm = ({ borrador }: Props) => {
             : "Presupuesto creado con éxito",
           severity: "success",
         });
-        router.push("/dashboard/presupuestos");
+
+        if (data.esBorrador) {
+          router.push("/dashboard/presupuestos");
+        } else {
+          router.back();
+        }
       } else {
         const errorData = await response.json();
         setSnackbar({
