@@ -205,15 +205,105 @@ const OrdenesReparacionPage = () => {
     fetchData();
   }, [paginationModel, authFetch, searchTerm, tabValue]);
 
+  const columnsBorradores: GridColDef[] = [
+    {
+      field: "fechaCreacion",
+      headerName: "Fecha De Creación",
+      flex: 1,
+      valueGetter: (fechaCreacion: string) => {
+        return fechaCreacion
+          ? new Date(fechaCreacion).toLocaleDateString("es-AR")
+          : "No ingresado";
+      },
+    },
+    {
+      field: "vehículo",
+      headerName: "Auto",
+      flex: 2,
+      renderCell: (params: any) => (
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "center",
+            height: "100%",
+          }}
+        >
+          <Typography variant="body2">
+            {params.row.auto.brand} {params.row.auto.model}
+          </Typography>
+          <Typography>{params.row.auto.patent}</Typography>
+        </Box>
+      ),
+    },
+    {
+      field: "id",
+      headerName: "Estado",
+      flex: 1,
+      renderCell: () => (
+        <Chip
+          label="Borrador"
+          sx={{
+            backgroundColor: "#808080",
+            color: "white",
+            fontWeight: "bold",
+          }}
+        />
+      ),
+    },
+    {
+      field: "cliente",
+      headerName: "Cliente",
+      flex: 1,
+      renderCell: (params: any) => params.row.auto.owner.fullName,
+    },
+    {
+      field: "totalAPagar",
+      headerName: "Total a Pagar",
+      flex: 1,
+      renderCell: (params: any) =>
+        calcularTotalOrdenReparacion(params.row).toFixed(2),
+    },
+    {
+      field: "acciones",
+      headerName: "Acciones",
+      width: 200,
+      renderCell: (params) => (
+        <>
+          <IconButton
+            onClick={() => handleEditClick(params.row.id)}
+            size="small"
+          >
+            <EditIcon />
+          </IconButton>
+          <IconButton
+            onClick={() =>
+              router.push(`/dashboard/ordenes-reparacion/${params.row.id}/ver`)
+            }
+            size="small"
+          >
+            <VisibilityIcon />
+          </IconButton>
+          <IconButton
+            onClick={() => handleDeleteClick(params.row.id)}
+            size="small"
+          >
+            <DeleteIcon />
+          </IconButton>
+        </>
+      ),
+    },
+  ];
+
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", flex: 0.3 },
     {
-      field: "fechaEntradaReparacion",
-      headerName: "Fecha Entrada a Taller",
+      field: "fechaCreacion",
+      headerName: "Fecha De Creación",
       flex: 1,
-      valueGetter: (fechaEntradaReparacion: string) => {
-        return fechaEntradaReparacion
-          ? new Date(fechaEntradaReparacion).toLocaleDateString("es-AR")
+      valueGetter: (fechaCreacion: string) => {
+        return fechaCreacion
+          ? new Date(fechaCreacion).toLocaleDateString("es-AR")
           : "No ingresado";
       },
     },
@@ -354,7 +444,7 @@ const OrdenesReparacionPage = () => {
 
       <DataGrid
         rows={tabValue === 0 ? ordenes : borradores}
-        columns={columns}
+        columns={tabValue === 0 ? columns : columnsBorradores}
         paginationModel={paginationModel}
         onPaginationModelChange={setPaginationModel}
         pageSizeOptions={[10, 25, 50]}

@@ -23,7 +23,11 @@ import {
 import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
-function TrabajosRealizadosFormSection() {
+function TrabajosRealizadosFormSection({
+  esBorrador,
+}: {
+  esBorrador: boolean;
+}) {
   const { authFetch } = useFetch();
   const { control, getValues, setValue } = useFormContext();
   const [snackbar, setSnackbar] = useState({
@@ -77,9 +81,6 @@ function TrabajosRealizadosFormSection() {
     };
 
     if (editingTrabajoId) {
-      console.log(currentTrabajos);
-      console.log(newTrabajo);
-      console.log(editingTrabajoId);
       const updatedTrabajos = currentTrabajos.map((t: any) =>
         t.id === editingTrabajoId ||
         `${selectedTrabajo?.id || "otros"}-${t.manoDeObra.name}` ===
@@ -331,7 +332,7 @@ function TrabajosRealizadosFormSection() {
             disabled={
               (tipoTrabajo === "lista" && !selectedTrabajo) ||
               (tipoTrabajo === "otros" && !nombreTrabajo) ||
-              !precioUnitario
+              (!esBorrador && !precioUnitario)
             }
           >
             {editingTrabajoId ? "Actualizar" : "Agregar"}

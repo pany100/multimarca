@@ -21,7 +21,11 @@ import {
 import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
-function ReparacionesTercerosFormSection() {
+function ReparacionesTercerosFormSection({
+  esBorrador,
+}: {
+  esBorrador: boolean;
+}) {
   const { control, getValues, setValue } = useFormContext();
   const { authFetch } = useFetch();
 
@@ -271,7 +275,9 @@ function ReparacionesTercerosFormSection() {
             type="button"
             onClick={handleAddOrUpdateReparacion}
             disabled={
-              !selectedProveedor || !nombre || !precioCompra || !precioVenta
+              !selectedProveedor ||
+              !nombre ||
+              (!esBorrador && (!precioCompra || !precioVenta))
             }
           >
             {editingReparacionId ? "Actualizar" : "Agregar"}

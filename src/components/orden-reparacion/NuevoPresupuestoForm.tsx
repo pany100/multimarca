@@ -5,7 +5,9 @@ import {
   Alert,
   Autocomplete,
   Button,
+  Checkbox,
   FormControl,
+  FormControlLabel,
   Grid,
   Snackbar,
   TextField,
@@ -33,19 +35,28 @@ const schema = yup.object().shape({
           name: yup.string().required(),
         })
         .required("El repuesto es requerido"),
-      precioCompra: yup
-        .number()
-        .positive()
-        .required("El precio de compra es requerido"),
-      precioVenta: yup
-        .number()
-        .positive()
-        .required("El precio de venta es requerido"),
-      unidadesConsumidas: yup
-        .number()
-        .positive()
-        .integer()
-        .required("Las unidades consumidas son requeridas"),
+      precioCompra: yup.mixed().when("$esBorrador", {
+        is: false,
+        then: () =>
+          yup.number().positive().required("El precio de compra es requerido"),
+        otherwise: () => yup.mixed(),
+      }),
+      precioVenta: yup.mixed().when("$esBorrador", {
+        is: false,
+        then: () =>
+          yup.number().positive().required("El precio de venta es requerido"),
+        otherwise: () => yup.mixed(),
+      }),
+      unidadesConsumidas: yup.mixed().when("$esBorrador", {
+        is: false,
+        then: () =>
+          yup
+            .number()
+            .positive()
+            .integer()
+            .required("Las unidades consumidas son requeridas"),
+        otherwise: () => yup.mixed(),
+      }),
     })
   ),
   trabajosRealizados: yup.array().of(
@@ -57,23 +68,29 @@ const schema = yup.object().shape({
           diasParaRecordatorio: yup.number().positive().integer().nullable(),
         })
         .required("La mano de obra es requerida"),
-      precioUnitario: yup
-        .number()
-        .positive()
-        .required("El precio unitario es requerido"),
+      precioUnitario: yup.mixed().when("$esBorrador", {
+        is: false,
+        then: () =>
+          yup.number().positive().required("El precio unitario es requerido"),
+        otherwise: () => yup.mixed(),
+      }),
     })
   ),
   reparacionesDeTercero: yup.array().of(
     yup.object().shape({
       nombre: yup.string().required("El nombre de la reparación es requerido"),
-      precioCompra: yup
-        .number()
-        .positive()
-        .required("El precio de compra es requerido"),
-      precioVenta: yup
-        .number()
-        .positive()
-        .required("El precio de venta es requerido"),
+      precioCompra: yup.mixed().when("$esBorrador", {
+        is: false,
+        then: () =>
+          yup.number().positive().required("El precio de compra es requerido"),
+        otherwise: () => yup.mixed(),
+      }),
+      precioVenta: yup.mixed().when("$esBorrador", {
+        is: false,
+        then: () =>
+          yup.number().positive().required("El precio de venta es requerido"),
+        otherwise: () => yup.mixed(),
+      }),
       proveedor: yup
         .object()
         .shape({
@@ -85,6 +102,7 @@ const schema = yup.object().shape({
   ),
   manoDeObra: yup.number().required("El monto total es requerido"),
   observacionesEntrada: yup.string(),
+  esBorrador: yup.boolean(),
 });
 
 const NuevoPresupuestoForm = ({
@@ -108,6 +126,7 @@ const NuevoPresupuestoForm = ({
     resolver: yupResolver(schema),
     defaultValues: {
       manoDeObra: 0,
+      esBorrador: false,
     },
   });
   const {
@@ -115,7 +134,10 @@ const NuevoPresupuestoForm = ({
     formState: { errors },
     control,
     setValue,
+    watch,
   } = methods;
+
+  const esBorrador = watch("esBorrador") || false;
 
   useEffect(() => {
     const fetchTemplateData = async () => {
@@ -175,9 +197,14 @@ const NuevoPresupuestoForm = ({
   });
   const manoDeObra = useWatch({ control, name: "manoDeObra" });
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
-    repuestosUsados: repuestosUsados ?? [],
-    reparacionesDeTercero: reparacionesTerceros ?? [],
-    manoDeObra,
+    repuestosUsados: (repuestosUsados ?? []).map((item) => ({
+      precioVenta: Number(item.precioVenta) || 0,
+      unidadesConsumidas: Number(item.unidadesConsumidas) || 0,
+    })),
+    reparacionesDeTercero: (reparacionesTerceros ?? []).map((item) => ({
+      precioVenta: Number(item.precioVenta) || 0,
+    })),
+    manoDeObra: Number(manoDeObra) || 0,
   });
 
   const router = useRouter();
@@ -210,7 +237,10 @@ const NuevoPresupuestoForm = ({
 
   const onSubmit = async (data: any) => {
     try {
-      const response = await authFetch("/api/orden-reparacion", {
+      const endpoint = data.esBorrador
+        ? "/api/borradores"
+        : "/api/orden-reparacion";
+      const response = await authFetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -221,7 +251,9 @@ const NuevoPresupuestoForm = ({
       if (response.ok) {
         setSnackbar({
           open: true,
-          message: "Presupuesto creado con éxito",
+          message: data.esBorrador
+            ? "Borrador guardado con éxito"
+            : "Presupuesto creado con éxito",
           severity: "success",
         });
         router.push("/dashboard/presupuestos");
@@ -296,6 +328,21 @@ const NuevoPresupuestoForm = ({
                 </FormControl>
               )}
             />
+            <Controller
+              name="esBorrador"
+              control={control}
+              render={({ field: { onChange, value } }) => (
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      checked={value}
+                      onChange={(e) => onChange(e.target.checked)}
+                    />
+                  }
+                  label="Guardar como borrador"
+                />
+              )}
+            />
           </Grid>
           <Grid item xs={6}>
             <Controller
@@ -316,13 +363,13 @@ const NuevoPresupuestoForm = ({
             />
           </Grid>
           <Grid item xs={12}>
-            <RepuestoUsadoFormSection />
+            <RepuestoUsadoFormSection esBorrador={esBorrador} />
           </Grid>
           <Grid item xs={12}>
-            <ReparacionesTercerosFormSection />
+            <ReparacionesTercerosFormSection esBorrador={esBorrador} />
           </Grid>
           <Grid item xs={12}>
-            <TrabajosRealizadosFormSection />
+            <TrabajosRealizadosFormSection esBorrador={esBorrador} />
           </Grid>
           <Grid item xs={12}>
             <Controller
@@ -371,7 +418,7 @@ const NuevoPresupuestoForm = ({
             my: 2,
           }}
         >
-          Crear Presupuesto
+          {esBorrador ? "Guardar Borrador" : "Crear Presupuesto"}
         </Button>
       </form>
       <Snackbar

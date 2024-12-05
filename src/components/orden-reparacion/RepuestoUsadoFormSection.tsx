@@ -21,7 +21,7 @@ import {
 import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
-function RepuestoUsadoFormSection() {
+function RepuestoUsadoFormSection({ esBorrador }: { esBorrador: boolean }) {
   const { control, getValues, setValue } = useFormContext();
   const [editingRepuestoId, setEditingRepuestoId] = useState<number | null>(
     null
@@ -276,8 +276,7 @@ function RepuestoUsadoFormSection() {
             onClick={handleAddOrUpdateRepuesto}
             disabled={
               !selectedRepuesto ||
-              !precioCompra ||
-              !precioVenta ||
+              (!esBorrador && (!precioCompra || !precioVenta)) ||
               !unidadesConsumidas
             }
           >
