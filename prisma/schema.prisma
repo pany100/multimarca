@@ -79,6 +79,7 @@ model Auto {
   cedulaVerdePath   String?           @db.VarChar(1000)
   owner             Cliente           @relation(fields: [ownerId], references: [id])
   ordenesReparacion OrdenReparacion[] @relation("AutoOrdenReparacion")
+  borradores         Borrador[]       @relation("AutoBorrador")
 
   @@index([patent])
   @@index([ownerId])
@@ -305,12 +306,14 @@ model OrdenReparacion {
 model RepuestoUsado {
   id                     Int                   @id @default(autoincrement())
   ordenReparacionId      Int?
+  borradorId             Int?
   stockId                Int
   precioCompra           Decimal               @db.Decimal(10, 2)
   precioVenta            Decimal               @db.Decimal(10, 2)
   unidadesConsumidas     Int
   plantillaPresupuestoId Int?
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionRepuestos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
+  borrador               Borrador?      @relation("BorradorRepuestos", fields: [borradorId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoRepuestos", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   stock                  Stock                 @relation(fields: [stockId], references: [id])
 
@@ -326,8 +329,10 @@ model ReparacionDeTercero {
   precioVenta            Decimal               @db.Decimal(10, 2)
   proveedorId            Int
   ordenReparacionId      Int?
+  borradorId             Int?
   plantillaPresupuestoId Int?
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionReparacionTercero", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
+  borrador               Borrador?      @relation("BorradorReparacionTercero", fields: [borradorId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoReparacionTercero", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   proveedor              Proveedor             @relation(fields: [proveedorId], references: [id])
 
@@ -340,11 +345,13 @@ model ReparacionDeTercero {
 model TrabajoRealizado {
   id                     Int                   @id @default(autoincrement())
   ordenReparacionId      Int?
+  borradorId             Int?
   precioUnitario         Decimal               @db.Decimal(10, 2)
   descripcion            String                @db.Text
   diasParaRecordatorio   Int?
   plantillaPresupuestoId Int?
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionTrabajosRealizados", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
+  borrador               Borrador?      @relation("BorradorTrabajosRealizados", fields: [borradorId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoTrabajosRealizados", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
 
   @@index([ordenReparacionId])
@@ -456,6 +463,23 @@ model MensajeWhatsApp {
   @@index([timestamp])
   @@index([conversacionId])
 }
+
+
+model Borrador {
+  id                     Int                       @id @default(autoincrement())
+  autoId                 Int
+  fechaCreacion          DateTime                  @default(now())
+  observacionesCliente   String                    @db.Text
+  manoDeObra             Decimal                   @db.Decimal(10, 2)
+  auto                   Auto                      @relation("AutoBorrador", fields: [autoId], references: [id])
+  reparacionesDeTercero  ReparacionDeTercero[]     @relation("BorradorReparacionTercero")
+  repuestosUsados        RepuestoUsado[]           @relation("BorradorRepuestos")
+  trabajosRealizados     TrabajoRealizado[]        @relation("BorradorTrabajosRealizados")
+
+  @@index([autoId])
+  @@index([fechaCreacion])
+}
+
 
 enum TipoEmpleado {
   Mecanico

@@ -19,6 +19,8 @@ import {
   MenuItem,
   Select,
   Snackbar,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
@@ -47,6 +49,7 @@ interface Template {
 
 const OrdenesReparacionPage = () => {
   const [ordenes, setOrdenes] = useState<OrdenReparacion[]>([]);
+  const [borradores, setBorradores] = useState<any[]>([]);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
@@ -62,16 +65,93 @@ const OrdenesReparacionPage = () => {
   });
   const [templates, setTemplates] = useState<Template[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<number | null>(null);
+  const [tabValue, setTabValue] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [totalItems, setTotalItems] = useState(0);
+
+  const router = useRouter();
+  const { authFetch } = useFetch();
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+    setPaginationModel({ page: 0, pageSize: 10 });
+    setSearchTerm("");
+  };
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setPaginationModel({ ...paginationModel, page: 0 });
+  };
+
+  const handleAddClick = () => {
+    setAddModalOpen(true);
+  };
+
+  const handleAddTemplateBlank = () => {
+    router.push("/dashboard/presupuestos/nuevo");
+    setAddModalOpen(false);
+  };
+
+  const handleEditClick = (id: string) => {
+    router.push(`/dashboard/ordenes-reparacion/${id}/editar`);
+  };
 
   const handleDeleteClick = (id: string) => {
     setItemToDelete(id);
     setDeleteConfirmOpen(true);
   };
 
-  const [totalItems, setTotalItems] = useState(0);
-  const [searchTerm, setSearchTerm] = useState("");
-  const router = useRouter();
-  const { authFetch } = useFetch();
+  const handleTemplateChange = (event: SelectChangeEvent<number | null>) => {
+    const templateId = event.target.value as number | null;
+    setSelectedTemplate(templateId);
+  };
+
+  const handleAddWithTemplate = () => {
+    if (selectedTemplate) {
+      router.push(
+        `/dashboard/presupuestos/nuevo?templateId=${selectedTemplate}`
+      );
+    }
+    setAddModalOpen(false);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!itemToDelete) return;
+
+    try {
+      const url = new URL("/api/orden-reparacion", window.location.origin);
+      const baseUrl = `${url.origin}${url.pathname}`;
+
+      const response = await authFetch(`${baseUrl}/${itemToDelete}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setOrdenes((prevItems) =>
+          prevItems.filter((item) => item.id !== itemToDelete)
+        );
+        setSnackbar({
+          open: true,
+          message: `Orden de reparación eliminada con éxito`,
+          severity: "success",
+        });
+      } else {
+        setSnackbar({
+          open: true,
+          message: `Error al eliminar la orden de reparación`,
+          severity: "error",
+        });
+      }
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: `Error al realizar la solicitud DELETE`,
+        severity: "error",
+      });
+    } finally {
+      setDeleteConfirmOpen(false);
+      setItemToDelete(null);
+    }
+  };
 
   useEffect(() => {
     const fetchTemplates = async () => {
@@ -87,10 +167,43 @@ const OrdenesReparacionPage = () => {
     fetchTemplates();
   }, [authFetch]);
 
-  const handleTemplateChange = (event: SelectChangeEvent<number | null>) => {
-    const templateId = event.target.value as number | null;
-    setSelectedTemplate(templateId);
-  };
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        let url;
+        if (tabValue === 0) {
+          url = new URL("/api/orden-reparacion", window.location.origin);
+          url.searchParams.append(
+            "estado",
+            EstadoOrdenReparacion.Presupuestado
+          );
+        } else {
+          url = new URL("/api/borradores", window.location.origin);
+        }
+
+        url.searchParams.append("page", paginationModel.page.toString());
+        url.searchParams.append("size", paginationModel.pageSize.toString());
+        if (searchTerm) url.searchParams.append("query", searchTerm);
+
+        const response = await authFetch(url.toString());
+        const data = await response.json();
+
+        if (tabValue === 0) {
+          setOrdenes(data.items);
+        } else {
+          setBorradores(data.items);
+        }
+        setTotalItems(data.total);
+      } catch (error) {
+        console.error("Error al obtener datos:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [paginationModel, authFetch, searchTerm, tabValue]);
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", flex: 0.3 },
@@ -196,106 +309,19 @@ const OrdenesReparacionPage = () => {
       ),
     },
   ];
+
   const estadosDisplay: Record<EstadoOrdenReparacion, string> = {
     [EstadoOrdenReparacion.Presupuestado]: "Presupuestado",
     [EstadoOrdenReparacion.Aceptado]: "Aceptado",
     [EstadoOrdenReparacion.EnProgreso]: "En Progreso",
     [EstadoOrdenReparacion.Terminado]: "Terminado",
   };
+
   const estadoColors = {
     [EstadoOrdenReparacion.Presupuestado]: "#FFA500",
     [EstadoOrdenReparacion.Aceptado]: "#FFD700",
     [EstadoOrdenReparacion.EnProgreso]: "#4169E1",
     [EstadoOrdenReparacion.Terminado]: "#32CD32",
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!itemToDelete) return;
-
-    try {
-      const url = new URL("/api/orden-reparacion", window.location.origin);
-      const baseUrl = `${url.origin}${url.pathname}`;
-
-      const response = await authFetch(`${baseUrl}/${itemToDelete}`, {
-        method: "DELETE",
-      });
-      if (response.ok) {
-        setOrdenes((prevItems) =>
-          prevItems.filter((item) => item.id !== itemToDelete)
-        );
-        setSnackbar({
-          open: true,
-          message: `Orden de reparación eliminada con éxito`,
-          severity: "success",
-        });
-      } else {
-        setSnackbar({
-          open: true,
-          message: `Error al eliminar la orden de reparación`,
-          severity: "error",
-        });
-      }
-    } catch (error) {
-      setSnackbar({
-        open: true,
-        message: `Error al realizar la solicitud DELETE`,
-        severity: "error",
-      });
-    } finally {
-      setDeleteConfirmOpen(false);
-      setItemToDelete(null);
-    }
-  };
-
-  useEffect(() => {
-    const fetchOrdenes = async () => {
-      setLoading(true);
-      try {
-        const url = new URL("/api/orden-reparacion", window.location.origin);
-        url.searchParams.append("page", paginationModel.page.toString());
-        url.searchParams.append("size", paginationModel.pageSize.toString());
-        if (searchTerm) url.searchParams.append("query", searchTerm);
-        url.searchParams.append("estado", EstadoOrdenReparacion.Presupuestado);
-
-        const response = await authFetch(url.toString());
-        const data = await response.json();
-        setOrdenes(data.items);
-        setTotalItems(data.total);
-      } catch (error) {
-        console.error("Error al obtener órdenes de reparación:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchOrdenes();
-  }, [paginationModel, authFetch, searchTerm]);
-
-  const handleAddClick = () => {
-    setAddModalOpen(true);
-  };
-
-  const handleAddTemplateBlank = () => {
-    router.push("/dashboard/presupuestos/nuevo");
-    setAddModalOpen(false);
-  };
-
-  const handleEditClick = (id: string) => {
-    router.push(`/dashboard/ordenes-reparacion/${id}/editar`);
-  };
-
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-    setPaginationModel({ ...paginationModel, page: 0 });
-  };
-
-  const handleAddWithTemplate = () => {
-    if (selectedTemplate) {
-      router.push(
-        `/dashboard/presupuestos/nuevo?templateId=${selectedTemplate}`
-      );
-    }
-    setAddModalOpen(false);
   };
 
   return (
@@ -311,6 +337,12 @@ const OrdenesReparacionPage = () => {
       >
         Agregar Presupuesto
       </Button>
+
+      <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
+        <Tab label="Presupuestos" />
+        <Tab label="Borradores" />
+      </Tabs>
+
       <TextField
         label="Buscar"
         variant="outlined"
@@ -319,8 +351,9 @@ const OrdenesReparacionPage = () => {
         fullWidth
         margin="normal"
       />
+
       <DataGrid
-        rows={ordenes}
+        rows={tabValue === 0 ? ordenes : borradores}
         columns={columns}
         paginationModel={paginationModel}
         onPaginationModelChange={setPaginationModel}
@@ -331,6 +364,7 @@ const OrdenesReparacionPage = () => {
         getRowId={(row) => row.id}
         autoHeight
       />
+
       <Dialog
         open={deleteConfirmOpen}
         onClose={() => setDeleteConfirmOpen(false)}
@@ -359,6 +393,7 @@ const OrdenesReparacionPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       <Dialog open={addModalOpen} onClose={() => setAddModalOpen(false)}>
         <DialogTitle>Nuevo Presupuesto</DialogTitle>
         <DialogContent>
@@ -372,7 +407,7 @@ const OrdenesReparacionPage = () => {
             fullWidth
             sx={{ mt: 2, mb: 2 }}
           >
-            Agregar Template en Blanco
+            En Blanco
           </Button>
           <FormControl fullWidth sx={{ mt: 2 }}>
             <InputLabel>Seleccionar Template</InputLabel>
@@ -410,6 +445,7 @@ const OrdenesReparacionPage = () => {
           </Button>
         </DialogActions>
       </Dialog>
+
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
