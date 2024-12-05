@@ -4,7 +4,6 @@ const PDF_PAGE_HEIGHT = 1130;
 const PDF_PAGE_WIDTH = 800;
 
 const PDFPage = styled("div")(() => ({
-  padding: 20,
   height: PDF_PAGE_HEIGHT,
   width: PDF_PAGE_WIDTH,
   display: "flex",

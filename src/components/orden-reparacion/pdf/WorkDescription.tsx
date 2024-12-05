@@ -15,7 +15,7 @@ const Box = styled("div")(() => ({
 
 function WorkDescription({ repair }: Props) {
   return (
-    <Box sx={{ marginRight: 10 }}>
+    <Box sx={{ marginRight: 15 }}>
       <Typography variant="body1" sx={{ color: "common.black" }}>
         Descripción
       </Typography>
@@ -55,21 +55,35 @@ function WorkDescription({ repair }: Props) {
           </Fragment>
         )
       )}
-      <Typography variant="body1" sx={{ color: "common.black", mb: 2 }}>
-        Mano de obra
-      </Typography>
+      {repair.trabajosRealizados.map(
+        (el: { descripcion: string; precioUnitario: string }) => (
+          <Fragment key={el.descripcion}>
+            <Typography variant="body1" sx={{ color: "common.black" }}>
+              {el.descripcion}
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ color: "common.black", textAlign: "right" }}
+            >
+              ${el.precioUnitario}
+            </Typography>
+          </Fragment>
+        )
+      )}
       <Typography
         variant="body1"
-        sx={{ color: "common.black", textAlign: "right" }}
+        sx={{ mt: 2, fontWeight: "bold", color: "common.black" }}
       >
-        ${repair.manoDeObra}
-      </Typography>
-      <Typography variant="body1" sx={{ color: "common.black" }}>
         Importe Total:
       </Typography>
       <Typography
         variant="body1"
-        sx={{ color: "common.black", textAlign: "right" }}
+        sx={{
+          mt: 2,
+          fontWeight: "bold",
+          color: "common.black",
+          textAlign: "right",
+        }}
       >
         ${calcularTotalOrdenReparacion(repair)}
       </Typography>

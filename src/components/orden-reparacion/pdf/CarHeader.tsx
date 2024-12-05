@@ -1,20 +1,9 @@
 import { Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
-
-const HeaderBox = styled("div")(() => ({
-  border: "1px solid black",
-  borderRadius: "4px",
-  height: "150px",
-  width: "100%",
-  padding: "10px",
-  marginBottom: 20,
-}));
+import { EstadoOrdenReparacion } from "@prisma/client";
 
 const Info = styled("div")(() => ({
   display: "grid",
-  gridTemplateRows: "auto auto auto auto",
-  gridTemplateColumns: "50% 50%",
-  gridAutoFlow: "column",
 }));
 
 type Props = {
@@ -23,6 +12,7 @@ type Props = {
     brand: string;
     model: string;
     year: string;
+    transmission_type: string;
     color: string;
   };
   owner: {
@@ -32,35 +22,51 @@ type Props = {
     zipCode: string;
     phone: string;
   };
+  repair: {
+    id: number;
+    fechaEntradaReparacion: string;
+    kilometros: number;
+    fechaSalidaReparacion: string;
+    estado: string;
+  };
 };
 
-function CarHeader({ car, owner }: Props) {
+function CarHeader({ repair, car, owner }: Props) {
   return (
-    <HeaderBox>
-      <Typography
-        variant="h6"
-        sx={{ color: "common.black", textTransform: "uppercase" }}
-      >
-        {car.patent} {car.brand} {car.model} {car.year} {car.color}
+    <div>
+      <Typography variant="h5" sx={{ mb: 2, color: "common.black" }}>
+        {repair.estado === EstadoOrdenReparacion.Presupuestado
+          ? "Presupuesto Nro: "
+          : "Orden Reparación Nro: "}
+        {repair.id}
       </Typography>
       <Info>
         <Typography variant="body1" sx={{ color: "common.black" }}>
           Titular: {owner.fullName}
         </Typography>
         <Typography variant="body1" sx={{ color: "common.black" }}>
-          Domicilio: {owner.address}
-        </Typography>
-        <Typography variant="body1" sx={{ color: "common.black" }}>
-          Localidad: {owner.city}
-        </Typography>
-        <Typography variant="body1" sx={{ color: "common.black" }}>
-          Codigo Postal: {owner.zipCode}
+          Vehículo: {car.patent} {car.brand} {car.model} {car.year} {car.color}{" "}
+          - Caja {car.transmission_type}
         </Typography>
         <Typography variant="body1" sx={{ color: "common.black" }}>
           Teléfono: {owner.phone}
         </Typography>
+        <Typography variant="body1" sx={{ color: "common.black" }}>
+          Fecha Ingreso:{" "}
+          {repair.fechaEntradaReparacion
+            ? new Date(repair.fechaEntradaReparacion).toLocaleDateString(
+                "es-AR"
+              )
+            : "-"}
+        </Typography>
+        <Typography variant="body1" sx={{ color: "common.black" }}>
+          Fecha Egreso:{" "}
+          {repair.fechaSalidaReparacion
+            ? new Date(repair.fechaSalidaReparacion).toLocaleDateString("es-AR")
+            : "-"}
+        </Typography>
       </Info>
-    </HeaderBox>
+    </div>
   );
 }
 

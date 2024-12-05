@@ -4,9 +4,8 @@ import PDFPage from "./PDFPage";
 import TemplateHeader from "./TemplateHeader";
 
 import { Typography } from "@mui/material";
+import { EstadoOrdenReparacion } from "@prisma/client";
 import CarHeader from "./CarHeader";
-import ServiceHeader from "./ServiceHeader";
-import ThirdPartyRepairList from "./ThirdPartyRepairList";
 import WorkDescription from "./WorkDescription";
 
 type Props = {
@@ -34,27 +33,25 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
         <style>{setPageStyles()}</style>
         <PDFPage style={{ height: "auto" }}>
           <TemplateHeader />
-          <CarHeader car={repair.auto} owner={repair.auto.owner} />
-          <ServiceHeader repair={repair} />
-          <Divider sx={{ mt: 4, borderColor: "common.black" }} />
-          <Typography variant="body1" sx={{ color: "common.black" }}>
-            Observación del cliente
-          </Typography>
-          <Typography variant="body1" sx={{ color: "common.black", mb: 10 }}>
-            {repair.observacionesCliente}
-          </Typography>
-          <Typography variant="body1" sx={{ color: "common.black" }}>
-            Trabajos realizados
-          </Typography>
-          <ThirdPartyRepairList repair={repair} />
-          <Divider sx={{ mt: 4, borderColor: "common.black" }} />
-          <Typography variant="body1" sx={{ color: "common.black" }}>
+          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+          <CarHeader
+            car={repair.auto}
+            repair={repair}
+            owner={repair.auto.owner}
+          />
+          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+          <Typography
+            variant="body1"
+            sx={{ fontWeight: "bold", color: "common.black" }}
+          >
             Detalle de Trabajos
           </Typography>
           <WorkDescription repair={repair} />
           <Divider sx={{ mt: 4, borderColor: "common.black" }} />
           <Typography variant="body1" sx={{ color: "common.black" }}>
-            Realizó {repair.mecanicos[0]?.name}
+            {repair.estado === EstadoOrdenReparacion.Presupuestado
+              ? "Presupuesto aproximado, valores al día, sin IVA, sujeto a desarme y re-ensamble."
+              : "Detalle del trabajo, sin IVA"}
           </Typography>
         </PDFPage>
       </div>
