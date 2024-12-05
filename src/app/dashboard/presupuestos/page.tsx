@@ -110,7 +110,7 @@ const OrdenesReparacionPage = () => {
   };
 
   const handleEditDraftClick = (id: string) => {
-    router.push(`/dashboard/presupuestos/editar/${id}`);
+    router.push(`/dashboard/borradores/${id}/editar`);
   };
 
   const handleTemplateChange = (event: SelectChangeEvent<number | null>) => {

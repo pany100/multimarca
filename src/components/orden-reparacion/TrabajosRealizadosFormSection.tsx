@@ -24,9 +24,9 @@ import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
 function TrabajosRealizadosFormSection({
-  esBorrador,
+  esBorrador = false,
 }: {
-  esBorrador: boolean;
+  esBorrador?: boolean;
 }) {
   const { authFetch } = useFetch();
   const { control, getValues, setValue } = useFormContext();

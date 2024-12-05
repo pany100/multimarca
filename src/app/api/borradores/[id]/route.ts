@@ -1,5 +1,57 @@
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: "ID de borrador inválido" },
+        { status: 400 }
+      );
+    }
+
+    const borrador = await prisma.borrador.findUnique({
+      where: { id },
+      include: {
+        auto: {
+          include: {
+            owner: true,
+          },
+        },
+        repuestosUsados: {
+          include: {
+            stock: true,
+          },
+        },
+        trabajosRealizados: true,
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
+          },
+        },
+      },
+    });
+
+    if (!borrador) {
+      return NextResponse.json(
+        { error: "Borrador no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(borrador);
+  } catch (error) {
+    console.error("Error al obtener borrador:", error);
+    return NextResponse.json(
+      { error: `Error al obtener el borrador: ${error}` },
+      { status: 500 }
+    );
+  }
+}
 
 export async function PUT(
   request: Request,

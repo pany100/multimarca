@@ -21,7 +21,11 @@ import {
 import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
-function RepuestoUsadoFormSection({ esBorrador }: { esBorrador: boolean }) {
+function RepuestoUsadoFormSection({
+  esBorrador = false,
+}: {
+  esBorrador?: boolean;
+}) {
   const { control, getValues, setValue } = useFormContext();
   const [editingRepuestoId, setEditingRepuestoId] = useState<number | null>(
     null

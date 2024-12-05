@@ -22,9 +22,9 @@ import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 
 function ReparacionesTercerosFormSection({
-  esBorrador,
+  esBorrador = false,
 }: {
-  esBorrador: boolean;
+  esBorrador?: boolean;
 }) {
   const { control, getValues, setValue } = useFormContext();
   const { authFetch } = useFetch();
