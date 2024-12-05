@@ -51,6 +51,9 @@ const OrdenesReparacionPage = () => {
   const [ordenes, setOrdenes] = useState<OrdenReparacion[]>([]);
   const [borradores, setBorradores] = useState<any[]>([]);
   const [itemToDelete, setItemToDelete] = useState<string | null>(null);
+  const [draftItemToDelete, setDraftItemToDelete] = useState<string | null>(
+    null
+  );
   const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
   const [addModalOpen, setAddModalOpen] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -101,6 +104,15 @@ const OrdenesReparacionPage = () => {
     setDeleteConfirmOpen(true);
   };
 
+  const handleDeleteDraftClick = (id: string) => {
+    setDraftItemToDelete(id);
+    setDeleteConfirmOpen(true);
+  };
+
+  const handleEditDraftClick = (id: string) => {
+    router.push(`/dashboard/presupuestos/editar/${id}`);
+  };
+
   const handleTemplateChange = (event: SelectChangeEvent<number | null>) => {
     const templateId = event.target.value as number | null;
     setSelectedTemplate(templateId);
@@ -113,6 +125,41 @@ const OrdenesReparacionPage = () => {
       );
     }
     setAddModalOpen(false);
+  };
+
+  const handleDeleteDraftConfirm = async () => {
+    if (!draftItemToDelete) return;
+
+    try {
+      const response = await authFetch(`/api/borradores/${draftItemToDelete}`, {
+        method: "DELETE",
+      });
+      if (response.ok) {
+        setBorradores((prevItems) =>
+          prevItems.filter((item) => item.id !== draftItemToDelete)
+        );
+        setSnackbar({
+          open: true,
+          message: `Borrador eliminado con éxito`,
+          severity: "success",
+        });
+      } else {
+        setSnackbar({
+          open: true,
+          message: `Error al eliminar el borrador`,
+          severity: "error",
+        });
+      }
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: `Error al realizar la solicitud DELETE`,
+        severity: "error",
+      });
+    } finally {
+      setDeleteConfirmOpen(false);
+      setDraftItemToDelete(null);
+    }
   };
 
   const handleDeleteConfirm = async () => {
@@ -271,21 +318,13 @@ const OrdenesReparacionPage = () => {
       renderCell: (params) => (
         <>
           <IconButton
-            onClick={() => handleEditClick(params.row.id)}
+            onClick={() => handleEditDraftClick(params.row.id)}
             size="small"
           >
             <EditIcon />
           </IconButton>
           <IconButton
-            onClick={() =>
-              router.push(`/dashboard/ordenes-reparacion/${params.row.id}/ver`)
-            }
-            size="small"
-          >
-            <VisibilityIcon />
-          </IconButton>
-          <IconButton
-            onClick={() => handleDeleteClick(params.row.id)}
+            onClick={() => handleDeleteDraftClick(params.row.id)}
             size="small"
           >
             <DeleteIcon />
@@ -457,24 +496,36 @@ const OrdenesReparacionPage = () => {
 
       <Dialog
         open={deleteConfirmOpen}
-        onClose={() => setDeleteConfirmOpen(false)}
+        onClose={() => {
+          setDeleteConfirmOpen(false);
+          setDraftItemToDelete(null);
+          setItemToDelete(null);
+        }}
       >
         <DialogTitle>Confirmar eliminación</DialogTitle>
         <DialogContent>
           <Typography>
-            ¿Estás seguro de que quieres eliminar este presupuesto?
+            {draftItemToDelete
+              ? "¿Estás seguro de que quieres eliminar este borrador?"
+              : "¿Estás seguro de que quieres eliminar este presupuesto?"}
           </Typography>
         </DialogContent>
         <DialogActions sx={{ justifyContent: "center", pb: 2, px: 3 }}>
           <Button
-            onClick={() => setDeleteConfirmOpen(false)}
+            onClick={() => {
+              setDeleteConfirmOpen(false);
+              setDraftItemToDelete(null);
+              setItemToDelete(null);
+            }}
             variant="outlined"
             sx={{ mr: 1 }}
           >
             Cancelar
           </Button>
           <Button
-            onClick={handleDeleteConfirm}
+            onClick={
+              draftItemToDelete ? handleDeleteDraftConfirm : handleDeleteConfirm
+            }
             variant="contained"
             color="error"
             autoFocus
