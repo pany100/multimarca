@@ -1,2 +1,0 @@
--- AlterTable
-ALTER TABLE `Dolar` ALTER COLUMN `fecha` DROP DEFAULT;
