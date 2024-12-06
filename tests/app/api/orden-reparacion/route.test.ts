@@ -54,6 +54,7 @@ describe("POST /api/orden-reparacion", () => {
         },
       ],
       manoDeObra: 300,
+      descuento: 0,
     };
 
     // Crear la solicitud
