@@ -6,6 +6,7 @@ import TemplateHeader from "./TemplateHeader";
 import { Typography } from "@mui/material";
 import { EstadoOrdenReparacion } from "@prisma/client";
 import CarHeader from "./CarHeader";
+import ControlesRealizados from "./ControlesRealizados";
 import WorkDescription from "./WorkDescription";
 
 type Props = {
@@ -39,6 +40,8 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
             repair={repair}
             owner={repair.auto.owner}
           />
+          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+          <ControlesRealizados repair={repair} />
           <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
           <Typography
             variant="body1"
