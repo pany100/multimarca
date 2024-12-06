@@ -1,3 +1,4 @@
+import { sincronizarControles } from "@/utils/controlHelper";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -24,6 +25,7 @@ export async function PUT(
         type,
       },
     });
+    sincronizarControles();
 
     return NextResponse.json(controlActualizado);
   } catch (error) {

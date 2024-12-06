@@ -302,9 +302,11 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
             </Typography>
             <Typography>
               <strong>Entrada a taller:</strong>{" "}
-              {new Date(
-                ordenReparacion.fechaEntradaReparacion
-              ).toLocaleDateString()}
+              {ordenReparacion.fechaEntradaReparacion
+                ? new Date(
+                    ordenReparacion.fechaEntradaReparacion
+                  ).toLocaleDateString()
+                : "N/A"}
             </Typography>
             <Typography>
               <strong>Salida de taller:</strong>{" "}

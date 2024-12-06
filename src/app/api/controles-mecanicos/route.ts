@@ -1,3 +1,4 @@
+import { sincronizarControles } from "@/utils/controlHelper";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -67,6 +68,7 @@ export async function POST(request: Request) {
         type,
       },
     });
+    sincronizarControles();
 
     return NextResponse.json(nuevoControl, { status: 201 });
   } catch (error) {

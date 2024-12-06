@@ -1,5 +1,5 @@
 import Divider from "@mui/material/Divider";
-import React from "react";
+import React, { Fragment } from "react";
 import PDFPage from "./PDFPage";
 import TemplateHeader from "./TemplateHeader";
 
@@ -41,8 +41,15 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
             owner={repair.auto.owner}
           />
           <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
-          <ControlesRealizados repair={repair} />
-          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+          {repair.estado !== EstadoOrdenReparacion.Presupuestado &&
+            repair.controlesEnReparacion.filter(
+              (control: any) => control.valor === "true"
+            ).length > 0 && (
+              <Fragment>
+                <ControlesRealizados repair={repair} />
+                <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+              </Fragment>
+            )}
           <Typography
             variant="body1"
             sx={{ fontWeight: "bold", color: "common.black" }}

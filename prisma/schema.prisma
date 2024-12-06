@@ -373,6 +373,7 @@ model ControlEnReparacion {
   ordenReparacionId Int
   controlMecanicoId Int
   valor             String          @db.VarChar(255)
+  detalle           String?          @db.Text
   controlMecanico   ControlMecanico @relation(fields: [controlMecanicoId], references: [id], onDelete: Cascade)
   ordenReparacion   OrdenReparacion @relation("OrdenReparacionControlesEnReparacion", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
 

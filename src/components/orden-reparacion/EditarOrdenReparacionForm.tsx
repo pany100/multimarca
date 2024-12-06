@@ -87,6 +87,7 @@ const schema = yup.object().shape({
     yup.object().shape({
       id: yup.number().required("Id es requerido"),
       valor: yup.string(),
+      detalle: yup.string(),
     })
   ),
   trabajosRealizados: yup.array().of(
@@ -193,6 +194,7 @@ type OrdenReparacion = {
       name: string;
       type: string;
     };
+    detalle: string;
   }[];
   descuento: number;
 };
@@ -272,6 +274,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
         (control) => ({
           id: control.id,
           valor: control.valor,
+          detalle: control.detalle || "",
         })
       ),
     },
@@ -671,6 +674,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
                             ? "checkbox"
                             : "texto",
                         valor: control.valor,
+                        detalle: control.detalle,
                       })
                     )}
                   />

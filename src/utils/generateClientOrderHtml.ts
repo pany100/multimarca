@@ -177,10 +177,16 @@ export default function generateClientOrderHtml(repair: any): string {
         </div>
       </div>
       <hr class="divider" />
-      <div>
-        <h5 class="TypographyH6">
-          Controles Realizados
-        </h5>
+      ${
+        repair.estado !== EstadoOrdenReparacion.Presupuestado &&
+        repair.controlesEnReparacion.filter(
+          (control: any) => control.valor === "true"
+        ).length > 0 &&
+        `
+        <div>
+          <h5 class="TypographyH6">
+            Controles Realizados
+          </h5>
         ${repair.controlesEnReparacion
           .filter((control: any) => control.valor === "true")
           .map(
@@ -191,8 +197,10 @@ export default function generateClientOrderHtml(repair: any): string {
           `
           )
           .join("")}
-      </div>
-      <hr class="divider" />
+        </div>
+        <hr class="divider" />
+        `
+      }
       <div class="TypographyBody1" style="font-weight: bold;">
         Detalle de Trabajos
       </div>

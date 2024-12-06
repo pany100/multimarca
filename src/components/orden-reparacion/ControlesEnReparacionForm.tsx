@@ -7,13 +7,14 @@ import {
   Typography,
 } from "@mui/material";
 import React from "react";
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 
 type ControlMecanico = {
   id: number;
   nombre: string;
   tipo: "checkbox" | "texto";
   valor: string;
+  detalle: string;
 };
 
 type Props = {
@@ -25,11 +26,10 @@ const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
 
   const handleControlChange = (id: number, valor: string) => {
     const controlesEnReparacion = getValues("controlesEnReparacion");
-    console.log(controlesEnReparacion);
     const controlesActualizados = controlesEnReparacion.map(
       (control: ControlMecanico) => {
         if (control.id === id) {
-          return { id, valor };
+          return { id, valor, detalle: control.detalle };
         }
         return control;
       }
@@ -37,21 +37,24 @@ const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
     setValue("controlesEnReparacion", controlesActualizados);
   };
 
+  const controlesEnForm = useWatch({ control, name: "controlesEnReparacion" });
+  console.log(controlesMecanicos);
   return (
     <>
       <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-        Trabajos Realizados
+        Controles Realizados
       </Typography>
 
       <Grid container spacing={2}>
         {controlesMecanicos
           .filter((control) => control.tipo === "checkbox")
           .map((control) => (
-            <Grid item xs={6} key={control.id} sx={{ pt: "0 !important" }}>
+            <Grid item xs={12} key={control.id} sx={{ pt: "0 !important" }}>
               <Box
                 display="flex"
                 alignItems="center"
                 justifyContent="space-between"
+                width="100%"
               >
                 <Typography>{control.nombre}</Typography>
                 <Checkbox
@@ -64,6 +67,20 @@ const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
                   }
                 />
               </Box>
+              {controlesEnForm.find(
+                (formControl: any) => formControl.id === control.id
+              )?.valor === "true" && (
+                <TextField
+                  fullWidth
+                  size="small"
+                  placeholder="Detalle (Opcional)"
+                  value={control.detalle || ""}
+                  onChange={(e) =>
+                    handleControlChange(control.id, e.target.value)
+                  }
+                  sx={{ mt: 1 }}
+                />
+              )}
             </Grid>
           ))}
         {controlesMecanicos
