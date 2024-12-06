@@ -440,15 +440,27 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                 id: string;
                 controlMecanico: { name: string };
                 valor: string;
+                detalle?: string;
               }) => (
-                <Grid item xs={12} sm={6} md={4} key={control.id}>
-                  <Box display="flex" alignItems="center">
-                    <Checkbox
-                      checked={control.valor === "true"}
-                      disabled
-                      sx={{ mr: 1 }}
-                    />
-                    <Typography>{control.controlMecanico.name}</Typography>
+                <Grid item xs={12} sm={6} key={control.id}>
+                  <Box sx={{ display: "flex", flexDirection: "column" }}>
+                    <Box display="flex" alignItems="center">
+                      <Checkbox
+                        checked={control.valor === "true"}
+                        disabled
+                        sx={{ mr: 1 }}
+                      />
+                      <Typography>{control.controlMecanico.name}</Typography>
+                    </Box>
+                    {control.valor === "true" && control.detalle && (
+                      <Typography
+                        variant="body2"
+                        color="textSecondary"
+                        sx={{ ml: 2 }}
+                      >
+                        {control.detalle}
+                      </Typography>
+                    )}
                   </Box>
                 </Grid>
               )
@@ -466,7 +478,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                 controlMecanico: { name: string };
                 valor: string;
               }) => (
-                <Grid item xs={12} sm={6} md={4} key={control.id}>
+                <Grid item xs={12} sm={6} md={6} key={control.id}>
                   <TextField
                     label={control.controlMecanico.name}
                     value={control.valor || ""}
