@@ -48,16 +48,28 @@ const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
         {controlesMecanicos
           .filter((control) => control.tipo === "checkbox")
           .map((control) => (
-            <Grid item xs={12} key={control.id} sx={{ pt: "0 !important" }}>
+            <Grid
+              item
+              xs={12}
+              key={control.id}
+              sx={{ pt: "0 !important", mb: 1 }}
+            >
               <Box
-                display="flex"
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "auto 40px 400px",
+                }}
                 alignItems="center"
-                justifyContent="space-between"
                 width="100%"
+                gap={2}
               >
                 <Typography>{control.nombre}</Typography>
                 <Checkbox
-                  defaultChecked={control?.valor === "true"}
+                  checked={
+                    controlesEnForm.find(
+                      (formControl: any) => formControl.id === control.id
+                    )?.valor === "true"
+                  }
                   onChange={(e) =>
                     handleControlChange(
                       control.id,
@@ -65,30 +77,45 @@ const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
                       control.detalle
                     )
                   }
+                  sx={{ minWidth: "48px" }}
                 />
+                {controlesEnForm.find(
+                  (formControl: any) => formControl.id === control.id
+                )?.valor === "true" && (
+                  <TextField
+                    size="small"
+                    placeholder="Detalle (Opcional)"
+                    value={
+                      controlesEnForm.find(
+                        (formControl: any) => formControl.id === control.id
+                      )?.detalle || ""
+                    }
+                    onChange={(e) =>
+                      handleControlChange(control.id, "true", e.target.value)
+                    }
+                    sx={{ flex: 1, minWidth: "400px" }}
+                  />
+                )}
               </Box>
-              {controlesEnForm.find(
-                (formControl: any) => formControl.id === control.id
-              )?.valor === "true" && (
-                <TextField
-                  fullWidth
-                  size="small"
-                  placeholder="Detalle (Opcional)"
-                  defaultValue={control.detalle}
-                  onChange={(e) =>
-                    handleControlChange(control.id, "true", e.target.value)
-                  }
-                  sx={{ mt: 1 }}
-                />
-              )}
             </Grid>
           ))}
         {controlesMecanicos
           .filter((control) => control.tipo !== "checkbox")
           .map((control) => (
-            <Grid item xs={12} key={control.id} sx={{ pt: "0 !important" }}>
-              <Box display="flex" alignItems="center">
-                <Typography style={{ marginRight: "16px", minWidth: "120px" }}>
+            <Grid
+              item
+              xs={12}
+              key={control.id}
+              sx={{ pt: "0 !important", mb: 1 }}
+            >
+              <Box
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: "auto 400px",
+                }}
+                alignItems="center"
+              >
+                <Typography style={{ marginRight: "16px" }}>
                   {control.nombre}
                 </Typography>
                 <TextField
