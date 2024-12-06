@@ -101,7 +101,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                 Teléfono: {repair.auto.owner.phone}
               </Typography>
               <Typography variant="h6" sx={{ color: "common.black" }}>
-                Km: {repair.kilometros}
+                Km: {repair.kilometros?.toLocaleString("es-AR")}
               </Typography>
               <div>
                 <Typography

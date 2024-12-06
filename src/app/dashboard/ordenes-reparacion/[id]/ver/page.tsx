@@ -277,7 +277,8 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
               <strong>Patente:</strong> {ordenReparacion.auto.patent}
             </Typography>
             <Typography>
-              <strong>Kilómetros:</strong> {ordenReparacion.kilometros}
+              <strong>Kilómetros:</strong>{" "}
+              {ordenReparacion.kilometros?.toLocaleString("es-AR")}
             </Typography>
           </Grid>
 

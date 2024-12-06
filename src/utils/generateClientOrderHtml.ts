@@ -10,9 +10,11 @@ export default function generateClientOrderHtml(repair: any): string {
     <style>
       @page {
         size: A4;
-        /* Change from the default size of A4 */
-        margin: 0mm;
-        /* Set margin on each page */
+        margin: 10mm;
+      }
+      .pagebreak {
+        clear: both;
+        page-break-after: always;
       }
     </style>
   </head>
