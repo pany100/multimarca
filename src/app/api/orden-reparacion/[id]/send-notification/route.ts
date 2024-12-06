@@ -40,6 +40,13 @@ export async function POST(
 
     // Genera el PDF
     const pdfBuffer = await generatePdf(ordenReparacion);
+    // // Escribe el PDF a un archivo
+    // const fs = require("fs");
+    // const path = require("path");
+
+    // const pdfPath = path.join(process.cwd(), "tmp", `orden.pdf`);
+    // await fs.promises.mkdir(path.dirname(pdfPath), { recursive: true });
+    // await fs.promises.writeFile(pdfPath, pdfBuffer);
 
     // Envía el PDF por WhatsApp
     const response = await sendPdfViaWhatsApp(ordenReparacion, pdfBuffer);
