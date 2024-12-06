@@ -41,6 +41,32 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
             owner={repair.auto.owner}
           />
           <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+          <Typography
+            variant="body1"
+            sx={{ fontWeight: "bold", color: "common.black" }}
+          >
+            Observaciones de entrada
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: "common.black", width: "90%" }}
+          >
+            {JSON.parse(repair.observacionesEntrada || "[]").join(", ") || "-"}
+          </Typography>
+          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+          <Typography
+            variant="body1"
+            sx={{ fontWeight: "bold", color: "common.black" }}
+          >
+            Observaciones del taller
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ color: "common.black", width: "90%" }}
+          >
+            {JSON.parse(repair.observacionesSalida || "[]").join(", ") || "-"}
+          </Typography>
+          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
           {repair.estado !== EstadoOrdenReparacion.Presupuestado &&
             repair.controlesEnReparacion.filter(
               (control: any) => control.valor === "true"

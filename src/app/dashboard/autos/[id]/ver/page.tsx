@@ -179,7 +179,18 @@ const VerAutoPage = ({ params }: { params: { id: string } }) => {
             </TableHead>
             <TableBody>
               {auto.ordenesReparacion.map((orden: any) => (
-                <TableRow key={orden.id}>
+                <TableRow
+                  key={orden.id}
+                  onClick={() => {
+                    window.location.href = `/dashboard/ordenes-reparacion/${orden.id}/ver`;
+                  }}
+                  sx={{
+                    cursor: "pointer",
+                    "&:hover": {
+                      backgroundColor: "rgba(0, 0, 0, 0.04)",
+                    },
+                  }}
+                >
                   <TableCell>
                     {new Date(orden.fechaCreacion).toLocaleDateString()}
                   </TableCell>

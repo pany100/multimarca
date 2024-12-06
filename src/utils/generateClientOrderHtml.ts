@@ -177,6 +177,20 @@ export default function generateClientOrderHtml(repair: any): string {
         </div>
       </div>
       <hr class="divider" />
+      <div class="TypographyBody1" style="font-weight: bold;">
+        Observaciones de entrada
+      </div>
+      <div class="TypographyBody1" style="width: 90%;">
+        ${JSON.parse(repair.observacionesEntrada || "[]").join(", ") || "-"}
+      </div>
+      <hr class="divider" />
+      <div class="TypographyBody1" style="font-weight: bold;">
+        Observaciones del taller
+      </div>
+      <div class="TypographyBody1" style="width: 90%;">
+        ${JSON.parse(repair.observacionesSalida || "[]").join(", ") || "-"}
+      </div>
+      <hr class="divider" />
       ${
         repair.estado !== EstadoOrdenReparacion.Presupuestado &&
         repair.controlesEnReparacion.filter(
@@ -193,6 +207,9 @@ export default function generateClientOrderHtml(repair: any): string {
             (control: any) => `
             <div class="TypographyBody1">
               ${control.controlMecanico.name}
+            </div>
+            <div class="TypographyBody1" style="margin-bottom: 10px;">
+              ${control.detalle}
             </div>
           `
           )
