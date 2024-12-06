@@ -70,6 +70,19 @@ function WorkDescription({ repair }: Props) {
           </Fragment>
         )
       )}
+      {repair.descuento > 0 && (
+        <Fragment>
+          <Typography variant="body1" sx={{ mt: 2, color: "common.black" }}>
+            Descuento
+          </Typography>
+          <Typography
+            variant="body1"
+            sx={{ mt: 2, color: "common.black", textAlign: "right" }}
+          >
+            {"- "}${repair.descuento}
+          </Typography>
+        </Fragment>
+      )}
       <Typography
         variant="body1"
         sx={{ mt: 2, fontWeight: "bold", color: "common.black" }}

@@ -67,6 +67,7 @@ export async function POST(request: Request) {
       reparacionesDeTercero = [],
       trabajosRealizados = [],
       manoDeObra,
+      descuento,
     } = body;
 
     const repuestosToPersist = repuestosUsados.map((repuesto: any) => ({
@@ -106,6 +107,7 @@ export async function POST(request: Request) {
         autoId: parseInt(autoId),
         observacionesCliente,
         manoDeObra: new Prisma.Decimal(manoDeObra),
+        descuento: new Prisma.Decimal(descuento),
         repuestosUsados: {
           create: repuestosToPersist,
         },

@@ -40,7 +40,9 @@ function calcularTotalOrdenReparacion(ordenReparacion: {
   // 3. Mano de obra
   const manoDeObra = parseFloat(ordenReparacion.manoDeObra.toString());
 
-  return totalRepuestos + totalReparacionesTerceros + manoDeObra;
+  const descuento = parseFloat(ordenReparacion.descuento.toString());
+
+  return totalRepuestos + totalReparacionesTerceros + manoDeObra - descuento;
 }
 
 function getStatusColor(estado: string): ChipProps["color"] {

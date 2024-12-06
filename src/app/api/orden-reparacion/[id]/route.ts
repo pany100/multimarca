@@ -99,6 +99,7 @@ export async function PUT(
       trabajosRealizados = [],
       controlesEnReparacion = [],
       manoDeObra,
+      descuento,
     } = body;
 
     // Obtener la orden de reparación actual
@@ -264,6 +265,7 @@ export async function PUT(
             observacionesSalida,
             estado,
             manoDeObra: new Prisma.Decimal(manoDeObra),
+            descuento: new Prisma.Decimal(descuento),
             mecanicos: {
               deleteMany: {},
               create: mecanicosToPersist,

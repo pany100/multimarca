@@ -472,6 +472,7 @@ model Borrador {
   fechaCreacion          DateTime                  @default(now())
   observacionesCliente   String                    @db.Text
   manoDeObra             Decimal                   @db.Decimal(10, 2)
+  descuento              Decimal                   @db.Decimal(10, 2) @default(0)
   auto                   Auto                      @relation("AutoBorrador", fields: [autoId], references: [id])
   reparacionesDeTercero  ReparacionDeTercero[]     @relation("BorradorReparacionTercero")
   repuestosUsados        RepuestoUsado[]           @relation("BorradorRepuestos")
