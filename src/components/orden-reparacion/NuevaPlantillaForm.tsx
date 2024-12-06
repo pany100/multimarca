@@ -106,6 +106,7 @@ const NuevaPlantillaForm = () => {
     repuestosUsados: repuestosUsados ?? [],
     reparacionesDeTercero: reparacionesTerceros ?? [],
     manoDeObra,
+    descuento: 0,
   });
 
   const router = useRouter();
