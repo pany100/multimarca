@@ -87,7 +87,7 @@ const schema = yup.object().shape({
     yup.object().shape({
       id: yup.number().required("Id es requerido"),
       valor: yup.string(),
-      detalle: yup.string(),
+      detalle: yup.string().nullable(),
     })
   ),
   trabajosRealizados: yup.array().of(
@@ -404,7 +404,6 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
     manoDeObra,
     descuento,
   });
-
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)} onChange={handleFormChange}>
@@ -680,7 +679,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
                   />
                   {!!errors.controlesEnReparacion && (
                     <Alert severity="error" sx={{ mt: 1 }}>
-                      {errors.controlesEnReparacion.message}
+                      {JSON.stringify(errors.controlesEnReparacion)}
                     </Alert>
                   )}
                 </>

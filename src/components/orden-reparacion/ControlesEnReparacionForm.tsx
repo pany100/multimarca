@@ -24,12 +24,12 @@ type Props = {
 const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
   const { control, getValues, setValue } = useFormContext();
 
-  const handleControlChange = (id: number, valor: string) => {
+  const handleControlChange = (id: number, valor: string, detalle: string) => {
     const controlesEnReparacion = getValues("controlesEnReparacion");
     const controlesActualizados = controlesEnReparacion.map(
       (control: ControlMecanico) => {
         if (control.id === id) {
-          return { id, valor, detalle: control.detalle };
+          return { id, valor, detalle };
         }
         return control;
       }
@@ -38,7 +38,6 @@ const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
   };
 
   const controlesEnForm = useWatch({ control, name: "controlesEnReparacion" });
-  console.log(controlesMecanicos);
   return (
     <>
       <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
@@ -62,7 +61,8 @@ const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
                   onChange={(e) =>
                     handleControlChange(
                       control.id,
-                      e.target.checked ? "true" : "false"
+                      e.target.checked ? "true" : "false",
+                      control.detalle
                     )
                   }
                 />
@@ -74,9 +74,9 @@ const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
                   fullWidth
                   size="small"
                   placeholder="Detalle (Opcional)"
-                  value={control.detalle || ""}
+                  defaultValue={control.detalle}
                   onChange={(e) =>
-                    handleControlChange(control.id, e.target.value)
+                    handleControlChange(control.id, "true", e.target.value)
                   }
                   sx={{ mt: 1 }}
                 />
@@ -95,7 +95,7 @@ const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
                   fullWidth
                   defaultValue={control?.valor || ""}
                   onBlur={(e) =>
-                    handleControlChange(control.id, e.target.value)
+                    handleControlChange(control.id, e.target.value, "")
                   }
                   size="small"
                 />
