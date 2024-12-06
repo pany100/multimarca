@@ -102,6 +102,7 @@ const schema = yup.object().shape({
   ),
   manoDeObra: yup.number().required("El monto total es requerido"),
   observacionesEntrada: yup.string(),
+  descuento: yup.number().min(0),
   esBorrador: yup.boolean(),
 });
 
@@ -142,6 +143,7 @@ type Props = {
       };
     }[];
     manoDeObra: number;
+    descuento: number;
     observacionesEntrada?: string;
   };
 };
@@ -170,6 +172,7 @@ const EditarBorradorForm = ({ borrador }: Props) => {
     defaultValues: {
       ...borrador,
       esBorrador: true,
+      descuento: 0,
     },
   });
 
@@ -214,6 +217,7 @@ const EditarBorradorForm = ({ borrador }: Props) => {
     name: "reparacionesDeTercero",
   });
   const manoDeObra = useWatch({ control, name: "manoDeObra" });
+  const descuento = useWatch({ control, name: "descuento" }) || 0;
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
     repuestosUsados: (repuestosUsados ?? []).map((item) => ({
       precioVenta: Number(item.precioVenta) || 0,
@@ -223,6 +227,7 @@ const EditarBorradorForm = ({ borrador }: Props) => {
       precioVenta: Number(item.precioVenta) || 0,
     })),
     manoDeObra: Number(manoDeObra) || 0,
+    descuento: Number(descuento) || 0,
   });
   const esBorrador = watch("esBorrador") || false;
   console.log(esBorrador);
@@ -367,6 +372,23 @@ const EditarBorradorForm = ({ borrador }: Props) => {
           </Grid>
           <Grid item xs={12}>
             <TrabajosRealizadosFormSection esBorrador={esBorrador} />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
+              name="descuento"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Descuento"
+                  type="number"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.descuento}
+                  helperText={errors.descuento?.message as string}
+                />
+              )}
+            />
           </Grid>
           <Grid item xs={12}>
             <Controller

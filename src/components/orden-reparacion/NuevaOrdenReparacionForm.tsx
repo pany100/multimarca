@@ -107,6 +107,7 @@ const schema = yup.object().shape({
     })
   ),
   manoDeObra: yup.number().required("El monto total es requerido"),
+  descuento: yup.number().min(0),
   observacionesEntrada: yup.string(),
 });
 
@@ -129,6 +130,7 @@ const NuevaOrdenReparacionForm = () => {
       manoDeObra: 0,
       estado: "Presupuestado",
       fechaCreacion: new Date().toISOString().split("T")[0],
+      descuento: 0,
     },
   });
   const {
@@ -144,10 +146,12 @@ const NuevaOrdenReparacionForm = () => {
     name: "reparacionesDeTercero",
   });
   const manoDeObra = useWatch({ control, name: "manoDeObra" });
+  const descuento = useWatch({ control, name: "descuento" }) || 0;
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
     repuestosUsados: repuestosUsados ?? [],
     reparacionesDeTercero: reparacionesTerceros ?? [],
     manoDeObra,
+    descuento,
   });
 
   const router = useRouter();
@@ -410,6 +414,23 @@ const NuevaOrdenReparacionForm = () => {
                   margin="normal"
                   error={!!errors.manoDeObra}
                   helperText={errors.manoDeObra?.message as string}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
+              name="descuento"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Descuento"
+                  type="number"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.descuento}
+                  helperText={errors.descuento?.message as string}
                 />
               )}
             />

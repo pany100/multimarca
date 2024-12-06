@@ -219,6 +219,7 @@ const EditarOrdenReparacionForm = ({ plantilla }: Props) => {
     repuestosUsados: repuestosUsados ?? [],
     reparacionesDeTercero: reparacionesTerceros ?? [],
     manoDeObra,
+    descuento: 0,
   });
 
   return (

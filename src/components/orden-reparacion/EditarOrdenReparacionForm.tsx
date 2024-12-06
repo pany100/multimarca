@@ -127,6 +127,7 @@ const schema = yup.object().shape({
     .number()
     .typeError("La mano de obra debe ser un nmero")
     .required("La mano de obra es requerida"),
+  descuento: yup.number().min(0),
   observacionesEntrada: yup.string(),
 });
 
@@ -193,6 +194,7 @@ type OrdenReparacion = {
       type: string;
     };
   }[];
+  descuento: number;
 };
 
 const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
@@ -242,6 +244,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
     defaultValues: {
       ...ordenReparacion,
       manoDeObra: ordenReparacion.manoDeObra,
+      descuento: ordenReparacion.descuento,
       trabajosRealizados: ordenReparacion.trabajosRealizados.map((trabajo) => ({
         manoDeObra: { name: trabajo.descripcion },
         precioUnitario: Number(trabajo.precioUnitario),
@@ -391,10 +394,12 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
     name: "reparacionesDeTercero",
   });
   const manoDeObra = useWatch({ control, name: "manoDeObra" });
+  const descuento = useWatch({ control, name: "descuento" }) || 0;
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
     repuestosUsados: repuestosUsados ?? [],
     reparacionesDeTercero: reparacionesTerceros ?? [],
     manoDeObra,
+    descuento,
   });
 
   return (
@@ -594,6 +599,28 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
           </Grid>
           <Grid item xs={12}>
             <TrabajosRealizadosFormSection />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
+              name="descuento"
+              control={control}
+              render={({ field }) => (
+                <>
+                  <TextField
+                    {...field}
+                    label="Descuento"
+                    type="number"
+                    fullWidth
+                    margin="normal"
+                  />
+                  {!!errors.descuento && (
+                    <Alert severity="error" sx={{ mt: 1 }}>
+                      {errors.descuento.message}
+                    </Alert>
+                  )}
+                </>
+              )}
+            />
           </Grid>
           <Grid item xs={12}>
             <Controller

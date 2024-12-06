@@ -288,6 +288,7 @@ model OrdenReparacion {
   estado                 EstadoOrdenReparacion     @default(Presupuestado)
   pdfPath                String?                   @db.VarChar(255)
   manoDeObra             Decimal                   @db.Decimal(10, 2)
+  descuento              Decimal                   @db.Decimal(10, 2) @default(0)
   controlesEnReparacion  ControlEnReparacion[]     @relation("OrdenReparacionControlesEnReparacion")
   ingresos               IngresoPorReparacion[]    @relation("OrdenReparacionIngresos")
   notificacionesInternas NotificacionInterna[]     @relation("OrdenReparacionNotificacionesInternas")

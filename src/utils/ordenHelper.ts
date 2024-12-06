@@ -30,6 +30,7 @@ function calcularTotalOrdenReparacion(ordenReparacion: {
   repuestosUsados: { precioVenta: number; unidadesConsumidas: number }[];
   reparacionesDeTercero: { precioVenta: number }[];
   manoDeObra: number;
+  descuento: number;
 }): number {
   const totalRepuestos = Number(calcularTotalRepuestos(ordenReparacion));
 

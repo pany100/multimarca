@@ -101,6 +101,7 @@ const schema = yup.object().shape({
     })
   ),
   manoDeObra: yup.number().required("El monto total es requerido"),
+  descuento: yup.number().min(0),
   observacionesEntrada: yup.string(),
   esBorrador: yup.boolean(),
 });
@@ -127,6 +128,7 @@ const NuevoPresupuestoForm = ({
     defaultValues: {
       manoDeObra: 0,
       esBorrador: false,
+      descuento: 0,
     },
   });
   const {
@@ -138,7 +140,7 @@ const NuevoPresupuestoForm = ({
   } = methods;
 
   const esBorrador = watch("esBorrador") || false;
-
+  const descuento = watch("descuento") || 0;
   useEffect(() => {
     const fetchTemplateData = async () => {
       if (templateId) {
@@ -205,6 +207,7 @@ const NuevoPresupuestoForm = ({
       precioVenta: Number(item.precioVenta) || 0,
     })),
     manoDeObra: Number(manoDeObra) || 0,
+    descuento: Number(descuento) || 0,
   });
 
   const router = useRouter();
@@ -370,6 +373,23 @@ const NuevoPresupuestoForm = ({
           </Grid>
           <Grid item xs={12}>
             <TrabajosRealizadosFormSection esBorrador={esBorrador} />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
+              name="descuento"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Descuento"
+                  type="number"
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.descuento}
+                  helperText={errors.descuento?.message as string}
+                />
+              )}
+            />
           </Grid>
           <Grid item xs={12}>
             <Controller
