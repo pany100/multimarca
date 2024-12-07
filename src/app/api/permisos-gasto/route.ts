@@ -40,8 +40,13 @@ export async function GET(request: Request) {
       }),
     ]);
 
+    const permisosGastoConRoles = permisosGasto.map((permiso) => ({
+      ...permiso,
+      roles: permiso.roles.map((rol) => rol.name),
+    }));
+
     return NextResponse.json({
-      items: permisosGasto,
+      items: permisosGastoConRoles,
       total,
       page,
       size,

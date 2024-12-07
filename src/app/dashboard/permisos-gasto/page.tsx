@@ -44,8 +44,12 @@ const PermisosGastoPage = () => {
       field: "roles",
       headerName: "Roles",
       flex: 2,
-      valueGetter: (roles: any) => {
-        return roles?.map((rol: any) => rol.name).join(", ") || "";
+      renderCell: (params: any) => {
+        return (
+          <div style={{ whiteSpace: "normal", wordWrap: "break-word" }}>
+            {params.row.roles.join(", ")}
+          </div>
+        );
       },
     },
   ];
@@ -75,7 +79,7 @@ const PermisosGastoPage = () => {
       label: "Roles",
       type: "multiselect",
       options: roles,
-      valueKey: "id",
+      valueKey: "name",
       labelKey: "name",
     },
   ];
