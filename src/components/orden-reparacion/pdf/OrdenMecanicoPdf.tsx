@@ -34,12 +34,14 @@ const setPageStyles = () => {
   `;
 };
 
+const MAX_CONTROL_LENGTH = 30;
+
 export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
   ({ repair }, ref) => {
     return (
       <div ref={ref}>
         <style>{setPageStyles()}</style>
-        <PDFPage style={{ height: "297mm" }}>
+        <PDFPage style={{ height: "auto" }}>
           <TemplateHeader />
           <div style={{ marginBottom: 30 }}>
             <Typography
@@ -142,7 +144,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
               >
                 Trabajos Realizados
               </Typography>
-              {[...Array(30)].map((el, index) => (
+              {[...Array(20)].map((el, index) => (
                 <CompleteLine key={index} />
               ))}
             </div>
@@ -157,13 +159,11 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
               >
                 Repuestos
               </Typography>
-              {[...Array(30)].map((el, index) => (
+              {[...Array(20)].map((el, index) => (
                 <CompleteLine key={index} />
               ))}
             </div>
           </div>
-        </PDFPage>
-        <PDFPage style={{ height: "297mm" }}>
           <div
             style={{
               marginBottom: 10,
@@ -173,7 +173,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
           >
             <Typography
               variant="h6"
-              sx={{ color: "common.black", textTransform: "uppercase" }}
+              sx={{ mt: 4, color: "common.black", textTransform: "uppercase" }}
             >
               Observaciones
             </Typography>
@@ -193,27 +193,31 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                 .filter(
                   (e: { controlMecanico: { type: string; name: string } }) =>
                     e.controlMecanico.type === "checkbox" &&
-                    e.controlMecanico.name.length <= 20
+                    e.controlMecanico.name.length <= MAX_CONTROL_LENGTH
                 )
                 .map(
                   (el: {
                     id: string;
                     controlMecanico: { type: string; name: string };
                   }) => (
-                    <div key={el.id}>
-                      <Typography
-                        variant="overline"
-                        sx={{
-                          color: "common.black",
-                          textTransform: "uppercase",
-                          fontSize: 18,
-                          lineHeight: "30px",
-                        }}
-                      >
-                        * {el.controlMecanico.name}
-                        <Checkbox sx={{ color: "common.black", pt: 0 }} />
-                      </Typography>
-                    </div>
+                    <Typography
+                      variant="overline"
+                      sx={{
+                        color: "common.black",
+                        textTransform: "uppercase",
+                        fontSize: 18,
+                        lineHeight: "30px",
+                        display: "flex",
+                        alignItems: "flex-start",
+                      }}
+                      key={el.id}
+                    >
+                      <span style={{ marginRight: "8px", flexShrink: 0 }}>
+                        *
+                      </span>
+                      <span style={{ flex: 1 }}>{el.controlMecanico.name}</span>
+                      <Checkbox sx={{ color: "common.black", pt: 0, ml: 1 }} />
+                    </Typography>
                   )
                 )}
             </CheckTypeControlsTwoColumns>
@@ -222,33 +226,37 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                 .filter(
                   (e: { controlMecanico: { type: string; name: string } }) =>
                     e.controlMecanico.type === "checkbox" &&
-                    e.controlMecanico.name.length > 20
+                    e.controlMecanico.name.length > MAX_CONTROL_LENGTH
                 )
                 .map(
                   (el: {
                     id: string;
                     controlMecanico: { type: string; name: string };
                   }) => (
-                    <div key={el.id}>
-                      <Typography
-                        variant="overline"
-                        sx={{
-                          color: "common.black",
-                          textTransform: "uppercase",
-                          fontSize: 18,
-                          lineHeight: "30px",
-                        }}
-                      >
-                        * {el.controlMecanico.name}
-                        <Checkbox sx={{ color: "common.black", pt: 0 }} />
-                      </Typography>
-                    </div>
+                    <Typography
+                      variant="overline"
+                      sx={{
+                        color: "common.black",
+                        textTransform: "uppercase",
+                        fontSize: 18,
+                        lineHeight: "30px",
+                        display: "flex",
+                        alignItems: "flex-start",
+                      }}
+                      key={el.id}
+                    >
+                      <span style={{ marginRight: "8px", flexShrink: 0 }}>
+                        *
+                      </span>
+                      <span style={{ flex: 1 }}>{el.controlMecanico.name}</span>
+                      <Checkbox sx={{ color: "common.black", pt: 0, ml: 1 }} />
+                    </Typography>
                   )
                 )}
               {repair.controlesEnReparacion
                 .filter(
                   (e: { controlMecanico: { type: string } }) =>
-                    e.controlMecanico.type === "text"
+                    e.controlMecanico.type !== "checkbox"
                 )
                 .map(
                   (el: {
