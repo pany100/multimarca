@@ -3,12 +3,16 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import authFetch from "@/utils/authFetch";
+import { CategoriaGasto } from "@prisma/client";
 import React from "react";
 import * as yup from "yup";
 
 interface PermisoGasto {
   id: string;
-  roles: number[];
+  roles: {
+    id: number;
+    name: string;
+  }[];
 }
 
 const PermisosGastoPage = () => {
@@ -61,6 +65,10 @@ const PermisosGastoPage = () => {
           value: categoria.id,
         }));
       },
+      getInitialValue: (categoria: CategoriaGasto) => ({
+        value: categoria.id,
+        label: categoria.nombre,
+      }),
     },
     {
       name: "roles",
