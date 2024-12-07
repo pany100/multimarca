@@ -1,20 +1,30 @@
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "0");
     const size = parseInt(searchParams.get("size") || "10");
     const query = searchParams.get("query") || "";
+    const estado = searchParams.get("estado");
 
     const skip = page * size;
 
     const hoy = new Date();
     const fechaHoy = hoy.toISOString().split("T")[0];
-    const dosMesesAtras = new Date(hoy);
-    dosMesesAtras.setMonth(hoy.getMonth() - 2);
-    const fechaDosMesesAtras = dosMesesAtras.toISOString().split("T")[0];
+    const seisMesesAtras = new Date(hoy);
+    seisMesesAtras.setMonth(hoy.getMonth() - 6);
+    const fechaSeisMesesAtras = seisMesesAtras.toISOString().split("T")[0];
+
+    let estadoCondition = null;
+    if (estado === "enviado") {
+      estadoCondition = Prisma.sql`AND DATE(DATE_ADD(orep.fechaSalidaReparacion, INTERVAL tr.diasParaRecordatorio DAY)) <= ${fechaHoy}`;
+    } else if (estado === "pendiente") {
+      estadoCondition = Prisma.sql`AND DATE(DATE_ADD(orep.fechaSalidaReparacion, INTERVAL tr.diasParaRecordatorio DAY)) > ${fechaHoy}`;
+    } else {
+      estadoCondition = Prisma.sql``;
+    }
 
     const [recordatorios, total] = await Promise.all([
       prisma.$queryRaw`
@@ -45,9 +55,10 @@ export async function GET(request: Request) {
           tr.diasParaRecordatorio IS NOT NULL
         AND 
           DATE(DATE_ADD(orep.fechaSalidaReparacion, INTERVAL tr.diasParaRecordatorio DAY)) 
-          BETWEEN ${fechaDosMesesAtras} AND DATE_ADD(${fechaHoy}, INTERVAL 365 DAY)
+          BETWEEN ${fechaSeisMesesAtras} AND DATE_ADD(${fechaHoy}, INTERVAL 365 DAY)
         AND
           (c.fullName LIKE ${`%${query}%`} OR tr.descripcion LIKE ${`%${query}%`})
+        ${estadoCondition}
         ORDER BY fechaRecordatorio ASC
         LIMIT ${size} OFFSET ${skip}
       `,
@@ -69,9 +80,10 @@ export async function GET(request: Request) {
           tr.diasParaRecordatorio IS NOT NULL
         AND 
           DATE(DATE_ADD(orep.fechaSalidaReparacion, INTERVAL tr.diasParaRecordatorio DAY)) 
-          BETWEEN ${fechaDosMesesAtras} AND DATE_ADD(${fechaHoy}, INTERVAL 365 DAY)
+          BETWEEN ${fechaSeisMesesAtras} AND DATE_ADD(${fechaHoy}, INTERVAL 365 DAY)
         AND
           (c.fullName LIKE ${`%${query}%`} OR tr.descripcion LIKE ${`%${query}%`})
+        ${estadoCondition}
       `,
     ]);
 

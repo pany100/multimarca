@@ -1,6 +1,6 @@
 "use client";
 import { useFetch } from "@/contexts/FetchContext";
-import { Box, TextField, Typography } from "@mui/material";
+import { Box, Chip, Tab, Tabs, TextField, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useEffect, useState } from "react";
 
@@ -13,6 +13,7 @@ const RecordatoriosPage = () => {
   });
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
+  const [tabValue, setTabValue] = useState(0);
   const { authFetch } = useFetch();
 
   const columns: GridColDef[] = [
@@ -51,7 +52,12 @@ const RecordatoriosPage = () => {
       field: "enviado",
       headerName: "Estado",
       flex: 1,
-      valueGetter: (enviado: boolean) => (enviado ? "Enviado" : "Pendiente"),
+      renderCell: (params) => (
+        <Chip
+          label={params.row.enviado ? "Enviado" : "Pendiente"}
+          color={params.row.enviado ? "success" : "warning"}
+        />
+      ),
     },
   ];
 
@@ -63,6 +69,13 @@ const RecordatoriosPage = () => {
         url.searchParams.append("page", paginationModel.page.toString());
         url.searchParams.append("size", paginationModel.pageSize.toString());
         if (searchTerm) url.searchParams.append("query", searchTerm);
+
+        // Agregar estado según el tab seleccionado
+        if (tabValue === 1) {
+          url.searchParams.append("estado", "pendiente");
+        } else if (tabValue === 2) {
+          url.searchParams.append("estado", "enviado");
+        }
 
         const response = await authFetch(url.toString());
         const data = await response.json();
@@ -76,10 +89,15 @@ const RecordatoriosPage = () => {
     };
 
     fetchRecordatorios();
-  }, [paginationModel, authFetch, searchTerm]);
+  }, [paginationModel, authFetch, searchTerm, tabValue]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
+    setPaginationModel({ ...paginationModel, page: 0 });
+  };
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
     setPaginationModel({ ...paginationModel, page: 0 });
   };
 
@@ -88,6 +106,12 @@ const RecordatoriosPage = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         Recordatorios
       </Typography>
+
+      <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
+        <Tab label="Todos" />
+        <Tab label="Pendientes" />
+        <Tab label="Enviados" />
+      </Tabs>
 
       <TextField
         label="Buscar"
