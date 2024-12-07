@@ -354,9 +354,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "NotificacionesClientes",
-            texto: "Recordatorios WhatsApp",
+            texto: "Recordatorios",
             icono: <AlarmIcon />,
-            ruta: "/dashboard/recordatorios-whatsapp",
+            ruta: "/dashboard/recordatorios",
+          },
+          {
+            permiso: "NotificacionesClientes",
+            texto: "Templates de WhatsApp",
+            icono: <ContentPasteIcon />,
+            ruta: "/dashboard/templates-whatsapp",
           },
           {
             permiso: "NotificacionesClientes",

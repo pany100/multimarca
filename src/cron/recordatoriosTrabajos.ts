@@ -25,8 +25,10 @@ async function enviarRecordatoriosTrabajos() {
         tr.descripcion
       FROM
         OrdenReparacion orep
+      JOIN
+      	Auto a on a.id = orep.autoId
       JOIN 
-        Cliente c ON orep.autoId = c.id
+        Cliente c ON a.ownerId = c.id
       JOIN 
         TrabajoRealizado tr ON orep.id = tr.ordenReparacionId
       WHERE 
