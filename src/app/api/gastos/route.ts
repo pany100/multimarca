@@ -8,6 +8,28 @@ export async function GET(request: Request) {
     const size = parseInt(searchParams.get("size") || "10");
     const query = searchParams.get("query") || "";
 
+    // Obtener el token de la cabecera de autorización
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decodedToken = JSON.parse(atob(token.split(".")[1]));
+    // Obtener el rol del usuario desde la base de datos
+    const user = await prisma.usuario.findUnique({
+      where: { id: decodedToken.userId },
+      include: {
+        rol: true,
+      },
+    });
+
+    if (!user || !user.rol) {
+      return NextResponse.json(
+        { error: "Usuario no tiene rol asignado" },
+        { status: 403 }
+      );
+    }
     const skip = page * size;
 
     const whereClause = {
@@ -15,6 +37,16 @@ export async function GET(request: Request) {
         { nombre: { contains: query } },
         { categoria: { nombre: { contains: query } } },
         { mecanico: { name: { contains: query } } },
+      ],
+      AND: [
+        {
+          categoria: {
+            OR: [
+              { roles: { none: {} } },
+              { roles: { some: { name: user.rol.name } } },
+            ],
+          },
+        },
       ],
     };
 
@@ -25,7 +57,11 @@ export async function GET(request: Request) {
         take: size,
         orderBy: { fecha: "desc" },
         include: {
-          categoria: true,
+          categoria: {
+            include: {
+              roles: true,
+            },
+          },
           mecanico: true,
           proveedor: true,
         },

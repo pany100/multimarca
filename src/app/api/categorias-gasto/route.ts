@@ -8,21 +8,51 @@ export async function GET(request: Request) {
     const size = parseInt(searchParams.get("size") || "10");
     const query = searchParams.get("query") || "";
 
+    // Obtener el token de la cabecera de autorización
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
+    const token = authHeader.split(" ")[1];
+    const decodedToken = JSON.parse(atob(token.split(".")[1]));
+    // Obtener el rol del usuario desde la base de datos
+    const user = await prisma.usuario.findUnique({
+      where: { id: decodedToken.userId },
+      include: {
+        rol: true,
+      },
+    });
+
+    if (!user || !user.rol) {
+      return NextResponse.json(
+        { error: "Usuario no tiene rol asignado" },
+        { status: 403 }
+      );
+    }
+
     const skip = page * size;
+
+    const whereClause = {
+      nombre: { contains: query },
+      OR: [
+        { roles: { none: {} } },
+        { roles: { some: { name: user.rol.name } } },
+      ],
+    };
 
     const [categoriasGasto, total] = await Promise.all([
       prisma.categoriaGasto.findMany({
-        where: {
-          nombre: { contains: query },
-        },
+        where: whereClause,
         skip,
         take: size,
         orderBy: { nombre: "asc" },
+        include: {
+          roles: true,
+        },
       }),
       prisma.categoriaGasto.count({
-        where: {
-          nombre: { contains: query },
-        },
+        where: whereClause,
       }),
     ]);
 
