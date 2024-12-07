@@ -398,6 +398,7 @@ model IngresoPorReparacion {
   fecha             DateTime        @default(now())
   clienteId         Int
   monto             Decimal         @db.Decimal(10, 2)
+  moneda            Moneda          @default(Peso)
   descripcion       String          @db.Text
   ordenReparacionId Int
   reciboEnviado     Boolean         @default(false)
@@ -510,4 +511,9 @@ enum TipoNotificacionInterna {
 enum EstadoConversacion {
   Activa
   Cerrada
+}
+
+enum Moneda {
+  Dolar
+  Peso
 }

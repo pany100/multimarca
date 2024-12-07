@@ -8,7 +8,7 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { clienteId, monto, descripcion, ordenReparacionId } = body;
+    const { clienteId, monto, moneda, descripcion, ordenReparacionId } = body;
 
     if (!clienteId || !monto || !descripcion || !ordenReparacionId) {
       return NextResponse.json(
@@ -22,6 +22,7 @@ export async function PUT(
       data: {
         clienteId,
         monto,
+        moneda,
         descripcion,
         ordenReparacionId,
         fecha: new Date(),

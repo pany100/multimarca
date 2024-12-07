@@ -7,6 +7,7 @@ import SendIcon from "@mui/icons-material/Send";
 import {
   Box,
   Button,
+  Chip,
   IconButton,
   Modal,
   Snackbar,
@@ -63,6 +64,18 @@ const IngresosPorReparacionPage = () => {
         new Date(fecha).toLocaleDateString("es-AR"),
     },
     { field: "monto", headerName: "Monto", flex: 1 },
+    {
+      field: "moneda",
+      headerName: "Moneda",
+      flex: 1,
+      renderCell: (params: any) => (
+        <Chip
+          label={params.value}
+          color={params.value === "Dolar" ? "success" : "warning"}
+          size="small"
+        />
+      ),
+    },
     { field: "descripcion", headerName: "Descripción", flex: 2 },
     {
       field: "cliente",
@@ -111,6 +124,15 @@ const IngresosPorReparacionPage = () => {
       layout: {
         xs: 6,
       },
+    },
+    {
+      name: "moneda",
+      label: "Moneda",
+      type: "select",
+      options: [
+        { label: "Dolar", value: "Dolar" },
+        { label: "Peso", value: "Peso" },
+      ],
     },
     { name: "descripcion", label: "Descripción", type: "text" },
     {
