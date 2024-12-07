@@ -197,6 +197,8 @@ const IngresosPorReparacionPage = () => {
       type: "select",
       options: (ingreso: any) => {
         if (ingreso.ordenReparacionId && !initializedRef.current) {
+          console.log("Is Edit");
+          console.log(ingreso);
           const init = [
             {
               label: `#${ingreso.ordenReparacionId} - ${
@@ -262,6 +264,10 @@ const IngresosPorReparacionPage = () => {
     }
   };
 
+  const handleEdit = (item: any) => {
+    initializedRef.current = false;
+  };
+
   const handleSendRecibo = async () => {
     if (!selectedIngreso) return;
     try {
@@ -311,12 +317,14 @@ const IngresosPorReparacionPage = () => {
         fields={formFields}
         createNewItem={createNewIngresoPorReparacion}
         extraActions={extraActions}
+        onEdit={handleEdit}
         validationSchema={yup.object({
           fecha: yup.date().required("La fecha es requerida"),
           monto: yup
             .number()
             .required("El monto es requerido")
             .positive("El monto debe ser positivo"),
+          moneda: yup.string().required("La moneda es requerida"),
           descripcion: yup.string().required("La descripción es requerida"),
           clienteId: yup.number().required("El cliente es requerido"),
           ordenReparacionId: yup

@@ -34,6 +34,7 @@ interface CrudTableProps<T> {
   nonEditableItems?: number[];
   shouldRenderEdit?: (item: T) => boolean;
   shouldRenderDelete?: (item: T) => boolean;
+  onEdit?: (item: T | undefined) => void;
 }
 
 function CrudTable<T extends { id: string }>({
@@ -49,6 +50,7 @@ function CrudTable<T extends { id: string }>({
   nonEditableItems = [],
   shouldRenderEdit,
   shouldRenderDelete,
+  onEdit,
 }: CrudTableProps<T>) {
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -123,6 +125,7 @@ function CrudTable<T extends { id: string }>({
 
   const handleEditClick = (id: string) => {
     const itemToEdit = items.find((item) => item.id === id);
+    onEdit?.(itemToEdit);
     setEditingItem(itemToEdit || null);
     setEditModalOpen(true);
   };
