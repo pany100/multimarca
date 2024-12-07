@@ -146,10 +146,15 @@ export default function generateClientOrderHtml(repair: any): string {
             Titular: ${repair.auto.owner.fullName}
           </div>
           <div class="TypographyBody1">
-            Vehículo: ${repair.auto.patent} ${repair.auto.brand} ${
-    repair.auto.model
-  } ${repair.auto.year} ${repair.auto.color}
-            - Caja ${repair.auto.transmission_type}
+            Vehículo: ${repair.auto.brand} ${repair.auto.model} ${
+    repair.auto.color
+  }
+            ${repair.auto.transmission_type === "Manual" ? "MT" : "AT"} - ${
+    repair.auto.year
+  }
+          </div>
+          <div class="TypographyBody1">
+            Patente: ${repair.auto.patent}
           </div>
           <div class="TypographyBody1">
             Teléfono: ${repair.auto.owner.phone}

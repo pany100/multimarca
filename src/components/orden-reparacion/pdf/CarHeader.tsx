@@ -45,8 +45,11 @@ function CarHeader({ repair, car, owner }: Props) {
           Titular: {owner.fullName}
         </Typography>
         <Typography variant="body1" sx={{ color: "common.black" }}>
-          Vehículo: {car.patent} {car.brand} {car.model} {car.year} {car.color}{" "}
-          - Caja {car.transmission_type}
+          Vehículo: {car.brand} {car.model} {car.color}{" "}
+          {car.transmission_type === "Manual" ? "MT" : "AT"} - {car.year}{" "}
+        </Typography>
+        <Typography variant="body1" sx={{ color: "common.black" }}>
+          Patente: {car.patent}
         </Typography>
         <Typography variant="body1" sx={{ color: "common.black" }}>
           Teléfono: {owner.phone}
