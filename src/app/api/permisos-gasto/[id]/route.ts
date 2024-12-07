@@ -6,15 +6,42 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
-    const { nombre, roles } = await request.json();
+    const { id, roles } = await request.json();
+    const existingGasto = await prisma.categoriaGasto.findUnique({
+      where: { id: parseInt(id) },
+      include: {
+        roles: true,
+      },
+    });
 
+    if (!existingGasto) {
+      return NextResponse.json(
+        { error: "No se encontró la categoría de gasto" },
+        { status: 404 }
+      );
+    }
+
+    // Buscar los roles por nombre
+    const rolesEncontrados = await prisma.rol.findMany({
+      where: {
+        name: {
+          in: roles,
+        },
+      },
+    });
+
+    if (rolesEncontrados.length !== roles.length) {
+      return NextResponse.json(
+        { error: "Algunos roles especificados no existen" },
+        { status: 400 }
+      );
+    }
     const categoriaGasto = await prisma.categoriaGasto.update({
-      where: { id },
+      where: { id: parseInt(id) },
       data: {
-        nombre,
         roles: {
-          set: roles.map((rolId: number) => ({ id: rolId })),
+          set: [], // Primero borramos todos los roles existentes
+          connect: rolesEncontrados.map((rol) => ({ id: rol.id })), // Conectamos los nuevos roles
         },
       },
       include: {
@@ -27,7 +54,12 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(categoriaGasto);
+    const categoriaGastoConRoles = {
+      ...categoriaGasto,
+      roles: categoriaGasto.roles.map((rol) => rol.name),
+    };
+
+    return NextResponse.json(categoriaGastoConRoles);
   } catch (error) {
     console.error("Error al actualizar permiso de gasto:", error);
     return NextResponse.json(
