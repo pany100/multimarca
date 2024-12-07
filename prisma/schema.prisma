@@ -90,6 +90,7 @@ model ControlMecanico {
   name                  String                @unique @db.VarChar(150)
   type                  String                @db.VarChar(10)
   controlesEnReparacion ControlEnReparacion[]
+  ordenEnPdf            Int?
 
   @@index([name])
 }

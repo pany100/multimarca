@@ -8,6 +8,7 @@ interface ControlMecanico {
   id: string;
   name: string;
   type: string;
+  ordenEnPdf: number | null;
 }
 
 const ControlesMecanicosPage = () => {
@@ -15,6 +16,12 @@ const ControlesMecanicosPage = () => {
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "name", headerName: "Nombre del Control", flex: 1 },
     { field: "type", headerName: "Tipo", flex: 1 },
+    {
+      field: "ordenEnPdf",
+      headerName: "Orden en PDF",
+      flex: 1,
+      renderCell: (params: any) => params.value || "N/A",
+    },
   ];
 
   const formFields: FieldConfig[] = [
@@ -28,6 +35,7 @@ const ControlesMecanicosPage = () => {
         { value: "checkbox", label: "Checkbox" },
       ],
     },
+    { name: "ordenEnPdf", label: "Orden en PDF", type: "number" },
   ];
 
   const createNewControl = (): ControlMecanico => {
@@ -35,6 +43,7 @@ const ControlesMecanicosPage = () => {
       id: "",
       name: "",
       type: "",
+      ordenEnPdf: null,
     };
   };
 
@@ -48,6 +57,7 @@ const ControlesMecanicosPage = () => {
       validationSchema={yup.object({
         name: yup.string().required("El nombre es requerido"),
         type: yup.string().required("El tipo es requerido"),
+        ordenEnPdf: yup.number().nullable(),
       })}
     />
   );

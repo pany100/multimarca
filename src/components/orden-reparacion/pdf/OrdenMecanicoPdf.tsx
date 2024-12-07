@@ -34,7 +34,15 @@ const setPageStyles = () => {
   `;
 };
 
-const MAX_CONTROL_LENGTH = 30;
+const MAX_CONTROL_LENGTH = 20;
+
+function sortControls(a: any, b: any) {
+  if (a.controlMecanico.ordenEnPdf === null) return 1;
+  if (b.controlMecanico.ordenEnPdf === null) return -1;
+  return (
+    (a.controlMecanico.ordenEnPdf || 0) - (b.controlMecanico.ordenEnPdf || 0)
+  );
+}
 
 export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
   ({ repair }, ref) => {
@@ -195,6 +203,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                     e.controlMecanico.type === "checkbox" &&
                     e.controlMecanico.name.length <= MAX_CONTROL_LENGTH
                 )
+                .sort(sortControls)
                 .map(
                   (el: {
                     id: string;
@@ -224,14 +233,32 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
             <div>
               {repair.controlesEnReparacion
                 .filter(
-                  (e: { controlMecanico: { type: string; name: string } }) =>
+                  (e: {
+                    controlMecanico: {
+                      type: string;
+                      name: string;
+                      ordenEnPdf: number | null;
+                    };
+                  }) =>
                     e.controlMecanico.type === "checkbox" &&
                     e.controlMecanico.name.length > MAX_CONTROL_LENGTH
                 )
+                .sort((a: any, b: any) => {
+                  if (a.controlMecanico.ordenEnPdf === null) return 1;
+                  if (b.controlMecanico.ordenEnPdf === null) return -1;
+                  return (
+                    (a.controlMecanico.ordenEnPdf || 0) -
+                    (b.controlMecanico.ordenEnPdf || 0)
+                  );
+                })
                 .map(
                   (el: {
                     id: string;
-                    controlMecanico: { type: string; name: string };
+                    controlMecanico: {
+                      type: string;
+                      name: string;
+                      ordenEnPdf: number | null;
+                    };
                   }) => (
                     <Typography
                       variant="overline"
@@ -258,6 +285,14 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                   (e: { controlMecanico: { type: string } }) =>
                     e.controlMecanico.type !== "checkbox"
                 )
+                .sort((a: any, b: any) => {
+                  if (a.controlMecanico.ordenEnPdf === null) return 1;
+                  if (b.controlMecanico.ordenEnPdf === null) return -1;
+                  return (
+                    (a.controlMecanico.ordenEnPdf || 0) -
+                    (b.controlMecanico.ordenEnPdf || 0)
+                  );
+                })
                 .map(
                   (el: {
                     id: string;
