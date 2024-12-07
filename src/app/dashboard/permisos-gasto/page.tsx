@@ -9,10 +9,7 @@ import * as yup from "yup";
 
 interface PermisoGasto {
   id: string;
-  roles: {
-    id: number;
-    name: string;
-  }[];
+  roles: string[];
 }
 
 const PermisosGastoPage = () => {
