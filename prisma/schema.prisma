@@ -35,6 +35,7 @@ model Rol {
   name     String    @unique @db.VarChar(150)
   usuarios Usuario[]
   permisos Permiso[] @relation("PermisoToRol")
+  categoriasGasto CategoriaGasto[] @relation("CategoriaGastoToRol")
 
   @@index([name])
 }
@@ -236,6 +237,7 @@ model CategoriaGasto {
   id     Int     @id @default(autoincrement())
   nombre String  @unique @db.VarChar(150)
   gastos Gasto[]
+  roles     Rol[]    @relation("CategoriaGastoToRol")
 
   @@index([nombre])
 }

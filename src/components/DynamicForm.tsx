@@ -347,7 +347,23 @@ function DynamicForm<T extends FieldValues>({
                 handleFieldChange(field.name as keyof T, e.target.value)
               }
               label={field.label}
-              renderValue={(selected) => (selected as string[]).join(", ")}
+              renderValue={(selected) => {
+                const selectedOptions = (
+                  typeof field.options === "function"
+                    ? field.options(item)
+                    : field.options
+                )?.filter((option: Record<string, string | number>) =>
+                  (selected as any[]).includes(
+                    option[field.valueKey || "value"]
+                  )
+                );
+                return selectedOptions
+                  ?.map(
+                    (option: Record<string, string | number>) =>
+                      option[field.labelKey || "label"]
+                  )
+                  .join(", ");
+              }}
             >
               {(typeof field.options === "function"
                 ? field.options(item)

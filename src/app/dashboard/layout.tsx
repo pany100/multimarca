@@ -5,6 +5,7 @@ import CalculateIcon from "@mui/icons-material/Calculate";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import LockIcon from "@mui/icons-material/Lock";
 import MenuIcon from "@mui/icons-material/Menu";
 import {
   AppBar,
@@ -301,6 +302,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Gastos",
             icono: <AttachMoneyIcon />,
             ruta: "/dashboard/gastos",
+          },
+          {
+            permiso: "GastosExclusivos",
+            texto: "Permisos de Gastos",
+            icono: <LockIcon />,
+            ruta: "/dashboard/permisos-gasto",
           },
           {
             permiso: "CategoriaGasto",
