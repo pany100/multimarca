@@ -310,6 +310,11 @@ export async function PUT(
             trabajosRealizados: true,
             controlesEnReparacion: true,
             pagos: true,
+            ingresos: {
+              include: {
+                dolar: true,
+              },
+            },
           },
         });
 

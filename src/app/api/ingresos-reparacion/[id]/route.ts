@@ -8,7 +8,8 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { clienteId, monto, moneda, descripcion, ordenReparacionId } = body;
+    const { clienteId, fecha, monto, moneda, descripcion, ordenReparacionId } =
+      body;
 
     if (!clienteId || !monto || !descripcion || !ordenReparacionId) {
       return NextResponse.json(
@@ -16,6 +17,17 @@ export async function PUT(
         { status: 400 }
       );
     }
+
+    const dolar = await prisma.dolar.findFirst({
+      where: {
+        fecha: {
+          lte: new Date(fecha),
+        },
+      },
+      orderBy: {
+        fecha: "desc",
+      },
+    });
 
     const ingresoActualizado = await prisma.ingresoPorReparacion.update({
       where: { id },
@@ -25,7 +37,8 @@ export async function PUT(
         moneda,
         descripcion,
         ordenReparacionId,
-        fecha: new Date(),
+        fecha,
+        dolarId: dolar?.id,
       },
       include: {
         cliente: true,

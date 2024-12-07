@@ -59,11 +59,39 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { clienteId, monto, moneda, descripcion, ordenReparacionId } = body;
+    const { clienteId, monto, fecha, moneda, descripcion, ordenReparacionId } =
+      body;
 
-    if (!clienteId || !monto || !moneda || !descripcion || !ordenReparacionId) {
+    if (
+      !clienteId ||
+      !monto ||
+      !fecha ||
+      !moneda ||
+      !descripcion ||
+      !ordenReparacionId
+    ) {
       return NextResponse.json(
         { error: "Datos de ingreso por reparación inválidos o faltantes" },
+        { status: 400 }
+      );
+    }
+
+    const dolar = await prisma.dolar.findFirst({
+      where: {
+        fecha: {
+          lte: new Date(fecha),
+        },
+      },
+      orderBy: {
+        fecha: "desc",
+      },
+    });
+
+    if (moneda === "Dolar" && !dolar) {
+      return NextResponse.json(
+        {
+          error: "No hay cotización de dólar disponible para la fecha indicada",
+        },
         { status: 400 }
       );
     }
@@ -75,7 +103,8 @@ export async function POST(request: Request) {
         moneda,
         descripcion,
         ordenReparacionId,
-        fecha: new Date(),
+        fecha,
+        dolarId: dolar?.id,
       },
       include: {
         cliente: true,

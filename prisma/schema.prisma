@@ -399,6 +399,8 @@ model IngresoPorReparacion {
   clienteId         Int
   monto             Decimal         @db.Decimal(10, 2)
   moneda            Moneda          @default(Peso)
+  dolarId           Int?
+  dolar             Dolar?          @relation(fields: [dolarId], references: [id])
   descripcion       String          @db.Text
   ordenReparacionId Int
   reciboEnviado     Boolean         @default(false)
@@ -415,6 +417,7 @@ model Dolar {
   fecha   DateTime @unique @default(now())
   oficial Decimal  @db.Decimal(10, 2)
   blue    Decimal  @db.Decimal(10, 2)
+  ingresosPorReparacion IngresoPorReparacion[]
 
   @@index([fecha])
 }

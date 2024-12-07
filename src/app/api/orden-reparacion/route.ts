@@ -48,7 +48,11 @@ export async function GET(request: Request) {
           },
           repuestosUsados: true,
           reparacionesDeTercero: true,
-          ingresos: true,
+          ingresos: {
+            include: {
+              dolar: true,
+            },
+          },
         },
       }),
       prisma.ordenReparacion.count({

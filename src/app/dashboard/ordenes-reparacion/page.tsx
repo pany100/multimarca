@@ -135,7 +135,12 @@ const OrdenesReparacionPage = () => {
       flex: 1,
       renderCell: (params: any) =>
         params.row.ingresos
-          .reduce((sum: number, ingreso: any) => sum + Number(ingreso.monto), 0)
+          .reduce((sum: number, ingreso: any) => {
+            if (ingreso.moneda === "Dolar") {
+              return sum + Number(ingreso.monto) * Number(ingreso.dolar.blue);
+            }
+            return sum + Number(ingreso.monto);
+          }, 0)
           .toFixed(2),
     },
     {
