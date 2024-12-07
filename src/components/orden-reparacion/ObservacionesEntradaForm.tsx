@@ -1,12 +1,14 @@
 import { useFetch } from "@/contexts/FetchContext";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
+  Box,
   Button,
   Divider,
   IconButton,
   List,
   ListItem,
   ListItemText,
+  TextField,
   Typography,
 } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
@@ -15,6 +17,9 @@ import { useFormContext, useWatch } from "react-hook-form";
 const ObservacionesEntradaForm = () => {
   const { control, setValue, getValues } = useFormContext();
   const [reparacionesAnteriores, setReparacionesAnteriores] = useState([]);
+  const [textoPersonalizado, setTextoPersonalizado] = useState("");
+  const [mostrarInput, setMostrarInput] = useState(false);
+
   const autoId = useWatch({ control, name: "autoId" });
   const observacionesEntrada = useWatch({
     control,
@@ -22,6 +27,14 @@ const ObservacionesEntradaForm = () => {
   });
   const isFirstRun = useRef(true);
   const { authFetch } = useFetch();
+
+  const agregarObservacionPersonalizada = () => {
+    if (textoPersonalizado.trim()) {
+      agregarObservacion(textoPersonalizado.trim());
+      setTextoPersonalizado("");
+      setMostrarInput(false);
+    }
+  };
 
   useEffect(() => {
     const fetchReparacionesAnteriores = async () => {
@@ -137,6 +150,52 @@ const ObservacionesEntradaForm = () => {
           )
         )}
       </List>
+      <Button
+        fullWidth
+        variant="outlined"
+        onClick={() => setMostrarInput(true)}
+        sx={{ mb: 2 }}
+        disabled={mostrarInput}
+      >
+        Agregar observación en texto
+      </Button>
+      {mostrarInput && (
+        <>
+          <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
+            <TextField
+              multiline
+              rows={3}
+              value={textoPersonalizado}
+              onChange={(e) => setTextoPersonalizado(e.target.value)}
+              placeholder="Agregar observación personalizada"
+              sx={{ flex: 1 }}
+              autoFocus
+              onKeyPress={(e) => {
+                if (e.key === "Enter" && e.ctrlKey) {
+                  e.preventDefault();
+                  agregarObservacionPersonalizada();
+                }
+              }}
+            />
+            <Button
+              size="small"
+              onClick={() => {
+                setMostrarInput(false);
+                setTextoPersonalizado("");
+              }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              size="small"
+              onClick={agregarObservacionPersonalizada}
+              disabled={!textoPersonalizado.trim()}
+            >
+              Agregar
+            </Button>
+          </Box>
+        </>
+      )}
       {JSON.parse(observacionesEntrada || "[]").length > 0 && (
         <>
           <Typography variant="subtitle1" sx={{ mb: 0 }}>

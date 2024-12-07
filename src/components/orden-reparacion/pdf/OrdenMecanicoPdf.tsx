@@ -67,7 +67,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
               display: "grid",
               gridTemplateColumns: "45% 50%",
               gridGap: "5%",
-              marginBottom: 30,
+              marginBottom: 15,
             }}
           >
             <div>
@@ -88,20 +88,6 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
               <Typography variant="h6" sx={{ color: "common.black" }}>
                 Válvulas: {repair.auto.valves}
               </Typography>
-              <Typography variant="h6" sx={{ color: "common.black" }}>
-                Transmisión: {repair.auto.transmission_type}
-              </Typography>
-              <div>
-                <Typography
-                  variant="h6"
-                  sx={{ color: "common.black", textTransform: "uppercase" }}
-                >
-                  Motivos
-                </Typography>
-                <Typography sx={{ color: "common.black" }}>
-                  {repair.observacionesCliente}
-                </Typography>
-              </div>
             </div>
             <div>
               <Typography variant="h6" sx={{ color: "common.black" }}>
@@ -113,24 +99,35 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
               <Typography variant="h6" sx={{ color: "common.black" }}>
                 Km: {repair.kilometros?.toLocaleString("es-AR")}
               </Typography>
-              <div>
-                <Typography
-                  variant="h6"
-                  sx={{ color: "common.black", textTransform: "uppercase" }}
-                >
-                  Historia
-                </Typography>
-                {JSON.parse(repair.observacionesEntrada).length > 0 &&
-                  JSON.parse(repair.observacionesEntrada).map((el: string) => (
-                    <Typography
-                      key={el.toString()}
-                      sx={{ color: "common.black" }}
-                    >
-                      * {el}
-                    </Typography>
-                  ))}
-              </div>
+              <Typography variant="h6" sx={{ color: "common.black" }}>
+                Transmisión: {repair.auto.transmission_type}
+              </Typography>
             </div>
+          </div>
+          <div style={{ marginBottom: 15 }}>
+            <Typography
+              variant="h6"
+              sx={{ color: "common.black", textTransform: "uppercase" }}
+            >
+              Historia
+            </Typography>
+            {JSON.parse(repair.observacionesEntrada).length > 0 &&
+              JSON.parse(repair.observacionesEntrada).map((el: string) => (
+                <Typography key={el.toString()} sx={{ color: "common.black" }}>
+                  * {el}
+                </Typography>
+              ))}
+          </div>
+          <div style={{ marginBottom: 15 }}>
+            <Typography
+              variant="h6"
+              sx={{ color: "common.black", textTransform: "uppercase" }}
+            >
+              Motivos
+            </Typography>
+            <Typography sx={{ color: "common.black" }}>
+              {repair.observacionesCliente}
+            </Typography>
           </div>
           <div
             style={{
