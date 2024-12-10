@@ -46,7 +46,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, type, ordenEnPdf } = body;
+    const { name, type, pdfName, ordenEnPdf } = body;
 
     if (!name || typeof name !== "string") {
       return NextResponse.json(
@@ -67,6 +67,7 @@ export async function POST(request: Request) {
         name,
         type,
         ordenEnPdf,
+        pdfName,
       },
     });
     sincronizarControles();

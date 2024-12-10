@@ -17,6 +17,12 @@ const ControlesMecanicosPage = () => {
     { field: "name", headerName: "Nombre del Control", flex: 1 },
     { field: "type", headerName: "Tipo", flex: 1 },
     {
+      field: "pdfName",
+      headerName: "Nombre para el detalle",
+      flex: 1,
+      renderCell: (params: any) => params.row.pdfName || params.row.name,
+    },
+    {
       field: "ordenEnPdf",
       headerName: "Orden en PDF",
       flex: 1,
@@ -35,6 +41,7 @@ const ControlesMecanicosPage = () => {
         { value: "checkbox", label: "Checkbox" },
       ],
     },
+    { name: "pdfName", label: "Nombre para el detalle", type: "text" },
     { name: "ordenEnPdf", label: "Orden en PDF", type: "number" },
   ];
 
@@ -57,6 +64,7 @@ const ControlesMecanicosPage = () => {
       validationSchema={yup.object({
         name: yup.string().required("El nombre es requerido"),
         type: yup.string().required("El tipo es requerido"),
+        pdfName: yup.string().nullable(),
         ordenEnPdf: yup.number().nullable(),
       })}
     />
