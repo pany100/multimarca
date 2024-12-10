@@ -117,13 +117,17 @@ export default function generateClientOrderHtml(repair: any): string {
           <img alt="mtservice" src="data:image/jpg;base64,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"
           style="width: 100%;">
             <div class="Typography">
-              mtserviciomecanicointegral
+            mtservicemultimarca
             </div>
           </div>
         </div>
       </div>
       <hr class="divider" />
       <div>
+        <div style='
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        '>
         <h5 style='
           margin: 0;
           font-family: Inter, sans-serif;
@@ -134,14 +138,30 @@ export default function generateClientOrderHtml(repair: any): string {
           color: #000;
           margin-bottom: 16px;
         '>
-          ${
-            repair.estado === EstadoOrdenReparacion.Presupuestado
-              ? "Presupuesto Nro: "
-              : "Orden Reparación Nro: "
-          }
-          ${repair.id}
+        Patente: ${repair.auto.patent}
         </h5>
+        <h5 style='
+          margin: 0;
+          font-family: Inter, sans-serif;
+          font-weight: 400;
+          font-size: 1.5rem;
+          line-height: 1.334;
+          letter-spacing: 0em;
+          color: #000;
+          margin-bottom: 16px;
+        '>
+        Km: ${repair.kilometros}
+        </h5>
+        </div>
         <div style="display: grid;">
+          <div class="TypographyBody1">
+            ${
+              repair.estado === EstadoOrdenReparacion.Presupuestado
+                ? "Presupuesto Nro: "
+                : "Orden Reparación Nro: "
+            }
+            ${repair.id}
+          </div>
           <div class="TypographyBody1">
             Titular: ${repair.auto.owner.fullName}
           </div>

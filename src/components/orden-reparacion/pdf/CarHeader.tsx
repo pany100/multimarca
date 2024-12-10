@@ -1,4 +1,4 @@
-import { Typography } from "@mui/material";
+import { Grid, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import { EstadoOrdenReparacion } from "@prisma/client";
 
@@ -34,13 +34,25 @@ type Props = {
 function CarHeader({ repair, car, owner }: Props) {
   return (
     <div>
-      <Typography variant="h5" sx={{ mb: 2, color: "common.black" }}>
-        {repair.estado === EstadoOrdenReparacion.Presupuestado
-          ? "Presupuesto Nro: "
-          : "Orden Reparación Nro: "}
-        {repair.id}
-      </Typography>
+      <Grid container>
+        <Grid item xs={6}>
+          <Typography variant="h5" sx={{ color: "common.black" }}>
+            Patente: {car.patent}
+          </Typography>
+        </Grid>
+        <Grid item xs={6}>
+          <Typography variant="h5" sx={{ color: "common.black" }}>
+            Km: {repair.kilometros?.toLocaleString("es-AR")}
+          </Typography>
+        </Grid>
+      </Grid>
       <Info>
+        <Typography variant="body1" sx={{ color: "common.black" }}>
+          {repair.estado === EstadoOrdenReparacion.Presupuestado
+            ? "Presupuesto Nro: "
+            : "Orden Reparación Nro: "}
+          {repair.id}
+        </Typography>
         <Typography variant="body1" sx={{ color: "common.black" }}>
           Titular: {owner.fullName}
         </Typography>

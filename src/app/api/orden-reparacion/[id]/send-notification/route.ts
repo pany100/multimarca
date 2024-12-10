@@ -40,7 +40,7 @@ export async function POST(
 
     // Genera el PDF
     const pdfBuffer = await generatePdf(ordenReparacion);
-    // // Escribe el PDF a un archivo
+    // Escribe el PDF a un archivo
     // const fs = require("fs");
     // const path = require("path");
 

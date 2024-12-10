@@ -54,7 +54,7 @@ function TemplateHeader() {
         >
           <img style={{ width: "100%" }} alt="mtservice" src="/instagram.png" />
           <Typography sx={{ color: "common.black" }}>
-            mtserviciomecanicointegral
+            mtservicemultimarca
           </Typography>
         </div>
       </div>
