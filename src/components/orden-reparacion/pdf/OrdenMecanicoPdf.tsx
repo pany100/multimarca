@@ -34,7 +34,7 @@ const setPageStyles = () => {
   `;
 };
 
-const MAX_CONTROL_LENGTH = 20;
+const MAX_CONTROL_LENGTH = 26;
 
 function sortControls(a: any, b: any) {
   if (a.controlMecanico.ordenEnPdf === null) return 1;

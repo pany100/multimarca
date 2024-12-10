@@ -61,9 +61,6 @@ function CarHeader({ repair, car, owner }: Props) {
           {car.transmission_type === "Manual" ? "MT" : "AT"} - {car.year}{" "}
         </Typography>
         <Typography variant="body1" sx={{ color: "common.black" }}>
-          Patente: {car.patent}
-        </Typography>
-        <Typography variant="body1" sx={{ color: "common.black" }}>
           Teléfono: {owner.phone}
         </Typography>
         <Typography variant="body1" sx={{ color: "common.black" }}>

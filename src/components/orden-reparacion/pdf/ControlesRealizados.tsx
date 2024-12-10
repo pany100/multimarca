@@ -27,12 +27,17 @@ function ControlesRealizados({ repair }: Props) {
         Controles Realizados
       </Typography>
       {repair.controlesEnReparacion
-        .filter((control) => control.valor === "true")
+        .filter((control) => control.valor !== "false" && control.valor !== "")
         .map((control) => (
           <Fragment key={control.id}>
             <Typography variant="body1" sx={{ color: "common.black" }}>
               {control.controlMecanico.pdfName || control.controlMecanico.name}
             </Typography>
+            {control.controlMecanico.type === "texto" && (
+              <Typography variant="body1" sx={{ color: "common.black" }}>
+                {control.valor}
+              </Typography>
+            )}
             <Typography variant="body1" sx={{ color: "common.black", mb: 1 }}>
               {control.detalle}
             </Typography>

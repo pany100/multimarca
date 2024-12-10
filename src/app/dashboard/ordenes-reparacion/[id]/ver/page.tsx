@@ -611,7 +611,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           {snackbar.message}
         </Alert>
       </Snackbar>
-      <div style={{ display: "none" }}>
+      <div style={{ display: "block" }}>
         {ordenReparacion !== null && (
           <OrdenMecanicoPdf ref={mechanicOrderRef} repair={ordenReparacion} />
         )}

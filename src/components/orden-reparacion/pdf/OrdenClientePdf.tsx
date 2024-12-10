@@ -69,7 +69,8 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
           <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
           {repair.estado !== EstadoOrdenReparacion.Presupuestado &&
             repair.controlesEnReparacion.filter(
-              (control: any) => control.valor === "true"
+              (control: any) =>
+                control.valor !== "false" && control.valor !== false
             ).length > 0 && (
               <Fragment>
                 <ControlesRealizados repair={repair} />
