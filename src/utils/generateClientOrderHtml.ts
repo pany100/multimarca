@@ -231,7 +231,7 @@ export default function generateClientOrderHtml(repair: any): string {
           .map(
             (control: any) => `
             <div class="TypographyBody1">
-              ${control.controlMecanico.name}
+              ${control.controlMecanico.pdfName || control.controlMecanico.name}
             </div>
             <div class="TypographyBody1" style="margin-bottom: 10px;">
               ${control.detalle}

@@ -1,4 +1,5 @@
 "use client";
+import OrdenClienteInterna from "@/components/orden-reparacion/pdf/OrdenClienteInterna";
 import OrdenClientePdf from "@/components/orden-reparacion/pdf/OrdenClientePdf";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
 import { useFetch } from "@/contexts/FetchContext";
@@ -86,6 +87,8 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
   const { userData, isLoading } = useAuth();
   let mechanicOrderRef = useRef(null);
   let clientOrderRef = useRef(null);
+  let internClientOrderRef = useRef(null);
+
   const [ordenReparacion, setOrdenReparacion] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [openConfirmModal, setOpenConfirmModal] = useState(false);
@@ -111,6 +114,9 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
   });
   const handleClientOrderPrint = useReactToPrint({
     content: () => clientOrderRef.current,
+  });
+  const handleInternClientOrderPrint = useReactToPrint({
+    content: () => internClientOrderRef.current,
   });
   const handleOpenConfirmModal = () => {
     setOpenConfirmModal(true);
@@ -219,6 +225,17 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
               fullWidth
             >
               Imprimir orden para el mecánico
+            </Button>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Button
+              variant="contained"
+              color="warning"
+              startIcon={<PrintIcon />}
+              onClick={handleInternClientOrderPrint}
+              fullWidth
+            >
+              Imprimir orden interna
             </Button>
           </Grid>
           <Grid item xs={12} sm={4}>
@@ -600,6 +617,12 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
         )}
         {ordenReparacion !== null && (
           <OrdenClientePdf ref={clientOrderRef} repair={ordenReparacion} />
+        )}
+        {ordenReparacion !== null && (
+          <OrdenClienteInterna
+            ref={internClientOrderRef}
+            repair={ordenReparacion}
+          />
         )}
       </div>
     </Box>

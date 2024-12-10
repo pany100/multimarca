@@ -4,6 +4,7 @@ import { Fragment } from "react";
 type ControlMecanico = {
   name: string;
   type: string;
+  pdfName: string;
 };
 
 type ControlReparacion = {
@@ -30,7 +31,7 @@ function ControlesRealizados({ repair }: Props) {
         .map((control) => (
           <Fragment key={control.id}>
             <Typography variant="body1" sx={{ color: "common.black" }}>
-              {control.controlMecanico.name}
+              {control.controlMecanico.pdfName || control.controlMecanico.name}
             </Typography>
             <Typography variant="body1" sx={{ color: "common.black", mb: 1 }}>
               {control.detalle}
