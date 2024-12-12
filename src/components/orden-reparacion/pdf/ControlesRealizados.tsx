@@ -30,16 +30,18 @@ function ControlesRealizados({ repair }: Props) {
         .filter((control) => control.valor !== "false" && control.valor !== "")
         .map((control) => (
           <Fragment key={control.id}>
-            <Typography variant="body1" sx={{ color: "common.black" }}>
+            <Typography
+              variant="body1"
+              sx={{ color: "common.black", lineHeight: 1.1, maxWidth: 720 }}
+            >
+              -{" "}
               {control.controlMecanico.pdfName || control.controlMecanico.name}
-            </Typography>
-            {control.controlMecanico.type === "texto" && (
-              <Typography variant="body1" sx={{ color: "common.black" }}>
-                {control.valor}
-              </Typography>
-            )}
-            <Typography variant="body1" sx={{ color: "common.black", mb: 1 }}>
-              {control.detalle}
+              {control.controlMecanico.type === "texto" && (
+                <>
+                  {": "}
+                  {control.valor}
+                </>
+              )}
             </Typography>
           </Fragment>
         ))}

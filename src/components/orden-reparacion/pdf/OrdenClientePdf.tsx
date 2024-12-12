@@ -34,13 +34,13 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
         <style>{setPageStyles()}</style>
         <PDFPage style={{ height: "auto" }}>
           <TemplateHeader />
-          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+          <Divider sx={{ borderColor: "common.black" }} />
           <CarHeader
             car={repair.auto}
             repair={repair}
             owner={repair.auto.owner}
           />
-          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+          <Divider sx={{ borderColor: "common.black" }} />
           <Typography
             variant="body1"
             sx={{ fontWeight: "bold", color: "common.black" }}
@@ -53,7 +53,7 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
           >
             {JSON.parse(repair.observacionesEntrada || "[]").join(", ") || "-"}
           </Typography>
-          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+          <Divider sx={{ borderColor: "common.black" }} />
           <Typography
             variant="body1"
             sx={{ fontWeight: "bold", color: "common.black" }}
@@ -66,7 +66,7 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
           >
             {JSON.parse(repair.observacionesSalida || "[]").join(", ") || "-"}
           </Typography>
-          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+          <Divider sx={{ borderColor: "common.black" }} />
           {repair.estado !== EstadoOrdenReparacion.Presupuestado &&
             repair.controlesEnReparacion.filter(
               (control: any) =>
@@ -74,7 +74,7 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
             ).length > 0 && (
               <Fragment>
                 <ControlesRealizados repair={repair} />
-                <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+                <Divider sx={{ borderColor: "common.black" }} />
               </Fragment>
             )}
           <Typography
@@ -84,7 +84,7 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
             Detalle de Trabajos
           </Typography>
           <WorkDescription repair={repair} />
-          <Divider sx={{ mt: 4, borderColor: "common.black" }} />
+          <Divider sx={{ borderColor: "common.black" }} />
           <Typography variant="body1" sx={{ color: "common.black" }}>
             {repair.estado === EstadoOrdenReparacion.Presupuestado
               ? "Presupuesto aproximado, valores al día, sin IVA, sujeto a desarme y re-ensamble."

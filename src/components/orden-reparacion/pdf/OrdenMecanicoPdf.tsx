@@ -13,7 +13,7 @@ import { styled } from "@mui/material/styles";
 const CheckTypeControlsTwoColumns = styled("div")(() => ({
   display: "grid",
   gridTemplateColumns: "50% 50%",
-  width: "100%",
+  width: "770px",
 }));
 
 type Props = {
@@ -34,7 +34,7 @@ const setPageStyles = () => {
   `;
 };
 
-const MAX_CONTROL_LENGTH = 26;
+const MAX_CONTROL_LENGTH = 25;
 
 function sortControls(a: any, b: any) {
   if (a.controlMecanico.ordenEnPdf === null) return 1;
@@ -114,7 +114,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
             {JSON.parse(repair.observacionesEntrada).length > 0 &&
               JSON.parse(repair.observacionesEntrada).map((el: string) => (
                 <Typography key={el.toString()} sx={{ color: "common.black" }}>
-                  * {el}
+                  {el}
                 </Typography>
               ))}
           </div>
@@ -273,7 +273,15 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                         *
                       </span>
                       <span style={{ flex: 1 }}>{el.controlMecanico.name}</span>
-                      <Checkbox sx={{ color: "common.black", pt: 0, ml: 1 }} />
+                      <Checkbox
+                        sx={{
+                          color: "common.black",
+                          pt: 0,
+                          mr: 1,
+                          height: 24,
+                          width: 24,
+                        }}
+                      />
                     </Typography>
                   )
                 )}

@@ -5,7 +5,7 @@ const Header = styled("div")(() => ({
   display: "grid",
   gridGap: 20,
   gridTemplateColumns: "200px auto",
-  marginBottom: 20,
+  marginBottom: 10,
 }));
 
 function TemplateHeader() {
