@@ -8,7 +8,7 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { monto, usuarioId, motivo, tipoExtraccion, fecha } = body;
+    const { monto, usuarioId, motivo, moneda, tipoExtraccion, fecha } = body;
 
     if (!monto || typeof monto !== "number" || monto <= 0) {
       return NextResponse.json(
@@ -41,6 +41,17 @@ export async function PUT(
       );
     }
 
+    const dolar = await prisma.dolar.findFirst({
+      where: {
+        fecha: {
+          lte: new Date(fecha),
+        },
+      },
+      orderBy: {
+        fecha: "desc",
+      },
+    });
+
     const extraccionActualizada = await prisma.extraccion.update({
       where: { id },
       data: {
@@ -49,6 +60,15 @@ export async function PUT(
         motivo,
         fecha,
         tipoExtraccion,
+        moneda,
+        dolarId: dolar?.id,
+      },
+      include: {
+        usuario: {
+          select: {
+            fullName: true,
+          },
+        },
       },
     });
 

@@ -18,6 +18,13 @@ export async function PUT(
       );
     }
 
+    if (!moneda || !["Dolar", "Peso"].includes(moneda)) {
+      return NextResponse.json(
+        { error: "Moneda inválida o faltante" },
+        { status: 400 }
+      );
+    }
+
     const dolar = await prisma.dolar.findFirst({
       where: {
         fecha: {

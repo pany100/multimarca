@@ -97,6 +97,7 @@ export async function POST(request: Request) {
       categoriaId,
       mecanicoId,
       proveedorId,
+      moneda,
       detalle,
     } = body;
 
@@ -107,15 +108,35 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!moneda || !["Dolar", "Peso"].includes(moneda)) {
+      return NextResponse.json(
+        { error: "Moneda inválida o faltante" },
+        { status: 400 }
+      );
+    }
+
+    const dolar = await prisma.dolar.findFirst({
+      where: {
+        fecha: {
+          lte: new Date(fecha),
+        },
+      },
+      orderBy: {
+        fecha: "desc",
+      },
+    });
+
     const nuevoGasto = await prisma.gasto.create({
       data: {
         nombre,
+        moneda,
         precio,
         fecha: new Date(fecha),
         categoriaId,
         mecanicoId,
         proveedorId,
         detalle,
+        dolarId: dolar?.id,
       },
       include: {
         categoria: true,

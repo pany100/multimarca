@@ -3,11 +3,13 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { Chip } from "@mui/material";
 import { useEffect, useState } from "react";
 import * as yup from "yup";
 
 interface Extraccion {
   id: string;
+  moneda: string;
   monto: number;
   fecha: string;
   usuarioId: number;
@@ -43,11 +45,23 @@ const ExtraccionesPage = () => {
   }, [authFetch]);
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
-    { field: "monto", headerName: "Monto", width: 130 },
+    { field: "monto", headerName: "Monto", width: 100 },
+    {
+      field: "moneda",
+      headerName: "Moneda",
+      width: 100,
+      renderCell: (params: any) => (
+        <Chip
+          label={params.value}
+          color={params.value === "Dolar" ? "success" : "warning"}
+          size="small"
+        />
+      ),
+    },
     {
       field: "fecha",
       headerName: "Fecha",
-      width: 180,
+      width: 100,
       renderCell: (value: any) => new Date(value.value).toLocaleDateString(),
     },
     {
@@ -68,6 +82,15 @@ const ExtraccionesPage = () => {
       layout: {
         xs: 6,
       },
+    },
+    {
+      name: "moneda",
+      label: "Moneda",
+      type: "select",
+      options: [
+        { label: "Dolar", value: "Dolar" },
+        { label: "Peso", value: "Peso" },
+      ],
     },
     {
       name: "fecha",
@@ -107,6 +130,7 @@ const ExtraccionesPage = () => {
       id: "",
       monto: 0,
       fecha: new Date().toISOString().split("T")[0],
+      moneda: "Peso",
       usuarioId: 0,
       usuario: {
         fullName: "",
@@ -128,6 +152,7 @@ const ExtraccionesPage = () => {
           .number()
           .required("El monto es requerido")
           .positive("El monto debe ser positivo"),
+        moneda: yup.string().required("La moneda es requerida"),
         fecha: yup.date().required("La fecha es requerida"),
         usuarioId: yup.number().required("El usuario es requerido"),
         motivo: yup.string().required("El motivo es requerido"),

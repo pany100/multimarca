@@ -52,7 +52,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { monto, usuarioId, motivo, fecha, tipoExtraccion } = body;
+    const { monto, usuarioId, motivo, moneda, fecha, tipoExtraccion } = body;
 
     if (!monto || typeof monto !== "number" || monto <= 0) {
       return NextResponse.json(
@@ -75,6 +75,13 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!moneda || !["Dolar", "Peso"].includes(moneda)) {
+      return NextResponse.json(
+        { error: "Moneda inválida o faltante" },
+        { status: 400 }
+      );
+    }
+
     if (
       !tipoExtraccion ||
       !["EFECTIVO", "TRANSFERENCIA"].includes(tipoExtraccion)
@@ -85,13 +92,35 @@ export async function POST(request: Request) {
       );
     }
 
+    const dolar = await prisma.dolar.findFirst({
+      where: {
+        fecha: {
+          lte: new Date(fecha),
+        },
+      },
+      orderBy: {
+        fecha: "desc",
+      },
+    });
+
+    if (moneda === "Dolar" && !dolar) {
+      return NextResponse.json(
+        {
+          error: "No hay cotización de dólar disponible para la fecha indicada",
+        },
+        { status: 400 }
+      );
+    }
+
     const nuevaExtraccion = await prisma.extraccion.create({
       data: {
         monto,
+        moneda,
         usuarioId,
         motivo,
         tipoExtraccion,
         fecha,
+        dolarId: dolar?.id,
       },
       include: {
         usuario: {

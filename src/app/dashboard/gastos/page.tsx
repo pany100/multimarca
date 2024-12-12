@@ -3,6 +3,7 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { Chip } from "@mui/material";
 import * as yup from "yup";
 
 interface Gasto {
@@ -20,6 +21,7 @@ interface Gasto {
     id: number;
     name: string;
   };
+  moneda: string;
   proveedorId?: number;
   proveedor?: {
     id: number;
@@ -33,6 +35,18 @@ const GastosPage = () => {
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "nombre", headerName: "Descripción", flex: 1.5 },
+    {
+      field: "moneda",
+      headerName: "Moneda",
+      flex: 1,
+      renderCell: (params: any) => (
+        <Chip
+          label={params.value}
+          color={params.value === "Dolar" ? "success" : "warning"}
+          size="small"
+        />
+      ),
+    },
     { field: "detalle", headerName: "Detalle", flex: 1.5 },
     { field: "precio", headerName: "Monto", flex: 1 },
     {
@@ -67,6 +81,15 @@ const GastosPage = () => {
   const formFields: FieldConfig[] = [
     { name: "nombre", label: "Nombre", type: "text" },
     { name: "precio", label: "Monto", type: "number" },
+    {
+      name: "moneda",
+      label: "Moneda",
+      type: "select",
+      options: [
+        { label: "Dolar", value: "Dolar" },
+        { label: "Peso", value: "Peso" },
+      ],
+    },
     { name: "fecha", label: "Fecha", type: "date" },
     { name: "detalle", label: "Detalle", type: "textarea" },
     {
@@ -137,6 +160,7 @@ const GastosPage = () => {
       id: "",
       nombre: "",
       precio: 0,
+      moneda: "Peso",
       fecha: new Date().toISOString().split("T")[0],
       categoriaId: 0,
       categoria: {
@@ -155,6 +179,7 @@ const GastosPage = () => {
       createNewItem={createNewGasto}
       validationSchema={yup.object({
         nombre: yup.string().required("El nombre es requerido"),
+        moneda: yup.string().required("La moneda es requerida"),
         precio: yup
           .number()
           .required("El precio es requerido")

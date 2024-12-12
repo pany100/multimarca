@@ -204,12 +204,15 @@ model OrdenDeCompraItem {
 
 model Extraccion {
   id             Int            @id @default(autoincrement())
+  dolarId           Int?
   monto          Decimal        @db.Decimal(10, 2)
+  moneda         Moneda         @default(Peso)
   fecha          DateTime       @default(now())
   usuarioId      Int
   motivo         String         @db.VarChar(150)
   tipoExtraccion TipoExtraccion
   usuario        Usuario        @relation(fields: [usuarioId], references: [id])
+  dolar          Dolar?         @relation(fields: [dolarId], references: [id])
 
   @@index([usuarioId])
   @@index([fecha])
@@ -219,11 +222,14 @@ model Gasto {
   id          Int            @id @default(autoincrement())
   nombre      String         @db.VarChar(150)
   precio      Decimal        @db.Decimal(10, 2)
+  moneda      Moneda         @default(Peso)
   fecha       DateTime
   categoriaId Int
   mecanicoId  Int?
   detalle     String?        @db.Text
   proveedorId Int?
+  dolarId     Int?
+  dolar       Dolar?         @relation(fields: [dolarId], references: [id])
   categoria   CategoriaGasto @relation(fields: [categoriaId], references: [id])
   mecanico    Empleado?      @relation(fields: [mecanicoId], references: [id])
   proveedor   Proveedor?     @relation(fields: [proveedorId], references: [id])
@@ -425,6 +431,8 @@ model Dolar {
   oficial               Decimal                @db.Decimal(10, 2)
   blue                  Decimal                @db.Decimal(10, 2)
   ingresosPorReparacion IngresoPorReparacion[]
+  extraccion            Extraccion[]
+  gasto                 Gasto[]
 
   @@index([fecha])
 }
