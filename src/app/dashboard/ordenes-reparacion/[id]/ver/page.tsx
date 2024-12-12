@@ -54,6 +54,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
@@ -203,11 +204,23 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
             <Typography variant="h4" gutterBottom>
               Orden de Reparación #{ordenReparacion.id}
             </Typography>
+
             <Chip
               label={ordenReparacion.estado}
               color={getStatusColor(ordenReparacion.estado)}
               size="medium"
             />
+            <Box sx={{ mt: 1 }}>
+              <Link
+                href={`/dashboard/ordenes-reparacion/${ordenReparacion.id}/editar`}
+                style={{
+                  color: theme.palette.primary.main,
+                  alignItems: "center",
+                }}
+              >
+                Editar orden
+              </Link>
+            </Box>
           </Box>
           <Box sx={{ textAlign: "right" }}>
             <Typography variant="h4">

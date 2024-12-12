@@ -47,23 +47,38 @@ function CarHeader({ repair, car, owner }: Props) {
         </Grid>
       </Grid>
       <Info>
-        <Typography variant="body1" sx={{ color: "common.black" }}>
+        <Typography
+          variant="body1"
+          sx={{ color: "common.black", lineHeight: 1.1 }}
+        >
           {repair.estado === EstadoOrdenReparacion.Presupuestado
             ? "Presupuesto Nro: "
             : "Orden Reparación Nro: "}
           {repair.id}
         </Typography>
-        <Typography variant="body1" sx={{ color: "common.black" }}>
+        <Typography
+          variant="body1"
+          sx={{ color: "common.black", lineHeight: 1.1 }}
+        >
           Titular: {owner.fullName}
         </Typography>
-        <Typography variant="body1" sx={{ color: "common.black" }}>
+        <Typography
+          variant="body1"
+          sx={{ color: "common.black", lineHeight: 1.1 }}
+        >
           Vehículo: {car.brand} {car.model} {car.color}{" "}
           {car.transmission_type === "Manual" ? "MT" : "AT"} - {car.year}{" "}
         </Typography>
-        <Typography variant="body1" sx={{ color: "common.black" }}>
+        <Typography
+          variant="body1"
+          sx={{ color: "common.black", lineHeight: 1.1 }}
+        >
           Teléfono: {owner.phone}
         </Typography>
-        <Typography variant="body1" sx={{ color: "common.black" }}>
+        <Typography
+          variant="body1"
+          sx={{ color: "common.black", lineHeight: 1.1 }}
+        >
           Fecha Ingreso:{" "}
           {repair.fechaEntradaReparacion
             ? new Date(repair.fechaEntradaReparacion).toLocaleDateString(
@@ -71,7 +86,10 @@ function CarHeader({ repair, car, owner }: Props) {
               )
             : "-"}
         </Typography>
-        <Typography variant="body1" sx={{ color: "common.black" }}>
+        <Typography
+          variant="body1"
+          sx={{ color: "common.black", lineHeight: 1.1 }}
+        >
           Fecha Egreso:{" "}
           {repair.fechaSalidaReparacion
             ? new Date(repair.fechaSalidaReparacion).toLocaleDateString("es-AR")

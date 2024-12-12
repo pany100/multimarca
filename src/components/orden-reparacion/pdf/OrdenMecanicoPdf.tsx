@@ -13,7 +13,7 @@ import { styled } from "@mui/material/styles";
 const CheckTypeControlsTwoColumns = styled("div")(() => ({
   display: "grid",
   gridTemplateColumns: "50% 50%",
-  width: "770px",
+  width: "730px",
 }));
 
 type Props = {
@@ -34,7 +34,7 @@ const setPageStyles = () => {
   `;
 };
 
-const MAX_CONTROL_LENGTH = 25;
+const MAX_CONTROL_LENGTH = 24;
 
 function sortControls(a: any, b: any) {
   if (a.controlMecanico.ordenEnPdf === null) return 1;
@@ -149,7 +149,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
               >
                 Trabajos Realizados
               </Typography>
-              {[...Array(20)].map((el, index) => (
+              {[...Array(18)].map((el, index) => (
                 <CompleteLine key={index} />
               ))}
             </div>
@@ -164,7 +164,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
               >
                 Repuestos
               </Typography>
-              {[...Array(20)].map((el, index) => (
+              {[...Array(18)].map((el, index) => (
                 <CompleteLine key={index} />
               ))}
             </div>
@@ -227,7 +227,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                   )
                 )}
             </CheckTypeControlsTwoColumns>
-            <div>
+            <div style={{ width: "730px" }}>
               {repair.controlesEnReparacion
                 .filter(
                   (e: {

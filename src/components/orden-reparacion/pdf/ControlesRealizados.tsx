@@ -23,7 +23,10 @@ type Props = {
 function ControlesRealizados({ repair }: Props) {
   return (
     <div>
-      <Typography variant="h6" sx={{ color: "common.black" }}>
+      <Typography
+        variant="body1"
+        sx={{ fontWeight: "bold", color: "common.black" }}
+      >
         Controles Realizados
       </Typography>
       {repair.controlesEnReparacion
@@ -42,6 +45,29 @@ function ControlesRealizados({ repair }: Props) {
                   {control.valor}
                 </>
               )}
+            </Typography>
+          </Fragment>
+        ))}
+      <Typography
+        variant="body1"
+        sx={{ fontWeight: "bold", color: "common.black" }}
+      >
+        Trabajos Realizados
+      </Typography>
+      {repair.controlesEnReparacion
+        .filter(
+          (control) =>
+            control.valor !== "false" &&
+            control.valor !== "" &&
+            control.detalle !== ""
+        )
+        .map((control) => (
+          <Fragment key={control.id}>
+            <Typography
+              variant="body1"
+              sx={{ color: "common.black", lineHeight: 1.1, maxWidth: 720 }}
+            >
+              - {control.detalle}
             </Typography>
           </Fragment>
         ))}

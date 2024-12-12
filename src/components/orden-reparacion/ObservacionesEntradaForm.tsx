@@ -78,17 +78,16 @@ const ObservacionesEntradaForm = () => {
     const observaciones = JSON.parse(observacionesEntrada || "[]");
     return observaciones.includes(observacion);
   };
-  if (reparacionesAnteriores.length === 0) {
-    return null;
-  }
   return (
     <>
       <Typography variant="h6" sx={{ mb: 0 }}>
         Observaciones de entrada
       </Typography>
-      <Typography variant="subtitle1" sx={{ mb: 0 }}>
-        Reparaciones Previas
-      </Typography>
+      {reparacionesAnteriores.length > 0 && (
+        <Typography variant="subtitle1" sx={{ mb: 0 }}>
+          Reparaciones Previas
+        </Typography>
+      )}
       <List sx={{ mt: 0 }}>
         {reparacionesAnteriores.map(
           (
@@ -157,7 +156,7 @@ const ObservacionesEntradaForm = () => {
         sx={{ mb: 2 }}
         disabled={mostrarInput}
       >
-        Agregar observación en texto
+        Agregar observación
       </Button>
       {mostrarInput && (
         <>
