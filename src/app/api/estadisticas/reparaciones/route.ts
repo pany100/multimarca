@@ -56,7 +56,12 @@ export async function GET(request: NextRequest) {
 
     if (año && mes) {
       sqlQuery += ` AND orep.fechaCreacion >= ? AND orep.fechaCreacion < ?`;
-      queryParams.push(`${año}-${mes}-01`, `${año}-${parseInt(mes) + 1}-01`);
+      queryParams.push(
+        `${año}-${mes}-01`,
+        mes === "12"
+          ? `${parseInt(año) + 1}-01-01`
+          : `${año}-${parseInt(mes) + 1}-01`
+      );
     } else if (año) {
       sqlQuery += ` AND YEAR(orep.fechaCreacion) = ?`;
       queryParams.push(año);

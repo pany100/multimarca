@@ -50,7 +50,12 @@ export async function GET(request: NextRequest) {
     // Aplicar filtros de fecha si es necesario
     if (año && mes) {
       ventasQuery += ` AND v.fecha >= ? AND v.fecha < ?`;
-      queryParams.push(`${año}-${mes}-01`, `${año}-${parseInt(mes) + 1}-01`);
+      queryParams.push(
+        `${año}-${mes}-01`,
+        mes === "12"
+          ? `${parseInt(año) + 1}-01-01`
+          : `${año}-${parseInt(mes) + 1}-01`
+      );
     } else if (año) {
       ventasQuery += ` AND YEAR(v.fecha) = ?`;
       queryParams.push(año);
@@ -88,7 +93,9 @@ export async function GET(request: NextRequest) {
       reparacionesQuery += ` AND orep.fechaCreacion >= ? AND orep.fechaCreacion < ?`;
       reparacionesParams.push(
         `${año}-${mes}-01`,
-        `${año}-${parseInt(mes) + 1}-01`
+        mes === "12"
+          ? `${parseInt(año) + 1}-01-01`
+          : `${año}-${parseInt(mes) + 1}-01`
       );
     } else if (año) {
       reparacionesQuery += ` AND YEAR(orep.fechaCreacion) = ?`;
@@ -126,7 +133,12 @@ export async function GET(request: NextRequest) {
 
     if (año && mes) {
       gastosQuery += ` AND g.fecha >= ? AND g.fecha < ?`;
-      gastosParams.push(`${año}-${mes}-01`, `${año}-${parseInt(mes) + 1}-01`);
+      gastosParams.push(
+        `${año}-${mes}-01`,
+        mes === "12"
+          ? `${parseInt(año) + 1}-01-01`
+          : `${año}-${parseInt(mes) + 1}-01`
+      );
     } else if (año) {
       gastosQuery += ` AND YEAR(g.fecha) = ?`;
       gastosParams.push(año);

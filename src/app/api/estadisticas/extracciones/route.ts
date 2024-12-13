@@ -15,8 +15,9 @@ export async function GET(request: NextRequest) {
   try {
     const url = new URL(request.url);
     const moneda = url.searchParams.get("moneda") || "ARS";
-    const fechaInicio = url.searchParams.get("fechaInicio");
-    const fechaFin = url.searchParams.get("fechaFin");
+    const mes = url.searchParams.get("mes");
+    const año = url.searchParams.get("año");
+
     const limit = url.searchParams.get("limit") || "10";
 
     if (moneda !== "ARS" && moneda !== "USD") {
@@ -50,9 +51,17 @@ export async function GET(request: NextRequest) {
 
     const queryParams: any[] = [moneda];
 
-    if (fechaInicio && fechaFin) {
-      sqlQuery += ` AND e.fecha >= ? AND e.fecha <= ?`;
-      queryParams.push(fechaInicio, fechaFin);
+    if (año && mes) {
+      sqlQuery += ` AND e.fecha >= ? AND e.fecha < ?`;
+      queryParams.push(
+        `${año}-${mes}-01`,
+        mes === "12"
+          ? `${parseInt(año) + 1}-01-01`
+          : `${año}-${parseInt(mes) + 1}-01`
+      );
+    } else if (año) {
+      sqlQuery += ` AND YEAR(e.fecha) = ?`;
+      queryParams.push(año);
     }
 
     sqlQuery += `

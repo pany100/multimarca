@@ -5,9 +5,9 @@ const prisma = new PrismaClient();
 
 export const dynamic = "force-dynamic";
 
-interface CategoriaGastoDetallado {
+interface GastoMecanico {
   id: number;
-  nombre: string;
+  name: string;
   totalGastos: number;
 }
 
@@ -17,7 +17,6 @@ export async function GET(request: NextRequest) {
     const moneda = url.searchParams.get("moneda") || "ARS";
     const mes = url.searchParams.get("mes");
     const año = url.searchParams.get("año");
-    const limit = url.searchParams.get("limit") || "10";
 
     if (moneda !== "ARS" && moneda !== "USD") {
       return NextResponse.json(
@@ -28,8 +27,8 @@ export async function GET(request: NextRequest) {
 
     let sqlQuery = `
     SELECT 
-      cg.id, 
-      cg.nombre, 
+    e.id,
+    e.name,
       ROUND(SUM(
         CASE 
           WHEN ? = 'USD' THEN 
@@ -40,18 +39,19 @@ export async function GET(request: NextRequest) {
         ELSE 
           CASE
             WHEN g.moneda = 'Dolar' THEN g.precio * COALESCE(d.blue, 1)
-              ELSE g.precio
-            END
+            ELSE g.precio
+          END
         END
       ), 2) as totalGastos
-    FROM CategoriaGasto cg
-    JOIN Gasto g ON cg.id = g.categoriaId
+      FROM Gasto g
+      JOIN Empleado e ON e.id = g.mecanicoId
+    JOIN CategoriaGasto cg ON g.categoriaId = cg.id
     LEFT JOIN Dolar d ON d.id = g.dolarId
-    WHERE 1=1
+    WHERE cg.id = 2
     `;
 
     const queryParams: any[] = [moneda];
-
+    console.log(año);
     if (año && mes) {
       sqlQuery += ` AND g.fecha >= ? AND g.fecha < ?`;
       queryParams.push(
@@ -66,31 +66,33 @@ export async function GET(request: NextRequest) {
     }
 
     sqlQuery += `
-      GROUP BY cg.id, cg.nombre
-      ORDER BY totalGastos DESC
-      LIMIT ?
+    GROUP BY e.id, e.name
+    ORDER BY totalGastos DESC;
     `;
-    queryParams.push(parseInt(limit));
 
-    const categoriasGastoDetallado = await prisma.$queryRawUnsafe<
-      CategoriaGastoDetallado[]
-    >(sqlQuery, ...queryParams);
+    const gastosMecanicos = await prisma.$queryRawUnsafe<GastoMecanico[]>(
+      sqlQuery,
+      ...queryParams
+    );
 
-    if (categoriasGastoDetallado.length === 0) {
+    if (gastosMecanicos.length === 0) {
       return NextResponse.json({
         message: "No se encontraron datos para el período especificado",
       });
     }
 
-    const categoriasFormateadas = categoriasGastoDetallado.map((categoria) => ({
-      id: categoria.id,
-      nombre: categoria.nombre,
-      totalGastos: parseFloat(categoria.totalGastos.toFixed(2)),
+    const mecanicosFormateados = gastosMecanicos.map((mecanico) => ({
+      id: mecanico.id,
+      fullName: mecanico.name,
+      totalGastos: parseFloat(mecanico.totalGastos.toFixed(2)),
     }));
 
-    return NextResponse.json(categoriasFormateadas);
+    return NextResponse.json(mecanicosFormateados);
   } catch (error) {
-    console.error("Error al obtener estadísticas de gastos:", error);
+    console.error(
+      "Error al obtener estadísticas de gastos por mecánico:",
+      error
+    );
     return NextResponse.json(
       { error: "Error interno del servidor" },
       { status: 500 }
