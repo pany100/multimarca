@@ -35,14 +35,7 @@ export async function GET(request: NextRequest) {
         ROUND(SUM(
           CASE 
             WHEN ? = 'USD' THEN 
-              (ru.unidadesConsumidas * (ru.precioVenta - ru.precioCompra)) / 
-              COALESCE(
-                (SELECT d.blue 
-                 FROM Dolar d 
-                 WHERE DATE(d.fecha) <= DATE(orep.fechaCreacion) 
-                 ORDER BY d.fecha DESC 
-                 LIMIT 1), 
-                1)
+              (ru.unidadesConsumidas * (ru.precioVenta - ru.precioCompra)) / COALESCE(d.blue, 1)
             ELSE 
               (ru.unidadesConsumidas * (ru.precioVenta - ru.precioCompra))
           END
@@ -50,6 +43,7 @@ export async function GET(request: NextRequest) {
       FROM Stock s
       JOIN RepuestoUsado ru ON s.id = ru.stockId
       JOIN OrdenReparacion orep ON ru.ordenReparacionId = orep.id
+      LEFT JOIN Dolar d ON d.id = orep.dolarId
       WHERE orep.estado != 'Presupuestado'
     `;
 

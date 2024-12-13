@@ -26,17 +26,22 @@ export async function GET(request: NextRequest) {
     // Construir la consulta SQL base para ventas
     let ventasQuery = `
       SELECT 
-        ROUND(SUM(CASE 
-          WHEN ? = 'USD' THEN v.total / COALESCE(
-            (SELECT d.blue 
-             FROM Dolar d 
-             WHERE DATE(d.fecha) <= DATE(v.fecha) 
-             ORDER BY d.fecha DESC 
-             LIMIT 1), 
-            1)
-          ELSE v.total 
-        END)) as totalVentas
+        ROUND(SUM(
+          CASE 
+            WHEN ? = 'USD' THEN 
+              CASE 
+                WHEN v.moneda = 'Dolar' THEN v.total
+                ELSE v.total / COALESCE(d.blue, 1)
+              END
+            ELSE 
+              CASE 
+                WHEN v.moneda = 'Dolar' THEN v.total * COALESCE(d.blue, 1)
+                ELSE v.total
+              END
+          END
+        )) as totalVentas
       FROM Venta v
+      LEFT JOIN Dolar d ON d.id = v.dolarId
       WHERE 1=1
     `;
 
@@ -63,23 +68,17 @@ export async function GET(request: NextRequest) {
           WHEN ? = 'USD' THEN 
             (orep.manoDeObra + 
              COALESCE((SELECT SUM(ru.precioVenta) FROM RepuestoUsado ru WHERE ru.ordenReparacionId = orep.id), 0) + 
-             COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0)
-            ) / 
-            COALESCE(
-              (SELECT d.blue 
-               FROM Dolar d 
-               WHERE DATE(d.fecha) <= DATE(orep.fechaCreacion) 
-               ORDER BY d.fecha DESC 
-               LIMIT 1), 
-              1)
-          ELSE 
-            (orep.manoDeObra + 
-             COALESCE((SELECT SUM(ru.precioVenta) FROM RepuestoUsado ru WHERE ru.ordenReparacionId = orep.id), 0) + 
-             COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0)
-            )
+           COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0)
+          ) / COALESCE(d.blue, 1)
+        ELSE 
+          (orep.manoDeObra + 
+           COALESCE((SELECT SUM(ru.precioVenta) FROM RepuestoUsado ru WHERE ru.ordenReparacionId = orep.id), 0) + 
+           COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0)
+          )
         END
       )) as totalReparaciones
       FROM OrdenReparacion orep
+      LEFT JOIN Dolar d ON d.id = orep.dolarId
       WHERE orep.estado != 'Presupuestado'
     `;
 
@@ -107,17 +106,19 @@ export async function GET(request: NextRequest) {
       SELECT ROUND(SUM(
         CASE 
           WHEN ? = 'USD' THEN 
-            g.precio / COALESCE(
-              (SELECT d.blue 
-               FROM Dolar d 
-               WHERE DATE(d.fecha) <= DATE(g.fecha) 
-               ORDER BY d.fecha DESC 
-               LIMIT 1), 
-              1)
-          ELSE g.precio
+            CASE
+              WHEN g.moneda = 'Dolar' THEN g.precio
+              ELSE g.precio / COALESCE(d.blue, 1)
+            END
+        ELSE 
+          CASE
+            WHEN g.moneda = 'Dolar' THEN g.precio * COALESCE(d.blue, 1)
+              ELSE g.precio
+            END
         END
       )) as totalGastos
       FROM Gasto g
+      LEFT JOIN Dolar d ON d.id = g.dolarId
       WHERE 1=1
     `;
 

@@ -28,35 +28,29 @@ export async function GET(request: NextRequest) {
 
     let sqlQuery = `
     SELECT 
-    c.id, 
-    c.fullName, 
-    ROUND(SUM(
-      CASE 
-        WHEN ? = 'USD' THEN 
-          (orep.manoDeObra + 
-           COALESCE((SELECT SUM(ru.precioVenta) FROM RepuestoUsado ru WHERE ru.ordenReparacionId = orep.id), 0) + 
-           COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0)
-          ) / 
-          COALESCE(
-            (SELECT d.blue 
-             FROM Dolar d 
-             WHERE DATE(d.fecha) <= DATE(orep.fechaCreacion) 
-             ORDER BY d.fecha DESC 
-             LIMIT 1), 
-            1)
-        ELSE 
-          (orep.manoDeObra + 
-           COALESCE((SELECT SUM(ru.precioVenta) FROM RepuestoUsado ru WHERE ru.ordenReparacionId = orep.id), 0) + 
-           COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0)
-          )
-      END
-    )) as totalGastos,
-    COUNT(DISTINCT orep.id) as cantidadOrdenes
-  FROM Cliente c
-  JOIN Auto a ON c.id = a.ownerId
-  JOIN OrdenReparacion orep ON a.id = orep.autoId
-  WHERE orep.estado != 'Presupuestado'
-    `;
+        c.id, 
+        c.fullName, 
+        ROUND(SUM(
+          CASE 
+            WHEN ? = 'USD' THEN 
+              (orep.manoDeObra + 
+               COALESCE((SELECT SUM(ru.precioVenta) FROM RepuestoUsado ru WHERE ru.ordenReparacionId = orep.id), 0) + 
+               COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0)
+              ) / COALESCE(d.blue, 1)
+            ELSE 
+              (orep.manoDeObra + 
+               COALESCE((SELECT SUM(ru.precioVenta) FROM RepuestoUsado ru WHERE ru.ordenReparacionId = orep.id), 0) + 
+               COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0)
+              )
+          END
+        )) as totalGastos,
+        COUNT(DISTINCT orep.id) as cantidadOrdenes
+    FROM Cliente c
+    JOIN Auto a ON c.id = a.ownerId
+    JOIN OrdenReparacion orep ON a.id = orep.autoId
+    LEFT JOIN Dolar d ON d.id = orep.dolarId
+    WHERE orep.estado != 'Presupuestado'
+`;
 
     const queryParams: any[] = [moneda];
 

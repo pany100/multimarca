@@ -33,19 +33,23 @@ export async function GET(request: NextRequest) {
       SELECT 
         c.id, 
         c.fullName, 
-        ROUND(SUM(CASE 
-          WHEN ? = 'USD' THEN v.total / COALESCE(
-            (SELECT d.blue 
-             FROM Dolar d 
-             WHERE DATE(d.fecha) <= DATE(v.fecha) 
-             ORDER BY d.fecha DESC 
-             LIMIT 1), 
-            1)
-          ELSE v.total 
-        END)) as totalVentas
+        ROUND(SUM(
+          CASE 
+            WHEN ? = 'USD' THEN 
+              CASE 
+                WHEN v.moneda = 'Dolar' THEN v.total
+                ELSE v.total / COALESCE(d.blue, 1)
+              END
+            ELSE 
+              CASE 
+                WHEN v.moneda = 'Dolar' THEN v.total * COALESCE(d.blue, 1)
+                ELSE v.total
+              END
+          END
+        )) as totalVentas
       FROM Cliente c
       LEFT JOIN Venta v ON c.id = v.clienteId
-      LEFT JOIN Dolar d ON DATE(v.fecha) = DATE(d.fecha)
+      LEFT JOIN Dolar d ON d.id = v.dolarId
       WHERE 1=1
     `;
 

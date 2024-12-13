@@ -31,18 +31,20 @@ export async function GET(request: NextRequest) {
         u.id, 
         u.fullName, 
         ROUND(SUM(CASE 
-          WHEN ? = 'USD' THEN e.monto / COALESCE(
-            (SELECT d.blue 
-             FROM Dolar d 
-             WHERE DATE(d.fecha) <= DATE(e.fecha) 
-             ORDER BY d.fecha DESC 
-             LIMIT 1), 
-            1)
-          ELSE e.monto 
+          WHEN ? = 'USD' THEN 
+            CASE
+              WHEN e.moneda = 'Dolar' THEN e.monto
+              ELSE e.monto / COALESCE(d.blue, 1)
+            END
+          ELSE 
+            CASE
+              WHEN e.moneda = 'Dolar' THEN e.monto * COALESCE(d.blue, 1)
+              ELSE e.monto
+            END
         END)) as totalExtracciones
       FROM Usuario u
       LEFT JOIN Extraccion e ON u.id = e.usuarioId
-      LEFT JOIN Dolar d ON DATE(e.fecha) = DATE(d.fecha)
+      LEFT JOIN Dolar d ON d.id = e.dolarId
       WHERE 1=1
     `;
 

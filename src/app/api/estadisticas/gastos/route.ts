@@ -33,19 +33,20 @@ export async function GET(request: NextRequest) {
       ROUND(SUM(
         CASE 
           WHEN ? = 'USD' THEN 
-            g.precio / COALESCE(
-              (SELECT d.blue 
-               FROM Dolar d 
-               WHERE DATE(d.fecha) <= DATE(g.fecha) 
-               ORDER BY d.fecha DESC 
-               LIMIT 1), 
-              1)
-          ELSE 
-            g.precio
+            CASE
+              WHEN g.moneda = 'Dolar' THEN g.precio
+              ELSE g.precio / COALESCE(d.blue, 1)
+            END
+        ELSE 
+          CASE
+            WHEN g.moneda = 'Dolar' THEN g.precio * COALESCE(d.blue, 1)
+              ELSE g.precio
+            END
         END
       ), 2) as totalGastos
     FROM CategoriaGasto cg
     JOIN Gasto g ON cg.id = g.categoriaId
+    LEFT JOIN Dolar d ON d.id = g.dolarId
     WHERE 1=1
     `;
 
