@@ -7,6 +7,7 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import LockIcon from "@mui/icons-material/Lock";
 import MenuIcon from "@mui/icons-material/Menu";
+import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import {
   AppBar,
   Badge,
@@ -29,14 +30,13 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "src/app/globals.css";
-
 // Importa los iconos necesarios
 import { useFetch } from "@/contexts/FetchContext";
 import { useSocket } from "@/hooks/useSocket";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import AlarmIcon from "@mui/icons-material/Alarm";
 import AssignmentIcon from "@mui/icons-material/Assignment";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import { default as AttachMoneyIcon } from "@mui/icons-material/AttachMoney";
 import BarChartIcon from "@mui/icons-material/BarChart";
 import BuildIcon from "@mui/icons-material/Build";
 import CategoryIcon from "@mui/icons-material/Category";
@@ -291,6 +291,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       {
         title: "Finanzas",
         items: [
+          {
+            permiso: "IngresoDinero",
+            texto: "Ingreso Manual",
+            icono: <MonetizationOnIcon />,
+            ruta: "/dashboard/ingresos-manuales",
+          },
           {
             permiso: "RetirosDinero",
             texto: "Extracciones",

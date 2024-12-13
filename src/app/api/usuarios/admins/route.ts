@@ -3,9 +3,11 @@ import prisma from "src/lib/prisma";
 
 export async function GET(request: Request) {
   try {
-    // Obtener todos los usuarios con rol "Administrador"
+    // Obtener todos los usuarios con rol "Administrador" excepto id 1
     const adminUsers = await prisma.usuario.findMany({
-      where: { rol: { name: "Administrador" } },
+      where: {
+        AND: [{ rol: { name: "Administrador" } }, { id: { not: 1 } }],
+      },
       select: {
         id: true,
         fullName: true,

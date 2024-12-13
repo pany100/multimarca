@@ -1,7 +1,6 @@
 import { signupUser } from "@/lib/auth/userService";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
-
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -14,10 +13,15 @@ export async function GET(request: Request) {
     const [usuarios, total] = await Promise.all([
       prisma.usuario.findMany({
         where: {
-          OR: [
-            { fullName: { contains: query } },
-            { email: { contains: query } },
-            { username: { contains: query } },
+          AND: [
+            {
+              OR: [
+                { fullName: { contains: query } },
+                { email: { contains: query } },
+                { username: { contains: query } },
+              ],
+            },
+            { id: { not: 1 } },
           ],
         },
         select: {
@@ -37,10 +41,15 @@ export async function GET(request: Request) {
       }),
       prisma.usuario.count({
         where: {
-          OR: [
-            { fullName: { contains: query } },
-            { email: { contains: query } },
-            { username: { contains: query } },
+          AND: [
+            {
+              OR: [
+                { fullName: { contains: query } },
+                { email: { contains: query } },
+                { username: { contains: query } },
+              ],
+            },
+            { id: { not: 1 } },
           ],
         },
       }),

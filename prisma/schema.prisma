@@ -17,6 +17,7 @@ model Usuario {
   reset_password_token_expired DateTime?
   rolId                        Int
   extracciones                 Extraccion[]
+  ingresosManuales            IngresoManualDeDinero[]
   rol                          Rol          @relation(fields: [rolId], references: [id])
 
   @@index([fullName])
@@ -514,7 +515,12 @@ model IngresoManualDeDinero {
   descripcion String? @db.Text
   moneda    Moneda  @default(Peso)
   dolarId   Int?
-  dolar     Dolar?  @relation(fields: [dolarId], references: [id])
+  dolar           Dolar?           @relation(fields: [dolarId], references: [id])
+  usuarioId       Int
+  tipoExtraccion  TipoExtraccion
+  usuario         Usuario          @relation(fields: [usuarioId], references: [id])
+
+  @@index([usuarioId])
 }
 
 enum TipoEmpleado {
