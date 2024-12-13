@@ -56,6 +56,16 @@ async function main() {
       },
     });
 
+    const ordenesReparacion = await prisma.ordenReparacion.findMany({
+      where: {
+        dolarId: null,
+      },
+      select: {
+        id: true,
+        fechaCreacion: true,
+      },
+    });
+
     // Función para obtener el dólar correspondiente a una fecha
     const getDolarForDate = async (fecha: Date) => {
       return await prisma.dolar.findFirst({
@@ -124,12 +134,23 @@ async function main() {
       })
     );
 
+    const ordenesReparacionUpdates = await Promise.all(
+      ordenesReparacion.map(async (orden) => {
+        const dolar = await getDolarForDate(orden.fechaCreacion);
+        return prisma.ordenReparacion.update({
+          where: { id: orden.id },
+          data: { dolarId: dolar?.id },
+        });
+      })
+    );
+
     await Promise.all([
       ...ventasUpdates,
       ...ingresosReparacionUpdates,
       ...extraccionesUpdates,
       ...gastosUpdates,
       ...ingresosManualesUpdates,
+      ...ordenesReparacionUpdates,
     ]);
 
     console.log("Actualizaciones completadas");

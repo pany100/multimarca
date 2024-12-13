@@ -1,4 +1,5 @@
 import { getIO } from "@/lib/socketio";
+import getDolarForDate from "@/utils/dolar";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import {
   EstadoOrdenReparacion,
@@ -87,6 +88,7 @@ export async function PUT(
       autoId,
       fechaEntradaReparacion,
       fechaSalidaReparacion,
+      fechaCreacion,
       kilometros,
       observacionesCliente,
       observacionesEntrada,
@@ -250,6 +252,8 @@ export async function PUT(
       permanentUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${s3ObjectKey}`;
     }
 
+    const dolar = await getDolarForDate(fechaCreacion);
+
     // Actualizar la orden de reparación y el stock en una transacción
     const [ordenReparacionActualizada] = await prisma.$transaction(
       async (prisma) => {
@@ -259,11 +263,13 @@ export async function PUT(
             autoId: parseInt(autoId),
             fechaEntradaReparacion,
             fechaSalidaReparacion,
+            fechaCreacion,
             kilometros,
             observacionesCliente,
             observacionesEntrada,
             observacionesSalida,
             estado,
+            dolarId: dolar?.id,
             manoDeObra: new Prisma.Decimal(manoDeObra),
             descuento: new Prisma.Decimal(descuento),
             mecanicos: {

@@ -1,4 +1,5 @@
 import { getIO } from "@/lib/socketio";
+import getDolarForDate from "@/utils/dolar";
 import {
   EstadoOrdenReparacion,
   Prisma,
@@ -83,6 +84,7 @@ export async function POST(request: Request) {
       autoId,
       fechaEntradaReparacion,
       fechaSalidaReparacion,
+      fechaCreacion,
       kilometros,
       observacionesCliente,
       observacionesEntrada = "[]",
@@ -191,11 +193,15 @@ export async function POST(request: Request) {
       mecanicoId: mecanico.id,
     }));
 
+    const dolar = await getDolarForDate(fechaCreacion);
+
     const [nuevaOrdenReparacion] = await prisma.$transaction(async (prisma) => {
       const ordenCreada = await prisma.ordenReparacion.create({
         data: {
           autoId: parseInt(autoId),
+          fechaCreacion,
           fechaEntradaReparacion,
+          dolarId: dolar?.id,
           fechaSalidaReparacion,
           kilometros,
           observacionesCliente,

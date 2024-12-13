@@ -312,6 +312,8 @@ model OrdenReparacion {
   reparacionesDeTercero  ReparacionDeTercero[]     @relation("OrdenReparacionReparacionTercero")
   repuestosUsados        RepuestoUsado[]           @relation("OrdenReparacionRepuestos")
   trabajosRealizados     TrabajoRealizado[]        @relation("OrdenReparacionTrabajosRealizados")
+  dolarId                Int?
+  dolar                  Dolar?                   @relation(fields: [dolarId], references: [id])
 
   @@index([autoId])
   @@index([fechaCreacion])
@@ -439,6 +441,7 @@ model Dolar {
   gasto                 Gasto[]
   venta                 Venta[]
   ingresoManualDeDinero IngresoManualDeDinero[]
+  ordenReparacion       OrdenReparacion[]
 
   @@index([fecha])
 }
