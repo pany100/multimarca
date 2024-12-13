@@ -193,13 +193,16 @@ export async function POST(request: Request) {
       mecanicoId: mecanico.id,
     }));
 
-    const dolar = await getDolarForDate(fechaCreacion);
+    const fechaCreacionDate = fechaCreacion
+      ? new Date(fechaCreacion)
+      : new Date();
+    const dolar = await getDolarForDate(fechaCreacionDate);
 
     const [nuevaOrdenReparacion] = await prisma.$transaction(async (prisma) => {
       const ordenCreada = await prisma.ordenReparacion.create({
         data: {
           autoId: parseInt(autoId),
-          fechaCreacion,
+          fechaCreacion: fechaCreacionDate,
           fechaEntradaReparacion,
           dolarId: dolar?.id,
           fechaSalidaReparacion,
