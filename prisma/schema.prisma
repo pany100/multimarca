@@ -252,10 +252,13 @@ model CategoriaGasto {
 model Venta {
   id        Int         @id @default(autoincrement())
   fecha     DateTime    @default(now())
+  moneda    Moneda      @default(Peso)
   clienteId Int?
   total     Decimal     @db.Decimal(10, 2)
   cliente   Cliente?    @relation(fields: [clienteId], references: [id])
   items     VentaItem[] @relation("VentaToItems")
+  dolarId   Int?
+  dolar     Dolar?      @relation(fields: [dolarId], references: [id])
 
   @@index([clienteId])
   @@index([fecha])
@@ -433,6 +436,8 @@ model Dolar {
   ingresosPorReparacion IngresoPorReparacion[]
   extraccion            Extraccion[]
   gasto                 Gasto[]
+  venta                 Venta[]
+  ingresoManualDeDinero IngresoManualDeDinero[]
 
   @@index([fecha])
 }
@@ -500,6 +505,16 @@ model Borrador {
 
   @@index([autoId])
   @@index([fechaCreacion])
+}
+
+model IngresoManualDeDinero {
+  id        Int     @id @default(autoincrement())
+  monto     Decimal @db.Decimal(10, 2)
+  fecha     DateTime
+  descripcion String? @db.Text
+  moneda    Moneda  @default(Peso)
+  dolarId   Int?
+  dolar     Dolar?  @relation(fields: [dolarId], references: [id])
 }
 
 enum TipoEmpleado {

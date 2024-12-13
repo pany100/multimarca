@@ -53,13 +53,45 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { clienteId, items, total, fecha } = body;
+    const { clienteId, items, total, moneda, fecha } = body;
+
+    // Verificar stock suficiente antes de crear la venta
+    for (const item of items) {
+      const stock = await prisma.stock.findUnique({
+        where: { id: item.stockId },
+        select: { id: true, name: true, units: true, restockValue: true },
+      });
+
+      if (!stock || (stock.units ?? 0) - item.cantidad < 0) {
+        throw new Error(`Stock insuficiente para el ítem ${stock?.name}`);
+      }
+    }
+
+    if (!moneda || !["Dolar", "Peso"].includes(moneda)) {
+      return NextResponse.json(
+        { error: "Moneda inválida o faltante" },
+        { status: 400 }
+      );
+    }
+
+    const dolar = await prisma.dolar.findFirst({
+      where: {
+        fecha: {
+          lte: new Date(fecha),
+        },
+      },
+      orderBy: {
+        fecha: "desc",
+      },
+    });
 
     const venta = await prisma.venta.create({
       data: {
         clienteId,
         total,
         fecha,
+        moneda,
+        dolarId: dolar?.id,
         items: {
           create: items.map((item: { stockId: number; cantidad: number }) => ({
             stockId: item.stockId,
@@ -83,10 +115,6 @@ export async function POST(request: Request) {
         where: { id: item.stockId },
         select: { id: true, name: true, units: true, restockValue: true },
       });
-
-      if (!stock || (stock.units ?? 0) - item.cantidad < 0) {
-        throw new Error(`Stock insuficiente para el ítem ${stock?.name}`);
-      }
 
       const stockActualizado = await prisma.stock.update({
         where: { id: item.stockId },

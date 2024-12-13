@@ -7,6 +7,7 @@ import {
   Autocomplete,
   Box,
   Button,
+  Chip,
   Dialog,
   DialogActions,
   DialogContent,
@@ -30,6 +31,7 @@ interface Venta {
   cliente: {
     fullName: string;
   };
+  moneda: string;
   items: Array<{
     id: string;
     cantidad: number | null;
@@ -68,6 +70,18 @@ const VentasPage = () => {
       headerName: "Fecha",
       flex: 0.8,
       valueGetter: (fecha: string) => new Date(fecha).toLocaleDateString(),
+    },
+    {
+      field: "moneda",
+      headerName: "Moneda",
+      flex: 1,
+      renderCell: (params: any) => (
+        <Chip
+          label={params.value}
+          color={params.value === "Dolar" ? "success" : "warning"}
+          size="small"
+        />
+      ),
     },
     { field: "total", headerName: "Total", flex: 1 },
     {
@@ -280,6 +294,15 @@ const VentasPage = () => {
       },
     },
     {
+      name: "moneda",
+      label: "Moneda",
+      type: "select",
+      options: [
+        { label: "Dolar", value: "Dolar" },
+        { label: "Peso", value: "Peso" },
+      ],
+    },
+    {
       name: "total",
       label: "Total",
       type: "number",
@@ -293,6 +316,7 @@ const VentasPage = () => {
     return {
       id: "",
       fecha: new Date().toISOString().split("T")[0],
+      moneda: "Peso",
       total: 0,
       clienteId: 0,
       cliente: {
@@ -311,6 +335,7 @@ const VentasPage = () => {
       createNewItem={createNewVenta}
       validationSchema={yup.object({
         fecha: yup.date().required("La fecha es requerida"),
+        moneda: yup.string().required("La moneda es requerida"),
         total: yup.number().required("El total es requerido"),
         clienteId: yup.number().required("El cliente es requerido"),
         items: yup.array().min(1, "Debe agregar al menos un item"),

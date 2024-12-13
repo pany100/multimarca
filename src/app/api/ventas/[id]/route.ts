@@ -10,7 +10,7 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { clienteId, items, total, fecha } = body;
+    const { clienteId, items, moneda, total, fecha } = body;
 
     if (!clienteId || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -19,48 +19,97 @@ export async function PUT(
       );
     }
 
-    const ventaActualizada = await prisma.$transaction(async (prisma) => {
-      // Obtener la venta actual
-      const ventaActual = await prisma.venta.findUnique({
-        where: { id },
-        include: {
-          items: {
-            include: {
-              stock: true,
-            },
-          },
-        },
-      });
+    if (!moneda || !["Dolar", "Peso"].includes(moneda)) {
+      return NextResponse.json(
+        { error: "Moneda inválida o faltante" },
+        { status: 400 }
+      );
+    }
 
-      if (!ventaActual) {
-        throw new Error("Venta no encontrada");
+    // Obtener la venta actual para comparar items
+    const ventaActual = await prisma.venta.findUnique({
+      where: { id },
+      include: {
+        items: true,
+      },
+    });
+
+    if (!ventaActual) {
+      throw new Error("Venta no encontrada");
+    }
+
+    // Verificar solo los items nuevos o modificados
+    for (const item of items) {
+      const itemExistente = ventaActual.items.find(
+        (i) => i.stockId === item.stockId && i.cantidad === item.cantidad
+      );
+      // Si el item ya existe con la misma cantidad, no necesita verificación
+      if (itemExistente) {
+        continue;
       }
 
-      // Restaurar el stock de los elementos eliminados o modificados
-      for (const itemActual of ventaActual.items) {
-        const itemNuevo = items.find((item) => item.id === itemActual.id);
-        const cantidadARestaurar = itemNuevo
-          ? itemActual.cantidad - itemNuevo.cantidad
-          : itemActual.cantidad;
+      // Si es un item nuevo o modificado, verificar stock
+      const stock = await prisma.stock.findUnique({
+        where: { id: item.stockId },
+        select: { id: true, name: true, units: true, restockValue: true },
+      });
 
-        if (cantidadARestaurar !== 0) {
-          await prisma.stock.update({
-            where: { id: itemActual.stockId },
-            data: {
-              units: {
-                increment: cantidadARestaurar,
-              },
-            },
-          });
+      const cantidadPrevia =
+        ventaActual.items.find((i) => i.stockId === item.stockId)?.cantidad ||
+        0;
+      const cantidadAdicional = item.cantidad - cantidadPrevia;
+
+      if (!stock || (stock.units ?? 0) - cantidadAdicional < 0) {
+        throw new Error(`Stock insuficiente para el ítem ${stock?.name}`);
+      }
+    }
+
+    const dolar = await prisma.dolar.findFirst({
+      where: {
+        fecha: {
+          lte: new Date(fecha),
+        },
+      },
+      orderBy: {
+        fecha: "desc",
+      },
+    });
+
+    const ventaActualizada = await prisma.$transaction(async (prisma) => {
+      const stockVerification = new Map();
+      for (const item of items) {
+        const stock = await prisma.stock.findUnique({
+          where: { id: item.stockId },
+          select: { id: true, name: true, units: true },
+        });
+        if (!stock)
+          throw new Error(`Stock no encontrado para el ítem ${item.stockId}`);
+        stockVerification.set(item.stockId, stock.units ?? 0);
+      }
+
+      // Sumar las devoluciones
+      for (const itemActual of ventaActual.items) {
+        const stockActual = stockVerification.get(itemActual.stockId) ?? 0;
+        stockVerification.set(
+          itemActual.stockId,
+          stockActual + itemActual.cantidad
+        );
+      }
+
+      for (const item of items) {
+        const stockDisponible = stockVerification.get(item.stockId) ?? 0;
+        if (stockDisponible - item.cantidad < 0) {
+          throw new Error(`Stock insuficiente para el ítem ${item.stockId}`);
         }
       }
 
-      // Actualizar la venta
       const ventaActualizada = await prisma.venta.update({
         where: { id },
         data: {
           clienteId,
           total,
+          moneda,
+          dolarId: dolar?.id,
           fecha,
           items: {
             deleteMany: {},
@@ -80,42 +129,57 @@ export async function PUT(
         },
       });
 
-      // Actualizar el stock de los nuevos elementos
-      for (const item of items) {
-        const stock = await prisma.stock.findUnique({
-          where: { id: item.stockId },
-          select: { id: true, name: true, units: true, restockValue: true },
-        });
+      // Actualizar el stock en una sola operación por item
+      for (const itemActual of ventaActual.items) {
+        const itemNuevo = items.find(
+          (item) => item.stockId === itemActual.stockId
+        );
+        const diferencia = (itemNuevo?.cantidad ?? 0) - itemActual.cantidad;
 
-        if (!stock || (stock.units ?? 0) - item.cantidad < 0) {
-          throw new Error(`Stock insuficiente para el ítem ${stock?.name}`);
-        }
-
-        const stockActualizado = await prisma.stock.update({
-          where: { id: item.stockId },
+        await prisma.stock.update({
+          where: { id: itemActual.stockId },
           data: {
             units: {
-              decrement: item.cantidad,
+              decrement: diferencia,
             },
           },
         });
+      }
 
-        if (
-          (stockActualizado.units ?? 0) <= (stockActualizado.restockValue ?? 0)
-        ) {
-          await prisma.notificacionInterna.create({
+      // Actualizar el stock de los nuevos elementos
+      for (const item of items) {
+        const existiaAntes = ventaActual.items.some(
+          (i) => i.stockId === item.stockId
+        );
+        if (!existiaAntes) {
+          const stockActualizado = await prisma.stock.update({
+            where: { id: item.stockId },
             data: {
-              fecha: new Date(),
-              titulo: `${stockActualizado.name} necesita reposición`,
-              texto: `El elemento ${stockActualizado.name} quedó con ${stockActualizado.units} unidades. Necesita reponer stock.`,
-              leida: false,
-              tipo: TipoNotificacionInterna.REPOSICION_STOCK,
-              stockId: stockActualizado.id,
+              units: {
+                decrement: item.cantidad,
+              },
             },
           });
-          const io = getIO();
-          if (io) {
-            io.emit("newNotification");
+
+          // Verificar si necesita reposición
+          if (
+            (stockActualizado.units ?? 0) <=
+            (stockActualizado.restockValue ?? 0)
+          ) {
+            await prisma.notificacionInterna.create({
+              data: {
+                fecha: new Date(),
+                titulo: `${stockActualizado.name} necesita reposición`,
+                texto: `El elemento ${stockActualizado.name} quedó con ${stockActualizado.units} unidades. Necesita reponer stock.`,
+                leida: false,
+                tipo: TipoNotificacionInterna.REPOSICION_STOCK,
+                stockId: stockActualizado.id,
+              },
+            });
+            const io = getIO();
+            if (io) {
+              io.emit("newNotification");
+            }
           }
         }
       }
