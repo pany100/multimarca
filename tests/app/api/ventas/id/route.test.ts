@@ -76,6 +76,7 @@ describe("PUT /api/ventas/[id]", () => {
       clienteId: cliente.id,
       items: [{ stockId: stock2.id, cantidad: 5 }],
       total: 150,
+      moneda: "Peso",
       fecha: new Date(),
     };
 

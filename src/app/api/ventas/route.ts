@@ -108,14 +108,8 @@ export async function POST(request: Request) {
         },
       },
     });
-
     // Actualizar el stock y crear notificaciones si es necesario
     for (const item of items) {
-      const stock = await prisma.stock.findUnique({
-        where: { id: item.stockId },
-        select: { id: true, name: true, units: true, restockValue: true },
-      });
-
       const stockActualizado = await prisma.stock.update({
         where: { id: item.stockId },
         data: {

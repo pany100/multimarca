@@ -21,6 +21,7 @@ describe("POST /api/ventas", () => {
       body: JSON.stringify({
         clienteId: cliente.id,
         items: [{ stockId: stock.id, cantidad: 3 }],
+        moneda: "Peso",
         total: 100,
         fecha: new Date(),
       }),
