@@ -51,7 +51,6 @@ export async function GET(request: NextRequest) {
     `;
 
     const queryParams: any[] = [moneda];
-    console.log(año);
     if (año && mes) {
       sqlQuery += ` AND g.fecha >= ? AND g.fecha < ?`;
       queryParams.push(
