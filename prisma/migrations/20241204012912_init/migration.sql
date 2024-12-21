@@ -84,9 +84,9 @@ CREATE TABLE `Auto` (
 CREATE TABLE `ControlMecanico` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(150) NOT NULL,
-    `pdfName` VARCHAR(191) NULL,
     `type` VARCHAR(10) NOT NULL,
     `ordenEnPdf` INTEGER NULL,
+    `pdfName` VARCHAR(191) NULL,
 
     UNIQUE INDEX `ControlMecanico_name_key`(`name`),
     INDEX `ControlMecanico_name_idx`(`name`),
@@ -200,7 +200,9 @@ CREATE TABLE `OrdenDeCompraItem` (
 -- CreateTable
 CREATE TABLE `Extraccion` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `dolarId` INTEGER NULL,
     `monto` DECIMAL(10, 2) NOT NULL,
+    `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
     `fecha` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `usuarioId` INTEGER NOT NULL,
     `motivo` VARCHAR(150) NOT NULL,
@@ -216,11 +218,13 @@ CREATE TABLE `Gasto` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `nombre` VARCHAR(150) NOT NULL,
     `precio` DECIMAL(10, 2) NOT NULL,
+    `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
     `fecha` DATETIME(3) NOT NULL,
     `categoriaId` INTEGER NOT NULL,
     `mecanicoId` INTEGER NULL,
     `detalle` TEXT NULL,
     `proveedorId` INTEGER NULL,
+    `dolarId` INTEGER NULL,
 
     INDEX `Gasto_categoriaId_idx`(`categoriaId`),
     INDEX `Gasto_mecanicoId_idx`(`mecanicoId`),
@@ -243,8 +247,10 @@ CREATE TABLE `CategoriaGasto` (
 CREATE TABLE `Venta` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `fecha` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
     `clienteId` INTEGER NULL,
     `total` DECIMAL(10, 2) NOT NULL,
+    `dolarId` INTEGER NULL,
 
     INDEX `Venta_clienteId_idx`(`clienteId`),
     INDEX `Venta_fecha_idx`(`fecha`),
@@ -291,7 +297,8 @@ CREATE TABLE `OrdenReparacion` (
     `estado` ENUM('Presupuestado', 'EnProgreso', 'Aceptado', 'Terminado') NOT NULL DEFAULT 'Presupuestado',
     `pdfPath` VARCHAR(255) NULL,
     `manoDeObra` DECIMAL(10, 2) NOT NULL,
-    `descuento` DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    `descuento` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    `dolarId` INTEGER NULL,
 
     INDEX `OrdenReparacion_autoId_idx`(`autoId`),
     INDEX `OrdenReparacion_fechaCreacion_idx`(`fechaCreacion`),
@@ -303,16 +310,17 @@ CREATE TABLE `OrdenReparacion` (
 CREATE TABLE `RepuestoUsado` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `ordenReparacionId` INTEGER NULL,
-    `borradorId` INTEGER NULL,
     `stockId` INTEGER NOT NULL,
     `precioCompra` DECIMAL(10, 2) NOT NULL,
     `precioVenta` DECIMAL(10, 2) NOT NULL,
     `unidadesConsumidas` INTEGER NOT NULL,
     `plantillaPresupuestoId` INTEGER NULL,
+    `borradorId` INTEGER NULL,
 
     INDEX `RepuestoUsado_ordenReparacionId_idx`(`ordenReparacionId`),
     INDEX `RepuestoUsado_stockId_idx`(`stockId`),
     INDEX `RepuestoUsado_plantillaPresupuestoId_fkey`(`plantillaPresupuestoId`),
+    INDEX `RepuestoUsado_borradorId_fkey`(`borradorId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -324,13 +332,14 @@ CREATE TABLE `ReparacionDeTercero` (
     `precioVenta` DECIMAL(10, 2) NOT NULL,
     `proveedorId` INTEGER NOT NULL,
     `ordenReparacionId` INTEGER NULL,
-    `borradorId` INTEGER NULL,
     `plantillaPresupuestoId` INTEGER NULL,
+    `borradorId` INTEGER NULL,
 
     INDEX `ReparacionDeTercero_nombre_idx`(`nombre`),
     INDEX `ReparacionDeTercero_proveedorId_idx`(`proveedorId`),
     INDEX `ReparacionDeTercero_ordenReparacionId_fkey`(`ordenReparacionId`),
     INDEX `ReparacionDeTercero_plantillaPresupuestoId_fkey`(`plantillaPresupuestoId`),
+    INDEX `ReparacionDeTercero_borradorId_fkey`(`borradorId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -338,14 +347,15 @@ CREATE TABLE `ReparacionDeTercero` (
 CREATE TABLE `TrabajoRealizado` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `ordenReparacionId` INTEGER NULL,
-    `borradorId` INTEGER NULL,
     `precioUnitario` DECIMAL(10, 2) NOT NULL,
     `descripcion` TEXT NOT NULL,
     `diasParaRecordatorio` INTEGER NULL,
     `plantillaPresupuestoId` INTEGER NULL,
+    `borradorId` INTEGER NULL,
 
     INDEX `TrabajoRealizado_ordenReparacionId_idx`(`ordenReparacionId`),
     INDEX `TrabajoRealizado_plantillaPresupuestoId_fkey`(`plantillaPresupuestoId`),
+    INDEX `TrabajoRealizado_borradorId_fkey`(`borradorId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -389,15 +399,16 @@ CREATE TABLE `IngresoPorReparacion` (
     `fecha` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `clienteId` INTEGER NOT NULL,
     `monto` DECIMAL(10, 2) NOT NULL,
-    `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
-    `dolarId` INTEGER NULL,
     `descripcion` TEXT NOT NULL,
     `ordenReparacionId` INTEGER NOT NULL,
     `reciboEnviado` BOOLEAN NOT NULL DEFAULT false,
+    `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
+    `dolarId` INTEGER NULL,
 
     INDEX `IngresoPorReparacion_fecha_idx`(`fecha`),
     INDEX `IngresoPorReparacion_clienteId_idx`(`clienteId`),
     INDEX `IngresoPorReparacion_ordenReparacionId_idx`(`ordenReparacionId`),
+    INDEX `IngresoPorReparacion_dolarId_fkey`(`dolarId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -470,10 +481,25 @@ CREATE TABLE `Borrador` (
     `fechaCreacion` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `observacionesCliente` TEXT NOT NULL,
     `manoDeObra` DECIMAL(10, 2) NOT NULL,
-    `descuento` DECIMAL(10, 2) NOT NULL DEFAULT 0,
+    `descuento` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
 
     INDEX `Borrador_autoId_idx`(`autoId`),
     INDEX `Borrador_fechaCreacion_idx`(`fechaCreacion`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `IngresoManualDeDinero` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `monto` DECIMAL(10, 2) NOT NULL,
+    `fecha` DATETIME(3) NOT NULL,
+    `descripcion` TEXT NULL,
+    `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
+    `dolarId` INTEGER NULL,
+    `usuarioId` INTEGER NOT NULL,
+    `tipoExtraccion` ENUM('EFECTIVO', 'TRANSFERENCIA') NOT NULL,
+
+    INDEX `IngresoManualDeDinero_usuarioId_idx`(`usuarioId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -523,6 +549,12 @@ ALTER TABLE `OrdenDeCompraItem` ADD CONSTRAINT `OrdenDeCompraItem_stockId_fkey` 
 ALTER TABLE `Extraccion` ADD CONSTRAINT `Extraccion_usuarioId_fkey` FOREIGN KEY (`usuarioId`) REFERENCES `Usuario`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Extraccion` ADD CONSTRAINT `Extraccion_dolarId_fkey` FOREIGN KEY (`dolarId`) REFERENCES `Dolar`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Gasto` ADD CONSTRAINT `Gasto_dolarId_fkey` FOREIGN KEY (`dolarId`) REFERENCES `Dolar`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `Gasto` ADD CONSTRAINT `Gasto_categoriaId_fkey` FOREIGN KEY (`categoriaId`) REFERENCES `CategoriaGasto`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -535,6 +567,9 @@ ALTER TABLE `Gasto` ADD CONSTRAINT `Gasto_proveedorId_fkey` FOREIGN KEY (`provee
 ALTER TABLE `Venta` ADD CONSTRAINT `Venta_clienteId_fkey` FOREIGN KEY (`clienteId`) REFERENCES `Cliente`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
+ALTER TABLE `Venta` ADD CONSTRAINT `Venta_dolarId_fkey` FOREIGN KEY (`dolarId`) REFERENCES `Dolar`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
 ALTER TABLE `VentaItem` ADD CONSTRAINT `VentaItem_stockId_fkey` FOREIGN KEY (`stockId`) REFERENCES `Stock`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
@@ -544,10 +579,13 @@ ALTER TABLE `VentaItem` ADD CONSTRAINT `VentaItem_ventaId_fkey` FOREIGN KEY (`ve
 ALTER TABLE `OrdenReparacion` ADD CONSTRAINT `OrdenReparacion_autoId_fkey` FOREIGN KEY (`autoId`) REFERENCES `Auto`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `RepuestoUsado` ADD CONSTRAINT `RepuestoUsado_ordenReparacionId_fkey` FOREIGN KEY (`ordenReparacionId`) REFERENCES `OrdenReparacion`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `OrdenReparacion` ADD CONSTRAINT `OrdenReparacion_dolarId_fkey` FOREIGN KEY (`dolarId`) REFERENCES `Dolar`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `RepuestoUsado` ADD CONSTRAINT `RepuestoUsado_borradorId_fkey` FOREIGN KEY (`borradorId`) REFERENCES `Borrador`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `RepuestoUsado` ADD CONSTRAINT `RepuestoUsado_ordenReparacionId_fkey` FOREIGN KEY (`ordenReparacionId`) REFERENCES `OrdenReparacion`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `RepuestoUsado` ADD CONSTRAINT `RepuestoUsado_plantillaPresupuestoId_fkey` FOREIGN KEY (`plantillaPresupuestoId`) REFERENCES `PlantillaPresupuesto`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -556,10 +594,10 @@ ALTER TABLE `RepuestoUsado` ADD CONSTRAINT `RepuestoUsado_plantillaPresupuestoId
 ALTER TABLE `RepuestoUsado` ADD CONSTRAINT `RepuestoUsado_stockId_fkey` FOREIGN KEY (`stockId`) REFERENCES `Stock`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `ReparacionDeTercero` ADD CONSTRAINT `ReparacionDeTercero_ordenReparacionId_fkey` FOREIGN KEY (`ordenReparacionId`) REFERENCES `OrdenReparacion`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ReparacionDeTercero` ADD CONSTRAINT `ReparacionDeTercero_borradorId_fkey` FOREIGN KEY (`borradorId`) REFERENCES `Borrador`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `ReparacionDeTercero` ADD CONSTRAINT `ReparacionDeTercero_borradorId_fkey` FOREIGN KEY (`borradorId`) REFERENCES `Borrador`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `ReparacionDeTercero` ADD CONSTRAINT `ReparacionDeTercero_ordenReparacionId_fkey` FOREIGN KEY (`ordenReparacionId`) REFERENCES `OrdenReparacion`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `ReparacionDeTercero` ADD CONSTRAINT `ReparacionDeTercero_plantillaPresupuestoId_fkey` FOREIGN KEY (`plantillaPresupuestoId`) REFERENCES `PlantillaPresupuesto`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -568,10 +606,10 @@ ALTER TABLE `ReparacionDeTercero` ADD CONSTRAINT `ReparacionDeTercero_plantillaP
 ALTER TABLE `ReparacionDeTercero` ADD CONSTRAINT `ReparacionDeTercero_proveedorId_fkey` FOREIGN KEY (`proveedorId`) REFERENCES `Proveedor`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `TrabajoRealizado` ADD CONSTRAINT `TrabajoRealizado_ordenReparacionId_fkey` FOREIGN KEY (`ordenReparacionId`) REFERENCES `OrdenReparacion`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `TrabajoRealizado` ADD CONSTRAINT `TrabajoRealizado_borradorId_fkey` FOREIGN KEY (`borradorId`) REFERENCES `Borrador`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `TrabajoRealizado` ADD CONSTRAINT `TrabajoRealizado_borradorId_fkey` FOREIGN KEY (`borradorId`) REFERENCES `Borrador`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `TrabajoRealizado` ADD CONSTRAINT `TrabajoRealizado_ordenReparacionId_fkey` FOREIGN KEY (`ordenReparacionId`) REFERENCES `OrdenReparacion`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `TrabajoRealizado` ADD CONSTRAINT `TrabajoRealizado_plantillaPresupuestoId_fkey` FOREIGN KEY (`plantillaPresupuestoId`) REFERENCES `PlantillaPresupuesto`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -586,10 +624,10 @@ ALTER TABLE `ControlEnReparacion` ADD CONSTRAINT `ControlEnReparacion_ordenRepar
 ALTER TABLE `PagoAMecanico` ADD CONSTRAINT `PagoAMecanico_ordenReparacionId_fkey` FOREIGN KEY (`ordenReparacionId`) REFERENCES `OrdenReparacion`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `IngresoPorReparacion` ADD CONSTRAINT `IngresoPorReparacion_dolarId_fkey` FOREIGN KEY (`dolarId`) REFERENCES `Dolar`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `IngresoPorReparacion` ADD CONSTRAINT `IngresoPorReparacion_clienteId_fkey` FOREIGN KEY (`clienteId`) REFERENCES `Cliente`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `IngresoPorReparacion` ADD CONSTRAINT `IngresoPorReparacion_clienteId_fkey` FOREIGN KEY (`clienteId`) REFERENCES `Cliente`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `IngresoPorReparacion` ADD CONSTRAINT `IngresoPorReparacion_dolarId_fkey` FOREIGN KEY (`dolarId`) REFERENCES `Dolar`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `IngresoPorReparacion` ADD CONSTRAINT `IngresoPorReparacion_ordenReparacionId_fkey` FOREIGN KEY (`ordenReparacionId`) REFERENCES `OrdenReparacion`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
@@ -608,6 +646,12 @@ ALTER TABLE `MensajeWhatsApp` ADD CONSTRAINT `MensajeWhatsApp_conversacionId_fke
 
 -- AddForeignKey
 ALTER TABLE `Borrador` ADD CONSTRAINT `Borrador_autoId_fkey` FOREIGN KEY (`autoId`) REFERENCES `Auto`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `IngresoManualDeDinero` ADD CONSTRAINT `IngresoManualDeDinero_dolarId_fkey` FOREIGN KEY (`dolarId`) REFERENCES `Dolar`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `IngresoManualDeDinero` ADD CONSTRAINT `IngresoManualDeDinero_usuarioId_fkey` FOREIGN KEY (`usuarioId`) REFERENCES `Usuario`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `_PermisoToRol` ADD CONSTRAINT `_PermisoToRol_A_fkey` FOREIGN KEY (`A`) REFERENCES `Permiso`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
