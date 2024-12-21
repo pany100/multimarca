@@ -584,6 +584,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
                 />
               )}
             />
+            <Divider sx={{ mt: 2 }} />
           </Grid>
           <Grid item xs={12}>
             <ObservacionesEntradaForm />

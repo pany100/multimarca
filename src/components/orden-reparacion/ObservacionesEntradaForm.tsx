@@ -1,4 +1,5 @@
 import { useFetch } from "@/contexts/FetchContext";
+import CheckIcon from "@mui/icons-material/Check";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
   Box,
@@ -120,7 +121,7 @@ const ObservacionesEntradaForm = () => {
                                   </Typography>
                                 }
                               />
-                              {!estaObservacionAgregada(obs) && (
+                              {!estaObservacionAgregada(obs) ? (
                                 <Button
                                   size="small"
                                   onClick={() => agregarObservacion(obs)}
@@ -128,6 +129,18 @@ const ObservacionesEntradaForm = () => {
                                 >
                                   Agregar
                                 </Button>
+                              ) : (
+                                <Typography
+                                  variant="body2"
+                                  sx={{ ml: 1, py: 0, color: "lightgreen" }}
+                                >
+                                  <CheckIcon
+                                    sx={{
+                                      ml: 1,
+                                      verticalAlign: "middle",
+                                    }}
+                                  />
+                                </Typography>
                               )}
                             </ListItem>
                           )
@@ -149,15 +162,50 @@ const ObservacionesEntradaForm = () => {
           )
         )}
       </List>
-      <Button
-        fullWidth
-        variant="outlined"
-        onClick={() => setMostrarInput(true)}
-        sx={{ mb: 2 }}
-        disabled={mostrarInput}
-      >
-        Agregar observación
-      </Button>
+      {JSON.parse(observacionesEntrada || "[]").length > 0 && (
+        <>
+          <Typography variant="subtitle1" sx={{ mb: 0 }}>
+            Observaciones Agregadas
+          </Typography>
+          <List sx={{ mt: 0, py: 0 }}>
+            {JSON.parse(observacionesEntrada || "[]").map(
+              (obs: string, index: number) => (
+                <ListItem
+                  key={index}
+                  secondaryAction={
+                    <IconButton
+                      edge="end"
+                      aria-label="delete"
+                      onClick={() => quitarObservacion(index)}
+                    >
+                      <DeleteIcon />
+                    </IconButton>
+                  }
+                  sx={{ py: 0.0 }}
+                >
+                  <ListItemText
+                    primary={
+                      <Typography variant="body2" sx={{ my: 0 }}>
+                        ◦ {obs}
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+              )
+            )}
+          </List>
+        </>
+      )}
+      <Box display="flex" justifyContent="flex-end" mt={2}>
+        <Button
+          variant="contained"
+          onClick={() => setMostrarInput(true)}
+          sx={{ mb: 2 }}
+          disabled={mostrarInput}
+        >
+          Agregar observación
+        </Button>
+      </Box>
       {mostrarInput && (
         <>
           <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
@@ -195,41 +243,7 @@ const ObservacionesEntradaForm = () => {
           </Box>
         </>
       )}
-      {JSON.parse(observacionesEntrada || "[]").length > 0 && (
-        <>
-          <Typography variant="subtitle1" sx={{ mb: 0 }}>
-            Observaciones Agregadas
-          </Typography>
-          <List sx={{ mt: 0, py: 0 }}>
-            {JSON.parse(observacionesEntrada || "[]").map(
-              (obs: string, index: number) => (
-                <ListItem
-                  key={index}
-                  secondaryAction={
-                    <IconButton
-                      edge="end"
-                      aria-label="delete"
-                      onClick={() => quitarObservacion(index)}
-                    >
-                      <DeleteIcon />
-                    </IconButton>
-                  }
-                  sx={{ py: 0.0 }}
-                >
-                  <ListItemText
-                    primary={
-                      <Typography variant="body2" sx={{ my: 0 }}>
-                        ◦ {obs}
-                      </Typography>
-                    }
-                  />
-                </ListItem>
-              )
-            )}
-          </List>
-          <Divider sx={{ mt: 2 }} />
-        </>
-      )}
+      <Divider sx={{ mt: 1 }} />
     </>
   );
 };
