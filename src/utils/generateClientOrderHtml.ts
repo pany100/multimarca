@@ -234,7 +234,7 @@ export default function generateClientOrderHtml(repair: any): string {
               ${control.controlMecanico.pdfName || control.controlMecanico.name}
             </div>
             <div class="TypographyBody1" style="margin-bottom: 10px;">
-              ${control.detalle}
+              
             </div>
           `
           )

@@ -482,15 +482,6 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                       />
                       <Typography>{control.controlMecanico.name}</Typography>
                     </Box>
-                    {control.valor === "true" && control.detalle && (
-                      <Typography
-                        variant="body2"
-                        color="textSecondary"
-                        sx={{ ml: 2 }}
-                      >
-                        {control.detalle}
-                      </Typography>
-                    )}
                   </Box>
                 </Grid>
               )

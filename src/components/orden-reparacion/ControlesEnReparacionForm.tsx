@@ -1,3 +1,4 @@
+import { getFormattedControlName } from "@/utils/fieldHelper";
 import {
   Box,
   Checkbox,
@@ -14,7 +15,6 @@ type ControlMecanico = {
   nombre: string;
   tipo: "checkbox" | "texto";
   valor: string;
-  detalle: string;
 };
 
 type Props = {
@@ -24,12 +24,12 @@ type Props = {
 const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
   const { control, getValues, setValue } = useFormContext();
 
-  const handleControlChange = (id: number, valor: string, detalle: string) => {
+  const handleControlChange = (id: number, valor: string) => {
     const controlesEnReparacion = getValues("controlesEnReparacion");
     const controlesActualizados = controlesEnReparacion.map(
       (control: ControlMecanico) => {
         if (control.id === id) {
-          return { id, valor, detalle };
+          return { id, valor };
         }
         return control;
       }
@@ -44,26 +44,28 @@ const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
         Controles Realizados
       </Typography>
 
-      <Grid container spacing={2}>
-        {controlesMecanicos
-          .filter((control) => control.tipo === "checkbox")
-          .map((control) => (
-            <Grid
-              item
-              xs={12}
-              key={control.id}
-              sx={{ pt: "0 !important", mb: 1 }}
-            >
-              <Box
+      <Grid container spacing={2} gap={1}>
+        <Grid
+          container
+          gap={1}
+          sx={{ ml: 2, mr: 2, justifyContent: "space-between" }}
+        >
+          {controlesMecanicos
+            .filter((control) => control.tipo === "checkbox")
+            .map((control) => (
+              <Grid
+                key={control.id}
+                item
+                xs={5}
                 sx={{
                   display: "grid",
-                  gridTemplateColumns: "auto 40px 400px",
+                  gridTemplateColumns: "auto 40px",
                 }}
                 alignItems="center"
-                width="100%"
-                gap={2}
               >
-                <Typography>{control.nombre}</Typography>
+                <Typography>
+                  {getFormattedControlName(control.nombre)}
+                </Typography>
                 <Checkbox
                   checked={
                     controlesEnForm.find(
@@ -73,32 +75,14 @@ const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
                   onChange={(e) =>
                     handleControlChange(
                       control.id,
-                      e.target.checked ? "true" : "false",
-                      control.detalle
+                      e.target.checked ? "true" : "false"
                     )
                   }
                   sx={{ minWidth: "48px" }}
                 />
-                {controlesEnForm.find(
-                  (formControl: any) => formControl.id === control.id
-                )?.valor === "true" && (
-                  <TextField
-                    size="small"
-                    placeholder="Detalle (Opcional)"
-                    value={
-                      controlesEnForm.find(
-                        (formControl: any) => formControl.id === control.id
-                      )?.detalle || ""
-                    }
-                    onChange={(e) =>
-                      handleControlChange(control.id, "true", e.target.value)
-                    }
-                    sx={{ flex: 1, minWidth: "400px" }}
-                  />
-                )}
-              </Box>
-            </Grid>
-          ))}
+              </Grid>
+            ))}
+        </Grid>
         {controlesMecanicos
           .filter((control) => control.tipo !== "checkbox")
           .map((control) => (
@@ -122,7 +106,7 @@ const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
                   fullWidth
                   defaultValue={control?.valor || ""}
                   onBlur={(e) =>
-                    handleControlChange(control.id, e.target.value, "")
+                    handleControlChange(control.id, e.target.value)
                   }
                   size="small"
                 />

@@ -11,7 +11,6 @@ type ControlReparacion = {
   id: number;
   controlMecanico: ControlMecanico;
   valor: string;
-  detalle: string;
 };
 
 type Props = {
@@ -55,19 +54,14 @@ function ControlesRealizados({ repair }: Props) {
         Trabajos Realizados
       </Typography>
       {repair.controlesEnReparacion
-        .filter(
-          (control) =>
-            control.valor !== "false" &&
-            control.valor !== "" &&
-            control.detalle !== ""
-        )
+        .filter((control) => control.valor !== "false" && control.valor !== "")
         .map((control) => (
           <Fragment key={control.id}>
             <Typography
               variant="body1"
               sx={{ color: "common.black", lineHeight: 1.1, maxWidth: 720 }}
             >
-              - {control.detalle}
+              -
             </Typography>
           </Fragment>
         ))}

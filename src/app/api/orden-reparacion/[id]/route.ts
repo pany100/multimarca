@@ -293,12 +293,10 @@ export async function PUT(
                 where: { id: control.id },
                 update: {
                   valor: control.valor,
-                  detalle: control.detalle,
                 },
                 create: {
                   controlMecanicoId: control.id,
                   valor: control.valor,
-                  detalle: control.detalle,
                 },
               })),
             },
