@@ -26,6 +26,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
+import TextListInput from "../TextListInput";
 import ControlesEnReparacionForm from "./ControlesEnReparacionForm";
 import MecanicoFormSection from "./MecanicoFormSection";
 import ObservacionesEntradaForm from "./ObservacionesEntradaForm";
@@ -195,6 +196,7 @@ type OrdenReparacion = {
     };
   }[];
   descuento: number;
+  detalleControles: string;
 };
 
 const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
@@ -680,6 +682,12 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
                   )}
                 </>
               )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextListInput
+              inputName="detalleControles"
+              label="Detalle de controles"
             />
           </Grid>
           <Grid item xs={12}>

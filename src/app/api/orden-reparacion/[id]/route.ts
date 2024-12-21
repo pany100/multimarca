@@ -100,6 +100,7 @@ export async function PUT(
       reparacionesDeTercero = [],
       trabajosRealizados = [],
       controlesEnReparacion = [],
+      detalleControles,
       manoDeObra,
       descuento,
     } = body;
@@ -300,6 +301,7 @@ export async function PUT(
                 },
               })),
             },
+            detalleControles,
             pdfPath: permanentUrl,
           },
           include: {
