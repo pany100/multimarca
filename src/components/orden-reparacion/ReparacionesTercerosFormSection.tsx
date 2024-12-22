@@ -18,8 +18,10 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import Image from "next/image";
 import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
+import ImageInput from "../ImageInput";
 
 function ReparacionesTercerosFormSection({
   esBorrador = false,
@@ -48,6 +50,7 @@ function ReparacionesTercerosFormSection({
   const [editingReparacionId, setEditingReparacionId] = useState<string | null>(
     null
   );
+  const [recibo, setRecibo] = useState<string | null>(null);
 
   const searchProveedores = async (query: string) => {
     const response = await authFetch(
@@ -71,6 +74,7 @@ function ReparacionesTercerosFormSection({
         nombre,
         precioCompra: Number(precioCompra),
         precioVenta: Number(precioVenta),
+        recibo,
       };
 
       if (editingReparacionId) {
@@ -117,6 +121,7 @@ function ReparacionesTercerosFormSection({
   const handleEditReparacion = (reparacion: any) => {
     setSelectedProveedor(reparacion.proveedor);
     setNombre(reparacion.nombre);
+    setRecibo(reparacion.recibo);
     setPrecioCompra(reparacion.precioCompra.toString());
     setPrecioVenta(reparacion.precioVenta.toString());
     setEditingReparacionId(
@@ -138,6 +143,7 @@ function ReparacionesTercerosFormSection({
   const resetFields = () => {
     setSelectedProveedor(null);
     setNombre("");
+    setRecibo(null);
     setPrecioCompra("");
     setPrecioVenta("");
     setEditingReparacionId(null);
@@ -161,6 +167,7 @@ function ReparacionesTercerosFormSection({
                     <TableCell>Descripción</TableCell>
                     <TableCell>Precio Compra</TableCell>
                     <TableCell>Precio Venta</TableCell>
+                    <TableCell>Recibo</TableCell>
                     <TableCell>Acciones</TableCell>
                   </TableRow>
                 </TableHead>
@@ -171,6 +178,17 @@ function ReparacionesTercerosFormSection({
                       <TableCell>{reparacion.nombre}</TableCell>
                       <TableCell>{reparacion.precioCompra}</TableCell>
                       <TableCell>{reparacion.precioVenta}</TableCell>
+                      <TableCell>
+                        {reparacion.recibo && (
+                          <Image
+                            src={reparacion.recibo}
+                            alt="Imagen seleccionada"
+                            width={300}
+                            height={200}
+                            style={{ width: "300px", height: "auto" }}
+                          />
+                        )}
+                      </TableCell>
                       <TableCell>
                         <Button
                           onClick={() => handleEditReparacion(reparacion)}
@@ -260,6 +278,7 @@ function ReparacionesTercerosFormSection({
             fullWidth
             margin="normal"
           />
+          <ImageInput image={recibo} setImage={setRecibo} />
         </DialogContent>
         <DialogActions>
           <Button

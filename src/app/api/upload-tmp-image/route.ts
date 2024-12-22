@@ -1,17 +1,11 @@
-import { deleteFileFromS3 } from "@/utils/s3Helper";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 
 const allowedExtensions = ["jpg", "jpeg", "png"];
 
-export async function PUT(
-  request: NextRequest,
-  { params }: { params: { id: string } }
-) {
+export async function POST(request: NextRequest) {
   try {
-    const carId = parseInt(params.id);
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
 
@@ -33,7 +27,7 @@ export async function PUT(
     }
 
     const secureFileName = `${uuidv4()}.${fileExtension}`;
-    const s3ObjectKey = `cedula-verde/${secureFileName}`;
+    const s3ObjectKey = `tmp/${secureFileName}`;
 
     const uploadParams = {
       Bucket: process.env.AWS_S3_BUCKET_NAME,
@@ -42,7 +36,6 @@ export async function PUT(
       ContentType: file.type,
     };
 
-    const command = new PutObjectCommand(uploadParams);
     const s3Client = new S3Client({
       region: process.env.AWS_DEFAULT_REGION,
       credentials: {
@@ -50,29 +43,17 @@ export async function PUT(
         secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
       },
     });
+
+    const command = new PutObjectCommand(uploadParams);
     await s3Client.send(command);
 
     const bucketName = process.env.AWS_S3_BUCKET_NAME!;
     const region = process.env.AWS_DEFAULT_REGION!;
     const permanentUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${s3ObjectKey}`;
-    const prisma = new PrismaClient();
-    // Obtener el auto actual para verificar si tiene una cédula verde existente
-    const currentCar = await prisma.auto.findUnique({
-      where: { id: carId },
-    });
 
-    if (currentCar?.cedulaVerdePath) {
-      await deleteFileFromS3(currentCar.cedulaVerdePath);
-    }
-    const updatedCar = await prisma.auto.update({
-      where: { id: carId },
-      data: { cedulaVerdePath: permanentUrl },
-      include: { owner: true },
-    });
-
-    return NextResponse.json(updatedCar, { status: 200 });
+    return NextResponse.json({ url: permanentUrl }, { status: 200 });
   } catch (error) {
-    console.error("Error al agregar cédula verde:", error);
+    console.error("Error al subir imagen temporal:", error);
     return NextResponse.json(
       { mensaje: "Error interno del servidor" },
       { status: 500 }

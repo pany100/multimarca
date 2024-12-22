@@ -122,6 +122,7 @@ const schema = yup.object().shape({
           name: yup.string().required(),
         })
         .required("El proveedor es requerido"),
+      recibo: yup.string(),
     })
   ),
   manoDeObra: yup
@@ -178,6 +179,7 @@ type OrdenReparacion = {
       id: number;
       name: string;
     };
+    recibo: string;
   }[];
   trabajosRealizados: {
     id: number;
@@ -267,6 +269,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
             id: reparacion.proveedorId,
             name: reparacion.proveedor.name,
           },
+          recibo: reparacion.recibo,
         })
       ),
       observacionesSalida: ordenReparacion.observacionesSalida,

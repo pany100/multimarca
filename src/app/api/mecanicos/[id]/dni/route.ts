@@ -1,3 +1,4 @@
+import { deleteFileFromS3 } from "@/utils/s3Helper";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
@@ -60,6 +61,16 @@ export async function PUT(
     const nombreBucket = process.env.AWS_S3_BUCKET_NAME!;
     const region = process.env.AWS_DEFAULT_REGION!;
     const urlPermanente = `https://${nombreBucket}.s3.${region}.amazonaws.com/${claveObjetoS3}`;
+    // Obtener el empleado actual y su dniImagePath
+    const empleadoActual = await prisma.empleado.findUnique({
+      where: { id: empleadoId },
+      select: { dniImagePath: true },
+    });
+
+    // Si existe una imagen previa, eliminarla de S3
+    if (empleadoActual?.dniImagePath) {
+      await deleteFileFromS3(empleadoActual.dniImagePath);
+    }
 
     const empleadoActualizado = await prisma.empleado.update({
       where: { id: empleadoId },

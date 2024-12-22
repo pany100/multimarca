@@ -1,5 +1,6 @@
 import { getIO } from "@/lib/socketio";
 import getDolarForDate from "@/utils/dolar";
+import { moveFileInS3 } from "@/utils/s3Helper";
 import {
   EstadoOrdenReparacion,
   Prisma,
@@ -157,16 +158,23 @@ export async function POST(request: Request) {
       stock: { connect: { id: repuesto.stock.id } },
     }));
 
-    const reparacionesDeTerceroToPersist = reparacionesDeTercero.map(
-      (reparacion: any) => ({
-        nombre: reparacion.nombre,
-        precioCompra: reparacion.precioCompra
-          ? new Prisma.Decimal(reparacion.precioCompra)
-          : new Prisma.Decimal(0),
-        precioVenta: reparacion.precioVenta
-          ? new Prisma.Decimal(reparacion.precioVenta)
-          : new Prisma.Decimal(0),
-        proveedor: { connect: { id: reparacion.proveedor.id } },
+    const reparacionesDeTerceroToPersist = await Promise.all(
+      reparacionesDeTercero.map(async (reparacion: any) => {
+        let reciboUrl = reparacion.recibo;
+        if (reparacion.recibo && reparacion.recibo.includes("/tmp/")) {
+          reciboUrl = await moveFileInS3(reparacion.recibo, "recibos");
+        }
+        return {
+          nombre: reparacion.nombre,
+          precioCompra: reparacion.precioCompra
+            ? new Prisma.Decimal(reparacion.precioCompra)
+            : new Prisma.Decimal(0),
+          precioVenta: reparacion.precioVenta
+            ? new Prisma.Decimal(reparacion.precioVenta)
+            : new Prisma.Decimal(0),
+          proveedor: { connect: { id: reparacion.proveedor.id } },
+          recibo: reciboUrl,
+        };
       })
     );
 

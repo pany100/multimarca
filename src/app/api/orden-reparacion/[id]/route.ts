@@ -1,5 +1,6 @@
 import { getIO } from "@/lib/socketio";
 import getDolarForDate from "@/utils/dolar";
+import { deleteFileFromS3, moveFileInS3 } from "@/utils/s3Helper";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import {
   EstadoOrdenReparacion,
@@ -189,16 +190,36 @@ export async function PUT(
       stock: { connect: { id: repuesto.stock.id } },
     }));
 
-    const reparacionesDeTerceroToPersist = reparacionesDeTercero.map(
-      (reparacion: any) => ({
-        nombre: reparacion.nombre,
-        precioCompra: reparacion.precioCompra
-          ? new Prisma.Decimal(reparacion.precioCompra)
-          : new Prisma.Decimal(0),
-        precioVenta: reparacion.precioVenta
-          ? new Prisma.Decimal(reparacion.precioVenta)
-          : new Prisma.Decimal(0),
-        proveedor: { connect: { id: reparacion.proveedor.id } },
+    const reparacionesDeTerceroToPersist = await Promise.all(
+      reparacionesDeTercero.map(async (reparacion: any) => {
+        const reparacionExistente = await prisma.reparacionDeTercero.findFirst({
+          where: {
+            ordenReparacionId: id,
+            nombre: reparacion.nombre,
+            proveedorId: reparacion.proveedor.id,
+          },
+        });
+        let reciboUrl = reparacion.recibo;
+        if (reparacion.recibo && reparacion.recibo.includes("/tmp/")) {
+          reciboUrl = await moveFileInS3(reparacion.recibo, "recibos");
+        }
+        if (
+          reparacionExistente?.recibo &&
+          reparacionExistente.recibo !== reciboUrl
+        ) {
+          await deleteFileFromS3(reparacionExistente.recibo);
+        }
+        return {
+          nombre: reparacion.nombre,
+          precioCompra: reparacion.precioCompra
+            ? new Prisma.Decimal(reparacion.precioCompra)
+            : new Prisma.Decimal(0),
+          precioVenta: reparacion.precioVenta
+            ? new Prisma.Decimal(reparacion.precioVenta)
+            : new Prisma.Decimal(0),
+          proveedor: { connect: { id: reparacion.proveedor.id } },
+          recibo: reciboUrl,
+        };
       })
     );
 
@@ -254,7 +275,6 @@ export async function PUT(
     }
 
     const dolar = await getDolarForDate(fechaCreacion);
-
     // Actualizar la orden de reparación y el stock en una transacción
     const [ordenReparacionActualizada] = await prisma.$transaction(
       async (prisma) => {
@@ -388,6 +408,11 @@ export async function PUT(
           tipo: TipoNotificacionInterna.REPARACION_TERMINADA,
         },
       });
+
+      // Si existe un PDF previo y se está subiendo uno nuevo, eliminar el anterior de S3
+      if (ordenActual?.pdfPath && ordenActual.pdfPath !== permanentUrl) {
+        await deleteFileFromS3(ordenActual.pdfPath);
+      }
 
       if (!existeNotificacion) {
         await prisma.notificacionInterna.create({

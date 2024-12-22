@@ -104,6 +104,7 @@ const schema = yup.object().shape({
           name: yup.string().required(),
         })
         .required("El proveedor es requerido"),
+      recibo: yup.string().nullable(),
     })
   ),
   manoDeObra: yup.number().required("El monto total es requerido"),

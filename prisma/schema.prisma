@@ -307,6 +307,7 @@ model OrdenReparacion {
   pdfPath                String?                   @db.VarChar(255)
   manoDeObra             Decimal                   @db.Decimal(10, 2)
   descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
+  descripcionDescuento   String?                   @db.VarChar(255)
   dolarId                Int?
   controlesEnReparacion  ControlEnReparacion[]     @relation("OrdenReparacionControlesEnReparacion")
   ingresos               IngresoPorReparacion[]    @relation("OrdenReparacionIngresos")
@@ -358,6 +359,7 @@ model ReparacionDeTercero {
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionReparacionTercero", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoReparacionTercero", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   proveedor              Proveedor             @relation(fields: [proveedorId], references: [id])
+  recibo                 String?               @db.VarChar(255)
 
   @@index([nombre])
   @@index([proveedorId])
