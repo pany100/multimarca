@@ -49,7 +49,6 @@ import {
   TableHead,
   TableRow,
   Tabs,
-  TextField,
   Tooltip,
   Typography,
   useTheme,
@@ -204,22 +203,20 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
             <Typography variant="h4" gutterBottom>
               Orden de Reparación #{ordenReparacion.id}
             </Typography>
-
-            <Chip
-              label={ordenReparacion.estado}
-              color={getStatusColor(ordenReparacion.estado)}
-              size="medium"
-            />
-            <Box sx={{ mt: 1 }}>
-              <Link
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <Chip
+                label={ordenReparacion.estado}
+                color={getStatusColor(ordenReparacion.estado)}
+                size="medium"
+              />
+              <Button
+                variant="contained"
+                color="info"
+                component={Link}
                 href={`/dashboard/ordenes-reparacion/${ordenReparacion.id}/editar`}
-                style={{
-                  color: theme.palette.primary.main,
-                  alignItems: "center",
-                }}
               >
                 Editar orden
-              </Link>
+              </Button>
             </Box>
           </Box>
           <Box sx={{ textAlign: "right" }}>
@@ -229,7 +226,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           </Box>
         </Box>
         <Grid container spacing={2} sx={{ mt: 2 }}>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <Button
               variant="contained"
               color="primary"
@@ -240,7 +237,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
               Imprimir orden para el mecánico
             </Button>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <Button
               variant="contained"
               color="warning"
@@ -251,7 +248,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
               Imprimir orden interna
             </Button>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             <Button
               variant="contained"
               color="secondary"
@@ -262,7 +259,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
               Imprimir orden para el cliente
             </Button>
           </Grid>
-          <Grid item xs={12} sm={4}>
+          <Grid item xs={12} sm={3}>
             {ordenReparacion.estado !== "Terminado" ? (
               <Tooltip title="Solo disponible para reparaciones terminadas">
                 <span>
@@ -473,21 +470,23 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                 detalle?: string;
               }) => (
                 <Grid item xs={12} sm={6} key={control.id}>
-                  <Box sx={{ display: "flex", flexDirection: "column" }}>
-                    <Box display="flex" alignItems="center">
-                      <Checkbox
-                        checked={control.valor === "true"}
-                        disabled
-                        sx={{ mr: 1 }}
-                      />
-                      <Typography>{control.controlMecanico.name}</Typography>
-                    </Box>
+                  <Box
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "space-between",
+                    }}
+                  >
+                    <Typography>{control.controlMecanico.name}</Typography>
+                    <Checkbox
+                      checked={control.valor === "true"}
+                      disabled
+                      edge="end"
+                    />
                   </Box>
                 </Grid>
               )
             )}
-        </Grid>
-        <Grid container spacing={2} sx={{ mt: 2 }}>
           {ordenReparacion.controlesEnReparacion
             .filter(
               (control: { controlMecanico: { type: string } }) =>
@@ -499,19 +498,31 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                 controlMecanico: { name: string };
                 valor: string;
               }) => (
-                <Grid item xs={12} sm={6} md={6} key={control.id}>
-                  <TextField
-                    label={control.controlMecanico.name}
-                    value={control.valor || ""}
-                    fullWidth
-                    disabled
-                    variant="outlined"
-                    size="small"
-                    sx={{ mb: 2 }}
-                  />
+                <Grid item xs={12} key={control.id}>
+                  <Typography>
+                    {control.controlMecanico.name}: {control.valor || "-"}
+                  </Typography>
                 </Grid>
               )
             )}
+          <Grid item xs={12}>
+            <Typography variant="h6">Detalles:</Typography>
+          </Grid>
+          <List sx={{ mt: 0, py: 0 }}>
+            {JSON.parse(ordenReparacion.detalleControles || "[]").map(
+              (element: string, index: number) => (
+                <ListItem key={index} sx={{ py: 0.0 }}>
+                  <ListItemText
+                    primary={
+                      <Typography variant="body2" sx={{ my: 0 }}>
+                        ◦ {element}
+                      </Typography>
+                    }
+                  />
+                </ListItem>
+              )
+            )}
+          </List>
         </Grid>
         <Divider sx={{ my: 2 }} />
 

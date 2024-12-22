@@ -690,6 +690,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
               inputName="detalleControles"
               label="Detalle de controles"
             />
+            <Divider sx={{ mt: 2 }} />
           </Grid>
           <Grid item xs={12}>
             <Box>
