@@ -80,6 +80,7 @@ describe("PUT /api/autos/[id]/cedula", () => {
     mockPrisma = {
       auto: {
         update: jest.fn().mockResolvedValue(mockUpdatedCar),
+        findUnique: jest.fn().mockResolvedValue(mockUpdatedCar),
       },
     } as unknown as jest.Mocked<PrismaClient>;
     mockS3Client = {
@@ -91,7 +92,7 @@ describe("PUT /api/autos/[id]/cedula", () => {
 
     expect(response.status).toBe(200);
     expect(responseBody).toEqual(mockUpdatedCar);
-    expect(mockS3Client.send).toHaveBeenCalledTimes(1);
+    expect(mockS3Client.send).toHaveBeenCalledTimes(2);
     expect(mockPrisma.auto.update).toHaveBeenCalledTimes(1);
   });
 });
