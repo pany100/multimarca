@@ -276,7 +276,7 @@ function ReparacionesTercerosFormSection({
             fullWidth
             margin="normal"
           />
-          <ImageInput image={recibo} setImage={setRecibo} />
+          <ImageInput label="Recibo" image={recibo} setImage={setRecibo} />
         </DialogContent>
         <DialogActions>
           <Button

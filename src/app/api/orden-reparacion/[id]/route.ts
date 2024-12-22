@@ -190,6 +190,22 @@ export async function PUT(
       stock: { connect: { id: repuesto.stock.id } },
     }));
 
+    // Obtener todas las reparaciones existentes para comparar
+    const reparacionesExistentes = await prisma.reparacionDeTercero.findMany({
+      where: {
+        ordenReparacionId: id,
+      },
+    });
+
+    const reparacionesEliminadas = reparacionesExistentes.filter(
+      (reparacionExistente) =>
+        !reparacionesDeTercero.some(
+          (reparacion: any) =>
+            reparacion.nombre === reparacionExistente.nombre &&
+            reparacion.proveedor.id === reparacionExistente.proveedorId
+        )
+    );
+
     const reparacionesDeTerceroToPersist = await Promise.all(
       reparacionesDeTercero.map(async (reparacion: any) => {
         const reparacionExistente = await prisma.reparacionDeTercero.findFirst({
@@ -413,6 +429,14 @@ export async function PUT(
       if (ordenActual?.pdfPath && ordenActual.pdfPath !== permanentUrl) {
         await deleteFileFromS3(ordenActual.pdfPath);
       }
+
+      await Promise.all(
+        reparacionesEliminadas.map(async (reparacion) => {
+          if (reparacion.recibo) {
+            await deleteFileFromS3(reparacion.recibo);
+          }
+        })
+      );
 
       if (!existeNotificacion) {
         await prisma.notificacionInterna.create({
