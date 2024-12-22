@@ -3,6 +3,7 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import { Chip } from "@mui/material";
 import { useEffect, useState } from "react";
 import * as yup from "yup";
@@ -45,7 +46,12 @@ const ExtraccionesPage = () => {
   }, [authFetch]);
   const columns = [
     { field: "id", headerName: "ID", width: 70 },
-    { field: "monto", headerName: "Monto", width: 100 },
+    {
+      field: "monto",
+      headerName: "Monto",
+      width: 100,
+      valueGetter: (monto: any) => getFormattedPrice(monto),
+    },
     {
       field: "moneda",
       headerName: "Moneda",

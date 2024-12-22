@@ -3,6 +3,7 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import { Chip } from "@mui/material";
 import * as yup from "yup";
 
@@ -48,7 +49,12 @@ const GastosPage = () => {
       ),
     },
     { field: "detalle", headerName: "Detalle", flex: 1.5 },
-    { field: "precio", headerName: "Monto", flex: 1 },
+    {
+      field: "precio",
+      headerName: "Monto",
+      flex: 1,
+      valueGetter: (precio: any) => getFormattedPrice(precio),
+    },
     {
       field: "fecha",
       headerName: "Fecha",
@@ -80,7 +86,11 @@ const GastosPage = () => {
 
   const formFields: FieldConfig[] = [
     { name: "nombre", label: "Nombre", type: "text" },
-    { name: "precio", label: "Monto", type: "number" },
+    {
+      name: "precio",
+      label: "Monto",
+      type: "number",
+    },
     {
       name: "moneda",
       label: "Moneda",

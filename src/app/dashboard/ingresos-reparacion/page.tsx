@@ -3,6 +3,7 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import SendIcon from "@mui/icons-material/Send";
 import {
   Box,
@@ -63,7 +64,12 @@ const IngresosPorReparacionPage = () => {
       valueGetter: (fecha: string) =>
         new Date(fecha).toLocaleDateString("es-AR"),
     },
-    { field: "monto", headerName: "Monto", flex: 1 },
+    {
+      field: "monto",
+      headerName: "Monto",
+      flex: 1,
+      valueGetter: (monto: any) => getFormattedPrice(monto),
+    },
     {
       field: "moneda",
       headerName: "Moneda",
