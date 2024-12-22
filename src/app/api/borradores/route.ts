@@ -66,7 +66,6 @@ export async function POST(request: Request) {
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
-      manoDeObra,
       descuento,
     } = body;
 
@@ -106,7 +105,6 @@ export async function POST(request: Request) {
       data: {
         autoId: parseInt(autoId),
         observacionesCliente,
-        manoDeObra: new Prisma.Decimal(manoDeObra),
         descuento: new Prisma.Decimal(descuento),
         repuestosUsados: {
           create: repuestosToPersist,

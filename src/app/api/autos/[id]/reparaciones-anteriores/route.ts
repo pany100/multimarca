@@ -25,7 +25,6 @@ export async function GET(
         fechaCreacion: true,
         fechaSalidaReparacion: true,
         observacionesSalida: true,
-        manoDeObra: true,
       },
       orderBy: {
         fechaCreacion: "desc",

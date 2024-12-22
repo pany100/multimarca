@@ -102,7 +102,6 @@ export async function PUT(
       trabajosRealizados = [],
       controlesEnReparacion = [],
       detalleControles,
-      manoDeObra,
       descuento,
       descripcionDescuento,
     } = body;
@@ -308,7 +307,6 @@ export async function PUT(
             observacionesSalida,
             estado,
             dolarId: dolar?.id,
-            manoDeObra: new Prisma.Decimal(manoDeObra),
             descuento: new Prisma.Decimal(descuento),
             mecanicos: {
               deleteMany: {},

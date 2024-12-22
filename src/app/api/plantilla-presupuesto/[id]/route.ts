@@ -51,7 +51,6 @@ export async function PUT(
     const body = await request.json();
     const {
       nombre,
-      manoDeObra,
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
@@ -85,7 +84,6 @@ export async function PUT(
       where: { id },
       data: {
         nombre,
-        manoDeObra: new Prisma.Decimal(manoDeObra),
         repuestosUsados: {
           deleteMany: {},
           create: repuestosToPersist,

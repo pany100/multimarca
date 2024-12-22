@@ -58,7 +58,6 @@ export async function POST(request: Request) {
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
-      manoDeObra,
     } = body;
 
     const repuestosToPersist = repuestosUsados.map((repuesto: any) => ({
@@ -88,7 +87,6 @@ export async function POST(request: Request) {
     const nuevaPlantillaPresupuesto = await prisma.plantillaPresupuesto.create({
       data: {
         nombre,
-        manoDeObra: new Prisma.Decimal(manoDeObra),
         repuestosUsados: {
           create: repuestosToPersist,
         },

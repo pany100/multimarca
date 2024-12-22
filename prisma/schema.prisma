@@ -305,7 +305,6 @@ model OrdenReparacion {
   detalleControles       String?                    @db.Text
   estado                 EstadoOrdenReparacion     @default(Presupuestado)
   pdfPath                String?                   @db.VarChar(255)
-  manoDeObra             Decimal                   @db.Decimal(10, 2)
   descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
   descripcionDescuento   String?                   @db.VarChar(255)
   dolarId                Int?
@@ -388,7 +387,6 @@ model TrabajoRealizado {
 model PlantillaPresupuesto {
   id                    Int                   @id @default(autoincrement())
   nombre                String                @db.VarChar(255)
-  manoDeObra            Decimal               @db.Decimal(10, 2)
   reparacionesDeTercero ReparacionDeTercero[] @relation("PlantillaPresupuestoReparacionTercero")
   repuestosUsados       RepuestoUsado[]       @relation("PlantillaPresupuestoRepuestos")
   trabajosRealizados    TrabajoRealizado[]    @relation("PlantillaPresupuestoTrabajosRealizados")
@@ -506,7 +504,6 @@ model Borrador {
   autoId                Int
   fechaCreacion         DateTime              @default(now())
   observacionesCliente  String                @db.Text
-  manoDeObra            Decimal               @db.Decimal(10, 2)
   descuento             Decimal               @default(0.00) @db.Decimal(10, 2)
   auto                  Auto                  @relation("AutoBorrador", fields: [autoId], references: [id])
   reparacionesDeTercero ReparacionDeTercero[] @relation("BorradorReparacionTercero")

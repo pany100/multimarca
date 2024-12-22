@@ -97,7 +97,6 @@ export async function POST(request: Request) {
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
-      manoDeObra,
       descuento,
       descripcionDescuento,
     } = body;
@@ -222,7 +221,6 @@ export async function POST(request: Request) {
           observacionesSalida,
           estado,
           pdfPath,
-          manoDeObra: new Prisma.Decimal(manoDeObra),
           descuento: new Prisma.Decimal(descuento),
           descripcionDescuento,
           mecanicos: {
