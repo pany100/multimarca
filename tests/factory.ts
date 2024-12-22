@@ -178,7 +178,6 @@ export async function createOrdenReparacion(
       "Terminado",
     ]),
     pdfPath: faker.system.filePath(),
-    manoDeObra: faker.number.float({ min: 100, max: 1000, multipleOf: 0.01 }),
     ...overrides,
   };
 
