@@ -13,7 +13,10 @@ export async function GET(request: Request) {
     const [extracciones, total] = await Promise.all([
       prisma.extraccion.findMany({
         where: {
-          motivo: { contains: query },
+          OR: [
+            { motivo: { contains: query } },
+            { usuario: { fullName: { contains: query } } },
+          ],
         },
         skip,
         take: size,
@@ -28,7 +31,10 @@ export async function GET(request: Request) {
       }),
       prisma.extraccion.count({
         where: {
-          motivo: { contains: query },
+          OR: [
+            { motivo: { contains: query } },
+            { usuario: { fullName: { contains: query } } },
+          ],
         },
       }),
     ]);

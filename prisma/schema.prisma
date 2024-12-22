@@ -230,6 +230,7 @@ model Gasto {
   detalle     String?        @db.Text
   proveedorId Int?
   moneda      Moneda         @default(Peso)
+  tipo        TipoExtraccion @default(EFECTIVO)
   dolarId     Int?
   categoria   CategoriaGasto @relation(fields: [categoriaId], references: [id])
   dolar       Dolar?         @relation(fields: [dolarId], references: [id])

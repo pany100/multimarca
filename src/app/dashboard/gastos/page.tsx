@@ -36,6 +36,13 @@ const GastosPage = () => {
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "nombre", headerName: "Descripción", flex: 1.5 },
+
+    {
+      field: "precio",
+      headerName: "Monto",
+      flex: 1,
+      valueGetter: (precio: any) => getFormattedPrice(precio),
+    },
     {
       field: "moneda",
       headerName: "Moneda",
@@ -48,13 +55,12 @@ const GastosPage = () => {
         />
       ),
     },
-    { field: "detalle", headerName: "Detalle", flex: 1.5 },
     {
-      field: "precio",
-      headerName: "Monto",
+      field: "tipo",
+      headerName: "Tipo",
       flex: 1,
-      valueGetter: (precio: any) => getFormattedPrice(precio),
     },
+    { field: "detalle", headerName: "Detalle", flex: 1.5 },
     {
       field: "fecha",
       headerName: "Fecha",
@@ -70,14 +76,14 @@ const GastosPage = () => {
     },
     {
       field: "mecanico",
-      headerName: "Mecánico",
+      headerName: "Empleado",
       flex: 1,
       valueGetter: (mecanico: any) => mecanico?.name || "-",
     },
     {
       field: "proveedor",
       headerName: "Proveedor",
-      flex: 2.5,
+      flex: 1.5,
       valueGetter: (proveedor: any) => {
         return proveedor?.name || "-";
       },
@@ -98,6 +104,15 @@ const GastosPage = () => {
       options: [
         { label: "Dolar", value: "Dolar" },
         { label: "Peso", value: "Peso" },
+      ],
+    },
+    {
+      name: "tipo",
+      label: "Tipo de Operación",
+      type: "select",
+      options: [
+        { label: "Efectivo", value: "EFECTIVO" },
+        { label: "Transferencia", value: "TRANSFERENCIA" },
       ],
     },
     { name: "fecha", label: "Fecha", type: "date" },
@@ -210,6 +225,10 @@ const GastosPage = () => {
                 .required("El proveedor es requerido para Pago Proveedores")
             : yup.number().nullable();
         }),
+        tipo: yup
+          .string()
+          .oneOf(["EFECTIVO", "TRANSFERENCIA"], "Tipo de extracción inválido")
+          .required("El tipo de extracción es requerido"),
       })}
     />
   );
