@@ -1,4 +1,5 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   Alert,
   Autocomplete,
@@ -164,8 +165,12 @@ function RepuestoUsadoFormSection({
                   {field.value.map((repuesto: any) => (
                     <TableRow key={repuesto.stock.id}>
                       <TableCell>{repuesto.stock.name}</TableCell>
-                      <TableCell>{repuesto.precioCompra}</TableCell>
-                      <TableCell>{repuesto.precioVenta}</TableCell>
+                      <TableCell>
+                        {getFormattedPrice(repuesto.precioCompra)}
+                      </TableCell>
+                      <TableCell>
+                        {getFormattedPrice(repuesto.precioVenta)}
+                      </TableCell>
                       <TableCell>{repuesto.unidadesConsumidas}</TableCell>
                       <TableCell>
                         <Button onClick={() => handleEditRepuesto(repuesto)}>

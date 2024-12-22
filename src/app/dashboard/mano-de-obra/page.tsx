@@ -3,6 +3,7 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   Alert,
   Box,
@@ -35,7 +36,12 @@ const ManoDeObraPage = () => {
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "name", headerName: "Nombre del Trabajo", flex: 2 },
-    { field: "sellPrice", headerName: "Precio de Venta", flex: 1 },
+    {
+      field: "sellPrice",
+      headerName: "Precio de Venta",
+      flex: 1,
+      renderCell: (params: any) => getFormattedPrice(params.value),
+    },
   ];
 
   const formFields: FieldConfig[] = [

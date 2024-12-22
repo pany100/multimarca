@@ -2,6 +2,7 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import { Box, Tab, Tabs } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import React, { useState } from "react";
@@ -66,7 +67,8 @@ const PagosAMecanicoPage = () => {
       field: "monto",
       headerName: "Monto",
       flex: 1,
-      valueGetter: (monto: any) => (monto ? `$${monto}` : "NO PAGADO"),
+      valueGetter: (monto: any) =>
+        monto ? getFormattedPrice(monto) : "NO PAGADO",
     },
     {
       field: "fechaPago",

@@ -1,6 +1,7 @@
 "use client";
 
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import { Box, Chip, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useCallback, useEffect, useState } from "react";
@@ -100,11 +101,7 @@ function VerPage({ params }: { params: { id: string } }) {
           </Typography>
           <Typography variant="h6" gutterBottom>
             {estadoDeuda > 0 ? "Crédito: " : "Deuda: "}
-            {estadoDeuda &&
-              `$${estadoDeuda.toLocaleString("es-AR", {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2,
-              })}`}
+            {estadoDeuda && getFormattedPrice(estadoDeuda)}
           </Typography>
         </>
       )}

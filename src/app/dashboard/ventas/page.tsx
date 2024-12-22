@@ -3,6 +3,7 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   Autocomplete,
   Box,
@@ -83,7 +84,12 @@ const VentasPage = () => {
         />
       ),
     },
-    { field: "total", headerName: "Total", flex: 1 },
+    {
+      field: "total",
+      headerName: "Total",
+      flex: 1,
+      valueGetter: (total: any) => getFormattedPrice(total),
+    },
     {
       field: "cliente",
       headerName: "Cliente",

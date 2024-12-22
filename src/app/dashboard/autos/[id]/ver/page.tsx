@@ -1,6 +1,7 @@
 "use client";
 import { useFetch } from "@/contexts/FetchContext";
 import { useAuth } from "@/hooks/useAuth";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   calcularTotalOrdenReparacion,
   getStatusColor,
@@ -201,7 +202,9 @@ const VerAutoPage = ({ params }: { params: { id: string } }) => {
                       color={getStatusColor(orden.estado)}
                     />
                   </TableCell>
-                  <TableCell>${calcularTotalOrdenReparacion(orden)}</TableCell>
+                  <TableCell>
+                    {getFormattedPrice(calcularTotalOrdenReparacion(orden))}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

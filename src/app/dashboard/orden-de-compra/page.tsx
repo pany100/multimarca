@@ -3,6 +3,7 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   Box,
   Button,
@@ -97,7 +98,12 @@ const OrdenDeCompraPage = () => {
       valueGetter: (fecha: string) =>
         new Date(fecha).toLocaleDateString("es-AR"),
     },
-    { field: "precioTotal", headerName: "Precio Total", flex: 0.5 },
+    {
+      field: "precioTotal",
+      headerName: "Precio Total",
+      flex: 0.5,
+      valueGetter: (precioTotal: any) => getFormattedPrice(precioTotal),
+    },
     {
       field: "proveedor",
       headerName: "Proveedor",

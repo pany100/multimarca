@@ -1,6 +1,7 @@
 "use client";
 import { useFetch } from "@/contexts/FetchContext";
 import { useAuth } from "@/hooks/useAuth";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   calcularTotalOrdenReparacion,
   getStatusColor,
@@ -187,8 +188,8 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
                   />
                 </Typography>
                 <Typography>
-                  <strong>Monto Total:</strong> $
-                  {calcularTotalOrdenReparacion(reparacion)}
+                  <strong>Monto Total:</strong>
+                  {getFormattedPrice(calcularTotalOrdenReparacion(reparacion))}
                 </Typography>
               </Paper>
             ))}

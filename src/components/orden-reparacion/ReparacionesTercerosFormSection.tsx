@@ -1,4 +1,5 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   Alert,
   Autocomplete,
@@ -131,10 +132,16 @@ function ReparacionesTercerosFormSection({
     setOpenReparacionModal(true);
   };
 
-  const handleRemoveReparacion = (id: string) => {
+  const handleRemoveReparacion = (reparacion: any) => {
     const currentReparaciones = getValues("reparacionesDeTercero") || [];
     const updatedReparaciones = currentReparaciones.filter(
-      (r: any) => r.id !== id
+      (r: any) =>
+        !(
+          r.nombre === reparacion.nombre &&
+          r.precioCompra === reparacion.precioCompra &&
+          r.precioVenta === reparacion.precioVenta &&
+          r.proveedor.id === reparacion.proveedor.id
+        )
     );
 
     setValue("reparacionesDeTercero", updatedReparaciones);
@@ -176,8 +183,12 @@ function ReparacionesTercerosFormSection({
                     <TableRow key={reparacion.id}>
                       <TableCell>{reparacion.proveedor.name}</TableCell>
                       <TableCell>{reparacion.nombre}</TableCell>
-                      <TableCell>{reparacion.precioCompra}</TableCell>
-                      <TableCell>{reparacion.precioVenta}</TableCell>
+                      <TableCell>
+                        {getFormattedPrice(reparacion.precioCompra)}
+                      </TableCell>
+                      <TableCell>
+                        {getFormattedPrice(reparacion.precioVenta)}
+                      </TableCell>
                       <TableCell>
                         {reparacion.recibo && (
                           <Link href={reparacion.recibo} target="_blank">
@@ -195,7 +206,7 @@ function ReparacionesTercerosFormSection({
                         </Button>
                         <Button
                           onClick={() => {
-                            handleRemoveReparacion(reparacion.id);
+                            handleRemoveReparacion(reparacion);
                           }}
                         >
                           Eliminar

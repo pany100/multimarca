@@ -4,6 +4,7 @@ import OrdenClientePdf from "@/components/orden-reparacion/pdf/OrdenClientePdf";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
 import { useFetch } from "@/contexts/FetchContext";
 import { useAuth } from "@/hooks/useAuth";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   calcularManoDeObra,
   calcularTotalOrdenReparacion,
@@ -222,7 +223,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           </Box>
           <Box sx={{ textAlign: "right" }}>
             <Typography variant="h4">
-              ${calcularTotalOrdenReparacion(ordenReparacion).toFixed(2)}
+              {getFormattedPrice(calcularTotalOrdenReparacion(ordenReparacion))}
             </Typography>
           </Box>
         </Box>
@@ -375,7 +376,9 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                   <ListItem key={trabajo.id}>
                     <ListItemText
                       primary={trabajo.descripcion}
-                      secondary={`Precio: $${trabajo.precioUnitario}`}
+                      secondary={`Precio: ${getFormattedPrice(
+                        trabajo.precioUnitario
+                      )}`}
                     />
                   </ListItem>
                 )
@@ -395,7 +398,9 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                   <ListItem key={repuesto.id}>
                     <ListItemText
                       primary={repuesto.stock.name}
-                      secondary={`Cantidad: ${repuesto.unidadesConsumidas} - Precio: $${repuesto.precioVenta}`}
+                      secondary={`Cantidad: ${
+                        repuesto.unidadesConsumidas
+                      } - Precio: ${getFormattedPrice(repuesto.precioVenta)}`}
                     />
                   </ListItem>
                 )
@@ -417,7 +422,11 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                   <ListItem key={reparacion.id}>
                     <ListItemText
                       primary={`${reparacion.nombre} - Proveedor: ${reparacion.proveedor.name}`}
-                      secondary={`Precio de compra: $${reparacion.precioCompra} - Precio de venta: $${reparacion.precioVenta}`}
+                      secondary={`Precio de compra: ${getFormattedPrice(
+                        reparacion.precioCompra
+                      )} - Precio de venta: ${getFormattedPrice(
+                        reparacion.precioVenta
+                      )}`}
                     />
                     {reparacion.recibo && (
                       <Box sx={{ mr: 5 }}>
@@ -571,19 +580,23 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
               <TableRow>
                 <TableCell>Repuestos</TableCell>
                 <TableCell align="right">
-                  ${calcularTotalRepuestos(ordenReparacion)}
+                  {getFormattedPrice(calcularTotalRepuestos(ordenReparacion))}
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Reparaciones / Repuestos de terceros</TableCell>
                 <TableCell align="right">
-                  ${calcularTotalReparacionesTerceros(ordenReparacion)}
+                  {getFormattedPrice(
+                    calcularTotalReparacionesTerceros(ordenReparacion)
+                  )}
                 </TableCell>
               </TableRow>
               <TableRow>
                 <TableCell>Mano de Obra</TableCell>
                 <TableCell align="right">
-                  ${calcularManoDeObra(ordenReparacion.trabajosRealizados)}
+                  {getFormattedPrice(
+                    calcularManoDeObra(ordenReparacion.trabajosRealizados)
+                  )}
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -594,7 +607,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                   )}
                 </TableCell>
                 <TableCell align="right">
-                  ${ordenReparacion.descuento}
+                  {getFormattedPrice(ordenReparacion.descuento)}
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -603,7 +616,9 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                 </TableCell>
                 <TableCell align="right">
                   <strong>
-                    ${calcularTotalOrdenReparacion(ordenReparacion)}
+                    {getFormattedPrice(
+                      calcularTotalOrdenReparacion(ordenReparacion)
+                    )}
                   </strong>
                 </TableCell>
               </TableRow>

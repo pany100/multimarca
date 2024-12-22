@@ -1,5 +1,6 @@
 "use client";
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
@@ -309,7 +310,7 @@ const OrdenesReparacionPage = () => {
       headerName: "Total a Pagar",
       flex: 1,
       renderCell: (params: any) =>
-        calcularTotalOrdenReparacion(params.row).toFixed(2),
+        getFormattedPrice(calcularTotalOrdenReparacion(params.row)),
     },
     {
       field: "acciones",
@@ -397,21 +398,21 @@ const OrdenesReparacionPage = () => {
       headerName: "Total a Pagar",
       flex: 1,
       renderCell: (params: any) =>
-        calcularTotalOrdenReparacion(params.row).toFixed(2),
+        getFormattedPrice(calcularTotalOrdenReparacion(params.row)),
     },
     {
       field: "totalPagado",
       headerName: "Total Pagado",
       flex: 1,
       renderCell: (params: any) =>
-        params.row.ingresos
-          .reduce((sum: number, ingreso: any) => {
+        getFormattedPrice(
+          params.row.ingresos.reduce((sum: number, ingreso: any) => {
             if (ingreso.moneda === "Dolar") {
               return sum + Number(ingreso.monto) * Number(ingreso.dolar.blue);
             }
             return sum + Number(ingreso.monto);
           }, 0)
-          .toFixed(2),
+        ),
     },
     {
       field: "acciones",

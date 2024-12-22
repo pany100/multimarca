@@ -32,7 +32,11 @@ export async function PUT(
                 owner: true,
               },
             },
-            mecanicos: true,
+            mecanicos: {
+              include: {
+                mecanico: true,
+              },
+            },
           },
         },
       },

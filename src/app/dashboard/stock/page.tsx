@@ -3,6 +3,7 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   Alert,
   Autocomplete,
@@ -98,7 +99,12 @@ const StockPage = () => {
     { field: "id", headerName: "ID", flex: 0.2 },
     { field: "name", headerName: "Nombre", flex: 0.6 },
     { field: "brand", headerName: "Marca", flex: 0.5 },
-    { field: "buyPrice", headerName: "Precio de compra", flex: 0.8 },
+    {
+      field: "buyPrice",
+      headerName: "Precio de compra",
+      flex: 0.8,
+      valueGetter: (buyPrice: any) => getFormattedPrice(buyPrice),
+    },
     {
       field: "units",
       headerName: "Unidades",

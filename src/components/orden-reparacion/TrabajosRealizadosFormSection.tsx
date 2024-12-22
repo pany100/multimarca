@@ -1,4 +1,5 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   Alert,
   Autocomplete,
@@ -94,13 +95,6 @@ function TrabajosRealizadosFormSection({
         message: "Trabajo actualizado correctamente",
         severity: "success",
       });
-      // Actualizar el campo manoDeObra del formulario
-      const currentManoObra = Number(getValues("manoDeObra")) || 0;
-      const oldPrecioUnitario =
-        currentTrabajos.find((t: any) => t.id === editingTrabajoId)
-          ?.precioUnitario || 0;
-      const diferencia = Number(precioUnitario) - oldPrecioUnitario;
-      setValue("manoDeObra", currentManoObra + diferencia);
       setOpenTrabajoModal(false);
       resetFields();
     } else {
@@ -119,10 +113,6 @@ function TrabajosRealizadosFormSection({
         });
       } else {
         setValue("trabajosRealizados", [...currentTrabajos, newTrabajo]);
-
-        // Sumar el precio unitario al campo manoObra del formulario
-        const currentManoObra = Number(getValues("manoDeObra")) || 0;
-        setValue("manoDeObra", currentManoObra + Number(precioUnitario));
 
         setOpenTrabajoModal(false);
         resetFields();
@@ -152,16 +142,17 @@ function TrabajosRealizadosFormSection({
     setOpenTrabajoModal(true);
   };
 
-  const handleRemoveTrabajo = (id: string) => {
+  const handleRemoveTrabajo = (trabajo: any) => {
     const currentTrabajos = getValues("trabajosRealizados") || [];
-    const trabajoARemover = currentTrabajos.find((t: any) => t.id === id);
-    const currentManoObra = Number(getValues("manoDeObra")) || 0;
-    const precioARestar = Number(trabajoARemover.precioUnitario);
-
-    const updatedTrabajos = currentTrabajos.filter((t: any) => t.id !== id);
-
+    const updatedTrabajos = currentTrabajos.filter(
+      (t: any) =>
+        !(
+          t.manoDeObra.name === trabajo.manoDeObra.name &&
+          t.precioUnitario === trabajo.precioUnitario &&
+          t.diasParaRecordatorio === trabajo.diasParaRecordatorio
+        )
+    );
     setValue("trabajosRealizados", updatedTrabajos);
-    setValue("manoDeObra", Math.max(0, currentManoObra - precioARestar));
   };
 
   const resetFields = () => {
@@ -208,7 +199,9 @@ function TrabajosRealizadosFormSection({
                   {field.value.map((trabajo: any) => (
                     <TableRow key={trabajo.id}>
                       <TableCell>{trabajo.manoDeObra.name}</TableCell>
-                      <TableCell>{trabajo.precioUnitario}</TableCell>
+                      <TableCell>
+                        {getFormattedPrice(trabajo.precioUnitario)}
+                      </TableCell>
                       <TableCell>
                         {trabajo.diasParaRecordatorio || "-"}
                       </TableCell>
@@ -216,7 +209,7 @@ function TrabajosRealizadosFormSection({
                         <Button onClick={() => handleEditTrabajo(trabajo)}>
                           Editar
                         </Button>
-                        <Button onClick={() => handleRemoveTrabajo(trabajo.id)}>
+                        <Button onClick={() => handleRemoveTrabajo(trabajo)}>
                           Eliminar
                         </Button>
                       </TableCell>
