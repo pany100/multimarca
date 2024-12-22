@@ -2,7 +2,11 @@
 
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import * as yup from "yup";
+
+import { IconButton, Tooltip } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 interface Proveedor {
   id: string;
@@ -18,6 +22,8 @@ interface Proveedor {
 }
 
 const ProveedoresPage = () => {
+  const router = useRouter();
+
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "numeroProveedor", headerName: "Número de proveedor", flex: 1 },
@@ -25,12 +31,6 @@ const ProveedoresPage = () => {
     { field: "email", headerName: "Email", flex: 2 },
     { field: "phone", headerName: "Teléfono", flex: 1 },
     { field: "mobile", headerName: "Móvil", flex: 1 },
-    {
-      field: "estadoCuenta",
-      headerName: "Estado de cuenta",
-      flex: 1,
-      valueGetter: (value: number) => (value ? `$${value}` : "-"),
-    },
   ];
 
   const formFields: FieldConfig[] = [
@@ -62,6 +62,21 @@ const ProveedoresPage = () => {
     };
   };
 
+  const extraActions = (proveedor: Proveedor) => (
+    <>
+      <Tooltip title="Ver estado de cuenta">
+        <IconButton
+          onClick={() =>
+            router.push(`/dashboard/proveedores/${proveedor.id}/ver`)
+          }
+          size="small"
+        >
+          <VisibilityIcon />
+        </IconButton>
+      </Tooltip>
+    </>
+  );
+
   return (
     <CrudTable<Proveedor>
       title="Proveedores"
@@ -81,6 +96,7 @@ const ProveedoresPage = () => {
           .min(1)
           .nullable(),
       })}
+      extraActions={extraActions}
     />
   );
 };
