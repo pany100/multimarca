@@ -26,10 +26,21 @@ function calcularTotalReparacionesTerceros(ordenReparacion: {
     .toFixed(2);
 }
 
+function calcularManoDeObra(
+  trabajosRealizados: {
+    precioUnitario: number;
+  }[]
+): number {
+  return trabajosRealizados.reduce(
+    (total, trabajo) => total + parseFloat(trabajo.precioUnitario.toString()),
+    0
+  );
+}
+
 function calcularTotalOrdenReparacion(ordenReparacion: {
   repuestosUsados: { precioVenta: number; unidadesConsumidas: number }[];
   reparacionesDeTercero: { precioVenta: number }[];
-  manoDeObra: number;
+  trabajosRealizados: { precioUnitario: number }[];
   descuento: number;
 }): number {
   const totalRepuestos = Number(calcularTotalRepuestos(ordenReparacion));
@@ -38,7 +49,9 @@ function calcularTotalOrdenReparacion(ordenReparacion: {
     calcularTotalReparacionesTerceros(ordenReparacion)
   );
   // 3. Mano de obra
-  const manoDeObra = parseFloat(ordenReparacion.manoDeObra.toString());
+  const manoDeObra = Number(
+    calcularManoDeObra(ordenReparacion.trabajosRealizados)
+  );
 
   const descuento = parseFloat(ordenReparacion.descuento.toString());
 
@@ -61,6 +74,7 @@ function getStatusColor(estado: string): ChipProps["color"] {
 }
 
 export {
+  calcularManoDeObra,
   calcularTotalOrdenReparacion,
   calcularTotalReparacionesTerceros,
   calcularTotalRepuestos,

@@ -1,5 +1,8 @@
 import { useFetch } from "@/contexts/FetchContext";
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
+import {
+  calcularManoDeObra,
+  calcularTotalOrdenReparacion,
+} from "@/utils/ordenHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import DeleteIcon from "@mui/icons-material/Delete";
 import {
@@ -125,10 +128,6 @@ const schema = yup.object().shape({
       recibo: yup.string().nullable(),
     })
   ),
-  manoDeObra: yup
-    .number()
-    .typeError("La mano de obra debe ser un nmero")
-    .required("La mano de obra es requerida"),
   descuento: yup.number().min(0),
   descripcionDescuento: yup.string().nullable(),
   observacionesEntrada: yup.string(),
@@ -249,7 +248,6 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
     resolver: yupResolver(schema),
     defaultValues: {
       ...ordenReparacion,
-      manoDeObra: ordenReparacion.manoDeObra,
       descuento: ordenReparacion.descuento,
       descripcionDescuento: ordenReparacion.descripcionDescuento,
       trabajosRealizados: ordenReparacion.trabajosRealizados.map((trabajo) => ({
@@ -401,12 +399,14 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
     control,
     name: "reparacionesDeTercero",
   });
-  const manoDeObra = useWatch({ control, name: "manoDeObra" });
+  const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
+
+  const manoDeObra = calcularManoDeObra(trabajosRealizados ?? []);
   const descuento = useWatch({ control, name: "descuento" }) || 0;
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
     repuestosUsados: repuestosUsados ?? [],
     reparacionesDeTercero: reparacionesTerceros ?? [],
-    manoDeObra,
+    trabajosRealizados: trabajosRealizados ?? [],
     descuento,
   });
   return (
@@ -649,25 +649,15 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
             />
           </Grid>
           <Grid item xs={12}>
-            <Controller
-              name="manoDeObra"
-              control={control}
-              render={({ field }) => (
-                <>
-                  <TextField
-                    {...field}
-                    label="Mano de obra"
-                    type="number"
-                    fullWidth
-                    margin="normal"
-                  />
-                  {!!errors.manoDeObra && (
-                    <Alert severity="error" sx={{ mt: 1 }}>
-                      {errors.manoDeObra.message}
-                    </Alert>
-                  )}
-                </>
-              )}
+            <TextField
+              label="Mano de obra"
+              value={Number(manoDeObra.toFixed(2))}
+              fullWidth
+              disabled
+              margin="normal"
+              InputProps={{
+                readOnly: true,
+              }}
             />
           </Grid>
           <Grid item xs={12}>
@@ -675,6 +665,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
               label="Total Orden de Reparación"
               value={Number(totalOrdenReparacion.toFixed(2))}
               fullWidth
+              disabled
               margin="normal"
               InputProps={{
                 readOnly: true,

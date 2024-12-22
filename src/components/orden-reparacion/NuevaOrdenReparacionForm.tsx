@@ -1,5 +1,8 @@
 import { useFetch } from "@/contexts/FetchContext";
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
+import {
+  calcularManoDeObra,
+  calcularTotalOrdenReparacion,
+} from "@/utils/ordenHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Alert,
@@ -107,7 +110,6 @@ const schema = yup.object().shape({
       recibo: yup.string().nullable(),
     })
   ),
-  manoDeObra: yup.number().required("El monto total es requerido"),
   descuento: yup.number().min(0),
   descripcionDescuento: yup.string().nullable(),
   observacionesEntrada: yup.string(),
@@ -129,7 +131,6 @@ const NuevaOrdenReparacionForm = () => {
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      manoDeObra: 0,
       estado: "Presupuestado",
       fechaCreacion: new Date().toISOString().split("T")[0],
       descuento: 0,
@@ -147,12 +148,13 @@ const NuevaOrdenReparacionForm = () => {
     control,
     name: "reparacionesDeTercero",
   });
-  const manoDeObra = useWatch({ control, name: "manoDeObra" });
+  const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
   const descuento = useWatch({ control, name: "descuento" }) || 0;
+  const manoDeObra = calcularManoDeObra(trabajosRealizados ?? []);
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
     repuestosUsados: repuestosUsados ?? [],
     reparacionesDeTercero: reparacionesTerceros ?? [],
-    manoDeObra,
+    trabajosRealizados: trabajosRealizados ?? [],
     descuento,
   });
 
@@ -404,20 +406,21 @@ const NuevaOrdenReparacionForm = () => {
             <TrabajosRealizadosFormSection />
           </Grid>
           <Grid item xs={12}>
-            <Controller
-              name="manoDeObra"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Mano de obra Cliente"
-                  type="number"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.manoDeObra}
-                  helperText={errors.manoDeObra?.message as string}
-                />
-              )}
+            <TextField
+              label="Mano de obra"
+              value={isNaN(manoDeObra) ? "0" : manoDeObra.toFixed(2)}
+              fullWidth
+              margin="normal"
+              InputProps={{
+                readOnly: true,
+              }}
+              disabled
+              sx={{
+                backgroundColor: "action.disabledBackground",
+                "& .MuiInputBase-input": {
+                  color: "text.secondary",
+                },
+              }}
             />
           </Grid>
           <Grid item xs={12}>
@@ -458,6 +461,7 @@ const NuevaOrdenReparacionForm = () => {
           <Grid item xs={12}>
             <TextField
               label="Total Orden de Reparación"
+              disabled
               value={
                 isNaN(totalOrdenReparacion)
                   ? "0"

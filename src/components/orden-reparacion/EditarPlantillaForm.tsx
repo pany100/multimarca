@@ -1,5 +1,8 @@
 import { useFetch } from "@/contexts/FetchContext";
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
+import {
+  calcularManoDeObra,
+  calcularTotalOrdenReparacion,
+} from "@/utils/ordenHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Alert, Button, Grid, Snackbar, TextField } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -214,11 +217,14 @@ const EditarOrdenReparacionForm = ({ plantilla }: Props) => {
     control,
     name: "reparacionesDeTercero",
   });
-  const manoDeObra = useWatch({ control, name: "manoDeObra" });
+  const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
+
+  const manoDeObra = calcularManoDeObra(trabajosRealizados ?? []);
+
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
     repuestosUsados: repuestosUsados ?? [],
     reparacionesDeTercero: reparacionesTerceros ?? [],
-    manoDeObra,
+    trabajosRealizados: trabajosRealizados ?? [],
     descuento: 0,
   });
 
@@ -252,25 +258,14 @@ const EditarOrdenReparacionForm = ({ plantilla }: Props) => {
             <TrabajosRealizadosFormSection />
           </Grid>
           <Grid item xs={12}>
-            <Controller
-              name="manoDeObra"
-              control={control}
-              render={({ field }) => (
-                <>
-                  <TextField
-                    {...field}
-                    label="Mano de obra"
-                    type="number"
-                    fullWidth
-                    margin="normal"
-                  />
-                  {!!errors.manoDeObra && (
-                    <Alert severity="error" sx={{ mt: 1 }}>
-                      {errors.manoDeObra.message}
-                    </Alert>
-                  )}
-                </>
-              )}
+            <TextField
+              label="Mano de obra"
+              value={Number(manoDeObra.toFixed(2))}
+              fullWidth
+              margin="normal"
+              InputProps={{
+                readOnly: true,
+              }}
             />
           </Grid>
           <Grid item xs={12}>

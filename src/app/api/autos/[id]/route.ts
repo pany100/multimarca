@@ -107,6 +107,7 @@ export async function GET(
           include: {
             reparacionesDeTercero: true,
             repuestosUsados: true,
+            trabajosRealizados: true,
           },
         },
       },

@@ -1,5 +1,8 @@
 import { useFetch } from "@/contexts/FetchContext";
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
+import {
+  calcularManoDeObra,
+  calcularTotalOrdenReparacion,
+} from "@/utils/ordenHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Alert,
@@ -127,11 +130,11 @@ type Props = {
       unidadesConsumidas?: number;
     }[];
     trabajosRealizados: {
-      manoDeObra: {
-        name: string;
-        diasParaRecordatorio?: number;
-      };
-      precioUnitario?: number;
+      id: number;
+      ordenReparacionId: number;
+      descripcion: string;
+      precioUnitario: number;
+      diasParaRecordatorio?: number;
     }[];
     reparacionesDeTercero: {
       nombre: string;
@@ -142,7 +145,6 @@ type Props = {
         name: string;
       };
     }[];
-    manoDeObra: number;
     descuento: number;
     observacionesEntrada?: string;
   };
@@ -173,6 +175,11 @@ const EditarBorradorForm = ({ borrador }: Props) => {
       ...borrador,
       esBorrador: true,
       descuento: 0,
+      trabajosRealizados: borrador.trabajosRealizados.map((trabajo) => ({
+        manoDeObra: { name: trabajo.descripcion },
+        precioUnitario: Number(trabajo.precioUnitario),
+        diasParaRecordatorio: trabajo.diasParaRecordatorio,
+      })),
     },
   });
 
@@ -216,7 +223,15 @@ const EditarBorradorForm = ({ borrador }: Props) => {
     control,
     name: "reparacionesDeTercero",
   });
-  const manoDeObra = useWatch({ control, name: "manoDeObra" });
+  const trabajosRealizadosField = useWatch({
+    control,
+    name: "trabajosRealizados",
+  });
+  const trabajosRealizados = (trabajosRealizadosField ?? []).map((trabajo) => ({
+    precioUnitario: Number(trabajo.precioUnitario) || 0,
+  }));
+  const manoDeObra = calcularManoDeObra(trabajosRealizados ?? []);
+
   const descuento = useWatch({ control, name: "descuento" }) || 0;
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
     repuestosUsados: (repuestosUsados ?? []).map((item) => ({
@@ -226,7 +241,7 @@ const EditarBorradorForm = ({ borrador }: Props) => {
     reparacionesDeTercero: (reparacionesTerceros ?? []).map((item) => ({
       precioVenta: Number(item.precioVenta) || 0,
     })),
-    manoDeObra: Number(manoDeObra) || 0,
+    trabajosRealizados: trabajosRealizados ?? [],
     descuento: Number(descuento) || 0,
   });
   const esBorrador = watch("esBorrador") || false;
@@ -391,20 +406,20 @@ const EditarBorradorForm = ({ borrador }: Props) => {
             />
           </Grid>
           <Grid item xs={12}>
-            <Controller
-              name="manoDeObra"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Mano de obra"
-                  type="number"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.manoDeObra}
-                  helperText={errors.manoDeObra?.message as string}
-                />
-              )}
+            <TextField
+              label="Mano de obra"
+              value={isNaN(manoDeObra) ? "0" : manoDeObra.toFixed(2)}
+              fullWidth
+              margin="normal"
+              InputProps={{
+                readOnly: true,
+              }}
+              sx={{
+                backgroundColor: "action.disabledBackground",
+                "& .MuiInputBase-input": {
+                  color: "text.secondary",
+                },
+              }}
             />
           </Grid>
           <Grid item xs={12}>

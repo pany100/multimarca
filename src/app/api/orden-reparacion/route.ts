@@ -50,6 +50,7 @@ export async function GET(request: Request) {
           },
           repuestosUsados: true,
           reparacionesDeTercero: true,
+          trabajosRealizados: true,
           ingresos: {
             include: {
               dolar: true,

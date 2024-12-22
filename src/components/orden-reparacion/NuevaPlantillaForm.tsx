@@ -1,5 +1,8 @@
 import { useFetch } from "@/contexts/FetchContext";
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
+import {
+  calcularManoDeObra,
+  calcularTotalOrdenReparacion,
+} from "@/utils/ordenHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Alert, Button, Grid, Snackbar, TextField } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -71,7 +74,6 @@ const schema = yup.object().shape({
         .required("El proveedor es requerido"),
     })
   ),
-  manoDeObra: yup.number().required("El monto total es requerido"),
 });
 
 const NuevaPlantillaForm = () => {
@@ -85,9 +87,6 @@ const NuevaPlantillaForm = () => {
 
   const methods = useForm({
     resolver: yupResolver(schema),
-    defaultValues: {
-      manoDeObra: 0,
-    },
   });
   const {
     handleSubmit,
@@ -101,11 +100,14 @@ const NuevaPlantillaForm = () => {
     control,
     name: "reparacionesDeTercero",
   });
-  const manoDeObra = useWatch({ control, name: "manoDeObra" });
+  const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
+
+  const manoDeObra = calcularManoDeObra(trabajosRealizados ?? []);
+
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
     repuestosUsados: repuestosUsados ?? [],
     reparacionesDeTercero: reparacionesTerceros ?? [],
-    manoDeObra,
+    trabajosRealizados: trabajosRealizados ?? [],
     descuento: 0,
   });
 
@@ -177,20 +179,20 @@ const NuevaPlantillaForm = () => {
             <TrabajosRealizadosFormSection />
           </Grid>
           <Grid item xs={12}>
-            <Controller
-              name="manoDeObra"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Mano de obra Cliente"
-                  type="number"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.manoDeObra}
-                  helperText={errors.manoDeObra?.message as string}
-                />
-              )}
+            <TextField
+              label="Mano de obra Cliente"
+              value={isNaN(manoDeObra) ? "0" : manoDeObra.toFixed(2)}
+              fullWidth
+              margin="normal"
+              InputProps={{
+                readOnly: true,
+              }}
+              sx={{
+                backgroundColor: "action.disabledBackground",
+                "& .MuiInputBase-input": {
+                  color: "text.secondary",
+                },
+              }}
             />
           </Grid>
           <Grid item xs={12}>

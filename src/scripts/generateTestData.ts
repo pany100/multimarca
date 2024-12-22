@@ -82,7 +82,7 @@ function calcularTotalOrdenReparacion(ordenReparacion: {
   const totalReparacionesTerceros =
     calcularTotalReparacionesTerceros(ordenReparacion);
   // 3. Mano de obra
-  const manoDeObra = parseFloat(ordenReparacion.manoDeObra.toString());
+  const manoDeObra = 0;
 
   return totalRepuestos + totalReparacionesTerceros + manoDeObra;
 }

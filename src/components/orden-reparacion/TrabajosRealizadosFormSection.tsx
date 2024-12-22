@@ -199,7 +199,7 @@ function TrabajosRealizadosFormSection({
                 <TableHead>
                   <TableRow>
                     <TableCell>Trabajo</TableCell>
-                    <TableCell>Precio sugerido</TableCell>
+                    <TableCell>Precio</TableCell>
                     <TableCell>Días para Recordatorio</TableCell>
                     <TableCell>Acciones</TableCell>
                   </TableRow>
@@ -300,7 +300,7 @@ function TrabajosRealizadosFormSection({
             />
           )}
           <TextField
-            label="Precio Unitario Sugerido"
+            label="Precio"
             type="number"
             value={precioUnitario}
             onChange={(e) => setPrecioUnitario(e.target.value)}

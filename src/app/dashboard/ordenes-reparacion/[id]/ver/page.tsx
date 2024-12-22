@@ -5,6 +5,7 @@ import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanic
 import { useFetch } from "@/contexts/FetchContext";
 import { useAuth } from "@/hooks/useAuth";
 import {
+  calcularManoDeObra,
   calcularTotalOrdenReparacion,
   calcularTotalReparacionesTerceros,
   calcularTotalRepuestos,
@@ -582,7 +583,7 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
               <TableRow>
                 <TableCell>Mano de Obra</TableCell>
                 <TableCell align="right">
-                  ${ordenReparacion.manoDeObra}
+                  ${calcularManoDeObra(ordenReparacion.trabajosRealizados)}
                 </TableCell>
               </TableRow>
               <TableRow>

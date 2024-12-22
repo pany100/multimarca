@@ -1,5 +1,8 @@
 import { useFetch } from "@/contexts/FetchContext";
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
+import {
+  calcularManoDeObra,
+  calcularTotalOrdenReparacion,
+} from "@/utils/ordenHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
   Alert,
@@ -100,7 +103,6 @@ const schema = yup.object().shape({
         .required("El proveedor es requerido"),
     })
   ),
-  manoDeObra: yup.number().required("El monto total es requerido"),
   descuento: yup.number().min(0),
   observacionesEntrada: yup.string(),
   esBorrador: yup.boolean(),
@@ -126,7 +128,6 @@ const NuevoPresupuestoForm = ({
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      manoDeObra: 0,
       esBorrador: false,
       descuento: 0,
     },
@@ -179,7 +180,6 @@ const NuevoPresupuestoForm = ({
                 diasParaRecordatorio: trabajo.diasParaRecordatorio,
               }))
             );
-            setValue("manoDeObra", templateData.manoDeObra);
           } else {
             console.error("Error al obtener datos de la plantilla");
           }
@@ -197,7 +197,14 @@ const NuevoPresupuestoForm = ({
     control,
     name: "reparacionesDeTercero",
   });
-  const manoDeObra = useWatch({ control, name: "manoDeObra" });
+  const trabajosRealizadosField = useWatch({
+    control,
+    name: "trabajosRealizados",
+  });
+  const trabajosRealizados = (trabajosRealizadosField ?? []).map((trabajo) => ({
+    precioUnitario: Number(trabajo.precioUnitario) || 0,
+  }));
+  const manoDeObra = calcularManoDeObra(trabajosRealizados ?? []);
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
     repuestosUsados: (repuestosUsados ?? []).map((item) => ({
       precioVenta: Number(item.precioVenta) || 0,
@@ -206,7 +213,9 @@ const NuevoPresupuestoForm = ({
     reparacionesDeTercero: (reparacionesTerceros ?? []).map((item) => ({
       precioVenta: Number(item.precioVenta) || 0,
     })),
-    manoDeObra: Number(manoDeObra) || 0,
+    trabajosRealizados: (trabajosRealizados ?? []).map((item) => ({
+      precioUnitario: Number(item.precioUnitario) || 0,
+    })),
     descuento: Number(descuento) || 0,
   });
 
@@ -392,20 +401,20 @@ const NuevoPresupuestoForm = ({
             />
           </Grid>
           <Grid item xs={12}>
-            <Controller
-              name="manoDeObra"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Mano de obra Cliente"
-                  type="number"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.manoDeObra}
-                  helperText={errors.manoDeObra?.message as string}
-                />
-              )}
+            <TextField
+              label="Mano de obra Cliente"
+              value={isNaN(manoDeObra) ? "0" : manoDeObra.toFixed(2)}
+              fullWidth
+              margin="normal"
+              InputProps={{
+                readOnly: true,
+              }}
+              sx={{
+                backgroundColor: "action.disabledBackground",
+                "& .MuiInputBase-input": {
+                  color: "text.secondary",
+                },
+              }}
             />
           </Grid>
           <Grid item xs={12}>
