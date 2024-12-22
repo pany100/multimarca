@@ -98,6 +98,7 @@ export async function POST(request: Request) {
       trabajosRealizados = [],
       manoDeObra,
       descuento,
+      descripcionDescuento,
     } = body;
 
     if (estado === EstadoOrdenReparacion.Terminado) {
@@ -222,6 +223,7 @@ export async function POST(request: Request) {
           pdfPath,
           manoDeObra: new Prisma.Decimal(manoDeObra),
           descuento: new Prisma.Decimal(descuento),
+          descripcionDescuento,
           mecanicos: {
             create: mecanicosToPersist,
           },

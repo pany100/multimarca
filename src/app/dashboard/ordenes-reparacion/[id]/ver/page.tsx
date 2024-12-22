@@ -587,6 +587,17 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
               </TableRow>
               <TableRow>
                 <TableCell>
+                  Descuento
+                  {ordenReparacion.descripcionDescuento && (
+                    <>: {ordenReparacion.descripcionDescuento}</>
+                  )}
+                </TableCell>
+                <TableCell align="right">
+                  ${ordenReparacion.descuento}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell>
                   <strong>Total</strong>
                 </TableCell>
                 <TableCell align="right">

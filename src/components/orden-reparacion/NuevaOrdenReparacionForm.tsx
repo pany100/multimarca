@@ -109,6 +109,7 @@ const schema = yup.object().shape({
   ),
   manoDeObra: yup.number().required("El monto total es requerido"),
   descuento: yup.number().min(0),
+  descripcionDescuento: yup.string().nullable(),
   observacionesEntrada: yup.string(),
 });
 
@@ -432,6 +433,24 @@ const NuevaOrdenReparacionForm = () => {
                   margin="normal"
                   error={!!errors.descuento}
                   helperText={errors.descuento?.message as string}
+                />
+              )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
+              name="descripcionDescuento"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Descripción del descuento"
+                  multiline
+                  rows={1}
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.descripcionDescuento}
+                  helperText={errors.descripcionDescuento?.message as string}
                 />
               )}
             />

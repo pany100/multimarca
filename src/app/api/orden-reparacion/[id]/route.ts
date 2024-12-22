@@ -104,6 +104,7 @@ export async function PUT(
       detalleControles,
       manoDeObra,
       descuento,
+      descripcionDescuento,
     } = body;
 
     // Obtener la orden de reparación actual
@@ -338,6 +339,7 @@ export async function PUT(
               })),
             },
             detalleControles,
+            descripcionDescuento,
             pdfPath: permanentUrl,
           },
           include: {

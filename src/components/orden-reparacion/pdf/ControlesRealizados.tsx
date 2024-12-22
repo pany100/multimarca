@@ -16,6 +16,7 @@ type ControlReparacion = {
 type Props = {
   repair: {
     controlesEnReparacion: ControlReparacion[];
+    detalleControles: string;
   };
 };
 
@@ -30,6 +31,14 @@ function ControlesRealizados({ repair }: Props) {
       </Typography>
       {repair.controlesEnReparacion
         .filter((control) => control.valor !== "false" && control.valor !== "")
+        .sort((a: any, b: any) => {
+          if (a.controlMecanico.ordenEnPdf === null) return 1;
+          if (b.controlMecanico.ordenEnPdf === null) return -1;
+          return (
+            (a.controlMecanico.ordenEnPdf || 0) -
+            (b.controlMecanico.ordenEnPdf || 0)
+          );
+        })
         .map((control) => (
           <Fragment key={control.id}>
             <Typography
@@ -53,18 +62,17 @@ function ControlesRealizados({ repair }: Props) {
       >
         Trabajos Realizados
       </Typography>
-      {repair.controlesEnReparacion
-        .filter((control) => control.valor !== "false" && control.valor !== "")
-        .map((control) => (
-          <Fragment key={control.id}>
-            <Typography
-              variant="body1"
-              sx={{ color: "common.black", lineHeight: 1.1, maxWidth: 720 }}
-            >
-              -
-            </Typography>
-          </Fragment>
-        ))}
+      {JSON.parse(repair.detalleControles || "[]").map(
+        (element: string, index: number) => (
+          <Typography
+            key={index}
+            variant="body1"
+            sx={{ color: "common.black", lineHeight: 1.1, maxWidth: 720 }}
+          >
+            - {element}
+          </Typography>
+        )
+      )}
     </div>
   );
 }

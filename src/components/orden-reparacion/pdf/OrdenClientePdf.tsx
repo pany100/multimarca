@@ -45,7 +45,7 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
             variant="body1"
             sx={{ fontWeight: "bold", color: "common.black" }}
           >
-            Observaciones de entrada
+            Observaciones del cliente
           </Typography>
           <Typography
             variant="body1"
@@ -77,12 +77,6 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
                 <Divider sx={{ borderColor: "common.black" }} />
               </Fragment>
             )}
-          <Typography
-            variant="body1"
-            sx={{ fontWeight: "bold", color: "common.black" }}
-          >
-            Detalle de Trabajos
-          </Typography>
           <WorkDescription repair={repair} />
           <Typography variant="body1" sx={{ color: "common.black", mt: 2 }}>
             {repair.estado === EstadoOrdenReparacion.Terminado &&

@@ -16,16 +16,27 @@ const Box = styled("div")(() => ({
 function WorkDescription({ repair }: Props) {
   return (
     <>
-      <Box sx={{ marginRight: 15 }}>
+      <Box sx={{ marginRight: 15, marginTop: 1 }}>
         <Typography
           variant="body1"
-          sx={{ color: "common.black", lineHeight: 1.1 }}
+          sx={{
+            color: "common.black",
+            fontWeight: "bold",
+            lineHeight: 1.1,
+            mb: 1,
+          }}
         >
           Repuestos utilizados
         </Typography>
         <Typography
           variant="body1"
-          sx={{ color: "common.black", textAlign: "right", lineHeight: 1.1 }}
+          sx={{
+            color: "common.black",
+            textAlign: "right",
+            lineHeight: 1.1,
+            mb: 1,
+            fontWeight: "bold",
+          }}
         >
           Importe
         </Typography>
@@ -81,7 +92,7 @@ function WorkDescription({ repair }: Props) {
       <Box sx={{ marginRight: 15 }}>
         <Typography
           variant="body1"
-          sx={{ color: "common.black", lineHeight: 1.1 }}
+          sx={{ color: "common.black", lineHeight: 1.1, fontWeight: "bold" }}
         >
           Mano de Obra
         </Typography>

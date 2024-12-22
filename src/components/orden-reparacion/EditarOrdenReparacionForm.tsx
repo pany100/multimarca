@@ -130,6 +130,7 @@ const schema = yup.object().shape({
     .typeError("La mano de obra debe ser un nmero")
     .required("La mano de obra es requerida"),
   descuento: yup.number().min(0),
+  descripcionDescuento: yup.string().nullable(),
   observacionesEntrada: yup.string(),
 });
 
@@ -198,6 +199,7 @@ type OrdenReparacion = {
     };
   }[];
   descuento: number;
+  descripcionDescuento: string;
   detalleControles: string;
 };
 
@@ -249,6 +251,7 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
       ...ordenReparacion,
       manoDeObra: ordenReparacion.manoDeObra,
       descuento: ordenReparacion.descuento,
+      descripcionDescuento: ordenReparacion.descripcionDescuento,
       trabajosRealizados: ordenReparacion.trabajosRealizados.map((trabajo) => ({
         manoDeObra: { name: trabajo.descripcion },
         precioUnitario: Number(trabajo.precioUnitario),
@@ -624,6 +627,24 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
                     </Alert>
                   )}
                 </>
+              )}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
+              name="descripcionDescuento"
+              control={control}
+              render={({ field }) => (
+                <TextField
+                  {...field}
+                  label="Descripción del descuento"
+                  multiline
+                  rows={1}
+                  fullWidth
+                  margin="normal"
+                  error={!!errors.descripcionDescuento}
+                  helperText={errors.descripcionDescuento?.message as string}
+                />
               )}
             />
           </Grid>
