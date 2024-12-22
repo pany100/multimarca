@@ -18,7 +18,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
 import ImageInput from "../ImageInput";
@@ -180,13 +180,11 @@ function ReparacionesTercerosFormSection({
                       <TableCell>{reparacion.precioVenta}</TableCell>
                       <TableCell>
                         {reparacion.recibo && (
-                          <Image
-                            src={reparacion.recibo}
-                            alt="Imagen seleccionada"
-                            width={300}
-                            height={200}
-                            style={{ width: "300px", height: "auto" }}
-                          />
+                          <Link href={reparacion.recibo} target="_blank">
+                            <Button size="small" color="primary">
+                              Ver recibo
+                            </Button>
+                          </Link>
                         )}
                       </TableCell>
                       <TableCell>
