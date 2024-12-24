@@ -128,7 +128,7 @@ const schema = yup.object().shape({
       recibo: yup.string().nullable(),
     })
   ),
-  descuento: yup.number().min(0),
+  descuento: yup.number().nullable().min(0),
   descripcionDescuento: yup.string().nullable(),
   observacionesEntrada: yup.string(),
 });
@@ -620,6 +620,11 @@ const EditarOrdenReparacionForm = ({ ordenReparacion }: Props) => {
                     type="number"
                     fullWidth
                     margin="normal"
+                    value={field.value || 0}
+                    onChange={(e) => {
+                      const value = e.target.value === "" ? 0 : e.target.value;
+                      field.onChange(value);
+                    }}
                   />
                   {!!errors.descuento && (
                     <Alert severity="error" sx={{ mt: 1 }}>

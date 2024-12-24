@@ -113,6 +113,7 @@ const GastosPage = () => {
       options: [
         { label: "Efectivo", value: "EFECTIVO" },
         { label: "Transferencia", value: "TRANSFERENCIA" },
+        { label: "Cheque", value: "CHEQUE" },
       ],
     },
     { name: "fecha", label: "Fecha", type: "date" },
@@ -227,7 +228,10 @@ const GastosPage = () => {
         }),
         tipo: yup
           .string()
-          .oneOf(["EFECTIVO", "TRANSFERENCIA"], "Tipo de extracción inválido")
+          .oneOf(
+            ["EFECTIVO", "TRANSFERENCIA", "CHEQUE"],
+            "Tipo de extracción inválido"
+          )
           .required("El tipo de extracción es requerido"),
       })}
     />

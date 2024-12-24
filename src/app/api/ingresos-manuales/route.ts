@@ -86,7 +86,7 @@ export async function POST(request: Request) {
 
     if (
       !tipoExtraccion ||
-      !["EFECTIVO", "TRANSFERENCIA"].includes(tipoExtraccion)
+      !["EFECTIVO", "TRANSFERENCIA", "CHEQUE"].includes(tipoExtraccion)
     ) {
       return NextResponse.json(
         { error: "Tipo de extracción inválido o faltante" },

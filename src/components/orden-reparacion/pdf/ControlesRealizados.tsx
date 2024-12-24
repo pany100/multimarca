@@ -56,23 +56,28 @@ function ControlesRealizados({ repair }: Props) {
             </Typography>
           </Fragment>
         ))}
-      <Typography
-        variant="body1"
-        sx={{ fontWeight: "bold", color: "common.black" }}
-      >
-        Trabajos Realizados
-      </Typography>
-      {JSON.parse(repair.detalleControles || "[]").map(
-        (element: string, index: number) => (
-          <Typography
-            key={index}
-            variant="body1"
-            sx={{ color: "common.black", lineHeight: 1.1, maxWidth: 720 }}
-          >
-            - {element}
-          </Typography>
-        )
-      )}
+      {repair.detalleControles &&
+        JSON.parse(repair.detalleControles || "[]").length > 0 && (
+          <>
+            <Typography
+              variant="body1"
+              sx={{ fontWeight: "bold", color: "common.black" }}
+            >
+              Trabajos Realizados
+            </Typography>
+            {JSON.parse(repair.detalleControles || "[]").map(
+              (element: string, index: number) => (
+                <Typography
+                  key={index}
+                  variant="body1"
+                  sx={{ color: "common.black", lineHeight: 1.1, maxWidth: 720 }}
+                >
+                  - {element}
+                </Typography>
+              )
+            )}
+          </>
+        )}
     </div>
   );
 }

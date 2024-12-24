@@ -525,24 +525,29 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
                 </Grid>
               )
             )}
-          <Grid item xs={12}>
-            <Typography variant="h6">Detalles:</Typography>
-          </Grid>
-          <List sx={{ mt: 0, py: 0 }}>
-            {JSON.parse(ordenReparacion.detalleControles || "[]").map(
-              (element: string, index: number) => (
-                <ListItem key={index} sx={{ py: 0.0 }}>
-                  <ListItemText
-                    primary={
-                      <Typography variant="body2" sx={{ my: 0 }}>
-                        ◦ {element}
-                      </Typography>
-                    }
-                  />
-                </ListItem>
-              )
+          {ordenReparacion.detalleControles &&
+            JSON.parse(ordenReparacion.detalleControles || "[]").length > 0 && (
+              <>
+                <Grid item xs={12}>
+                  <Typography variant="h6">Detalles:</Typography>
+                </Grid>
+                <List sx={{ mt: 0, py: 0 }}>
+                  {JSON.parse(ordenReparacion.detalleControles || "[]").map(
+                    (element: string, index: number) => (
+                      <ListItem key={index} sx={{ py: 0.0 }}>
+                        <ListItemText
+                          primary={
+                            <Typography variant="body2" sx={{ my: 0 }}>
+                              ◦ {element}
+                            </Typography>
+                          }
+                        />
+                      </ListItem>
+                    )
+                  )}
+                </List>
+              </>
             )}
-          </List>
         </Grid>
         <Divider sx={{ my: 2 }} />
 

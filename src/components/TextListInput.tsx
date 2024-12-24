@@ -24,7 +24,7 @@ function TextListInput({ inputName, label }: Props) {
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const agregarTexto = () => {
-    const prevValues = getValues(inputName);
+    const prevValues = getValues(inputName) || "[]";
     if (textoPersonalizado.trim()) {
       const updatedValues =
         editingIndex !== null

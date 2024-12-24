@@ -1,0 +1,8 @@
+-- AlterTable
+ALTER TABLE `Extraccion` MODIFY `tipoExtraccion` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE') NOT NULL;
+
+-- AlterTable
+ALTER TABLE `Gasto` MODIFY `tipo` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE') NOT NULL DEFAULT 'EFECTIVO';
+
+-- AlterTable
+ALTER TABLE `IngresoManualDeDinero` MODIFY `tipoExtraccion` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE') NOT NULL;

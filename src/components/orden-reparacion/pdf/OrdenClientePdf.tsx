@@ -79,8 +79,7 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
             )}
           <WorkDescription repair={repair} />
           <Typography variant="body1" sx={{ color: "common.black", mt: 2 }}>
-            {repair.estado === EstadoOrdenReparacion.Terminado &&
-              repair.mecanicos.length > 0 &&
+            {repair.mecanicos.length > 0 &&
               (repair.mecanicos.length === 1
                 ? `Realizó: ${repair.mecanicos[0].name}`
                 : `Realizaron: ${repair.mecanicos

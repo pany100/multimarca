@@ -81,6 +81,7 @@ function ReparacionesTercerosFormSection({
       if (editingReparacionId) {
         const updatedReparaciones = currentReparaciones.map((r: any) =>
           r.id === editingReparacionId ||
+          `${r.proveedor.id}-${r.nombre}` === editingReparacionId ||
           `${r.proveedor.id}-${r.nombre}` ===
             `${selectedProveedor.id}-${nombre}`
             ? newReparacion

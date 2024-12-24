@@ -361,6 +361,8 @@ function CrudTable<T extends { id: string }>({
             bgcolor: "background.paper",
             boxShadow: 24,
             p: 4,
+            maxHeight: "90vh",
+            overflow: "scroll",
           }}
         >
           <Typography variant="h6" component="h2">
@@ -388,6 +390,8 @@ function CrudTable<T extends { id: string }>({
               bgcolor: "background.paper",
               boxShadow: 24,
               p: 4,
+              maxHeight: "90vh",
+              overflow: "scroll",
             }}
           >
             <Typography variant="h6" component="h2">

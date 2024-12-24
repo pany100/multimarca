@@ -113,6 +113,9 @@ function WorkDescription({ repair }: Props) {
           <Fragment>
             <Typography variant="body1" sx={{ mt: 2, color: "common.black" }}>
               Descuento
+              {repair.descripcionDescuento && (
+                <>: {repair.descripcionDescuento}</>
+              )}
             </Typography>
             <Typography
               variant="body1"

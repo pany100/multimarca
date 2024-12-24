@@ -539,6 +539,7 @@ enum TipoEmpleado {
 enum TipoExtraccion {
   EFECTIVO
   TRANSFERENCIA
+  CHEQUE
 }
 
 enum EstadoOrdenReparacion {

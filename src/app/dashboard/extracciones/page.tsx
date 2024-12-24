@@ -18,7 +18,7 @@ interface Extraccion {
     fullName: string;
   };
   motivo: string;
-  tipoExtraccion: "EFECTIVO" | "TRANSFERENCIA";
+  tipoExtraccion: "EFECTIVO" | "TRANSFERENCIA" | "CHEQUE";
 }
 
 const ExtraccionesPage = () => {
@@ -127,6 +127,7 @@ const ExtraccionesPage = () => {
       options: [
         { label: "Efectivo", value: "EFECTIVO" },
         { label: "Transferencia", value: "TRANSFERENCIA" },
+        { label: "Cheque", value: "CHEQUE" },
       ],
     },
   ];
@@ -164,7 +165,10 @@ const ExtraccionesPage = () => {
         motivo: yup.string().required("El motivo es requerido"),
         tipoExtraccion: yup
           .string()
-          .oneOf(["EFECTIVO", "TRANSFERENCIA"], "Tipo de extracción inválido")
+          .oneOf(
+            ["EFECTIVO", "TRANSFERENCIA", "CHEQUE"],
+            "Tipo de extracción inválido"
+          )
           .required("El tipo de extracción es requerido"),
       })}
     />
