@@ -18,7 +18,11 @@ interface Extraccion {
     fullName: string;
   };
   motivo: string;
-  tipoExtraccion: "EFECTIVO" | "TRANSFERENCIA" | "CHEQUE";
+  tipoExtraccion:
+    | "EFECTIVO"
+    | "TRANSFERENCIA"
+    | "CHEQUE"
+    | "DEBITO_AUTOMATICO_TARJETA_CREDITO";
 }
 
 const ExtraccionesPage = () => {
@@ -128,6 +132,10 @@ const ExtraccionesPage = () => {
         { label: "Efectivo", value: "EFECTIVO" },
         { label: "Transferencia", value: "TRANSFERENCIA" },
         { label: "Cheque", value: "CHEQUE" },
+        {
+          label: "Débito Automático tarjeta crédito",
+          value: "DEBITO_AUTOMATICO_TARJETA_CREDITO",
+        },
       ],
     },
   ];
@@ -166,7 +174,12 @@ const ExtraccionesPage = () => {
         tipoExtraccion: yup
           .string()
           .oneOf(
-            ["EFECTIVO", "TRANSFERENCIA", "CHEQUE"],
+            [
+              "EFECTIVO",
+              "TRANSFERENCIA",
+              "CHEQUE",
+              "DEBITO_AUTOMATICO_TARJETA_CREDITO",
+            ],
             "Tipo de extracción inválido"
           )
           .required("El tipo de extracción es requerido"),

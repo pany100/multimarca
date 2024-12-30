@@ -19,7 +19,11 @@ interface IngresoManual {
   usuario: {
     fullName: string;
   };
-  tipoExtraccion: "EFECTIVO" | "TRANSFERENCIA" | "CHEQUE";
+  tipoExtraccion:
+    | "EFECTIVO"
+    | "TRANSFERENCIA"
+    | "CHEQUE"
+    | "DEBITO_AUTOMATICO_TARJETA_CREDITO";
 }
 
 const IngresosPage = () => {
@@ -135,6 +139,10 @@ const IngresosPage = () => {
         { label: "Efectivo", value: "EFECTIVO" },
         { label: "Transferencia", value: "TRANSFERENCIA" },
         { label: "Cheque", value: "CHEQUE" },
+        {
+          label: "Débito Automático tarjeta crédito",
+          value: "DEBITO_AUTOMATICO_TARJETA_CREDITO",
+        },
       ],
     },
   ];
@@ -173,7 +181,12 @@ const IngresosPage = () => {
         tipoExtraccion: yup
           .string()
           .oneOf(
-            ["EFECTIVO", "TRANSFERENCIA", "CHEQUE"],
+            [
+              "EFECTIVO",
+              "TRANSFERENCIA",
+              "CHEQUE",
+              "DEBITO_AUTOMATICO_TARJETA_CREDITO",
+            ],
             "Tipo de extracción inválido"
           )
           .required("El tipo de extracción es requerido"),

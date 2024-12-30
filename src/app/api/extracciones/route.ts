@@ -90,7 +90,12 @@ export async function POST(request: Request) {
 
     if (
       !tipoExtraccion ||
-      !["EFECTIVO", "TRANSFERENCIA", "CHEQUE"].includes(tipoExtraccion)
+      ![
+        "EFECTIVO",
+        "TRANSFERENCIA",
+        "CHEQUE",
+        "DEBITO_AUTOMATICO_TARJETA_CREDITO",
+      ].includes(tipoExtraccion)
     ) {
       return NextResponse.json(
         { error: "Tipo de extracción inválido o faltante" },

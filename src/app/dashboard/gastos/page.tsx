@@ -114,6 +114,10 @@ const GastosPage = () => {
         { label: "Efectivo", value: "EFECTIVO" },
         { label: "Transferencia", value: "TRANSFERENCIA" },
         { label: "Cheque", value: "CHEQUE" },
+        {
+          label: "Débito Automático tarjeta crédito",
+          value: "DEBITO_AUTOMATICO_TARJETA_CREDITO",
+        },
       ],
     },
     { name: "fecha", label: "Fecha", type: "date" },
@@ -229,7 +233,12 @@ const GastosPage = () => {
         tipo: yup
           .string()
           .oneOf(
-            ["EFECTIVO", "TRANSFERENCIA", "CHEQUE"],
+            [
+              "EFECTIVO",
+              "TRANSFERENCIA",
+              "CHEQUE",
+              "DEBITO_AUTOMATICO_TARJETA_CREDITO",
+            ],
             "Tipo de extracción inválido"
           )
           .required("El tipo de extracción es requerido"),
