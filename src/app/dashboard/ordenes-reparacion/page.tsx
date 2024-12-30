@@ -1,4 +1,5 @@
 "use client";
+import BoschTemplate from "@/components/orden-reparacion/pdf/BoschTemplate";
 import { useFetch } from "@/contexts/FetchContext";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
@@ -24,7 +25,8 @@ import {
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { EstadoOrdenReparacion } from "@prisma/client";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useReactToPrint } from "react-to-print";
 
 interface OrdenReparacion {
   id: string;
@@ -60,6 +62,11 @@ const OrdenesReparacionPage = () => {
     setItemToDelete(id);
     setDeleteConfirmOpen(true);
   };
+  let boschTemplateRef = useRef(null);
+
+  const handleBoschTemplatePrint = useReactToPrint({
+    content: () => boschTemplateRef.current,
+  });
 
   const [totalItems, setTotalItems] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
@@ -285,14 +292,22 @@ const OrdenesReparacionPage = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         Órdenes de Reparación
       </Typography>
-      <Button
-        variant="contained"
-        color="primary"
-        onClick={handleAddClick}
-        style={{ marginBottom: "1rem" }}
-      >
-        Agregar Orden de Reparación
-      </Button>
+      <Box sx={{ display: "flex", gap: 2, marginBottom: "1rem" }}>
+        <Button variant="contained" color="primary" onClick={handleAddClick}>
+          Agregar Orden de Reparación
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleBoschTemplatePrint}
+          sx={{
+            backgroundColor: "#87CEEB",
+            "&:hover": { backgroundColor: "#5F9EA0" },
+            marginLeft: "auto", // Esto empujará el botón hacia la derecha
+          }}
+        >
+          Imprimir Bosch Template
+        </Button>
+      </Box>
       <Tabs value={tabValue} onChange={handleTabChange}>
         {estados.map((estado) => (
           <Tab
@@ -366,6 +381,9 @@ const OrdenesReparacionPage = () => {
           {snackbar.message}
         </Alert>
       </Snackbar>
+      <div style={{ display: "none" }}>
+        <BoschTemplate ref={boschTemplateRef} />
+      </div>
     </Box>
   );
 };

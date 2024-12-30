@@ -16,7 +16,7 @@ function TemplateHeader() {
           width: "100%",
         }}
         alt="mtservice"
-        src="/bosch-icon.jpeg"
+        src="/bosch-icon.svg"
       />
       <div>
         <Typography
