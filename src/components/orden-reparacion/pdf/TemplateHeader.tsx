@@ -16,7 +16,7 @@ function TemplateHeader() {
           width: "100%",
         }}
         alt="mtservice"
-        src="/mtservice-icon.png"
+        src="/bosch-icon.jpeg"
       />
       <div>
         <Typography
@@ -27,7 +27,7 @@ function TemplateHeader() {
             color: "common.black",
           }}
         >
-          SERV MECANICO INTEGRAL
+          BOSCH CAR SERVICE MT MULTIMARCA
         </Typography>
         <Typography variant="body2" sx={{ color: "common.black" }}>
           Guemes 1798 entre José María Paz y Blois

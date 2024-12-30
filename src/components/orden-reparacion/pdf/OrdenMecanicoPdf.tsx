@@ -110,6 +110,17 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
               variant="h6"
               sx={{ color: "common.black", textTransform: "uppercase" }}
             >
+              Motivos:
+            </Typography>
+            <Typography sx={{ color: "common.black" }}>
+              {repair.observacionesCliente || "-"}
+            </Typography>
+          </div>
+          <div style={{ marginBottom: 15 }}>
+            <Typography
+              variant="h6"
+              sx={{ color: "common.black", textTransform: "uppercase" }}
+            >
               Historia
             </Typography>
             {JSON.parse(repair.observacionesEntrada).length > 0 &&
@@ -118,17 +129,6 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                   {el}
                 </Typography>
               ))}
-          </div>
-          <div style={{ marginBottom: 15 }}>
-            <Typography
-              variant="h6"
-              sx={{ color: "common.black", textTransform: "uppercase" }}
-            >
-              Motivos
-            </Typography>
-            <Typography sx={{ color: "common.black" }}>
-              {repair.observacionesCliente}
-            </Typography>
           </div>
           <div
             style={{
