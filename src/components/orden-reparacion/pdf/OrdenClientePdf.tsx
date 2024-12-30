@@ -51,7 +51,7 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
             variant="body1"
             sx={{ color: "common.black", width: "90%", lineHeight: 1.1 }}
           >
-            {JSON.parse(repair.observacionesCliente || "[]").join(", ") || "-"}
+            {repair.observacionesCliente || "-"}
           </Typography>
           <Divider sx={{ borderColor: "common.black" }} />
           <Typography
