@@ -162,6 +162,7 @@ const BoschTemplate = React.forwardRef<HTMLDivElement>((_, ref) => {
             <div>Año:</div>
             <div>Kilómetros:</div>
           </CarInfoFourColumn>
+          <CarInfoLine>Patente:</CarInfoLine>
           <CarInfoDoubleColumn>
             <div>Fecha de entrada:</div>
             <div>Próximo servicio:</div>
