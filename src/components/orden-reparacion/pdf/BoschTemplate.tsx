@@ -40,7 +40,7 @@ const SectionText = styled("div")(() => ({
 }));
 
 const CarInfo = styled("div")(() => ({
-  marginTop: "20px",
+  marginTop: "5px",
   fontSize: "13px",
   marginBottom: "10px",
 }));
