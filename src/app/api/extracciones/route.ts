@@ -20,7 +20,7 @@ export async function GET(request: Request) {
         },
         skip,
         take: size,
-        orderBy: { fecha: "desc" },
+        orderBy: { id: "desc" },
         include: {
           usuario: {
             select: {

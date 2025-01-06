@@ -35,7 +35,7 @@ export async function GET(request: Request) {
         where: whereClause,
         skip,
         take: size,
-        orderBy: { fechaCreacion: "desc" },
+        orderBy: { id: "desc" },
         include: {
           auto: {
             include: {

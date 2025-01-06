@@ -22,7 +22,7 @@ export async function GET(request: Request) {
         where: whereClause,
         skip,
         take: size,
-        orderBy: { fecha: "desc" },
+        orderBy: { id: "desc" },
         include: {
           proveedor: true,
           items: {

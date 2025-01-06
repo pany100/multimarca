@@ -30,7 +30,7 @@ export async function GET(request: Request) {
         },
         skip: page * limit,
         take: limit,
-        orderBy: { fecha: "desc" },
+        orderBy: { id: "desc" },
       }),
       prisma.venta.count({ where }),
     ]);
