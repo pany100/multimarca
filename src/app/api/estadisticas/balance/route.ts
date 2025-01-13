@@ -108,6 +108,46 @@ export async function GET(request: NextRequest) {
       }[]
     >(reparacionesQuery, ...reparacionesParams);
 
+    let ingresosManualesQuery = `
+    SELECT 
+        ROUND(SUM(
+          CASE 
+            WHEN ? = 'USD' THEN 
+              CASE 
+                WHEN i.moneda = 'Dolar' THEN i.monto
+                ELSE i.monto / COALESCE(d.blue, 1)
+              END
+            ELSE 
+              CASE 
+                WHEN i.moneda = 'Dolar' THEN i.monto * COALESCE(d.blue, 1)
+                ELSE i.monto
+              END
+          END
+        )) as totalIngresos
+      FROM IngresoManualDeDinero i
+      LEFT JOIN Dolar d ON d.id = i.dolarId
+      WHERE 1=1
+    `;
+
+    const ingresosManualesParams: any[] = [moneda];
+
+    if (año && mes) {
+      ingresosManualesQuery += ` AND i.fecha >= ? AND i.fecha < ?`;
+      ingresosManualesParams.push(
+        `${año}-${mes}-01`,
+        mes === "12"
+          ? `${parseInt(año) + 1}-01-01`
+          : `${año}-${parseInt(mes) + 1}-01`
+      );
+    } else if (año) {
+      ingresosManualesQuery += ` AND YEAR(i.fecha) = ?`;
+      ingresosManualesParams.push(año);
+    }
+
+    const [ingresosManualesResult] = await prisma.$queryRawUnsafe<
+      { totalIngresos: number }[]
+    >(ingresosManualesQuery, ...ingresosManualesParams);
+
     // Consulta para gastos
     let gastosQuery = `
       SELECT ROUND(SUM(
@@ -150,7 +190,8 @@ export async function GET(request: NextRequest) {
 
     const ingresos =
       Number(ventasResult?.totalVentas || 0) +
-      Number(reparacionesResult?.totalReparaciones || 0);
+      Number(reparacionesResult?.totalReparaciones || 0) +
+      Number(ingresosManualesResult?.totalIngresos || 0);
     const gastos = Number(gastosResult?.totalGastos || 0);
 
     return NextResponse.json({

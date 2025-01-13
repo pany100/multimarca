@@ -214,7 +214,9 @@ const Balance = () => {
       </Box>
       <Bar data={chartData} options={options} />
       <Typography variant="h6" align="center" mt={2}>
-        Balance: {balanceData.balance.toFixed(2)} {balanceData.moneda}
+        Balance:{" "}
+        {Number(balanceData.balance.toFixed(2)).toLocaleString("es-AR")}{" "}
+        {balanceData.moneda}
       </Typography>
     </Box>
   );
