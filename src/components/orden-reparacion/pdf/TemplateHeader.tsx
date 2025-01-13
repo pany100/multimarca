@@ -4,7 +4,7 @@ import { styled } from "@mui/material/styles";
 const Header = styled("div")(() => ({
   display: "grid",
   gridGap: 20,
-  gridTemplateColumns: "200px auto",
+  gridTemplateColumns: "170px auto",
   marginBottom: 10,
 }));
 
@@ -13,7 +13,7 @@ function TemplateHeader() {
     <Header>
       <img
         style={{
-          width: "100%",
+          width: "170px",
         }}
         alt="mtservice"
         src="/bosch-icon.svg"

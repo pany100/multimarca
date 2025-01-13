@@ -18,7 +18,11 @@ export async function POST(
             owner: true,
           },
         },
-        mecanicos: true,
+        mecanicos: {
+          include: {
+            mecanico: true,
+          },
+        },
         repuestosUsados: {
           include: {
             stock: true,
@@ -39,15 +43,10 @@ export async function POST(
     });
 
     // Genera el PDF
+    // saveClientOrderHtml(ordenReparacion);
+    // saveClientOrderPdf(ordenReparacion);
+
     const pdfBuffer = await generatePdf(ordenReparacion);
-    // Escribe el PDF a un archivo
-    // const fs = require("fs");
-    // const path = require("path");
-
-    // const pdfPath = path.join(process.cwd(), "tmp", `orden.pdf`);
-    // await fs.promises.mkdir(path.dirname(pdfPath), { recursive: true });
-    // await fs.promises.writeFile(pdfPath, pdfBuffer);
-
     // Envía el PDF por WhatsApp
     const response = await sendPdfViaWhatsApp(ordenReparacion, pdfBuffer);
 
@@ -65,6 +64,17 @@ export async function POST(
   }
 }
 
+async function saveClientOrderHtml(ordenReparacion: any) {
+  const html = generateClientOrderHtml(ordenReparacion);
+
+  const fs = require("fs");
+  const path = require("path");
+  const htmlPath = path.join(process.cwd(), "tmp", `orden.html`);
+
+  await fs.promises.mkdir(path.dirname(htmlPath), { recursive: true });
+  await fs.promises.writeFile(htmlPath, html);
+}
+
 async function sendPdfViaWhatsApp(ordenReparacion: any, pdfBuffer: Buffer) {
   const mediaId = await uploadMedia(pdfBuffer);
   const message = await sendWhatsAppMessage(
@@ -74,6 +84,15 @@ async function sendPdfViaWhatsApp(ordenReparacion: any, pdfBuffer: Buffer) {
     mediaId
   );
   return message;
+}
+
+async function saveClientOrderPdf(ordenReparacion: any) {
+  const fs = require("fs");
+  const path = require("path");
+
+  const pdfBuffer = await generatePdf(ordenReparacion);
+  const pdfPath = path.join(process.cwd(), "tmp", `orden.pdf`);
+  await fs.promises.writeFile(pdfPath, pdfBuffer);
 }
 
 async function generatePdf(repair: any): Promise<Buffer> {
