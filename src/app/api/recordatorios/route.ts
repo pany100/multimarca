@@ -31,7 +31,9 @@ export async function GET(request: Request) {
         SELECT 
           c.fullName, 
           c.phone, 
-          orep.fechaSalidaReparacion, 
+          orep.fechaSalidaReparacion,
+          a.patent,
+          orep.kilometros,
           tr.descripcion,
           DATE_ADD(orep.fechaSalidaReparacion, INTERVAL tr.diasParaRecordatorio DAY) as fechaRecordatorio,
           CASE 
@@ -59,7 +61,7 @@ export async function GET(request: Request) {
         AND
           (c.fullName LIKE ${`%${query}%`} OR tr.descripcion LIKE ${`%${query}%`})
         ${estadoCondition}
-        ORDER BY fechaRecordatorio ASC
+        ORDER BY DATE(fechaRecordatorio) ASC
         LIMIT ${size} OFFSET ${skip}
       `,
       prisma.$queryRaw`

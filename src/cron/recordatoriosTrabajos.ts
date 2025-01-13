@@ -1,3 +1,4 @@
+import { sendWhatsAppMessage } from "@/services/whatsappService";
 import { PrismaClient } from "@prisma/client";
 import cron from "node-cron";
 
@@ -16,11 +17,13 @@ async function enviarRecordatoriosTrabajos() {
       fullName: string;
       phone: string;
       fechaSalidaReparacion: string;
+      patent: string;
       descripcion: string;
     }[] = await prisma.$queryRaw`
       SELECT 
         c.fullName, 
-        c.phone, 
+        c.phone,
+        a.patent,
         orep.fechaSalidaReparacion, 
         tr.descripcion
       FROM
@@ -43,10 +46,16 @@ async function enviarRecordatoriosTrabajos() {
 
     for (const trabajo of trabajosParaRecordar) {
       // Enviar mensaje de WhatsApp de recordatorio
-      // await sendWhatsAppMessage(trabajo.phone, "recordatorio_reparacion");
-      console.log(
-        `Recordatorio de trabajo enviado a ${trabajo.fullName} para el trabajo: ${trabajo.descripcion}`
-      );
+      await sendWhatsAppMessage(trabajo.phone, "recordatorio_reparacion", [
+        trabajo.fullName,
+        trabajo.descripcion,
+        trabajo.patent,
+        new Date(trabajo.fechaSalidaReparacion).toLocaleDateString("es-AR", {
+          day: "2-digit",
+          month: "2-digit",
+          year: "numeric",
+        }),
+      ]);
     }
 
     console.log(

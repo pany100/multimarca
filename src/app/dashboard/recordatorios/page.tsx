@@ -36,6 +36,19 @@ const RecordatoriosPage = () => {
       },
     },
     {
+      field: "patent",
+      headerName: "Patente",
+      flex: 1,
+    },
+    {
+      field: "kilometros",
+      headerName: "Kilometros",
+      flex: 1,
+      valueGetter: (kilometros: number) => {
+        return kilometros.toLocaleString("es-AR");
+      },
+    },
+    {
       field: "descripcion",
       headerName: "Trabajo Realizado",
       flex: 2,

@@ -200,16 +200,17 @@ CREATE TABLE `OrdenDeCompraItem` (
 -- CreateTable
 CREATE TABLE `Extraccion` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `dolarId` INTEGER NULL,
     `monto` DECIMAL(10, 2) NOT NULL,
-    `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
     `fecha` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `usuarioId` INTEGER NOT NULL,
     `motivo` VARCHAR(150) NOT NULL,
-    `tipoExtraccion` ENUM('EFECTIVO', 'TRANSFERENCIA') NOT NULL,
+    `tipoExtraccion` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE', 'DEBITO_AUTOMATICO_TARJETA_CREDITO') NOT NULL,
+    `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
+    `dolarId` INTEGER NULL,
 
     INDEX `Extraccion_usuarioId_idx`(`usuarioId`),
     INDEX `Extraccion_fecha_idx`(`fecha`),
+    INDEX `Extraccion_dolarId_fkey`(`dolarId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -218,18 +219,20 @@ CREATE TABLE `Gasto` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `nombre` VARCHAR(150) NOT NULL,
     `precio` DECIMAL(10, 2) NOT NULL,
-    `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
     `fecha` DATETIME(3) NOT NULL,
     `categoriaId` INTEGER NOT NULL,
     `mecanicoId` INTEGER NULL,
     `detalle` TEXT NULL,
     `proveedorId` INTEGER NULL,
+    `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
+    `tipo` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE', 'DEBITO_AUTOMATICO_TARJETA_CREDITO') NOT NULL DEFAULT 'EFECTIVO',
     `dolarId` INTEGER NULL,
 
     INDEX `Gasto_categoriaId_idx`(`categoriaId`),
     INDEX `Gasto_mecanicoId_idx`(`mecanicoId`),
     INDEX `Gasto_proveedorId_idx`(`proveedorId`),
     INDEX `Gasto_fecha_idx`(`fecha`),
+    INDEX `Gasto_dolarId_fkey`(`dolarId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -247,13 +250,14 @@ CREATE TABLE `CategoriaGasto` (
 CREATE TABLE `Venta` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `fecha` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
     `clienteId` INTEGER NULL,
     `total` DECIMAL(10, 2) NOT NULL,
     `dolarId` INTEGER NULL,
+    `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
 
     INDEX `Venta_clienteId_idx`(`clienteId`),
     INDEX `Venta_fecha_idx`(`fecha`),
+    INDEX `Venta_dolarId_fkey`(`dolarId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -294,15 +298,17 @@ CREATE TABLE `OrdenReparacion` (
     `observacionesCliente` TEXT NOT NULL,
     `observacionesEntrada` TEXT NOT NULL,
     `observacionesSalida` TEXT NOT NULL,
+    `detalleControles` TEXT NULL,
     `estado` ENUM('Presupuestado', 'EnProgreso', 'Aceptado', 'Terminado') NOT NULL DEFAULT 'Presupuestado',
     `pdfPath` VARCHAR(255) NULL,
-    `manoDeObra` DECIMAL(10, 2) NOT NULL,
     `descuento` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
+    `descripcionDescuento` VARCHAR(255) NULL,
     `dolarId` INTEGER NULL,
 
     INDEX `OrdenReparacion_autoId_idx`(`autoId`),
     INDEX `OrdenReparacion_fechaCreacion_idx`(`fechaCreacion`),
     INDEX `OrdenReparacion_estado_idx`(`estado`),
+    INDEX `OrdenReparacion_dolarId_fkey`(`dolarId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -334,6 +340,7 @@ CREATE TABLE `ReparacionDeTercero` (
     `ordenReparacionId` INTEGER NULL,
     `plantillaPresupuestoId` INTEGER NULL,
     `borradorId` INTEGER NULL,
+    `recibo` VARCHAR(255) NULL,
 
     INDEX `ReparacionDeTercero_nombre_idx`(`nombre`),
     INDEX `ReparacionDeTercero_proveedorId_idx`(`proveedorId`),
@@ -363,7 +370,6 @@ CREATE TABLE `TrabajoRealizado` (
 CREATE TABLE `PlantillaPresupuesto` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `nombre` VARCHAR(255) NOT NULL,
-    `manoDeObra` DECIMAL(10, 2) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -374,7 +380,6 @@ CREATE TABLE `ControlEnReparacion` (
     `ordenReparacionId` INTEGER NOT NULL,
     `controlMecanicoId` INTEGER NOT NULL,
     `valor` VARCHAR(255) NOT NULL,
-    `detalle` TEXT NULL,
 
     INDEX `ControlEnReparacion_ordenReparacionId_idx`(`ordenReparacionId`),
     INDEX `ControlEnReparacion_controlMecanicoId_idx`(`controlMecanicoId`),
@@ -480,7 +485,6 @@ CREATE TABLE `Borrador` (
     `autoId` INTEGER NOT NULL,
     `fechaCreacion` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `observacionesCliente` TEXT NOT NULL,
-    `manoDeObra` DECIMAL(10, 2) NOT NULL,
     `descuento` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
 
     INDEX `Borrador_autoId_idx`(`autoId`),
@@ -496,10 +500,11 @@ CREATE TABLE `IngresoManualDeDinero` (
     `descripcion` TEXT NULL,
     `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
     `dolarId` INTEGER NULL,
+    `tipoExtraccion` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE', 'DEBITO_AUTOMATICO_TARJETA_CREDITO') NOT NULL,
     `usuarioId` INTEGER NOT NULL,
-    `tipoExtraccion` ENUM('EFECTIVO', 'TRANSFERENCIA') NOT NULL,
 
     INDEX `IngresoManualDeDinero_usuarioId_idx`(`usuarioId`),
+    INDEX `IngresoManualDeDinero_dolarId_fkey`(`dolarId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -546,16 +551,16 @@ ALTER TABLE `OrdenDeCompraItem` ADD CONSTRAINT `OrdenDeCompraItem_ordenDeCompraI
 ALTER TABLE `OrdenDeCompraItem` ADD CONSTRAINT `OrdenDeCompraItem_stockId_fkey` FOREIGN KEY (`stockId`) REFERENCES `Stock`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Extraccion` ADD CONSTRAINT `Extraccion_usuarioId_fkey` FOREIGN KEY (`usuarioId`) REFERENCES `Usuario`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `Extraccion` ADD CONSTRAINT `Extraccion_dolarId_fkey` FOREIGN KEY (`dolarId`) REFERENCES `Dolar`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `Gasto` ADD CONSTRAINT `Gasto_dolarId_fkey` FOREIGN KEY (`dolarId`) REFERENCES `Dolar`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `Extraccion` ADD CONSTRAINT `Extraccion_usuarioId_fkey` FOREIGN KEY (`usuarioId`) REFERENCES `Usuario`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Gasto` ADD CONSTRAINT `Gasto_categoriaId_fkey` FOREIGN KEY (`categoriaId`) REFERENCES `CategoriaGasto`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `Gasto` ADD CONSTRAINT `Gasto_dolarId_fkey` FOREIGN KEY (`dolarId`) REFERENCES `Dolar`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `Gasto` ADD CONSTRAINT `Gasto_mecanicoId_fkey` FOREIGN KEY (`mecanicoId`) REFERENCES `Empleado`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
