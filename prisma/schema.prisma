@@ -204,16 +204,16 @@ model OrdenDeCompraItem {
 }
 
 model Extraccion {
-  id             Int                       @id @default(autoincrement())
-  monto          Decimal                   @db.Decimal(10, 2)
-  fecha          DateTime                  @default(now())
+  id             Int            @id @default(autoincrement())
+  monto          Decimal        @db.Decimal(10, 2)
+  fecha          DateTime       @default(now())
   usuarioId      Int
-  motivo         String                    @db.VarChar(150)
-  tipoExtraccion Extraccion_tipoExtraccion
-  moneda         Moneda                    @default(Peso)
+  motivo         String         @db.VarChar(150)
+  tipoExtraccion TipoExtraccion
+  moneda         Moneda         @default(Peso)
   dolarId        Int?
-  dolar          Dolar?                    @relation(fields: [dolarId], references: [id])
-  usuario        Usuario                   @relation(fields: [usuarioId], references: [id])
+  dolar          Dolar?         @relation(fields: [dolarId], references: [id])
+  usuario        Usuario        @relation(fields: [usuarioId], references: [id])
 
   @@index([usuarioId])
   @@index([fecha])
@@ -230,8 +230,8 @@ model Gasto {
   detalle     String?        @db.Text
   proveedorId Int?
   moneda      Moneda         @default(Peso)
+  tipo        TipoExtraccion @default(EFECTIVO)
   dolarId     Int?
-  tipo        Gasto_tipo     @default(EFECTIVO)
   categoria   CategoriaGasto @relation(fields: [categoriaId], references: [id])
   dolar       Dolar?         @relation(fields: [dolarId], references: [id])
   mecanico    Empleado?      @relation(fields: [mecanicoId], references: [id])
@@ -303,12 +303,12 @@ model OrdenReparacion {
   observacionesCliente   String                    @db.Text
   observacionesEntrada   String                    @db.Text
   observacionesSalida    String                    @db.Text
+  detalleControles       String?                    @db.Text
   estado                 EstadoOrdenReparacion     @default(Presupuestado)
   pdfPath                String?                   @db.VarChar(255)
   descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
-  dolarId                Int?
-  detalleControles       String?                   @db.Text
   descripcionDescuento   String?                   @db.VarChar(255)
+  dolarId                Int?
   controlesEnReparacion  ControlEnReparacion[]     @relation("OrdenReparacionControlesEnReparacion")
   ingresos               IngresoPorReparacion[]    @relation("OrdenReparacionIngresos")
   notificacionesInternas NotificacionInterna[]     @relation("OrdenReparacionNotificacionesInternas")
@@ -355,11 +355,11 @@ model ReparacionDeTercero {
   ordenReparacionId      Int?
   plantillaPresupuestoId Int?
   borradorId             Int?
-  recibo                 String?               @db.VarChar(255)
   borrador               Borrador?             @relation("BorradorReparacionTercero", fields: [borradorId], references: [id], onDelete: Cascade)
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionReparacionTercero", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoReparacionTercero", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   proveedor              Proveedor             @relation(fields: [proveedorId], references: [id])
+  recibo                 String?               @db.VarChar(255)
 
   @@index([nombre])
   @@index([proveedorId])
@@ -516,16 +516,16 @@ model Borrador {
 }
 
 model IngresoManualDeDinero {
-  id             Int                                  @id @default(autoincrement())
-  monto          Decimal                              @db.Decimal(10, 2)
+  id             Int            @id @default(autoincrement())
+  monto          Decimal        @db.Decimal(10, 2)
   fecha          DateTime
-  descripcion    String?                              @db.Text
-  moneda         Moneda                               @default(Peso)
+  descripcion    String?        @db.Text
+  moneda         Moneda         @default(Peso)
   dolarId        Int?
-  tipoExtraccion IngresoManualDeDinero_tipoExtraccion
+  tipoExtraccion TipoExtraccion
   usuarioId      Int
-  dolar          Dolar?                               @relation(fields: [dolarId], references: [id])
-  usuario        Usuario                              @relation(fields: [usuarioId], references: [id])
+  dolar          Dolar?         @relation(fields: [dolarId], references: [id])
+  usuario        Usuario        @relation(fields: [usuarioId], references: [id])
 
   @@index([usuarioId])
   @@index([dolarId], map: "IngresoManualDeDinero_dolarId_fkey")
@@ -534,6 +534,13 @@ model IngresoManualDeDinero {
 enum TipoEmpleado {
   Mecanico
   Administrativo
+}
+
+enum TipoExtraccion {
+  EFECTIVO
+  TRANSFERENCIA
+  CHEQUE
+  DEBITO_AUTOMATICO_TARJETA_CREDITO
 }
 
 enum EstadoOrdenReparacion {
@@ -556,22 +563,4 @@ enum EstadoConversacion {
 enum Moneda {
   Dolar
   Peso
-}
-
-enum Extraccion_tipoExtraccion {
-  EFECTIVO
-  TRANSFERENCIA
-  CHEQUE
-}
-
-enum IngresoManualDeDinero_tipoExtraccion {
-  EFECTIVO
-  TRANSFERENCIA
-  CHEQUE
-}
-
-enum Gasto_tipo {
-  EFECTIVO
-  TRANSFERENCIA
-  CHEQUE
 }
