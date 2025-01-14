@@ -66,7 +66,7 @@ export async function PUT(
     const mecanicoActualizado = await prisma.empleado.update({
       where: { id },
       data: {
-        name,
+        name: name.toUpperCase(),
         start_date: start_date ? new Date(start_date) : null,
         dni: dni ? dni.toString() : null,
         address,

@@ -27,7 +27,7 @@ export async function PUT(
       updateData.phone = phone;
     }
     if (fullName !== undefined) {
-      updateData.fullName = fullName;
+      updateData.fullName = fullName.toUpperCase();
     }
     if (email !== undefined) {
       updateData.email = email;

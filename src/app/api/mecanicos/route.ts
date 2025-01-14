@@ -76,7 +76,7 @@ export async function POST(request: Request) {
 
     const nuevoMecanico = await prisma.empleado.create({
       data: {
-        name,
+        name: name.toUpperCase(),
         start_date: start_date ? new Date(start_date) : null,
         dni: dni ? dni.toString() : null,
         address,

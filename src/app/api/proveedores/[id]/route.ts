@@ -153,7 +153,7 @@ export async function PUT(
     const proveedorActualizado = await prisma.proveedor.update({
       where: { id },
       data: {
-        name,
+        name: name.toUpperCase(),
         address,
         email,
         phone,

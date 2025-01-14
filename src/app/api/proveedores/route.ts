@@ -106,7 +106,7 @@ export async function POST(request: Request) {
 
     const nuevoProveedor = await prisma.proveedor.create({
       data: {
-        name,
+        name: name.toUpperCase(),
         address,
         email,
         phone,

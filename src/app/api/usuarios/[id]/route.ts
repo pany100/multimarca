@@ -59,7 +59,7 @@ export async function PUT(
 
     const updatedUser = await updateUser({
       id: user.id,
-      fullName,
+      fullName: fullName.toUpperCase(),
       username,
       email,
       rolId,

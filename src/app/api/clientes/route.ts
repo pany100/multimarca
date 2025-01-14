@@ -80,7 +80,7 @@ export async function POST(request: Request) {
     // Crear el cliente
     const nuevoCliente = await prisma.cliente.create({
       data: {
-        fullName,
+        fullName: fullName.toUpperCase(),
         phone: phone || null,
         email: email || null,
         birthday: birthday ? new Date(birthday) : null,

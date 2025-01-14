@@ -59,10 +59,10 @@ export async function POST(request: Request) {
     const body = await request.json();
     const nuevoAuto = await prisma.auto.create({
       data: {
-        patent: body.patent,
-        model: body.model,
-        brand: body.brand,
-        color: body.color,
+        patent: body.patent.toUpperCase(),
+        model: body.model.toUpperCase(),
+        brand: body.brand.toUpperCase(),
+        color: body.color.toUpperCase(),
         year:
           typeof body.year === "string" ? parseInt(body.year, 10) : body.year,
         kms: typeof body.kms === "string" ? parseInt(body.kms, 10) : body.kms,
@@ -71,8 +71,8 @@ export async function POST(request: Request) {
             ? parseInt(body.valves, 10)
             : body.valves,
         ownerId: body.ownerId,
-        chassis_number: body.chassis_number,
-        engine_number: body.engine_number,
+        chassis_number: body.chassis_number.toUpperCase(),
+        engine_number: body.engine_number.toUpperCase(),
         observations: body.observations,
         transmission_type: body.transmission_type,
       },
