@@ -59,8 +59,15 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { clienteId, monto, fecha, moneda, descripcion, ordenReparacionId } =
-      body;
+    const {
+      clienteId,
+      monto,
+      fecha,
+      moneda,
+      tipoOperacion,
+      descripcion,
+      ordenReparacionId,
+    } = body;
 
     if (
       !clienteId ||
@@ -68,7 +75,8 @@ export async function POST(request: Request) {
       !fecha ||
       !moneda ||
       !descripcion ||
-      !ordenReparacionId
+      !ordenReparacionId ||
+      !tipoOperacion
     ) {
       return NextResponse.json(
         { error: "Datos de ingreso por reparación inválidos o faltantes" },
@@ -105,6 +113,7 @@ export async function POST(request: Request) {
         ordenReparacionId,
         fecha,
         dolarId: dolar?.id,
+        tipoOperacion,
       },
       include: {
         cliente: true,

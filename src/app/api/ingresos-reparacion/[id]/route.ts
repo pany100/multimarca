@@ -8,10 +8,23 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { clienteId, fecha, monto, moneda, descripcion, ordenReparacionId } =
-      body;
+    const {
+      clienteId,
+      fecha,
+      monto,
+      moneda,
+      tipoOperacion,
+      descripcion,
+      ordenReparacionId,
+    } = body;
 
-    if (!clienteId || !monto || !descripcion || !ordenReparacionId) {
+    if (
+      !clienteId ||
+      !monto ||
+      !descripcion ||
+      !ordenReparacionId ||
+      !tipoOperacion
+    ) {
       return NextResponse.json(
         { error: "Datos de ingreso por reparación inválidos o faltantes" },
         { status: 400 }
@@ -46,6 +59,7 @@ export async function PUT(
         ordenReparacionId,
         fecha,
         dolarId: dolar?.id,
+        tipoOperacion,
       },
       include: {
         cliente: true,

@@ -37,6 +37,11 @@ interface IngresoPorReparacion {
       model: string;
     };
   };
+  tipoOperacion:
+    | "EFECTIVO"
+    | "TRANSFERENCIA"
+    | "CHEQUE"
+    | "DEBITO_AUTOMATICO_TARJETA_CREDITO";
 }
 
 const IngresosPorReparacionPage = () => {
@@ -81,6 +86,11 @@ const IngresosPorReparacionPage = () => {
           size="small"
         />
       ),
+    },
+    {
+      field: "tipoOperacion",
+      headerName: "Tipo de Ingreso",
+      flex: 1,
     },
     { field: "descripcion", headerName: "Descripción", flex: 2 },
     {
@@ -138,6 +148,20 @@ const IngresosPorReparacionPage = () => {
       options: [
         { label: "Dolar", value: "Dolar" },
         { label: "Peso", value: "Peso" },
+      ],
+    },
+    {
+      name: "tipoOperacion",
+      label: "Tipo de Ingreso",
+      type: "select",
+      options: [
+        { label: "Efectivo", value: "EFECTIVO" },
+        { label: "Transferencia", value: "TRANSFERENCIA" },
+        { label: "Cheque", value: "CHEQUE" },
+        {
+          label: "Débito Automático tarjeta crédito",
+          value: "DEBITO_AUTOMATICO_TARJETA_CREDITO",
+        },
       ],
     },
     { name: "descripcion", label: "Descripción", type: "text" },
@@ -247,6 +271,7 @@ const IngresosPorReparacionPage = () => {
           model: "",
         },
       },
+      tipoOperacion: "EFECTIVO",
     };
   };
 
@@ -336,6 +361,18 @@ const IngresosPorReparacionPage = () => {
           ordenReparacionId: yup
             .number()
             .required("La orden de reparación es requerida"),
+          tipoOperacion: yup
+            .string()
+            .oneOf(
+              [
+                "EFECTIVO",
+                "TRANSFERENCIA",
+                "CHEQUE",
+                "DEBITO_AUTOMATICO_TARJETA_CREDITO",
+              ],
+              "Tipo de extracción inválido"
+            )
+            .required("El tipo de extracción es requerido"),
         })}
       />
       <Modal

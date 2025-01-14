@@ -210,7 +210,7 @@ model Extraccion {
   fecha          DateTime       @default(now())
   usuarioId      Int
   motivo         String         @db.VarChar(150)
-  tipoExtraccion TipoExtraccion @default(EFECTIVO)
+  tipoExtraccion TipoOperacion @default(EFECTIVO)
   moneda         Moneda         @default(Peso)
   dolarId        Int?
   dolar          Dolar?         @relation(fields: [dolarId], references: [id])
@@ -232,7 +232,7 @@ model Gasto {
   proveedorId Int?
   moneda      Moneda         @default(Peso)
   dolarId     Int?
-  tipo        TipoExtraccion @default(EFECTIVO)
+  tipo        TipoOperacion @default(EFECTIVO)
   categoria   CategoriaGasto @relation(fields: [categoriaId], references: [id])
   dolar       Dolar?         @relation(fields: [dolarId], references: [id])
   mecanico    Empleado?      @relation(fields: [mecanicoId], references: [id])
@@ -430,6 +430,7 @@ model IngresoPorReparacion {
   cliente           Cliente         @relation(fields: [clienteId], references: [id])
   dolar             Dolar?          @relation(fields: [dolarId], references: [id])
   ordenReparacion   OrdenReparacion @relation("OrdenReparacionIngresos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
+  tipoOperacion TipoOperacion @default(EFECTIVO)
 
   @@index([fecha])
   @@index([clienteId])
@@ -523,7 +524,7 @@ model IngresoManualDeDinero {
   descripcion    String?        @db.Text
   moneda         Moneda         @default(Peso)
   dolarId        Int?
-  tipoExtraccion TipoExtraccion @default(EFECTIVO)
+  tipoExtraccion TipoOperacion @default(EFECTIVO)
   usuarioId      Int
   dolar          Dolar?         @relation(fields: [dolarId], references: [id])
   usuario        Usuario        @relation(fields: [usuarioId], references: [id])
@@ -537,7 +538,7 @@ enum TipoEmpleado {
   Administrativo
 }
 
-enum TipoExtraccion {
+enum TipoOperacion {
   EFECTIVO
   TRANSFERENCIA
   CHEQUE
