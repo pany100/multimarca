@@ -197,7 +197,7 @@ const IngresosPorReparacionPage = () => {
           return;
         }
         const response = await authFetch(
-          `/api/clientes/${value}/orden-reparacion?limit=10&page=0`
+          `/api/clientes/${value}/orden-reparacion?soloConDeuda=true&limit=10&page=0`
         );
         const data = await response.json();
         setOptions(
@@ -357,7 +357,10 @@ const IngresosPorReparacionPage = () => {
             .positive("El monto debe ser positivo"),
           moneda: yup.string().required("La moneda es requerida"),
           descripcion: yup.string().required("La descripción es requerida"),
-          clienteId: yup.number().required("El cliente es requerido"),
+          clienteId: yup
+            .number()
+            .typeError("Debe selecionar un cliente de la lista")
+            .required("El cliente es requerido"),
           ordenReparacionId: yup
             .number()
             .required("La orden de reparación es requerida"),

@@ -246,14 +246,24 @@ function DynamicForm<T extends FieldValues>({
               }
               label={field.label}
             >
-              {(typeof field.options === "function"
-                ? field.options(item)
-                : field.options
-              )?.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
+              {!(
+                typeof field.options === "function"
+                  ? field.options(item)
+                  : field.options
+              )?.length ? (
+                <MenuItem disabled value="">
+                  No hay opciones disponibles
                 </MenuItem>
-              ))}
+              ) : (
+                (typeof field.options === "function"
+                  ? field.options(item)
+                  : field.options
+                )?.map((option) => (
+                  <MenuItem key={option.value} value={option.value}>
+                    {option.label}
+                  </MenuItem>
+                ))
+              )}
             </Select>
             <FormHelperText>
               {errors[field.name as Path<T>]?.message as string}
