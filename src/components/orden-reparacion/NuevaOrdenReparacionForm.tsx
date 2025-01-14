@@ -48,6 +48,7 @@ const schema = yup.object().shape({
     yup.object().shape({
       id: yup.number().required(),
       name: yup.string().required(),
+      detalle: yup.string().nullable(),
     })
   ),
   repuestosUsados: yup.array().of(

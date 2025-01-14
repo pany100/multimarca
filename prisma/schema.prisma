@@ -153,6 +153,7 @@ model OrdenReparacionMecanico {
   mecanicoId        Int
   mecanico          Empleado        @relation(fields: [mecanicoId], references: [id], onDelete: Cascade)
   ordenReparacion   OrdenReparacion @relation(fields: [ordenReparacionId], references: [id], onDelete: Cascade)
+  detalle           String?         @db.Text
 
   @@id([ordenReparacionId, mecanicoId])
   @@index([mecanicoId], map: "OrdenReparacionMecanico_mecanicoId_fkey")

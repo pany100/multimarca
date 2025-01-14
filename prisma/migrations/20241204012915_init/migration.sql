@@ -204,7 +204,7 @@ CREATE TABLE `Extraccion` (
     `fecha` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `usuarioId` INTEGER NOT NULL,
     `motivo` VARCHAR(150) NOT NULL,
-    `tipoExtraccion` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE', 'DEBITO_AUTOMATICO_TARJETA_CREDITO') NOT NULL,
+    `tipoExtraccion` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE', 'DEBITO_AUTOMATICO_TARJETA_CREDITO') NOT NULL DEFAULT 'EFECTIVO',
     `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
     `dolarId` INTEGER NULL,
 
@@ -225,8 +225,8 @@ CREATE TABLE `Gasto` (
     `detalle` TEXT NULL,
     `proveedorId` INTEGER NULL,
     `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
-    `tipo` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE', 'DEBITO_AUTOMATICO_TARJETA_CREDITO') NOT NULL DEFAULT 'EFECTIVO',
     `dolarId` INTEGER NULL,
+    `tipo` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE', 'DEBITO_AUTOMATICO_TARJETA_CREDITO') NOT NULL DEFAULT 'EFECTIVO',
 
     INDEX `Gasto_categoriaId_idx`(`categoriaId`),
     INDEX `Gasto_mecanicoId_idx`(`mecanicoId`),
@@ -298,12 +298,12 @@ CREATE TABLE `OrdenReparacion` (
     `observacionesCliente` TEXT NOT NULL,
     `observacionesEntrada` TEXT NOT NULL,
     `observacionesSalida` TEXT NOT NULL,
-    `detalleControles` TEXT NULL,
     `estado` ENUM('Presupuestado', 'EnProgreso', 'Aceptado', 'Terminado') NOT NULL DEFAULT 'Presupuestado',
     `pdfPath` VARCHAR(255) NULL,
     `descuento` DECIMAL(10, 2) NOT NULL DEFAULT 0.00,
-    `descripcionDescuento` VARCHAR(255) NULL,
     `dolarId` INTEGER NULL,
+    `detalleControles` TEXT NULL,
+    `descripcionDescuento` VARCHAR(255) NULL,
 
     INDEX `OrdenReparacion_autoId_idx`(`autoId`),
     INDEX `OrdenReparacion_fechaCreacion_idx`(`fechaCreacion`),
@@ -500,7 +500,7 @@ CREATE TABLE `IngresoManualDeDinero` (
     `descripcion` TEXT NULL,
     `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
     `dolarId` INTEGER NULL,
-    `tipoExtraccion` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE', 'DEBITO_AUTOMATICO_TARJETA_CREDITO') NOT NULL,
+    `tipoExtraccion` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE', 'DEBITO_AUTOMATICO_TARJETA_CREDITO') NOT NULL DEFAULT 'EFECTIVO',
     `usuarioId` INTEGER NOT NULL,
 
     INDEX `IngresoManualDeDinero_usuarioId_idx`(`usuarioId`),

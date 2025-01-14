@@ -30,6 +30,12 @@ function MecanicoFormSection() {
     severity: "success",
   });
   const [openMecanicoModal, setOpenMecanicoModal] = useState(false);
+  const [detalle, setDetalle] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedMecanico, setEditedMecanico] = useState<{
+    id: number;
+    name: string;
+  } | null>(null);
   const [selectedMecanico, setSelectedMecanico] = useState<{
     id: number;
     name: string;
@@ -52,6 +58,29 @@ function MecanicoFormSection() {
     );
   };
 
+  const handleEditMecanico = () => {
+    if (selectedMecanico) {
+      const currentMecanicos = getValues("mecanicos") || [];
+      const mecanicoBeingEdited = currentMecanicos.find(
+        (m: { id: number }) => m.id === selectedMecanico.id
+      );
+      if (!mecanicoBeingEdited) {
+        handleAddMecanico();
+
+        if (editedMecanico) {
+          handleRemoveMecanico(editedMecanico.id);
+        }
+      } else {
+        mecanicoBeingEdited.detalle = detalle;
+        setValue("mecanicos", currentMecanicos);
+        setOpenMecanicoModal(false);
+        setSelectedMecanico(null);
+        setDetalle("");
+      }
+    }
+    setEditedMecanico(null);
+  };
+
   const handleAddMecanico = () => {
     if (selectedMecanico) {
       const currentMecanicos = getValues("mecanicos") || [];
@@ -60,7 +89,10 @@ function MecanicoFormSection() {
           (m: { id: number }) => m.id === selectedMecanico.id
         )
       ) {
-        setValue("mecanicos", [...currentMecanicos, selectedMecanico]);
+        setValue("mecanicos", [
+          ...currentMecanicos,
+          { id: selectedMecanico.id, name: selectedMecanico.name, detalle },
+        ]);
         setOpenMecanicoModal(false);
         setSelectedMecanico(null);
       } else {
@@ -98,24 +130,52 @@ function MecanicoFormSection() {
                 <TableHead>
                   <TableRow>
                     <TableCell>Mecánico</TableCell>
+                    <TableCell>Detalle</TableCell>
                     <TableCell>Acciones</TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {field.value.map((mecanico: { id: number; name: string }) => (
-                    <TableRow key={mecanico.id}>
-                      <TableCell>{mecanico.name}</TableCell>
-                      <TableCell>
-                        <Button
-                          onClick={() => {
-                            handleRemoveMecanico(mecanico.id);
-                          }}
-                        >
-                          Eliminar
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
+                  {field.value.map(
+                    (mecanico: {
+                      id: number;
+                      name: string;
+                      detalle: string;
+                    }) => (
+                      <TableRow key={mecanico.id}>
+                        <TableCell>{mecanico.name}</TableCell>
+                        <TableCell>{mecanico.detalle || "-"}</TableCell>
+                        <TableCell>
+                          <Box
+                            display="flex"
+                            flexDirection="column"
+                            sx={{ textAlign: "left" }}
+                          >
+                            <Button
+                              onClick={() => {
+                                handleRemoveMecanico(mecanico.id);
+                              }}
+                            >
+                              Eliminar
+                            </Button>
+                            <Button
+                              onClick={() => {
+                                setEditedMecanico(mecanico);
+                                setSelectedMecanico({
+                                  id: mecanico.id,
+                                  name: mecanico.name,
+                                });
+                                setDetalle(mecanico.detalle || "");
+                                setOpenMecanicoModal(true);
+                                setIsEditing(true);
+                              }}
+                            >
+                              Editar
+                            </Button>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    )
+                  )}
                 </TableBody>
               </Table>
             ) : (
@@ -160,6 +220,15 @@ function MecanicoFormSection() {
             }}
             sx={{ mt: 2 }}
           />
+          <TextField
+            label="Detalle"
+            value={detalle}
+            onChange={(e) => setDetalle(e.target.value)}
+            multiline
+            fullWidth
+            rows={2}
+            sx={{ mt: 2 }}
+          />
         </DialogContent>
         <DialogActions>
           <Button
@@ -167,16 +236,19 @@ function MecanicoFormSection() {
             onClick={() => {
               setOpenMecanicoModal(false);
               setSelectedMecanico(null);
+              setDetalle("");
             }}
           >
             Cancelar
           </Button>
           <Button
             type="button"
-            onClick={handleAddMecanico}
+            onClick={() => {
+              isEditing ? handleEditMecanico() : handleAddMecanico();
+            }}
             disabled={!selectedMecanico}
           >
-            Agregar
+            {isEditing ? "Actualizar" : "Agregar"}
           </Button>
         </DialogActions>
       </Dialog>

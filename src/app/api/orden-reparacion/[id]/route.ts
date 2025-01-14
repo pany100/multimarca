@@ -58,9 +58,13 @@ export async function GET(
     }
     const { mecanicos, ...ordenReparacionWithoutMecanicos } = ordenReparacion;
     const mecanicosWithoutMecanico = mecanicos.map(
-      (el: { mecanico: { id: number; name: string } }) => ({
+      (el: {
+        mecanico: { id: number; name: string };
+        detalle: string | null;
+      }) => ({
         id: el.mecanico.id,
         name: el.mecanico.name,
+        detalle: el.detalle,
       })
     );
 
@@ -249,6 +253,7 @@ export async function PUT(
 
     const mecanicosToPersist = mecanicos.map((mecanico: any) => ({
       mecanicoId: mecanico.id,
+      detalle: mecanico.detalle,
     }));
 
     const pdfFile = formData.get("pdfPath") as File | null;

@@ -25,7 +25,6 @@ import PrintIcon from "@mui/icons-material/Print";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import {
   Alert,
-  Avatar,
   Box,
   Button,
   Checkbox,
@@ -556,17 +555,26 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
           Mecánicos Asignados
         </Typography>
         <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
-          {ordenReparacion.mecanicos.map(
-            (mecanico: { id: string; name: string }) => (
-              <Chip
-                key={mecanico.id}
-                avatar={<Avatar alt={mecanico.name} />}
-                label={mecanico.name}
-                variant="outlined"
-                sx={{ m: 0.5 }}
-              />
-            )
-          )}
+          <List>
+            {ordenReparacion.mecanicos.map(
+              (mecanico: {
+                id: string;
+                name: string;
+                detalle: string | null;
+              }) => (
+                <ListItem key={mecanico.id}>
+                  <Typography variant="body1" sx={{ fontWeight: "bold" }}>
+                    • {mecanico.name}
+                  </Typography>
+                  {mecanico.detalle && (
+                    <Typography key={mecanico.id} variant="body1">
+                      : {mecanico.detalle}
+                    </Typography>
+                  )}
+                </ListItem>
+              )
+            )}
+          </List>
         </Box>
         <Divider sx={{ my: 2 }} />
         <Typography variant="h6" gutterBottom>
