@@ -209,7 +209,7 @@ model Extraccion {
   fecha          DateTime       @default(now())
   usuarioId      Int
   motivo         String         @db.VarChar(150)
-  tipoExtraccion TipoExtraccion
+  tipoExtraccion TipoExtraccion @default(EFECTIVO)
   moneda         Moneda         @default(Peso)
   dolarId        Int?
   dolar          Dolar?         @relation(fields: [dolarId], references: [id])
@@ -230,8 +230,8 @@ model Gasto {
   detalle     String?        @db.Text
   proveedorId Int?
   moneda      Moneda         @default(Peso)
-  tipo        TipoExtraccion @default(EFECTIVO)
   dolarId     Int?
+  tipo        TipoExtraccion @default(EFECTIVO)
   categoria   CategoriaGasto @relation(fields: [categoriaId], references: [id])
   dolar       Dolar?         @relation(fields: [dolarId], references: [id])
   mecanico    Empleado?      @relation(fields: [mecanicoId], references: [id])
@@ -303,12 +303,12 @@ model OrdenReparacion {
   observacionesCliente   String                    @db.Text
   observacionesEntrada   String                    @db.Text
   observacionesSalida    String                    @db.Text
-  detalleControles       String?                    @db.Text
   estado                 EstadoOrdenReparacion     @default(Presupuestado)
   pdfPath                String?                   @db.VarChar(255)
   descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
-  descripcionDescuento   String?                   @db.VarChar(255)
   dolarId                Int?
+  detalleControles       String?                   @db.Text
+  descripcionDescuento   String?                   @db.VarChar(255)
   controlesEnReparacion  ControlEnReparacion[]     @relation("OrdenReparacionControlesEnReparacion")
   ingresos               IngresoPorReparacion[]    @relation("OrdenReparacionIngresos")
   notificacionesInternas NotificacionInterna[]     @relation("OrdenReparacionNotificacionesInternas")
@@ -355,11 +355,11 @@ model ReparacionDeTercero {
   ordenReparacionId      Int?
   plantillaPresupuestoId Int?
   borradorId             Int?
+  recibo                 String?               @db.VarChar(255)
   borrador               Borrador?             @relation("BorradorReparacionTercero", fields: [borradorId], references: [id], onDelete: Cascade)
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionReparacionTercero", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoReparacionTercero", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   proveedor              Proveedor             @relation(fields: [proveedorId], references: [id])
-  recibo                 String?               @db.VarChar(255)
 
   @@index([nombre])
   @@index([proveedorId])
@@ -522,7 +522,7 @@ model IngresoManualDeDinero {
   descripcion    String?        @db.Text
   moneda         Moneda         @default(Peso)
   dolarId        Int?
-  tipoExtraccion TipoExtraccion
+  tipoExtraccion TipoExtraccion @default(EFECTIVO)
   usuarioId      Int
   dolar          Dolar?         @relation(fields: [dolarId], references: [id])
   usuario        Usuario        @relation(fields: [usuarioId], references: [id])
