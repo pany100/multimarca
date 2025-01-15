@@ -59,6 +59,10 @@ const GastosPage = () => {
       field: "tipo",
       headerName: "Tipo",
       flex: 1,
+      renderCell: (params: any) =>
+        params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO"
+          ? "DEBITO AUTOMATICO"
+          : params.value,
     },
     { field: "detalle", headerName: "Detalle", flex: 1.5 },
     {

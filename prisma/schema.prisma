@@ -264,6 +264,7 @@ model Venta {
   cliente   Cliente?    @relation(fields: [clienteId], references: [id])
   dolar     Dolar?      @relation(fields: [dolarId], references: [id])
   items     VentaItem[] @relation("VentaToItems")
+  tipoOperacion TipoOperacion @default(EFECTIVO)
 
   @@index([clienteId])
   @@index([fecha])

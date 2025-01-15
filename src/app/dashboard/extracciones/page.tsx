@@ -81,7 +81,15 @@ const ExtraccionesPage = () => {
       renderCell: (value: any) => value.value.fullName,
     },
     { field: "motivo", headerName: "Descripción", width: 250 },
-    { field: "tipoExtraccion", headerName: "Tipo de Extracción", width: 180 },
+    {
+      field: "tipoExtraccion",
+      headerName: "Tipo de Extracción",
+      width: 180,
+      renderCell: (params: any) =>
+        params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO"
+          ? "DEBITO AUTOMATICO"
+          : params.value,
+    },
   ];
 
   const formFields: FieldConfig[] = [

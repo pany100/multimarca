@@ -91,6 +91,10 @@ const IngresosPorReparacionPage = () => {
       field: "tipoOperacion",
       headerName: "Tipo de Ingreso",
       flex: 1,
+      renderCell: (params: any) =>
+        params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO"
+          ? "DEBITO AUTOMATICO"
+          : params.value,
     },
     { field: "descripcion", headerName: "Descripción", flex: 2 },
     {

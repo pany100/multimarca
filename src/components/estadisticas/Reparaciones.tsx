@@ -82,7 +82,7 @@ const Reparaciones = () => {
       },
       title: {
         display: true,
-        text: "Estadísticas de Reparaciones por Cliente",
+        text: "Reparaciones por Cliente",
         font: {
           size: 20,
         },

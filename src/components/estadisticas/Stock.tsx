@@ -80,7 +80,7 @@ const Stock = () => {
       },
       title: {
         display: true,
-        text: "Estadísticas de Stock más Rentable",
+        text: "Stock más Rentable",
         font: {
           size: 20,
         },

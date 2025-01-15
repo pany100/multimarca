@@ -74,7 +74,7 @@ const Extracciones = () => {
       },
       title: {
         display: true,
-        text: "Estadísticas de Extracciones por Usuario",
+        text: "Extracciones por Usuario",
         font: {
           size: 20,
         },

@@ -74,7 +74,7 @@ const GastoEmpleados = () => {
       },
       title: {
         display: true,
-        text: "Estadísticas de Gastos por Empleado",
+        text: "Gastos por Empleado",
         font: {
           size: 20,
         },

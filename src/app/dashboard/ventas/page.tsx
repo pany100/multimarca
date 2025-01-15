@@ -43,6 +43,11 @@ interface Venta {
       price: number;
     };
   }>;
+  tipoOperacion:
+    | "EFECTIVO"
+    | "TRANSFERENCIA"
+    | "CHEQUE"
+    | "DEBITO_AUTOMATICO_TARJETA_CREDITO";
 }
 
 const VentasPage = () => {
@@ -83,6 +88,15 @@ const VentasPage = () => {
           size="small"
         />
       ),
+    },
+    {
+      field: "tipoOperacion",
+      headerName: "Tipo de Operación",
+      width: 180,
+      renderCell: (params: any) =>
+        params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO"
+          ? "DEBITO AUTOMATICO"
+          : params.value,
     },
     {
       field: "total",
@@ -316,6 +330,20 @@ const VentasPage = () => {
         xs: 12,
       },
     },
+    {
+      name: "tipoOperacion",
+      label: "Tipo de Operación",
+      type: "select",
+      options: [
+        { label: "Efectivo", value: "EFECTIVO" },
+        { label: "Transferencia", value: "TRANSFERENCIA" },
+        { label: "Cheque", value: "CHEQUE" },
+        {
+          label: "Débito Automático tarjeta crédito",
+          value: "DEBITO_AUTOMATICO_TARJETA_CREDITO",
+        },
+      ],
+    },
   ];
 
   const createNewVenta = (): Venta => {
@@ -329,6 +357,7 @@ const VentasPage = () => {
         fullName: "",
       },
       items: [],
+      tipoOperacion: "EFECTIVO",
     };
   };
 
@@ -345,6 +374,18 @@ const VentasPage = () => {
         total: yup.number().required("El total es requerido"),
         clienteId: yup.number().required("El cliente es requerido"),
         items: yup.array().min(1, "Debe agregar al menos un item"),
+        tipoOperacion: yup
+          .string()
+          .oneOf(
+            [
+              "EFECTIVO",
+              "TRANSFERENCIA",
+              "CHEQUE",
+              "DEBITO_AUTOMATICO_TARJETA_CREDITO",
+            ],
+            "Tipo de extracción inválido"
+          )
+          .required("El tipo de extracción es requerido"),
       })}
     />
   );

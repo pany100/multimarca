@@ -71,7 +71,7 @@ const Gastos = () => {
       },
       title: {
         display: true,
-        text: "Estadísticas de Gastos por Categoría",
+        text: "Gastos por Categoría",
         font: {
           size: 20,
         },

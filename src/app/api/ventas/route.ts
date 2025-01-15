@@ -53,7 +53,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { clienteId, items, total, moneda, fecha } = body;
+    const { clienteId, items, total, moneda, fecha, tipoOperacion } = body;
 
     // Verificar stock suficiente antes de crear la venta
     for (const item of items) {
@@ -98,6 +98,7 @@ export async function POST(request: Request) {
             cantidad: item.cantidad,
           })),
         },
+        tipoOperacion,
       },
       include: {
         cliente: true,

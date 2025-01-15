@@ -79,7 +79,7 @@ const Ventas = () => {
       },
       title: {
         display: true,
-        text: "Estadísticas de Ventas por Cliente",
+        text: "Ventas por Cliente",
         font: {
           size: 20,
         },

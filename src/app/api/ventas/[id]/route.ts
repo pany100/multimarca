@@ -10,7 +10,7 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { clienteId, items, moneda, total, fecha } = body;
+    const { clienteId, items, moneda, total, fecha, tipoOperacion } = body;
 
     if (!clienteId || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -111,6 +111,7 @@ export async function PUT(
           moneda,
           dolarId: dolar?.id,
           fecha,
+          tipoOperacion,
           items: {
             deleteMany: {},
             create: items.map((item) => ({

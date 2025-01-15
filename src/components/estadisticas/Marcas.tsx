@@ -70,7 +70,7 @@ const Marcas = () => {
       },
       title: {
         display: true,
-        text: "Estadísticas de Marcas más Atendidas",
+        text: "Marcas más Atendidas",
         font: {
           size: 20,
         },
