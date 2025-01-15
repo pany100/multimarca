@@ -94,10 +94,22 @@ const VentasPage = () => {
       field: "tipoOperacion",
       headerName: "Tipo de Operación",
       width: 180,
-      renderCell: (params: any) =>
-        params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO"
-          ? "DEBITO AUTOMATICO"
-          : params.value,
+      renderCell: (params: any) => {
+        if (params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO") {
+          return "DEBITO AUTOMATICO";
+        }
+        if (params.value === "CHEQUE") {
+          return (
+            <a
+              href={`/dashboard/cheques/${params.row.chequeId}`}
+              style={{ textDecoration: "underline" }}
+            >
+              CHEQUE
+            </a>
+          );
+        }
+        return params.value;
+      },
     },
     {
       field: "total",

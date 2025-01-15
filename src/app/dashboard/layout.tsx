@@ -8,6 +8,8 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import LockIcon from "@mui/icons-material/Lock";
 import MenuIcon from "@mui/icons-material/Menu";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+
 import {
   AppBar,
   Badge,
@@ -293,9 +295,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         title: "Finanzas",
         items: [
           {
-            permiso: "IngresoDinero",
+            permiso: "Cheques",
             texto: "Cheques",
-            icono: <AccountBalanceIcon />,
+            icono: <ReceiptLongIcon />,
             ruta: "/dashboard/cheques",
           },
           {

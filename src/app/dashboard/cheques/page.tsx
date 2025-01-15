@@ -24,7 +24,10 @@ const ChequesPage = () => {
       flex: 1,
       renderCell: (params) => {
         return (
-          <Link href={`/dashboard/cheques/${params.row.id}`}>
+          <Link
+            href={`/dashboard/cheques/${params.row.id}`}
+            style={{ textDecoration: "underline" }}
+          >
             {params.row.id.toString()}
           </Link>
         );
