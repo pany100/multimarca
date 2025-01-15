@@ -36,7 +36,7 @@ export async function PUT(
         patent: patent.toUpperCase(),
         model: model.toUpperCase(),
         brand: brand.toUpperCase(),
-        color,
+        color: color.toUpperCase(),
         year: year ? parseInt(year, 10) : null,
         kms: kms ? parseInt(kms, 10) : null,
         valves: valves ? parseInt(valves, 10) : null,

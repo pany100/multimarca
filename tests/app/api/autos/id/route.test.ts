@@ -34,8 +34,8 @@ describe("PUT /api/autos/[id]", () => {
       expect(args.data).toEqual(
         expect.objectContaining({
           patent: "XYZ789",
-          brand: "Honda",
-          model: "Civic",
+          brand: "HONDA",
+          model: "CIVIC",
         })
       );
       return Promise.resolve(autoActualizado);
@@ -46,10 +46,15 @@ describe("PUT /api/autos/[id]", () => {
         patent: "XYZ789",
         brand: "Honda",
         model: "Civic",
+        chassis_number: "123456",
+        engine_number: "654321",
+        color: "red",
       }),
     };
 
-    const mockParams = { id: "1" };
+    const mockParams = {
+      id: "1",
+    };
 
     const response = await PUT(mockRequest as any, { params: mockParams });
     const responseBody = await response.json();
@@ -61,8 +66,11 @@ describe("PUT /api/autos/[id]", () => {
       where: { id: 1 },
       data: expect.objectContaining({
         patent: "XYZ789",
-        brand: "Honda",
-        model: "Civic",
+        brand: "HONDA",
+        model: "CIVIC",
+        chassis_number: "123456",
+        engine_number: "654321",
+        color: "RED",
       }),
       include: { owner: true },
     });
