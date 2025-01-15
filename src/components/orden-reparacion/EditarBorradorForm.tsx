@@ -103,7 +103,6 @@ const schema = yup.object().shape({
         .required("El proveedor es requerido"),
     })
   ),
-  manoDeObra: yup.number().required("El monto total es requerido"),
   observacionesEntrada: yup.string(),
   descuento: yup.number().min(0),
   esBorrador: yup.boolean(),
@@ -245,7 +244,6 @@ const EditarBorradorForm = ({ borrador }: Props) => {
     descuento: Number(descuento) || 0,
   });
   const esBorrador = watch("esBorrador") || false;
-  console.log(esBorrador);
   const onSubmit = async (data: any) => {
     try {
       const endpoint = data.esBorrador

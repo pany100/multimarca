@@ -1,3 +1,8 @@
+import {
+  prepareReparacionesDeTerceroToPersist,
+  prepareRepuestosToPersist,
+  prepareTrabajosRealizadosToPersist,
+} from "@/utils/ordenPersistHelper";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 export async function GET(
@@ -58,12 +63,43 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
     const body = await request.json();
+    const {
+      autoId,
+      descuento,
+      fechaCreacion,
+      id,
+      observacionesCliente,
+      repuestosUsados = [],
+      reparacionesDeTercero = [],
+      trabajosRealizados = [],
+    } = body;
 
+    const repuestosUsadosToPersist = prepareRepuestosToPersist(repuestosUsados);
+    const reparacionesDeTerceroToPersist =
+      await prepareReparacionesDeTerceroToPersist(reparacionesDeTercero);
+    const trabajosRealizadosToPersist =
+      prepareTrabajosRealizadosToPersist(trabajosRealizados);
     const borradorActualizado = await prisma.borrador.update({
       where: { id },
-      data: body,
+      data: {
+        autoId,
+        descuento,
+        fechaCreacion,
+        observacionesCliente,
+        repuestosUsados: {
+          deleteMany: {},
+          create: repuestosUsadosToPersist,
+        },
+        reparacionesDeTercero: {
+          deleteMany: {},
+          create: reparacionesDeTerceroToPersist,
+        },
+        trabajosRealizados: {
+          deleteMany: {},
+          create: trabajosRealizadosToPersist,
+        },
+      },
       include: {
         auto: {
           include: {

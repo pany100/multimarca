@@ -175,7 +175,7 @@ function ReparacionesTercerosFormSection({
                     <TableCell>Descripción</TableCell>
                     <TableCell>Precio Compra</TableCell>
                     <TableCell>Precio Venta</TableCell>
-                    <TableCell>Recibo</TableCell>
+                    {!esBorrador && <TableCell>Recibo</TableCell>}
                     <TableCell>Acciones</TableCell>
                   </TableRow>
                 </TableHead>
@@ -190,15 +190,17 @@ function ReparacionesTercerosFormSection({
                       <TableCell>
                         {getFormattedPrice(reparacion.precioVenta)}
                       </TableCell>
-                      <TableCell>
-                        {reparacion.recibo && (
-                          <Link href={reparacion.recibo} target="_blank">
-                            <Button size="small" color="primary">
-                              Ver recibo
-                            </Button>
-                          </Link>
-                        )}
-                      </TableCell>
+                      {!esBorrador && (
+                        <TableCell>
+                          {reparacion.recibo && (
+                            <Link href={reparacion.recibo} target="_blank">
+                              <Button size="small" color="primary">
+                                Ver recibo
+                              </Button>
+                            </Link>
+                          )}
+                        </TableCell>
+                      )}
                       <TableCell>
                         <Button
                           onClick={() => handleEditReparacion(reparacion)}
@@ -288,7 +290,9 @@ function ReparacionesTercerosFormSection({
             fullWidth
             margin="normal"
           />
-          <ImageInput label="Recibo" image={recibo} setImage={setRecibo} />
+          {!esBorrador && (
+            <ImageInput label="Recibo" image={recibo} setImage={setRecibo} />
+          )}
         </DialogContent>
         <DialogActions>
           <Button

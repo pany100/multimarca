@@ -82,13 +82,12 @@ function TrabajosRealizadosFormSection({
     };
 
     if (editingTrabajoId) {
-      const updatedTrabajos = currentTrabajos.map((t: any) =>
-        t.id === editingTrabajoId ||
-        `${selectedTrabajo?.id || "otros"}-${t.manoDeObra.name}` ===
-          editingTrabajoId
+      const updatedTrabajos = currentTrabajos.map((t: any) => {
+        return t.id === editingTrabajoId ||
+          `otros-${t.manoDeObra.name}` === editingTrabajoId
           ? newTrabajo
-          : t
-      );
+          : t;
+      });
       setValue("trabajosRealizados", updatedTrabajos);
       setSnackbar({
         open: true,
