@@ -25,6 +25,7 @@ import {
   useForm,
 } from "react-hook-form";
 import * as yup from "yup";
+import ChequeForm from "./ChequeForm";
 
 export interface FieldConfig {
   name: string;
@@ -40,6 +41,7 @@ export interface FieldConfig {
     | "autocomplete"
     | "tel"
     | "textarea"
+    | "cheque"
     | "custom";
   options?:
     | Record<string, string | number>[]
@@ -64,6 +66,7 @@ export interface FieldConfig {
     lg?: number;
     xl?: number;
   };
+  sourceField?: string;
 }
 
 interface DynamicFormProps<T> {
@@ -101,6 +104,11 @@ function DynamicForm<T extends FieldValues>({
 
   const handleFieldChange = (field: keyof T, value: any) => {
     handleChange(field, value);
+    setValue(field as Path<T>, value, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
     const fieldConfig = fields.find((f) => f.name === field);
     if (fieldConfig?.onChange) {
       fieldConfig.onChange(value, setValue);
@@ -419,6 +427,20 @@ function DynamicForm<T extends FieldValues>({
             onChange={(e) =>
               handleFieldChange(field.name as keyof T, e.target.value)
             }
+          />
+        );
+      case "cheque":
+        if (!field.sourceField) {
+          return null;
+        }
+        return (
+          <ChequeForm
+            item={item}
+            sourceField={field.sourceField}
+            watch={watch}
+            handleFieldChange={handleFieldChange}
+            register={register}
+            errors={errors}
           />
         );
       default:

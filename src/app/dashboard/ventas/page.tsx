@@ -344,6 +344,12 @@ const VentasPage = () => {
         },
       ],
     },
+    {
+      type: "cheque",
+      sourceField: "tipoOperacion",
+      name: "cheque",
+      label: "Cheque",
+    },
   ];
 
   const createNewVenta = (): Venta => {

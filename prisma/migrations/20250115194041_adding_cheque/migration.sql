@@ -1,0 +1,14 @@
+-- CreateTable
+CREATE TABLE `Cheque` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `numero` VARCHAR(255) NOT NULL,
+    `fechaEmision` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `fechaCobro` DATETIME(3) NOT NULL,
+    `banco` VARCHAR(255) NOT NULL,
+    `monto` DECIMAL(10, 2) NOT NULL,
+    `owner` VARCHAR(255) NOT NULL,
+    `operacionCheque` ENUM('VENTA', 'GASTO', 'INGRESO_MANUAL', 'EXTRACCION', 'INGRESO_REPARACION') NOT NULL,
+    `operacionId` INTEGER NOT NULL,
+
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

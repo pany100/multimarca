@@ -534,6 +534,19 @@ model IngresoManualDeDinero {
   @@index([dolarId], map: "IngresoManualDeDinero_dolarId_fkey")
 }
 
+model Cheque {
+  id Int @id @default(autoincrement())
+  numero String @db.VarChar(255)
+  fechaEmision DateTime @default(now())
+  fechaCobro  DateTime
+  banco String @db.VarChar(255)
+  monto Decimal @db.Decimal(10, 2)
+  owner String @db.VarChar(255)
+
+  operacionCheque OperacionCheque
+  operacionId Int
+}
+
 enum TipoEmpleado {
   Mecanico
   Administrativo
@@ -566,4 +579,12 @@ enum EstadoConversacion {
 enum Moneda {
   Dolar
   Peso
+}
+
+enum OperacionCheque {
+  VENTA
+  GASTO
+  INGRESO_MANUAL
+  EXTRACCION
+  INGRESO_REPARACION
 }
