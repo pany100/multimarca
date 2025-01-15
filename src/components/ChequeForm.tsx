@@ -142,13 +142,13 @@ function ChequeForm({
           <TextField
             fullWidth
             margin="normal"
-            label="Monto"
-            {...register("monto")}
-            error={!!errors["monto"]}
-            helperText={errors["monto"]?.message as string}
+            label="importe"
+            {...register("importe")}
+            error={!!errors["importe"]}
+            helperText={errors["importe"]?.message as string}
             type="number"
-            value={item?.["monto"] || ""}
-            onChange={(e) => handleFieldChange("monto", e.target.value)}
+            value={item?.["importe"] || ""}
+            onChange={(e) => handleFieldChange("importe", e.target.value)}
           />
         </Grid>
         <Grid item xs={12} md={6}>

@@ -540,7 +540,7 @@ model Cheque {
   fechaEmision DateTime @default(now())
   fechaCobro  DateTime
   banco String @db.VarChar(255)
-  monto Decimal @db.Decimal(10, 2)
+  importe Decimal @db.Decimal(10, 2)
   owner String @db.VarChar(255)
   picturePath String @db.VarChar(255)
 

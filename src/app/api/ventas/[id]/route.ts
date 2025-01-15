@@ -30,7 +30,7 @@ export async function PUT(
       emisor,
       fechaCobro,
       fechaEmision,
-      monto,
+      importe,
       numeroCheque,
       picturePath,
     } = body;
@@ -41,7 +41,7 @@ export async function PUT(
         !emisor ||
         !fechaCobro ||
         !fechaEmision ||
-        !monto ||
+        !importe ||
         !numeroCheque ||
         !picturePath
       ) {
@@ -193,7 +193,7 @@ export async function PUT(
           emisor,
           fechaCobro,
           fechaEmision,
-          monto,
+          importe,
           numeroCheque,
           picturePath,
         },
@@ -245,7 +245,7 @@ export async function PUT(
         emisor: newCheque?.owner,
         fechaCobro: newCheque?.fechaCobro,
         fechaEmision: newCheque?.fechaEmision,
-        monto: newCheque?.monto,
+        importe: newCheque?.importe,
         numeroCheque: newCheque?.numero,
         picturePath: newCheque?.picturePath,
         chequeId: newCheque?.id,

@@ -54,7 +54,7 @@ export async function GET(request: Request) {
             emisor: cheque?.owner,
             fechaCobro: cheque?.fechaCobro,
             fechaEmision: cheque?.fechaEmision,
-            monto: cheque?.monto,
+            importe: cheque?.importe,
             numeroCheque: cheque?.numero,
             picturePath: cheque?.picturePath,
             chequeId: cheque?.id,
@@ -93,7 +93,7 @@ export async function POST(request: Request) {
       emisor,
       fechaCobro,
       fechaEmision,
-      monto,
+      importe,
       numeroCheque,
       picturePath,
     } = body;
@@ -104,7 +104,7 @@ export async function POST(request: Request) {
         !emisor ||
         !fechaCobro ||
         !fechaEmision ||
-        !monto ||
+        !importe ||
         !numeroCheque ||
         !picturePath
       ) {
@@ -176,7 +176,7 @@ export async function POST(request: Request) {
         emisor,
         fechaCobro,
         fechaEmision,
-        monto,
+        importe,
         numeroCheque,
         picturePath,
       },
@@ -223,7 +223,7 @@ export async function POST(request: Request) {
       emisor: newCheque?.owner,
       fechaCobro: newCheque?.fechaCobro,
       fechaEmision: newCheque?.fechaEmision,
-      monto: newCheque?.monto,
+      importe: newCheque?.importe,
       numeroCheque: newCheque?.numero,
       picturePath: newCheque?.picturePath,
       chequeId: newCheque?.id,

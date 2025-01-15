@@ -25,12 +25,12 @@ export const getSchemaPropsForCheque = (baseField: string) => {
       then: (schema) => schema.required("El banco es requerido"),
       otherwise: (schema) => schema.notRequired(),
     }),
-    monto: yup
+    importe: yup
       .number()
-      .typeError("El monto debe ser un número")
+      .typeError("El importe debe ser un número")
       .when(baseField, {
         is: "CHEQUE",
-        then: (schema) => schema.required("El monto es requerido"),
+        then: (schema) => schema.required("El importe es requerido"),
         otherwise: (schema) => schema.notRequired(),
       }),
     emisor: yup.string().when(baseField, {
@@ -51,7 +51,7 @@ type Cheque = {
   emisor: string;
   fechaCobro: Date;
   fechaEmision: Date;
-  monto: number;
+  importe: number;
   numeroCheque: string;
   picturePath: string;
 };
@@ -75,7 +75,7 @@ export const saveCheque = async ({
     emisor,
     fechaCobro,
     fechaEmision,
-    monto,
+    importe,
     numeroCheque,
     picturePath,
   } = cheque;
@@ -90,7 +90,7 @@ export const saveCheque = async ({
         owner: emisor,
         fechaCobro,
         fechaEmision,
-        monto,
+        importe,
         numero: numeroCheque,
         operacionCheque: operacionCheque,
         operacionId: idOperacion,
@@ -145,7 +145,7 @@ export const updateCheque = async ({
         data: {
           fechaCobro: cheque.fechaCobro,
           fechaEmision: cheque.fechaEmision,
-          monto: cheque.monto,
+          importe: cheque.importe,
           banco: cheque.banco,
           owner: cheque.emisor,
           numero: cheque.numeroCheque,
