@@ -41,9 +41,11 @@ function CarHeader({ repair, car, owner }: Props) {
           </Typography>
         </Grid>
         <Grid item xs={6}>
-          <Typography variant="h5" sx={{ color: "common.black" }}>
-            Km: {repair.kilometros?.toLocaleString("es-AR")}
-          </Typography>
+          {repair.estado !== EstadoOrdenReparacion.Presupuestado && (
+            <Typography variant="h5" sx={{ color: "common.black" }}>
+              Km: {repair.kilometros?.toLocaleString("es-AR")}
+            </Typography>
+          )}
         </Grid>
       </Grid>
       <Info>
@@ -75,26 +77,32 @@ function CarHeader({ repair, car, owner }: Props) {
         >
           Teléfono: {owner.phone}
         </Typography>
-        <Typography
-          variant="body1"
-          sx={{ color: "common.black", lineHeight: 1.1 }}
-        >
-          Fecha Ingreso:{" "}
-          {repair.fechaEntradaReparacion
-            ? new Date(repair.fechaEntradaReparacion).toLocaleDateString(
-                "es-AR"
-              )
-            : "-"}
-        </Typography>
-        <Typography
-          variant="body1"
-          sx={{ color: "common.black", lineHeight: 1.1 }}
-        >
-          Fecha Egreso:{" "}
-          {repair.fechaSalidaReparacion
-            ? new Date(repair.fechaSalidaReparacion).toLocaleDateString("es-AR")
-            : "-"}
-        </Typography>
+        {repair.estado !== EstadoOrdenReparacion.Presupuestado && (
+          <>
+            <Typography
+              variant="body1"
+              sx={{ color: "common.black", lineHeight: 1.1 }}
+            >
+              Fecha Ingreso:{" "}
+              {repair.fechaEntradaReparacion
+                ? new Date(repair.fechaEntradaReparacion).toLocaleDateString(
+                    "es-AR"
+                  )
+                : "-"}
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{ color: "common.black", lineHeight: 1.1 }}
+            >
+              Fecha Egreso:{" "}
+              {repair.fechaSalidaReparacion
+                ? new Date(repair.fechaSalidaReparacion).toLocaleDateString(
+                    "es-AR"
+                  )
+                : "-"}
+            </Typography>
+          </>
+        )}
       </Info>
     </div>
   );

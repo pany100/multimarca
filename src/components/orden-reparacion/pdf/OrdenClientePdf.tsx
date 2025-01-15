@@ -54,18 +54,23 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
             {repair.observacionesCliente || "-"}
           </Typography>
           <Divider sx={{ borderColor: "common.black" }} />
-          <Typography
-            variant="body1"
-            sx={{ fontWeight: "bold", color: "common.black" }}
-          >
-            Observaciones del taller
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{ color: "common.black", width: "90%", lineHeight: 1.1 }}
-          >
-            {JSON.parse(repair.observacionesSalida || "[]").join(", ") || "-"}
-          </Typography>
+          {repair.estado !== EstadoOrdenReparacion.Presupuestado && (
+            <>
+              <Typography
+                variant="body1"
+                sx={{ fontWeight: "bold", color: "common.black" }}
+              >
+                Observaciones del taller
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{ color: "common.black", width: "90%", lineHeight: 1.1 }}
+              >
+                {JSON.parse(repair.observacionesSalida || "[]").join(", ") ||
+                  "-"}
+              </Typography>
+            </>
+          )}
           <Divider sx={{ borderColor: "common.black" }} />
           {repair.estado !== EstadoOrdenReparacion.Presupuestado &&
             repair.controlesEnReparacion.filter(
