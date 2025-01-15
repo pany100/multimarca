@@ -34,6 +34,7 @@ import "src/app/globals.css";
 import { useFetch } from "@/contexts/FetchContext";
 import { useSocket } from "@/hooks/useSocket";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+
 import AlarmIcon from "@mui/icons-material/Alarm";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import { default as AttachMoneyIcon } from "@mui/icons-material/AttachMoney";
@@ -291,6 +292,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       {
         title: "Finanzas",
         items: [
+          {
+            permiso: "IngresoDinero",
+            texto: "Cheques",
+            icono: <AccountBalanceIcon />,
+            ruta: "/dashboard/cheques",
+          },
           {
             permiso: "IngresoDinero",
             texto: "Ingreso Manual",
