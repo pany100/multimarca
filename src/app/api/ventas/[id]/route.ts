@@ -1,6 +1,15 @@
 import prisma from "@/lib/prisma";
 import { getIO } from "@/lib/socketio";
-import { TipoNotificacionInterna } from "@prisma/client";
+import {
+  deleteCheque,
+  getChequeForOperation,
+  updateCheque,
+} from "@/utils/chequeUtils";
+import {
+  OperacionCheque,
+  TipoNotificacionInterna,
+  TipoOperacion,
+} from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function PUT(
@@ -10,7 +19,38 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { clienteId, items, moneda, total, fecha, tipoOperacion } = body;
+    const {
+      clienteId,
+      items,
+      moneda,
+      total,
+      fecha,
+      tipoOperacion,
+      banco,
+      emisor,
+      fechaCobro,
+      fechaEmision,
+      monto,
+      numeroCheque,
+      picturePath,
+    } = body;
+
+    if (tipoOperacion === TipoOperacion.CHEQUE) {
+      if (
+        !banco ||
+        !emisor ||
+        !fechaCobro ||
+        !fechaEmision ||
+        !monto ||
+        !numeroCheque ||
+        !picturePath
+      ) {
+        return NextResponse.json(
+          { error: "Faltan datos para la operación de cheque" },
+          { status: 400 }
+        );
+      }
+    }
 
     if (!clienteId || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -147,6 +187,20 @@ export async function PUT(
         });
       }
 
+      const newCheque = await updateCheque({
+        cheque: {
+          banco,
+          emisor,
+          fechaCobro,
+          fechaEmision,
+          monto,
+          numeroCheque,
+          picturePath,
+        },
+        tipoOperacion,
+        operacionCheque: OperacionCheque.VENTA,
+        idOperacion: id,
+      });
       // Actualizar el stock de los nuevos elementos
       for (const item of items) {
         const existiaAntes = ventaActual.items.some(
@@ -185,7 +239,17 @@ export async function PUT(
         }
       }
 
-      return ventaActualizada;
+      return {
+        ...ventaActualizada,
+        banco: newCheque?.banco,
+        emisor: newCheque?.owner,
+        fechaCobro: newCheque?.fechaCobro,
+        fechaEmision: newCheque?.fechaEmision,
+        monto: newCheque?.monto,
+        numeroCheque: newCheque?.numero,
+        picturePath: newCheque?.picturePath,
+        chequeId: newCheque?.id,
+      };
     });
 
     return NextResponse.json(ventaActualizada);
@@ -262,6 +326,10 @@ export async function DELETE(
             io.emit("newNotification");
           }
         }
+      }
+      const cheque = await getChequeForOperation(OperacionCheque.VENTA, id);
+      if (cheque) {
+        await deleteCheque(cheque.id);
       }
 
       // Eliminar la venta

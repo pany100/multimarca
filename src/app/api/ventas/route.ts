@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { getIO } from "@/lib/socketio";
+import { getChequeForOperation, saveCheque } from "@/utils/chequeUtils";
 import {
   OperacionCheque,
   Prisma,
@@ -43,15 +44,20 @@ export async function GET(request: Request) {
     const ventasConCheques = await Promise.all(
       ventas.map(async (venta) => {
         if (venta.tipoOperacion === "CHEQUE") {
-          const cheque = await prisma.cheque.findFirst({
-            where: {
-              operacionCheque: OperacionCheque.VENTA,
-              operacionId: venta.id,
-            },
-          });
+          const cheque = await getChequeForOperation(
+            OperacionCheque.VENTA,
+            venta.id
+          );
           return {
             ...venta,
-            cheque,
+            banco: cheque?.banco,
+            emisor: cheque?.owner,
+            fechaCobro: cheque?.fechaCobro,
+            fechaEmision: cheque?.fechaEmision,
+            monto: cheque?.monto,
+            numeroCheque: cheque?.numero,
+            picturePath: cheque?.picturePath,
+            chequeId: cheque?.id,
           };
         }
         return venta;
@@ -164,19 +170,22 @@ export async function POST(request: Request) {
       },
     });
 
-    const cheque = await prisma.cheque.create({
-      data: {
+    const newCheque = await saveCheque({
+      cheque: {
         banco,
-        owner: emisor,
+        emisor,
         fechaCobro,
         fechaEmision,
         monto,
-        numero: numeroCheque,
-        operacionCheque: OperacionCheque.VENTA,
-        operacionId: venta.id,
+        numeroCheque,
         picturePath,
       },
+
+      tipoOperacion,
+      operacionCheque: OperacionCheque.VENTA,
+      idOperacion: venta.id,
     });
+
     // Actualizar el stock y crear notificaciones si es necesario
     for (const item of items) {
       const stockActualizado = await prisma.stock.update({
@@ -210,7 +219,14 @@ export async function POST(request: Request) {
 
     const ventaToReturn = {
       ...venta,
-      cheque: cheque,
+      banco: newCheque?.banco,
+      emisor: newCheque?.owner,
+      fechaCobro: newCheque?.fechaCobro,
+      fechaEmision: newCheque?.fechaEmision,
+      monto: newCheque?.monto,
+      numeroCheque: newCheque?.numero,
+      picturePath: newCheque?.picturePath,
+      chequeId: newCheque?.id,
     };
 
     return NextResponse.json(ventaToReturn);

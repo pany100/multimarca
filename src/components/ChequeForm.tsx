@@ -24,6 +24,18 @@ function ChequeForm({
   const [chequeValue, setChequeValue] = useState("");
 
   useEffect(() => {
+    // Set initial value from item if it exists
+    if (item?.[sourceField]) {
+      setChequeValue(item[sourceField]);
+    }
+
+    // Set initial value from current form state
+    const currentValue = watch(sourceField);
+    if (currentValue) {
+      setChequeValue(currentValue);
+    }
+
+    // Subscribe to changes
     const subscription = watch((value, { name }) => {
       if (name === sourceField) {
         setChequeValue(value[sourceField]);
@@ -31,7 +43,7 @@ function ChequeForm({
     });
 
     return () => subscription.unsubscribe();
-  }, [watch, sourceField]);
+  }, [watch, sourceField, item]);
 
   if (!chequeValue || chequeValue !== "CHEQUE") {
     return null;

@@ -3,7 +3,7 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
-import { getSchemaPropsForCheque } from "@/utils/chequeSchema";
+import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   Autocomplete,
