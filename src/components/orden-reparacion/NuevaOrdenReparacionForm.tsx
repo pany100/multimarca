@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import debounce from "lodash/debounce";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
 import MecanicoFormSection from "./MecanicoFormSection";
@@ -150,6 +150,7 @@ const NuevaOrdenReparacionForm = () => {
     name: "reparacionesDeTercero",
   });
   const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
+  const autoId = useWatch({ control, name: "autoId" });
   const descuento = useWatch({ control, name: "descuento" }) || 0;
   const manoDeObra = calcularManoDeObra(trabajosRealizados ?? []);
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
@@ -186,6 +187,21 @@ const NuevaOrdenReparacionForm = () => {
     },
     300
   );
+
+  useEffect(() => {
+    const fetchKilometros = async () => {
+      if (autoId) {
+        const response = await authFetch(
+          `/api/autos/${autoId}/kilometros-sugeridos`
+        );
+        const data = await response.json();
+        setValue("kilometros", data.kilometros, { shouldDirty: true });
+      } else {
+        setValue("kilometros", 0, { shouldDirty: true });
+      }
+    };
+    fetchKilometros();
+  }, [autoId, authFetch, setValue]);
 
   const onSubmit = async (data: any) => {
     try {
