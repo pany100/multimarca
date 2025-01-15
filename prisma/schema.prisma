@@ -542,6 +542,7 @@ model Cheque {
   banco String @db.VarChar(255)
   monto Decimal @db.Decimal(10, 2)
   owner String @db.VarChar(255)
+  picturePath String @db.VarChar(255)
 
   operacionCheque OperacionCheque
   operacionId Int
