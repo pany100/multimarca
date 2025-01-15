@@ -1,6 +1,11 @@
 import prisma from "@/lib/prisma";
 import { getIO } from "@/lib/socketio";
-import { Prisma, TipoNotificacionInterna } from "@prisma/client";
+import {
+  OperacionCheque,
+  Prisma,
+  TipoNotificacionInterna,
+  TipoOperacion,
+} from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -35,8 +40,26 @@ export async function GET(request: Request) {
       prisma.venta.count({ where }),
     ]);
 
+    const ventasConCheques = await Promise.all(
+      ventas.map(async (venta) => {
+        if (venta.tipoOperacion === "CHEQUE") {
+          const cheque = await prisma.cheque.findFirst({
+            where: {
+              operacionCheque: OperacionCheque.VENTA,
+              operacionId: venta.id,
+            },
+          });
+          return {
+            ...venta,
+            cheque,
+          };
+        }
+        return venta;
+      })
+    );
+
     return NextResponse.json({
-      items: ventas,
+      items: ventasConCheques,
       total,
       page,
       limit,
@@ -53,7 +76,38 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { clienteId, items, total, moneda, fecha, tipoOperacion } = body;
+    const {
+      clienteId,
+      items,
+      total,
+      moneda,
+      fecha,
+      tipoOperacion,
+      banco,
+      emisor,
+      fechaCobro,
+      fechaEmision,
+      monto,
+      numeroCheque,
+      picturePath,
+    } = body;
+
+    if (tipoOperacion === TipoOperacion.CHEQUE) {
+      if (
+        !banco ||
+        !emisor ||
+        !fechaCobro ||
+        !fechaEmision ||
+        !monto ||
+        !numeroCheque ||
+        !picturePath
+      ) {
+        return NextResponse.json(
+          { error: "Faltan datos para la operación de cheque" },
+          { status: 400 }
+        );
+      }
+    }
 
     // Verificar stock suficiente antes de crear la venta
     for (const item of items) {
@@ -109,6 +163,20 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    const cheque = await prisma.cheque.create({
+      data: {
+        banco,
+        owner: emisor,
+        fechaCobro,
+        fechaEmision,
+        monto,
+        numero: numeroCheque,
+        operacionCheque: OperacionCheque.VENTA,
+        operacionId: venta.id,
+        picturePath,
+      },
+    });
     // Actualizar el stock y crear notificaciones si es necesario
     for (const item of items) {
       const stockActualizado = await prisma.stock.update({
@@ -140,7 +208,12 @@ export async function POST(request: Request) {
       }
     }
 
-    return NextResponse.json(venta);
+    const ventaToReturn = {
+      ...venta,
+      cheque: cheque,
+    };
+
+    return NextResponse.json(ventaToReturn);
   } catch (error) {
     console.error("Error al crear venta:", error);
     return NextResponse.json(

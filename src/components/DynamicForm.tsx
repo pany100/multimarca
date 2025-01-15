@@ -102,6 +102,8 @@ function DynamicForm<T extends FieldValues>({
     Record<string, { value: string; label: string }[]>
   >({});
 
+  console.log(watch());
+
   const handleFieldChange = (field: keyof T, value: any) => {
     handleChange(field, value);
     setValue(field as Path<T>, value, {

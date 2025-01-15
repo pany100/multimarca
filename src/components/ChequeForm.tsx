@@ -36,6 +36,9 @@ function ChequeForm({
   if (!chequeValue || chequeValue !== "CHEQUE") {
     return null;
   }
+  if (!register("picturePath")) {
+    register("picturePath", { required: true });
+  }
   return (
     <Grid container spacing={1}>
       <Grid item xs={12} md={6}>
