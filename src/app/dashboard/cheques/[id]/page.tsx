@@ -57,8 +57,8 @@ const ChequePage = () => {
             <strong>Banco:</strong> {cheque.banco}
           </Typography>
           <Typography>
-            <strong>Monto:</strong>{" "}
-            {cheque.monto.toLocaleString("es-AR", {
+            <strong>Importe:</strong>{" "}
+            {cheque.importe.toLocaleString("es-AR", {
               style: "currency",
               currency: "ARS",
             })}

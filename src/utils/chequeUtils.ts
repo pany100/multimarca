@@ -5,43 +5,45 @@ import { deleteFileFromS3, moveFileInS3 } from "./s3Helper";
 
 export const getSchemaPropsForCheque = (baseField: string) => {
   return {
-    fechaEmision: yup.date().when(baseField, {
+    fechaEmision: yup.mixed().when(baseField, {
       is: "CHEQUE",
-      then: (schema) => schema.required("La fecha de emisión es requerida"),
-      otherwise: (schema) => schema.notRequired(),
+      then: (schema) => yup.date().required("La fecha de emisión es requerida"),
+      otherwise: (schema) => yup.mixed(),
     }),
-    fechaCobro: yup.date().when(baseField, {
+    fechaCobro: yup.mixed().when(baseField, {
       is: "CHEQUE",
-      then: (schema) => schema.required("La fecha de cobro es requerida"),
-      otherwise: (schema) => schema.notRequired(),
+      then: (schema) => yup.date().required("La fecha de cobro es requerida"),
+      otherwise: (schema) => yup.mixed(),
     }),
-    numeroCheque: yup.string().when(baseField, {
+    numeroCheque: yup.mixed().when(baseField, {
       is: "CHEQUE",
-      then: (schema) => schema.required("El número de cheque es requerido"),
-      otherwise: (schema) => schema.notRequired(),
+      then: (schema) =>
+        yup.string().required("El número de cheque es requerido"),
+      otherwise: (schema) => yup.mixed(),
     }),
-    banco: yup.string().when(baseField, {
+    banco: yup.mixed().when(baseField, {
       is: "CHEQUE",
-      then: (schema) => schema.required("El banco es requerido"),
-      otherwise: (schema) => schema.notRequired(),
+      then: (schema) => yup.string().required("El banco es requerido"),
+      otherwise: (schema) => yup.mixed(),
     }),
-    importe: yup
-      .number()
-      .typeError("El importe debe ser un número")
-      .when(baseField, {
-        is: "CHEQUE",
-        then: (schema) => schema.required("El importe es requerido"),
-        otherwise: (schema) => schema.notRequired(),
-      }),
-    emisor: yup.string().when(baseField, {
+    importe: yup.mixed().when(baseField, {
       is: "CHEQUE",
-      then: (schema) => schema.required("El emisor es requerido"),
-      otherwise: (schema) => schema.notRequired(),
+      then: (schema) =>
+        yup
+          .number()
+          .typeError("El importe debe ser un número")
+          .required("El importe es requerido"),
+      otherwise: (schema) => yup.mixed(),
     }),
-    picturePath: yup.string().when(baseField, {
+    emisor: yup.mixed().when(baseField, {
       is: "CHEQUE",
-      then: (schema) => schema.required("La foto es requerida"),
-      otherwise: (schema) => schema.notRequired(),
+      then: (schema) => yup.string().required("El emisor es requerido"),
+      otherwise: (schema) => yup.mixed(),
+    }),
+    picturePath: yup.mixed().when(baseField, {
+      is: "CHEQUE",
+      then: (schema) => yup.string().required("La foto es requerida"),
+      otherwise: (schema) => yup.mixed(),
     }),
   };
 };

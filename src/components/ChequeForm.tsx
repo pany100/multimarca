@@ -142,7 +142,7 @@ function ChequeForm({
           <TextField
             fullWidth
             margin="normal"
-            label="importe"
+            label="Importe"
             {...register("importe")}
             error={!!errors["importe"]}
             helperText={errors["importe"]?.message as string}
@@ -170,6 +170,11 @@ function ChequeForm({
             image={item?.["picturePath"] || ""}
             setImage={(e) => handleFieldChange("picturePath", e)}
           />
+          {errors.picturePath && (
+            <Typography variant="subtitle2" color="error" sx={{ mt: 1 }}>
+              {errors.picturePath.message as string}
+            </Typography>
+          )}
         </Grid>
       </Grid>
     </Paper>

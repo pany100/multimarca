@@ -60,11 +60,11 @@ const ChequesPage = () => {
       flex: 1,
     },
     {
-      field: "monto",
-      headerName: "Monto",
+      field: "importe",
+      headerName: "importe",
       flex: 1,
       renderCell: (params) => {
-        return params.row.monto.toLocaleString("es-AR", {
+        return params.row.importe.toLocaleString("es-AR", {
           style: "currency",
           currency: "ARS",
         });
