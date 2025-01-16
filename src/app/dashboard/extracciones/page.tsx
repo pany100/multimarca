@@ -3,6 +3,7 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import { Chip } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -85,10 +86,22 @@ const ExtraccionesPage = () => {
       field: "tipoExtraccion",
       headerName: "Tipo de Extracción",
       width: 180,
-      renderCell: (params: any) =>
-        params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO"
-          ? "DEBITO AUTOMATICO"
-          : params.value,
+      renderCell: (params: any) => {
+        if (params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO") {
+          return "DEBITO AUTOMATICO";
+        }
+        if (params.value === "CHEQUE") {
+          return (
+            <a
+              href={`/dashboard/cheques/${params.row.chequeId}`}
+              style={{ textDecoration: "underline" }}
+            >
+              CHEQUE
+            </a>
+          );
+        }
+        return params.value;
+      },
     },
   ];
 
@@ -146,6 +159,12 @@ const ExtraccionesPage = () => {
         },
       ],
     },
+    {
+      type: "cheque",
+      sourceField: "tipoExtraccion",
+      name: "cheque",
+      label: "Cheque",
+    },
   ];
 
   const createNewExtraccion = (): Extraccion => {
@@ -191,6 +210,7 @@ const ExtraccionesPage = () => {
             "Tipo de extracción inválido"
           )
           .required("El tipo de extracción es requerido"),
+        ...getSchemaPropsForCheque("tipoExtraccion"),
       })}
     />
   );

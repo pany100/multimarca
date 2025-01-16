@@ -61,7 +61,7 @@ const ChequesPage = () => {
     },
     {
       field: "importe",
-      headerName: "importe",
+      headerName: "Importe",
       flex: 1,
       renderCell: (params) => {
         return params.row.importe.toLocaleString("es-AR", {
@@ -85,6 +85,9 @@ const ChequesPage = () => {
         }
         if (params.row.operacionCheque === OperacionCheque.INGRESO_MANUAL) {
           return `Ingreso manual de ${params.row.entidad?.usuario?.fullName}`;
+        }
+        if (params.row.operacionCheque === OperacionCheque.EXTRACCION) {
+          return `Extracción de ${params.row.entidad?.usuario?.fullName}`;
         }
 
         return "Sin operación asociada";

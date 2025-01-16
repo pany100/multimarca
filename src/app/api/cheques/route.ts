@@ -51,13 +51,30 @@ export async function GET(request: Request) {
           const ingresoManual = await prisma.ingresoManualDeDinero.findUnique({
             where: { id: cheque.operacionId },
             include: {
-              usuario: true,
+              usuario: {
+                select: {
+                  fullName: true,
+                },
+              },
             },
           });
           return {
             ...cheque,
             entidad: ingresoManual,
           };
+        }
+        if (cheque.operacionCheque === OperacionCheque.EXTRACCION) {
+          const extraccion = await prisma.extraccion.findUnique({
+            where: { id: cheque.operacionId },
+            include: {
+              usuario: {
+                select: {
+                  fullName: true,
+                },
+              },
+            },
+          });
+          return { ...cheque, entidad: extraccion };
         }
         return cheque;
       })

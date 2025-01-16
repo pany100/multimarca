@@ -1,3 +1,9 @@
+import {
+  deleteCheque,
+  getChequeForOperation,
+  updateCheque,
+} from "@/utils/chequeUtils";
+import { OperacionCheque, TipoOperacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -8,7 +14,38 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { monto, usuarioId, motivo, moneda, tipoExtraccion, fecha } = body;
+    const {
+      monto,
+      usuarioId,
+      motivo,
+      moneda,
+      tipoExtraccion,
+      fecha,
+      banco,
+      emisor,
+      fechaCobro,
+      fechaEmision,
+      importe,
+      numeroCheque,
+      picturePath,
+    } = body;
+
+    if (tipoExtraccion === TipoOperacion.CHEQUE) {
+      if (
+        !banco ||
+        !emisor ||
+        !fechaCobro ||
+        !fechaEmision ||
+        !importe ||
+        !numeroCheque ||
+        !picturePath
+      ) {
+        return NextResponse.json(
+          { error: "Faltan datos para la operación de cheque" },
+          { status: 400 }
+        );
+      }
+    }
 
     if (!monto || typeof monto !== "number" || monto <= 0) {
       return NextResponse.json(
@@ -77,7 +114,32 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(extraccionActualizada);
+    const newCheque = await updateCheque({
+      cheque: {
+        banco,
+        emisor,
+        fechaCobro,
+        fechaEmision,
+        importe,
+        numeroCheque,
+        picturePath,
+      },
+      tipoOperacion: tipoExtraccion,
+      operacionCheque: OperacionCheque.EXTRACCION,
+      idOperacion: id,
+    });
+
+    return NextResponse.json({
+      ...extraccionActualizada,
+      banco: newCheque?.banco,
+      emisor: newCheque?.owner,
+      fechaCobro: newCheque?.fechaCobro,
+      fechaEmision: newCheque?.fechaEmision,
+      importe: newCheque?.importe,
+      numeroCheque: newCheque?.numero,
+      picturePath: newCheque?.picturePath,
+      chequeId: newCheque?.id,
+    });
   } catch (error) {
     console.error("Error al actualizar extracción:", error);
     return NextResponse.json(
@@ -93,6 +155,11 @@ export async function DELETE(
 ) {
   try {
     const id = parseInt(params.id);
+
+    const cheque = await getChequeForOperation(OperacionCheque.EXTRACCION, id);
+    if (cheque) {
+      await deleteCheque(cheque.id);
+    }
 
     const extraccionEliminada = await prisma.extraccion.delete({
       where: { id },
