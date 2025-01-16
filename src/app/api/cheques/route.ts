@@ -82,6 +82,20 @@ export async function GET(request: Request) {
           });
           return { ...cheque, entidad: gasto };
         }
+        if (cheque.operacionCheque === OperacionCheque.INGRESO_REPARACION) {
+          const ingresoReparacion =
+            await prisma.ingresoPorReparacion.findUnique({
+              where: { id: cheque.operacionId },
+              include: {
+                cliente: {
+                  select: {
+                    fullName: true,
+                  },
+                },
+              },
+            });
+          return { ...cheque, entidad: ingresoReparacion };
+        }
         return cheque;
       })
     );

@@ -1,3 +1,9 @@
+import {
+  deleteCheque,
+  getChequeForOperation,
+  updateCheque,
+} from "@/utils/chequeUtils";
+import { OperacionCheque, TipoOperacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -16,7 +22,31 @@ export async function PUT(
       tipoOperacion,
       descripcion,
       ordenReparacionId,
+      banco,
+      emisor,
+      fechaCobro,
+      fechaEmision,
+      importe,
+      numeroCheque,
+      picturePath,
     } = body;
+
+    if (tipoOperacion === TipoOperacion.CHEQUE) {
+      if (
+        !banco ||
+        !emisor ||
+        !fechaCobro ||
+        !fechaEmision ||
+        !importe ||
+        !numeroCheque ||
+        !picturePath
+      ) {
+        return NextResponse.json(
+          { error: "Faltan datos para la operación de cheque" },
+          { status: 400 }
+        );
+      }
+    }
 
     if (
       !clienteId ||
@@ -71,7 +101,32 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(ingresoActualizado);
+    const newCheque = await updateCheque({
+      cheque: {
+        banco,
+        emisor,
+        fechaCobro,
+        fechaEmision,
+        importe,
+        numeroCheque,
+        picturePath,
+      },
+      tipoOperacion,
+      operacionCheque: OperacionCheque.INGRESO_REPARACION,
+      idOperacion: id,
+    });
+
+    return NextResponse.json({
+      ...ingresoActualizado,
+      banco: newCheque?.banco,
+      emisor: newCheque?.owner,
+      fechaCobro: newCheque?.fechaCobro,
+      fechaEmision: newCheque?.fechaEmision,
+      importe: newCheque?.importe,
+      numeroCheque: newCheque?.numero,
+      picturePath: newCheque?.picturePath,
+      chequeId: newCheque?.id,
+    });
   } catch (error) {
     console.error("Error al actualizar ingreso por reparación:", error);
     return NextResponse.json(
@@ -88,12 +143,28 @@ export async function DELETE(
   try {
     const id = parseInt(params.id);
 
-    await prisma.ingresoPorReparacion.delete({
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: "ID de ingreso por reparación inválido" },
+        { status: 400 }
+      );
+    }
+
+    const cheque = await getChequeForOperation(
+      OperacionCheque.INGRESO_REPARACION,
+      id
+    );
+    if (cheque) {
+      await deleteCheque(cheque.id);
+    }
+
+    const ingresoEliminado = await prisma.ingresoPorReparacion.delete({
       where: { id },
     });
 
     return NextResponse.json({
       message: "Ingreso por reparación eliminado con éxito",
+      ingreso: ingresoEliminado,
     });
   } catch (error) {
     console.error("Error al eliminar ingreso por reparación:", error);

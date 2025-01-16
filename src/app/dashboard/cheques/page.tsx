@@ -92,6 +92,9 @@ const ChequesPage = () => {
         if (params.row.operacionCheque === OperacionCheque.GASTO) {
           return `Gasto en ${params.row.entidad.nombre}`;
         }
+        if (params.row.operacionCheque === OperacionCheque.INGRESO_REPARACION) {
+          return `Ingreso por reparación de ${params.row.entidad.cliente.fullName}`;
+        }
 
         return "Sin operación asociada";
       },

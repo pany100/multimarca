@@ -3,6 +3,7 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import SendIcon from "@mui/icons-material/Send";
 import {
@@ -91,10 +92,22 @@ const IngresosPorReparacionPage = () => {
       field: "tipoOperacion",
       headerName: "Tipo de Ingreso",
       flex: 1,
-      renderCell: (params: any) =>
-        params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO"
-          ? "DEBITO AUTOMATICO"
-          : params.value,
+      renderCell: (params: any) => {
+        if (params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO") {
+          return "DEBITO AUTOMATICO";
+        }
+        if (params.value === "CHEQUE") {
+          return (
+            <a
+              href={`/dashboard/cheques/${params.row.chequeId}`}
+              style={{ textDecoration: "underline" }}
+            >
+              CHEQUE
+            </a>
+          );
+        }
+        return params.value;
+      },
     },
     { field: "descripcion", headerName: "Descripción", flex: 2 },
     {
@@ -154,20 +167,7 @@ const IngresosPorReparacionPage = () => {
         { label: "Peso", value: "Peso" },
       ],
     },
-    {
-      name: "tipoOperacion",
-      label: "Tipo de Ingreso",
-      type: "select",
-      options: [
-        { label: "Efectivo", value: "EFECTIVO" },
-        { label: "Transferencia", value: "TRANSFERENCIA" },
-        { label: "Cheque", value: "CHEQUE" },
-        {
-          label: "Débito Automático tarjeta crédito",
-          value: "DEBITO_AUTOMATICO_TARJETA_CREDITO",
-        },
-      ],
-    },
+
     { name: "descripcion", label: "Descripción", type: "text" },
     {
       name: "clienteId",
@@ -253,6 +253,26 @@ const IngresosPorReparacionPage = () => {
         }
         return options;
       },
+    },
+    {
+      name: "tipoOperacion",
+      label: "Tipo de Ingreso",
+      type: "select",
+      options: [
+        { label: "Efectivo", value: "EFECTIVO" },
+        { label: "Transferencia", value: "TRANSFERENCIA" },
+        { label: "Cheque", value: "CHEQUE" },
+        {
+          label: "Débito Automático tarjeta crédito",
+          value: "DEBITO_AUTOMATICO_TARJETA_CREDITO",
+        },
+      ],
+    },
+    {
+      type: "cheque",
+      sourceField: "tipoOperacion",
+      name: "cheque",
+      label: "Cheque",
     },
   ];
 
@@ -380,6 +400,7 @@ const IngresosPorReparacionPage = () => {
               "Tipo de extracción inválido"
             )
             .required("El tipo de extracción es requerido"),
+          ...getSchemaPropsForCheque("tipoOperacion"),
         })}
       />
       <Modal

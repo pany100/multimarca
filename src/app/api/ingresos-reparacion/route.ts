@@ -1,3 +1,5 @@
+import { getChequeForOperation, saveCheque } from "@/utils/chequeUtils";
+import { OperacionCheque, TipoOperacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -40,8 +42,31 @@ export async function GET(request: Request) {
       }),
     ]);
 
+    const ingresosConCheques = await Promise.all(
+      ingresos.map(async (ingreso) => {
+        if (ingreso.tipoOperacion === "CHEQUE") {
+          const cheque = await getChequeForOperation(
+            OperacionCheque.INGRESO_REPARACION,
+            ingreso.id
+          );
+          return {
+            ...ingreso,
+            banco: cheque?.banco,
+            emisor: cheque?.owner,
+            fechaCobro: cheque?.fechaCobro,
+            fechaEmision: cheque?.fechaEmision,
+            importe: cheque?.importe,
+            numeroCheque: cheque?.numero,
+            picturePath: cheque?.picturePath,
+            chequeId: cheque?.id,
+          };
+        }
+        return ingreso;
+      })
+    );
+
     return NextResponse.json({
-      items: ingresos,
+      items: ingresosConCheques,
       total,
       page,
       size,
@@ -67,7 +92,31 @@ export async function POST(request: Request) {
       tipoOperacion,
       descripcion,
       ordenReparacionId,
+      banco,
+      emisor,
+      fechaCobro,
+      fechaEmision,
+      importe,
+      numeroCheque,
+      picturePath,
     } = body;
+
+    if (tipoOperacion === TipoOperacion.CHEQUE) {
+      if (
+        !banco ||
+        !emisor ||
+        !fechaCobro ||
+        !fechaEmision ||
+        !importe ||
+        !numeroCheque ||
+        !picturePath
+      ) {
+        return NextResponse.json(
+          { error: "Faltan datos para la operación de cheque" },
+          { status: 400 }
+        );
+      }
+    }
 
     if (
       !clienteId ||
@@ -125,7 +174,34 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(nuevoIngreso, { status: 201 });
+    const newCheque = await saveCheque({
+      cheque: {
+        banco,
+        emisor,
+        fechaCobro,
+        fechaEmision,
+        importe,
+        numeroCheque,
+        picturePath,
+      },
+      tipoOperacion,
+      operacionCheque: OperacionCheque.INGRESO_REPARACION,
+      idOperacion: nuevoIngreso.id,
+    });
+
+    const ingresoToReturn = {
+      ...nuevoIngreso,
+      banco: newCheque?.banco,
+      emisor: newCheque?.owner,
+      fechaCobro: newCheque?.fechaCobro,
+      fechaEmision: newCheque?.fechaEmision,
+      importe: newCheque?.importe,
+      numeroCheque: newCheque?.numero,
+      picturePath: newCheque?.picturePath,
+      chequeId: newCheque?.id,
+    };
+
+    return NextResponse.json(ingresoToReturn, { status: 201 });
   } catch (error) {
     console.error("Error al crear ingreso por reparación:", error);
     return NextResponse.json(
