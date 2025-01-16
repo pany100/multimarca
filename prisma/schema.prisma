@@ -570,6 +570,7 @@ enum EstadoOrdenReparacion {
 enum TipoNotificacionInterna {
   REPOSICION_STOCK
   REPARACION_TERMINADA
+  CHEQUE_POR_VENCER
 }
 
 enum EstadoConversacion {

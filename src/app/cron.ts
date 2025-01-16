@@ -1,5 +1,6 @@
 import "src/cron/backup";
 import "src/cron/dolar";
+import "src/cron/notificacionesCheques";
 import "src/cron/notificacionesWhatsappCron";
 
 // Declaramos una variable global para verificar si el cron ya se ha iniciado
@@ -21,6 +22,7 @@ export function initCronJobs() {
   require("src/cron/notificacionesWhatsappCron").initNotificacionesWhatsappCron();
   require("src/cron/birthdays").initCumpleañosCron();
   require("src/cron/recordatoriosTrabajos").initRecordatoriosTrabajosCron();
+  require("src/cron/notificacionesCheques").initNotificacionesChequesCron();
 
   // Marcamos que los cron jobs se han iniciado
   global.cronJobsStarted = true;

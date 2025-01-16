@@ -51,7 +51,26 @@ const ChequesPage = () => {
       headerName: "Fecha Cobro",
       flex: 1,
       renderCell: (params) => {
-        return new Date(params.row.fechaCobro).toLocaleDateString("es-AR");
+        const fechaCobro = new Date(params.row.fechaCobro);
+        const hoy = new Date();
+        const diferenciaDias = Math.floor(
+          (fechaCobro.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24)
+        );
+
+        let backgroundColor = "#ADD8E6"; // celeste por defecto
+        if (diferenciaDias < 3 && diferenciaDias >= 0) {
+          backgroundColor = "#FF6B6B"; // rojo si faltan menos de 3 días
+        } else if (diferenciaDias < 0 && diferenciaDias > -3) {
+          backgroundColor = "#FFFF00"; // amarillo si pasaron menos de 3 días
+        }
+
+        return (
+          <Box
+            sx={{ backgroundColor, padding: "4px 8px", borderRadius: "4px" }}
+          >
+            {fechaCobro.toLocaleDateString("es-AR")}
+          </Box>
+        );
       },
     },
     {
