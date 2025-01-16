@@ -3,6 +3,7 @@
 import CrudTable from "@/components/CrudTable";
 import { FieldConfig } from "@/components/DynamicForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import { Chip } from "@mui/material";
 import * as yup from "yup";
@@ -59,10 +60,22 @@ const GastosPage = () => {
       field: "tipo",
       headerName: "Tipo",
       flex: 1,
-      renderCell: (params: any) =>
-        params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO"
-          ? "DEBITO AUTOMATICO"
-          : params.value,
+      renderCell: (params: any) => {
+        if (params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO") {
+          return "DEBITO AUTOMATICO";
+        }
+        if (params.value === "CHEQUE") {
+          return (
+            <a
+              href={`/dashboard/cheques/${params.row.chequeId}`}
+              style={{ textDecoration: "underline" }}
+            >
+              CHEQUE
+            </a>
+          );
+        }
+        return params.value;
+      },
     },
     { field: "detalle", headerName: "Detalle", flex: 1.5 },
     {
@@ -108,20 +121,6 @@ const GastosPage = () => {
       options: [
         { label: "Dolar", value: "Dolar" },
         { label: "Peso", value: "Peso" },
-      ],
-    },
-    {
-      name: "tipo",
-      label: "Tipo de Operación",
-      type: "select",
-      options: [
-        { label: "Efectivo", value: "EFECTIVO" },
-        { label: "Transferencia", value: "TRANSFERENCIA" },
-        { label: "Cheque", value: "CHEQUE" },
-        {
-          label: "Débito Automático tarjeta crédito",
-          value: "DEBITO_AUTOMATICO_TARJETA_CREDITO",
-        },
       ],
     },
     { name: "fecha", label: "Fecha", type: "date" },
@@ -187,6 +186,26 @@ const GastosPage = () => {
       },
       hidden: (gasto: Gasto) => gasto.categoriaId !== 1,
     },
+    {
+      name: "tipo",
+      label: "Tipo de Operación",
+      type: "select",
+      options: [
+        { label: "Efectivo", value: "EFECTIVO" },
+        { label: "Transferencia", value: "TRANSFERENCIA" },
+        { label: "Cheque", value: "CHEQUE" },
+        {
+          label: "Débito Automático tarjeta crédito",
+          value: "DEBITO_AUTOMATICO_TARJETA_CREDITO",
+        },
+      ],
+    },
+    {
+      type: "cheque",
+      sourceField: "tipo",
+      name: "cheque",
+      label: "Cheque",
+    },
   ];
 
   const createNewGasto = (): Gasto => {
@@ -246,6 +265,7 @@ const GastosPage = () => {
             "Tipo de extracción inválido"
           )
           .required("El tipo de extracción es requerido"),
+        ...getSchemaPropsForCheque("tipo"),
       })}
     />
   );

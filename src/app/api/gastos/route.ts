@@ -1,3 +1,5 @@
+import { getChequeForOperation, saveCheque } from "@/utils/chequeUtils";
+import { OperacionCheque, TipoOperacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -71,8 +73,31 @@ export async function GET(request: Request) {
       }),
     ]);
 
+    const gastosConCheques = await Promise.all(
+      gastos.map(async (gasto) => {
+        if (gasto.tipo === "CHEQUE") {
+          const cheque = await getChequeForOperation(
+            OperacionCheque.GASTO,
+            gasto.id
+          );
+          return {
+            ...gasto,
+            banco: cheque?.banco,
+            emisor: cheque?.owner,
+            fechaCobro: cheque?.fechaCobro,
+            fechaEmision: cheque?.fechaEmision,
+            importe: cheque?.importe,
+            numeroCheque: cheque?.numero,
+            picturePath: cheque?.picturePath,
+            chequeId: cheque?.id,
+          };
+        }
+        return gasto;
+      })
+    );
+
     return NextResponse.json({
-      items: gastos,
+      items: gastosConCheques,
       total,
       page,
       size,
@@ -86,7 +111,6 @@ export async function GET(request: Request) {
     );
   }
 }
-
 export async function POST(request: Request) {
   try {
     const body = await request.json();
@@ -100,7 +124,31 @@ export async function POST(request: Request) {
       proveedorId,
       moneda,
       detalle,
+      banco,
+      emisor,
+      fechaCobro,
+      fechaEmision,
+      importe,
+      numeroCheque,
+      picturePath,
     } = body;
+
+    if (tipo === TipoOperacion.CHEQUE) {
+      if (
+        !banco ||
+        !emisor ||
+        !fechaCobro ||
+        !fechaEmision ||
+        !importe ||
+        !numeroCheque ||
+        !picturePath
+      ) {
+        return NextResponse.json(
+          { error: "Faltan datos para la operación de cheque" },
+          { status: 400 }
+        );
+      }
+    }
 
     if (!nombre || !precio || !fecha || !categoriaId) {
       return NextResponse.json(
@@ -147,7 +195,34 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(nuevoGasto, { status: 201 });
+    const newCheque = await saveCheque({
+      cheque: {
+        banco,
+        emisor,
+        fechaCobro,
+        fechaEmision,
+        importe,
+        numeroCheque,
+        picturePath,
+      },
+      tipoOperacion: tipo,
+      operacionCheque: OperacionCheque.GASTO,
+      idOperacion: nuevoGasto.id,
+    });
+
+    const gastoToReturn = {
+      ...nuevoGasto,
+      banco: newCheque?.banco,
+      emisor: newCheque?.owner,
+      fechaCobro: newCheque?.fechaCobro,
+      fechaEmision: newCheque?.fechaEmision,
+      importe: newCheque?.importe,
+      numeroCheque: newCheque?.numero,
+      picturePath: newCheque?.picturePath,
+      chequeId: newCheque?.id,
+    };
+
+    return NextResponse.json(gastoToReturn, { status: 201 });
   } catch (error) {
     console.error("Error al crear gasto:", error);
     return NextResponse.json(

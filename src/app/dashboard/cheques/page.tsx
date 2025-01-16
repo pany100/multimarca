@@ -89,6 +89,9 @@ const ChequesPage = () => {
         if (params.row.operacionCheque === OperacionCheque.EXTRACCION) {
           return `Extracción de ${params.row.entidad?.usuario?.fullName}`;
         }
+        if (params.row.operacionCheque === OperacionCheque.GASTO) {
+          return `Gasto en ${params.row.entidad.nombre}`;
+        }
 
         return "Sin operación asociada";
       },

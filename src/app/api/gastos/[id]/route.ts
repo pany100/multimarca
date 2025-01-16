@@ -1,3 +1,9 @@
+import {
+  deleteCheque,
+  getChequeForOperation,
+  updateCheque,
+} from "@/utils/chequeUtils";
+import { OperacionCheque, TipoOperacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -18,7 +24,31 @@ export async function PUT(
       mecanicoId,
       proveedorId,
       detalle,
+      banco,
+      emisor,
+      fechaCobro,
+      fechaEmision,
+      importe,
+      numeroCheque,
+      picturePath,
     } = body;
+
+    if (tipo === TipoOperacion.CHEQUE) {
+      if (
+        !banco ||
+        !emisor ||
+        !fechaCobro ||
+        !fechaEmision ||
+        !importe ||
+        !numeroCheque ||
+        !picturePath
+      ) {
+        return NextResponse.json(
+          { error: "Faltan datos para la operación de cheque" },
+          { status: 400 }
+        );
+      }
+    }
 
     if (!nombre || !precio || !fecha || !categoriaId) {
       return NextResponse.json(
@@ -66,7 +96,32 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(gastoActualizado);
+    const newCheque = await updateCheque({
+      cheque: {
+        banco,
+        emisor,
+        fechaCobro,
+        fechaEmision,
+        importe,
+        numeroCheque,
+        picturePath,
+      },
+      tipoOperacion: tipo,
+      operacionCheque: OperacionCheque.GASTO,
+      idOperacion: id,
+    });
+
+    return NextResponse.json({
+      ...gastoActualizado,
+      banco: newCheque?.banco,
+      emisor: newCheque?.owner,
+      fechaCobro: newCheque?.fechaCobro,
+      fechaEmision: newCheque?.fechaEmision,
+      importe: newCheque?.importe,
+      numeroCheque: newCheque?.numero,
+      picturePath: newCheque?.picturePath,
+      chequeId: newCheque?.id,
+    });
   } catch (error) {
     console.error("Error al actualizar gasto:", error);
     return NextResponse.json(
@@ -88,6 +143,11 @@ export async function DELETE(
         { error: "ID de gasto inválido" },
         { status: 400 }
       );
+    }
+
+    const cheque = await getChequeForOperation(OperacionCheque.GASTO, id);
+    if (cheque) {
+      await deleteCheque(cheque.id);
     }
 
     const gastoEliminado = await prisma.gasto.delete({

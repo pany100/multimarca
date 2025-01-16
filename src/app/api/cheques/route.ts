@@ -76,6 +76,12 @@ export async function GET(request: Request) {
           });
           return { ...cheque, entidad: extraccion };
         }
+        if (cheque.operacionCheque === OperacionCheque.GASTO) {
+          const gasto = await prisma.gasto.findUnique({
+            where: { id: cheque.operacionId },
+          });
+          return { ...cheque, entidad: gasto };
+        }
         return cheque;
       })
     );
