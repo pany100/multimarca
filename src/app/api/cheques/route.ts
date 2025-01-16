@@ -47,6 +47,18 @@ export async function GET(request: Request) {
             entidad: venta,
           };
         }
+        if (cheque.operacionCheque === OperacionCheque.INGRESO_MANUAL) {
+          const ingresoManual = await prisma.ingresoManualDeDinero.findUnique({
+            where: { id: cheque.operacionId },
+            include: {
+              usuario: true,
+            },
+          });
+          return {
+            ...cheque,
+            entidad: ingresoManual,
+          };
+        }
         return cheque;
       })
     );

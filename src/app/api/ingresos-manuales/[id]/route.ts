@@ -1,3 +1,9 @@
+import {
+  deleteCheque,
+  getChequeForOperation,
+  updateCheque,
+} from "@/utils/chequeUtils";
+import { OperacionCheque, TipoOperacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 export async function GET(
@@ -25,6 +31,24 @@ export async function GET(
         { status: 404 }
       );
     }
+    if (ingreso.tipoExtraccion === "CHEQUE") {
+      const cheque = await getChequeForOperation(
+        OperacionCheque.INGRESO_MANUAL,
+        ingreso.id
+      );
+      const ingresoToReturn = {
+        ...ingreso,
+        banco: cheque?.banco,
+        emisor: cheque?.owner,
+        fechaCobro: cheque?.fechaCobro,
+        fechaEmision: cheque?.fechaEmision,
+        importe: cheque?.importe,
+        numeroCheque: cheque?.numero,
+        picturePath: cheque?.picturePath,
+        chequeId: cheque?.id,
+      };
+      return NextResponse.json(ingresoToReturn);
+    }
 
     return NextResponse.json(ingreso);
   } catch (error) {
@@ -43,7 +67,38 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { monto, descripcion, usuarioId, moneda, fecha } = body;
+    const {
+      monto,
+      descripcion,
+      usuarioId,
+      moneda,
+      fecha,
+      tipoExtraccion,
+      banco,
+      emisor,
+      fechaCobro,
+      fechaEmision,
+      importe,
+      numeroCheque,
+      picturePath,
+    } = body;
+
+    if (tipoExtraccion === TipoOperacion.CHEQUE) {
+      if (
+        !banco ||
+        !emisor ||
+        !fechaCobro ||
+        !fechaEmision ||
+        !importe ||
+        !numeroCheque ||
+        !picturePath
+      ) {
+        return NextResponse.json(
+          { error: "Faltan datos para la operación de cheque" },
+          { status: 400 }
+        );
+      }
+    }
 
     if (!monto || typeof monto !== "number" || monto <= 0) {
       return NextResponse.json(
@@ -86,6 +141,7 @@ export async function PUT(
         moneda,
         usuarioId,
         dolarId: dolar?.id,
+        tipoExtraccion,
       },
       include: {
         dolar: true,
@@ -97,7 +153,32 @@ export async function PUT(
       },
     });
 
-    return NextResponse.json(ingresoActualizado);
+    const newCheque = await updateCheque({
+      cheque: {
+        banco,
+        emisor,
+        fechaCobro,
+        fechaEmision,
+        importe,
+        numeroCheque,
+        picturePath,
+      },
+      tipoOperacion: tipoExtraccion,
+      operacionCheque: OperacionCheque.INGRESO_MANUAL,
+      idOperacion: id,
+    });
+
+    return NextResponse.json({
+      ...ingresoActualizado,
+      banco: newCheque?.banco,
+      emisor: newCheque?.owner,
+      fechaCobro: newCheque?.fechaCobro,
+      fechaEmision: newCheque?.fechaEmision,
+      importe: newCheque?.importe,
+      numeroCheque: newCheque?.numero,
+      picturePath: newCheque?.picturePath,
+      chequeId: newCheque?.id,
+    });
   } catch (error) {
     console.error("Error al actualizar ingreso manual:", error);
     return NextResponse.json(
@@ -113,6 +194,14 @@ export async function DELETE(
 ) {
   try {
     const id = parseInt(params.id);
+
+    const cheque = await getChequeForOperation(
+      OperacionCheque.INGRESO_MANUAL,
+      id
+    );
+    if (cheque) {
+      await deleteCheque(cheque.id);
+    }
 
     const ingresoEliminado = await prisma.ingresoManualDeDinero.delete({
       where: { id },

@@ -83,6 +83,9 @@ const ChequesPage = () => {
         if (params.row.operacionCheque === OperacionCheque.VENTA) {
           return `Venta a ${params.row.entidad.cliente.fullName}`;
         }
+        if (params.row.operacionCheque === OperacionCheque.INGRESO_MANUAL) {
+          return `Ingreso manual de ${params.row.entidad?.usuario?.fullName}`;
+        }
 
         return "Sin operación asociada";
       },
