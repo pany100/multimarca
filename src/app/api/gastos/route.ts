@@ -57,7 +57,12 @@ export async function GET(request: Request) {
         where: whereClause,
         skip,
         take: size,
-        orderBy: [{ fecha: "desc" }, { id: "desc" }],
+        orderBy: [
+          { fecha: "desc" },
+          { categoriaId: "asc" },
+          { proveedorId: "asc" },
+          { mecanicoId: "asc" },
+        ],
         include: {
           categoria: {
             include: {
