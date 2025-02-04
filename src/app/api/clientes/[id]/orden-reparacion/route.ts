@@ -1,4 +1,5 @@
 import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
+import { EstadoOrdenReparacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -16,6 +17,7 @@ export async function GET(
         auto: {
           ownerId: clienteId,
         },
+        estado: EstadoOrdenReparacion.Terminado,
       },
       include: {
         auto: {
