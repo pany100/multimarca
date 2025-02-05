@@ -434,10 +434,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Image
               src="/bosch-icon.svg"
+              onClick={() => router.push("/dashboard")}
               alt="MT Service"
               width={40}
               height={40}
-              style={{ borderRadius: "8px" }}
+              style={{ borderRadius: "8px", cursor: "pointer" }}
             />
             <Box sx={{ display: "flex", flexDirection: "column" }}>
               <Typography
