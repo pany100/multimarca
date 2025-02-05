@@ -1,13 +1,19 @@
 "use client";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
+import AssessmentIcon from "@mui/icons-material/Assessment";
+import BuildIcon from "@mui/icons-material/Build";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import InventoryIcon from "@mui/icons-material/Inventory";
 import LockIcon from "@mui/icons-material/Lock";
 import MenuIcon from "@mui/icons-material/Menu";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import PeopleIcon from "@mui/icons-material/People";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 
 import {
@@ -35,19 +41,15 @@ import "src/app/globals.css";
 // Importa los iconos necesarios
 import { useFetch } from "@/contexts/FetchContext";
 import { useSocket } from "@/hooks/useSocket";
-import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 
 import AlarmIcon from "@mui/icons-material/Alarm";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import { default as AttachMoneyIcon } from "@mui/icons-material/AttachMoney";
 import BarChartIcon from "@mui/icons-material/BarChart";
-import BuildIcon from "@mui/icons-material/Build";
 import CategoryIcon from "@mui/icons-material/Category";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import GroupIcon from "@mui/icons-material/Group";
-import InventoryIcon from "@mui/icons-material/Inventory";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MoneyOffIcon from "@mui/icons-material/MoneyOff";
@@ -172,6 +174,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     () => [
       {
         title: "Gestión de Personal",
+        icono: <PeopleIcon />,
         items: [
           {
             permiso: "Usuarios",
@@ -195,6 +198,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       },
       {
         title: "Clientes y Vehículos",
+        icono: <DirectionsCarIcon />,
         items: [
           {
             permiso: "Clientes",
@@ -212,6 +216,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       },
       {
         title: "Operaciones del Taller",
+        icono: <BuildIcon />,
         items: [
           {
             permiso: "Controles",
@@ -253,6 +258,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       },
       {
         title: "Inventario y Compras",
+        icono: <InventoryIcon />,
         items: [
           {
             permiso: "Stock",
@@ -282,6 +288,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       },
       {
         title: "Estadísticas y Reportes",
+        icono: <AssessmentIcon />,
         items: [
           {
             permiso: "Estadisticas",
@@ -293,6 +300,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       },
       {
         title: "Finanzas",
+        icono: <AccountBalanceIcon />,
         items: [
           {
             permiso: "Cheques",
