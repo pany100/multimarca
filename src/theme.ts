@@ -20,11 +20,33 @@ declare module "@mui/material/styles" {
 // Definimos las opciones del tema para cada modo
 const lightThemeOptions: ThemeOptions = {
   palette: {
-    mode: "light",
-    // Aquí puedes definir colores específicos para el modo claro
-    // Por ejemplo:
-    // primary: { main: '#1976d2' },
-    // secondary: { main: '#dc004e' },
+    primary: {
+      main: "#005691", // Bosch Blue
+      light: "#0076C8",
+      dark: "#003F6B",
+    },
+    secondary: {
+      main: "#EA0016", // Bosch Red
+      light: "#FF1A1A",
+      dark: "#C70012",
+    },
+    background: {
+      default: "#F5F5F5",
+      paper: "#FFFFFF",
+    },
+    text: {
+      primary: "#333333",
+      secondary: "#666666",
+    },
+  },
+  typography: {
+    fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
+    h1: {
+      fontWeight: 500,
+    },
+    h5: {
+      fontWeight: 500,
+    },
   },
   components: {
     MuiDataGrid: {
@@ -49,6 +71,33 @@ const darkThemeOptions: ThemeOptions = {
     },
   },
   components: {
+    MuiTextField: {
+      defaultProps: {
+        variant: "outlined",
+        fullWidth: true,
+      },
+      styleOverrides: {
+        root: {
+          "& .MuiOutlinedInput-root": {
+            "&:hover fieldset": {
+              borderColor: "#005691",
+            },
+          },
+        },
+      },
+    },
+    MuiButton: {
+      defaultProps: {
+        disableElevation: true,
+      },
+      styleOverrides: {
+        root: {
+          textTransform: "none",
+          borderRadius: 4,
+          padding: "10px 24px",
+        },
+      },
+    },
     MuiDataGrid: {
       defaultProps: {
         disableColumnMenu: true,

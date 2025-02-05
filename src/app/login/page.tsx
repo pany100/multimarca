@@ -9,18 +9,27 @@ import {
   Container,
   LinearProgress,
   Link,
+  Paper,
   TextField,
   Typography,
 } from "@mui/material";
 import { setCookie } from "cookies-next";
+import { useFormik } from "formik";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import React from "react";
+import * as yup from "yup";
+
+const validationSchema = yup.object({
+  email: yup
+    .string()
+    .email("Ingresa un correo electrónico válido")
+    .required("El correo electrónico es requerido"),
+  password: yup.string().required("La contraseña es requerida"),
+});
 
 export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const router = useRouter();
-  const [error, setError] = useState("");
   const { isAuthenticated } = useAuth();
   const { isLoading, fetch } = useFetch();
 
@@ -30,36 +39,42 @@ export default function LoginPage() {
     }
   }, [isLoading, isAuthenticated, router]);
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    try {
-      const response = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCookie("auth_token", data.token, {
-          maxAge: 7 * 24 * 60 * 60, // 30 días en segundos
-          path: "/",
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: async (values) => {
+      try {
+        const response = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(values),
         });
-        router.push("/dashboard");
-      } else {
-        setError(
-          "Error de inicio de sesión. Por favor, verifica tus credenciales."
-        );
+
+        if (response.ok) {
+          const data = await response.json();
+          setCookie("auth_token", data.token, {
+            maxAge: 7 * 24 * 60 * 60,
+            path: "/",
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "strict",
+          });
+          router.push("/dashboard");
+        } else {
+          formik.setStatus(
+            "Error de inicio de sesión. Por favor, verifica tus credenciales."
+          );
+        }
+      } catch (error) {
+        console.error("Error al realizar la solicitud:", error);
+        formik.setStatus("Error al realizar la solicitud");
       }
-    } catch (error) {
-      console.error("Error al realizar la solicitud:", error);
-      setError("Error al realizar la solicitud");
-    }
-  };
+    },
+  });
 
   return (
     <Container
@@ -83,63 +98,105 @@ export default function LoginPage() {
           }}
         />
       )}
-      <Box
+      <Paper
+        elevation={3}
         sx={{
-          marginTop: 8,
+          p: 4,
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
+          width: "100%",
         }}
       >
-        <Typography component="h1" variant="h5">
+        <Box
+          sx={{
+            mb: 4,
+            width: "200px",
+            height: "60px",
+            position: "relative",
+          }}
+        >
+          <Image
+            src="/bosch-icon.svg"
+            alt="Bosch Logo"
+            layout="fill"
+            objectFit="contain"
+            priority
+          />
+        </Box>
+
+        <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
           Iniciar sesión
         </Typography>
-        {error && (
-          <Alert severity="error" sx={{ mt: 2, width: "100%" }}>
-            {error}
+
+        {formik.status && (
+          <Alert severity="error" sx={{ mt: 2, mb: 2, width: "100%" }}>
+            {formik.status}
           </Alert>
         )}
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+
+        <Box
+          component="form"
+          onSubmit={formik.handleSubmit}
+          sx={{
+            width: "100%",
+            "& .MuiTextField-root": { width: "100%" },
+          }}
+        >
           <TextField
             margin="normal"
-            required
-            fullWidth
             id="email"
-            label="Correo electrónico"
             name="email"
+            label="Correo electrónico"
             autoComplete="email"
             autoFocus
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={formik.values.email}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.email && Boolean(formik.errors.email)}
+            helperText={formik.touched.email && formik.errors.email}
+            aria-label="Correo electrónico"
           />
           <TextField
             margin="normal"
-            required
-            fullWidth
             name="password"
             label="Contraseña"
             type="password"
             id="password"
             autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={formik.values.password}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={formik.touched.password && Boolean(formik.errors.password)}
+            helperText={formik.touched.password && formik.errors.password}
+            aria-label="Contraseña"
           />
           <Button
             type="submit"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            disabled={isLoading}
+            disabled={formik.isSubmitting || isLoading}
           >
             Ingresar
           </Button>
-          <Box sx={{ display: "flex", justifyContent: "space-between" }}>
-            <Link href="/forgot-password" variant="body2">
-              ¿Olvidaste tu contraseña?
-            </Link>
-          </Box>
+          <Link
+            href="#"
+            variant="body2"
+            sx={{
+              display: "block",
+              textAlign: "center",
+              color: "primary.main",
+              textDecoration: "none",
+              "&:hover": {
+                textDecoration: "underline",
+              },
+            }}
+          >
+            ¿Olvidaste tu contraseña?
+          </Link>
         </Box>
-      </Box>
+      </Paper>
     </Container>
   );
 }
