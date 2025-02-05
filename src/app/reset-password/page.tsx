@@ -7,65 +7,89 @@ import {
   Button,
   Container,
   LinearProgress,
+  Paper,
   TextField,
   Typography,
 } from "@mui/material";
+import { useFormik } from "formik";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
-import React, { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect } from "react";
+import * as yup from "yup";
+
+const validationSchema = yup.object({
+  newPassword: yup
+    .string()
+    .min(6, "La contraseña debe tener al menos 6 caracteres")
+    .required("La contraseña es requerida"),
+  confirmPassword: yup
+    .string()
+    .oneOf([yup.ref("newPassword")], "Las contraseñas no coinciden")
+    .required("Confirma tu contraseña"),
+});
 
 function ResetPasswordForm() {
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [token, setToken] = useState("");
-  const [message, setMessage] = useState("");
-  const [error, setError] = useState("");
   const router = useRouter();
   const searchParams = useSearchParams();
   const { fetch, isLoading } = useFetch();
 
+  const formik = useFormik({
+    initialValues: {
+      newPassword: "",
+      confirmPassword: "",
+      token: "",
+    },
+    validationSchema: validationSchema,
+    onSubmit: async (values) => {
+      try {
+        const response = await fetch("/api/auth/reset-password", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            token: values.token,
+            newPassword: values.newPassword,
+          }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          formik.setStatus({
+            message: "Contraseña restablecida con éxito.",
+            severity: "success",
+          });
+          setTimeout(() => router.push("/login"), 1500);
+        } else {
+          formik.setStatus({
+            message:
+              data.error ||
+              "Ha ocurrido un error al restablecer la contraseña.",
+            severity: "error",
+          });
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        formik.setStatus({
+          message: "Ha ocurrido un error. Por favor, inténtalo de nuevo.",
+          severity: "error",
+        });
+      }
+    },
+  });
+
   useEffect(() => {
     const tokenFromUrl = searchParams.get("token");
     if (tokenFromUrl) {
-      setToken(tokenFromUrl);
+      formik.setFieldValue("token", tokenFromUrl);
     } else {
-      setError("Token no encontrado en la URL.");
+      formik.setStatus({
+        message: "Token no encontrado en la URL.",
+        severity: "error",
+      });
     }
   }, [searchParams]);
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setError("");
-    setMessage("");
-
-    if (newPassword !== confirmPassword) {
-      setError("Las contraseñas no coinciden.");
-      return;
-    }
-
-    try {
-      const response = await fetch("/api/auth/reset-password", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ token, newPassword }),
-      });
-
-      const data = await response.json();
-
-      if (response.ok) {
-        setMessage("Contraseña restablecida con éxito.");
-        setTimeout(() => router.push("/login"), 500);
-      } else {
-        setError(
-          data.error || "Ha ocurrido un error al restablecer la contraseña."
-        );
-      }
-    } catch (error) {
-      console.error("Error:", error);
-      setError("Ha ocurrido un error. Por favor, inténtalo de nuevo.");
-    }
-  };
 
   return (
     <Container
@@ -89,63 +113,108 @@ function ResetPasswordForm() {
           }}
         />
       )}
-      <Box
-        sx={{ display: "flex", flexDirection: "column", alignItems: "center" }}
+      <Paper
+        elevation={3}
+        sx={{
+          p: 4,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          width: "100%",
+        }}
       >
-        <Typography component="h1" variant="h5">
+        <Box
+          sx={{
+            mb: 4,
+            width: "200px",
+            height: "60px",
+            position: "relative",
+          }}
+        >
+          <Image
+            src="/bosch-icon.svg"
+            alt="Bosch Logo"
+            layout="fill"
+            objectFit="contain"
+            priority
+          />
+        </Box>
+
+        <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
           Restablecer contraseña
         </Typography>
-        {error && (
-          <Alert severity="error" sx={{ mt: 2, width: "100%" }}>
-            {error}
+
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mb: 3, textAlign: "center" }}
+        >
+          Ingresa y confirma tu nueva contraseña para restablecer tu cuenta.
+        </Typography>
+
+        {formik.status && (
+          <Alert
+            severity={formik.status.severity}
+            sx={{ mt: 2, mb: 2, width: "100%" }}
+          >
+            {formik.status.message}
           </Alert>
         )}
-        {message && (
-          <Alert severity="success" sx={{ mt: 2, width: "100%" }}>
-            {message}
-          </Alert>
-        )}
+
         <Box
           component="form"
-          onSubmit={handleSubmit}
-          noValidate
-          sx={{ mt: 1, width: "100%" }}
+          onSubmit={formik.handleSubmit}
+          sx={{
+            width: "100%",
+            "& .MuiTextField-root": { width: "100%" },
+          }}
         >
           <TextField
             margin="normal"
-            required
-            fullWidth
             name="newPassword"
             label="Nueva contraseña"
             type="password"
             id="newPassword"
             autoComplete="new-password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
+            value={formik.values.newPassword}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={
+              formik.touched.newPassword && Boolean(formik.errors.newPassword)
+            }
+            helperText={formik.touched.newPassword && formik.errors.newPassword}
+            aria-label="Nueva contraseña"
           />
           <TextField
             margin="normal"
-            required
-            fullWidth
             name="confirmPassword"
             label="Confirmar nueva contraseña"
             type="password"
             id="confirmPassword"
             autoComplete="new-password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            value={formik.values.confirmPassword}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            error={
+              formik.touched.confirmPassword &&
+              Boolean(formik.errors.confirmPassword)
+            }
+            helperText={
+              formik.touched.confirmPassword && formik.errors.confirmPassword
+            }
+            aria-label="Confirmar nueva contraseña"
           />
           <Button
             type="submit"
             fullWidth
             variant="contained"
             sx={{ mt: 3, mb: 2 }}
-            disabled={!token || isLoading}
+            disabled={!formik.values.token || formik.isSubmitting || isLoading}
           >
             Restablecer contraseña
           </Button>
         </Box>
-      </Box>
+      </Paper>
     </Container>
   );
 }
