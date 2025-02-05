@@ -181,7 +181,7 @@ export default function LoginPage() {
             Ingresar
           </Button>
           <Link
-            href="#"
+            href="/forgot-password"
             variant="body2"
             sx={{
               display: "block",
