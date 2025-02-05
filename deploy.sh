@@ -13,6 +13,7 @@ handle_error() {
 
 echo "🚀 Iniciando proceso de despliegue..."
 echo "📦 Construyendo la aplicación localmente..."
+nvm use 18.17.0
 npm run build || handle_error "Falló el build local"
 
 echo "\n🔄 Conectando al servidor remoto..."
