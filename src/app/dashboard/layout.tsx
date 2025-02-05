@@ -173,7 +173,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const menuSections = useMemo(
     () => [
       {
-        title: "Gestión de Personal",
+        title: "Administración de Usuarios",
         icono: <PeopleIcon />,
         items: [
           {
@@ -190,14 +190,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "Mecanicos",
-            texto: "Empleados",
+            texto: "Mecánicos",
             icono: <BuildIcon />,
             ruta: "/dashboard/mecanicos",
           },
         ],
       },
       {
-        title: "Clientes y Vehículos",
+        title: "Clientes",
         icono: <DirectionsCarIcon />,
         items: [
           {
@@ -208,14 +208,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "Autos",
-            texto: "Autos",
+            texto: "Vehículos",
             icono: <DirectionsCarIcon />,
             ruta: "/dashboard/autos",
           },
         ],
       },
       {
-        title: "Operaciones del Taller",
+        title: "Gestión de Taller",
         icono: <BuildIcon />,
         items: [
           {
