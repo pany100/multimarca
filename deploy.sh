@@ -11,9 +11,13 @@ handle_error() {
     exit 1
 }
 
+# Cargar NVM
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+
 echo "🚀 Iniciando proceso de despliegue..."
 echo "📦 Construyendo la aplicación localmente..."
-nvm use 18.17.0
+nvm use 18.17.0 || handle_error "Falló la carga de NVM"
 npm run build || handle_error "Falló el build local"
 
 echo "\n🔄 Conectando al servidor remoto..."
