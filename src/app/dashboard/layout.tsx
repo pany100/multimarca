@@ -409,154 +409,199 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   }, [pathname, menuSections]);
 
   const drawer = (
-    <>
+    <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <Box
         sx={{
+          p: 2,
           display: "flex",
           alignItems: "center",
-          p: 2,
           justifyContent: "space-between",
+          borderBottom: 1,
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          height: 64,
         }}
       >
         {(!drawerCompressed || isMobile) && (
-          <>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <Image
-              src="/mtservice-icon.png"
+              src="/bosch-icon.svg"
               alt="MT Service"
               width={40}
               height={40}
+              style={{ borderRadius: "8px" }}
             />
-            <Typography variant="h6" noWrap sx={{ flexGrow: 1, ml: 2 }}>
-              MT Service Multimarca
-            </Typography>
-          </>
+            <Box sx={{ display: "flex", flexDirection: "column" }}>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 600,
+                  color: "primary.main",
+                  lineHeight: 1.2,
+                }}
+              >
+                MT Service
+              </Typography>
+              <Typography
+                variant="caption"
+                sx={{
+                  color: "text.secondary",
+                }}
+              >
+                Multimarca
+              </Typography>
+            </Box>
+          </Box>
         )}
         {!isMobile && (
-          <IconButton onClick={handleDrawerCompress}>
-            {drawerCompressed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-          </IconButton>
+          <Tooltip
+            title={drawerCompressed ? "Expandir menú" : "Comprimir menú"}
+          >
+            <IconButton
+              onClick={handleDrawerCompress}
+              sx={{
+                bgcolor: "action.hover",
+                "&:hover": { bgcolor: "action.selected" },
+              }}
+            >
+              {drawerCompressed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            </IconButton>
+          </Tooltip>
         )}
       </Box>
-      <List>
+
+      <List
+        sx={{
+          flex: 1,
+          px: 1,
+          py: 2,
+          overflowY: "auto",
+          "&::-webkit-scrollbar": {
+            width: "4px",
+          },
+          "&::-webkit-scrollbar-track": {
+            background: "transparent",
+          },
+          "&::-webkit-scrollbar-thumb": {
+            background: "rgba(0,0,0,0.2)",
+            borderRadius: "2px",
+          },
+        }}
+      >
         {menuSections.map(
           (section, index) =>
             section.items.some((item) => permisos.includes(item.permiso)) && (
-              <React.Fragment key={index}>
+              <Box key={index}>
                 <ListItem
                   button
                   onClick={() => handleSectionToggle(section.title)}
                   sx={{
+                    mb: 0.5,
+                    borderRadius: 1,
                     bgcolor: openSections[section.title]
-                      ? "action.selected"
-                      : "inherit",
+                      ? "primary.main"
+                      : "transparent",
+                    color: openSections[section.title] ? "white" : "inherit",
+                    "&:hover": {
+                      bgcolor: openSections[section.title]
+                        ? "primary.dark"
+                        : "action.hover",
+                    },
                   }}
                 >
-                  {section.icono && (
-                    <ListItemIcon
-                      sx={{
-                        position: "absolute",
-                        top: 0,
-                        left: 0,
-                        margin: "8px",
-                      }}
-                    >
-                      {section.icono}
-                    </ListItemIcon>
-                  )}
-                  <Tooltip key={index} title={section.title} placement="right">
-                    <ListItemText
-                      primary={section.title}
-                      sx={{
-                        "& .MuiListItemText-primary": {
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
-                          fontWeight: openSections[section.title]
-                            ? "bold"
-                            : "normal",
-                        },
-                      }}
-                    />
-                  </Tooltip>
-                  {openSections[section.title] ? (
-                    <ExpandLess />
-                  ) : (
-                    <ExpandMore />
+                  <ListItemIcon
+                    sx={{
+                      minWidth: drawerCompressed && !isMobile ? 0 : 40,
+                      color: openSections[section.title] ? "white" : "inherit",
+                    }}
+                  >
+                    {section.icono}
+                  </ListItemIcon>
+                  {(!drawerCompressed || isMobile) && (
+                    <>
+                      <ListItemText
+                        primary={section.title}
+                        sx={{
+                          "& .MuiListItemText-primary": {
+                            fontWeight: 500,
+                            fontSize: "0.875rem",
+                          },
+                        }}
+                      />
+                      {openSections[section.title] ? (
+                        <ExpandLess />
+                      ) : (
+                        <ExpandMore />
+                      )}
+                    </>
                   )}
                 </ListItem>
-                <Collapse
-                  in={openSections[section.title]}
-                  timeout="auto"
-                  unmountOnExit
-                >
-                  <List component="div" disablePadding>
+                <Collapse in={openSections[section.title]} timeout="auto">
+                  <List
+                    component="div"
+                    sx={{
+                      py: 0.5,
+                      pl: drawerCompressed && !isMobile ? 0 : 2,
+                    }}
+                  >
                     {section.items.map(
                       (item, itemIndex) =>
                         permisos.includes(item.permiso) && (
-                          <Tooltip
+                          <ListItem
                             key={itemIndex}
-                            title={item.texto}
-                            placement="right"
+                            button
+                            component={Link}
+                            href={item.ruta}
+                            onClick={handleMenuItemClick}
+                            sx={{
+                              mb: 0.5,
+                              borderRadius: 1,
+                              pl: 2,
+                              color: pathname.startsWith(item.ruta)
+                                ? "primary.main"
+                                : "text.primary",
+                              bgcolor: pathname.startsWith(item.ruta)
+                                ? "action.selected"
+                                : "transparent",
+                              "&:hover": {
+                                bgcolor: "action.hover",
+                              },
+                            }}
                           >
-                            <ListItem
-                              button
-                              component={Link}
-                              href={item.ruta}
-                              onClick={handleMenuItemClick}
+                            <ListItemIcon
                               sx={{
-                                pl: 4,
-                                justifyContent:
-                                  drawerCompressed && !isMobile
-                                    ? "center"
-                                    : "flex-start",
-                                bgcolor: pathname.startsWith(item.ruta)
-                                  ? "action.selected"
+                                minWidth:
+                                  drawerCompressed && !isMobile ? 0 : 40,
+                                color: pathname.startsWith(item.ruta)
+                                  ? "primary.main"
                                   : "inherit",
-                                "&:hover": {
-                                  bgcolor: "action.hover",
-                                },
                               }}
                             >
-                              <ListItemIcon
+                              {item.icono}
+                            </ListItemIcon>
+                            {(!drawerCompressed || isMobile) && (
+                              <ListItemText
+                                primary={item.texto}
                                 sx={{
-                                  minWidth:
-                                    drawerCompressed && !isMobile ? 0 : 40,
-                                  color: pathname.startsWith(item.ruta)
-                                    ? "primary.main"
-                                    : "inherit",
+                                  "& .MuiListItemText-primary": {
+                                    fontWeight: pathname.startsWith(item.ruta)
+                                      ? 600
+                                      : 400,
+                                    fontSize: "0.875rem",
+                                  },
                                 }}
-                              >
-                                {item.icono}
-                              </ListItemIcon>
-                              {(!drawerCompressed || isMobile) && (
-                                <ListItemText
-                                  primary={item.texto}
-                                  sx={{
-                                    "& .MuiListItemText-primary": {
-                                      whiteSpace: "nowrap",
-                                      overflow: "hidden",
-                                      textOverflow: "ellipsis",
-                                      fontWeight: pathname.startsWith(item.ruta)
-                                        ? "bold"
-                                        : "normal",
-                                      color: pathname.startsWith(item.ruta)
-                                        ? "primary.main"
-                                        : "inherit",
-                                    },
-                                  }}
-                                />
-                              )}
-                            </ListItem>
-                          </Tooltip>
+                              />
+                            )}
+                          </ListItem>
                         )
                     )}
                   </List>
                 </Collapse>
-              </React.Fragment>
+              </Box>
             )
         )}
       </List>
-    </>
+    </Box>
   );
 
   return (
@@ -598,26 +643,21 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               >
                 <MenuIcon />
               </IconButton>
-              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                <Image
-                  src="/bosch-icon.svg"
-                  alt="MT Service"
-                  width={40}
-                  height={40}
-                  style={{ borderRadius: "8px" }}
-                />
-                <Typography
-                  variant="h6"
-                  noWrap
-                  sx={{
-                    color: "text.primary",
-                    fontWeight: 600,
-                    display: { xs: "none", sm: "block" },
-                  }}
-                >
-                  MT Service
-                </Typography>
-              </Box>
+              <Typography
+                variant="h6"
+                noWrap
+                sx={{
+                  color: "text.primary",
+                  fontWeight: 500,
+                }}
+              >
+                {pathname === "/dashboard"
+                  ? "Dashboard"
+                  : menuSections
+                      .flatMap((section) => section.items)
+                      .find((item) => pathname.startsWith(item.ruta))?.texto ||
+                    "Dashboard"}
+              </Typography>
             </Box>
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
