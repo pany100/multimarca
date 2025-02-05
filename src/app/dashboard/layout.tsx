@@ -575,36 +575,104 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       <Box sx={{ display: "flex" }}>
         <AppBar
           position="fixed"
+          elevation={1}
           sx={{
             zIndex: (theme) => theme.zIndex.drawer + 1,
-            backgroundColor: theme.palette.grey[800],
+            backgroundColor: "background.paper",
+            borderBottom: 1,
+            borderColor: "divider",
           }}
         >
-          <Toolbar sx={{ justifyContent: "space-between" }}>
-            <Box sx={{ display: "flex", alignItems: "center" }}>
+          <Toolbar sx={{ justifyContent: "space-between", height: 64 }}>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <IconButton
                 color="inherit"
                 aria-label="open drawer"
                 edge="start"
                 onClick={handleDrawerToggle}
-                sx={{ mr: 2, display: { md: "none" } }}
+                sx={{
+                  mr: 2,
+                  display: { md: "none" },
+                  color: "text.primary",
+                }}
               >
                 <MenuIcon />
               </IconButton>
-              <Typography variant="h6" noWrap component="div">
-                Dashboard
-              </Typography>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <Image
+                  src="/bosch-icon.svg"
+                  alt="MT Service"
+                  width={40}
+                  height={40}
+                  style={{ borderRadius: "8px" }}
+                />
+                <Typography
+                  variant="h6"
+                  noWrap
+                  sx={{
+                    color: "text.primary",
+                    fontWeight: 600,
+                    display: { xs: "none", sm: "block" },
+                  }}
+                >
+                  MT Service
+                </Typography>
+              </Box>
             </Box>
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <Typography variant="body1" sx={{ mr: 2 }}>
-                {userName}
-              </Typography>
+
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+              <IconButton
+                sx={{ color: "text.secondary" }}
+                onClick={() =>
+                  router.push("/dashboard/notificaciones-internas")
+                }
+              >
+                <Badge badgeContent={cantidadNotificaciones} color="error">
+                  <NotificationsIcon />
+                </Badge>
+              </IconButton>
+
+              <IconButton
+                sx={{ color: "text.secondary" }}
+                onClick={() => router.push("/dashboard/whatsapp")}
+              >
+                <Badge
+                  badgeContent={notificacionesWhatsappNoLeidas}
+                  color="error"
+                >
+                  <WhatsAppIcon />
+                </Badge>
+              </IconButton>
+
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                  p: 1,
+                  borderRadius: 1,
+                  bgcolor: "action.hover",
+                }}
+              >
+                <PersonIcon sx={{ color: "text.secondary" }} />
+                <Typography
+                  variant="body2"
+                  sx={{
+                    color: "text.primary",
+                    fontWeight: 500,
+                    display: { xs: "none", sm: "block" },
+                  }}
+                >
+                  {userName}
+                </Typography>
+              </Box>
+
               <Tooltip title="Cerrar sesión">
                 <IconButton
-                  color="inherit"
-                  onClick={() => {
-                    logout();
-                    router.push("/login");
+                  onClick={logout}
+                  sx={{
+                    color: "error.main",
+                    "&:hover": { bgcolor: "error.lighter" },
                   }}
                 >
                   <LogoutIcon />
