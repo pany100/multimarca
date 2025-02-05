@@ -718,7 +718,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
               <Tooltip title="Cerrar sesión">
                 <IconButton
-                  onClick={logout}
+                  onClick={() => {
+                    logout();
+                    router.push("/login");
+                  }}
                   sx={{
                     color: "error.main",
                     "&:hover": { bgcolor: "error.lighter" },
