@@ -19,17 +19,19 @@ export async function PUT(request: Request) {
 
     const factorAumento = 1 + porcentajeAumento / 100;
 
-    const trabajosActualizados = await prisma.manoDeObra.updateMany({
-      data: {
-        sellPrice: {
-          multiply: factorAumento,
-        },
-      },
-    });
+    const trabajosActualizados = await prisma.$executeRaw`
+    UPDATE ManoDeObra
+    SET sellPrice = 
+      CASE 
+        WHEN ROUND(sellPrice * ${factorAumento}, 2) % 1000 > 0 
+        THEN CEILING(ROUND(sellPrice * ${factorAumento}, 2) / 1000) * 1000
+        ELSE ROUND(sellPrice * ${factorAumento}, 2)
+      END
+  `;
 
     return NextResponse.json({
       mensaje: "Precios de mano de obra actualizados con éxito",
-      trabajosActualizados: trabajosActualizados.count,
+      trabajosActualizados: trabajosActualizados,
     });
   } catch (error) {
     console.error("Error al actualizar precios de mano de obra:", error);
