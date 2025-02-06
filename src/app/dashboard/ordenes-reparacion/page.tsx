@@ -1,6 +1,7 @@
 "use client";
 import BoschTemplate from "@/components/orden-reparacion/pdf/BoschTemplate";
 import { useFetch } from "@/contexts/FetchContext";
+import { boschColors } from "@/theme";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -300,8 +301,8 @@ const OrdenesReparacionPage = () => {
           variant="contained"
           onClick={handleBoschTemplatePrint}
           sx={{
-            backgroundColor: "#87CEEB",
-            "&:hover": { backgroundColor: "#5F9EA0" },
+            backgroundColor: boschColors.boschBlue[75],
+            "&:hover": { backgroundColor: boschColors.boschBlue[50] },
             marginLeft: "auto", // Esto empujará el botón hacia la derecha
           }}
         >
