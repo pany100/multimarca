@@ -11,7 +11,6 @@ import {
   DialogContent,
   DialogTitle,
   IconButton,
-  Modal,
   Snackbar,
   TextField,
   Typography,
@@ -413,24 +412,31 @@ function CrudTable<T extends { id: string }>({
           }}
         />
       )}
-      <Modal open={editModalOpen} onClose={() => setEditModalOpen(false)}>
-        <Box
+      <Dialog
+        open={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: 1,
+            boxShadow: 3,
+          },
+        }}
+      >
+        <DialogTitle
           sx={{
-            position: "absolute",
-            top: "50%",
-            left: "50%",
-            transform: "translate(-50%, -50%)",
-            width: 600,
+            pb: 2,
+            borderBottom: 1,
+            borderColor: "divider",
             bgcolor: "background.paper",
-            boxShadow: 24,
-            p: 4,
-            maxHeight: "90vh",
-            overflow: "scroll",
           }}
         >
-          <Typography variant="h6" component="h2">
-            Editar {title}
+          <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+            Editar
           </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ pt: 3, pb: 3 }}>
           <DynamicForm<T>
             item={editingItem}
             fields={fields}
@@ -439,27 +445,34 @@ function CrudTable<T extends { id: string }>({
             validationSchema={validationSchema}
             cancel={() => setEditModalOpen(false)}
           />
-        </Box>
-      </Modal>
+        </DialogContent>
+      </Dialog>
       {createNewItem && (
-        <Modal open={addModalOpen} onClose={() => setAddModalOpen(false)}>
-          <Box
+        <Dialog
+          open={addModalOpen}
+          onClose={() => setAddModalOpen(false)}
+          maxWidth="sm"
+          fullWidth
+          PaperProps={{
+            sx: {
+              borderRadius: 1,
+              boxShadow: 3,
+            },
+          }}
+        >
+          <DialogTitle
             sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: "translate(-50%, -50%)",
-              width: 600,
+              pb: 2,
+              borderBottom: 1,
+              borderColor: "divider",
               bgcolor: "background.paper",
-              boxShadow: 24,
-              p: 4,
-              maxHeight: "90vh",
-              overflow: "scroll",
             }}
           >
-            <Typography variant="h6" component="h2">
-              Agregar nuevo {title}
+            <Typography variant="h6" component="div" sx={{ fontWeight: 600 }}>
+              Agregar Nuevo
             </Typography>
+          </DialogTitle>
+          <DialogContent sx={{ pt: 3, pb: 3 }}>
             <DynamicForm<T>
               item={newItem}
               fields={fields}
@@ -468,8 +481,8 @@ function CrudTable<T extends { id: string }>({
               validationSchema={validationSchema}
               cancel={() => setAddModalOpen(false)}
             />
-          </Box>
-        </Modal>
+          </DialogContent>
+        </Dialog>
       )}
       <Dialog
         open={deleteConfirmOpen}
