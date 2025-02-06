@@ -17,6 +17,29 @@ declare module "@mui/material/styles" {
   }
 }
 
+// Brand Colors Definition
+const boschColors = {
+  // Primary Brand Color
+  primary: "#00304B", // Bosch Blue
+  // Secondary Brand Colors
+  secondary: "#4C90CD", // Bosch Service Blye
+
+  white: "#FFFFFF",
+
+  fillColor: "#E20015",
+
+  // Design Colors - Bosch Blue variations
+  boschBlue: {
+    100: "#003B6A",
+    75: "#215F8B",
+    50: "#628CB2",
+    25: "#A2BAD2",
+  },
+
+  // Bosch Gray
+  boschGray: "#808285",
+};
+
 // Definimos las opciones del tema para cada modo
 const lightThemeOptions: ThemeOptions = {
   palette: {
@@ -52,6 +75,21 @@ const lightThemeOptions: ThemeOptions = {
     MuiDataGrid: {
       defaultProps: {
         disableColumnMenu: true,
+      },
+    },
+    MuiAppBar: {
+      styleOverrides: {
+        root: {
+          backgroundColor: boschColors.boschBlue[25], // Light blue for AppBar
+        },
+      },
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        paper: {
+          backgroundColor: boschColors.white,
+          borderRight: `1px solid ${boschColors.boschBlue[25]}`,
+        },
       },
     },
   },
@@ -118,3 +156,4 @@ export const createTheme = (mode: PaletteMode) => {
 const defaultTheme = createTheme("light");
 
 export default defaultTheme;
+export { boschColors };

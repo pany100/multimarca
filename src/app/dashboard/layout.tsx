@@ -42,6 +42,7 @@ import "src/app/globals.css";
 import { useFetch } from "@/contexts/FetchContext";
 import { useSocket } from "@/hooks/useSocket";
 
+import { boschColors } from "@/theme";
 import AlarmIcon from "@mui/icons-material/Alarm";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import { default as AttachMoneyIcon } from "@mui/icons-material/AttachMoney";
@@ -632,9 +633,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           elevation={1}
           sx={{
             zIndex: (theme) => theme.zIndex.drawer + 1,
-            backgroundColor: "background.paper",
-            borderBottom: 1,
-            borderColor: "divider",
+            backgroundColor: boschColors.boschBlue[100],
+            borderBottom: 0,
           }}
         >
           <Toolbar sx={{ justifyContent: "space-between", height: 64 }}>
@@ -647,7 +647,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 sx={{
                   mr: 2,
                   display: { md: "none" },
-                  color: "text.primary",
+                  color: boschColors.white,
                 }}
               >
                 <MenuIcon />
@@ -656,7 +656,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 variant="h6"
                 noWrap
                 sx={{
-                  color: "text.primary",
+                  color: boschColors.white,
                   fontWeight: 500,
                 }}
               >
@@ -671,7 +671,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
             <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
               <IconButton
-                sx={{ color: "text.secondary" }}
+                sx={{ color: boschColors.white }}
                 onClick={() =>
                   router.push("/dashboard/notificaciones-internas")
                 }
@@ -682,7 +682,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               </IconButton>
 
               <IconButton
-                sx={{ color: "text.secondary" }}
+                sx={{ color: boschColors.white }}
                 onClick={() => router.push("/dashboard/whatsapp")}
               >
                 <Badge
@@ -703,11 +703,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                   bgcolor: "action.hover",
                 }}
               >
-                <PersonIcon sx={{ color: "text.secondary" }} />
+                <PersonIcon sx={{ color: boschColors.white }} />
                 <Typography
                   variant="body2"
                   sx={{
-                    color: "text.primary",
+                    color: boschColors.white,
                     fontWeight: 500,
                     display: { xs: "none", sm: "block" },
                   }}
@@ -723,7 +723,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                     router.push("/login");
                   }}
                   sx={{
-                    color: "error.main",
+                    color: boschColors.white,
                     "&:hover": { bgcolor: "error.lighter" },
                   }}
                 >
@@ -765,6 +765,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.enteringScreen,
             }),
+            minHeight: "100vh",
+            backgroundColor: "background.paper",
           }}
         >
           {isMobile && (
