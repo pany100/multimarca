@@ -483,11 +483,39 @@ function DynamicForm<T extends FieldValues>({
           );
         })}
       </Grid>
-      <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-        <Button variant="outlined" onClick={() => cancel()} sx={{ mr: 1 }}>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "flex-end",
+          gap: 2,
+          mt: 2,
+        }}
+      >
+        <Button
+          variant="outlined"
+          onClick={() => cancel()}
+          sx={{
+            borderColor: "grey.300",
+            color: "text.secondary",
+            "&:hover": {
+              borderColor: "grey.400",
+              backgroundColor: "grey.50",
+            },
+          }}
+        >
           Cancelar
         </Button>
-        <Button type="submit" variant="contained">
+        <Button
+          type="submit"
+          variant="contained"
+          sx={{
+            backgroundColor: "primary.main",
+            color: "white",
+            "&:hover": {
+              backgroundColor: "primary.dark",
+            },
+          }}
+        >
           Guardar
         </Button>
       </Box>
