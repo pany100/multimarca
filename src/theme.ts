@@ -44,12 +44,12 @@ const boschColors = {
 const lightThemeOptions: ThemeOptions = {
   palette: {
     primary: {
-      main: "#005691", // Bosch Blue
+      main: boschColors.secondary, // Bosch Blue
       light: "#0076C8",
       dark: "#003F6B",
     },
     secondary: {
-      main: "#EA0016", // Bosch Red
+      main: boschColors.fillColor,
       light: "#FF1A1A",
       dark: "#C70012",
     },
