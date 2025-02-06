@@ -782,16 +782,35 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           )}
           <Toolbar />
           <Container maxWidth="lg">
-            <Typography variant="h4" component="h1" gutterBottom>
-              Dashboard
-            </Typography>
-            <Box sx={{ mb: 2 }}>
+            <Box
+              sx={{
+                mb: 3,
+                display: "flex",
+                alignItems: "center",
+              }}
+            >
               <Typography
                 variant="body2"
                 component="a"
                 onClick={() => window.history.back()}
-                sx={{ cursor: "pointer", textDecoration: "underline", mr: 2 }}
+                sx={{
+                  cursor: "pointer",
+                  color: "text.secondary",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  textDecoration: "none",
+                  "&:hover": {
+                    color: "primary.main",
+                    textDecoration: "none",
+                  },
+                  fontWeight: 500,
+                  fontSize: "0.875rem",
+                }}
               >
+                <Box component="span" sx={{ fontSize: "1.2rem" }}>
+                  ←
+                </Box>
                 Volver
               </Typography>
             </Box>

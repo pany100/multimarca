@@ -300,28 +300,80 @@ function CrudTable<T extends { id: string }>({
   };
 
   return (
-    <Box>
-      <Typography variant="h5" component="h2" gutterBottom>
-        {title}
-      </Typography>
-      {createNewItem && (
-        <Button
-          variant="contained"
-          color="primary"
-          startIcon={<AddIcon />}
-          onClick={handleAddClick}
+    <Box sx={{ width: "100%", p: 0 }}>
+      <Box
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: 3,
+          mb: 4,
+        }}
+      >
+        <Typography
+          variant="h5"
+          sx={{
+            fontWeight: 600,
+            color: "text.primary",
+            mb: 1,
+          }}
         >
-          Agregar {title}
-        </Button>
-      )}
-      <TextField
-        label="Buscar"
-        variant="outlined"
-        value={searchTerm}
-        onChange={handleSearchChange}
-        fullWidth
-        margin="normal"
-      />
+          {title}
+        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 2,
+          }}
+        >
+          <TextField
+            placeholder="Buscar..."
+            variant="outlined"
+            size="small"
+            value={searchTerm}
+            onChange={handleSearchChange}
+            sx={{
+              width: 300,
+              "& .MuiOutlinedInput-root": {
+                backgroundColor: "background.paper",
+                "&:hover fieldset": {
+                  borderColor: "primary.main",
+                },
+              },
+            }}
+            InputProps={{
+              startAdornment: (
+                <Box component="span" sx={{ color: "text.secondary", mr: 1 }}>
+                  🔍
+                </Box>
+              ),
+            }}
+          />
+
+          {createNewItem && (
+            <Button
+              variant="contained"
+              onClick={handleAddClick}
+              startIcon={<AddIcon />}
+              sx={{
+                backgroundColor: (theme) => theme.palette.primary.main,
+                color: "white",
+                "&:hover": {
+                  backgroundColor: (theme) => theme.palette.primary.dark,
+                },
+                px: 3,
+                py: 1,
+                borderRadius: 1,
+                boxShadow: 1,
+              }}
+            >
+              AGREGAR {title.toUpperCase()}
+            </Button>
+          )}
+        </Box>
+      </Box>
+
       {!loading && items.length === 0 ? (
         <Typography>No hay datos para mostrar</Typography>
       ) : (
@@ -339,13 +391,24 @@ function CrudTable<T extends { id: string }>({
           getRowClassName={getRowClassName}
           getRowHeight={() => "auto"}
           sx={{
+            border: 1,
+            borderColor: "divider",
+            "& .MuiDataGrid-columnHeaders": {
+              backgroundColor: (theme) => theme.palette.primary.main,
+              fontSize: "0.875rem",
+              fontWeight: 600,
+            },
             "& .MuiDataGrid-cell": {
               display: "flex",
               alignItems: "center",
               minHeight: "50px",
+              fontSize: "0.875rem",
             },
             "& .MuiDataGrid-row": {
               minHeight: "50px !important", // Asegura la altura mínima para la fila
+              "&:hover": {
+                backgroundColor: "action.hover",
+              },
             },
           }}
         />
