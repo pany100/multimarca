@@ -1,3 +1,4 @@
+import CustomSelect from "@/components/formV2/CustomSelect";
 import useRoles from "@/hooks/useRoles";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
@@ -77,31 +78,15 @@ const UsuarioForm = ({ onSubmit, initialValues }: UsuarioFormProps) => {
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <TextField
+          <CustomSelect
             {...register("rolId")}
+            id="rolId-select"
             label="Rol"
             type="number"
             error={!!errors.rolId}
             helperText={errors.rolId?.message?.toString()}
-            fullWidth
-            select
-            SelectProps={{
-              native: true,
-              displayEmpty: true,
-            }}
-            InputLabelProps={{
-              shrink: true,
-            }}
-          >
-            <option value="" disabled hidden>
-              Seleccionar Rol
-            </option>
-            {roles.map((role) => (
-              <option key={role.value} value={role.value}>
-                {role.label}
-              </option>
-            ))}
-          </TextField>
+            options={roles}
+          />
         </Grid>
       </Grid>
 
