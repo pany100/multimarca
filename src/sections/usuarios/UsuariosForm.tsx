@@ -9,7 +9,8 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 
 interface UsuarioFormProps {
@@ -32,14 +33,21 @@ const schema = yup.object().shape({
 
 const UsuarioForm = ({ onSubmit, initialValues }: UsuarioFormProps) => {
   const {
-    register,
+    control,
     handleSubmit,
     formState: { errors, isSubmitting },
+    reset,
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: initialValues,
   });
   const { roles } = useRoles();
+
+  useEffect(() => {
+    if (initialValues) {
+      reset(initialValues);
+    }
+  }, [initialValues, reset]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -49,43 +57,68 @@ const UsuarioForm = ({ onSubmit, initialValues }: UsuarioFormProps) => {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <TextField
-            {...register("fullName")}
-            label="Nombre completo"
-            error={!!errors.fullName}
-            helperText={errors.fullName?.message?.toString()}
-            fullWidth
-            autoFocus
+          <Controller
+            name="fullName"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Nombre completo"
+                error={!!errors.fullName}
+                helperText={errors.fullName?.message?.toString()}
+                fullWidth
+                autoFocus
+              />
+            )}
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <TextField
-            {...register("username")}
-            label="Nombre de usuario"
-            error={!!errors.username}
-            helperText={errors.username?.message?.toString()}
-            fullWidth
+          <Controller
+            name="username"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Nombre de usuario"
+                error={!!errors.username}
+                helperText={errors.username?.message?.toString()}
+                fullWidth
+              />
+            )}
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <TextField
-            {...register("email")}
-            label="Email"
-            type="email"
-            error={!!errors.email}
-            helperText={errors.email?.message?.toString()}
-            fullWidth
+          <Controller
+            name="email"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Email"
+                type="email"
+                error={!!errors.email}
+                helperText={errors.email?.message?.toString()}
+                fullWidth
+              />
+            )}
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomSelect
-            {...register("rolId")}
-            id="rolId-select"
-            label="Rol"
-            type="number"
-            error={!!errors.rolId}
-            helperText={errors.rolId?.message?.toString()}
-            options={roles}
+          <Controller
+            name="rolId"
+            control={control}
+            render={({ field: { value, onChange, ...field } }) => (
+              <CustomSelect
+                {...field}
+                value={value ?? ""}
+                onChange={onChange}
+                id="rolId"
+                label="Rol"
+                error={!!errors.rolId}
+                helperText={errors.rolId?.message?.toString()}
+                options={roles}
+              />
+            )}
           />
         </Grid>
       </Grid>
