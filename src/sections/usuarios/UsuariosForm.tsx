@@ -60,10 +60,11 @@ const UsuarioForm = ({ onSubmit, initialValues }: UsuarioFormProps) => {
           <Controller
             name="fullName"
             control={control}
-            render={({ field }) => (
+            render={({ field: { value, ...field } }) => (
               <TextField
                 {...field}
                 label="Nombre completo"
+                value={value ?? ""}
                 error={!!errors.fullName}
                 helperText={errors.fullName?.message?.toString()}
                 fullWidth
@@ -76,10 +77,11 @@ const UsuarioForm = ({ onSubmit, initialValues }: UsuarioFormProps) => {
           <Controller
             name="username"
             control={control}
-            render={({ field }) => (
+            render={({ field: { value, ...field } }) => (
               <TextField
                 {...field}
                 label="Nombre de usuario"
+                value={value ?? ""}
                 error={!!errors.username}
                 helperText={errors.username?.message?.toString()}
                 fullWidth
@@ -91,10 +93,11 @@ const UsuarioForm = ({ onSubmit, initialValues }: UsuarioFormProps) => {
           <Controller
             name="email"
             control={control}
-            render={({ field }) => (
+            render={({ field: { value, ...field } }) => (
               <TextField
                 {...field}
                 label="Email"
+                value={value ?? ""}
                 type="email"
                 error={!!errors.email}
                 helperText={errors.email?.message?.toString()}
