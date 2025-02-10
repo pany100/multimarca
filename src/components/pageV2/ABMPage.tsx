@@ -3,7 +3,9 @@ import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { Alert, MenuItem, Snackbar } from "@mui/material";
 import React, { useState } from "react";
+import * as yup from "yup";
 import { CrudAction } from "../formV2/constants";
+import CustomForm from "../formV2/CustomForm";
 import DeleteModal from "../formV2/DeleteModal";
 import FormModal from "../formV2/FormModal";
 
@@ -12,6 +14,7 @@ type Props = {
   table: React.ComponentType<any>;
   form: React.ComponentType<any>;
   crudActions: CrudAction[];
+  schema: yup.ObjectSchema<any>;
 };
 
 function ABMPage({
@@ -19,6 +22,7 @@ function ABMPage({
   table: Table,
   form: Form,
   crudActions,
+  schema,
 }: Props) {
   const { authFetch } = useFetch();
 
@@ -174,19 +178,23 @@ function ABMPage({
           open={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
         >
-          <Form
+          <CustomForm
             onCancel={() => setIsAddModalOpen(false)}
             onSubmit={handleAddSubmit}
+            schema={schema}
+            formDefinition={Form}
           />
         </FormModal>
       )}
 
       {crudActions.includes(CrudAction.EDIT) && (
         <FormModal open={isEditModalOpen} onClose={handleCloseEdit}>
-          <Form
+          <CustomForm
             onCancel={handleCloseEdit}
             initialValues={entity}
             onSubmit={handleEditSubmit}
+            schema={schema}
+            formDefinition={Form}
           />
         </FormModal>
       )}

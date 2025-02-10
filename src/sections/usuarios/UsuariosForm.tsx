@@ -1,19 +1,16 @@
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useRoles from "@/hooks/useRoles";
-import { yupResolver } from "@hookform/resolvers/yup";
-import { Box, Button, CircularProgress, Grid, Typography } from "@mui/material";
-import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Grid, Typography } from "@mui/material";
+import { Control, FieldErrors } from "react-hook-form";
 import * as yup from "yup";
 
 interface UsuarioFormProps {
-  onSubmit: (data: any) => void;
-  onCancel?: () => void;
-  initialValues?: any;
+  control: Control<any>;
+  errors: FieldErrors<any>;
 }
 
-const schema = yup.object().shape({
+export const schema = yup.object().shape({
   fullName: yup.string().required("El nombre es requerido"),
   username: yup.string().required("El nombre de usuario es requerido"),
   email: yup
@@ -27,30 +24,11 @@ const schema = yup.object().shape({
     .required("El rol es requerido"),
 });
 
-const UsuariosForm = ({
-  onSubmit,
-  onCancel,
-  initialValues,
-}: UsuarioFormProps) => {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: initialValues,
-  });
+const UsuariosForm = ({ control, errors }: UsuarioFormProps) => {
   const { roles } = useRoles();
 
-  useEffect(() => {
-    if (initialValues) {
-      reset(initialValues);
-    }
-  }, [initialValues, reset]);
-
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
+    <>
       <Typography variant="h5" sx={{ mb: 2 }}>
         Información del Usuario
       </Typography>
@@ -100,18 +78,7 @@ const UsuariosForm = ({
           />
         </Grid>
       </Grid>
-
-      <Box sx={{ mt: 2, display: "flex", gap: 2, justifyContent: "flex-end" }}>
-        {onCancel && (
-          <Button variant="outlined" onClick={onCancel} type="button">
-            Cancelar
-          </Button>
-        )}
-        <Button type="submit" variant="contained" disabled={isSubmitting}>
-          {isSubmitting ? <CircularProgress size={24} /> : "Guardar"}
-        </Button>
-      </Box>
-    </form>
+    </>
   );
 };
 
