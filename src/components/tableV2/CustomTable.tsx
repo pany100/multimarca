@@ -1,6 +1,14 @@
 import { useFetch } from "@/contexts/FetchContext";
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, TextField, Typography } from "@mui/material";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
+import {
+  Box,
+  Button,
+  IconButton,
+  Menu,
+  TextField,
+  Typography,
+} from "@mui/material";
 import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import React, { useCallback, useEffect, useState } from "react";
 
@@ -27,6 +35,8 @@ function CustomTable<T extends { id: string }>({
   const [searchTerm, setSearchTerm] = useState("");
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [selectedItem, setSelectedItem] = useState<T | null>(null);
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
     pageSize: 10,
@@ -72,6 +82,16 @@ function CustomTable<T extends { id: string }>({
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
     setPaginationModel({ ...paginationModel, page: 0 }); // Reset to first page on new search
+  };
+
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, item: T) => {
+    setAnchorEl(event.currentTarget);
+    setSelectedItem(item);
+  };
+
+  const handleMenuClose = () => {
+    setAnchorEl(null);
+    setSelectedItem(null);
   };
 
   return (
@@ -151,41 +171,79 @@ function CustomTable<T extends { id: string }>({
       {!loading && items.length === 0 ? (
         <Typography>No hay datos para mostrar</Typography>
       ) : (
-        <DataGrid
-          rows={items}
-          columns={[...columns]}
-          paginationModel={paginationModel}
-          onPaginationModelChange={setPaginationModel}
-          pageSizeOptions={[10, 20, 30]}
-          rowCount={totalItems}
-          paginationMode="server"
-          filterMode="server"
-          loading={loading}
-          getRowId={(row) => row.id}
-          getRowClassName={getRowClassName}
-          getRowHeight={() => "auto"}
-          sx={{
-            border: 1,
-            borderColor: "divider",
-            "& .MuiDataGrid-columnHeaders": {
-              backgroundColor: (theme) => theme.palette.primary.main,
-              fontSize: "0.875rem",
-              fontWeight: 600,
-            },
-            "& .MuiDataGrid-cell": {
-              display: "flex",
-              alignItems: "center",
-              minHeight: "50px",
-              fontSize: "0.875rem",
-            },
-            "& .MuiDataGrid-row": {
-              minHeight: "50px !important", // Asegura la altura mínima para la fila
-              "&:hover": {
-                backgroundColor: "action.hover",
+        <>
+          <DataGrid
+            rows={items}
+            columns={[
+              ...columns,
+              ...(extraActions
+                ? [
+                    {
+                      field: "actions",
+                      headerName: "",
+                      width: 50,
+                      sortable: false,
+                      filterable: false,
+                      renderCell: (params: any) => (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleMenuOpen(e, params.row)}
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                      ),
+                    },
+                  ]
+                : []),
+            ]}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            pageSizeOptions={[10, 20, 30]}
+            rowCount={totalItems}
+            paginationMode="server"
+            filterMode="server"
+            loading={loading}
+            getRowId={(row) => row.id}
+            getRowClassName={getRowClassName}
+            getRowHeight={() => "auto"}
+            sx={{
+              border: 1,
+              borderColor: "divider",
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: (theme) => theme.palette.primary.main,
+                fontSize: "0.875rem",
+                fontWeight: 600,
               },
-            },
-          }}
-        />
+              "& .MuiDataGrid-cell": {
+                display: "flex",
+                alignItems: "center",
+                minHeight: "50px",
+                fontSize: "0.875rem",
+              },
+              "& .MuiDataGrid-row": {
+                minHeight: "50px !important",
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                },
+              },
+            }}
+          />
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "right",
+            }}
+            transformOrigin={{
+              vertical: "top",
+              horizontal: "right",
+            }}
+          >
+            {selectedItem && extraActions && extraActions(selectedItem)}
+          </Menu>
+        </>
       )}
     </Box>
   );
