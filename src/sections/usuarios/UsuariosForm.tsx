@@ -1,14 +1,9 @@
+import { FormDefinitionProps } from "@/components/formV2/CustomForm";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useRoles from "@/hooks/useRoles";
 import { Grid, Typography } from "@mui/material";
-import { Control, FieldErrors } from "react-hook-form";
 import * as yup from "yup";
-
-interface UsuarioFormProps {
-  control: Control<any>;
-  errors: FieldErrors<any>;
-}
 
 export const schema = yup.object().shape({
   fullName: yup.string().required("El nombre es requerido"),
@@ -24,7 +19,7 @@ export const schema = yup.object().shape({
     .required("El rol es requerido"),
 });
 
-const UsuariosForm = ({ control, errors }: UsuarioFormProps) => {
+const UsuariosForm = ({ control, errors }: FormDefinitionProps) => {
   const { roles } = useRoles();
 
   return (

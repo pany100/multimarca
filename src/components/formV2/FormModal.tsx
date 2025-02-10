@@ -18,6 +18,8 @@ function FormModal({ open, onClose, children }: Props) {
           bgcolor: "background.paper",
           boxShadow: 24,
           p: 4,
+          minWidth: 600,
+          maxWidth: 800,
         }}
       >
         {children}

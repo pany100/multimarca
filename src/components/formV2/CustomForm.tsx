@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Button, CircularProgress } from "@mui/material";
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Control, FieldErrors, useForm } from "react-hook-form";
 import * as yup from "yup";
 
 interface CustomFormProps {
@@ -10,6 +10,11 @@ interface CustomFormProps {
   initialValues?: any;
   schema: yup.ObjectSchema<any>;
   formDefinition: React.ComponentType<any>;
+}
+
+export interface FormDefinitionProps {
+  control: Control<any>;
+  errors: FieldErrors<any>;
 }
 
 const CustomForm = ({
