@@ -1,7 +1,7 @@
 import CustomTable from "../../components/tableV2/CustomTable";
 
 type Props = {
-  extraActions?: (item: any) => React.ReactNode;
+  extraActions?: (item: any) => React.ReactNode[];
   ctaCb?: () => void;
 };
 

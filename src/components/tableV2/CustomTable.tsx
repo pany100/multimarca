@@ -16,7 +16,7 @@ export interface CustomTableProps<T> {
   title: string;
   columns: GridColDef[];
   apiEndpoint: string;
-  extraActions?: (item: T) => React.ReactNode;
+  extraActions?: (item: T) => React.ReactNode[];
   ctaCb?: () => void;
   getRowClassName?: (params: GridRowParams) => string;
   refreshTrigger?: number;

@@ -22,32 +22,30 @@ function ABMPage({ table: Table, form: Form, crudActions }: Props) {
   const [entity, setEntity] = useState(null);
 
   const extraActions = (params: any) => {
-    return (
-      <>
-        {crudActions.includes(CrudAction.EDIT) && (
-          <MenuItem
-            onClick={() => {
-              setIsEditModalOpen(true);
-              setEntity(params);
-            }}
-          >
-            <EditIcon sx={{ mr: 1 }} />
-            Editar
-          </MenuItem>
-        )}
-        {crudActions.includes(CrudAction.DELETE) && (
-          <MenuItem
-            onClick={() => {
-              setIsDeleteModalOpen(true);
-              setEntity(params);
-            }}
-          >
-            <DeleteIcon sx={{ mr: 1 }} />
-            Borrar
-          </MenuItem>
-        )}
-      </>
-    );
+    return [
+      crudActions.includes(CrudAction.EDIT) && (
+        <MenuItem
+          onClick={() => {
+            setIsEditModalOpen(true);
+            setEntity(params);
+          }}
+        >
+          <EditIcon sx={{ mr: 1 }} />
+          Editar
+        </MenuItem>
+      ),
+      crudActions.includes(CrudAction.DELETE) && (
+        <MenuItem
+          onClick={() => {
+            setIsDeleteModalOpen(true);
+            setEntity(params);
+          }}
+        >
+          <DeleteIcon sx={{ mr: 1 }} />
+          Borrar
+        </MenuItem>
+      ),
+    ];
   };
   const tableProps = {
     ...(shouldShowAdd && {
