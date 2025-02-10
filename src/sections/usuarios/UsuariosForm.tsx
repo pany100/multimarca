@@ -19,6 +19,7 @@ const schema = yup.object().shape({
     .string()
     .email("El email es inválido")
     .required("El email es requerido"),
+  password: yup.string().nullable(),
   rolId: yup
     .number()
     .typeError("Seleccione un rol válido")
@@ -72,6 +73,15 @@ const UsuarioForm = ({ onSubmit, initialValues }: UsuarioFormProps) => {
             name="email"
             label="Email"
             type="email"
+            errors={errors}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomInputText
+            control={control}
+            name="password"
+            label="Password"
+            type="password"
             errors={errors}
           />
         </Grid>
