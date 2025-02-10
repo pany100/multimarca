@@ -1,16 +1,8 @@
 import CustomTable, {
-  CustomTableProps,
+  InheritedTableProps,
 } from "../../components/tableV2/CustomTable";
 
-type Props = {
-  extraActions?: (item: any) => React.ReactNode[];
-  ctaCb?: () => void;
-} & Omit<
-  CustomTableProps,
-  "extraActions" | "ctaCb" | "title" | "columns" | "apiEndpoint"
->;
-
-function RolesTable({ extraActions, ctaCb, ...rest }: Props) {
+function RolesTable({ extraActions, ctaCb, ...rest }: InheritedTableProps) {
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "name", headerName: "Nombre del Rol", flex: 1 },

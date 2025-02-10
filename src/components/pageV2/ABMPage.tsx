@@ -167,6 +167,7 @@ function ABMPage({
     }),
     ...(shouldShowExtraActions && { extraActions }),
     refreshTrigger,
+    setRefreshTrigger,
   };
 
   return (

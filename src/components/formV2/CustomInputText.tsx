@@ -15,11 +15,19 @@ const CustomInputText = ({ control, errors, ...props }: Props) => {
         <TextField
           {...field}
           label={props.label}
-          value={value ?? ""}
+          value={
+            value && props.type === "date"
+              ? new Date(value).toISOString().split("T")[0]
+              : value ?? ""
+          }
           type={props.type}
           fullWidth
           error={!!errors[props.name as string]}
           helperText={errors[props.name as string]?.message?.toString()}
+          InputLabelProps={{
+            ...props.InputLabelProps,
+            shrink: props.type === "date" ? true : undefined,
+          }}
           {...props}
         />
       )}

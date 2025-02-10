@@ -22,6 +22,15 @@ export interface CustomTableProps {
   refreshTrigger?: number;
 }
 
+export type InheritedTableProps = {
+  extraActions?: (item: any) => React.ReactNode[];
+  ctaCb?: () => void;
+  setRefreshTrigger?: React.Dispatch<React.SetStateAction<number>>;
+} & Omit<
+  CustomTableProps,
+  "extraActions" | "ctaCb" | "title" | "columns" | "apiEndpoint"
+>;
+
 function CustomTable<T extends { id: string }>({
   title,
   columns,
