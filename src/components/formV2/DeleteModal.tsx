@@ -76,7 +76,7 @@ const DeleteModal = ({
           deshacer.
         </DialogContentText>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ mr: 2, mb: 2 }}>
         <Button onClick={onClose} disabled={loading}>
           Cancelar
         </Button>

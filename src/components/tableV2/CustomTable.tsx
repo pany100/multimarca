@@ -232,6 +232,7 @@ function CustomTable<T extends { id: string }>({
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
+            onClick={handleMenuClose}
             anchorOrigin={{
               vertical: "bottom",
               horizontal: "right",
