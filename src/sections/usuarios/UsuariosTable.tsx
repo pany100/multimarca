@@ -1,11 +1,16 @@
-import CustomTable from "../../components/tableV2/CustomTable";
+import CustomTable, {
+  CustomTableProps,
+} from "../../components/tableV2/CustomTable";
 
 type Props = {
   extraActions?: (item: any) => React.ReactNode[];
   ctaCb?: () => void;
-};
+} & Omit<
+  CustomTableProps,
+  "extraActions" | "ctaCb" | "title" | "columns" | "apiEndpoint"
+>;
 
-function UsuariosTable({ extraActions, ctaCb }: Props) {
+function UsuariosTable({ extraActions, ctaCb, ...rest }: Props) {
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "fullName", headerName: "Nombre completo", flex: 2 },
@@ -20,6 +25,7 @@ function UsuariosTable({ extraActions, ctaCb }: Props) {
       apiEndpoint="/api/usuarios"
       ctaCb={ctaCb}
       extraActions={extraActions}
+      {...rest}
     />
   );
 }

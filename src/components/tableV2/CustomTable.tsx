@@ -12,11 +12,11 @@ import {
 import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import React, { useCallback, useEffect, useState } from "react";
 
-export interface CustomTableProps<T> {
+export interface CustomTableProps {
   title: string;
   columns: GridColDef[];
   apiEndpoint: string;
-  extraActions?: (item: T) => React.ReactNode[];
+  extraActions?: (item: any) => React.ReactNode[];
   ctaCb?: () => void;
   getRowClassName?: (params: GridRowParams) => string;
   refreshTrigger?: number;
@@ -30,7 +30,7 @@ function CustomTable<T extends { id: string }>({
   ctaCb,
   getRowClassName,
   refreshTrigger = 0,
-}: CustomTableProps<T>) {
+}: CustomTableProps) {
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [totalItems, setTotalItems] = useState(0);

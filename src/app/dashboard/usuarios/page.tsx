@@ -8,6 +8,7 @@ import UsuariosTable from "@/sections/usuarios/UsuariosTable";
 const UsuariosPage = () => {
   return (
     <ABMPage
+      apiEndpoint="/api/usuarios"
       table={UsuariosTable}
       form={UsuariosForm}
       crudActions={[CrudAction.ADD, CrudAction.EDIT, CrudAction.DELETE]}

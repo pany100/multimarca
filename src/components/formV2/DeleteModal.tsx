@@ -1,3 +1,4 @@
+import { useFetch } from "@/contexts/FetchContext";
 import {
   Button,
   Dialog,
@@ -9,6 +10,7 @@ import {
 import { useState } from "react";
 
 type Props = {
+  apiEndpoint: string;
   open: boolean;
   onClose: () => void;
   entity: any;
@@ -16,20 +18,39 @@ type Props = {
     type: "success" | "error";
     message: string;
   }) => void;
+  onSuccess: () => void;
 };
 
-const DeleteModal = ({ open, onClose, entity, setFeedback }: Props) => {
+const DeleteModal = ({
+  open,
+  onClose,
+  entity,
+  setFeedback,
+  apiEndpoint,
+  onSuccess,
+}: Props) => {
   const [loading, setLoading] = useState(false);
+  const { authFetch } = useFetch();
 
   const handleDelete = async () => {
     if (!entity) return;
 
     setLoading(true);
     try {
+      const url = new URL(apiEndpoint, window.location.origin);
+      const baseUrl = `${url.origin}${url.pathname}`;
+      const response = await authFetch(`${baseUrl}/${entity.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Error al eliminar el elemento");
+      }
       setFeedback({
         type: "success",
         message: "Elemento eliminado correctamente",
       });
+      onSuccess();
       onClose();
     } catch (error) {
       setFeedback({

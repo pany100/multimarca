@@ -1,3 +1,4 @@
+import { useFetch } from "@/contexts/FetchContext";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { Alert, MenuItem, Snackbar } from "@mui/material";
@@ -7,13 +8,20 @@ import DeleteModal from "../formV2/DeleteModal";
 import FormModal from "../formV2/FormModal";
 
 type Props = {
+  apiEndpoint: string;
   table: React.ComponentType<any>;
   form: React.ComponentType<any>;
   crudActions: CrudAction[];
-  onDelete?: (entity: any) => Promise<void>;
 };
 
-function ABMPage({ table: Table, form: Form, crudActions, onDelete }: Props) {
+function ABMPage({
+  apiEndpoint,
+  table: Table,
+  form: Form,
+  crudActions,
+}: Props) {
+  const { authFetch } = useFetch();
+
   const shouldShowAdd = crudActions.includes(CrudAction.ADD);
   const shouldShowExtraActions =
     crudActions.includes(CrudAction.EDIT) ||
@@ -22,6 +30,8 @@ function ABMPage({ table: Table, form: Form, crudActions, onDelete }: Props) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
   const [entity, setEntity] = useState<any>(null);
 
   const [feedback, setFeedback] = useState<{
@@ -37,6 +47,75 @@ function ABMPage({ table: Table, form: Form, crudActions, onDelete }: Props) {
   const handleCloseEdit = () => {
     setIsEditModalOpen(false);
     setEntity(null);
+  };
+
+  const handleAddSubmit = async (data: any) => {
+    try {
+      const url = new URL(apiEndpoint, window.location.origin);
+      const baseUrl = `${url.origin}${url.pathname}`;
+
+      const response = await authFetch(baseUrl, {
+        method: "POST",
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        setFeedback({
+          message: "Elemento creado con éxito",
+          type: "success",
+        });
+        setRefreshTrigger((prev) => prev + 1);
+      } else {
+        const errorMessage = await response.json();
+        setFeedback({
+          message: `Error al crear elemento: ${errorMessage.error}`,
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error(`Error al crear elemento:`, error);
+      setFeedback({
+        message: `Error al realizar la solicitud de creación`,
+        type: "error",
+      });
+    } finally {
+      setIsAddModalOpen(false);
+    }
+  };
+
+  const handleEditSubmit = async (data: any) => {
+    try {
+      const url = new URL(apiEndpoint, window.location.origin);
+      const baseUrl = `${url.origin}${url.pathname}`;
+
+      const response = await authFetch(`${baseUrl}/${data.id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+      if (response.ok) {
+        const updatedItem = await response.json();
+        setFeedback({
+          message: "Elemento actualizado con éxito",
+          type: "success",
+        });
+        setRefreshTrigger((prev) => prev + 1);
+      } else {
+        const errorMessage = await response.json();
+        setFeedback({
+          message: `Error al actualizar elemento: ${errorMessage.error}`,
+          type: "error",
+        });
+      }
+    } catch (error) {
+      console.error(`Error al actualizar elemento:`, error);
+      setFeedback({
+        message: `Error al realizar la solicitud de actualización`,
+        type: "error",
+      });
+    } finally {
+      setIsEditModalOpen(false);
+      setEntity(null);
+    }
   };
 
   const extraActions = (params: any) => {
@@ -83,6 +162,7 @@ function ABMPage({ table: Table, form: Form, crudActions, onDelete }: Props) {
       },
     }),
     ...(shouldShowExtraActions && { extraActions }),
+    refreshTrigger,
   };
 
   return (
@@ -94,22 +174,31 @@ function ABMPage({ table: Table, form: Form, crudActions, onDelete }: Props) {
           open={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
         >
-          <Form onCancel={() => setIsAddModalOpen(false)} />
+          <Form
+            onCancel={() => setIsAddModalOpen(false)}
+            onSubmit={handleAddSubmit}
+          />
         </FormModal>
       )}
 
       {crudActions.includes(CrudAction.EDIT) && (
         <FormModal open={isEditModalOpen} onClose={handleCloseEdit}>
-          <Form onCancel={handleCloseEdit} initialValues={entity} />
+          <Form
+            onCancel={handleCloseEdit}
+            initialValues={entity}
+            onSubmit={handleEditSubmit}
+          />
         </FormModal>
       )}
 
       {crudActions.includes(CrudAction.DELETE) && (
         <DeleteModal
+          apiEndpoint={apiEndpoint}
           open={isDeleteModalOpen}
           onClose={handleCloseDelete}
           entity={entity}
           setFeedback={setFeedback}
+          onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
         />
       )}
 
