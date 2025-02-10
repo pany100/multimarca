@@ -40,7 +40,12 @@ const CustomForm = ({
       <FormDefinition control={control} errors={errors} />
       <Box sx={{ mt: 2, display: "flex", gap: 2, justifyContent: "flex-end" }}>
         {onCancel && (
-          <Button variant="outlined" onClick={onCancel} type="button">
+          <Button
+            variant="outlined"
+            onClick={onCancel}
+            type="button"
+            disabled={isSubmitting}
+          >
             Cancelar
           </Button>
         )}
