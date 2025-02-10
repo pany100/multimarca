@@ -9,6 +9,7 @@ import * as yup from "yup";
 
 interface UsuarioFormProps {
   onSubmit: (data: any) => void;
+  onCancel?: () => void;
   initialValues?: any;
 }
 
@@ -26,7 +27,11 @@ const schema = yup.object().shape({
     .required("El rol es requerido"),
 });
 
-const UsuarioForm = ({ onSubmit, initialValues }: UsuarioFormProps) => {
+const UsuariosForm = ({
+  onSubmit,
+  onCancel,
+  initialValues,
+}: UsuarioFormProps) => {
   const {
     control,
     handleSubmit,
@@ -96,31 +101,18 @@ const UsuarioForm = ({ onSubmit, initialValues }: UsuarioFormProps) => {
         </Grid>
       </Grid>
 
-      <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
-        <Button
-          type="submit"
-          variant="contained"
-          disabled={isSubmitting}
-          size="large"
-          sx={{ position: "relative" }}
-        >
-          Guardar Usuario
-          {isSubmitting && (
-            <CircularProgress
-              size={24}
-              sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                marginTop: "-12px",
-                marginLeft: "-12px",
-              }}
-            />
-          )}
+      <Box sx={{ mt: 2, display: "flex", gap: 2, justifyContent: "flex-end" }}>
+        {onCancel && (
+          <Button variant="outlined" onClick={onCancel} type="button">
+            Cancelar
+          </Button>
+        )}
+        <Button type="submit" variant="contained" disabled={isSubmitting}>
+          {isSubmitting ? <CircularProgress size={24} /> : "Guardar"}
         </Button>
       </Box>
     </form>
   );
 };
 
-export default UsuarioForm;
+export default UsuariosForm;
