@@ -4,6 +4,7 @@
 REMOTE_HOST="ubuntu@ec2-3-22-211-91.us-east-2.compute.amazonaws.com"
 PEM_PATH="/Users/luispaniagua/scripts/mtservice.pem"
 REMOTE_PATH="/home/ubuntu/multimarca"
+START_TIME=$(date +%s)
 
 # Función para manejar errores
 handle_error() {
@@ -71,4 +72,10 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "\n✅ ¡Despliegue completado exitosamente!"
+END_TIME=$(date +%s)
+DURATION=$((END_TIME - START_TIME))
+MINUTES=$((DURATION / 60))
+SECONDS=$((DURATION % 60))
+
+echo "⏱️  Tiempo total de despliegue: $MINUTES minutos y $SECONDS segundos"
 echo "🌐 La aplicación debería estar disponible en unos momentos."
