@@ -29,6 +29,7 @@ const CustomAutocompleteInput = ({
 
   useEffect(() => {
     const fetchInitialOptions = async () => {
+      setLoading(true);
       try {
         const initialValue = getValues(props.name as string);
         if (!initialValue) {
@@ -37,11 +38,11 @@ const CustomAutocompleteInput = ({
         const option = await initialOptions(initialValue);
         setOptions([option]);
       } catch (error) {
-        console.error("Error fetching initial options:", error);
         setOptions([]);
+      } finally {
+        setLoading(false);
       }
     };
-    console.log("fetching again");
     fetchInitialOptions();
   }, []);
 
