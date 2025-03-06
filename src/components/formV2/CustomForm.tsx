@@ -1,7 +1,7 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Button, CircularProgress } from "@mui/material";
 import { useEffect } from "react";
-import { Control, FieldErrors, useForm } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 
 interface CustomFormProps {
@@ -12,11 +12,6 @@ interface CustomFormProps {
   formDefinition: React.ComponentType<any>;
 }
 
-export interface FormDefinitionProps {
-  control: Control<any>;
-  errors: FieldErrors<any>;
-}
-
 const CustomForm = ({
   onSubmit,
   onCancel,
@@ -24,15 +19,16 @@ const CustomForm = ({
   schema,
   formDefinition: FormDefinition,
 }: CustomFormProps) => {
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    reset,
-  } = useForm({
+  const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: initialValues,
   });
+
+  const {
+    handleSubmit,
+    formState: { isSubmitting },
+    reset,
+  } = methods;
 
   useEffect(() => {
     if (initialValues) {
@@ -41,24 +37,28 @@ const CustomForm = ({
   }, [initialValues, reset]);
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <FormDefinition control={control} errors={errors} />
-      <Box sx={{ mt: 2, display: "flex", gap: 2, justifyContent: "flex-end" }}>
-        {onCancel && (
-          <Button
-            variant="outlined"
-            onClick={onCancel}
-            type="button"
-            disabled={isSubmitting}
-          >
-            Cancelar
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <FormDefinition />
+        <Box
+          sx={{ mt: 2, display: "flex", gap: 2, justifyContent: "flex-end" }}
+        >
+          {onCancel && (
+            <Button
+              variant="outlined"
+              onClick={onCancel}
+              type="button"
+              disabled={isSubmitting}
+            >
+              Cancelar
+            </Button>
+          )}
+          <Button type="submit" variant="contained" disabled={isSubmitting}>
+            {isSubmitting ? <CircularProgress size={24} /> : "Guardar"}
           </Button>
-        )}
-        <Button type="submit" variant="contained" disabled={isSubmitting}>
-          {isSubmitting ? <CircularProgress size={24} /> : "Guardar"}
-        </Button>
-      </Box>
-    </form>
+        </Box>
+      </form>
+    </FormProvider>
   );
 };
 

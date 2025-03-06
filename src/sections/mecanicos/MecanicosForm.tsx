@@ -1,7 +1,7 @@
-import { FormDefinitionProps } from "@/components/formV2/CustomForm";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import { Grid, Typography } from "@mui/material";
+import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
 
 export const schema = yup.object({
@@ -21,7 +21,11 @@ export const schema = yup.object({
   tipo: yup.string().oneOf(["Mecanico", "Administrativo"]).nullable(),
 });
 
-const MecanicosForm = ({ control, errors }: FormDefinitionProps) => {
+const MecanicosForm = () => {
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext();
   return (
     <>
       <Typography variant="h5" sx={{ mb: 2 }}>

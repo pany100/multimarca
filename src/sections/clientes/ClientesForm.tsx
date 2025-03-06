@@ -1,6 +1,6 @@
-import { FormDefinitionProps } from "@/components/formV2/CustomForm";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import { Grid, Typography } from "@mui/material";
+import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
 
 export const schema = yup.object({
@@ -22,7 +22,11 @@ export const schema = yup.object({
     .nullable(),
 });
 
-const ClientesForm = ({ control, errors }: FormDefinitionProps) => {
+const ClientesForm = () => {
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext();
   return (
     <>
       <Typography variant="h5" sx={{ mb: 2 }}>
