@@ -1,0 +1,33 @@
+import CustomInputText from "@/components/formV2/CustomInputText";
+import { Grid, Typography } from "@mui/material";
+import * as yup from "yup";
+
+export const schema = yup.object({
+  name: yup.string().required("El nombre es requerido"),
+  sellPrice: yup.number().required("El precio de venta es requerido"),
+});
+
+const ManoDeObraForm = () => {
+  return (
+    <>
+      <Typography variant="h5" sx={{ mb: 2 }}>
+        Información de Mano de Obra
+      </Typography>
+
+      <Grid container spacing={2}>
+        <Grid item xs={12} md={6}>
+          <CustomInputText name="name" label="Nombre del Trabajo" />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomInputText
+            name="sellPrice"
+            label="Precio de Venta"
+            type="number"
+          />
+        </Grid>
+      </Grid>
+    </>
+  );
+};
+
+export default ManoDeObraForm;
