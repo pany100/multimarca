@@ -6,30 +6,29 @@ import {
   Select,
   SelectProps,
 } from "@mui/material";
-import { Control, Controller, FieldErrors } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 
 type CustomSelectProps = SelectProps & {
   placeholder?: string;
   options: { value: string | number; label: string }[];
   helperText?: string;
-  control: Control<any>;
-  errors: FieldErrors<any>;
 };
 
 const CustomSelect = ({
   helperText,
   placeholder = "Seleccionar opción",
   options = [],
-  control,
-  errors,
   ...props
 }: CustomSelectProps) => {
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext();
   return (
     <Controller
       name={props.name as string}
       control={control}
       render={({ field: { value, onChange, ...field } }) => {
-        console.log(value);
         return (
           <FormControl fullWidth>
             <InputLabel id={props.name as string}>{props.label}</InputLabel>

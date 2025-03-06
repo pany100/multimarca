@@ -1,7 +1,6 @@
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import { Grid, Typography } from "@mui/material";
-import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
 
 export const schema = yup.object({
@@ -22,10 +21,6 @@ export const schema = yup.object({
 });
 
 const MecanicosForm = () => {
-  const {
-    control,
-    formState: { errors },
-  } = useFormContext();
   return (
     <>
       <Typography variant="h5" sx={{ mb: 2 }}>
@@ -34,63 +29,33 @@ const MecanicosForm = () => {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="name"
-            label="Nombre"
-            errors={errors}
-          />
+          <CustomInputText name="name" label="Nombre" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="email"
-            label="Email"
-            errors={errors}
-            type="email"
-          />
+          <CustomInputText name="email" label="Email" type="email" />
         </Grid>
         <Grid item xs={12} md={4}>
           <CustomInputText
-            control={control}
             name="birthday"
             label="Fecha de nacimiento"
-            errors={errors}
             type="date"
           />
         </Grid>
         <Grid item xs={12} md={4}>
           <CustomInputText
-            control={control}
             name="start_date"
             label="Fecha de comienzo"
-            errors={errors}
             type="date"
           />
         </Grid>
         <Grid item xs={12} md={4}>
-          <CustomInputText
-            control={control}
-            name="dni"
-            label="DNI"
-            errors={errors}
-          />
+          <CustomInputText name="dni" label="DNI" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="address"
-            label="Direccion"
-            errors={errors}
-          />
+          <CustomInputText name="address" label="Direccion" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="state"
-            label="Provincia"
-            errors={errors}
-          />
+          <CustomInputText name="state" label="Provincia" />
         </Grid>
         <Grid item xs={12} md={6}>
           <CustomSelect
@@ -98,35 +63,18 @@ const MecanicosForm = () => {
               { value: "Mecanico", label: "Mecanico" },
               { value: "Administrativo", label: "Administrativo" },
             ]}
-            control={control}
             name="tipo"
             label="Tipo"
-            errors={errors}
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="postal_code"
-            label="Codigo Postal"
-            errors={errors}
-          />
+          <CustomInputText name="postal_code" label="Codigo Postal" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="phone"
-            label="Telefono"
-            errors={errors}
-          />
+          <CustomInputText name="phone" label="Telefono" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="city"
-            label="Ciudad"
-            errors={errors}
-          />
+          <CustomInputText name="city" label="Ciudad" />
         </Grid>
       </Grid>
     </>

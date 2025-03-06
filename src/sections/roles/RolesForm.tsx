@@ -2,7 +2,6 @@ import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import usePermisos from "@/hooks/usePermisos";
 import { Grid, Typography } from "@mui/material";
-import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
 
 export const schema = yup.object().shape({
@@ -14,10 +13,6 @@ export const schema = yup.object().shape({
 });
 
 const RolesForm = () => {
-  const {
-    control,
-    formState: { errors },
-  } = useFormContext();
   const { permisos } = usePermisos();
   return (
     <>
@@ -27,20 +22,13 @@ const RolesForm = () => {
 
       <Grid container spacing={2}>
         <Grid item xs={12}>
-          <CustomInputText
-            control={control}
-            name="name"
-            label="Nombre del Rol"
-            errors={errors}
-          />
+          <CustomInputText name="name" label="Nombre del Rol" />
         </Grid>
         <Grid item xs={12}>
           <CustomSelect
             options={permisos}
-            control={control}
             label="Permisos"
             name="permisos"
-            errors={errors}
             multiple
           />
         </Grid>

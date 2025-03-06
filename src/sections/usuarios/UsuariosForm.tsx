@@ -2,7 +2,6 @@ import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useRoles from "@/hooks/useRoles";
 import { Grid, Typography } from "@mui/material";
-import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
 
 export const schema = yup.object().shape({
@@ -20,10 +19,6 @@ export const schema = yup.object().shape({
 });
 
 const UsuariosForm = () => {
-  const {
-    control,
-    formState: { errors },
-  } = useFormContext();
   const { roles } = useRoles();
 
   return (
@@ -34,47 +29,19 @@ const UsuariosForm = () => {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="fullName"
-            label="Nombre completo"
-            errors={errors}
-          />
+          <CustomInputText name="fullName" label="Nombre completo" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="username"
-            label="Nombre de usuario"
-            errors={errors}
-          />
+          <CustomInputText name="username" label="Nombre de usuario" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="email"
-            label="Email"
-            type="email"
-            errors={errors}
-          />
+          <CustomInputText name="email" label="Email" type="email" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="password"
-            label="Password"
-            type="password"
-            errors={errors}
-          />
+          <CustomInputText name="password" label="Password" type="password" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomSelect
-            options={roles}
-            control={control}
-            label="Rol"
-            name="rolId"
-            errors={errors}
-          />
+          <CustomSelect options={roles} label="Rol" name="rolId" />
         </Grid>
       </Grid>
     </>

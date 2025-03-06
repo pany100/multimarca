@@ -1,6 +1,5 @@
 import CustomInputText from "@/components/formV2/CustomInputText";
 import { Grid, Typography } from "@mui/material";
-import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
 
 export const schema = yup.object({
@@ -23,10 +22,6 @@ export const schema = yup.object({
 });
 
 const ClientesForm = () => {
-  const {
-    control,
-    formState: { errors },
-  } = useFormContext();
   return (
     <>
       <Typography variant="h5" sx={{ mb: 2 }}>
@@ -35,86 +30,38 @@ const ClientesForm = () => {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="fullName"
-            label="Nombre completo"
-            errors={errors}
-          />
+          <CustomInputText name="fullName" label="Nombre completo" />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomInputText name="email" label="Email" type="email" />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomInputText name="phone" label="Teléfono" />
         </Grid>
         <Grid item xs={12} md={6}>
           <CustomInputText
-            control={control}
-            name="email"
-            label="Email"
-            errors={errors}
-            type="email"
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="phone"
-            label="Teléfono"
-            errors={errors}
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
             name="birthday"
             label="Fecha de nacimiento"
-            errors={errors}
             type="date"
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="dni"
-            label="DNI"
-            errors={errors}
-          />
+          <CustomInputText name="dni" label="DNI" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="tax_status"
-            label="Estado fiscal"
-            errors={errors}
-          />
+          <CustomInputText name="tax_status" label="Estado fiscal" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="address"
-            label="Dirección"
-            errors={errors}
-          />
+          <CustomInputText name="address" label="Dirección" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="city"
-            label="Ciudad"
-            errors={errors}
-          />
+          <CustomInputText name="city" label="Ciudad" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="state"
-            label="Provincia"
-            errors={errors}
-          />
+          <CustomInputText name="state" label="Provincia" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText
-            control={control}
-            name="postal_code"
-            label="Código Postal"
-            errors={errors}
-          />
+          <CustomInputText name="postal_code" label="Código Postal" />
         </Grid>
       </Grid>
     </>

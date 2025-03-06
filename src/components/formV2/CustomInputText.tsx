@@ -1,12 +1,11 @@
 import { TextField, TextFieldProps } from "@mui/material";
-import { Control, Controller, FieldErrors } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 
-type Props = TextFieldProps & {
-  control: Control<any>;
-  errors: FieldErrors<any>;
-};
-
-const CustomInputText = ({ control, errors, ...props }: Props) => {
+const CustomInputText = (props: TextFieldProps) => {
+  const {
+    control,
+    formState: { errors },
+  } = useFormContext();
   return (
     <Controller
       name={props.name as string}
