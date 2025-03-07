@@ -11,6 +11,7 @@ import FormModal from "../formV2/FormModal";
 
 type Props = {
   apiEndpoint: string;
+  extraContent?: React.ComponentType<any>;
   table: React.ComponentType<any>;
   form: React.ComponentType<any>;
   crudActions: CrudAction[];
@@ -19,6 +20,7 @@ type Props = {
 
 function ABMPage({
   apiEndpoint,
+  extraContent: ExtraContent,
   table: Table,
   form: Form,
   crudActions,
@@ -172,6 +174,8 @@ function ABMPage({
 
   return (
     <div>
+      {ExtraContent && <ExtraContent setRefreshTrigger={setRefreshTrigger} />}
+
       <Table {...tableProps} />
 
       {shouldShowAdd && (
