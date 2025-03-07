@@ -1,4 +1,4 @@
-function useTipoOperacion() {
+function useFixedSelectData() {
   const tipoOperacion = [
     { value: "EFECTIVO", label: "Efectivo" },
     { value: "TRANSFERENCIA", label: "Transferencia" },
@@ -8,7 +8,11 @@ function useTipoOperacion() {
       label: "Débito Automático tarjeta crédito",
     },
   ];
-  return { tipoOperacion };
+  const currency = [
+    { value: "Peso", label: "Peso" },
+    { value: "Dolar", label: "Dolar" },
+  ];
+  return { tipoOperacion, currency };
 }
 
-export default useTipoOperacion;
+export default useFixedSelectData;

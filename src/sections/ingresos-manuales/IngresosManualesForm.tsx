@@ -4,7 +4,7 @@ import ChequeData from "@/components/formV2/ChequeData";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useAdmins from "@/hooks/useAdmins";
-import useTipoOperacion from "@/hooks/useTipoOperacion";
+import useFixedSelectData from "@/hooks/useFixedSelectData";
 import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
 import { Grid, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
@@ -36,7 +36,7 @@ export const schema = yup.object({
 
 const IngresosManualesForm = () => {
   const { admins } = useAdmins();
-  const { tipoOperacion } = useTipoOperacion();
+  const { currency, tipoOperacion } = useFixedSelectData();
   const { watch } = useFormContext();
   const operacionValue = watch("tipoExtraccion");
   return (
@@ -53,14 +53,7 @@ const IngresosManualesForm = () => {
           <CustomInputText name="fecha" label="Fecha" type="date" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomSelect
-            options={[
-              { value: "Peso", label: "Peso" },
-              { value: "Dolar", label: "Dolar" },
-            ]}
-            name="moneda"
-            label="Moneda"
-          />
+          <CustomSelect options={currency} name="moneda" label="Moneda" />
         </Grid>
         <Grid item xs={12} md={6}>
           <CustomSelect options={admins} name="usuarioId" label="Usuario" />
