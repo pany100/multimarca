@@ -1,10 +1,13 @@
 "use client";
 
+import ChequeData from "@/components/formV2/ChequeData";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
-import { useFetch } from "@/contexts/FetchContext";
+import useAdmins from "@/hooks/useAdmins";
+import useTipoOperacion from "@/hooks/useTipoOperacion";
+import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
 import { Grid, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
 
 export const schema = yup.object({
@@ -28,33 +31,14 @@ export const schema = yup.object({
       "DEBITO_AUTOMATICO_TARJETA_CREDITO",
     ])
     .required("El tipo de operación es requerido"),
+  ...getSchemaPropsForCheque("tipoExtraccion"),
 });
 
 const IngresosManualesForm = () => {
-  const [usuarios, setUsuarios] = useState<{ value: number; label: string }[]>(
-    []
-  );
-  const { authFetch } = useFetch();
-
-  useEffect(() => {
-    const fetchUsuarios = async () => {
-      try {
-        const response = await authFetch("/api/usuarios/admins");
-        const data = await response.json();
-        const customUsuarios = data.map(
-          (usuario: { id: number; fullName: string }) => ({
-            value: usuario.id,
-            label: usuario.fullName,
-          })
-        );
-        setUsuarios(customUsuarios);
-      } catch (error) {
-        console.error("Error al obtener usuarios:", error);
-      }
-    };
-    fetchUsuarios();
-  }, [authFetch]);
-
+  const { admins } = useAdmins();
+  const { tipoOperacion } = useTipoOperacion();
+  const { watch } = useFormContext();
+  const operacionValue = watch("tipoExtraccion");
   return (
     <>
       <Typography variant="h5" sx={{ mb: 2 }}>
@@ -79,26 +63,19 @@ const IngresosManualesForm = () => {
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomSelect options={usuarios} name="usuarioId" label="Usuario" />
+          <CustomSelect options={admins} name="usuarioId" label="Usuario" />
         </Grid>
         <Grid item xs={12}>
           <CustomInputText name="descripcion" label="Descripción" />
         </Grid>
         <Grid item xs={12}>
           <CustomSelect
-            options={[
-              { value: "EFECTIVO", label: "Efectivo" },
-              { value: "TRANSFERENCIA", label: "Transferencia" },
-              { value: "CHEQUE", label: "Cheque" },
-              {
-                value: "DEBITO_AUTOMATICO_TARJETA_CREDITO",
-                label: "Débito Automático tarjeta crédito",
-              },
-            ]}
+            options={tipoOperacion}
             name="tipoExtraccion"
             label="Tipo de Operación"
           />
         </Grid>
+        {operacionValue === "CHEQUE" && <ChequeData />}
       </Grid>
     </>
   );
