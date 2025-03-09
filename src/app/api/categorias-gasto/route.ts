@@ -5,7 +5,7 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const page = parseInt(searchParams.get("page") || "0");
-    const size = parseInt(searchParams.get("size") || "10");
+    const size = parseInt(searchParams.get("size") || "100");
     const query = searchParams.get("query") || "";
 
     // Obtener el token de la cabecera de autorización
