@@ -7,39 +7,28 @@ import {
   IconButton,
   Menu,
   TextField,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
 import React, { useCallback, useEffect, useState } from "react";
 
-export interface CustomTableProps<T extends { id: string }> {
+export interface CustomTableProps {
   title: string;
   columns: GridColDef[];
   apiEndpoint: string;
-  extraActions?: (item: T) => React.ReactNode[];
+  extraActions?: (item: any) => React.ReactNode[];
   ctaCb?: () => void;
   getRowClassName?: (params: GridRowParams) => string;
   refreshTrigger?: number;
-  disableMenuForRow?: (item: T) => boolean;
-  disabledMenuTooltip?: string;
 }
 
-export type InheritedTableProps<T extends { id: string }> = {
-  extraActions?: (item: T) => React.ReactNode[];
+export type InheritedTableProps = {
+  extraActions?: (item: any) => React.ReactNode[];
   ctaCb?: () => void;
   setRefreshTrigger?: React.Dispatch<React.SetStateAction<number>>;
-  disableMenuForRow?: (item: T) => boolean;
-  disabledMenuTooltip?: string;
 } & Omit<
-  CustomTableProps<T>,
-  | "extraActions"
-  | "ctaCb"
-  | "title"
-  | "columns"
-  | "apiEndpoint"
-  | "disableMenuForRow"
-  | "disabledMenuTooltip"
+  CustomTableProps,
+  "extraActions" | "ctaCb" | "title" | "columns" | "apiEndpoint"
 >;
 
 function CustomTable<T extends { id: string }>({
@@ -50,9 +39,7 @@ function CustomTable<T extends { id: string }>({
   ctaCb,
   getRowClassName,
   refreshTrigger = 0,
-  disableMenuForRow,
-  disabledMenuTooltip = "No se pueden realizar acciones en este registro",
-}: CustomTableProps<T>) {
+}: CustomTableProps) {
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [totalItems, setTotalItems] = useState(0);
@@ -107,7 +94,6 @@ function CustomTable<T extends { id: string }>({
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, item: T) => {
-    if (disableMenuForRow?.(item)) return;
     setAnchorEl(event.currentTarget);
     setSelectedItem(item);
   };
@@ -207,55 +193,55 @@ function CustomTable<T extends { id: string }>({
                       width: 50,
                       sortable: false,
                       filterable: false,
-                      renderCell: (params: any) => {
-                        const isDisabled = disableMenuForRow?.(params.row);
-                        return (
-                          <Tooltip
-                            title={isDisabled ? disabledMenuTooltip : ""}
-                          >
-                            <span>
-                              <IconButton
-                                size="small"
-                                onClick={(e) => handleMenuOpen(e, params.row)}
-                                disabled={isDisabled}
-                                sx={{
-                                  opacity: isDisabled ? 0.5 : 1,
-                                  cursor: isDisabled
-                                    ? "not-allowed"
-                                    : "pointer",
-                                }}
-                              >
-                                <MoreVertIcon />
-                              </IconButton>
-                            </span>
-                          </Tooltip>
-                        );
-                      },
+                      renderCell: (params: any) => (
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleMenuOpen(e, params.row)}
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                      ),
                     },
                   ]
                 : []),
             ]}
-            autoHeight
-            loading={loading}
-            getRowClassName={getRowClassName}
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
-            pageSizeOptions={[10, 25, 50]}
-            paginationMode="server"
+            pageSizeOptions={[10, 20, 30]}
             rowCount={totalItems}
-            disableRowSelectionOnClick
+            paginationMode="server"
+            filterMode="server"
+            loading={loading}
+            getRowId={(row) => row.id}
+            getRowClassName={getRowClassName}
+            getRowHeight={() => "auto"}
             sx={{
-              backgroundColor: "background.paper",
-              "& .MuiDataGrid-row:hover": {
-                backgroundColor: "action.hover",
+              border: 1,
+              borderColor: "divider",
+              "& .MuiDataGrid-columnHeaders": {
+                backgroundColor: (theme) => theme.palette.primary.main,
+                fontSize: "0.875rem",
+                fontWeight: 600,
+              },
+              "& .MuiDataGrid-cell": {
+                display: "flex",
+                alignItems: "center",
+                minHeight: "50px",
+                fontSize: "0.875rem",
+              },
+              "& .MuiDataGrid-row": {
+                minHeight: "50px !important",
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                },
               },
             }}
           />
-
           <Menu
             anchorEl={anchorEl}
             open={Boolean(anchorEl)}
             onClose={handleMenuClose}
+            onClick={handleMenuClose}
             anchorOrigin={{
               vertical: "bottom",
               horizontal: "right",
@@ -265,7 +251,7 @@ function CustomTable<T extends { id: string }>({
               horizontal: "right",
             }}
           >
-            {selectedItem && extraActions?.(selectedItem)}
+            {selectedItem && extraActions && extraActions(selectedItem)}
           </Menu>
         </>
       )}
