@@ -1,7 +1,9 @@
 import {
+  Checkbox,
   FormControl,
   FormHelperText,
   InputLabel,
+  ListItemText,
   MenuItem,
   Select,
   SelectProps,
@@ -23,32 +25,66 @@ const CustomSelect = ({
   const {
     control,
     formState: { errors },
+    watch,
   } = useFormContext();
   return (
     <Controller
       name={props.name as string}
       control={control}
       render={({ field: { value, onChange, ...field } }) => {
+        const currentValue = props.multiple ? value ?? [] : value ?? "";
+
         return (
           <FormControl fullWidth>
             <InputLabel id={props.name as string}>{props.label}</InputLabel>
             <Select
               labelId={props.name as string}
               label={props.label}
-              value={props.multiple ? value ?? [] : value ?? ""}
+              value={currentValue}
               onChange={onChange}
               error={!!errors[props.name as string]}
+              renderValue={
+                props.multiple
+                  ? (selected: any) => {
+                      const selectedOptions = options.filter((option) =>
+                        selected.includes(option.value)
+                      );
+                      return selectedOptions
+                        .map((option) => option.label)
+                        .join(", ");
+                    }
+                  : undefined
+              }
               {...props}
             >
-              {options.map((option) => (
-                <MenuItem key={option.value} value={option.value}>
-                  {option.label}
-                </MenuItem>
-              ))}
+              {options.map((option) => {
+                console.log(currentValue);
+                return (
+                  <MenuItem key={option.value} value={option.value}>
+                    {props.multiple ? (
+                      <>
+                        <Checkbox
+                          checked={
+                            Array.isArray(currentValue) &&
+                            currentValue.some(
+                              (itemValue) =>
+                                itemValue.toString() === option.value.toString()
+                            )
+                          }
+                        />
+                        <ListItemText primary={option.label} />
+                      </>
+                    ) : (
+                      option.label
+                    )}
+                  </MenuItem>
+                );
+              })}
             </Select>
-            {helperText && (
+            {(helperText || errors[props.name as string]?.message) && (
               <FormHelperText error={!!errors[props.name as string]}>
-                {helperText}
+                {(errors[props.name as string]?.message as string) ||
+                  helperText}
               </FormHelperText>
             )}
           </FormControl>

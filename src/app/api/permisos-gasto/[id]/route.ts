@@ -24,7 +24,7 @@ export async function PUT(
     // Buscar los roles por nombre
     const rolesEncontrados = await prisma.rol.findMany({
       where: {
-        name: {
+        id: {
           in: roles,
         },
       },
@@ -56,7 +56,8 @@ export async function PUT(
 
     const categoriaGastoConRoles = {
       ...categoriaGasto,
-      roles: categoriaGasto.roles.map((rol) => rol.name),
+      roles: categoriaGasto.roles.map((rol) => rol.id),
+      rolesData: categoriaGasto.roles,
     };
 
     return NextResponse.json(categoriaGastoConRoles);

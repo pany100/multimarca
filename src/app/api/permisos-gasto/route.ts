@@ -42,7 +42,8 @@ export async function GET(request: Request) {
 
     const permisosGastoConRoles = permisosGasto.map((permiso) => ({
       ...permiso,
-      roles: permiso.roles.map((rol) => rol.name),
+      roles: permiso.roles.map((rol) => rol.id),
+      rolesData: permiso.roles,
     }));
 
     return NextResponse.json({
@@ -88,7 +89,7 @@ export async function POST(request: Request) {
     // Buscar los roles por nombre
     const rolesEncontrados = await prisma.rol.findMany({
       where: {
-        name: {
+        id: {
           in: roles,
         },
       },
