@@ -153,15 +153,39 @@ const ChequesPage = () => {
       <Typography variant="h4" component="h1" gutterBottom>
         Cheques
       </Typography>
-
-      <TextField
-        label="Buscar por número"
-        variant="outlined"
-        value={searchTerm}
-        onChange={handleSearchChange}
-        fullWidth
-        margin="normal"
-      />
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          gap: 2,
+        }}
+      >
+        <TextField
+          label="Buscar por número"
+          variant="outlined"
+          value={searchTerm}
+          onChange={handleSearchChange}
+          fullWidth
+          margin="normal"
+          sx={{
+            width: 300,
+            "& .MuiOutlinedInput-root": {
+              backgroundColor: "background.paper",
+              "&:hover fieldset": {
+                borderColor: "primary.main",
+              },
+            },
+          }}
+          InputProps={{
+            startAdornment: (
+              <Box component="span" sx={{ color: "text.secondary", mr: 1 }}>
+                🔍
+              </Box>
+            ),
+          }}
+        />
+      </Box>
 
       <DataGrid
         rows={cheques}

@@ -20,6 +20,8 @@ function FormModal({ open, onClose, children }: Props) {
           p: 4,
           minWidth: 600,
           maxWidth: 800,
+          maxHeight: "90vh",
+          overflowY: "auto",
         }}
       >
         {children}
