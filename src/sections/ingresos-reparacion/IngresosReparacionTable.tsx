@@ -3,8 +3,12 @@
 import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
+import useRecibo from "@/hooks/useRecibo";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { Chip } from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
+import { Alert, Chip, MenuItem, Snackbar } from "@mui/material";
+import { useState } from "react";
+import RecibosModal from "./RecibosModal";
 
 function IngresosReparacionTable({
   extraActions,
@@ -12,6 +16,18 @@ function IngresosReparacionTable({
   setRefreshTrigger,
   ...rest
 }: InheritedTableProps) {
+  const [selectedIngreso, setSelectedIngreso] = useState<{
+    id: string;
+  } | null>(null);
+  const [pdfUrl, setPdfUrl] = useState("");
+
+  const [modalOpen, setModalOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
+  const { generateRecibo } = useRecibo();
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     {
@@ -87,15 +103,65 @@ function IngresosReparacionTable({
     },
   ];
 
+  const handleExtraAction = async (ingresoId: string) => {
+    try {
+      const url = await generateRecibo({ id: ingresoId });
+      setSelectedIngreso({ id: ingresoId });
+      setPdfUrl(`${url}#zoom=100`);
+      setModalOpen(true);
+    } catch (error) {
+      console.error("Error al generar el recibo:", error);
+      setSnackbar({
+        open: true,
+        message: "Error al generar el recibo",
+        severity: "error",
+      });
+    }
+  };
+
+  const customActions = (params: any) => {
+    const defaultActions = extraActions ? extraActions(params) : [];
+    const customActions: React.ReactNode[] = [
+      <MenuItem key="recibo" onClick={() => handleExtraAction(params.id)}>
+        <SendIcon sx={{ mr: 1 }} />
+        Enviar recibo
+      </MenuItem>,
+    ];
+    return customActions.concat(defaultActions);
+  };
+
   return (
-    <CustomTable
-      title="Ingresos por Reparación"
-      apiEndpoint="/api/ingresos-reparacion"
-      extraActions={extraActions}
-      ctaCb={ctaCb}
-      columns={columns}
-      {...rest}
-    />
+    <>
+      <CustomTable
+        title="Ingresos por Reparación"
+        apiEndpoint="/api/ingresos-reparacion"
+        extraActions={customActions}
+        ctaCb={ctaCb}
+        columns={columns}
+        {...rest}
+      />
+      {selectedIngreso && (
+        <RecibosModal
+          modalOpen={modalOpen}
+          setModalOpen={setModalOpen}
+          pdfUrl={pdfUrl}
+          selectedIngreso={selectedIngreso}
+          setSnackbar={setSnackbar}
+        />
+      )}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
   );
 }
 
