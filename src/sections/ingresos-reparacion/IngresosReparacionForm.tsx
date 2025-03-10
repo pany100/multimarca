@@ -1,11 +1,13 @@
 "use client";
 
+import ChequeData from "@/components/formV2/ChequeData";
 import CustomAutocomplete from "@/components/formV2/CustomAutocomplete";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useClientesAutocomplete from "@/hooks/useClientesAutocomplete";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import useOrdenReparacionDelCliente from "@/hooks/useOrdenReparacionDelCliente";
+import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
 import { Grid, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
@@ -23,6 +25,7 @@ export const schema = yup.object({
     .number()
     .required("La orden de reparación es requerida"),
   tipoOperacion: yup.string().required("El tipo de operación es requerido"),
+  ...getSchemaPropsForCheque("tipoOperacion"),
 });
 
 const IngresosReparacionForm = () => {
@@ -32,7 +35,7 @@ const IngresosReparacionForm = () => {
   const { searchClientes, initialCliente } = useClientesAutocomplete();
   const clienteId = watch("clienteId");
   const { ordenesReparacion } = useOrdenReparacionDelCliente(clienteId);
-
+  const operacionValue = watch("tipoOperacion");
   return (
     <>
       <Typography variant="h5" sx={{ mb: 2 }}>
@@ -56,6 +59,7 @@ const IngresosReparacionForm = () => {
             options={tipoOperacion}
           />
         </Grid>
+        {operacionValue === "CHEQUE" && <ChequeData />}
         <Grid item xs={12}>
           <CustomAutocomplete
             name="clienteId"
