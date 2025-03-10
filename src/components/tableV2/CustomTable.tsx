@@ -20,6 +20,7 @@ export interface CustomTableProps {
   ctaCb?: () => void;
   getRowClassName?: (params: GridRowParams) => string;
   refreshTrigger?: number;
+  disableMenuForRow?: (item: any) => boolean;
 }
 
 export type InheritedTableProps = {
@@ -38,6 +39,7 @@ function CustomTable<T extends { id: string }>({
   extraActions,
   ctaCb,
   getRowClassName,
+  disableMenuForRow,
   refreshTrigger = 0,
 }: CustomTableProps) {
   const [items, setItems] = useState<T[]>([]);
@@ -193,14 +195,18 @@ function CustomTable<T extends { id: string }>({
                       width: 50,
                       sortable: false,
                       filterable: false,
-                      renderCell: (params: any) => (
-                        <IconButton
-                          size="small"
-                          onClick={(e) => handleMenuOpen(e, params.row)}
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                      ),
+                      renderCell: (params: any) => {
+                        const isDisabled = disableMenuForRow?.(params.row);
+                        if (isDisabled) return null;
+                        return (
+                          <IconButton
+                            size="small"
+                            onClick={(e) => handleMenuOpen(e, params.row)}
+                          >
+                            <MoreVertIcon />
+                          </IconButton>
+                        );
+                      },
                     },
                   ]
                 : []),

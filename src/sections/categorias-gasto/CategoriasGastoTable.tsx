@@ -4,6 +4,8 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 
+const nonEditableItems = [1, 2, 3];
+
 function CategoriasGastoTable({
   extraActions,
   ctaCb,
@@ -22,6 +24,7 @@ function CategoriasGastoTable({
       extraActions={extraActions}
       ctaCb={ctaCb}
       columns={columns}
+      disableMenuForRow={(item) => nonEditableItems.includes(item.id)}
       {...rest}
     />
   );
