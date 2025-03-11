@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-function useOrdenCompraData({ onClose }: { onClose: () => void }) {
+function useStockItemData({ onClose }: { onClose: () => void }) {
   const { watch, setValue } = useFormContext();
   const [stock, setStock] = useState<{
     stockId: string;
@@ -46,4 +46,4 @@ function useOrdenCompraData({ onClose }: { onClose: () => void }) {
   };
 }
 
-export default useOrdenCompraData;
+export default useStockItemData;

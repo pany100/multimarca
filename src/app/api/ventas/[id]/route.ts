@@ -249,6 +249,11 @@ export async function PUT(
         numeroCheque: newCheque?.numero,
         picturePath: newCheque?.picturePath,
         chequeId: newCheque?.id,
+        items: ventaActualizada.items.map((item) => ({
+          ...item,
+          name: item.stock.name,
+          stockId: item.stock.id,
+        })),
       };
     });
 

@@ -97,7 +97,16 @@ export async function PUT(
       }
     );
 
-    return NextResponse.json(ordenDeCompraActualizada);
+    const ordenDeCompraActualizadaConLabel = {
+      ...ordenDeCompraActualizada,
+      items: ordenDeCompraActualizada.items.map((item) => ({
+        ...item,
+        name: item.stock.name,
+        stockId: item.stock.id,
+      })),
+    };
+
+    return NextResponse.json(ordenDeCompraActualizadaConLabel);
   } catch (error) {
     console.error("Error al actualizar orden de compra:", error);
     return NextResponse.json(

@@ -58,6 +58,11 @@ export async function GET(request: Request) {
             numeroCheque: cheque?.numero,
             picturePath: cheque?.picturePath,
             chequeId: cheque?.id,
+            items: venta.items.map((item) => ({
+              ...item,
+              name: item.stock.name,
+              stockId: item.stock.id,
+            })),
           };
         }
         return venta;
@@ -227,6 +232,11 @@ export async function POST(request: Request) {
       numeroCheque: newCheque?.numero,
       picturePath: newCheque?.picturePath,
       chequeId: newCheque?.id,
+      items: venta.items.map((item) => ({
+        ...item,
+        name: item.stock.name,
+        stockId: item.stock.id,
+      })),
     };
 
     return NextResponse.json(ventaToReturn);

@@ -10,9 +10,8 @@ function useStockAutocomplete() {
     const data = await response.json();
     const results = data.items.map(
       (stock: { name: string; id: number; price: number }) => ({
-        id: stock.id,
-        name: stock.name,
-        price: stock.price,
+        value: stock.id,
+        label: stock.name,
       })
     );
     return results;

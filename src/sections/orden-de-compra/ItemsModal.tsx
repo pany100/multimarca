@@ -1,4 +1,4 @@
-import useOrdenCompraData from "@/hooks/orden-de-compra/useOrdenCompraData";
+import useStockItemData from "@/hooks/useStockItemData";
 import useStockProveedores from "@/hooks/useStockProveedores";
 import {
   Box,
@@ -21,7 +21,7 @@ type Props = {
 function ItemsModal({ open, onClose, proveedorId }: Props) {
   const { stockOptions } = useStockProveedores({ proveedorId });
   const { onSubmit, setStock, setCantidad, error, submitDisabled, onCancel } =
-    useOrdenCompraData({
+    useStockItemData({
       onClose,
     });
   return (

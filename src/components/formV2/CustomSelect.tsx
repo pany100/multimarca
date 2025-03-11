@@ -58,7 +58,6 @@ const CustomSelect = ({
               {...props}
             >
               {options.map((option) => {
-                console.log(currentValue);
                 return (
                   <MenuItem key={option.value} value={option.value}>
                     {props.multiple ? (
