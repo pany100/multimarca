@@ -37,8 +37,16 @@ export async function GET(request: Request) {
       }),
     ]);
 
+    const ordenesDeCompraConLabel = ordenesDeCompra.map((orden) => ({
+      ...orden,
+      items: orden.items.map((item) => ({
+        ...item,
+        stockLabel: item.stock.label,
+      })),
+    }));
+
     return NextResponse.json({
-      items: ordenesDeCompra,
+      items: ordenesDeCompraConLabel,
       total,
       page,
       size,
@@ -110,7 +118,15 @@ export async function POST(request: Request) {
       return ordenCreada;
     });
 
-    return NextResponse.json(nuevaOrdenDeCompra, { status: 201 });
+    const nuevaOrdenDeCompraConLabel = {
+      ...nuevaOrdenDeCompra,
+      items: nuevaOrdenDeCompra.items.map((item) => ({
+        ...item,
+        stockLabel: item.stock.label,
+      })),
+    };
+
+    return NextResponse.json(nuevaOrdenDeCompraConLabel, { status: 201 });
   } catch (error) {
     console.error("Error al crear orden de compra:", error);
     return NextResponse.json(

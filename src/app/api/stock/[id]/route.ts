@@ -1,6 +1,39 @@
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+
+    const stock = await prisma.stock.findUnique({
+      where: { id },
+      select: {
+        label: true,
+        name: true,
+        brand: true,
+      },
+    });
+
+    if (!stock) {
+      return NextResponse.json(
+        { error: "Stock no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(stock);
+  } catch (error) {
+    console.error("Error al obtener el stock:", error);
+    return NextResponse.json(
+      { error: "Error al obtener el stock" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }

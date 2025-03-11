@@ -15,7 +15,7 @@ function useStockProveedores({ proveedorId }: { proveedorId?: number | null }) {
         );
         const data = await response.json();
         const results = data.items.map(
-          (stock: { name: string; id: number; label: string }) => ({
+          (stock: { id: number; label: string }) => ({
             value: stock.id,
             label: stock.label,
           })

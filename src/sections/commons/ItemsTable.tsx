@@ -40,7 +40,7 @@ function ItemsTable() {
                     : {}
                 }
               >
-                <TableCell>{item.stockId}</TableCell>
+                <TableCell>{item.stockLabel}</TableCell>
                 <TableCell>{item.cantidad}</TableCell>
                 <TableCell>
                   <Button

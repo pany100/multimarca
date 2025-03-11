@@ -8,7 +8,7 @@ type Props = {
 };
 
 function NonFormSelect({ options, onChange, label }: Props) {
-  const [value, setValue] = useState<string | null>(null);
+  const [value, setValue] = useState<string | null>("");
 
   return (
     <FormControl fullWidth sx={{ mt: 1 }}>

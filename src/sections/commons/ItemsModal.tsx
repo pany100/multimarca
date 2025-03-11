@@ -34,6 +34,8 @@ function ItemsModal({ open, onClose, proveedorId }: Props) {
     }
     const newItem = {
       stockId: Number(stockId),
+      stockLabel: stockOptions.find((option) => option.value === stockId)
+        ?.label,
       cantidad: Number(cantidad),
     };
     const updatedItems = [...items, newItem];
