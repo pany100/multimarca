@@ -17,7 +17,9 @@ export async function GET(
         auto: {
           ownerId: clienteId,
         },
-        estado: EstadoOrdenReparacion.Terminado,
+        estado: {
+          not: EstadoOrdenReparacion.Presupuestado,
+        },
       },
       include: {
         auto: {
