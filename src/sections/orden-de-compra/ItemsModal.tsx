@@ -1,3 +1,4 @@
+import useOrdenCompraData from "@/hooks/orden-de-compra/useOrdenCompraData";
 import useStockProveedores from "@/hooks/useStockProveedores";
 import {
   Box,
@@ -8,10 +9,8 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
-import { useFormContext } from "react-hook-form";
-import NonFormInput from "./NonFormInput";
-import NonFormSelect from "./NonFormSelect";
+import NonFormInput from "../commons/NonFormInput";
+import NonFormSelect from "../commons/NonFormSelect";
 
 type Props = {
   open: boolean;
@@ -21,30 +20,10 @@ type Props = {
 
 function ItemsModal({ open, onClose, proveedorId }: Props) {
   const { stockOptions } = useStockProveedores({ proveedorId });
-  const { watch, setValue } = useFormContext();
-  const [stock, setStock] = useState<{
-    stockId: string;
-    name: string;
-  } | null>(null);
-  const [cantidad, setCantidad] = useState<number | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const onSubmit = () => {
-    setError(null);
-    const items = watch("items") || [];
-    if (items.some((item: any) => item.stockId === Number(stock?.stockId))) {
-      setError("El stock ya existe en la orden");
-      return;
-    }
-    const newItem = {
-      ...stock,
-      cantidad: Number(cantidad),
-    };
-    const updatedItems = [...items, newItem];
-    setValue("items", updatedItems);
-    setStock(null);
-    setCantidad(null);
-    onClose();
-  };
+  const { onSubmit, setStock, setCantidad, error, submitDisabled, onCancel } =
+    useOrdenCompraData({
+      onClose,
+    });
   return (
     <Dialog
       open={open}
@@ -80,20 +59,11 @@ function ItemsModal({ open, onClose, proveedorId }: Props) {
         {error && <Typography color="error">{error}</Typography>}
       </DialogContent>
       <DialogActions sx={{ mr: 2, mb: 2 }}>
-        <Button
-          onClick={() => {
-            setStock(null);
-            setCantidad(null);
-            setError(null);
-            onClose();
-          }}
-        >
-          Cancelar
-        </Button>
+        <Button onClick={onCancel}>Cancelar</Button>
         <Button
           onClick={onSubmit}
           variant="contained"
-          disabled={stock === null || cantidad === null || cantidad === 0}
+          disabled={submitDisabled}
         >
           Agregar
         </Button>

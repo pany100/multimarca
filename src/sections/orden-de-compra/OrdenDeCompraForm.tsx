@@ -5,8 +5,8 @@ import { Box, Button, Grid, Typography } from "@mui/material";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
-import ItemsModal from "../commons/ItemsModal";
 import ItemsTable from "../commons/ItemsTable";
+import ItemsModal from "./ItemsModal";
 
 export const schema = yup.object({
   fecha: yup.date().required("La fecha es requerida"),
