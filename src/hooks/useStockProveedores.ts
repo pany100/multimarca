@@ -1,7 +1,7 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { useEffect, useState } from "react";
 
-function useStockProveedores({ proveedorId }: { proveedorId: number | null }) {
+function useStockProveedores({ proveedorId }: { proveedorId?: number | null }) {
   const [stockOptions, setStockOptions] = useState<
     { value: string; label: string }[]
   >([]);
@@ -25,6 +25,7 @@ function useStockProveedores({ proveedorId }: { proveedorId: number | null }) {
     };
     searchStock();
   }, [proveedorId, authFetch]);
+
   return {
     stockOptions,
   };

@@ -1,10 +1,12 @@
 import CustomAutocomplete from "@/components/formV2/CustomAutocomplete";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import useProveedorAutocomplete from "@/hooks/useProveedorAutocomplete";
-import { Grid, Typography } from "@mui/material";
+import { Box, Button, Grid, Typography } from "@mui/material";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
+import ItemsModal from "../commons/ItemsModal";
+import ItemsTable from "../commons/ItemsTable";
 
 export const schema = yup.object({
   fecha: yup.date().required("La fecha es requerida"),
@@ -47,7 +49,25 @@ function OrdenDeCompraForm() {
             initialOptions={initialProveedor}
           />
         </Grid>
-        <Grid item xs={12}></Grid>
+        <Grid item xs={12}>
+          <ItemsTable />
+          <Box
+            sx={{ display: "flex", justifyContent: "flex-end", mt: 2, mb: 2 }}
+          >
+            <Button
+              variant="outlined"
+              onClick={() => setOpenModal(true)}
+              disabled={!proveedorId}
+            >
+              Agregar Item
+            </Button>
+          </Box>
+          <ItemsModal
+            open={openModal}
+            onClose={() => setOpenModal(false)}
+            proveedorId={proveedorId}
+          />
+        </Grid>
         <Grid item xs={12} md={6}>
           <CustomInputText
             name="precioTotal"
