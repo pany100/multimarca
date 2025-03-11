@@ -17,7 +17,7 @@ export const schema = yup.object({
     .of(
       yup.object({
         cantidad: yup.number().required("La cantidad es requerida"),
-        stockLabel: yup.string().nullable(),
+        name: yup.string(),
         stockId: yup.number().required("El stock es requerido"),
       })
     )

@@ -22,25 +22,26 @@ type Props = {
 function ItemsModal({ open, onClose, proveedorId }: Props) {
   const { stockOptions } = useStockProveedores({ proveedorId });
   const { watch, setValue } = useFormContext();
-  const [stockId, setStockId] = useState<string | null>(null);
+  const [stock, setStock] = useState<{
+    stockId: string;
+    name: string;
+  } | null>(null);
   const [cantidad, setCantidad] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const onSubmit = () => {
     setError(null);
     const items = watch("items") || [];
-    if (items.some((item: any) => item.stockId === Number(stockId))) {
+    if (items.some((item: any) => item.stockId === Number(stock?.stockId))) {
       setError("El stock ya existe en la orden");
       return;
     }
     const newItem = {
-      stockId: Number(stockId),
-      stockLabel: stockOptions.find((option) => option.value === stockId)
-        ?.label,
+      ...stock,
       cantidad: Number(cantidad),
     };
     const updatedItems = [...items, newItem];
     setValue("items", updatedItems);
-    setStockId(null);
+    setStock(null);
     setCantidad(null);
     onClose();
   };
@@ -60,7 +61,12 @@ function ItemsModal({ open, onClose, proveedorId }: Props) {
         <Box sx={{ mb: 3 }}>
           <NonFormSelect
             options={stockOptions}
-            onChange={(value) => setStockId(value)}
+            onChange={(value: string) =>
+              setStock({
+                stockId: value,
+                name: stockOptions.find((s) => s.value === value)?.name || "",
+              })
+            }
             label="Stock"
           />
         </Box>
@@ -76,7 +82,7 @@ function ItemsModal({ open, onClose, proveedorId }: Props) {
       <DialogActions sx={{ mr: 2, mb: 2 }}>
         <Button
           onClick={() => {
-            setStockId(null);
+            setStock(null);
             setCantidad(null);
             setError(null);
             onClose();
@@ -87,7 +93,7 @@ function ItemsModal({ open, onClose, proveedorId }: Props) {
         <Button
           onClick={onSubmit}
           variant="contained"
-          disabled={stockId === null || cantidad === null || cantidad === 0}
+          disabled={stock === null || cantidad === null || cantidad === 0}
         >
           Agregar
         </Button>

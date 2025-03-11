@@ -31,7 +31,7 @@ function ItemsTable() {
           {items.length > 0 ? (
             items.map((item: any, index: number) => (
               <TableRow
-                key={item.id}
+                key={item.stockId}
                 sx={
                   index === items.length - 1
                     ? {
@@ -40,7 +40,7 @@ function ItemsTable() {
                     : {}
                 }
               >
-                <TableCell>{item.stockLabel}</TableCell>
+                <TableCell>{item.name}</TableCell>
                 <TableCell>{item.cantidad}</TableCell>
                 <TableCell>
                   <Button

@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 
 function useStockProveedores({ proveedorId }: { proveedorId?: number | null }) {
   const [stockOptions, setStockOptions] = useState<
-    { value: string; label: string }[]
+    { value: string; label: string; name: string }[]
   >([]);
   const { authFetch } = useFetch();
 
@@ -15,9 +15,10 @@ function useStockProveedores({ proveedorId }: { proveedorId?: number | null }) {
         );
         const data = await response.json();
         const results = data.items.map(
-          (stock: { id: number; label: string }) => ({
+          (stock: { id: number; label: string; name: string }) => ({
             value: stock.id,
             label: stock.label,
+            name: stock.name,
           })
         );
         setStockOptions(results);
