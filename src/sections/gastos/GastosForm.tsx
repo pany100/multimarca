@@ -4,7 +4,6 @@ import ChequeData from "@/components/formV2/ChequeData";
 import CustomAutocomplete from "@/components/formV2/CustomAutocomplete";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
-import { useFetch } from "@/contexts/FetchContext";
 import useCategoriasGasto from "@/hooks/useCategoriasGasto";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import useMecanicoAutocomplete from "@/hooks/useMecanicoAutocomplete";
@@ -50,7 +49,6 @@ export const schema = yup.object({
 });
 
 const GastosForm = () => {
-  const { authFetch } = useFetch();
   const { currency, tipoOperacion } = useFixedSelectData();
   const { watch } = useFormContext();
   const operacionValue = watch("tipo");
