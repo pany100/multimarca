@@ -100,27 +100,44 @@ function PresupuestosTable({
   ];
 
   const customActions = (params: any) => {
+    console.log(params);
+    const isBorrador = params.ingresos === undefined;
     const defaultActions = extraActions ? extraActions(params) : [];
-    const customActions: React.ReactNode[] = [
-      <MenuItem
-        key="edit"
-        onClick={() =>
-          router.push(`/dashboard/ordenes-reparacion/${params.id}/editar`)
-        }
-      >
-        <EditIcon sx={{ mr: 1 }} />
-        Editar
-      </MenuItem>,
-      <MenuItem
-        key="view"
-        onClick={() =>
-          router.push(`/dashboard/ordenes-reparacion/${params.id}/ver`)
-        }
-      >
-        <VisibilityIcon sx={{ mr: 1 }} />
-        Ver
-      </MenuItem>,
-    ];
+    let customActions: React.ReactNode[];
+    if (isBorrador) {
+      customActions = [
+        <MenuItem
+          key="edit"
+          onClick={() =>
+            router.push(`/dashboard/borradores/${params.id}/editar`)
+          }
+        >
+          <EditIcon sx={{ mr: 1 }} />
+          Editar
+        </MenuItem>,
+      ];
+    } else {
+      customActions = [
+        <MenuItem
+          key="edit"
+          onClick={() =>
+            router.push(`/dashboard/ordenes-reparacion/${params.id}/editar`)
+          }
+        >
+          <EditIcon sx={{ mr: 1 }} />
+          Editar
+        </MenuItem>,
+        <MenuItem
+          key="view"
+          onClick={() =>
+            router.push(`/dashboard/ordenes-reparacion/${params.id}/ver`)
+          }
+        >
+          <VisibilityIcon sx={{ mr: 1 }} />
+          Ver
+        </MenuItem>,
+      ];
+    }
     return customActions.concat(defaultActions);
   };
 

@@ -9,6 +9,13 @@ const PresupuestosPage = () => {
     <>
       <ABMPage
         apiEndpoint="/api/orden-reparacion"
+        getDeleteEndpoint={(entity: any) => {
+          const isBorrador = entity?.ingresos === undefined;
+          if (isBorrador) {
+            return "/api/borradores";
+          }
+          return "/api/orden-reparacion";
+        }}
         table={PresupuestosTable}
         crudActions={[CrudAction.ADD, CrudAction.DELETE]}
       />

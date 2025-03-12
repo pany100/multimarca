@@ -11,6 +11,7 @@ import FormModal from "../formV2/FormModal";
 
 type Props = {
   apiEndpoint: string;
+  getDeleteEndpoint?: (entity: any) => string;
   extraContent?: React.ComponentType<any>;
   table: React.ComponentType<any>;
   form?: React.ComponentType<any>;
@@ -20,6 +21,7 @@ type Props = {
 
 function ABMPage({
   apiEndpoint,
+  getDeleteEndpoint,
   extraContent: ExtraContent,
   table: Table,
   form: Form,
@@ -206,7 +208,9 @@ function ABMPage({
 
       {crudActions.includes(CrudAction.DELETE) && (
         <DeleteModal
-          apiEndpoint={apiEndpoint}
+          apiEndpoint={
+            getDeleteEndpoint ? getDeleteEndpoint(entity) : apiEndpoint
+          }
           open={isDeleteModalOpen}
           onClose={handleCloseDelete}
           entity={entity}
