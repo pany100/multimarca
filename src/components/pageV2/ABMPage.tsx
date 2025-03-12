@@ -13,9 +13,9 @@ type Props = {
   apiEndpoint: string;
   extraContent?: React.ComponentType<any>;
   table: React.ComponentType<any>;
-  form: React.ComponentType<any>;
+  form?: React.ComponentType<any>;
   crudActions: CrudAction[];
-  schema: yup.ObjectSchema<any>;
+  schema?: yup.ObjectSchema<any>;
 };
 
 function ABMPage({
@@ -178,7 +178,7 @@ function ABMPage({
 
       <Table {...tableProps} />
 
-      {shouldShowAdd && (
+      {shouldShowAdd && Form && schema && (
         <FormModal
           open={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
@@ -192,7 +192,7 @@ function ABMPage({
         </FormModal>
       )}
 
-      {crudActions.includes(CrudAction.EDIT) && (
+      {Form && schema && crudActions.includes(CrudAction.EDIT) && (
         <FormModal open={isEditModalOpen} onClose={handleCloseEdit}>
           <CustomForm
             onCancel={handleCloseEdit}
