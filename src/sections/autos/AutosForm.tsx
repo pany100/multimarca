@@ -3,7 +3,6 @@ import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useClientesAutocomplete from "@/hooks/useClientesAutocomplete";
 import { Grid, Typography } from "@mui/material";
-import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
 
 export const schema = yup.object({
@@ -22,10 +21,6 @@ export const schema = yup.object({
 });
 
 const AutosForm = () => {
-  const {
-    control,
-    formState: { errors },
-  } = useFormContext();
   const { searchClientes, initialCliente } = useClientesAutocomplete();
 
   return (

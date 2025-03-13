@@ -12,7 +12,14 @@ function useFixedSelectData() {
     { value: "Peso", label: "Peso" },
     { value: "Dolar", label: "Dolar" },
   ];
-  return { tipoOperacion, currency };
+
+  const orepEstadoOptions = [
+    { value: "Presupuestado", label: "Presupuestado" },
+    { value: "EnProgreso", label: "En Progreso" },
+    { value: "Aceptado", label: "Aceptado" },
+    { value: "Terminado", label: "Terminado" },
+  ];
+  return { tipoOperacion, currency, orepEstadoOptions };
 }
 
 export default useFixedSelectData;

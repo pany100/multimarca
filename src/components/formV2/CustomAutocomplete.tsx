@@ -67,20 +67,20 @@ const CustomAutocompleteInput = ({
         const currentValue = value
           ? options.find((option) => option.value === value) || null
           : null;
-
         return (
           <Autocomplete
             {...field}
             options={options}
             loading={loading}
             value={currentValue}
-            onChange={(_, newValue) => {
+            onChange={(_, newValue, reason) => {
               onChange(newValue?.value);
             }}
-            onInputChange={(_, newInputValue) => {
-              if (newInputValue.length >= 2) {
+            onInputChange={(_, newInputValue, reason) => {
+              if (newInputValue.length >= 2 && reason !== "reset") {
                 fetchOptions(newInputValue);
-              } else {
+              }
+              if (newInputValue.length < 2) {
                 setOptions([]);
               }
             }}
