@@ -1,5 +1,10 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import HandymanIcon from "@mui/icons-material/Handyman";
+import ReceiptIcon from "@mui/icons-material/Receipt";
 import {
   Alert,
   Autocomplete,
@@ -9,11 +14,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
+  IconButton,
+  Paper,
   Snackbar,
+  Stack,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   TextField,
@@ -93,7 +101,6 @@ function ReparacionesTercerosFormSection({
           message: "Reparación actualizada correctamente",
           severity: "success",
         });
-        setOpenReparacionModal(false);
         resetFields();
       } else if (
         currentReparaciones.some((r: any) => r.id === newReparacion.id)
@@ -109,7 +116,6 @@ function ReparacionesTercerosFormSection({
           ...currentReparaciones,
           newReparacion,
         ]);
-        setOpenReparacionModal(false);
         resetFields();
         setSnackbar({
           open: true,
@@ -146,9 +152,16 @@ function ReparacionesTercerosFormSection({
     );
 
     setValue("reparacionesDeTercero", updatedReparaciones);
+
+    setSnackbar({
+      open: true,
+      message: `${reparacion.nombre} eliminado`,
+      severity: "info",
+    });
   };
 
   const resetFields = () => {
+    setOpenReparacionModal(false);
     setSelectedProveedor(null);
     setNombre("");
     setRecibo(null);
@@ -157,106 +170,179 @@ function ReparacionesTercerosFormSection({
     setEditingReparacionId(null);
   };
 
+  const openAddModal = () => {
+    setEditingReparacionId(null);
+    setOpenReparacionModal(true);
+  };
+
   return (
     <>
-      <Typography variant="h6" gutterBottom>
-        Reparación / Repuestos de terceros
-      </Typography>
       <Controller
         name="reparacionesDeTercero"
         control={control}
         render={({ field, fieldState: { error } }) => (
           <>
             {field.value && field.value.length > 0 ? (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Proveedor</TableCell>
-                    <TableCell>Descripción</TableCell>
-                    <TableCell>Precio Compra</TableCell>
-                    <TableCell>Precio Venta</TableCell>
-                    {!esBorrador && <TableCell>Recibo</TableCell>}
-                    <TableCell>Acciones</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {field.value.map((reparacion: any) => (
-                    <TableRow key={reparacion.id}>
-                      <TableCell>{reparacion.proveedor.name}</TableCell>
-                      <TableCell>{reparacion.nombre}</TableCell>
-                      <TableCell>
-                        {getFormattedPrice(reparacion.precioCompra)}
+              <TableContainer
+                component={Paper}
+                variant="outlined"
+                sx={{ mb: 2 }}
+              >
+                <Table>
+                  <TableHead sx={{ backgroundColor: "primary.light" }}>
+                    <TableRow>
+                      <TableCell sx={{ color: "white" }}>Proveedor</TableCell>
+                      <TableCell sx={{ color: "white" }}>Descripción</TableCell>
+                      <TableCell sx={{ color: "white" }}>
+                        Precio Compra
                       </TableCell>
-                      <TableCell>
-                        {getFormattedPrice(reparacion.precioVenta)}
+                      <TableCell sx={{ color: "white" }}>
+                        Precio Venta
                       </TableCell>
                       {!esBorrador && (
-                        <TableCell>
-                          {reparacion.recibo && (
-                            <Link href={reparacion.recibo} target="_blank">
-                              <Button size="small" color="primary">
-                                Ver recibo
-                              </Button>
-                            </Link>
-                          )}
-                        </TableCell>
+                        <TableCell sx={{ color: "white" }}>Recibo</TableCell>
                       )}
-                      <TableCell>
-                        <Button
-                          onClick={() => handleEditReparacion(reparacion)}
-                        >
-                          Editar
-                        </Button>
-                        <Button
-                          onClick={() => {
-                            handleRemoveReparacion(reparacion);
-                          }}
-                        >
-                          Eliminar
-                        </Button>
+                      <TableCell sx={{ color: "white" }} align="right">
+                        Acciones
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHead>
+                  <TableBody>
+                    {field.value.map((reparacion: any) => (
+                      <TableRow key={reparacion.id}>
+                        <TableCell>
+                          <strong>{reparacion.proveedor.name}</strong>
+                        </TableCell>
+                        <TableCell>{reparacion.nombre}</TableCell>
+                        <TableCell>
+                          {getFormattedPrice(reparacion.precioCompra)}
+                        </TableCell>
+                        <TableCell>
+                          {getFormattedPrice(reparacion.precioVenta)}
+                        </TableCell>
+                        {!esBorrador && (
+                          <TableCell>
+                            {reparacion.recibo ? (
+                              <Link href={reparacion.recibo} target="_blank">
+                                <Button
+                                  size="small"
+                                  color="primary"
+                                  startIcon={<ReceiptIcon />}
+                                >
+                                  Ver recibo
+                                </Button>
+                              </Link>
+                            ) : (
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                Sin recibo
+                              </Typography>
+                            )}
+                          </TableCell>
+                        )}
+                        <TableCell align="right">
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            justifyContent="flex-end"
+                          >
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              onClick={() => handleEditReparacion(reparacion)}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              color="error"
+                              size="small"
+                              onClick={() => {
+                                handleRemoveReparacion(reparacion);
+                              }}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             ) : (
-              <Typography>
-                No hay repuestos / reparaciones de terceros asignadas
-              </Typography>
-            )}
-            {error && <Typography color="error">{error.message}</Typography>}
-            <Box display="flex" justifyContent="flex-end" mt={2}>
-              <Button
-                onClick={() => setOpenReparacionModal(true)}
-                variant="contained"
+              <Box
+                sx={{
+                  p: 3,
+                  textAlign: "center",
+                  border: "1px dashed #ccc",
+                  borderRadius: 1,
+                  mb: 2,
+                  backgroundColor: "action.hover",
+                }}
               >
-                Agregar Reparación / Repuesto
-              </Button>
-            </Box>
+                <HandymanIcon
+                  sx={{ fontSize: 40, color: "text.secondary", mb: 1 }}
+                />
+                <Typography color="textSecondary" gutterBottom>
+                  No hay repuestos / reparaciones de terceros asignadas
+                </Typography>
+                <Button
+                  variant="outlined"
+                  startIcon={<AddCircleOutlineIcon />}
+                  onClick={openAddModal}
+                  sx={{ mt: 1 }}
+                >
+                  Agregar Reparación / Repuesto
+                </Button>
+              </Box>
+            )}
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error.message}
+              </Alert>
+            )}
+            {field.value && field.value.length > 0 && (
+              <Box display="flex" justifyContent="flex-end">
+                <Button
+                  onClick={openAddModal}
+                  variant="contained"
+                  startIcon={<AddCircleOutlineIcon />}
+                >
+                  Agregar Reparación / Repuesto
+                </Button>
+              </Box>
+            )}
           </>
         )}
       />
+
       <Dialog
         open={openReparacionModal}
-        onClose={() => {
-          setOpenReparacionModal(false);
-          resetFields();
-        }}
+        onClose={resetFields}
         PaperProps={{
           style: {
-            minWidth: "350px",
+            width: "450px",
+            maxWidth: "90vw",
           },
         }}
       >
         <DialogTitle>
           {editingReparacionId ? "Editar" : "Agregar"} Reparación de Tercero
         </DialogTitle>
-        <DialogContent>
+        <DialogContent dividers>
           <Autocomplete
             options={proveedorOptions}
             getOptionLabel={(option) => option.name}
             renderInput={(params) => (
-              <TextField {...params} label="Proveedor" />
+              <TextField
+                {...params}
+                label="Proveedor"
+                fullWidth
+                variant="outlined"
+                placeholder="Buscar proveedor..."
+              />
             )}
             value={selectedProveedor}
             onChange={(_, newValue) => {
@@ -265,14 +351,19 @@ function ReparacionesTercerosFormSection({
             onInputChange={(_, newInputValue) => {
               searchProveedores(newInputValue);
             }}
-            sx={{ mt: 2 }}
+            disabled={!!editingReparacionId}
+            noOptionsText="No se encontraron proveedores"
+            loadingText="Buscando..."
+            sx={{ mb: 3 }}
           />
           <TextField
             label="Descripción"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
             fullWidth
+            variant="outlined"
             margin="normal"
+            sx={{ mb: 2 }}
           />
           <TextField
             label="Precio Compra"
@@ -280,7 +371,9 @@ function ReparacionesTercerosFormSection({
             value={precioCompra}
             onChange={(e) => setPrecioCompra(e.target.value)}
             fullWidth
+            variant="outlined"
             margin="normal"
+            sx={{ mb: 2 }}
           />
           <TextField
             label="Precio Venta"
@@ -288,45 +381,56 @@ function ReparacionesTercerosFormSection({
             value={precioVenta}
             onChange={(e) => setPrecioVenta(e.target.value)}
             fullWidth
+            variant="outlined"
             margin="normal"
+            sx={{ mb: 2 }}
           />
           {!esBorrador && (
-            <ImageInput label="Recibo" image={recibo} setImage={setRecibo} />
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="subtitle2" gutterBottom>
+                Recibo
+              </Typography>
+              <Box sx={{ overflow: "hidden" }}>
+                <ImageInput label="" image={recibo} setImage={setRecibo} />
+              </Box>
+            </Box>
           )}
         </DialogContent>
-        <DialogActions>
-          <Button
-            type="button"
-            onClick={() => {
-              setOpenReparacionModal(false);
-              resetFields();
-            }}
-          >
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button variant="outlined" onClick={resetFields}>
             Cancelar
           </Button>
           <Button
-            type="button"
+            variant="contained"
             onClick={handleAddOrUpdateReparacion}
             disabled={
               !selectedProveedor ||
               !nombre ||
               (!esBorrador && (!precioCompra || !precioVenta))
             }
+            color="primary"
           >
-            {editingReparacionId ? "Actualizar" : "Agregar"}
+            {editingReparacionId ? "Guardar Cambios" : "Agregar"}
           </Button>
         </DialogActions>
       </Dialog>
+
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={4000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        <Alert severity={snackbar.severity as "success" | "error" | "warning"}>
+        <Alert
+          severity={
+            snackbar.severity as "success" | "error" | "warning" | "info"
+          }
+          variant="filled"
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
-      <Divider sx={{ mt: 2 }} />
     </>
   );
 }

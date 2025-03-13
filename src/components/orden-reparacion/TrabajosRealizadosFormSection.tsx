@@ -1,5 +1,10 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
+import ConstructionIcon from "@mui/icons-material/Construction";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import EventNoteIcon from "@mui/icons-material/EventNote";
 import {
   Alert,
   Autocomplete,
@@ -9,11 +14,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
+  IconButton,
+  Paper,
   Snackbar,
+  Stack,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   TextField,
@@ -94,7 +102,6 @@ function TrabajosRealizadosFormSection({
         message: "Trabajo actualizado correctamente",
         severity: "success",
       });
-      setOpenTrabajoModal(false);
       resetFields();
     } else {
       const trabajoExistente = currentTrabajos.find(
@@ -113,7 +120,6 @@ function TrabajosRealizadosFormSection({
       } else {
         setValue("trabajosRealizados", [...currentTrabajos, newTrabajo]);
 
-        setOpenTrabajoModal(false);
         resetFields();
         setSnackbar({
           open: true,
@@ -152,9 +158,16 @@ function TrabajosRealizadosFormSection({
         )
     );
     setValue("trabajosRealizados", updatedTrabajos);
+
+    setSnackbar({
+      open: true,
+      message: `${trabajo.manoDeObra.name} eliminado`,
+      severity: "info",
+    });
   };
 
   const resetFields = () => {
+    setOpenTrabajoModal(false);
     setSelectedTrabajo(null);
     setNombreTrabajo("");
     setPrecioUnitario("");
@@ -171,101 +184,187 @@ function TrabajosRealizadosFormSection({
     }
     if (!editingTrabajoId) {
       resetFields();
+      setOpenTrabajoModal(true);
     }
+  };
+
+  const openAddModal = () => {
+    setEditingTrabajoId(null);
+    setOpenTrabajoModal(true);
   };
 
   return (
     <>
-      <Typography variant="h6" gutterBottom>
-        Trabajos Realizados
-      </Typography>
       <Controller
         name="trabajosRealizados"
         control={control}
         render={({ field, fieldState: { error } }) => (
           <>
             {field.value && field.value.length > 0 ? (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Trabajo</TableCell>
-                    <TableCell>Precio</TableCell>
-                    <TableCell>Días para Recordatorio</TableCell>
-                    <TableCell>Acciones</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {field.value.map((trabajo: any) => (
-                    <TableRow key={trabajo.id}>
-                      <TableCell>{trabajo.manoDeObra.name}</TableCell>
-                      <TableCell>
-                        {getFormattedPrice(trabajo.precioUnitario)}
+              <TableContainer
+                component={Paper}
+                variant="outlined"
+                sx={{ mb: 2 }}
+              >
+                <Table>
+                  <TableHead sx={{ backgroundColor: "primary.light" }}>
+                    <TableRow>
+                      <TableCell sx={{ color: "white" }}>Trabajo</TableCell>
+                      <TableCell sx={{ color: "white" }}>Precio</TableCell>
+                      <TableCell sx={{ color: "white" }}>
+                        Días para Recordatorio
                       </TableCell>
-                      <TableCell>
-                        {trabajo.diasParaRecordatorio || "-"}
-                      </TableCell>
-                      <TableCell>
-                        <Button onClick={() => handleEditTrabajo(trabajo)}>
-                          Editar
-                        </Button>
-                        <Button onClick={() => handleRemoveTrabajo(trabajo)}>
-                          Eliminar
-                        </Button>
+                      <TableCell sx={{ color: "white" }} align="right">
+                        Acciones
                       </TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHead>
+                  <TableBody>
+                    {field.value.map((trabajo: any) => (
+                      <TableRow key={trabajo.id}>
+                        <TableCell>
+                          <strong>{trabajo.manoDeObra.name}</strong>
+                        </TableCell>
+                        <TableCell>
+                          {getFormattedPrice(trabajo.precioUnitario)}
+                        </TableCell>
+                        <TableCell>
+                          {trabajo.diasParaRecordatorio ? (
+                            <Box display="flex" alignItems="center">
+                              <EventNoteIcon
+                                fontSize="small"
+                                sx={{ mr: 0.5, color: "text.secondary" }}
+                              />
+                              {trabajo.diasParaRecordatorio} días
+                            </Box>
+                          ) : (
+                            <Typography variant="body2" color="text.secondary">
+                              Sin recordatorio
+                            </Typography>
+                          )}
+                        </TableCell>
+                        <TableCell align="right">
+                          <Stack
+                            direction="row"
+                            spacing={1}
+                            justifyContent="flex-end"
+                          >
+                            <IconButton
+                              color="primary"
+                              size="small"
+                              onClick={() => handleEditTrabajo(trabajo)}
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+                            <IconButton
+                              color="error"
+                              size="small"
+                              onClick={() => handleRemoveTrabajo(trabajo)}
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Stack>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
             ) : (
-              <Typography>No hay trabajos realizados asignados</Typography>
-            )}
-            {error && <Typography color="error">{error.message}</Typography>}
-            <Box display="flex" justifyContent="flex-end" mt={2}>
-              <Button
-                onClick={() => setOpenTrabajoModal(true)}
-                variant="contained"
+              <Box
+                sx={{
+                  p: 3,
+                  textAlign: "center",
+                  border: "1px dashed #ccc",
+                  borderRadius: 1,
+                  mb: 2,
+                  backgroundColor: "action.hover",
+                }}
               >
-                Agregar Trabajo
-              </Button>
-            </Box>
+                <ConstructionIcon
+                  sx={{ fontSize: 40, color: "text.secondary", mb: 1 }}
+                />
+                <Typography color="textSecondary" gutterBottom>
+                  No hay trabajos realizados asignados
+                </Typography>
+                <Button
+                  variant="outlined"
+                  startIcon={<AddCircleOutlineIcon />}
+                  onClick={openAddModal}
+                  sx={{ mt: 1 }}
+                >
+                  Agregar Trabajo
+                </Button>
+              </Box>
+            )}
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error.message}
+              </Alert>
+            )}
+            {field.value && field.value.length > 0 && (
+              <Box display="flex" justifyContent="flex-end">
+                <Button
+                  onClick={openAddModal}
+                  variant="contained"
+                  startIcon={<AddCircleOutlineIcon />}
+                >
+                  Agregar Trabajo
+                </Button>
+              </Box>
+            )}
           </>
         )}
       />
+
       <Dialog
         open={openTrabajoModal}
-        onClose={() => {
-          setOpenTrabajoModal(false);
-          resetFields();
-        }}
+        onClose={resetFields}
         PaperProps={{
           style: {
-            width: "450px",
+            width: "500px",
+            maxWidth: "90vw",
           },
         }}
       >
         <DialogTitle>
           {editingTrabajoId ? "Editar" : "Agregar"} Trabajo Realizado
         </DialogTitle>
-        <DialogContent>
-          <ToggleButtonGroup
-            value={tipoTrabajo}
-            exclusive
-            onChange={handleTipoTrabajoChange}
-            aria-label="tipo de trabajo"
-          >
-            <ToggleButton value="lista" aria-label="trabajo de lista">
-              Trabajo de Lista
-            </ToggleButton>
-            <ToggleButton value="otros" aria-label="otros trabajos">
-              Otros Trabajos
-            </ToggleButton>
-          </ToggleButtonGroup>
+        <DialogContent dividers>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="subtitle2" gutterBottom>
+              Tipo de Trabajo
+            </Typography>
+            <ToggleButtonGroup
+              value={tipoTrabajo}
+              exclusive
+              onChange={handleTipoTrabajoChange}
+              aria-label="tipo de trabajo"
+              fullWidth
+              color="primary"
+              sx={{ mt: 1 }}
+            >
+              <ToggleButton value="lista" aria-label="trabajo de lista">
+                Trabajo de Lista
+              </ToggleButton>
+              <ToggleButton value="otros" aria-label="otros trabajos">
+                Otros Trabajos
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
           {tipoTrabajo === "lista" ? (
             <Autocomplete
               options={trabajoOptions}
               getOptionLabel={(option) => option.name}
               renderInput={(params) => (
-                <TextField {...params} label="Trabajo" />
+                <TextField
+                  {...params}
+                  label="Trabajo"
+                  fullWidth
+                  variant="outlined"
+                  placeholder="Buscar trabajo..."
+                />
               )}
               value={selectedTrabajo}
               onChange={(_, newValue) => {
@@ -279,7 +378,10 @@ function TrabajosRealizadosFormSection({
               onInputChange={(_, newInputValue) => {
                 searchTrabajos(newInputValue);
               }}
-              sx={{ mt: 2 }}
+              disabled={!!editingTrabajoId}
+              noOptionsText="No se encontraron trabajos"
+              loadingText="Buscando..."
+              sx={{ mb: 3 }}
             />
           ) : (
             <TextField
@@ -287,60 +389,88 @@ function TrabajosRealizadosFormSection({
               value={nombreTrabajo}
               onChange={(e) => setNombreTrabajo(e.target.value)}
               fullWidth
+              variant="outlined"
               margin="normal"
-              sx={{ mt: 2 }}
+              sx={{ mb: 3 }}
             />
           )}
+
           <TextField
             label="Precio"
             type="number"
             value={precioUnitario}
             onChange={(e) => setPrecioUnitario(e.target.value)}
             fullWidth
+            variant="outlined"
             margin="normal"
-          />
-          <TextField
-            label="Días para Recordatorio"
-            type="number"
-            value={diasParaRecordatorio}
-            onChange={(e) => setDiasParaRecordatorio(e.target.value)}
-            fullWidth
-            margin="normal"
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            type="button"
-            onClick={() => {
-              setOpenTrabajoModal(false);
-              resetFields();
+            sx={{ mb: 3 }}
+            InputProps={{
+              startAdornment: (
+                <Typography variant="body2" sx={{ mr: 1 }}>
+                  $
+                </Typography>
+              ),
             }}
-          >
+          />
+
+          <Box>
+            <Typography variant="subtitle2" gutterBottom>
+              Recordatorio (opcional)
+            </Typography>
+            <TextField
+              label="Días para Recordatorio"
+              type="number"
+              value={diasParaRecordatorio}
+              onChange={(e) => setDiasParaRecordatorio(e.target.value)}
+              fullWidth
+              variant="outlined"
+              margin="normal"
+              placeholder="Dejar vacío si no requiere recordatorio"
+              InputProps={{
+                endAdornment: (
+                  <Typography variant="body2" sx={{ ml: 1 }}>
+                    días
+                  </Typography>
+                ),
+              }}
+            />
+          </Box>
+        </DialogContent>
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button variant="outlined" onClick={resetFields}>
             Cancelar
           </Button>
           <Button
-            type="button"
+            variant="contained"
             onClick={handleAddOrUpdateTrabajo}
             disabled={
               (tipoTrabajo === "lista" && !selectedTrabajo) ||
               (tipoTrabajo === "otros" && !nombreTrabajo) ||
               (!esBorrador && !precioUnitario)
             }
+            color="primary"
           >
-            {editingTrabajoId ? "Actualizar" : "Agregar"}
+            {editingTrabajoId ? "Guardar Cambios" : "Agregar"}
           </Button>
         </DialogActions>
       </Dialog>
+
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={4000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        <Alert severity={snackbar.severity as "success" | "error" | "warning"}>
+        <Alert
+          severity={
+            snackbar.severity as "success" | "error" | "warning" | "info"
+          }
+          variant="filled"
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
-      <Divider sx={{ mt: 2 }} />
     </>
   );
 }

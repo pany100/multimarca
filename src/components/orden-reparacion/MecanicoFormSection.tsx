@@ -1,4 +1,8 @@
 import { useFetch } from "@/contexts/FetchContext";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import EngineeringIcon from "@mui/icons-material/Engineering";
+import PersonAddIcon from "@mui/icons-material/PersonAdd";
 import {
   Alert,
   Autocomplete,
@@ -8,11 +12,14 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
-  Divider,
+  IconButton,
+  Paper,
   Snackbar,
+  Stack,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   TextField,
@@ -76,6 +83,12 @@ function MecanicoFormSection() {
         setOpenMecanicoModal(false);
         setSelectedMecanico(null);
         setDetalle("");
+        setIsEditing(false);
+        setSnackbar({
+          open: true,
+          message: "Mecánico actualizado correctamente",
+          severity: "success",
+        });
       }
     }
     setEditedMecanico(null);
@@ -95,6 +108,12 @@ function MecanicoFormSection() {
         ]);
         setOpenMecanicoModal(false);
         setSelectedMecanico(null);
+        setDetalle("");
+        setSnackbar({
+          open: true,
+          message: "Mecánico agregado correctamente",
+          severity: "success",
+        });
       } else {
         setSnackbar({
           open: true,
@@ -107,18 +126,39 @@ function MecanicoFormSection() {
 
   const handleRemoveMecanico = (id: number) => {
     const currentMecanicos = getValues("mecanicos") || [];
+    const mecanicoToRemove = currentMecanicos.find(
+      (m: { id: number }) => m.id === id
+    );
     const updatedMecanicos = currentMecanicos.filter(
       (m: { id: number }) => m.id !== id
     );
 
     setValue("mecanicos", updatedMecanicos);
+
+    setSnackbar({
+      open: true,
+      message: mecanicoToRemove
+        ? `${mecanicoToRemove.name} eliminado`
+        : "Mecánico eliminado",
+      severity: "info",
+    });
+  };
+
+  const resetModal = () => {
+    setOpenMecanicoModal(false);
+    setSelectedMecanico(null);
+    setDetalle("");
+    setIsEditing(false);
+    setEditedMecanico(null);
+  };
+
+  const openAddModal = () => {
+    setIsEditing(false);
+    setOpenMecanicoModal(true);
   };
 
   return (
     <>
-      <Typography variant="h6" gutterBottom>
-        Mecánicos
-      </Typography>
       <Controller
         name="mecanicos"
         control={control}
@@ -126,91 +166,145 @@ function MecanicoFormSection() {
         render={({ field, fieldState: { error } }) => (
           <>
             {field.value && field.value.length > 0 ? (
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Mecánico</TableCell>
-                    <TableCell>Detalle</TableCell>
-                    <TableCell>Acciones</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {field.value.map(
-                    (mecanico: {
-                      id: number;
-                      name: string;
-                      detalle: string;
-                    }) => (
-                      <TableRow key={mecanico.id}>
-                        <TableCell>{mecanico.name}</TableCell>
-                        <TableCell>{mecanico.detalle || "-"}</TableCell>
-                        <TableCell>
-                          <Box
-                            display="flex"
-                            flexDirection="column"
-                            sx={{ textAlign: "left" }}
-                          >
-                            <Button
-                              onClick={() => {
-                                handleRemoveMecanico(mecanico.id);
-                              }}
-                            >
-                              Eliminar
-                            </Button>
-                            <Button
-                              onClick={() => {
-                                setEditedMecanico(mecanico);
-                                setSelectedMecanico({
-                                  id: mecanico.id,
-                                  name: mecanico.name,
-                                });
-                                setDetalle(mecanico.detalle || "");
-                                setOpenMecanicoModal(true);
-                                setIsEditing(true);
-                              }}
-                            >
-                              Editar
-                            </Button>
-                          </Box>
-                        </TableCell>
-                      </TableRow>
-                    )
-                  )}
-                </TableBody>
-              </Table>
-            ) : (
-              <Typography>No hay mecánicos asignados</Typography>
-            )}
-            {error && <Typography color="error">{error.message}</Typography>}
-            <Box display="flex" justifyContent="flex-end" mt={2}>
-              <Button
-                onClick={() => setOpenMecanicoModal(true)}
-                variant="contained"
+              <TableContainer
+                component={Paper}
+                variant="outlined"
+                sx={{ mb: 2 }}
               >
-                Agregar Mecánico
-              </Button>
-            </Box>
+                <Table>
+                  <TableHead sx={{ backgroundColor: "primary.light" }}>
+                    <TableRow>
+                      <TableCell sx={{ color: "white" }}>Mecánico</TableCell>
+                      <TableCell sx={{ color: "white" }}>Detalle</TableCell>
+                      <TableCell sx={{ color: "white" }} align="right">
+                        Acciones
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {field.value.map(
+                      (mecanico: {
+                        id: number;
+                        name: string;
+                        detalle: string;
+                      }) => (
+                        <TableRow key={mecanico.id}>
+                          <TableCell>
+                            <strong>{mecanico.name}</strong>
+                          </TableCell>
+                          <TableCell>{mecanico.detalle || "-"}</TableCell>
+                          <TableCell align="right">
+                            <Stack
+                              direction="row"
+                              spacing={1}
+                              justifyContent="flex-end"
+                            >
+                              <IconButton
+                                color="primary"
+                                size="small"
+                                onClick={() => {
+                                  setEditedMecanico(mecanico);
+                                  setSelectedMecanico({
+                                    id: mecanico.id,
+                                    name: mecanico.name,
+                                  });
+                                  setDetalle(mecanico.detalle || "");
+                                  setOpenMecanicoModal(true);
+                                  setIsEditing(true);
+                                }}
+                              >
+                                <EditIcon fontSize="small" />
+                              </IconButton>
+                              <IconButton
+                                color="error"
+                                size="small"
+                                onClick={() => {
+                                  handleRemoveMecanico(mecanico.id);
+                                }}
+                              >
+                                <DeleteIcon fontSize="small" />
+                              </IconButton>
+                            </Stack>
+                          </TableCell>
+                        </TableRow>
+                      )
+                    )}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ) : (
+              <Box
+                sx={{
+                  p: 3,
+                  textAlign: "center",
+                  border: "1px dashed #ccc",
+                  borderRadius: 1,
+                  mb: 2,
+                  backgroundColor: "action.hover",
+                }}
+              >
+                <EngineeringIcon
+                  sx={{ fontSize: 40, color: "text.secondary", mb: 1 }}
+                />
+                <Typography color="textSecondary" gutterBottom>
+                  No hay mecánicos asignados
+                </Typography>
+                <Button
+                  variant="outlined"
+                  startIcon={<PersonAddIcon />}
+                  onClick={openAddModal}
+                  sx={{ mt: 1 }}
+                >
+                  Agregar Mecánico
+                </Button>
+              </Box>
+            )}
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error.message}
+              </Alert>
+            )}
+            {field.value && field.value.length > 0 && (
+              <Box display="flex" justifyContent="flex-end">
+                <Button
+                  onClick={openAddModal}
+                  variant="contained"
+                  startIcon={<PersonAddIcon />}
+                >
+                  Agregar Mecánico
+                </Button>
+              </Box>
+            )}
           </>
         )}
       />
+
       <Dialog
         open={openMecanicoModal}
-        onClose={() => {
-          setOpenMecanicoModal(false);
-          setSelectedMecanico(null);
-        }}
+        onClose={resetModal}
         PaperProps={{
           style: {
-            minWidth: "350px",
+            width: "450px",
+            maxWidth: "90vw",
           },
         }}
       >
-        <DialogTitle>Agregar Mecánico</DialogTitle>
-        <DialogContent>
+        <DialogTitle>
+          {isEditing ? "Editar Mecánico" : "Agregar Mecánico"}
+        </DialogTitle>
+        <DialogContent dividers>
           <Autocomplete
             options={mecanicoOptions}
             getOptionLabel={(option) => option.name}
-            renderInput={(params) => <TextField {...params} label="Mecánico" />}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label="Mecánico"
+                fullWidth
+                variant="outlined"
+                placeholder="Buscar mecánico..."
+              />
+            )}
             value={selectedMecanico}
             onChange={(_, newValue) => {
               setSelectedMecanico(newValue);
@@ -218,50 +312,55 @@ function MecanicoFormSection() {
             onInputChange={(_, newInputValue) => {
               searchMecanicos(newInputValue);
             }}
-            sx={{ mt: 2 }}
+            disabled={isEditing}
+            noOptionsText="No se encontraron mecánicos"
+            loadingText="Buscando..."
+            sx={{ mb: 3 }}
           />
           <TextField
-            label="Detalle"
+            label="Detalle del trabajo"
             value={detalle}
             onChange={(e) => setDetalle(e.target.value)}
             multiline
             fullWidth
-            rows={2}
-            sx={{ mt: 2 }}
+            rows={3}
+            variant="outlined"
+            placeholder="Descripción del trabajo a realizar..."
           />
         </DialogContent>
-        <DialogActions>
-          <Button
-            type="button"
-            onClick={() => {
-              setOpenMecanicoModal(false);
-              setSelectedMecanico(null);
-              setDetalle("");
-            }}
-          >
+        <DialogActions sx={{ px: 3, py: 2 }}>
+          <Button variant="outlined" onClick={resetModal}>
             Cancelar
           </Button>
           <Button
-            type="button"
+            variant="contained"
             onClick={() => {
               isEditing ? handleEditMecanico() : handleAddMecanico();
             }}
             disabled={!selectedMecanico}
+            color="primary"
           >
-            {isEditing ? "Actualizar" : "Agregar"}
+            {isEditing ? "Guardar Cambios" : "Agregar"}
           </Button>
         </DialogActions>
       </Dialog>
+
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={4000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        <Alert severity={snackbar.severity as "success" | "error"}>
+        <Alert
+          severity={
+            snackbar.severity as "success" | "error" | "warning" | "info"
+          }
+          variant="filled"
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
-      <Divider sx={{ mt: 2 }} />
     </>
   );
 }
