@@ -32,7 +32,6 @@ const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
 
   const controlesEnForm = useWatch({ control, name: "controlesEnReparacion" });
   const controlGroups = getGroupedControls();
-  const stats = getControlStats();
 
   return (
     <Box>

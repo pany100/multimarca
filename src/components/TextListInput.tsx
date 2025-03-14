@@ -32,7 +32,7 @@ type Props = {
 function TextListInput({
   inputName,
   label,
-  maxLength = 256,
+  maxLength = 1024,
   placeholder,
 }: Props) {
   const { control, setValue, getValues } = useFormContext();
@@ -118,8 +118,8 @@ function TextListInput({
               borderRadius: 2,
             }}
           >
-            <Box sx={{ p: 2, pb: items.length > 0 ? 1 : 2 }}>
-              <Typography variant="h6" sx={{ fontWeight: "500", mb: 1 }}>
+            <Box sx={{ pb: items.length > 0 ? 1 : 2 }}>
+              <Typography variant="subtitle1" fontWeight="medium" gutterBottom>
                 {label}
               </Typography>
 

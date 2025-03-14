@@ -412,7 +412,7 @@ function EditarOrdenReparacionForm({ ordenReparacion }: Props) {
           <Box display="flex" alignItems="center" mb={2}>
             <ConstructionIcon sx={{ mr: 1, color: "primary.main" }} />
             <Typography variant="h6" component="h2">
-              Controles Realizados
+              Controles Realizados y observaciones de salida
             </Typography>
           </Box>
           <Grid container spacing={3}>
@@ -446,6 +446,25 @@ function EditarOrdenReparacionForm({ ordenReparacion }: Props) {
                 <TextListInput
                   inputName="detalleControles"
                   label="Detalle de controles"
+                />
+              </Paper>
+            </Grid>
+          </Grid>
+          <Grid container sx={{ mt: 2 }}>
+            <Grid item xs={12}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 3,
+                  mb: 3,
+                  borderRadius: 2,
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              >
+                <TextListInput
+                  inputName="observacionesSalida"
+                  label="Observaciones de salida"
                 />
               </Paper>
             </Grid>
