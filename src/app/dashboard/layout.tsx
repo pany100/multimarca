@@ -303,6 +303,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             icono: <QueryStatsIcon />,
             ruta: "/dashboard/balance",
           },
+          {
+            permiso: "Estadisticas",
+            texto: "Mecánicos",
+            icono: <BuildIcon />,
+            ruta: "/dashboard/estadisticasMecanicos",
+          },
         ],
       },
       {
