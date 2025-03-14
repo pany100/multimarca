@@ -3,9 +3,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormProvider, useForm } from "react-hook-form";
 
 import useEditOrden from "@/hooks/orden-reparacion/useEditOrden";
-import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
-import useFixedSelectData from "@/hooks/useFixedSelectData";
-import useScrollToError from "@/hooks/useScrollToError";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
 import { Alert, Box, Button, Link, Snackbar } from "@mui/material";
@@ -136,11 +133,11 @@ function EditarOrdenReparacionForm({ ordenReparacion }: Props) {
     setValue,
   } = methods;
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const { registerFieldRef } = useScrollToError({ errors, isSubmitted });
-  const { searchAutos, initialAuto } = useAutosAutocomplete();
-  const { orepEstadoOptions } = useFixedSelectData();
-  const { snackbar, setSnackbar, manoDeObra, totalOrdenReparacion, onSubmit } =
-    useEditOrden({ control, ordenReparacion, selectedFile });
+  const { snackbar, setSnackbar, onSubmit } = useEditOrden({
+    control,
+    ordenReparacion,
+    selectedFile,
+  });
 
   return (
     <FormProvider {...methods}>
