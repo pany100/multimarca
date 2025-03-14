@@ -86,21 +86,26 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Paper elevation={3} sx={{ p: 3, m: 2 }}>
-        <Header ordenReparacion={ordenReparacion} />
-        <Divider sx={{ my: 3 }} />
-        <AutoInfo ordenReparacion={ordenReparacion} />
-        <Divider sx={{ my: 2 }} />
-        <Details ordenReparacion={ordenReparacion} />
-        <Divider sx={{ my: 2 }} />
-        <Controls ordenReparacion={ordenReparacion} />
-        <Divider sx={{ my: 2 }} />
-        <Mechanics ordenReparacion={ordenReparacion} />
-        <Divider sx={{ my: 2 }} />
-        <PriceInfo ordenReparacion={ordenReparacion} />
-      </Paper>
-    </Box>
+    <Paper
+      elevation={1}
+      sx={{
+        p: { xs: 2, md: 3 },
+        borderRadius: 2,
+        mb: 3,
+      }}
+    >
+      <Header ordenReparacion={ordenReparacion} />
+      <Divider sx={{ my: 3 }} />
+      <AutoInfo ordenReparacion={ordenReparacion} />
+      <Divider sx={{ my: 2 }} />
+      <Details ordenReparacion={ordenReparacion} />
+      <Divider sx={{ my: 2 }} />
+      <Controls ordenReparacion={ordenReparacion} />
+      <Divider sx={{ my: 2 }} />
+      <Mechanics ordenReparacion={ordenReparacion} />
+      <Divider sx={{ my: 2 }} />
+      <PriceInfo ordenReparacion={ordenReparacion} />
+    </Paper>
   );
 };
 
