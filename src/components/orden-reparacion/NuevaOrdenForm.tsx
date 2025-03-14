@@ -2,10 +2,6 @@ import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import schema from "@/sections/ordenes-reparacion/nueva/schema";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import {
-  calcularManoDeObra,
-  calcularTotalOrdenReparacion,
-} from "@/utils/ordenHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ConstructionIcon from "@mui/icons-material/Construction";
@@ -14,9 +10,9 @@ import HandymanIcon from "@mui/icons-material/Handyman";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import PaidIcon from "@mui/icons-material/Paid";
 import SaveIcon from "@mui/icons-material/Save";
-import { useRouter } from "next/navigation";
 
-import { useFetch } from "@/contexts/FetchContext";
+import useNuevaOrden from "@/hooks/orden-reparacion/useNuevaOrden";
+import useScrollToError from "@/hooks/useScrollToError";
 import {
   Alert,
   Box,
@@ -27,8 +23,7 @@ import {
   Snackbar,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
-import { FormProvider, useForm, useWatch } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import CustomAutocomplete from "../formV2/CustomAutocomplete";
 import CustomInputText from "../formV2/CustomInputText";
 import CustomSelect from "../formV2/CustomSelect";
@@ -39,78 +34,19 @@ import RepuestoUsadoFormSection from "./RepuestoUsadoFormSection";
 import TrabajosRealizadosFormSection from "./TrabajosRealizadosFormSection";
 
 function NuevaOrdenForm() {
-  const { authFetch } = useFetch();
-  const router = useRouter();
-
   const methods = useForm({
     resolver: yupResolver(schema),
   });
-  const {
-    handleSubmit,
-    control,
-    formState: { errors },
-  } = methods;
+  const { handleSubmit, control, formState } = methods;
+  const { errors, isSubmitted } = formState;
 
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+  const { onSubmit, snackbar, setSnackbar, manoDeObra, totalOrdenReparacion } =
+    useNuevaOrden({ control });
 
   const { searchAutos, initialAuto } = useAutosAutocomplete();
   const { orepEstadoOptions } = useFixedSelectData();
-  const repuestosUsados = useWatch({ control, name: "repuestosUsados" });
-  const reparacionesTerceros = useWatch({
-    control,
-    name: "reparacionesDeTercero",
-  });
-  const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
-  const autoId = useWatch({ control, name: "autoId" });
-  const descuento = useWatch({ control, name: "descuento" }) || 0;
-  const manoDeObra = calcularManoDeObra(trabajosRealizados ?? []);
-  const totalOrdenReparacion = calcularTotalOrdenReparacion({
-    repuestosUsados: repuestosUsados ?? [],
-    reparacionesDeTercero: reparacionesTerceros ?? [],
-    trabajosRealizados: trabajosRealizados ?? [],
-    descuento,
-  });
+  const { registerFieldRef } = useScrollToError({ errors, isSubmitted });
 
-  const onSubmit = async (data: any) => {
-    try {
-      const response = await authFetch("/api/orden-reparacion", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        setSnackbar({
-          open: true,
-          message: "Orden de reparación creada con éxito",
-          severity: "success",
-        });
-        router.push("/dashboard/ordenes-reparacion");
-      } else {
-        const errorData = await response.json();
-        setSnackbar({
-          open: true,
-          message: errorData.error || "Error al crear la orden de reparación",
-          severity: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error al enviar la solicitud:", error);
-      setSnackbar({
-        open: true,
-        message: `Error al realizar la solicitud de creación: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
-        severity: "error",
-      });
-    }
-  };
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -133,7 +69,12 @@ function NuevaOrdenForm() {
             Información del Vehículo y Fechas
           </Typography>
           <Grid container spacing={3}>
-            <Grid item xs={12} md={4}>
+            <Grid
+              item
+              xs={12}
+              md={4}
+              ref={(el) => registerFieldRef("autoId", el)}
+            >
               <CustomAutocomplete
                 name="autoId"
                 label="Vehículo"
@@ -141,35 +82,60 @@ function NuevaOrdenForm() {
                 initialOptions={initialAuto}
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid
+              item
+              xs={12}
+              md={4}
+              ref={(el) => registerFieldRef("kilometros", el)}
+            >
               <CustomInputText
                 name="kilometros"
                 label="Kilómetros"
                 type="number"
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid
+              item
+              xs={12}
+              md={4}
+              ref={(el) => registerFieldRef("estado", el)}
+            >
               <CustomSelect
                 name="estado"
                 label="Estado"
                 options={orepEstadoOptions}
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid
+              item
+              xs={12}
+              md={4}
+              ref={(el) => registerFieldRef("fechaCreacion", el)}
+            >
               <CustomInputText
                 name="fechaCreacion"
                 label="Fecha de Creación"
                 type="date"
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid
+              item
+              xs={12}
+              md={4}
+              ref={(el) => registerFieldRef("fechaEntradaReparacion", el)}
+            >
               <CustomInputText
                 name="fechaEntradaReparacion"
                 label="Fecha de Entrada a Reparación"
                 type="date"
               />
             </Grid>
-            <Grid item xs={12} md={4}>
+            <Grid
+              item
+              xs={12}
+              md={4}
+              ref={(el) => registerFieldRef("fechaSalidaReparacion", el)}
+            >
               <CustomInputText
                 name="fechaSalidaReparacion"
                 label="Fecha de Salida de Reparación"
@@ -198,7 +164,11 @@ function NuevaOrdenForm() {
             Observaciones del Cliente
           </Typography>
           <Grid container spacing={3}>
-            <Grid item xs={12}>
+            <Grid
+              item
+              xs={12}
+              ref={(el) => registerFieldRef("observacionesCliente", el)}
+            >
               <CustomInputText
                 name="observacionesCliente"
                 label="Detalles proporcionados por el cliente"
@@ -345,7 +315,7 @@ function NuevaOrdenForm() {
             </Typography>
           </Box>
           <Grid container spacing={2}>
-            <Grid item xs={4}>
+            <Grid item xs={4} ref={(el) => registerFieldRef("descuento", el)}>
               <CustomInputText
                 name="descuento"
                 label="Descuento"
@@ -353,7 +323,11 @@ function NuevaOrdenForm() {
               />
             </Grid>
 
-            <Grid item xs={8}>
+            <Grid
+              item
+              xs={8}
+              ref={(el) => registerFieldRef("descripcionDescuento", el)}
+            >
               <CustomInputText
                 name="descripcionDescuento"
                 label="Descripción del descuento"

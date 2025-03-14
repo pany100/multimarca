@@ -2,7 +2,7 @@
 
 import NuevaOrdenForm from "@/components/orden-reparacion/NuevaOrdenForm";
 import { useAuth } from "@/hooks/useAuth";
-import { Card, CardContent, CardHeader, Typography } from "@mui/material";
+import { Card, CardContent, CardHeader } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -29,19 +29,6 @@ const NuevaOrdenReparacionPage = () => {
       <CardContent>
         <NuevaOrdenForm />
       </CardContent>
-
-      <Typography
-        variant="body2"
-        component="p"
-        sx={{
-          cursor: "pointer",
-          textDecoration: "underline",
-          color: "primary.main",
-        }}
-        onClick={() => router.back()}
-      >
-        Volver a la lista de órdenes
-      </Typography>
     </Card>
   );
 };
