@@ -14,8 +14,8 @@ import LockIcon from "@mui/icons-material/Lock";
 import MenuIcon from "@mui/icons-material/Menu";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import PeopleIcon from "@mui/icons-material/People";
+import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-
 import {
   AppBar,
   Badge,
@@ -296,6 +296,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Estadísticas Generales",
             icono: <BarChartIcon />,
             ruta: "/dashboard/estadisticas",
+          },
+          {
+            permiso: "Estadisticas",
+            texto: "Balances",
+            icono: <QueryStatsIcon />,
+            ruta: "/dashboard/balance",
           },
         ],
       },
