@@ -2,18 +2,29 @@ import schema from "@/sections/ordenes-reparacion/editar/schema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormProvider, useForm } from "react-hook-form";
 
-import useNuevaOrden from "@/hooks/orden-reparacion/useNuevaOrden";
+import useEditOrden from "@/hooks/orden-reparacion/useEditOrden";
 import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import useScrollToError from "@/hooks/useScrollToError";
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import ConstructionIcon from "@mui/icons-material/Construction";
 import EngineeringIcon from "@mui/icons-material/Engineering";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import PaidIcon from "@mui/icons-material/Paid";
 import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
-import { Box, Grid, Paper, Typography } from "@mui/material";
+import SaveIcon from "@mui/icons-material/Save";
+import {
+  Alert,
+  Box,
+  Button,
+  Grid,
+  Link,
+  Paper,
+  Snackbar,
+  Typography,
+} from "@mui/material";
 import { useState } from "react";
 import CustomAutocomplete from "../formV2/CustomAutocomplete";
 import CustomInputText from "../formV2/CustomInputText";
@@ -145,10 +156,9 @@ function EditarOrdenReparacionForm({ ordenReparacion }: Props) {
   const { registerFieldRef } = useScrollToError({ errors, isSubmitted });
   const { searchAutos, initialAuto } = useAutosAutocomplete();
   const { orepEstadoOptions } = useFixedSelectData();
-  const { snackbar, setSnackbar, manoDeObra, totalOrdenReparacion } =
-    useNuevaOrden({ control });
+  const { snackbar, setSnackbar, manoDeObra, totalOrdenReparacion, onSubmit } =
+    useEditOrden({ control, ordenReparacion, selectedFile });
 
-  const onSubmit = (data: any) => {};
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -572,7 +582,47 @@ function EditarOrdenReparacionForm({ ordenReparacion }: Props) {
             </Grid>
           </Grid>
         </Paper>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            mt: 3,
+            mb: 2,
+          }}
+        >
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            component={Link}
+            href="/dashboard/ordenes-reparacion"
+          >
+            Volver a la lista
+          </Button>
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<SaveIcon />}
+            sx={{
+              px: 4,
+              py: 1,
+            }}
+          >
+            Editar Orden de Reparación
+          </Button>
+        </Box>
       </form>
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert severity={snackbar.severity as "success" | "error"}>
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </FormProvider>
   );
 }
