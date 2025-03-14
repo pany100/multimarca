@@ -383,7 +383,7 @@ function TextListInput({
                           wordBreak: "break-word",
                         }}
                       >
-                        "{items[deleteIndex]}"
+                        {items[deleteIndex]}
                       </Box>
                     </>
                   ) : (
