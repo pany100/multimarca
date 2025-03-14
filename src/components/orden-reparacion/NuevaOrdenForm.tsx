@@ -149,6 +149,13 @@ function NuevaOrdenForm() {
               />
             </Grid>
             <Grid item xs={12} md={4}>
+              <CustomSelect
+                name="estado"
+                label="Estado"
+                options={orepEstadoOptions}
+              />
+            </Grid>
+            <Grid item xs={12} md={4}>
               <CustomInputText
                 name="fechaCreacion"
                 label="Fecha de Creación"
@@ -167,13 +174,6 @@ function NuevaOrdenForm() {
                 name="fechaSalidaReparacion"
                 label="Fecha de Salida de Reparación"
                 type="date"
-              />
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <CustomSelect
-                name="estado"
-                label="Estado"
-                options={orepEstadoOptions}
               />
             </Grid>
           </Grid>
@@ -361,12 +361,46 @@ function NuevaOrdenForm() {
             </Grid>
 
             <Grid item xs={12}>
-              <Typography variant="h6" component="h2" textAlign="right">
-                Total Orden de Reparación:{" "}
-                {isNaN(totalOrdenReparacion)
-                  ? "0"
-                  : totalOrdenReparacion.toFixed(2)}
-              </Typography>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  mt: 1,
+                  backgroundColor: "primary.lighter",
+                  borderRadius: 1,
+                }}
+              >
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                    color="primary.dark"
+                  >
+                    Total Orden de Reparación
+                  </Typography>
+                  <Typography
+                    variant="h5"
+                    fontWeight="bold"
+                    color="primary.dark"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    ${" "}
+                    {isNaN(totalOrdenReparacion)
+                      ? "0.00"
+                      : totalOrdenReparacion.toLocaleString("es-AR", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                  </Typography>
+                </Box>
+              </Paper>
             </Grid>
           </Grid>
         </Paper>

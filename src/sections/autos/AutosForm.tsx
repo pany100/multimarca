@@ -12,10 +12,10 @@ export const schema = yup.object({
   year: yup.number().required("El año es requerido"),
   color: yup.string().required("El color es requerido"),
   kms: yup.number().required("Las km es requerido"),
-  valves: yup.number().required("Las valvulas es requerido"),
+  valves: yup.number(),
   ownerId: yup.number().required("El propietario es requerido"),
-  chassis_number: yup.string().required("El numero de chasis es requerido"),
-  engine_number: yup.string().required("El numero de motor es requerido"),
+  chassis_number: yup.string(),
+  engine_number: yup.string(),
   transmission_type: yup.string().nullable(),
   observations: yup.string().nullable(),
 });
