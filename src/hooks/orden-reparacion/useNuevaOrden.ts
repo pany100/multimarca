@@ -71,7 +71,56 @@ function useNuevaOrden({ control }: Props) {
     }
   };
 
-  return { onSubmit, snackbar, setSnackbar, manoDeObra, totalOrdenReparacion };
+  const presupuestoSubmit = async (data: any) => {
+    try {
+      const endpoint = data.esBorrador
+        ? "/api/borradores"
+        : "/api/orden-reparacion";
+      const response = await authFetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        setSnackbar({
+          open: true,
+          message: data.esBorrador
+            ? "Borrador guardado con éxito"
+            : "Presupuesto creado con éxito",
+          severity: "success",
+        });
+        router.push("/dashboard/presupuestos");
+      } else {
+        const errorData = await response.json();
+        setSnackbar({
+          open: true,
+          message: errorData.error || "Error al crear la orden de reparación",
+          severity: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error al enviar la solicitud:", error);
+      setSnackbar({
+        open: true,
+        message: `Error al realizar la solicitud de creación: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
+        severity: "error",
+      });
+    }
+  };
+
+  return {
+    presupuestoSubmit,
+    onSubmit,
+    snackbar,
+    setSnackbar,
+    manoDeObra,
+    totalOrdenReparacion,
+  };
 }
 
 export default useNuevaOrden;

@@ -1,466 +1,352 @@
-import { useFetch } from "@/contexts/FetchContext";
-import {
-  calcularManoDeObra,
-  calcularTotalOrdenReparacion,
-} from "@/utils/ordenHelper";
+import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
+import useScrollToError from "@/hooks/useScrollToError";
+import { presupuestoSchema } from "@/sections/ordenes-reparacion/nueva/schema";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
+import ConstructionIcon from "@mui/icons-material/Construction";
+import HandymanIcon from "@mui/icons-material/Handyman";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import PaidIcon from "@mui/icons-material/Paid";
 import {
   Alert,
-  Autocomplete,
-  Button,
   Checkbox,
-  FormControl,
   FormControlLabel,
   Grid,
+  Paper,
   Snackbar,
-  TextField,
+  Typography,
 } from "@mui/material";
-import debounce from "lodash/debounce";
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
-import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
-import * as yup from "yup";
+import { Controller, FormProvider, useForm } from "react-hook-form";
+import CustomAutocompleteInput from "../formV2/CustomAutocomplete";
+import CustomInputText from "../formV2/CustomInputText";
+
+import useNuevaOrden from "@/hooks/orden-reparacion/useNuevaOrden";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SaveIcon from "@mui/icons-material/Save";
+import { Box } from "@mui/material";
 import ReparacionesTercerosFormSection from "./ReparacionesTercerosFormSection";
 import RepuestoUsadoFormSection from "./RepuestoUsadoFormSection";
 import TrabajosRealizadosFormSection from "./TrabajosRealizadosFormSection";
 
-const schema = yup.object().shape({
-  autoId: yup.string().required("Debe seleccionar un auto"),
-  observacionesCliente: yup
-    .string()
-    .required("Debe ingresar las observaciones"),
-  repuestosUsados: yup.array().of(
-    yup.object().shape({
-      stock: yup
-        .object()
-        .shape({
-          id: yup.number().required(),
-          name: yup.string().required(),
-        })
-        .required("El repuesto es requerido"),
-      precioCompra: yup.mixed().when("$esBorrador", {
-        is: false,
-        then: () =>
-          yup.number().positive().required("El precio de compra es requerido"),
-        otherwise: () => yup.mixed(),
-      }),
-      precioVenta: yup.mixed().when("$esBorrador", {
-        is: false,
-        then: () =>
-          yup.number().positive().required("El precio de venta es requerido"),
-        otherwise: () => yup.mixed(),
-      }),
-      unidadesConsumidas: yup.mixed().when("$esBorrador", {
-        is: false,
-        then: () =>
-          yup
-            .number()
-            .positive()
-            .integer()
-            .required("Las unidades consumidas son requeridas"),
-        otherwise: () => yup.mixed(),
-      }),
-    })
-  ),
-  trabajosRealizados: yup.array().of(
-    yup.object().shape({
-      manoDeObra: yup
-        .object()
-        .shape({
-          name: yup.string().required(),
-          diasParaRecordatorio: yup.number().positive().integer().nullable(),
-        })
-        .required("La mano de obra es requerida"),
-      precioUnitario: yup.mixed().when("$esBorrador", {
-        is: false,
-        then: () =>
-          yup.number().positive().required("El precio unitario es requerido"),
-        otherwise: () => yup.mixed(),
-      }),
-    })
-  ),
-  reparacionesDeTercero: yup.array().of(
-    yup.object().shape({
-      nombre: yup.string().required("El nombre de la reparación es requerido"),
-      precioCompra: yup.mixed().when("$esBorrador", {
-        is: false,
-        then: () =>
-          yup.number().positive().required("El precio de compra es requerido"),
-        otherwise: () => yup.mixed(),
-      }),
-      precioVenta: yup.mixed().when("$esBorrador", {
-        is: false,
-        then: () =>
-          yup.number().positive().required("El precio de venta es requerido"),
-        otherwise: () => yup.mixed(),
-      }),
-      proveedor: yup
-        .object()
-        .shape({
-          id: yup.number().required(),
-          name: yup.string().required(),
-        })
-        .required("El proveedor es requerido"),
-    })
-  ),
-  descuento: yup.number().min(0),
-  observacionesEntrada: yup.string(),
-  esBorrador: yup.boolean(),
-});
+import usePresupuestoTemplate from "@/hooks/orden-reparacion/usePresupuestoTemplate";
+import { Button, Link } from "@mui/material";
 
-const NuevoPresupuestoForm = ({
+function NuevoPresupuestoForm({
   templateId,
 }: {
   templateId: number | null | undefined;
-}) => {
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
-
-  const { authFetch } = useFetch();
-
-  const [autocompleteOptions, setAutocompleteOptions] = useState<
-    { value: string; label: string }[]
-  >([]);
-
+}) {
   const methods = useForm({
-    resolver: yupResolver(schema),
-    defaultValues: {
-      esBorrador: false,
-      descuento: 0,
-    },
+    resolver: yupResolver(presupuestoSchema),
   });
   const {
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitted },
     control,
-    setValue,
     watch,
+    setValue,
   } = methods;
-
+  const { registerFieldRef } = useScrollToError({ errors, isSubmitted });
+  const {
+    presupuestoSubmit,
+    snackbar,
+    setSnackbar,
+    manoDeObra,
+    totalOrdenReparacion,
+  } = useNuevaOrden({ control });
+  const { searchAutos, initialAuto } = useAutosAutocomplete();
+  usePresupuestoTemplate({ templateId, setValue });
   const esBorrador = watch("esBorrador") || false;
-  const descuento = watch("descuento") || 0;
-  useEffect(() => {
-    const fetchTemplateData = async () => {
-      if (templateId) {
-        try {
-          const response = await authFetch(
-            `/api/plantilla-presupuesto/${templateId}`
-          );
-          if (response.ok) {
-            const templateData = await response.json();
-            setValue(
-              "repuestosUsados",
-              templateData.repuestosUsados.map((repuesto: any) => ({
-                stock: { id: repuesto.stockId, name: repuesto.stock.name },
-                precioCompra: Number(repuesto.precioCompra),
-                precioVenta: Number(repuesto.precioVenta),
-                unidadesConsumidas: repuesto.unidadesConsumidas,
-              }))
-            );
-            setValue(
-              "reparacionesDeTercero",
-              templateData.reparacionesDeTercero.map((reparacion: any) => ({
-                nombre: reparacion.nombre,
-                precioCompra: Number(reparacion.precioCompra),
-                precioVenta: Number(reparacion.precioVenta),
-                proveedor: {
-                  id: reparacion.proveedorId,
-                  name: reparacion.proveedor.name,
-                },
-              }))
-            );
-            setValue(
-              "trabajosRealizados",
-              templateData.trabajosRealizados.map((trabajo: any) => ({
-                manoDeObra: { name: trabajo.descripcion },
-                precioUnitario: Number(trabajo.precioUnitario),
-                diasParaRecordatorio: trabajo.diasParaRecordatorio,
-              }))
-            );
-          } else {
-            console.error("Error al obtener datos de la plantilla");
-          }
-        } catch (error) {
-          console.error("Error al obtener datos de la plantilla:", error);
-        }
-      }
-    };
 
-    fetchTemplateData();
-  }, [templateId, authFetch, setValue]);
-
-  const repuestosUsados = useWatch({ control, name: "repuestosUsados" });
-  const reparacionesTerceros = useWatch({
-    control,
-    name: "reparacionesDeTercero",
-  });
-  const trabajosRealizadosField = useWatch({
-    control,
-    name: "trabajosRealizados",
-  });
-  const trabajosRealizados = (trabajosRealizadosField ?? []).map((trabajo) => ({
-    precioUnitario: Number(trabajo.precioUnitario) || 0,
-  }));
-  const manoDeObra = calcularManoDeObra(trabajosRealizados ?? []);
-  const totalOrdenReparacion = calcularTotalOrdenReparacion({
-    repuestosUsados: (repuestosUsados ?? []).map((item) => ({
-      precioVenta: Number(item.precioVenta) || 0,
-      unidadesConsumidas: Number(item.unidadesConsumidas) || 0,
-    })),
-    reparacionesDeTercero: (reparacionesTerceros ?? []).map((item) => ({
-      precioVenta: Number(item.precioVenta) || 0,
-    })),
-    trabajosRealizados: (trabajosRealizados ?? []).map((item) => ({
-      precioUnitario: Number(item.precioUnitario) || 0,
-    })),
-    descuento: Number(descuento) || 0,
-  });
-
-  const router = useRouter();
-
-  const debouncedSearch = debounce(
-    async (
-      query: string,
-      callback: (options: { value: string; label: string }[]) => void
-    ) => {
-      const response = await authFetch(
-        `/api/autos?query=${query}&limit=10&page=0`
-      );
-      const data = await response.json();
-
-      const opciones = data.items.map(
-        (auto: {
-          patent: string;
-          id: number;
-          brand: string;
-          model: string;
-        }) => ({
-          label: `${auto.patent} - ${auto.brand || ""} ${auto.model || ""}`,
-          value: auto.id.toString(),
-        })
-      );
-      callback(opciones);
-    },
-    300
-  );
-
-  const onSubmit = async (data: any) => {
-    try {
-      const endpoint = data.esBorrador
-        ? "/api/borradores"
-        : "/api/orden-reparacion";
-      const response = await authFetch(endpoint, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
-
-      if (response.ok) {
-        setSnackbar({
-          open: true,
-          message: data.esBorrador
-            ? "Borrador guardado con éxito"
-            : "Presupuesto creado con éxito",
-          severity: "success",
-        });
-        router.push("/dashboard/presupuestos");
-      } else {
-        const errorData = await response.json();
-        setSnackbar({
-          open: true,
-          message: errorData.error || "Error al crear la orden de reparación",
-          severity: "error",
-        });
-      }
-    } catch (error) {
-      console.error("Error al enviar la solicitud:", error);
-      setSnackbar({
-        open: true,
-        message: `Error al realizar la solicitud de creación: ${
-          error instanceof Error ? error.message : "Error desconocido"
-        }`,
-        severity: "error",
-      });
-    }
-  };
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <Controller
-              name="autoId"
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <FormControl fullWidth margin="normal">
-                  <Autocomplete
-                    options={autocompleteOptions || []}
-                    getOptionLabel={(option) => option?.label || ""}
-                    value={
-                      value
-                        ? autocompleteOptions.find(
-                            (option) => option.value === value
-                          ) || null
-                        : null
-                    }
-                    onChange={(_, newValue) => {
-                      onChange(newValue?.value || null);
-                    }}
-                    onInputChange={(event, newInputValue, reason) => {
-                      if (reason === "input") {
-                        debouncedSearch(
-                          newInputValue,
-                          (options: { value: string; label: string }[]) =>
-                            setAutocompleteOptions(options)
-                        );
-                      }
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Auto"
-                        error={!!errors.autoId}
-                        helperText={errors.autoId?.message as string}
-                      />
-                    )}
-                    isOptionEqualToValue={(option, value) =>
-                      option?.value === value?.value
-                    }
-                    loadingText="Buscando..."
-                    noOptionsText="No se encontraron resultados"
-                    sx={{
-                      marginBottom: 2,
-                    }}
-                  />
-                </FormControl>
-              )}
-            />
-            <Controller
-              name="esBorrador"
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={value}
-                      onChange={(e) => onChange(e.target.checked)}
-                    />
-                  }
-                  label="Guardar como borrador"
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={6}>
-            <Controller
-              name="observacionesCliente"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Observaciones del cliente"
-                  multiline
-                  rows={4}
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.observacionesCliente}
-                  helperText={errors.observacionesCliente?.message as string}
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <RepuestoUsadoFormSection esBorrador={esBorrador} />
-          </Grid>
-          <Grid item xs={12}>
-            <ReparacionesTercerosFormSection esBorrador={esBorrador} />
-          </Grid>
-          <Grid item xs={12}>
-            <TrabajosRealizadosFormSection esBorrador={esBorrador} />
-          </Grid>
-          <Grid item xs={12}>
-            <Controller
-              name="descuento"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Descuento"
-                  type="number"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.descuento}
-                  helperText={errors.descuento?.message as string}
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Mano de obra Cliente"
-              value={isNaN(manoDeObra) ? "0" : manoDeObra.toFixed(2)}
-              fullWidth
-              margin="normal"
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{
-                backgroundColor: "action.disabledBackground",
-                "& .MuiInputBase-input": {
-                  color: "text.secondary",
-                },
-              }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Total Orden de Reparación"
-              value={
-                isNaN(totalOrdenReparacion)
-                  ? "0"
-                  : totalOrdenReparacion.toFixed(2)
-              }
-              fullWidth
-              margin="normal"
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{
-                backgroundColor: "action.disabledBackground",
-                "& .MuiInputBase-input": {
-                  color: "text.secondary",
-                },
-              }}
-            />
-          </Grid>
-        </Grid>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
+      <form onSubmit={handleSubmit(presupuestoSubmit)}>
+        <Paper
+          elevation={0}
           sx={{
-            my: 2,
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
           }}
         >
-          {esBorrador ? "Guardar Borrador" : "Crear Presupuesto"}
-        </Button>
+          <Typography
+            variant="h6"
+            component="h2"
+            gutterBottom
+            sx={{ fontWeight: "medium", color: "primary.main" }}
+          >
+            Información del Vehículo
+          </Typography>
+          <Grid container spacing={3}>
+            <Grid
+              item
+              xs={12}
+              md={6}
+              ref={(el) => registerFieldRef("autoId", el)}
+            >
+              <CustomAutocompleteInput
+                name="autoId"
+                label="Vehículo"
+                searchOptions={searchAutos}
+                initialOptions={initialAuto}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Controller
+                name="esBorrador"
+                control={control}
+                render={({ field: { onChange, value } }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={value}
+                        onChange={(e) => onChange(e.target.checked)}
+                      />
+                    }
+                    label="Guardar como borrador"
+                  />
+                )}
+              />
+            </Grid>
+          </Grid>
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography
+            variant="h6"
+            component="h2"
+            gutterBottom
+            sx={{ fontWeight: "medium", color: "primary.main" }}
+          >
+            Observaciones del Cliente
+          </Typography>
+          <Grid container spacing={3}>
+            <Grid
+              item
+              xs={12}
+              ref={(el) => registerFieldRef("observacionesCliente", el)}
+            >
+              <CustomInputText
+                name="observacionesCliente"
+                label="Detalles proporcionados por el cliente"
+                multiline
+                rows={4}
+              />
+            </Grid>
+          </Grid>
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box display="flex" alignItems="center" mb={2}>
+            <InventoryIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" component="h2">
+              Repuestos Usados
+            </Typography>
+          </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <RepuestoUsadoFormSection esBorrador={esBorrador} />
+            </Grid>
+          </Grid>
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box display="flex" alignItems="center" mb={2}>
+            <HandymanIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" component="h2">
+              Reparación / Repuestos de terceros
+            </Typography>
+          </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <ReparacionesTercerosFormSection esBorrador={esBorrador} />
+            </Grid>
+          </Grid>
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box display="flex" alignItems="center" mb={2}>
+            <ConstructionIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" component="h2">
+              Trabajos Realizados
+            </Typography>
+          </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <TrabajosRealizadosFormSection esBorrador={esBorrador} />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="h6" component="h2" textAlign="right">
+                Mano de obra:{" "}
+                {isNaN(manoDeObra)
+                  ? "0"
+                  : getFormattedPrice(manoDeObra.toFixed(2))}
+              </Typography>
+            </Grid>
+          </Grid>
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box display="flex" alignItems="center" mb={2}>
+            <PaidIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" component="h2">
+              Resumen de Costos
+            </Typography>
+          </Box>
+          <Grid container spacing={2}>
+            <Grid item xs={4} ref={(el) => registerFieldRef("descuento", el)}>
+              <CustomInputText
+                name="descuento"
+                label="Descuento"
+                type="number"
+              />
+            </Grid>
+
+            <Grid
+              item
+              xs={8}
+              ref={(el) => registerFieldRef("descripcionDescuento", el)}
+            >
+              <CustomInputText
+                name="descripcionDescuento"
+                label="Descripción del descuento"
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  mt: 1,
+                  backgroundColor: "primary.lighter",
+                  borderRadius: 1,
+                }}
+              >
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                    color="primary.dark"
+                  >
+                    Total Orden de Reparación
+                  </Typography>
+                  <Typography
+                    variant="h5"
+                    fontWeight="bold"
+                    color="primary.dark"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    ${" "}
+                    {isNaN(totalOrdenReparacion)
+                      ? "0.00"
+                      : totalOrdenReparacion.toLocaleString("es-AR", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
+          </Grid>
+        </Paper>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            mt: 3,
+            mb: 2,
+          }}
+        >
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            component={Link}
+            href="/dashboard/presupuestos"
+          >
+            Volver a la lista
+          </Button>
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<SaveIcon />}
+            sx={{
+              px: 4,
+              py: 1,
+            }}
+          >
+            Crear Presupuesto
+          </Button>
+        </Box>
       </form>
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={6000}
+        autoHideDuration={4000}
         onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       >
-        <Alert severity={snackbar.severity as "success" | "error"}>
+        <Alert
+          severity={snackbar.severity as "success" | "error"}
+          variant="filled"
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
           {snackbar.message}
         </Alert>
       </Snackbar>
     </FormProvider>
   );
-};
+}
 
 export default NuevoPresupuestoForm;

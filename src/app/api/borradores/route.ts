@@ -66,7 +66,7 @@ export async function POST(request: Request) {
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
-      descuento,
+      descuento = 0,
     } = body;
 
     const repuestosToPersist = repuestosUsados.map((repuesto: any) => ({
