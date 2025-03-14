@@ -1,10 +1,24 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   calcularManoDeObra,
   calcularTotalOrdenReparacion,
 } from "@/utils/ordenHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Alert, Button, Grid, Snackbar, TextField } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import ConstructionIcon from "@mui/icons-material/Construction";
+import HandymanIcon from "@mui/icons-material/Handyman";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import SaveIcon from "@mui/icons-material/Save";
+import {
+  Alert,
+  Box,
+  Button,
+  Grid,
+  Link,
+  Snackbar,
+  TextField,
+} from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
@@ -12,6 +26,8 @@ import * as yup from "yup";
 import ReparacionesTercerosFormSection from "./ReparacionesTercerosFormSection";
 import RepuestoUsadoFormSection from "./RepuestoUsadoFormSection";
 import TrabajosRealizadosFormSection from "./TrabajosRealizadosFormSection";
+
+import { Paper, Typography } from "@mui/material";
 
 const schema = yup.object().shape({
   nombre: yup.string().required("Debe ingresar un nombre"),
@@ -79,10 +95,6 @@ const schema = yup.object().shape({
         .required("El proveedor es requerido"),
     })
   ),
-  manoDeObra: yup
-    .number()
-    .typeError("La mano de obra debe ser un nmero")
-    .required("La mano de obra es requerida"),
 });
 
 type PlantillaPresupuesto = {
@@ -137,7 +149,6 @@ const EditarOrdenReparacionForm = ({ plantilla }: Props) => {
     resolver: yupResolver(schema),
     defaultValues: {
       ...plantilla,
-      manoDeObra: plantilla.manoDeObra,
       trabajosRealizados: plantilla.trabajosRealizados.map((trabajo) => ({
         manoDeObra: { name: trabajo.descripcion },
         precioUnitario: Number(trabajo.precioUnitario),
@@ -231,60 +242,144 @@ const EditarOrdenReparacionForm = ({ plantilla }: Props) => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Grid container spacing={2}>
-          <Grid item xs={12}>
-            <Controller
-              name="nombre"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Nombre de la plantilla"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.nombre}
-                  helperText={errors.nombre?.message as string}
-                />
-              )}
-            />
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography
+            variant="h6"
+            component="h2"
+            gutterBottom
+            sx={{ fontWeight: "medium", color: "primary.main" }}
+          >
+            Información de la plantilla
+          </Typography>
+          <Controller
+            name="nombre"
+            control={control}
+            render={({ field }) => (
+              <TextField
+                {...field}
+                label="Nombre de la plantilla"
+                fullWidth
+                margin="normal"
+                error={!!errors.nombre}
+                helperText={errors.nombre?.message as string}
+              />
+            )}
+          />
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box display="flex" alignItems="center" mb={2}>
+            <InventoryIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" component="h2">
+              Repuestos Usados
+            </Typography>
+          </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <RepuestoUsadoFormSection />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <RepuestoUsadoFormSection />
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box display="flex" alignItems="center" mb={2}>
+            <HandymanIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" component="h2">
+              Reparación / Repuestos de terceros
+            </Typography>
+          </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <ReparacionesTercerosFormSection />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <ReparacionesTercerosFormSection />
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box display="flex" alignItems="center" mb={2}>
+            <ConstructionIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" component="h2">
+              Trabajos Realizados
+            </Typography>
+          </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <TrabajosRealizadosFormSection />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="h6" component="h2" textAlign="right">
+                Mano de obra:{" "}
+                {isNaN(manoDeObra)
+                  ? "0"
+                  : getFormattedPrice(manoDeObra.toFixed(2))}
+              </Typography>
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <TrabajosRealizadosFormSection />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Mano de obra"
-              value={Number(manoDeObra.toFixed(2))}
-              fullWidth
-              margin="normal"
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Total Orden de Reparación"
-              value={Number(totalOrdenReparacion.toFixed(2))}
-              fullWidth
-              margin="normal"
-              InputProps={{
-                readOnly: true,
-              }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary">
-              Actualizar Orden de Reparación
-            </Button>
-          </Grid>
-        </Grid>
+        </Paper>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            mt: 3,
+            mb: 2,
+          }}
+        >
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            component={Link}
+            href="/dashboard/plantilla-presupuesto"
+          >
+            Volver a la lista
+          </Button>
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<SaveIcon />}
+            sx={{
+              px: 4,
+              py: 1,
+            }}
+          >
+            Actualizar Plantilla
+          </Button>
+        </Box>
       </form>
       <Snackbar
         open={snackbar.open}

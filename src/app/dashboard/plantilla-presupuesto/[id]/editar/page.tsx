@@ -2,7 +2,13 @@
 
 import EditarPlantillaForm from "@/components/orden-reparacion/EditarPlantillaForm";
 import { useFetch } from "@/contexts/FetchContext";
-import { Box, CircularProgress, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  CircularProgress,
+} from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -50,29 +56,15 @@ const EditarPlantillaPage = ({ params }: { params: { id: string } }) => {
   }
 
   return (
-    <Box sx={{ maxWidth: 800, margin: "0 auto", padding: 2 }}>
-      <Paper elevation={3} sx={{ padding: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Editar Plantilla de Presupuesto
-        </Typography>
-
+    <Card sx={{ padding: 3 }}>
+      <CardHeader
+        title="Editar Plantilla de Presupuesto"
+        subheader="Complete los datos para editar la plantilla"
+      />
+      <CardContent>
         {plantilla && <EditarPlantillaForm plantilla={plantilla} />}
-
-        <Typography
-          variant="body2"
-          component="p"
-          sx={{
-            cursor: "pointer",
-            textDecoration: "underline",
-            color: "primary.main",
-            marginTop: 2,
-          }}
-          onClick={() => router.back()}
-        >
-          Volver a la lista
-        </Typography>
-      </Paper>
-    </Box>
+      </CardContent>
+    </Card>
   );
 };
 
