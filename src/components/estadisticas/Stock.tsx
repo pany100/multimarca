@@ -280,15 +280,6 @@ const Stock = () => {
                       fontWeight: 600,
                     }}
                   >
-                    Cantidad Vendida
-                  </th>
-                  <th
-                    style={{
-                      padding: "12px 16px",
-                      textAlign: "right",
-                      fontWeight: 600,
-                    }}
-                  >
                     Ganancia Total
                   </th>
                 </tr>
@@ -300,7 +291,6 @@ const Stock = () => {
                       stock: {
                         nombre: string;
                         marca: string;
-                        cantidadVendida: number;
                         gananciaTotal: number;
                       },
                       index: number
@@ -317,11 +307,6 @@ const Stock = () => {
                       >
                         <td style={{ padding: "10px 16px" }}>{stock.nombre}</td>
                         <td style={{ padding: "10px 16px" }}>{stock.marca}</td>
-                        <td
-                          style={{ padding: "10px 16px", textAlign: "right" }}
-                        >
-                          {stock.cantidadVendida}
-                        </td>
                         <td
                           style={{ padding: "10px 16px", textAlign: "right" }}
                         >
