@@ -1,28 +1,41 @@
 import { useFetch } from "@/contexts/FetchContext";
+import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
+import useScrollToError from "@/hooks/useScrollToError";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   calcularManoDeObra,
   calcularTotalOrdenReparacion,
 } from "@/utils/ordenHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
+import ConstructionIcon from "@mui/icons-material/Construction";
+import HandymanIcon from "@mui/icons-material/Handyman";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import PaidIcon from "@mui/icons-material/Paid";
 import {
   Alert,
-  Autocomplete,
-  Button,
   Checkbox,
-  FormControl,
   FormControlLabel,
   Grid,
+  Paper,
   Snackbar,
-  TextField,
+  Typography,
 } from "@mui/material";
-import debounce from "lodash/debounce";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
 import * as yup from "yup";
+import CustomAutocompleteInput from "../formV2/CustomAutocomplete";
+import CustomInputText from "../formV2/CustomInputText";
 import ReparacionesTercerosFormSection from "./ReparacionesTercerosFormSection";
 import RepuestoUsadoFormSection from "./RepuestoUsadoFormSection";
 import TrabajosRealizadosFormSection from "./TrabajosRealizadosFormSection";
+
+import { Box } from "@mui/material";
+
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SaveIcon from "@mui/icons-material/Save";
+
+import { Button, Link } from "@mui/material";
 
 const schema = yup.object().shape({
   autoId: yup.number().required("Debe seleccionar un auto"),
@@ -173,7 +186,6 @@ const EditarBorradorForm = ({ borrador }: Props) => {
     defaultValues: {
       ...borrador,
       esBorrador: true,
-      descuento: 0,
       trabajosRealizados: borrador.trabajosRealizados.map((trabajo) => ({
         manoDeObra: { name: trabajo.descripcion },
         precioUnitario: Number(trabajo.precioUnitario),
@@ -186,36 +198,12 @@ const EditarBorradorForm = ({ borrador }: Props) => {
 
   const {
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isSubmitted },
     control,
     watch,
   } = methods;
 
-  const debouncedSearch = debounce(
-    async (
-      query: string,
-      callback: (options: { value: string; label: string }[]) => void
-    ) => {
-      const response = await authFetch(
-        `/api/autos?query=${query}&limit=10&page=0`
-      );
-      const data = await response.json();
-
-      const opciones = data.items.map(
-        (auto: {
-          patent: string;
-          id: number;
-          brand: string;
-          model: string;
-        }) => ({
-          label: `${auto.patent} - ${auto.brand || ""} ${auto.model || ""}`,
-          value: auto.id.toString(),
-        })
-      );
-      callback(opciones);
-    },
-    300
-  );
+  const { searchAutos, initialAuto } = useAutosAutocomplete();
 
   const repuestosUsados = useWatch({ control, name: "repuestosUsados" });
   const reparacionesTerceros = useWatch({
@@ -299,156 +287,280 @@ const EditarBorradorForm = ({ borrador }: Props) => {
       });
     }
   };
+  const { registerFieldRef } = useScrollToError({ errors, isSubmitted });
 
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
-        <Grid container spacing={2}>
-          <Grid item xs={6}>
-            <Controller
-              name="autoId"
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <FormControl fullWidth margin="normal">
-                  <Autocomplete
-                    options={autocompleteOptions}
-                    getOptionLabel={(option) => option?.label || ""}
-                    value={
-                      value
-                        ? autocompleteOptions.find(
-                            (option) => option.value === value.toString()
-                          ) || null
-                        : null
-                    }
-                    onChange={(_, newValue) => {
-                      onChange(newValue?.value || null);
-                    }}
-                    onInputChange={(event, newInputValue, reason) => {
-                      if (reason === "input") {
-                        debouncedSearch(newInputValue, setAutocompleteOptions);
-                      }
-                    }}
-                    renderInput={(params) => (
-                      <TextField
-                        {...params}
-                        label="Auto"
-                        error={!!errors.autoId}
-                        helperText={errors.autoId?.message as string}
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography
+            variant="h6"
+            component="h2"
+            gutterBottom
+            sx={{ fontWeight: "medium", color: "primary.main" }}
+          >
+            Información del Vehículo
+          </Typography>
+          <Grid container spacing={3}>
+            <Grid
+              item
+              xs={12}
+              md={6}
+              ref={(el) => registerFieldRef("autoId", el)}
+            >
+              <CustomAutocompleteInput
+                name="autoId"
+                label="Vehículo"
+                searchOptions={searchAutos}
+                initialOptions={initialAuto}
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <Controller
+                name="esBorrador"
+                control={control}
+                render={({ field: { onChange, value } }) => (
+                  <FormControlLabel
+                    control={
+                      <Checkbox
+                        checked={value}
+                        onChange={(e) => onChange(e.target.checked)}
                       />
-                    )}
-                    isOptionEqualToValue={(option, value) =>
-                      option?.value === value?.value
                     }
+                    label="Guardar como borrador"
                   />
-                </FormControl>
-              )}
-            />
-            <Controller
-              name="esBorrador"
-              control={control}
-              render={({ field: { onChange, value } }) => (
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      checked={value}
-                      onChange={(e) => onChange(e.target.checked)}
-                    />
-                  }
-                  label="Guardar como borrador"
-                />
-              )}
-            />
+                )}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={6}>
-            <Controller
-              name="observacionesCliente"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Observaciones del cliente"
-                  multiline
-                  rows={4}
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.observacionesCliente}
-                  helperText={errors.observacionesCliente?.message as string}
-                />
-              )}
-            />
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Typography
+            variant="h6"
+            component="h2"
+            gutterBottom
+            sx={{ fontWeight: "medium", color: "primary.main" }}
+          >
+            Observaciones del Cliente
+          </Typography>
+          <Grid container spacing={3}>
+            <Grid
+              item
+              xs={12}
+              ref={(el) => registerFieldRef("observacionesCliente", el)}
+            >
+              <CustomInputText
+                name="observacionesCliente"
+                label="Detalles proporcionados por el cliente"
+                multiline
+                rows={4}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <RepuestoUsadoFormSection esBorrador={esBorrador} />
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box display="flex" alignItems="center" mb={2}>
+            <InventoryIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" component="h2">
+              Repuestos Usados
+            </Typography>
+          </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <RepuestoUsadoFormSection esBorrador={esBorrador} />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <ReparacionesTercerosFormSection esBorrador={esBorrador} />
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box display="flex" alignItems="center" mb={2}>
+            <HandymanIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" component="h2">
+              Reparación / Repuestos de terceros
+            </Typography>
+          </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <ReparacionesTercerosFormSection esBorrador={esBorrador} />
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <TrabajosRealizadosFormSection esBorrador={esBorrador} />
-          </Grid>
-          <Grid item xs={12}>
-            <Controller
-              name="descuento"
-              control={control}
-              render={({ field }) => (
-                <TextField
-                  {...field}
-                  label="Descuento"
-                  type="number"
-                  fullWidth
-                  margin="normal"
-                  error={!!errors.descuento}
-                  helperText={errors.descuento?.message as string}
-                />
-              )}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Mano de obra"
-              value={isNaN(manoDeObra) ? "0" : manoDeObra.toFixed(2)}
-              fullWidth
-              margin="normal"
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{
-                backgroundColor: "action.disabledBackground",
-                "& .MuiInputBase-input": {
-                  color: "text.secondary",
-                },
-              }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Total Orden de Reparación"
-              value={
-                isNaN(totalOrdenReparacion)
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box display="flex" alignItems="center" mb={2}>
+            <ConstructionIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" component="h2">
+              Trabajos Realizados
+            </Typography>
+          </Box>
+          <Grid container spacing={3}>
+            <Grid item xs={12}>
+              <TrabajosRealizadosFormSection esBorrador={esBorrador} />
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="h6" component="h2" textAlign="right">
+                Mano de obra:{" "}
+                {isNaN(manoDeObra)
                   ? "0"
-                  : totalOrdenReparacion.toFixed(2)
-              }
-              fullWidth
-              margin="normal"
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{
-                backgroundColor: "action.disabledBackground",
-                "& .MuiInputBase-input": {
-                  color: "text.secondary",
-                },
-              }}
-            />
+                  : getFormattedPrice(manoDeObra.toFixed(2))}
+              </Typography>
+            </Grid>
           </Grid>
-          <Grid item xs={12}>
-            <Button type="submit" variant="contained" color="primary">
-              {methods.watch("esBorrador")
-                ? "Actualizar Borrador"
-                : "Crear Presupuesto"}
-            </Button>
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box display="flex" alignItems="center" mb={2}>
+            <PaidIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" component="h2">
+              Resumen de Costos
+            </Typography>
+          </Box>
+          <Grid container spacing={2}>
+            <Grid item xs={4} ref={(el) => registerFieldRef("descuento", el)}>
+              <CustomInputText
+                name="descuento"
+                label="Descuento"
+                type="number"
+              />
+            </Grid>
+
+            <Grid
+              item
+              xs={8}
+              ref={(el) => registerFieldRef("descripcionDescuento", el)}
+            >
+              <CustomInputText
+                name="descripcionDescuento"
+                label="Descripción del descuento"
+              />
+            </Grid>
+
+            <Grid item xs={12}>
+              <Paper
+                elevation={0}
+                sx={{
+                  p: 2,
+                  mt: 1,
+                  backgroundColor: "primary.lighter",
+                  borderRadius: 1,
+                }}
+              >
+                <Box
+                  display="flex"
+                  justifyContent="space-between"
+                  alignItems="center"
+                >
+                  <Typography
+                    variant="h6"
+                    fontWeight="bold"
+                    color="primary.dark"
+                  >
+                    Total Orden de Reparación
+                  </Typography>
+                  <Typography
+                    variant="h5"
+                    fontWeight="bold"
+                    color="primary.dark"
+                    sx={{
+                      display: "flex",
+                      alignItems: "center",
+                    }}
+                  >
+                    ${" "}
+                    {isNaN(totalOrdenReparacion)
+                      ? "0.00"
+                      : totalOrdenReparacion.toLocaleString("es-AR", {
+                          minimumFractionDigits: 2,
+                          maximumFractionDigits: 2,
+                        })}
+                  </Typography>
+                </Box>
+              </Paper>
+            </Grid>
           </Grid>
-        </Grid>
+        </Paper>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            mt: 3,
+            mb: 2,
+          }}
+        >
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            component={Link}
+            href="/dashboard/presupuestos"
+          >
+            Volver a la lista
+          </Button>
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<SaveIcon />}
+            sx={{
+              px: 4,
+              py: 1,
+            }}
+          >
+            Actualizar Borrador
+          </Button>
+        </Box>
       </form>
       <Snackbar
         open={snackbar.open}

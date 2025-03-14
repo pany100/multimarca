@@ -3,8 +3,10 @@ import {
   prepareRepuestosToPersist,
   prepareTrabajosRealizadosToPersist,
 } from "@/utils/ordenPersistHelper";
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -84,7 +86,9 @@ export async function PUT(
       where: { id },
       data: {
         autoId,
-        descuento,
+        descuento: descuento
+          ? new Prisma.Decimal(descuento)
+          : new Prisma.Decimal(0),
         fechaCreacion,
         observacionesCliente,
         repuestosUsados: {

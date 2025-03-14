@@ -3,7 +3,13 @@
 import EditarBorradorForm from "@/components/orden-reparacion/EditarBorradorForm";
 import { useFetch } from "@/contexts/FetchContext";
 import { useAuth } from "@/hooks/useAuth";
-import { Box, CircularProgress, Paper, Typography } from "@mui/material";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  CircularProgress,
+} from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -59,29 +65,15 @@ const EditarBorradorPage = ({ params }: { params: { id: string } }) => {
   }
 
   return (
-    <Box sx={{ maxWidth: 800, margin: "0 auto", padding: 2 }}>
-      <Paper elevation={3} sx={{ padding: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Editar Borrador
-        </Typography>
-
+    <Card sx={{ padding: 3 }}>
+      <CardHeader
+        title="Editar Borrador"
+        subheader="Complete los datos para editar el borrador"
+      />
+      <CardContent>
         {borrador && <EditarBorradorForm borrador={borrador} />}
-
-        <Typography
-          variant="body2"
-          component="p"
-          sx={{
-            cursor: "pointer",
-            textDecoration: "underline",
-            color: "primary.main",
-            marginTop: 2,
-          }}
-          onClick={() => router.back()}
-        >
-          Volver a la lista de borradores
-        </Typography>
-      </Paper>
-    </Box>
+      </CardContent>
+    </Card>
   );
 };
 
