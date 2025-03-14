@@ -4,7 +4,17 @@ import {
   calcularTotalOrdenReparacion,
 } from "@/utils/ordenHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Alert, Button, Grid, Snackbar, TextField } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import SaveIcon from "@mui/icons-material/Save";
+import {
+  Alert,
+  Box,
+  Button,
+  Grid,
+  Link,
+  Snackbar,
+  TextField,
+} from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Controller, FormProvider, useForm, useWatch } from "react-hook-form";
@@ -178,55 +188,38 @@ const NuevaPlantillaForm = () => {
           <Grid item xs={12}>
             <TrabajosRealizadosFormSection />
           </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Mano de obra Cliente"
-              value={isNaN(manoDeObra) ? "0" : manoDeObra.toFixed(2)}
-              fullWidth
-              margin="normal"
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{
-                backgroundColor: "action.disabledBackground",
-                "& .MuiInputBase-input": {
-                  color: "text.secondary",
-                },
-              }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              label="Total Orden de Reparación"
-              value={
-                isNaN(totalOrdenReparacion)
-                  ? "0"
-                  : totalOrdenReparacion.toFixed(2)
-              }
-              fullWidth
-              margin="normal"
-              InputProps={{
-                readOnly: true,
-              }}
-              sx={{
-                backgroundColor: "action.disabledBackground",
-                "& .MuiInputBase-input": {
-                  color: "text.secondary",
-                },
-              }}
-            />
-          </Grid>
         </Grid>
-        <Button
-          type="submit"
-          variant="contained"
-          color="primary"
+        <Box
           sx={{
-            my: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            mt: 3,
+            mb: 2,
           }}
         >
-          Crear Plantilla
-        </Button>
+          <Button
+            variant="outlined"
+            startIcon={<ArrowBackIcon />}
+            component={Link}
+            href="/dashboard/plantilla-presupuesto"
+          >
+            Volver a la lista
+          </Button>
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            size="large"
+            startIcon={<SaveIcon />}
+            sx={{
+              px: 4,
+              py: 1,
+            }}
+          >
+            Crear Plantilla
+          </Button>
+        </Box>
       </form>
       <Snackbar
         open={snackbar.open}

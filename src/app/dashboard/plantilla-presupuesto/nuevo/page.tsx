@@ -27,19 +27,6 @@ const NuevaOrdenReparacionPage = () => {
         </Typography>
 
         <NuevaPlantillaForm />
-
-        <Typography
-          variant="body2"
-          component="p"
-          sx={{
-            cursor: "pointer",
-            textDecoration: "underline",
-            color: "primary.main",
-          }}
-          onClick={() => router.back()}
-        >
-          Volver a la lista de órdenes
-        </Typography>
       </Paper>
     </Box>
   );
