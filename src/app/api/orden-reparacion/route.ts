@@ -97,7 +97,7 @@ export async function POST(request: Request) {
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
-      descuento,
+      descuento = 0,
       descripcionDescuento,
     } = body;
 
