@@ -9,12 +9,8 @@ import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import {
   Box,
   CircularProgress,
-  FormControl,
   Grid,
-  InputLabel,
-  MenuItem,
   Paper,
-  Select,
   Table,
   TableBody,
   TableCell,
@@ -419,9 +415,43 @@ function BalancePage() {
 
   return (
     <div>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Balance Detallado
-      </Typography>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          mb: 3,
+        }}
+      >
+        <Typography variant="h4" component="h1">
+          Balance Detallado
+        </Typography>
+        <Box>
+          <Typography
+            component="span"
+            sx={{
+              cursor: "pointer",
+              fontWeight: moneda === "ARS" ? "bold" : "normal",
+              color: moneda === "ARS" ? "primary.main" : "text.secondary",
+              mr: 2,
+            }}
+            onClick={() => setMoneda("ARS")}
+          >
+            ARS
+          </Typography>
+          <Typography
+            component="span"
+            sx={{
+              cursor: "pointer",
+              fontWeight: moneda === "USD" ? "bold" : "normal",
+              color: moneda === "USD" ? "primary.main" : "text.secondary",
+            }}
+            onClick={() => setMoneda("USD")}
+          >
+            USD
+          </Typography>
+        </Box>
+      </Box>
 
       <Paper
         elevation={0}
@@ -445,35 +475,7 @@ function BalancePage() {
           Balance Financiero - Últimas 10 Semanas
         </Typography>
 
-        <Box sx={{ p: 3 }}>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
-              mb: 3,
-              backgroundColor: theme.palette.background.default,
-              borderRadius: 2,
-            }}
-          >
-            <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={6} md={3}>
-                <FormControl fullWidth size="small">
-                  <InputLabel>Moneda</InputLabel>
-                  <Select
-                    value={moneda}
-                    label="Moneda"
-                    onChange={(e) => setMoneda(e.target.value)}
-                  >
-                    <MenuItem value="ARS">ARS</MenuItem>
-                    <MenuItem value="USD">USD</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-            </Grid>
-          </Paper>
-
-          {renderContent()}
-        </Box>
+        <Box sx={{ p: 3 }}>{renderContent()}</Box>
       </Paper>
     </div>
   );
