@@ -90,11 +90,14 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
       <Typography
         variant="h6"
         sx={{
-          fontWeight: 500,
+          fontWeight: 600,
           p: 2,
           borderBottom: `1px solid ${theme.palette.divider}`,
+          display: "flex",
+          alignItems: "center",
         }}
       >
+        <BuildIcon sx={{ mr: 1, color: theme.palette.primary.main }} />
         Detalles de la Reparación
       </Typography>
 

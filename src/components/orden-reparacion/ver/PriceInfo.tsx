@@ -8,6 +8,7 @@ import {
 } from "@/utils/ordenHelper";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import {
+  Box,
   Paper,
   Table,
   TableBody,
@@ -16,73 +17,110 @@ import {
   TableHead,
   TableRow,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 
 function PriceInfo({ ordenReparacion }: { ordenReparacion: any }) {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   return (
-    <>
-      <Typography variant="h6" gutterBottom>
-        <AttachMoneyIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+    <Paper
+      elevation={0}
+      sx={{
+        mb: 4,
+        borderRadius: "4px",
+        overflow: "hidden",
+      }}
+    >
+      <Typography
+        variant="h6"
+        sx={{
+          fontWeight: 600,
+          p: 2,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          display: "flex",
+          alignItems: "center",
+        }}
+      >
+        <AttachMoneyIcon sx={{ mr: 1, color: theme.palette.primary.main }} />
         Facturación Detallada
       </Typography>
-      <TableContainer component={Paper} elevation={0}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>Concepto</TableCell>
-              <TableCell align="right">Subtotal</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            <TableRow>
-              <TableCell>Repuestos</TableCell>
-              <TableCell align="right">
-                {getFormattedPrice(calcularTotalRepuestos(ordenReparacion))}
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Reparaciones / Repuestos de terceros</TableCell>
-              <TableCell align="right">
-                {getFormattedPrice(
-                  calcularTotalReparacionesTerceros(ordenReparacion)
-                )}
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>Mano de Obra</TableCell>
-              <TableCell align="right">
-                {getFormattedPrice(
-                  calcularManoDeObra(ordenReparacion.trabajosRealizados)
-                )}
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>
-                Descuento
-                {ordenReparacion.descripcionDescuento && (
-                  <>: {ordenReparacion.descripcionDescuento}</>
-                )}
-              </TableCell>
-              <TableCell align="right">
-                {getFormattedPrice(ordenReparacion.descuento)}
-              </TableCell>
-            </TableRow>
-            <TableRow>
-              <TableCell>
-                <strong>Total</strong>
-              </TableCell>
-              <TableCell align="right">
-                <strong>
+
+      <Box sx={{ p: 2 }}>
+        <TableContainer component={Paper} elevation={0}>
+          <Table size={isMobile ? "small" : "medium"}>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: theme.palette.action.hover }}>
+                <TableCell sx={{ fontWeight: 500 }}>Concepto</TableCell>
+                <TableCell align="right" sx={{ fontWeight: 500 }}>
+                  Subtotal
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableRow>
+                <TableCell component="th" scope="row">
+                  Repuestos
+                </TableCell>
+                <TableCell align="right">
+                  {getFormattedPrice(calcularTotalRepuestos(ordenReparacion))}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component="th" scope="row">
+                  Reparaciones / Repuestos de terceros
+                </TableCell>
+                <TableCell align="right">
+                  {getFormattedPrice(
+                    calcularTotalReparacionesTerceros(ordenReparacion)
+                  )}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component="th" scope="row">
+                  Mano de Obra
+                </TableCell>
+                <TableCell align="right">
+                  {getFormattedPrice(
+                    calcularManoDeObra(ordenReparacion.trabajosRealizados)
+                  )}
+                </TableCell>
+              </TableRow>
+              <TableRow>
+                <TableCell component="th" scope="row">
+                  Descuento
+                  {ordenReparacion.descripcionDescuento && (
+                    <>: {ordenReparacion.descripcionDescuento}</>
+                  )}
+                </TableCell>
+                <TableCell align="right">
+                  {getFormattedPrice(ordenReparacion.descuento)}
+                </TableCell>
+              </TableRow>
+              <TableRow
+                sx={{
+                  backgroundColor: theme.palette.action.hover,
+                  "& .MuiTableCell-root": {
+                    fontWeight: 600,
+                  },
+                }}
+              >
+                <TableCell component="th" scope="row">
+                  Total
+                </TableCell>
+                <TableCell align="right">
                   {getFormattedPrice(
                     calcularTotalOrdenReparacion(ordenReparacion)
                   )}
-                </strong>
-              </TableCell>
-            </TableRow>
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </>
+                </TableCell>
+              </TableRow>
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+    </Paper>
   );
 }
 
