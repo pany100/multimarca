@@ -75,11 +75,13 @@ export async function GET(request: NextRequest) {
       UsuarioExtraccion[]
     >(sqlQuery, ...queryParams);
 
-    const usuariosFormateados = usuariosExtracciones.map((usuario: any) => ({
-      id: usuario.id,
-      fullName: usuario.fullName,
-      totalExtracciones: parseFloat(usuario.totalExtracciones),
-    }));
+    const usuariosFormateados = usuariosExtracciones
+      .filter((usuario) => usuario.totalExtracciones !== null)
+      .map((usuario) => ({
+        ...usuario,
+        totalExtracciones:
+          parseFloat(usuario.totalExtracciones.toString()) || 0,
+      }));
 
     return NextResponse.json(usuariosFormateados);
   } catch (error) {

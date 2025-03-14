@@ -1,16 +1,20 @@
 "use client";
 
 import { useFetch } from "@/contexts/FetchContext";
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 import {
   Box,
   Button,
   CircularProgress,
   FormControl,
+  Grid,
   InputLabel,
   MenuItem,
+  Paper,
   Select,
   TextField,
   Typography,
+  useTheme,
 } from "@mui/material";
 import {
   ArcElement,
@@ -26,6 +30,7 @@ import { Pie } from "react-chartjs-2";
 ChartJS.register(CategoryScale, ArcElement, Title, Tooltip, Legend);
 
 const Extracciones = () => {
+  const theme = useTheme();
   const [moneda, setMoneda] = useState("ARS");
   const [mesInput, setMesInput] = useState("");
   const [anioInput, setAnioInput] = useState("");
@@ -51,6 +56,7 @@ const Extracciones = () => {
       setDatos(datos);
     } catch (error) {
       console.error("Error al obtener estadísticas:", error);
+      setDatos([]);
     } finally {
       setCargando(false);
     }
@@ -68,19 +74,59 @@ const Extracciones = () => {
 
   const opciones = {
     responsive: true,
+    maintainAspectRatio: true,
     plugins: {
       legend: {
         position: "top" as const,
+        labels: {
+          boxWidth: 15,
+          padding: 15,
+          font: {
+            size: 12,
+          },
+        },
       },
       title: {
-        display: true,
-        text: "Extracciones por Usuario",
-        font: {
-          size: 20,
+        display: false,
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context: any) {
+            let label = context.label || "";
+            let value = context.raw || 0;
+            let total = context.chart._metasets[context.datasetIndex].total;
+            let percentage = Math.round((value * 100) / total) + "%";
+
+            return `${label}: ${new Intl.NumberFormat("es-AR", {
+              style: "currency",
+              currency: moneda,
+              minimumFractionDigits: 2,
+            }).format(value)} (${percentage})`;
+          },
         },
       },
     },
   };
+
+  const colores = [
+    "rgba(255, 99, 132, 0.7)",
+    "rgba(54, 162, 235, 0.7)",
+    "rgba(255, 206, 86, 0.7)",
+    "rgba(75, 192, 192, 0.7)",
+    "rgba(153, 102, 255, 0.7)",
+    "rgba(255, 159, 64, 0.7)",
+    "rgba(201, 203, 207, 0.7)",
+  ];
+
+  const bordeColores = [
+    "rgba(255, 99, 132, 1)",
+    "rgba(54, 162, 235, 1)",
+    "rgba(255, 206, 86, 1)",
+    "rgba(75, 192, 192, 1)",
+    "rgba(153, 102, 255, 1)",
+    "rgba(255, 159, 64, 1)",
+    "rgba(201, 203, 207, 1)",
+  ];
 
   const datosGrafico = React.useMemo(() => {
     if (datos.length === 0) {
@@ -88,9 +134,10 @@ const Extracciones = () => {
         labels: [],
         datasets: [
           {
-            label: `Extracciones totales (${moneda})`,
             data: [],
             backgroundColor: [],
+            borderColor: [],
+            borderWidth: 1,
           },
         ],
       };
@@ -102,26 +149,181 @@ const Extracciones = () => {
         : [],
       datasets: [
         {
-          label: `Extracciones totales (${moneda})`,
           data: Array.isArray(datos)
             ? datos.map(
                 (usuario: { totalExtracciones: number }) =>
                   usuario.totalExtracciones
               )
             : [],
-          backgroundColor: [
-            "rgba(255, 99, 132, 0.7)",
-            "rgba(54, 162, 235, 0.7)",
-            "rgba(255, 206, 86, 0.7)",
-            "rgba(75, 192, 192, 0.7)",
-            "rgba(153, 102, 255, 0.7)",
-            "rgba(255, 159, 64, 0.7)",
-            "rgba(201, 203, 207, 0.7)",
-          ],
+          backgroundColor: colores.slice(0, datos.length),
+          borderColor: bordeColores.slice(0, datos.length),
+          borderWidth: 1,
         },
       ],
     };
   }, [datos, moneda]);
+
+  const renderContent = () => {
+    if (cargando) {
+      return (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="200px"
+        >
+          <CircularProgress />
+        </Box>
+      );
+    }
+
+    if (datos.length === 0) {
+      return (
+        <Box
+          display="flex"
+          justifyContent="center"
+          alignItems="center"
+          height="200px"
+        >
+          <Typography color="text.secondary">Sin datos disponibles</Typography>
+        </Box>
+      );
+    }
+
+    // Calculate total extractions for percentage calculation
+    const totalExtracciones = datos.reduce(
+      (sum: number, usuario: { totalExtracciones: number }) =>
+        sum + usuario.totalExtracciones,
+      0
+    );
+
+    return (
+      <>
+        <Box
+          sx={{
+            height: "350px",
+            mb: 2,
+            display: "flex",
+            justifyContent: "center",
+          }}
+        >
+          <Box
+            sx={{
+              width: "100%",
+              maxWidth: "900px",
+              display: "grid",
+              justifyContent: "center",
+            }}
+          >
+            <Pie options={opciones} data={datosGrafico} />
+          </Box>
+        </Box>
+
+        {/* Table view for more detailed information */}
+        <Paper
+          elevation={0}
+          sx={{
+            borderRadius: 2,
+            overflow: "hidden",
+            mb: 2,
+          }}
+        >
+          <Box sx={{ overflowX: "auto" }}>
+            <table
+              style={{
+                width: "100%",
+                borderCollapse: "collapse",
+                fontSize: "0.875rem",
+              }}
+            >
+              <thead>
+                <tr
+                  style={{
+                    backgroundColor: theme.palette.grey[100],
+                    borderBottom: `1px solid ${theme.palette.divider}`,
+                  }}
+                >
+                  <th
+                    style={{
+                      padding: "12px 16px",
+                      textAlign: "left",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Usuario
+                  </th>
+                  <th
+                    style={{
+                      padding: "12px 16px",
+                      textAlign: "right",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Total Extracciones
+                  </th>
+                  <th
+                    style={{
+                      padding: "12px 16px",
+                      textAlign: "right",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Porcentaje
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {Array.isArray(datos) &&
+                  datos.map(
+                    (
+                      usuario: {
+                        fullName: string;
+                        totalExtracciones: number;
+                      },
+                      index: number
+                    ) => {
+                      const porcentaje = Math.round(
+                        (usuario.totalExtracciones * 100) / totalExtracciones
+                      );
+
+                      return (
+                        <tr
+                          key={index}
+                          style={{
+                            borderBottom: `1px solid ${theme.palette.divider}`,
+                            backgroundColor:
+                              index % 2 === 0
+                                ? "white"
+                                : theme.palette.background.default,
+                          }}
+                        >
+                          <td style={{ padding: "10px 16px" }}>
+                            {usuario.fullName}
+                          </td>
+                          <td
+                            style={{ padding: "10px 16px", textAlign: "right" }}
+                          >
+                            {new Intl.NumberFormat("es-AR", {
+                              style: "currency",
+                              currency: moneda,
+                            }).format(usuario.totalExtracciones)}
+                          </td>
+                          <td
+                            style={{ padding: "10px 16px", textAlign: "right" }}
+                          >
+                            {porcentaje}%
+                          </td>
+                        </tr>
+                      );
+                    }
+                  )}
+              </tbody>
+            </table>
+          </Box>
+        </Paper>
+      </>
+    );
+  };
 
   const meses = [
     { valor: "1", nombre: "Enero" },
@@ -139,61 +341,98 @@ const Extracciones = () => {
   ];
 
   return (
-    <Box sx={{ p: 3 }}>
-      <FormControl fullWidth sx={{ mb: 2 }}>
-        <InputLabel>Moneda</InputLabel>
-        <Select
-          value={moneda}
-          label="Moneda"
-          onChange={(e) => setMoneda(e.target.value)}
-        >
-          <MenuItem value="ARS">ARS</MenuItem>
-          <MenuItem value="USD">USD</MenuItem>
-        </Select>
-      </FormControl>
-      <FormControl sx={{ mr: 2, mb: 2, minWidth: 120 }}>
-        <InputLabel>Mes</InputLabel>
-        <Select
-          value={mesInput}
-          label="Mes"
-          onChange={(e) => setMesInput(e.target.value)}
-        >
-          <MenuItem value="">
-            <em>Todos los meses</em>
-          </MenuItem>
-          {meses.map((mes) => (
-            <MenuItem key={mes.valor} value={mes.valor}>
-              {mes.nombre}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <TextField
-        label="Año"
-        type="number"
-        value={anioInput}
-        onChange={(e) => setAnioInput(e.target.value)}
-        sx={{ mb: 2, mr: 2 }}
-      />
-      <Button
-        variant="contained"
-        onClick={actualizarEstadisticas}
-        sx={{ mb: 2, mt: 1 }}
+    <Paper
+      elevation={0}
+      sx={{
+        mb: 4,
+        borderRadius: "4px",
+        overflow: "hidden",
+      }}
+    >
+      <Typography
+        variant="h6"
+        sx={{
+          fontWeight: 600,
+          p: 2,
+          borderBottom: `1px solid ${theme.palette.divider}`,
+          display: "flex",
+          alignItems: "center",
+        }}
       >
-        Actualizar
-      </Button>
-      {cargando ? (
-        <Box sx={{ display: "flex", justifyContent: "center", mt: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : datos.length > 0 ? (
-        <Pie options={opciones} data={datosGrafico} />
-      ) : (
-        <Typography variant="h6" align="center" sx={{ mt: 4 }}>
-          Sin datos
-        </Typography>
-      )}
-    </Box>
+        <AccountBalanceWalletIcon
+          sx={{ mr: 1, color: theme.palette.primary.main }}
+        />
+        Extracciones por Usuario
+      </Typography>
+
+      <Box sx={{ p: 3 }}>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 2,
+            mb: 3,
+            backgroundColor: theme.palette.background.default,
+            borderRadius: 2,
+          }}
+        >
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Moneda</InputLabel>
+                <Select
+                  value={moneda}
+                  label="Moneda"
+                  onChange={(e) => setMoneda(e.target.value)}
+                >
+                  <MenuItem value="ARS">ARS</MenuItem>
+                  <MenuItem value="USD">USD</MenuItem>
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <FormControl fullWidth size="small">
+                <InputLabel>Mes</InputLabel>
+                <Select
+                  value={mesInput}
+                  label="Mes"
+                  onChange={(e) => setMesInput(e.target.value)}
+                >
+                  <MenuItem value="">
+                    <em>Todos los meses</em>
+                  </MenuItem>
+                  {meses.map((mes) => (
+                    <MenuItem key={mes.valor} value={mes.valor}>
+                      {mes.nombre}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <TextField
+                label="Año"
+                type="number"
+                value={anioInput}
+                onChange={(e) => setAnioInput(e.target.value)}
+                fullWidth
+                size="small"
+              />
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Button
+                variant="contained"
+                onClick={actualizarEstadisticas}
+                fullWidth
+              >
+                Actualizar
+              </Button>
+            </Grid>
+          </Grid>
+        </Paper>
+
+        {renderContent()}
+      </Box>
+    </Paper>
   );
 };
 
