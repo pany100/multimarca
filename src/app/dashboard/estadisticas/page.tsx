@@ -36,7 +36,7 @@ const EstadisticasPage = () => {
             <Reparaciones />
           </Card>
         </Grid>
-        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
+        <Grid item xs={12} md={12} sx={{ display: "flex" }}>
           <Card
             sx={{ width: "100%", display: "flex", flexDirection: "column" }}
           >
