@@ -2,12 +2,16 @@
 
 import EditarOrdenReparacionForm from "@/components/orden-reparacion/EditarOrdenReparacionForm";
 import { useFetch } from "@/contexts/FetchContext";
-import { Box, CircularProgress, Paper, Typography } from "@mui/material";
-import { useRouter } from "next/navigation";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  CircularProgress,
+} from "@mui/material";
 import { useEffect, useState } from "react";
 
 const EditarOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
-  const router = useRouter();
   const [ordenReparacion, setOrdenReparacion] = useState(null);
   const [loading, setLoading] = useState(true);
   const { authFetch } = useFetch();
@@ -48,31 +52,18 @@ const EditarOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
   }
 
   return (
-    <Box sx={{ maxWidth: 800, margin: "0 auto", padding: 2 }}>
-      <Paper elevation={3} sx={{ padding: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Editar Orden de Reparación
-        </Typography>
+    <Card sx={{ padding: 3 }}>
+      <CardHeader
+        title="Editar Orden de Reparación"
+        subheader="Complete los datos para editar la orden de reparación"
+      />
 
+      <CardContent>
         {ordenReparacion && (
           <EditarOrdenReparacionForm ordenReparacion={ordenReparacion} />
         )}
-
-        <Typography
-          variant="body2"
-          component="p"
-          sx={{
-            cursor: "pointer",
-            textDecoration: "underline",
-            color: "primary.main",
-            marginTop: 2,
-          }}
-          onClick={() => router.back()}
-        >
-          Volver a la lista de órdenes
-        </Typography>
-      </Paper>
-    </Box>
+      </CardContent>
+    </Card>
   );
 };
 
