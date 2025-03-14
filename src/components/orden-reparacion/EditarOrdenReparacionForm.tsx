@@ -12,7 +12,9 @@ import EngineeringIcon from "@mui/icons-material/Engineering";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import PaidIcon from "@mui/icons-material/Paid";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { Box, Grid, Paper, Typography } from "@mui/material";
+import { useState } from "react";
 import CustomAutocomplete from "../formV2/CustomAutocomplete";
 import CustomInputText from "../formV2/CustomInputText";
 import CustomSelect from "../formV2/CustomSelect";
@@ -22,6 +24,7 @@ import MecanicoFormSection from "./MecanicoFormSection";
 import ObservacionesEntradaForm from "./ObservacionesEntradaForm";
 import ReparacionesTercerosFormSection from "./ReparacionesTercerosFormSection";
 import RepuestoUsadoFormSection from "./RepuestoUsadoFormSection";
+import ScannerForm from "./ScannerForm";
 import TrabajosRealizadosFormSection from "./TrabajosRealizadosFormSection";
 
 type Props = {
@@ -138,6 +141,7 @@ function EditarOrdenReparacionForm({ ordenReparacion }: Props) {
     control,
     setValue,
   } = methods;
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { registerFieldRef } = useScrollToError({ errors, isSubmitted });
   const { searchAutos, initialAuto } = useAutosAutocomplete();
   const { orepEstadoOptions } = useFixedSelectData();
@@ -446,6 +450,28 @@ function EditarOrdenReparacionForm({ ordenReparacion }: Props) {
               </Paper>
             </Grid>
           </Grid>
+        </Paper>
+        <Paper
+          elevation={0}
+          sx={{
+            p: 3,
+            mb: 3,
+            borderRadius: 2,
+            border: "1px solid",
+            borderColor: "divider",
+          }}
+        >
+          <Box display="flex" alignItems="center" mb={2}>
+            <PictureAsPdfIcon sx={{ mr: 1, color: "primary.main" }} />
+            <Typography variant="h6" component="h2">
+              Informe del Scanner
+            </Typography>
+          </Box>
+          <ScannerForm
+            ordenReparacion={ordenReparacion}
+            selectedFile={selectedFile}
+            setSelectedFile={setSelectedFile}
+          />
         </Paper>
         <Paper
           elevation={0}
