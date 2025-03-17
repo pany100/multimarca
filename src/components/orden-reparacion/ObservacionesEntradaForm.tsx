@@ -23,9 +23,11 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { useFormContext } from "react-hook-form";
 
 const ObservacionesEntradaForm = () => {
-  const [observaciones, setObservaciones] = useState<string[]>([]);
+  const { setValue, watch } = useFormContext();
+  const observaciones = JSON.parse(watch("observacionesEntrada"));
   const [open, setOpen] = useState(false);
   const [newObservacion, setNewObservacion] = useState("");
   const { reparacionesAnteriores } = usePrevOrdenes();
@@ -42,7 +44,10 @@ const ObservacionesEntradaForm = () => {
 
   const handleAdd = () => {
     if (newObservacion.trim()) {
-      setObservaciones([...observaciones, newObservacion.trim()]);
+      setValue(
+        "observacionesEntrada",
+        JSON.stringify([...observaciones, newObservacion.trim()])
+      );
       setNewObservacion("");
       setOpen(false);
     }
@@ -50,7 +55,10 @@ const ObservacionesEntradaForm = () => {
 
   const handleAddPreviousObservation = (observation: string) => {
     if (!observaciones.includes(observation)) {
-      setObservaciones([...observaciones, observation]);
+      setValue(
+        "observacionesEntrada",
+        JSON.stringify([...observaciones, observation])
+      );
       setSnackbar({
         open: true,
         message: "Observación agregada correctamente",
@@ -66,7 +74,7 @@ const ObservacionesEntradaForm = () => {
   const handleDelete = (index: number) => {
     const newObservaciones = [...observaciones];
     newObservaciones.splice(index, 1);
-    setObservaciones(newObservaciones);
+    setValue("observacionesEntrada", JSON.stringify(newObservaciones));
   };
 
   const handleCloseSnackbar = () => {
@@ -92,7 +100,7 @@ const ObservacionesEntradaForm = () => {
 
         {observaciones.length > 0 ? (
           <List>
-            {observaciones.map((obs, index) => (
+            {observaciones.map((obs: string, index: number) => (
               <ListItem
                 key={index}
                 secondaryAction={
