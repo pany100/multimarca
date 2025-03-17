@@ -3,6 +3,7 @@ import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
+import useInitialKms from "@/hooks/useInitialKms";
 import useScrollToError from "@/hooks/useScrollToError";
 import { Grid, Paper, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
@@ -14,6 +15,7 @@ function AutoFormSection() {
   const { searchAutos, initialAuto } = useAutosAutocomplete();
   const { orepEstadoOptions } = useFixedSelectData();
   const { registerFieldRef } = useScrollToError({ errors, isSubmitted });
+  useInitialKms();
 
   return (
     <Paper

@@ -126,12 +126,7 @@ function EditarOrdenReparacionForm({ ordenReparacion }: Props) {
       ),
     },
   });
-  const {
-    handleSubmit,
-    formState: { errors, isSubmitted },
-    control,
-    setValue,
-  } = methods;
+  const { handleSubmit, control } = methods;
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const { snackbar, setSnackbar, onSubmit } = useEditOrden({
     control,
