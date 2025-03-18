@@ -8,7 +8,7 @@ import TextWithFillLine from "./TextWithFillLine";
 
 import Checkbox from "@mui/material/Checkbox";
 
-import { getFormattedControlName } from "@/utils/fieldHelper";
+import { getFormattedControlName, getFormattedDate } from "@/utils/fieldHelper";
 import { styled } from "@mui/material/styles";
 
 const CheckTypeControlsTwoColumns = styled("div")(() => ({
@@ -73,12 +73,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
           >
             <div>
               <Typography variant="h6" sx={{ color: "common.black" }}>
-                Fecha:{" "}
-                {new Date(repair.fechaCreacion).toLocaleDateString("es-AR", {
-                  day: "2-digit",
-                  month: "2-digit",
-                  year: "numeric",
-                })}
+                Fecha: {getFormattedDate(repair.fechaCreacion)}
               </Typography>
               <Typography variant="h6" sx={{ color: "common.black" }}>
                 Titular: {repair.auto.owner.fullName}

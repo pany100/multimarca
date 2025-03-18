@@ -9,4 +9,12 @@ function getFormattedPrice(price: number | string) {
   })}`;
 }
 
-export { getFormattedControlName, getFormattedPrice };
+function getFormattedDate(date: string) {
+  const dateParts = date.split("T")[0].split("-");
+  const year = dateParts[0];
+  const month = dateParts[1];
+  const day = dateParts[2];
+  return `${day}/${month}/${year}`;
+}
+
+export { getFormattedControlName, getFormattedDate, getFormattedPrice };

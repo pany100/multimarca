@@ -27,7 +27,7 @@ import { useFormContext } from "react-hook-form";
 
 const ObservacionesEntradaForm = () => {
   const { setValue, watch } = useFormContext();
-  const observaciones = JSON.parse(watch("observacionesEntrada"));
+  const observaciones = JSON.parse(watch("observacionesEntrada") || "[]");
   const [open, setOpen] = useState(false);
   const [newObservacion, setNewObservacion] = useState("");
   const { reparacionesAnteriores } = usePrevOrdenes();
@@ -82,6 +82,11 @@ const ObservacionesEntradaForm = () => {
       ...snackbar,
       open: false,
     });
+  };
+
+  // Helper function to check if an observation is already added
+  const isObservationAlreadyAdded = (observation: string) => {
+    return observaciones.includes(observation);
   };
 
   return (
@@ -164,17 +169,26 @@ const ObservacionesEntradaForm = () => {
                             key={obsIndex}
                             sx={{ py: 0.5 }}
                             secondaryAction={
-                              <Tooltip title="Agregar a observaciones actuales">
-                                <Button
-                                  variant="contained"
-                                  size="small"
-                                  onClick={() =>
-                                    handleAddPreviousObservation(obs)
-                                  }
-                                  color="primary"
-                                >
-                                  AGREGAR
-                                </Button>
+                              <Tooltip
+                                title={
+                                  isObservationAlreadyAdded(obs)
+                                    ? "Esta observación ya fue agregada"
+                                    : "Agregar a observaciones actuales"
+                                }
+                              >
+                                <span>
+                                  <Button
+                                    variant="contained"
+                                    size="small"
+                                    onClick={() =>
+                                      handleAddPreviousObservation(obs)
+                                    }
+                                    color="primary"
+                                    disabled={isObservationAlreadyAdded(obs)}
+                                  >
+                                    AGREGAR
+                                  </Button>
+                                </span>
                               </Tooltip>
                             }
                           >

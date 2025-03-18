@@ -7,24 +7,17 @@ function useInitialKms() {
   const { setValue } = useFormContext();
   const { authFetch } = useFetch();
   const initialAutoId = useRef(autoId);
-  const isFirstRun = useRef(true);
 
   useEffect(() => {
+    if (!autoId) {
+      setValue("kilometros", null);
+      return;
+    }
     const fetchAuto = async () => {
-      if (autoId) {
-        if (initialAutoId.current === autoId) {
-          isFirstRun.current = false;
-          return;
-        }
-        if (isFirstRun.current) {
-          return;
-        }
-
+      if (autoId !== initialAutoId.current) {
         const response = await authFetch(`/api/autos/${autoId}`);
         const data = await response.json();
         setValue("kilometros", data.kms);
-      } else {
-        setValue("kilometros", null);
       }
     };
 
