@@ -136,8 +136,11 @@ const ObservacionesEntradaForm = () => {
             Reparaciones previas
           </Typography>
         </Box>
-
-        {reparacionesAnteriores.length > 0 ? (
+        {reparacionesAnteriores.length > 0 &&
+        reparacionesAnteriores.some(
+          (reparacion: { observacionesSalida: string }) =>
+            reparacion.observacionesSalida !== "[]"
+        ) ? (
           <Paper variant="outlined" sx={{ borderRadius: 1 }}>
             {reparacionesAnteriores.map(
               (
@@ -211,7 +214,8 @@ const ObservacionesEntradaForm = () => {
               color="text.secondary"
               sx={{ fontStyle: "italic", textAlign: "center" }}
             >
-              No hay reparaciones previas para este vehículo
+              No hay reparaciones previas con observaciones de salida para este
+              vehículo
             </Typography>
           </Paper>
         )}
