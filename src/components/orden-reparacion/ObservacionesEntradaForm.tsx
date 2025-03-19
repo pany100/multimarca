@@ -136,11 +136,7 @@ const ObservacionesEntradaForm = () => {
             Reparaciones previas
           </Typography>
         </Box>
-        {reparacionesAnteriores.length > 0 &&
-        reparacionesAnteriores.some(
-          (reparacion: { observacionesSalida: string }) =>
-            reparacion.observacionesSalida !== "[]"
-        ) ? (
+        {reparacionesAnteriores.length > 0 ? (
           <Paper variant="outlined" sx={{ borderRadius: 1 }}>
             {reparacionesAnteriores.map(
               (
@@ -151,23 +147,34 @@ const ObservacionesEntradaForm = () => {
                   observacionesSalida: string;
                 },
                 index
-              ) => (
-                <Box key={reparacion.id}>
-                  {index > 0 && <Divider />}
-                  <Box p={2}>
-                    <Box display="flex" alignItems="center" mb={1}>
-                      <Chip
-                        label={new Date(
-                          reparacion.fechaCreacion
-                        ).toLocaleDateString()}
-                        size="small"
-                        color="primary"
-                        variant="outlined"
-                      />
-                    </Box>
-                    <List dense disablePadding>
-                      {JSON.parse(reparacion.observacionesSalida).map(
-                        (obs: string, obsIndex: number) => (
+              ) => {
+                const observaciones = JSON.parse(
+                  reparacion.observacionesSalida
+                );
+                return (
+                  <Box key={reparacion.id}>
+                    {index > 0 && <Divider />}
+                    <Box p={2}>
+                      <Box display="flex" alignItems="center" mb={1}>
+                        <Chip
+                          label={new Date(
+                            reparacion.fechaCreacion
+                          ).toLocaleDateString()}
+                          size="small"
+                          color="primary"
+                          variant="outlined"
+                        />
+                        {observaciones.length === 0 && (
+                          <Typography
+                            color="text.secondary"
+                            sx={{ fontStyle: "italic", pl: 2 }}
+                          >
+                            No hay observaciones de salida registradas
+                          </Typography>
+                        )}
+                      </Box>
+                      <List dense disablePadding>
+                        {observaciones.map((obs: string, obsIndex: number) => (
                           <ListItem
                             key={obsIndex}
                             sx={{ py: 0.5 }}
@@ -200,12 +207,12 @@ const ObservacionesEntradaForm = () => {
                               primaryTypographyProps={{ variant: "body2" }}
                             />
                           </ListItem>
-                        )
-                      )}
-                    </List>
+                        ))}
+                      </List>
+                    </Box>
                   </Box>
-                </Box>
-              )
+                );
+              }
             )}
           </Paper>
         ) : (
@@ -214,8 +221,7 @@ const ObservacionesEntradaForm = () => {
               color="text.secondary"
               sx={{ fontStyle: "italic", textAlign: "center" }}
             >
-              No hay reparaciones previas con observaciones de salida para este
-              vehículo
+              No hay reparaciones previas para este vehículo
             </Typography>
           </Paper>
         )}
