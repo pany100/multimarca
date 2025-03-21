@@ -1,5 +1,10 @@
-import { getChequeForOperation, saveCheque } from "@/utils/chequeUtils";
-import { OperacionCheque, TipoOperacion } from "@prisma/client";
+import {
+  chequeQueryData,
+  getChequeId,
+  returnAllModelsWithChequeData,
+  returnModelWithChequeData,
+  validateChequeRequest,
+} from "@/utils/chequeUtils";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -71,6 +76,7 @@ export async function GET(request: Request) {
           },
           mecanico: true,
           proveedor: true,
+          cheque: chequeQueryData,
         },
       }),
       prisma.gasto.count({
@@ -78,31 +84,8 @@ export async function GET(request: Request) {
       }),
     ]);
 
-    const gastosConCheques = await Promise.all(
-      gastos.map(async (gasto) => {
-        if (gasto.tipo === "CHEQUE") {
-          const cheque = await getChequeForOperation(
-            OperacionCheque.GASTO,
-            gasto.id
-          );
-          return {
-            ...gasto,
-            banco: cheque?.banco,
-            emisor: cheque?.owner,
-            fechaCobro: cheque?.fechaCobro,
-            fechaEmision: cheque?.fechaEmision,
-            importe: cheque?.importe,
-            numeroCheque: cheque?.numero,
-            picturePath: cheque?.picturePath,
-            chequeId: cheque?.id,
-          };
-        }
-        return gasto;
-      })
-    );
-
     return NextResponse.json({
-      items: gastosConCheques,
+      items: returnAllModelsWithChequeData(gastos),
       total,
       page,
       size,
@@ -129,30 +112,13 @@ export async function POST(request: Request) {
       proveedorId,
       moneda,
       detalle,
-      banco,
-      emisor,
-      fechaCobro,
-      fechaEmision,
-      importe,
-      numeroCheque,
-      picturePath,
     } = body;
 
-    if (tipo === TipoOperacion.CHEQUE) {
-      if (
-        !banco ||
-        !emisor ||
-        !fechaCobro ||
-        !fechaEmision ||
-        !importe ||
-        !numeroCheque ||
-        !picturePath
-      ) {
-        return NextResponse.json(
-          { error: "Faltan datos para la operación de cheque" },
-          { status: 400 }
-        );
-      }
+    if (!validateChequeRequest(body, tipo)) {
+      return NextResponse.json(
+        { error: "Faltan datos para la operación de cheque" },
+        { status: 400 }
+      );
     }
 
     if (!nombre || !precio || !fecha || !categoriaId) {
@@ -180,6 +146,8 @@ export async function POST(request: Request) {
       },
     });
 
+    const chequeIdToPass = await getChequeId(body, tipo);
+
     const nuevoGasto = await prisma.gasto.create({
       data: {
         nombre,
@@ -192,42 +160,19 @@ export async function POST(request: Request) {
         tipo,
         detalle,
         dolarId: dolar?.id,
+        chequeId: chequeIdToPass,
       },
       include: {
         categoria: true,
         mecanico: true,
         proveedor: true,
+        cheque: chequeQueryData,
       },
     });
 
-    const newCheque = await saveCheque({
-      cheque: {
-        banco,
-        emisor,
-        fechaCobro,
-        fechaEmision,
-        importe,
-        numeroCheque,
-        picturePath,
-      },
-      tipoOperacion: tipo,
-      operacionCheque: OperacionCheque.GASTO,
-      idOperacion: nuevoGasto.id,
+    return NextResponse.json(returnModelWithChequeData(nuevoGasto), {
+      status: 201,
     });
-
-    const gastoToReturn = {
-      ...nuevoGasto,
-      banco: newCheque?.banco,
-      emisor: newCheque?.owner,
-      fechaCobro: newCheque?.fechaCobro,
-      fechaEmision: newCheque?.fechaEmision,
-      importe: newCheque?.importe,
-      numeroCheque: newCheque?.numero,
-      picturePath: newCheque?.picturePath,
-      chequeId: newCheque?.id,
-    };
-
-    return NextResponse.json(gastoToReturn, { status: 201 });
   } catch (error) {
     console.error("Error al crear gasto:", error);
     return NextResponse.json(

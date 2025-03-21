@@ -1,9 +1,12 @@
 import {
+  chequeQueryData,
   deleteCheque,
   getChequeForOperation,
-  updateCheque,
+  getChequeId,
+  returnModelWithChequeData,
+  validateChequeRequest,
 } from "@/utils/chequeUtils";
-import { OperacionCheque, TipoOperacion } from "@prisma/client";
+import { OperacionCheque } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -24,30 +27,13 @@ export async function PUT(
       mecanicoId,
       proveedorId,
       detalle,
-      banco,
-      emisor,
-      fechaCobro,
-      fechaEmision,
-      importe,
-      numeroCheque,
-      picturePath,
     } = body;
 
-    if (tipo === TipoOperacion.CHEQUE) {
-      if (
-        !banco ||
-        !emisor ||
-        !fechaCobro ||
-        !fechaEmision ||
-        !importe ||
-        !numeroCheque ||
-        !picturePath
-      ) {
-        return NextResponse.json(
-          { error: "Faltan datos para la operación de cheque" },
-          { status: 400 }
-        );
-      }
+    if (!validateChequeRequest(body, tipo)) {
+      return NextResponse.json(
+        { error: "Faltan datos para la operación de cheque" },
+        { status: 400 }
+      );
     }
 
     if (!nombre || !precio || !fecha || !categoriaId) {
@@ -75,6 +61,8 @@ export async function PUT(
       },
     });
 
+    const chequeIdToPass = await getChequeId(body, tipo);
+
     const gastoActualizado = await prisma.gasto.update({
       where: { id },
       data: {
@@ -88,40 +76,17 @@ export async function PUT(
         proveedorId,
         detalle,
         dolarId: dolar?.id,
+        chequeId: chequeIdToPass,
       },
       include: {
         categoria: true,
         mecanico: true,
         proveedor: true,
+        cheque: chequeQueryData,
       },
     });
 
-    const newCheque = await updateCheque({
-      cheque: {
-        banco,
-        emisor,
-        fechaCobro,
-        fechaEmision,
-        importe,
-        numeroCheque,
-        picturePath,
-      },
-      tipoOperacion: tipo,
-      operacionCheque: OperacionCheque.GASTO,
-      idOperacion: id,
-    });
-
-    return NextResponse.json({
-      ...gastoActualizado,
-      banco: newCheque?.banco,
-      emisor: newCheque?.owner,
-      fechaCobro: newCheque?.fechaCobro,
-      fechaEmision: newCheque?.fechaEmision,
-      importe: newCheque?.importe,
-      numeroCheque: newCheque?.numero,
-      picturePath: newCheque?.picturePath,
-      chequeId: newCheque?.id,
-    });
+    return NextResponse.json(returnModelWithChequeData(gastoActualizado));
   } catch (error) {
     console.error("Error al actualizar gasto:", error);
     return NextResponse.json(
