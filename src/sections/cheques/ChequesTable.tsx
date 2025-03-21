@@ -5,7 +5,6 @@ import CustomTable, {
 } from "@/components/tableV2/CustomTable";
 import { Box } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
-import { OperacionCheque } from "@prisma/client";
 import Link from "next/link";
 
 function ChequesTable({
@@ -88,30 +87,6 @@ function ChequesTable({
       field: "owner",
       headerName: "Emisor",
       flex: 1,
-    },
-    {
-      field: "entidad",
-      headerName: "Operación",
-      flex: 2,
-      renderCell: (params) => {
-        if (params.row.operacionCheque === OperacionCheque.VENTA) {
-          return `Venta a ${params.row.entidad.cliente.fullName}`;
-        }
-        if (params.row.operacionCheque === OperacionCheque.INGRESO_MANUAL) {
-          return `Ingreso manual de ${params.row.entidad?.usuario?.fullName}`;
-        }
-        if (params.row.operacionCheque === OperacionCheque.EXTRACCION) {
-          return `Extracción de ${params.row.entidad?.usuario?.fullName}`;
-        }
-        if (params.row.operacionCheque === OperacionCheque.GASTO) {
-          return `Gasto en ${params.row.entidad.nombre}`;
-        }
-        if (params.row.operacionCheque === OperacionCheque.INGRESO_REPARACION) {
-          return `Ingreso por reparación de ${params.row.entidad.cliente.fullName}`;
-        }
-
-        return "Sin operación asociada";
-      },
     },
   ];
 

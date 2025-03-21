@@ -1,4 +1,3 @@
-import { OperacionCheque } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -27,81 +26,8 @@ export async function GET(request: Request) {
       }),
     ]);
 
-    // Obtener las entidades relacionadas para cada cheque
-    const chequesConEntidades = await Promise.all(
-      cheques.map(async (cheque) => {
-        if (cheque.operacionCheque === OperacionCheque.VENTA) {
-          const venta = await prisma.venta.findUnique({
-            where: { id: cheque.operacionId },
-            include: {
-              cliente: true,
-              items: {
-                include: {
-                  stock: true,
-                },
-              },
-            },
-          });
-          return {
-            ...cheque,
-            entidad: venta,
-          };
-        }
-        if (cheque.operacionCheque === OperacionCheque.INGRESO_MANUAL) {
-          const ingresoManual = await prisma.ingresoManualDeDinero.findUnique({
-            where: { id: cheque.operacionId },
-            include: {
-              usuario: {
-                select: {
-                  fullName: true,
-                },
-              },
-            },
-          });
-          return {
-            ...cheque,
-            entidad: ingresoManual,
-          };
-        }
-        if (cheque.operacionCheque === OperacionCheque.EXTRACCION) {
-          const extraccion = await prisma.extraccion.findUnique({
-            where: { id: cheque.operacionId },
-            include: {
-              usuario: {
-                select: {
-                  fullName: true,
-                },
-              },
-            },
-          });
-          return { ...cheque, entidad: extraccion };
-        }
-        if (cheque.operacionCheque === OperacionCheque.GASTO) {
-          const gasto = await prisma.gasto.findUnique({
-            where: { id: cheque.operacionId },
-          });
-          return { ...cheque, entidad: gasto };
-        }
-        if (cheque.operacionCheque === OperacionCheque.INGRESO_REPARACION) {
-          const ingresoReparacion =
-            await prisma.ingresoPorReparacion.findUnique({
-              where: { id: cheque.operacionId },
-              include: {
-                cliente: {
-                  select: {
-                    fullName: true,
-                  },
-                },
-              },
-            });
-          return { ...cheque, entidad: ingresoReparacion };
-        }
-        return cheque;
-      })
-    );
-
     return NextResponse.json({
-      items: chequesConEntidades,
+      items: cheques,
       total,
       page,
       size,

@@ -1,5 +1,4 @@
 import prisma from "@/lib/prisma";
-import { OperacionCheque } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -18,25 +17,6 @@ export async function GET(
         { error: "Cheque no encontrado" },
         { status: 404 }
       );
-    }
-
-    if (cheque.operacionCheque === OperacionCheque.VENTA) {
-      const venta = await prisma.venta.findUnique({
-        where: { id: cheque.operacionId },
-        include: {
-          cliente: true,
-          items: {
-            include: {
-              stock: true,
-            },
-          },
-        },
-      });
-
-      return NextResponse.json({
-        ...cheque,
-        entidad: venta,
-      });
     }
 
     return NextResponse.json(cheque);

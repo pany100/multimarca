@@ -1,5 +1,6 @@
 "use client";
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import { Box, Paper, Typography } from "@mui/material";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -57,11 +58,7 @@ const ChequePage = () => {
             <strong>Banco:</strong> {cheque.banco}
           </Typography>
           <Typography>
-            <strong>Importe:</strong>{" "}
-            {cheque.importe.toLocaleString("es-AR", {
-              style: "currency",
-              currency: "ARS",
-            })}
+            <strong>Importe:</strong> {getFormattedPrice(cheque.importe)}
           </Typography>
           <Typography>
             <strong>Emisor:</strong> {cheque.owner}
