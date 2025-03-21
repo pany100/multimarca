@@ -1,12 +1,13 @@
 import prisma from "@/lib/prisma";
 import { getIO } from "@/lib/socketio";
-import { getChequeForOperation, saveCheque } from "@/utils/chequeUtils";
 import {
-  OperacionCheque,
-  Prisma,
-  TipoNotificacionInterna,
-  TipoOperacion,
-} from "@prisma/client";
+  chequeQueryData,
+  getChequeId,
+  returnAllModelsWithChequeData,
+  returnModelWithChequeData,
+  validateChequeRequest,
+} from "@/utils/chequeUtils";
+import { Prisma, TipoNotificacionInterna } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -33,6 +34,7 @@ export async function GET(request: Request) {
               stock: true,
             },
           },
+          cheque: chequeQueryData,
         },
         skip: page * limit,
         take: limit,
@@ -41,36 +43,8 @@ export async function GET(request: Request) {
       prisma.venta.count({ where }),
     ]);
 
-    const ventasConCheques = await Promise.all(
-      ventas.map(async (venta) => {
-        if (venta.tipoOperacion === "CHEQUE") {
-          const cheque = await getChequeForOperation(
-            OperacionCheque.VENTA,
-            venta.id
-          );
-          return {
-            ...venta,
-            banco: cheque?.banco,
-            emisor: cheque?.owner,
-            fechaCobro: cheque?.fechaCobro,
-            fechaEmision: cheque?.fechaEmision,
-            importe: cheque?.importe,
-            numeroCheque: cheque?.numero,
-            picturePath: cheque?.picturePath,
-            chequeId: cheque?.id,
-            items: venta.items.map((item) => ({
-              ...item,
-              name: item.stock.name,
-              stockId: item.stock.id,
-            })),
-          };
-        }
-        return venta;
-      })
-    );
-
     return NextResponse.json({
-      items: ventasConCheques,
+      items: returnAllModelsWithChequeData(ventas),
       total,
       page,
       limit,
@@ -87,37 +61,13 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const {
-      clienteId,
-      items,
-      total,
-      moneda,
-      fecha,
-      tipoOperacion,
-      banco,
-      emisor,
-      fechaCobro,
-      fechaEmision,
-      importe,
-      numeroCheque,
-      picturePath,
-    } = body;
+    const { clienteId, items, total, moneda, fecha, tipoOperacion } = body;
 
-    if (tipoOperacion === TipoOperacion.CHEQUE) {
-      if (
-        !banco ||
-        !emisor ||
-        !fechaCobro ||
-        !fechaEmision ||
-        !importe ||
-        !numeroCheque ||
-        !picturePath
-      ) {
-        return NextResponse.json(
-          { error: "Faltan datos para la operación de cheque" },
-          { status: 400 }
-        );
-      }
+    if (!validateChequeRequest(body, tipoOperacion)) {
+      return NextResponse.json(
+        { error: "Faltan datos para la operación de cheque" },
+        { status: 400 }
+      );
     }
 
     // Verificar stock suficiente antes de crear la venta
@@ -150,6 +100,8 @@ export async function POST(request: Request) {
       },
     });
 
+    const chequeIdToPass = await getChequeId(body, tipoOperacion);
+
     const venta = await prisma.venta.create({
       data: {
         clienteId,
@@ -164,6 +116,7 @@ export async function POST(request: Request) {
           })),
         },
         tipoOperacion,
+        chequeId: chequeIdToPass,
       },
       include: {
         cliente: true,
@@ -172,23 +125,8 @@ export async function POST(request: Request) {
             stock: true,
           },
         },
+        cheque: chequeQueryData,
       },
-    });
-
-    const newCheque = await saveCheque({
-      cheque: {
-        banco,
-        emisor,
-        fechaCobro,
-        fechaEmision,
-        importe,
-        numeroCheque,
-        picturePath,
-      },
-
-      tipoOperacion,
-      operacionCheque: OperacionCheque.VENTA,
-      idOperacion: venta.id,
     });
 
     // Actualizar el stock y crear notificaciones si es necesario
@@ -222,28 +160,11 @@ export async function POST(request: Request) {
       }
     }
 
-    const ventaToReturn = {
-      ...venta,
-      banco: newCheque?.banco,
-      emisor: newCheque?.owner,
-      fechaCobro: newCheque?.fechaCobro,
-      fechaEmision: newCheque?.fechaEmision,
-      importe: newCheque?.importe,
-      numeroCheque: newCheque?.numero,
-      picturePath: newCheque?.picturePath,
-      chequeId: newCheque?.id,
-      items: venta.items.map((item) => ({
-        ...item,
-        name: item.stock.name,
-        stockId: item.stock.id,
-      })),
-    };
-
-    return NextResponse.json(ventaToReturn);
+    return NextResponse.json(returnModelWithChequeData(venta), { status: 201 });
   } catch (error) {
     console.error("Error al crear venta:", error);
     return NextResponse.json(
-      { error: `Error al crear venta: ${error}` },
+      { error: `Error al crear la venta: ${error}` },
       { status: 500 }
     );
   }

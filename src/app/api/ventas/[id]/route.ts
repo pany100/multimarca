@@ -1,15 +1,12 @@
 import prisma from "@/lib/prisma";
 import { getIO } from "@/lib/socketio";
 import {
-  deleteCheque,
-  getChequeForOperation,
-  updateCheque,
+  chequeQueryData,
+  getChequeId,
+  returnModelWithChequeData,
+  validateChequeRequest,
 } from "@/utils/chequeUtils";
-import {
-  OperacionCheque,
-  TipoNotificacionInterna,
-  TipoOperacion,
-} from "@prisma/client";
+import { TipoNotificacionInterna } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function PUT(
@@ -19,37 +16,13 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const {
-      clienteId,
-      items,
-      moneda,
-      total,
-      fecha,
-      tipoOperacion,
-      banco,
-      emisor,
-      fechaCobro,
-      fechaEmision,
-      importe,
-      numeroCheque,
-      picturePath,
-    } = body;
+    const { clienteId, items, moneda, total, fecha, tipoOperacion } = body;
 
-    if (tipoOperacion === TipoOperacion.CHEQUE) {
-      if (
-        !banco ||
-        !emisor ||
-        !fechaCobro ||
-        !fechaEmision ||
-        !importe ||
-        !numeroCheque ||
-        !picturePath
-      ) {
-        return NextResponse.json(
-          { error: "Faltan datos para la operación de cheque" },
-          { status: 400 }
-        );
-      }
+    if (!validateChequeRequest(body, tipoOperacion)) {
+      return NextResponse.json(
+        { error: "Faltan datos para la operación de cheque" },
+        { status: 400 }
+      );
     }
 
     if (!clienteId || !Array.isArray(items) || items.length === 0) {
@@ -115,6 +88,8 @@ export async function PUT(
       },
     });
 
+    const chequeIdToPass = await getChequeId(body, tipoOperacion);
+
     const ventaActualizada = await prisma.$transaction(async (prisma) => {
       const stockVerification = new Map();
       for (const item of items) {
@@ -152,6 +127,7 @@ export async function PUT(
           dolarId: dolar?.id,
           fecha,
           tipoOperacion,
+          chequeId: chequeIdToPass,
           items: {
             deleteMany: {},
             create: items.map((item) => ({
@@ -167,6 +143,7 @@ export async function PUT(
               stock: true,
             },
           },
+          cheque: chequeQueryData,
         },
       });
 
@@ -187,85 +164,14 @@ export async function PUT(
         });
       }
 
-      const newCheque = await updateCheque({
-        cheque: {
-          banco,
-          emisor,
-          fechaCobro,
-          fechaEmision,
-          importe,
-          numeroCheque,
-          picturePath,
-        },
-        tipoOperacion,
-        operacionCheque: OperacionCheque.VENTA,
-        idOperacion: id,
-      });
-      // Actualizar el stock de los nuevos elementos
-      for (const item of items) {
-        const existiaAntes = ventaActual.items.some(
-          (i) => i.stockId === item.stockId
-        );
-        if (!existiaAntes) {
-          const stockActualizado = await prisma.stock.update({
-            where: { id: item.stockId },
-            data: {
-              units: {
-                decrement: item.cantidad,
-              },
-            },
-          });
-
-          // Verificar si necesita reposición
-          if (
-            (stockActualizado.units ?? 0) <=
-            (stockActualizado.restockValue ?? 0)
-          ) {
-            await prisma.notificacionInterna.create({
-              data: {
-                fecha: new Date(),
-                titulo: `${stockActualizado.name} necesita reposición`,
-                texto: `El elemento ${stockActualizado.name} quedó con ${stockActualizado.units} unidades. Necesita reponer stock.`,
-                leida: false,
-                tipo: TipoNotificacionInterna.REPOSICION_STOCK,
-                stockId: stockActualizado.id,
-              },
-            });
-            const io = getIO();
-            if (io) {
-              io.emit("newNotification");
-            }
-          }
-        }
-      }
-
-      return {
-        ...ventaActualizada,
-        banco: newCheque?.banco,
-        emisor: newCheque?.owner,
-        fechaCobro: newCheque?.fechaCobro,
-        fechaEmision: newCheque?.fechaEmision,
-        importe: newCheque?.importe,
-        numeroCheque: newCheque?.numero,
-        picturePath: newCheque?.picturePath,
-        chequeId: newCheque?.id,
-        items: ventaActualizada.items.map((item) => ({
-          ...item,
-          name: item.stock.name,
-          stockId: item.stock.id,
-        })),
-      };
+      return ventaActualizada;
     });
 
-    return NextResponse.json(ventaActualizada);
+    return NextResponse.json(returnModelWithChequeData(ventaActualizada));
   } catch (error) {
     console.error("Error al actualizar venta:", error);
     return NextResponse.json(
-      {
-        error: `Error al actualizar la venta: ${
-          error instanceof Error ? error.message : String(error)
-        }`,
-      },
+      { error: `Error al actualizar la venta: ${error}` },
       { status: 500 }
     );
   }
@@ -331,10 +237,6 @@ export async function DELETE(
             io.emit("newNotification");
           }
         }
-      }
-      const cheque = await getChequeForOperation(OperacionCheque.VENTA, id);
-      if (cheque) {
-        await deleteCheque(cheque.id);
       }
 
       // Eliminar la venta
