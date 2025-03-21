@@ -1,5 +1,11 @@
-import { getChequeForOperation, saveCheque } from "@/utils/chequeUtils";
-import { OperacionCheque, TipoOperacion } from "@prisma/client";
+import {
+  chequeQueryData,
+  getChequeId,
+  returnAllModelsWithChequeData,
+  returnModelWithChequeData,
+  validateChequeRequest,
+} from "@/utils/chequeUtils";
+import { TipoOperacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -27,6 +33,7 @@ export async function GET(request: Request) {
               fullName: true,
             },
           },
+          cheque: chequeQueryData,
         },
       }),
       prisma.ingresoManualDeDinero.count({
@@ -36,31 +43,8 @@ export async function GET(request: Request) {
       }),
     ]);
 
-    const ingresosConCheques = await Promise.all(
-      ingresos.map(async (ingreso) => {
-        if (ingreso.tipoExtraccion === "CHEQUE") {
-          const cheque = await getChequeForOperation(
-            OperacionCheque.INGRESO_MANUAL,
-            ingreso.id
-          );
-          return {
-            ...ingreso,
-            banco: cheque?.banco,
-            emisor: cheque?.owner,
-            fechaCobro: cheque?.fechaCobro,
-            fechaEmision: cheque?.fechaEmision,
-            importe: cheque?.importe,
-            numeroCheque: cheque?.numero,
-            picturePath: cheque?.picturePath,
-            chequeId: cheque?.id,
-          };
-        }
-        return ingreso;
-      })
-    );
-
     return NextResponse.json({
-      items: ingresosConCheques,
+      items: returnAllModelsWithChequeData(ingresos),
       total,
       page,
       size,
@@ -85,31 +69,15 @@ export async function POST(request: Request) {
       fecha,
       usuarioId,
       tipoExtraccion,
-      banco,
-      emisor,
-      fechaCobro,
-      fechaEmision,
-      importe,
-      numeroCheque,
-      picturePath,
     } = body;
 
-    if (tipoExtraccion === TipoOperacion.CHEQUE) {
-      if (
-        !banco ||
-        !emisor ||
-        !fechaCobro ||
-        !fechaEmision ||
-        !importe ||
-        !numeroCheque ||
-        !picturePath
-      ) {
-        return NextResponse.json(
-          { error: "Faltan datos para la operación de cheque" },
-          { status: 400 }
-        );
-      }
+    if (!validateChequeRequest(body, tipoExtraccion)) {
+      return NextResponse.json(
+        { error: "Faltan datos para la operación de cheque" },
+        { status: 400 }
+      );
     }
+
     if (!monto || typeof monto !== "number" || monto <= 0) {
       return NextResponse.json(
         { error: "Monto de ingreso inválido o faltante" },
@@ -173,6 +141,8 @@ export async function POST(request: Request) {
       );
     }
 
+    const chequeIdToPass = await getChequeId(body, tipoExtraccion);
+
     const nuevoIngreso = await prisma.ingresoManualDeDinero.create({
       data: {
         monto,
@@ -182,6 +152,7 @@ export async function POST(request: Request) {
         dolarId: dolar?.id,
         usuarioId,
         tipoExtraccion,
+        chequeId: chequeIdToPass,
       },
       include: {
         dolar: true,
@@ -190,37 +161,11 @@ export async function POST(request: Request) {
             fullName: true,
           },
         },
+        cheque: chequeQueryData,
       },
     });
 
-    const newCheque = await saveCheque({
-      cheque: {
-        banco,
-        emisor,
-        fechaCobro,
-        fechaEmision,
-        importe,
-        numeroCheque,
-        picturePath,
-      },
-      tipoOperacion: tipoExtraccion,
-      operacionCheque: OperacionCheque.INGRESO_MANUAL,
-      idOperacion: nuevoIngreso.id,
-    });
-
-    const ingresoToReturn = {
-      ...nuevoIngreso,
-      banco: newCheque?.banco,
-      emisor: newCheque?.owner,
-      fechaCobro: newCheque?.fechaCobro,
-      fechaEmision: newCheque?.fechaEmision,
-      importe: newCheque?.importe,
-      numeroCheque: newCheque?.numero,
-      picturePath: newCheque?.picturePath,
-      chequeId: newCheque?.id,
-    };
-
-    return NextResponse.json(ingresoToReturn, { status: 201 });
+    return NextResponse.json(returnModelWithChequeData(nuevoIngreso), { status: 201 });
   } catch (error) {
     console.error("Error al crear ingreso manual:", error);
     return NextResponse.json(

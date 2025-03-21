@@ -1,12 +1,9 @@
 import {
   chequeQueryData,
-  deleteCheque,
-  getChequeForOperation,
   getChequeId,
   returnModelWithChequeData,
   validateChequeRequest,
 } from "@/utils/chequeUtils";
-import { OperacionCheque } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -108,11 +105,6 @@ export async function DELETE(
         { error: "ID de gasto inválido" },
         { status: 400 }
       );
-    }
-
-    const cheque = await getChequeForOperation(OperacionCheque.GASTO, id);
-    if (cheque) {
-      await deleteCheque(cheque.id);
     }
 
     const gastoEliminado = await prisma.gasto.delete({

@@ -1,9 +1,9 @@
 import {
-  deleteCheque,
-  getChequeForOperation,
-  updateCheque,
+  chequeQueryData,
+  getChequeId,
+  returnModelWithChequeData,
+  validateChequeRequest,
 } from "@/utils/chequeUtils";
-import { OperacionCheque, TipoOperacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -22,30 +22,13 @@ export async function PUT(
       tipoOperacion,
       descripcion,
       ordenReparacionId,
-      banco,
-      emisor,
-      fechaCobro,
-      fechaEmision,
-      importe,
-      numeroCheque,
-      picturePath,
     } = body;
 
-    if (tipoOperacion === TipoOperacion.CHEQUE) {
-      if (
-        !banco ||
-        !emisor ||
-        !fechaCobro ||
-        !fechaEmision ||
-        !importe ||
-        !numeroCheque ||
-        !picturePath
-      ) {
-        return NextResponse.json(
-          { error: "Faltan datos para la operación de cheque" },
-          { status: 400 }
-        );
-      }
+    if (!validateChequeRequest(body, tipoOperacion)) {
+      return NextResponse.json(
+        { error: "Faltan datos para la operación de cheque" },
+        { status: 400 }
+      );
     }
 
     if (
@@ -79,6 +62,8 @@ export async function PUT(
       },
     });
 
+    const chequeIdToPass = await getChequeId(body, tipoOperacion);
+
     const ingresoActualizado = await prisma.ingresoPorReparacion.update({
       where: { id },
       data: {
@@ -90,6 +75,7 @@ export async function PUT(
         fecha,
         dolarId: dolar?.id,
         tipoOperacion,
+        chequeId: chequeIdToPass,
       },
       include: {
         cliente: true,
@@ -98,35 +84,11 @@ export async function PUT(
             auto: true,
           },
         },
+        cheque: chequeQueryData,
       },
     });
 
-    const newCheque = await updateCheque({
-      cheque: {
-        banco,
-        emisor,
-        fechaCobro,
-        fechaEmision,
-        importe,
-        numeroCheque,
-        picturePath,
-      },
-      tipoOperacion,
-      operacionCheque: OperacionCheque.INGRESO_REPARACION,
-      idOperacion: id,
-    });
-
-    return NextResponse.json({
-      ...ingresoActualizado,
-      banco: newCheque?.banco,
-      emisor: newCheque?.owner,
-      fechaCobro: newCheque?.fechaCobro,
-      fechaEmision: newCheque?.fechaEmision,
-      importe: newCheque?.importe,
-      numeroCheque: newCheque?.numero,
-      picturePath: newCheque?.picturePath,
-      chequeId: newCheque?.id,
-    });
+    return NextResponse.json(returnModelWithChequeData(ingresoActualizado));
   } catch (error) {
     console.error("Error al actualizar ingreso por reparación:", error);
     return NextResponse.json(
@@ -150,14 +112,6 @@ export async function DELETE(
       );
     }
 
-    const cheque = await getChequeForOperation(
-      OperacionCheque.INGRESO_REPARACION,
-      id
-    );
-    if (cheque) {
-      await deleteCheque(cheque.id);
-    }
-
     const ingresoEliminado = await prisma.ingresoPorReparacion.delete({
       where: { id },
     });
@@ -170,6 +124,43 @@ export async function DELETE(
     console.error("Error al eliminar ingreso por reparación:", error);
     return NextResponse.json(
       { error: "Error al eliminar el ingreso por reparación" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+
+    const ingreso = await prisma.ingresoPorReparacion.findUnique({
+      where: { id },
+      include: {
+        cliente: true,
+        ordenReparacion: {
+          include: {
+            auto: true,
+          },
+        },
+        cheque: chequeQueryData,
+      },
+    });
+
+    if (!ingreso) {
+      return NextResponse.json(
+        { error: "Ingreso por reparación no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(returnModelWithChequeData(ingreso));
+  } catch (error) {
+    console.error("Error al obtener ingreso por reparación:", error);
+    return NextResponse.json(
+      { error: "Error al obtener el ingreso por reparación" },
       { status: 500 }
     );
   }

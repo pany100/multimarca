@@ -1,11 +1,12 @@
 import {
-  deleteCheque,
-  getChequeForOperation,
-  updateCheque,
+  chequeQueryData,
+  getChequeId,
+  returnModelWithChequeData,
+  validateChequeRequest,
 } from "@/utils/chequeUtils";
-import { OperacionCheque, TipoOperacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
@@ -22,6 +23,7 @@ export async function GET(
             fullName: true,
           },
         },
+        cheque: chequeQueryData,
       },
     });
 
@@ -31,26 +33,8 @@ export async function GET(
         { status: 404 }
       );
     }
-    if (ingreso.tipoExtraccion === "CHEQUE") {
-      const cheque = await getChequeForOperation(
-        OperacionCheque.INGRESO_MANUAL,
-        ingreso.id
-      );
-      const ingresoToReturn = {
-        ...ingreso,
-        banco: cheque?.banco,
-        emisor: cheque?.owner,
-        fechaCobro: cheque?.fechaCobro,
-        fechaEmision: cheque?.fechaEmision,
-        importe: cheque?.importe,
-        numeroCheque: cheque?.numero,
-        picturePath: cheque?.picturePath,
-        chequeId: cheque?.id,
-      };
-      return NextResponse.json(ingresoToReturn);
-    }
 
-    return NextResponse.json(ingreso);
+    return NextResponse.json(returnModelWithChequeData(ingreso));
   } catch (error) {
     console.error("Error al obtener ingreso manual:", error);
     return NextResponse.json(
@@ -67,37 +51,14 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const {
-      monto,
-      descripcion,
-      usuarioId,
-      moneda,
-      fecha,
-      tipoExtraccion,
-      banco,
-      emisor,
-      fechaCobro,
-      fechaEmision,
-      importe,
-      numeroCheque,
-      picturePath,
-    } = body;
+    const { monto, descripcion, usuarioId, moneda, fecha, tipoExtraccion } =
+      body;
 
-    if (tipoExtraccion === TipoOperacion.CHEQUE) {
-      if (
-        !banco ||
-        !emisor ||
-        !fechaCobro ||
-        !fechaEmision ||
-        !importe ||
-        !numeroCheque ||
-        !picturePath
-      ) {
-        return NextResponse.json(
-          { error: "Faltan datos para la operación de cheque" },
-          { status: 400 }
-        );
-      }
+    if (!validateChequeRequest(body, tipoExtraccion)) {
+      return NextResponse.json(
+        { error: "Faltan datos para la operación de cheque" },
+        { status: 400 }
+      );
     }
 
     if (!monto || typeof monto !== "number" || monto <= 0) {
@@ -132,6 +93,8 @@ export async function PUT(
       },
     });
 
+    const chequeIdToPass = await getChequeId(body, tipoExtraccion);
+
     const ingresoActualizado = await prisma.ingresoManualDeDinero.update({
       where: { id },
       data: {
@@ -142,6 +105,7 @@ export async function PUT(
         usuarioId,
         dolarId: dolar?.id,
         tipoExtraccion,
+        chequeId: chequeIdToPass,
       },
       include: {
         dolar: true,
@@ -150,35 +114,11 @@ export async function PUT(
             fullName: true,
           },
         },
+        cheque: chequeQueryData,
       },
     });
 
-    const newCheque = await updateCheque({
-      cheque: {
-        banco,
-        emisor,
-        fechaCobro,
-        fechaEmision,
-        importe,
-        numeroCheque,
-        picturePath,
-      },
-      tipoOperacion: tipoExtraccion,
-      operacionCheque: OperacionCheque.INGRESO_MANUAL,
-      idOperacion: id,
-    });
-
-    return NextResponse.json({
-      ...ingresoActualizado,
-      banco: newCheque?.banco,
-      emisor: newCheque?.owner,
-      fechaCobro: newCheque?.fechaCobro,
-      fechaEmision: newCheque?.fechaEmision,
-      importe: newCheque?.importe,
-      numeroCheque: newCheque?.numero,
-      picturePath: newCheque?.picturePath,
-      chequeId: newCheque?.id,
-    });
+    return NextResponse.json(returnModelWithChequeData(ingresoActualizado));
   } catch (error) {
     console.error("Error al actualizar ingreso manual:", error);
     return NextResponse.json(
@@ -194,15 +134,6 @@ export async function DELETE(
 ) {
   try {
     const id = parseInt(params.id);
-
-    const cheque = await getChequeForOperation(
-      OperacionCheque.INGRESO_MANUAL,
-      id
-    );
-    if (cheque) {
-      await deleteCheque(cheque.id);
-    }
-
     const ingresoEliminado = await prisma.ingresoManualDeDinero.delete({
       where: { id },
     });
