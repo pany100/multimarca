@@ -1,10 +1,7 @@
-import useChequesAutocomplete from "@/hooks/useChequesAutocomplete";
 import AddIcon from "@mui/icons-material/Add";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
-  Fade,
-  Grid,
   Paper,
   ToggleButton,
   ToggleButtonGroup,
@@ -12,19 +9,12 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
-import ImageInput from "../ImageInput";
-import CustomAutocompleteInput from "./CustomAutocomplete";
-import CustomInputText from "./CustomInputText";
+import ChequeFields from "./ChequeFields";
+import NumeroChequeField from "./NumeroChequeField";
 
 function ChequeData() {
-  const {
-    setValue,
-    watch,
-    formState: { errors },
-  } = useFormContext();
+  const { setValue } = useFormContext();
 
-  const picturePath = watch("picturePath");
-  const { searchCheques, initialCheque } = useChequesAutocomplete();
   const [nuevoFormVisible, setNuevoFormVisible] = useState(false);
 
   const handleToggleChange = (
@@ -33,7 +23,6 @@ function ChequeData() {
   ) => {
     if (newValue !== null) {
       setNuevoFormVisible(newValue);
-      // Clear the chequeId field when switching to new cheque form
       if (newValue) {
         setValue("chequeId", null);
       }
@@ -86,79 +75,8 @@ function ChequeData() {
         </ToggleButtonGroup>
       </Box>
 
-      <Fade
-        in={!nuevoFormVisible}
-        timeout={500}
-        unmountOnExit
-        style={{ display: nuevoFormVisible ? "none" : "block" }}
-      >
-        <div>
-          <Grid container spacing={2}>
-            <Grid item xs={12}>
-              <CustomAutocompleteInput
-                name="chequeId"
-                label="Nro de cheque"
-                searchOptions={searchCheques}
-                initialOptions={initialCheque}
-              />
-            </Grid>
-          </Grid>
-        </div>
-      </Fade>
-
-      <Fade
-        in={nuevoFormVisible}
-        timeout={500}
-        unmountOnExit
-        style={{ display: !nuevoFormVisible ? "none" : "block" }}
-      >
-        <div>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <CustomInputText
-                name="fechaEmision"
-                label="Fecha emisión"
-                type="date"
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <CustomInputText
-                name="fechaCobro"
-                label="Fecha cobro"
-                type="date"
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <CustomInputText
-                name="numeroCheque"
-                label="Número de Cheque"
-                type="text"
-              />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <CustomInputText name="banco" label="Banco" type="text" />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <CustomInputText name="importe" label="Importe" type="number" />
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <CustomInputText name="emisor" label="Emisor" type="text" />
-            </Grid>
-            <Grid item xs={12} md={12}>
-              <ImageInput
-                label="Foto"
-                image={picturePath || ""}
-                setImage={(e) => setValue("picturePath", e)}
-              />
-              {errors.picturePath && (
-                <Typography variant="subtitle2" color="error" sx={{ mt: 1 }}>
-                  {errors.picturePath.message as string}
-                </Typography>
-              )}
-            </Grid>
-          </Grid>
-        </div>
-      </Fade>
+      <NumeroChequeField nuevoFormVisible={nuevoFormVisible} />
+      <ChequeFields nuevoFormVisible={nuevoFormVisible} />
     </Paper>
   );
 }

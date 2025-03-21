@@ -1,4 +1,5 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 
 function useChequesAutocomplete() {
   const { authFetch } = useFetch();
@@ -9,9 +10,16 @@ function useChequesAutocomplete() {
     );
     const data = await response.json();
     const results = data.items.map(
-      (cheque: { numero: string; id: number }) => ({
+      (cheque: {
+        numero: string;
+        id: number;
+        banco: string;
+        importe: number;
+      }) => ({
         value: cheque.id,
-        label: cheque.numero,
+        label: `Nro ${cheque.numero} - Banco ${
+          cheque.banco
+        } - Importe ${getFormattedPrice(cheque.importe)}`,
       })
     );
     return results;
