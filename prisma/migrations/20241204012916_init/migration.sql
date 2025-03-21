@@ -150,6 +150,7 @@ CREATE TABLE `Empleado` (
 CREATE TABLE `OrdenReparacionMecanico` (
     `ordenReparacionId` INTEGER NOT NULL,
     `mecanicoId` INTEGER NOT NULL,
+    `detalle` TEXT NULL,
 
     INDEX `OrdenReparacionMecanico_mecanicoId_fkey`(`mecanicoId`),
     PRIMARY KEY (`ordenReparacionId`, `mecanicoId`)
@@ -254,6 +255,7 @@ CREATE TABLE `Venta` (
     `total` DECIMAL(10, 2) NOT NULL,
     `dolarId` INTEGER NULL,
     `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
+    `tipoOperacion` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE', 'DEBITO_AUTOMATICO_TARJETA_CREDITO') NOT NULL DEFAULT 'EFECTIVO',
 
     INDEX `Venta_clienteId_idx`(`clienteId`),
     INDEX `Venta_fecha_idx`(`fecha`),
@@ -409,6 +411,7 @@ CREATE TABLE `IngresoPorReparacion` (
     `reciboEnviado` BOOLEAN NOT NULL DEFAULT false,
     `moneda` ENUM('Dolar', 'Peso') NOT NULL DEFAULT 'Peso',
     `dolarId` INTEGER NULL,
+    `tipoOperacion` ENUM('EFECTIVO', 'TRANSFERENCIA', 'CHEQUE', 'DEBITO_AUTOMATICO_TARJETA_CREDITO') NOT NULL DEFAULT 'EFECTIVO',
 
     INDEX `IngresoPorReparacion_fecha_idx`(`fecha`),
     INDEX `IngresoPorReparacion_clienteId_idx`(`clienteId`),
@@ -436,7 +439,7 @@ CREATE TABLE `NotificacionInterna` (
     `titulo` VARCHAR(255) NOT NULL,
     `texto` TEXT NOT NULL,
     `leida` BOOLEAN NOT NULL DEFAULT false,
-    `tipo` ENUM('REPOSICION_STOCK', 'REPARACION_TERMINADA') NOT NULL,
+    `tipo` ENUM('REPOSICION_STOCK', 'REPARACION_TERMINADA', 'CHEQUE_POR_VENCER') NOT NULL,
     `stockId` INTEGER NULL,
     `ordenReparacionId` INTEGER NULL,
 
@@ -505,6 +508,22 @@ CREATE TABLE `IngresoManualDeDinero` (
 
     INDEX `IngresoManualDeDinero_usuarioId_idx`(`usuarioId`),
     INDEX `IngresoManualDeDinero_dolarId_fkey`(`dolarId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `Cheque` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `numero` VARCHAR(255) NOT NULL,
+    `fechaEmision` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `fechaCobro` DATETIME(3) NOT NULL,
+    `banco` VARCHAR(255) NOT NULL,
+    `importe` DECIMAL(10, 2) NOT NULL,
+    `owner` VARCHAR(255) NOT NULL,
+    `picturePath` VARCHAR(255) NOT NULL,
+    `operacionCheque` ENUM('VENTA', 'GASTO', 'INGRESO_MANUAL', 'EXTRACCION', 'INGRESO_REPARACION') NOT NULL,
+    `operacionId` INTEGER NOT NULL,
+
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
