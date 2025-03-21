@@ -118,56 +118,6 @@ const getById = async (chequeId: number) => {
   return cheque;
 };
 
-const updateCheque = async ({ cheque, tipoOperacion }: UpdateChequeProps) => {
-  let newCheque = null;
-  const { picturePath } = cheque;
-  const existingCheque = await getById(cheque.id);
-  if (tipoOperacion === TipoOperacion.CHEQUE) {
-    if (existingCheque) {
-      let picturePathUrl = picturePath;
-      if (picturePath && picturePath.includes("/tmp/")) {
-        picturePathUrl = await moveFileInS3(picturePath, "cheques");
-      }
-      if (
-        existingCheque?.picturePath &&
-        existingCheque.picturePath !== picturePathUrl
-      ) {
-        await deleteFileFromS3(existingCheque.picturePath);
-      }
-      newCheque = await prisma.cheque.update({
-        where: {
-          id: existingCheque.id,
-        },
-        data: {
-          fechaCobro: cheque.fechaCobro,
-          fechaEmision: cheque.fechaEmision,
-          importe: cheque.importe,
-          banco: cheque.banco,
-          owner: cheque.emisor,
-          numero: cheque.numeroCheque,
-          picturePath: picturePathUrl,
-        },
-      });
-    } else {
-      newCheque = await saveCheque({
-        cheque,
-      });
-    }
-  } else {
-    if (existingCheque) {
-      if (existingCheque.picturePath) {
-        await deleteFileFromS3(existingCheque.picturePath);
-      }
-      await prisma.cheque.delete({
-        where: {
-          id: existingCheque.id,
-        },
-      });
-    }
-  }
-  return newCheque;
-};
-
 export const deleteCheque = async (idCheque: number) => {
   const cheque = await prisma.cheque.findFirst({
     where: {
@@ -246,6 +196,31 @@ export const validateChequeRequest = (
     ) {
       return false;
     }
+  }
+  return true;
+};
+
+export const validateChequeEditRequest = (data: ChequeRequestData) => {
+  const {
+    banco,
+    emisor,
+    fechaCobro,
+    fechaEmision,
+    importe,
+    numeroCheque,
+    chequeId,
+    picturePath,
+  } = data;
+  if (
+    !banco ||
+    !emisor ||
+    !fechaCobro ||
+    !fechaEmision ||
+    !importe ||
+    !numeroCheque ||
+    !picturePath
+  ) {
+    return false;
   }
   return true;
 };
