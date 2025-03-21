@@ -546,7 +546,7 @@ model IngresoManualDeDinero {
 
 model Cheque {
   id Int @id @default(autoincrement())
-  numero String @db.VarChar(255)
+  numero String @unique @db.VarChar(255)
   fechaEmision DateTime @default(now())
   fechaCobro  DateTime
   banco String @db.VarChar(255)

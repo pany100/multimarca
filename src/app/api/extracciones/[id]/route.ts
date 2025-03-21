@@ -1,8 +1,4 @@
-import {
-  deleteCheque,
-  getChequeForOperation,
-  updateCheque,
-} from "@/utils/chequeUtils";
+import { getById, updateCheque } from "@/utils/chequeUtils";
 import { OperacionCheque, TipoOperacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
@@ -19,6 +15,7 @@ export async function PUT(
       usuarioId,
       motivo,
       moneda,
+      chequeId,
       tipoExtraccion,
       fecha,
       banco,
@@ -32,13 +29,14 @@ export async function PUT(
 
     if (tipoExtraccion === TipoOperacion.CHEQUE) {
       if (
-        !banco ||
-        !emisor ||
-        !fechaCobro ||
-        !fechaEmision ||
-        !importe ||
-        !numeroCheque ||
-        !picturePath
+        !chequeId &&
+        (!banco ||
+          !emisor ||
+          !fechaCobro ||
+          !fechaEmision ||
+          !importe ||
+          !numeroCheque ||
+          !picturePath)
       ) {
         return NextResponse.json(
           { error: "Faltan datos para la operación de cheque" },
@@ -104,6 +102,7 @@ export async function PUT(
         tipoExtraccion,
         moneda,
         dolarId: dolar?.id,
+        chequeId,
       },
       include: {
         usuario: {
@@ -113,6 +112,22 @@ export async function PUT(
         },
       },
     });
+
+    if (chequeId) {
+      const cheque = await getById(chequeId);
+      const extraccionToReturn = {
+        ...extraccionActualizada,
+        banco: cheque?.banco,
+        emisor: cheque?.owner,
+        fechaCobro: cheque?.fechaCobro,
+        fechaEmision: cheque?.fechaEmision,
+        importe: cheque?.importe,
+        numeroCheque: cheque?.numero,
+        picturePath: cheque?.picturePath,
+        chequeId: cheque?.id,
+      };
+      return NextResponse.json(extraccionToReturn, { status: 201 });
+    }
 
     const newCheque = await updateCheque({
       cheque: {
@@ -155,12 +170,6 @@ export async function DELETE(
 ) {
   try {
     const id = parseInt(params.id);
-
-    const cheque = await getChequeForOperation(OperacionCheque.EXTRACCION, id);
-    if (cheque) {
-      await deleteCheque(cheque.id);
-    }
-
     const extraccionEliminada = await prisma.extraccion.delete({
       where: { id },
     });

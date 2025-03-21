@@ -1,4 +1,4 @@
-import { getChequeForOperation, saveCheque } from "@/utils/chequeUtils";
+import { getById, saveCheque } from "@/utils/chequeUtils";
 import { OperacionCheque, TipoOperacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
@@ -29,6 +29,18 @@ export async function GET(request: Request) {
               fullName: true,
             },
           },
+          cheque: {
+            select: {
+              id: true,
+              numero: true,
+              banco: true,
+              importe: true,
+              fechaCobro: true,
+              fechaEmision: true,
+              owner: true,
+              picturePath: true,
+            },
+          },
         },
       }),
       prisma.extraccion.count({
@@ -43,24 +55,19 @@ export async function GET(request: Request) {
 
     const extraccionesConCheques = await Promise.all(
       extracciones.map(async (extraccion) => {
-        if (extraccion.tipoExtraccion === "CHEQUE") {
-          const cheque = await getChequeForOperation(
-            OperacionCheque.EXTRACCION,
-            extraccion.id
-          );
-          return {
-            ...extraccion,
-            banco: cheque?.banco,
-            emisor: cheque?.owner,
-            fechaCobro: cheque?.fechaCobro,
-            fechaEmision: cheque?.fechaEmision,
-            importe: cheque?.importe,
-            numeroCheque: cheque?.numero,
-            picturePath: cheque?.picturePath,
-            chequeId: cheque?.id,
-          };
-        }
-        return extraccion;
+        const cheque = extraccion.cheque;
+        if (!cheque) return extraccion;
+        return {
+          ...extraccion,
+          banco: cheque.banco,
+          emisor: cheque.owner,
+          fechaCobro: cheque.fechaCobro,
+          fechaEmision: cheque.fechaEmision,
+          importe: cheque.importe,
+          numeroCheque: cheque.numero,
+          picturePath: cheque.picturePath,
+          chequeId: cheque.id,
+        };
       })
     );
 
@@ -96,18 +103,20 @@ export async function POST(request: Request) {
       fechaEmision,
       importe,
       numeroCheque,
+      chequeId,
       picturePath,
     } = body;
 
     if (tipoExtraccion === TipoOperacion.CHEQUE) {
       if (
-        !banco ||
-        !emisor ||
-        !fechaCobro ||
-        !fechaEmision ||
-        !importe ||
-        !numeroCheque ||
-        !picturePath
+        !chequeId &&
+        (!banco ||
+          !emisor ||
+          !fechaCobro ||
+          !fechaEmision ||
+          !importe ||
+          !numeroCheque ||
+          !picturePath)
       ) {
         return NextResponse.json(
           { error: "Faltan datos para la operación de cheque" },
@@ -188,6 +197,7 @@ export async function POST(request: Request) {
         tipoExtraccion,
         fecha,
         dolarId: dolar?.id,
+        chequeId,
       },
       include: {
         usuario: {
@@ -197,6 +207,22 @@ export async function POST(request: Request) {
         },
       },
     });
+
+    if (chequeId) {
+      const cheque = await getById(chequeId);
+      const extraccionToReturn = {
+        ...nuevaExtraccion,
+        banco: cheque?.banco,
+        emisor: cheque?.owner,
+        fechaCobro: cheque?.fechaCobro,
+        fechaEmision: cheque?.fechaEmision,
+        importe: cheque?.importe,
+        numeroCheque: cheque?.numero,
+        picturePath: cheque?.picturePath,
+        chequeId: cheque?.id,
+      };
+      return NextResponse.json(extraccionToReturn, { status: 201 });
+    }
 
     const newCheque = await saveCheque({
       cheque: {

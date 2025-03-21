@@ -124,6 +124,15 @@ export const getChequeForOperation = async (
   return cheque;
 };
 
+export const getById = async (chequeId: number) => {
+  const cheque = await prisma.cheque.findUnique({
+    where: {
+      id: chequeId,
+    },
+  });
+  return cheque;
+};
+
 export const updateCheque = async ({
   cheque,
   operacionCheque,
