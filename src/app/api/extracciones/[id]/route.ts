@@ -102,7 +102,7 @@ export async function PUT(
         tipoExtraccion,
         moneda,
         dolarId: dolar?.id,
-        chequeId,
+        chequeId: tipoExtraccion === TipoOperacion.CHEQUE ? chequeId : null,
       },
       include: {
         usuario: {
@@ -158,7 +158,7 @@ export async function PUT(
   } catch (error) {
     console.error("Error al actualizar extracción:", error);
     return NextResponse.json(
-      { error: "Error al actualizar la extracción" },
+      { error: `Error al actualizar la extracción ${error}` },
       { status: 500 }
     );
   }

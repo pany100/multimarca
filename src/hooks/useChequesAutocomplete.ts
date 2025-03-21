@@ -29,7 +29,9 @@ function useChequesAutocomplete() {
     const response = await authFetch(`/api/cheques/${id}`);
     const data = await response.json();
     return {
-      label: data.numero,
+      label: `Nro ${data.numero} - Banco ${
+        data.banco
+      } - Importe ${getFormattedPrice(data.importe)}`,
       value: data.id,
     };
   };

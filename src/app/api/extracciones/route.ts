@@ -197,7 +197,7 @@ export async function POST(request: Request) {
         tipoExtraccion,
         fecha,
         dolarId: dolar?.id,
-        chequeId,
+        chequeId: tipoExtraccion === TipoOperacion.CHEQUE ? chequeId : null,
       },
       include: {
         usuario: {

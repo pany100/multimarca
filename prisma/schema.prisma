@@ -215,8 +215,8 @@ model Extraccion {
   dolarId        Int?
   dolar          Dolar?         @relation(fields: [dolarId], references: [id])
   usuario        Usuario        @relation(fields: [usuarioId], references: [id])
-  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
   chequeId  Int?
+  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
 
   @@index([usuarioId])
   @@index([fecha])
@@ -239,8 +239,8 @@ model Gasto {
   dolar       Dolar?         @relation(fields: [dolarId], references: [id])
   mecanico    Empleado?      @relation(fields: [mecanicoId], references: [id])
   proveedor   Proveedor?     @relation(fields: [proveedorId], references: [id])
-  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
   chequeId  Int?
+  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
 
   @@index([categoriaId])
   @@index([mecanicoId])
@@ -269,8 +269,8 @@ model Venta {
   dolar     Dolar?      @relation(fields: [dolarId], references: [id])
   items     VentaItem[] @relation("VentaToItems")
   tipoOperacion TipoOperacion @default(EFECTIVO)
-  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
   chequeId  Int?
+  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
 
   @@index([clienteId])
   @@index([fecha])
@@ -438,8 +438,8 @@ model IngresoPorReparacion {
   dolar             Dolar?          @relation(fields: [dolarId], references: [id])
   ordenReparacion   OrdenReparacion @relation("OrdenReparacionIngresos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   tipoOperacion TipoOperacion @default(EFECTIVO)
-  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
   chequeId  Int?
+  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
 
   @@index([fecha])
   @@index([clienteId])
@@ -537,8 +537,8 @@ model IngresoManualDeDinero {
   usuarioId      Int
   dolar          Dolar?         @relation(fields: [dolarId], references: [id])
   usuario        Usuario        @relation(fields: [usuarioId], references: [id])
-  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
   chequeId  Int?
+  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
 
   @@index([usuarioId])
   @@index([dolarId], map: "IngresoManualDeDinero_dolarId_fkey")
