@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { OperacionCheque, TipoOperacion } from "@prisma/client";
+import { TipoOperacion } from "@prisma/client";
 import * as yup from "yup";
 import { deleteFileFromS3, moveFileInS3 } from "./s3Helper";
 
@@ -68,21 +68,20 @@ type Cheque = {
 
 type SaveChequeProps = {
   cheque: Cheque;
+};
+
+type UpdateChequeProps = {
+  cheque: Cheque & {
+    id: number;
+  };
   tipoOperacion: TipoOperacion;
-  operacionCheque: OperacionCheque;
-  idOperacion: number;
 };
 
 type ChequeRequestData = {
   chequeId?: string | null;
 } & Cheque;
 
-export const saveCheque = async ({
-  cheque,
-  tipoOperacion,
-  operacionCheque,
-  idOperacion,
-}: SaveChequeProps) => {
+const saveCheque = async ({ cheque }: SaveChequeProps) => {
   const {
     banco,
     emisor,
@@ -104,28 +103,13 @@ export const saveCheque = async ({
       fechaEmision,
       importe,
       numero: numeroCheque,
-      operacionCheque: operacionCheque,
-      operacionId: idOperacion,
       picturePath: picturePathUrl,
     },
   });
   return newCheque;
 };
 
-export const getChequeForOperation = async (
-  operacionCheque: OperacionCheque,
-  idOperacion: number
-) => {
-  const cheque = await prisma.cheque.findFirst({
-    where: {
-      operacionCheque: operacionCheque,
-      operacionId: idOperacion,
-    },
-  });
-  return cheque;
-};
-
-export const getById = async (chequeId: number) => {
+const getById = async (chequeId: number) => {
   const cheque = await prisma.cheque.findUnique({
     where: {
       id: chequeId,
@@ -134,18 +118,10 @@ export const getById = async (chequeId: number) => {
   return cheque;
 };
 
-export const updateCheque = async ({
-  cheque,
-  operacionCheque,
-  tipoOperacion,
-  idOperacion,
-}: SaveChequeProps) => {
+const updateCheque = async ({ cheque, tipoOperacion }: UpdateChequeProps) => {
   let newCheque = null;
   const { picturePath } = cheque;
-  const existingCheque = await getChequeForOperation(
-    operacionCheque,
-    idOperacion
-  );
+  const existingCheque = await getById(cheque.id);
   if (tipoOperacion === TipoOperacion.CHEQUE) {
     if (existingCheque) {
       let picturePathUrl = picturePath;
@@ -170,16 +146,11 @@ export const updateCheque = async ({
           owner: cheque.emisor,
           numero: cheque.numeroCheque,
           picturePath: picturePathUrl,
-          operacionCheque: operacionCheque,
-          operacionId: idOperacion,
         },
       });
     } else {
       newCheque = await saveCheque({
         cheque,
-        operacionCheque,
-        tipoOperacion,
-        idOperacion,
       });
     }
   } else {
@@ -308,9 +279,6 @@ export const getChequeId = async (
       numeroCheque,
       picturePath,
     },
-    tipoOperacion: TipoOperacion.CHEQUE,
-    operacionCheque: OperacionCheque.EXTRACCION,
-    idOperacion: 1,
   });
   return newCheque.id;
 };
