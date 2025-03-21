@@ -17,4 +17,41 @@ function getFormattedDate(date: string) {
   return `${day}/${month}/${year}`;
 }
 
-export { getFormattedControlName, getFormattedDate, getFormattedPrice };
+function getFormattedChequeType(type: string) {
+  switch (type) {
+    case "VENTA":
+      return "Venta";
+    case "GASTO":
+      return "Gasto";
+    case "EXTRACCION":
+      return "Extracción";
+    case "INGRESO_MANUAL":
+      return "Ingreso manual";
+    case "INGRESO_REPARACION":
+      return "Ingreso reparación";
+    default:
+      return type;
+  }
+}
+
+function getOperacionChequeLabel({
+  fecha,
+  tipo,
+  descripcion,
+}: {
+  fecha: Date;
+  tipo: string;
+  descripcion: string;
+}) {
+  return `${getFormattedChequeType(tipo)} ${new Date(fecha).toLocaleDateString(
+    "es-AR"
+  )}: ${descripcion}`;
+}
+
+export {
+  getFormattedChequeType,
+  getFormattedControlName,
+  getFormattedDate,
+  getFormattedPrice,
+  getOperacionChequeLabel,
+};

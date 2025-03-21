@@ -1,3 +1,4 @@
+import { getOperacionesByChequeId } from "@/utils/chequeUtils";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -26,8 +27,19 @@ export async function GET(request: Request) {
       }),
     ]);
 
+    // Get operations for each cheque
+    const chequesWithOperaciones = await Promise.all(
+      cheques.map(async (cheque) => {
+        const operaciones = await getOperacionesByChequeId(cheque.id);
+        return {
+          ...cheque,
+          operaciones,
+        };
+      })
+    );
+
     return NextResponse.json({
-      items: cheques,
+      items: chequesWithOperaciones,
       total,
       page,
       size,

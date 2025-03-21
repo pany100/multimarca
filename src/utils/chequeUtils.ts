@@ -282,3 +282,110 @@ export const getChequeId = async (
   });
   return newCheque.id;
 };
+
+export const getOperacionesByChequeId = async (chequeId: number) => {
+  const operaciones = [];
+
+  // Get Ventas
+  const ventas = await prisma.venta.findMany({
+    where: { chequeId },
+    select: {
+      id: true,
+      fecha: true,
+      cliente: {
+        select: {
+          fullName: true,
+        },
+      },
+    },
+  });
+
+  for (const venta of ventas) {
+    operaciones.push({
+      idOperacion: venta.id,
+      tipo: "VENTA",
+      fecha: venta.fecha,
+      descripcion: `Venta a ${
+        venta.cliente?.fullName || "Cliente no especificado"
+      }`,
+    });
+  }
+
+  // Get Gastos
+  const gastos = await prisma.gasto.findMany({
+    where: { chequeId },
+    select: {
+      id: true,
+      fecha: true,
+      nombre: true,
+    },
+  });
+
+  for (const gasto of gastos) {
+    operaciones.push({
+      idOperacion: gasto.id,
+      tipo: "GASTO",
+      fecha: gasto.fecha,
+      descripcion: gasto.nombre,
+    });
+  }
+
+  // Get Extracciones
+  const extracciones = await prisma.extraccion.findMany({
+    where: { chequeId },
+    select: {
+      id: true,
+      fecha: true,
+      motivo: true,
+    },
+  });
+
+  for (const extraccion of extracciones) {
+    operaciones.push({
+      idOperacion: extraccion.id,
+      tipo: "EXTRACCION",
+      fecha: extraccion.fecha,
+      descripcion: extraccion.motivo,
+    });
+  }
+
+  // Get IngresoManualDeDinero
+  const ingresosManuales = await prisma.ingresoManualDeDinero.findMany({
+    where: { chequeId },
+    select: {
+      id: true,
+      fecha: true,
+      descripcion: true,
+    },
+  });
+
+  for (const ingreso of ingresosManuales) {
+    operaciones.push({
+      idOperacion: ingreso.id,
+      tipo: "INGRESO_MANUAL",
+      fecha: ingreso.fecha,
+      descripcion: ingreso.descripcion || "Ingreso manual",
+    });
+  }
+
+  // Get IngresoPorReparacion
+  const ingresosReparacion = await prisma.ingresoPorReparacion.findMany({
+    where: { chequeId },
+    select: {
+      id: true,
+      fecha: true,
+      descripcion: true,
+    },
+  });
+
+  for (const ingreso of ingresosReparacion) {
+    operaciones.push({
+      idOperacion: ingreso.id,
+      tipo: "INGRESO_REPARACION",
+      fecha: ingreso.fecha,
+      descripcion: ingreso.descripcion,
+    });
+  }
+
+  return operaciones;
+};

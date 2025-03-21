@@ -3,7 +3,11 @@
 import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
-import { Box } from "@mui/material";
+import {
+  getFormattedPrice,
+  getOperacionChequeLabel,
+} from "@/utils/fieldHelper";
+import { Box, Grid } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 
@@ -77,16 +81,28 @@ function ChequesTable({
       headerName: "Importe",
       flex: 1,
       renderCell: (params) => {
-        return params.row.importe.toLocaleString("es-AR", {
-          style: "currency",
-          currency: "ARS",
-        });
+        return getFormattedPrice(params.row.importe);
       },
     },
     {
       field: "owner",
       headerName: "Emisor",
       flex: 1,
+    },
+    {
+      field: "operaciones",
+      headerName: "Operaciones",
+      flex: 1,
+      renderCell: (params) => {
+        const operaciones = params.row.operaciones.map(
+          (operacion: { fecha: Date; tipo: string; descripcion: string }) => (
+            <Box key={operacion.fecha.toString()}>
+              * {getOperacionChequeLabel(operacion)}
+            </Box>
+          )
+        );
+        return <Grid>{operaciones}</Grid>;
+      },
     },
   ];
 
