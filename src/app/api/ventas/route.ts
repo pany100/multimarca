@@ -49,9 +49,17 @@ export async function GET(request: Request) {
       }),
       prisma.venta.count({ where }),
     ]);
+    const ventasConItems = ventas.map((venta) => ({
+      ...venta,
+      items: venta.items.map((item) => ({
+        ...item,
+        name: item.stock.name,
+        stockId: item.stock.id,
+      })),
+    }));
 
     return NextResponse.json({
-      items: returnAllModelsWithChequeData(ventas),
+      items: returnAllModelsWithChequeData(ventasConItems),
       total,
       page,
       limit,
@@ -175,8 +183,18 @@ export async function POST(request: Request) {
         }
       }
     }
+    const ventaToReturn = {
+      ...venta,
+      items: venta.items.map((item) => ({
+        ...item,
+        name: item.stock.name,
+        stockId: item.stock.id,
+      })),
+    };
 
-    return NextResponse.json(returnModelWithChequeData(venta), { status: 201 });
+    return NextResponse.json(returnModelWithChequeData(ventaToReturn), {
+      status: 201,
+    });
   } catch (error) {
     console.error("Error al crear venta:", error);
     return NextResponse.json(

@@ -176,7 +176,16 @@ export async function PUT(
       return ventaActualizada;
     });
 
-    return NextResponse.json(returnModelWithChequeData(ventaActualizada));
+    const ventaToReturn = {
+      ...ventaActualizada,
+      items: ventaActualizada.items.map((item) => ({
+        ...item,
+        name: item.stock.name,
+        stockId: item.stock.id,
+      })),
+    };
+
+    return NextResponse.json(returnModelWithChequeData(ventaToReturn));
   } catch (error) {
     console.error("Error al actualizar venta:", error);
     return NextResponse.json(

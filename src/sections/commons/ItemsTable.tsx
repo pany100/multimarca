@@ -16,6 +16,7 @@ function ItemsTable() {
     formState: { errors },
   } = useFormContext();
   const items = watch("items") || [];
+  console.log(items);
   const error = errors.items?.message as string | undefined;
   return (
     <>
