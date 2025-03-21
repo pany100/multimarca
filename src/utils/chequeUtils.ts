@@ -389,3 +389,8 @@ export const getOperacionesByChequeId = async (chequeId: number) => {
 
   return operaciones;
 };
+
+export async function validateBeforeDelete(chequeId: number) {
+  const operaciones = await getOperacionesByChequeId(chequeId);
+  return operaciones.length === 0;
+}

@@ -58,6 +58,7 @@ const DeleteModal = ({
         message: "Error al eliminar el elemento",
       });
     } finally {
+      onClose();
       setLoading(false);
     }
   };
