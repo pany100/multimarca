@@ -20,13 +20,13 @@ import * as yup from "yup";
 export const schema = yup.object({
   fechaEmision: yup.date().required("La fecha de emisión es requerida"),
   fechaCobro: yup.date().required("La fecha de cobro es requerida"),
-  numeroCheque: yup.string().required("El número de cheque es requerido"),
+  numero: yup.string().required("El número de cheque es requerido"),
   banco: yup.string().required("El banco es requerido"),
   importe: yup
     .number()
     .typeError("El importe debe ser un número")
     .required("El importe es requerido"),
-  emisor: yup.string().required("El emisor es requerido"),
+  owner: yup.string().required("El emisor es requerido"),
   picturePath: yup.string().required("La foto es requerida"),
 });
 
@@ -43,7 +43,6 @@ const ChequesForm = () => {
       <Typography variant="h5" sx={{ mb: 2 }}>
         Información del cheque
       </Typography>
-
       {operaciones.length > 0 && (
         <Box sx={{ mb: 4 }}>
           <Typography variant="h6" sx={{ mb: 2 }}>

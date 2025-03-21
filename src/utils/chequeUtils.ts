@@ -70,16 +70,14 @@ type SaveChequeProps = {
   cheque: Cheque;
 };
 
-type UpdateChequeProps = {
-  cheque: Cheque & {
-    id: number;
-  };
-  tipoOperacion: TipoOperacion;
-};
-
 type ChequeRequestData = {
   chequeId?: string | null;
 } & Cheque;
+
+type ChequeEditRequestData = Omit<Cheque, "numeroCheque" | "emisor"> & {
+  numero: string;
+  owner: string;
+};
 
 const saveCheque = async ({ cheque }: SaveChequeProps) => {
   const {
@@ -200,24 +198,23 @@ export const validateChequeRequest = (
   return true;
 };
 
-export const validateChequeEditRequest = (data: ChequeRequestData) => {
+export const validateChequeEditRequest = (data: ChequeEditRequestData) => {
   const {
     banco,
-    emisor,
+    numero,
     fechaCobro,
     fechaEmision,
     importe,
-    numeroCheque,
-    chequeId,
+    owner,
     picturePath,
   } = data;
   if (
     !banco ||
-    !emisor ||
+    !numero ||
     !fechaCobro ||
     !fechaEmision ||
     !importe ||
-    !numeroCheque ||
+    !owner ||
     !picturePath
   ) {
     return false;

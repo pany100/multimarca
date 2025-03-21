@@ -77,12 +77,12 @@ export async function PUT(
     const body = await request.json();
     const {
       banco,
-      emisor,
       fechaCobro,
       fechaEmision,
       importe,
-      numeroCheque,
       picturePath,
+      numero,
+      owner,
     } = body;
 
     // Validate request data
@@ -128,9 +128,9 @@ export async function PUT(
         fechaEmision,
         picturePath: picturePathUrl || existingCheque.picturePath, // Keep old path if no new one
         banco,
-        owner: emisor,
+        owner,
         importe,
-        numero: numeroCheque,
+        numero,
       },
       select: {
         ...chequeQueryData.select,
