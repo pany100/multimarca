@@ -260,7 +260,7 @@ export const getOperacionesByChequeId = async (chequeId: number) => {
 
   // Get Ventas
   const ventas = await prisma.venta.findMany({
-    where: { chequeId },
+    where: { chequeId, presupuesto: false },
     select: {
       id: true,
       fecha: true,

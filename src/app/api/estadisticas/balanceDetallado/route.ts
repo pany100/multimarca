@@ -73,6 +73,7 @@ export async function GET(request: NextRequest) {
         FROM Venta v
         LEFT JOIN Dolar d ON d.id = v.dolarId
         WHERE v.fecha >= ? AND v.fecha <= ?
+        AND v.presupuesto = false
       `;
 
       const ventasParams = [moneda, startDate, endDate];

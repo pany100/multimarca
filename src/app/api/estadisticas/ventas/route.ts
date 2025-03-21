@@ -50,7 +50,7 @@ export async function GET(request: NextRequest) {
       FROM Cliente c
       LEFT JOIN Venta v ON c.id = v.clienteId
       LEFT JOIN Dolar d ON d.id = v.dolarId
-      WHERE 1=1
+      WHERE v.presupuesto = false
     `;
 
     const queryParams: any[] = [moneda];

@@ -42,7 +42,7 @@ export async function GET(request: NextRequest) {
         )) as totalVentas
       FROM Venta v
       LEFT JOIN Dolar d ON d.id = v.dolarId
-      WHERE 1=1
+      WHERE v.presupuesto = false
     `;
 
     const queryParams: any[] = [moneda];

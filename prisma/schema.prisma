@@ -271,6 +271,7 @@ model Venta {
   tipoOperacion TipoOperacion @default(EFECTIVO)
   chequeId  Int?
   cheque    Cheque?    @relation(fields: [chequeId], references: [id])
+  presupuesto Boolean @default(false)
 
   @@index([clienteId])
   @@index([fecha])

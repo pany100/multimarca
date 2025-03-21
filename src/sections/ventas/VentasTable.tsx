@@ -17,14 +17,14 @@ function VentasTable({
     {
       field: "fecha",
       headerName: "Fecha",
-      flex: 1,
+      flex: 0.5,
       valueGetter: (fecha: string) =>
         new Date(fecha).toLocaleDateString("es-AR"),
     },
     {
       field: "moneda",
       headerName: "Moneda",
-      flex: 1,
+      flex: 0.5,
       renderCell: (params: any) => (
         <Chip
           label={params.value}
@@ -95,6 +95,21 @@ function VentasTable({
         );
       },
       flex: 1.5,
+    },
+    {
+      field: "presupuesto",
+      headerName: "Presupuesto",
+      flex: 1,
+      renderCell: (params: any) => (
+        <Chip
+          label={params.value ? "Presupuesto" : "Terminada"}
+          sx={{
+            backgroundColor: params.value ? "#4169E1" : "#32CD32",
+            color: "white",
+            fontWeight: "bold",
+          }}
+        />
+      ),
     },
   ];
 
