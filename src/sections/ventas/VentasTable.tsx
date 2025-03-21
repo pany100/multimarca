@@ -4,14 +4,20 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { Chip, Typography } from "@mui/material";
-
+import { Box, Chip, Tab, Tabs, Typography } from "@mui/material";
+import { useState } from "react";
 function VentasTable({
   extraActions,
   ctaCb,
   setRefreshTrigger,
   ...rest
 }: InheritedTableProps) {
+  const [tabValue, setTabValue] = useState(0);
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
+
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     {
@@ -114,14 +120,45 @@ function VentasTable({
   ];
 
   return (
-    <CustomTable
-      title="Ventas"
-      apiEndpoint="/api/ventas"
-      extraActions={extraActions}
-      ctaCb={ctaCb}
-      columns={columns}
-      {...rest}
-    />
+    <Box>
+      <Tabs value={tabValue} onChange={handleTabChange}>
+        <Tab label="Todos" />
+        <Tab label="Terminados" />
+        <Tab label="Presupuestos" />
+      </Tabs>
+      <Box mt={2}>
+        {tabValue === 0 && (
+          <CustomTable
+            title="Ventas"
+            apiEndpoint="/api/ventas"
+            extraActions={extraActions}
+            ctaCb={ctaCb}
+            columns={columns}
+            {...rest}
+          />
+        )}
+        {tabValue === 1 && (
+          <CustomTable
+            title="Ventas"
+            apiEndpoint="/api/ventas?presupuesto=false"
+            extraActions={extraActions}
+            ctaCb={ctaCb}
+            columns={columns}
+            {...rest}
+          />
+        )}
+        {tabValue === 2 && (
+          <CustomTable
+            title="Ventas"
+            apiEndpoint="/api/ventas?presupuesto=true"
+            extraActions={extraActions}
+            ctaCb={ctaCb}
+            columns={columns}
+            {...rest}
+          />
+        )}
+      </Box>
+    </Box>
   );
 }
 

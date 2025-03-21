@@ -16,7 +16,15 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { clienteId, items, moneda, total, fecha, tipoOperacion } = body;
+    const {
+      clienteId,
+      items,
+      moneda,
+      total,
+      fecha,
+      tipoOperacion,
+      presupuesto,
+    } = body;
 
     if (!validateChequeRequest(body, tipoOperacion)) {
       return NextResponse.json(
@@ -128,6 +136,7 @@ export async function PUT(
           fecha,
           tipoOperacion,
           chequeId: chequeIdToPass,
+          presupuesto,
           items: {
             deleteMany: {},
             create: items.map((item) => ({

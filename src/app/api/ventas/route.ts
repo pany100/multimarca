@@ -16,12 +16,19 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get("page") || "0");
     const limit = parseInt(searchParams.get("limit") || "10");
     const query = searchParams.get("query") || "";
-
+    const presupuestoInput = searchParams.get("presupuesto");
+    let presupuesto = undefined;
+    if (presupuestoInput === "true") {
+      presupuesto = true;
+    } else if (presupuestoInput === "false") {
+      presupuesto = false;
+    }
     const where: Prisma.VentaWhereInput = {
       OR: [
         { cliente: { fullName: { contains: query } } },
         { id: { equals: parseInt(query) || undefined } },
       ],
+      presupuesto,
     };
 
     const [ventas, total] = await Promise.all([
@@ -61,7 +68,15 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { clienteId, items, total, moneda, fecha, tipoOperacion } = body;
+    const {
+      clienteId,
+      items,
+      total,
+      moneda,
+      fecha,
+      tipoOperacion,
+      presupuesto,
+    } = body;
 
     if (!validateChequeRequest(body, tipoOperacion)) {
       return NextResponse.json(
@@ -117,6 +132,7 @@ export async function POST(request: Request) {
         },
         tipoOperacion,
         chequeId: chequeIdToPass,
+        presupuesto,
       },
       include: {
         cliente: true,
