@@ -73,13 +73,16 @@ type SaveChequeProps = {
   idOperacion: number;
 };
 
+type ChequeRequestData = {
+  chequeId?: string | null;
+} & Cheque;
+
 export const saveCheque = async ({
   cheque,
   tipoOperacion,
   operacionCheque,
   idOperacion,
 }: SaveChequeProps) => {
-  let newCheque = null;
   const {
     banco,
     emisor,
@@ -89,25 +92,23 @@ export const saveCheque = async ({
     numeroCheque,
     picturePath,
   } = cheque;
-  if (tipoOperacion === TipoOperacion.CHEQUE) {
-    let picturePathUrl = picturePath;
-    if (picturePath && picturePath.includes("/tmp/")) {
-      picturePathUrl = await moveFileInS3(picturePath, "cheques");
-    }
-    newCheque = await prisma.cheque.create({
-      data: {
-        banco,
-        owner: emisor,
-        fechaCobro,
-        fechaEmision,
-        importe,
-        numero: numeroCheque,
-        operacionCheque: operacionCheque,
-        operacionId: idOperacion,
-        picturePath: picturePathUrl,
-      },
-    });
+  let picturePathUrl = picturePath;
+  if (picturePath && picturePath.includes("/tmp/")) {
+    picturePathUrl = await moveFileInS3(picturePath, "cheques");
   }
+  const newCheque = await prisma.cheque.create({
+    data: {
+      banco,
+      owner: emisor,
+      fechaCobro,
+      fechaEmision,
+      importe,
+      numero: numeroCheque,
+      operacionCheque: operacionCheque,
+      operacionId: idOperacion,
+      picturePath: picturePathUrl,
+    },
+  });
   return newCheque;
 };
 
@@ -212,4 +213,104 @@ export const deleteCheque = async (idCheque: number) => {
       },
     });
   }
+};
+
+export const chequeQueryData = {
+  select: {
+    id: true,
+    numero: true,
+    banco: true,
+    importe: true,
+    fechaCobro: true,
+    fechaEmision: true,
+    owner: true,
+    picturePath: true,
+  },
+};
+
+export const returnAllModelsWithChequeData = (models: { cheque?: any }[]) => {
+  return models.map((model) => returnModelWithChequeData(model));
+};
+
+export const returnModelWithChequeData = (model: { cheque?: any }) => {
+  const cheque = model.cheque;
+  if (!cheque) return model;
+  return {
+    ...model,
+    banco: cheque.banco,
+    emisor: cheque.owner,
+    fechaCobro: cheque.fechaCobro,
+    fechaEmision: cheque.fechaEmision,
+    importe: cheque.importe,
+    numeroCheque: cheque.numero,
+    picturePath: cheque.picturePath,
+    chequeId: cheque.id,
+  };
+};
+
+export const validateChequeRequest = (
+  data: ChequeRequestData,
+  operacion: TipoOperacion
+) => {
+  const {
+    banco,
+    emisor,
+    fechaCobro,
+    fechaEmision,
+    importe,
+    numeroCheque,
+    chequeId,
+    picturePath,
+  } = data;
+  if (operacion === TipoOperacion.CHEQUE) {
+    if (
+      !chequeId &&
+      (!banco ||
+        !emisor ||
+        !fechaCobro ||
+        !fechaEmision ||
+        !importe ||
+        !numeroCheque ||
+        !picturePath)
+    ) {
+      return false;
+    }
+  }
+  return true;
+};
+
+export const getChequeId = async (
+  data: ChequeRequestData,
+  operacion: TipoOperacion
+) => {
+  if (operacion !== TipoOperacion.CHEQUE) {
+    return null;
+  }
+  if (data.chequeId) {
+    return parseInt(data.chequeId);
+  }
+  const {
+    banco,
+    emisor,
+    fechaCobro,
+    fechaEmision,
+    importe,
+    numeroCheque,
+    picturePath,
+  } = data;
+  const newCheque = await saveCheque({
+    cheque: {
+      banco,
+      emisor,
+      fechaCobro,
+      fechaEmision,
+      importe,
+      numeroCheque,
+      picturePath,
+    },
+    tipoOperacion: TipoOperacion.CHEQUE,
+    operacionCheque: OperacionCheque.EXTRACCION,
+    idOperacion: 1,
+  });
+  return newCheque.id;
 };

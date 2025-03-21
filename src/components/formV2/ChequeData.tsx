@@ -13,9 +13,10 @@ import ChequeFields from "./ChequeFields";
 import NumeroChequeField from "./NumeroChequeField";
 
 function ChequeData() {
-  const { setValue } = useFormContext();
+  const { setValue, watch } = useFormContext();
+  const chequeId = watch("chequeId");
 
-  const [nuevoFormVisible, setNuevoFormVisible] = useState(false);
+  const [nuevoFormVisible, setNuevoFormVisible] = useState(chequeId === null);
 
   const handleToggleChange = (
     _event: React.MouseEvent<HTMLElement>,

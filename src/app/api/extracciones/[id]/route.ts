@@ -1,5 +1,9 @@
-import { getById, updateCheque } from "@/utils/chequeUtils";
-import { OperacionCheque, TipoOperacion } from "@prisma/client";
+import {
+  chequeQueryData,
+  getChequeId,
+  returnModelWithChequeData,
+  validateChequeRequest,
+} from "@/utils/chequeUtils";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -18,31 +22,12 @@ export async function PUT(
       chequeId,
       tipoExtraccion,
       fecha,
-      banco,
-      emisor,
-      fechaCobro,
-      fechaEmision,
-      importe,
-      numeroCheque,
-      picturePath,
     } = body;
-
-    if (tipoExtraccion === TipoOperacion.CHEQUE) {
-      if (
-        !chequeId &&
-        (!banco ||
-          !emisor ||
-          !fechaCobro ||
-          !fechaEmision ||
-          !importe ||
-          !numeroCheque ||
-          !picturePath)
-      ) {
-        return NextResponse.json(
-          { error: "Faltan datos para la operación de cheque" },
-          { status: 400 }
-        );
-      }
+    if (!validateChequeRequest(body, tipoExtraccion)) {
+      return NextResponse.json(
+        { error: "Faltan datos para la operación de cheque" },
+        { status: 400 }
+      );
     }
 
     if (!monto || typeof monto !== "number" || monto <= 0) {
@@ -92,6 +77,8 @@ export async function PUT(
       },
     });
 
+    const chequeIdToPass = await getChequeId(body, tipoExtraccion);
+
     const extraccionActualizada = await prisma.extraccion.update({
       where: { id },
       data: {
@@ -102,7 +89,7 @@ export async function PUT(
         tipoExtraccion,
         moneda,
         dolarId: dolar?.id,
-        chequeId: tipoExtraccion === TipoOperacion.CHEQUE ? chequeId : null,
+        chequeId: chequeIdToPass,
       },
       include: {
         usuario: {
@@ -110,51 +97,11 @@ export async function PUT(
             fullName: true,
           },
         },
+        cheque: chequeQueryData,
       },
     });
 
-    if (chequeId) {
-      const cheque = await getById(chequeId);
-      const extraccionToReturn = {
-        ...extraccionActualizada,
-        banco: cheque?.banco,
-        emisor: cheque?.owner,
-        fechaCobro: cheque?.fechaCobro,
-        fechaEmision: cheque?.fechaEmision,
-        importe: cheque?.importe,
-        numeroCheque: cheque?.numero,
-        picturePath: cheque?.picturePath,
-        chequeId: cheque?.id,
-      };
-      return NextResponse.json(extraccionToReturn, { status: 201 });
-    }
-
-    const newCheque = await updateCheque({
-      cheque: {
-        banco,
-        emisor,
-        fechaCobro,
-        fechaEmision,
-        importe,
-        numeroCheque,
-        picturePath,
-      },
-      tipoOperacion: tipoExtraccion,
-      operacionCheque: OperacionCheque.EXTRACCION,
-      idOperacion: id,
-    });
-
-    return NextResponse.json({
-      ...extraccionActualizada,
-      banco: newCheque?.banco,
-      emisor: newCheque?.owner,
-      fechaCobro: newCheque?.fechaCobro,
-      fechaEmision: newCheque?.fechaEmision,
-      importe: newCheque?.importe,
-      numeroCheque: newCheque?.numero,
-      picturePath: newCheque?.picturePath,
-      chequeId: newCheque?.id,
-    });
+    return NextResponse.json(returnModelWithChequeData(extraccionActualizada));
   } catch (error) {
     console.error("Error al actualizar extracción:", error);
     return NextResponse.json(
