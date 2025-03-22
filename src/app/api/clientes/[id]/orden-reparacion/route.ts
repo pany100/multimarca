@@ -69,10 +69,11 @@ export async function GET(
         deuda: totalAPagar - totalPagado,
       };
     });
-
     if (soloConDeuda) {
       return NextResponse.json(
-        ordenesConDeuda.filter((orden) => orden.deuda > 0)
+        ordenesConDeuda.filter(
+          (orden) => orden.deuda > 0 || orden.totalAPagar === 0
+        )
       );
     }
 
