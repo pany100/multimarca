@@ -103,14 +103,6 @@ function ResumenUltimaSemana() {
       headerAlign: "right",
       valueGetter: (value) => getFormattedPrice(value),
     },
-    {
-      field: "pendientePago",
-      headerName: "Pendiente de Pago",
-      flex: 1,
-      align: "right",
-      headerAlign: "right",
-      valueGetter: (value) => getFormattedPrice(value),
-    },
   ];
 
   return (
