@@ -7,6 +7,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import FormSection from "../commons/FormSection";
 import AutoSection from "../sections/autos/AutoSection";
 import ClientObservationSection from "../sections/client-observations/ClientObservationSection";
+import InputObservationSection from "../sections/input-observations/InputObservationsSection";
 
 function NuevaOrdenForm() {
   const methods = useForm({
@@ -24,6 +25,9 @@ function NuevaOrdenForm() {
           </FormSection>
           <FormSection title="Observaciones del Cliente">
             <ClientObservationSection />
+          </FormSection>
+          <FormSection title="Observaciones de Entrada">
+            <InputObservationSection />
           </FormSection>
         </form>
       </FormProvider>
