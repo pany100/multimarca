@@ -6,6 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { FormProvider, useForm } from "react-hook-form";
 import FormSection from "../commons/FormSection";
 import AutoSection from "../sections/autos/AutoSection";
+import ClientObservationSection from "../sections/client-observations/ClientObservationSection";
 
 function NuevaOrdenForm() {
   const methods = useForm({
@@ -20,6 +21,9 @@ function NuevaOrdenForm() {
         <form onSubmit={handleSubmit(onSubmit)}>
           <FormSection title="Información del Vehículo y Fechas">
             <AutoSection />
+          </FormSection>
+          <FormSection title="Observaciones del Cliente">
+            <ClientObservationSection />
           </FormSection>
         </form>
       </FormProvider>
