@@ -1,12 +1,14 @@
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import { Box, IconButton, Stack } from "@mui/material";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import { FormDataWithModalProvider } from "@/contexts/FormDataWithModalContext";
+import { Box } from "@mui/material";
+import { GridColDef } from "@mui/x-data-grid";
 import { useFormContext } from "react-hook-form";
+import FormDataModal from "./FormDataModal";
+import FormDataTable from "./FormDataTable";
 
 type Props = {
   fieldName: string;
   emptyContent: React.ComponentType<any>;
+  form: React.ComponentType<any>;
   columns: GridColDef[];
   rowsTransform?: (row: any, index: number) => any;
 };
@@ -14,6 +16,7 @@ type Props = {
 function FormDataArrayWithModal({
   fieldName,
   emptyContent: EmptyContent,
+  form: InnerForm,
   columns,
   rowsTransform,
 }: Props) {
@@ -21,93 +24,33 @@ function FormDataArrayWithModal({
   const values = watch(fieldName);
   const rows = typeof values === "string" ? JSON.parse(values || "[]") : values;
 
-  if (!rows || rows.length === 0) {
-    return (
-      <Box
-        sx={{
-          p: 3,
-          textAlign: "center",
-          border: "1px dashed #ccc",
-          borderRadius: 1,
-          mb: 2,
-          backgroundColor: "action.hover",
-        }}
-      >
-        <EmptyContent />
-      </Box>
-    );
-  }
-
-  function getItem(id: number) {
-    const rowsTransformed = rowsTransform ? rows.map(rowsTransform) : rows;
-    return rowsTransformed.find((r: any) => r.id === id);
-  }
-
-  const actionColumn: GridColDef = {
-    field: "actions",
-    headerName: "Acciones",
-    headerAlign: "center",
-    renderCell: (params) => (
-      <Stack
-        direction="row"
-        spacing={1}
-        justifyContent="center"
-        alignItems="center"
-        sx={{ width: "100%" }}
-      >
-        <IconButton
-          color="primary"
-          size="small"
-          onClick={() => {
-            const item = getItem(params.row.id);
-            console.log(item);
-          }}
-        >
-          <EditIcon fontSize="small" />
-        </IconButton>
-        <IconButton
-          color="error"
-          size="small"
-          onClick={() => {
-            const item = getItem(params.row.id);
-            console.log(item);
-          }}
-        >
-          <DeleteIcon fontSize="small" />
-        </IconButton>
-      </Stack>
-    ),
-  };
-
   return (
-    <>
-      <DataGrid
-        rows={rowsTransform ? rows.map(rowsTransform) : rows}
-        columns={[...columns, actionColumn]}
-        getRowId={(row) => row.id}
-        autoHeight
-        hideFooter
-        disableColumnMenu
-        disableRowSelectionOnClick
-        sx={{
-          border: 1,
-          borderColor: "divider",
-          "& .MuiDataGrid-columnHeader": {
-            backgroundColor: "primary.light",
-            color: "white",
-            fontSize: "0.875rem",
-            fontWeight: 600,
-          },
-          "& .MuiDataGrid-filler": {
-            backgroundColor: "primary.light",
-          },
-          "& .MuiDataGrid-cell": {
-            display: "flex",
-            alignItems: "center",
-          },
-        }}
-      />
-    </>
+    <FormDataWithModalProvider>
+      {!rows || rows.length === 0 ? (
+        <Box
+          sx={{
+            p: 3,
+            textAlign: "center",
+            border: "1px dashed #ccc",
+            borderRadius: 1,
+            mb: 2,
+            backgroundColor: "action.hover",
+          }}
+        >
+          <EmptyContent />
+        </Box>
+      ) : (
+        <FormDataTable
+          rowsTransform={rowsTransform}
+          columns={columns}
+          rows={rows}
+          fieldName={fieldName}
+        />
+      )}
+      <FormDataModal fieldName={fieldName}>
+        <InnerForm />
+      </FormDataModal>
+    </FormDataWithModalProvider>
   );
 }
 

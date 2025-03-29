@@ -19,7 +19,7 @@ export const ModalProvider: React.FC<React.PropsWithChildren<{}>> = ({
   );
 };
 
-export const useModal = (): ModalContextType => {
+export const useModalContext = (): ModalContextType => {
   const context = useContext(ModalContext);
   if (context === undefined) {
     throw new Error("useModal must be used within an ModalProvider");

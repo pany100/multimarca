@@ -5,7 +5,7 @@ const TableColumns: GridColDef[] = [
     field: "value",
     headerName: "Observación",
     flex: 1,
-    editable: false,
+    sortable: false,
   },
 ];
 
