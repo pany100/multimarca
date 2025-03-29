@@ -33,7 +33,6 @@ function NuevaOrdenForm() {
           <FormSection title="Mecánicos">
             <MechanicsSection />
           </FormSection>
-          {JSON.stringify(watch())}
         </form>
       </FormProvider>
       <FormSnackbar />

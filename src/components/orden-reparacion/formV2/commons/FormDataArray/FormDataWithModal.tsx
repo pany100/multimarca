@@ -12,6 +12,7 @@ type Props = {
   form: React.ComponentType<any>;
   columns: GridColDef[];
   rowsTransform?: (row: any, index: number) => any;
+  children: React.ReactNode;
 };
 
 function FormDataArrayWithModal({
@@ -19,6 +20,7 @@ function FormDataArrayWithModal({
   form: InnerForm,
   columns,
   rowsTransform,
+  children,
 }: Props) {
   const { watch } = useFormContext();
 
@@ -28,7 +30,7 @@ function FormDataArrayWithModal({
   return (
     <FormDataWithModalProvider>
       {!rows || rows.length === 0 ? (
-        <FormDataEmptyInfo />
+        <FormDataEmptyInfo>{children}</FormDataEmptyInfo>
       ) : (
         <Grid container spacing={2}>
           <Grid item xs={12}>

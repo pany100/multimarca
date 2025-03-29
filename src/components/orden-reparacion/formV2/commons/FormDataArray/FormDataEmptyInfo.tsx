@@ -1,9 +1,9 @@
 import { useFormDataWithModalContext } from "@/contexts/FormDataWithModalContext";
 import { useModalContext } from "@/contexts/ModalContext";
 import AddIcon from "@mui/icons-material/Add";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Button } from "@mui/material";
 
-function FormDataEmptyInfo() {
+function FormDataEmptyInfo({ children }: { children: React.ReactNode }) {
   const { setModalOpen } = useModalContext();
   const { setNewItem } = useFormDataWithModalContext();
   return (
@@ -17,9 +17,7 @@ function FormDataEmptyInfo() {
         backgroundColor: "action.hover",
       }}
     >
-      <Typography color="text.secondary" sx={{ fontStyle: "italic", py: 2 }}>
-        No hay entradas registradas
-      </Typography>
+      {children}
       <Button
         variant="outlined"
         startIcon={<AddIcon />}
