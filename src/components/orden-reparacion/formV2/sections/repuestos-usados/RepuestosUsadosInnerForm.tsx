@@ -1,26 +1,38 @@
 import { useFormDataWithModalContext } from "@/contexts/FormDataWithModalContext";
-import useStockAutocomplete from "@/hooks/useStockAutocomplete";
-import NonFormAutocomplete from "@/sections/commons/NonFormAutocomplete";
+import useStockObjectAutocomplete, {
+  StockObject,
+} from "@/hooks/orden-reparacion/useStockObjectAutocomplete";
+import NonFormObjectAutocomplete, {
+  ObjectAutocomplete,
+} from "@/sections/commons/NonFormObjectAutocomplete";
 import { Grid, TextField } from "@mui/material";
 
 function RepuestosUsadosInnerForm() {
   const { newItem, setNewItem, currentItem } = useFormDataWithModalContext();
-  const { searchStock } = useStockAutocomplete();
+  const { searchStockObject } = useStockObjectAutocomplete();
   return (
     <Grid container spacing={1}>
       <Grid item xs={12} sx={{ mb: 1 }}>
-        <NonFormAutocomplete
+        <NonFormObjectAutocomplete
           label="Repuesto"
-          searchOptions={searchStock}
-          selectOption={(option) => {
+          searchOptions={searchStockObject}
+          getOptionLabel={(option: { object: StockObject }) =>
+            option.object.name
+          }
+          selectOption={(option: ObjectAutocomplete | null) => {
             if (option) {
+              const precioVentaCalculado =
+                option.object.buyPrice *
+                (1 + (option.object.markup || 0) / 100);
               setNewItem({
                 id: option.value,
                 ...newItem,
                 stock: {
                   id: option.value,
-                  name: option.label,
+                  name: option.object.name,
                 },
+                precioCompra: option.object.buyPrice,
+                precioVenta: precioVentaCalculado.toFixed(2),
               });
             }
           }}
@@ -30,33 +42,37 @@ function RepuestosUsadosInnerForm() {
         <TextField
           label="Precio Compra"
           type="number"
-          value={currentItem?.precioCompra}
+          value={newItem?.precioCompra || currentItem?.precioCompra || ""}
           onChange={(e) =>
             setNewItem({ ...newItem, precioCompra: Number(e.target.value) })
           }
           fullWidth
           variant="outlined"
           margin="normal"
+          InputLabelProps={{ shrink: true }}
         />
       </Grid>
       <Grid item xs={12}>
         <TextField
           label="Precio Venta"
           type="number"
-          value={currentItem?.precioVenta}
+          value={newItem?.precioVenta || currentItem?.precioVenta || ""}
           onChange={(e) =>
             setNewItem({ ...newItem, precioVenta: Number(e.target.value) })
           }
           fullWidth
           variant="outlined"
           margin="normal"
+          InputLabelProps={{ shrink: true }}
         />
       </Grid>
       <Grid item xs={12}>
         <TextField
           label="Unidades Consumidas"
           type="number"
-          value={currentItem?.unidadesConsumidas}
+          value={
+            newItem?.unidadesConsumidas || currentItem?.unidadesConsumidas || ""
+          }
           onChange={(e) =>
             setNewItem({
               ...newItem,
@@ -66,6 +82,7 @@ function RepuestosUsadosInnerForm() {
           fullWidth
           variant="outlined"
           margin="normal"
+          InputLabelProps={{ shrink: true }}
         />
       </Grid>
     </Grid>
