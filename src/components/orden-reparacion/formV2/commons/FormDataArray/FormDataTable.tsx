@@ -68,17 +68,18 @@ function FormDataTable({ rowsTransform, columns, rows, fieldName }: Props) {
                   const item = rowsTransformed.find(
                     (r: any) => r.id === params.row.id
                   );
+                  let elements = [];
                   let index = null;
                   if (typeof values === "string") {
-                    index = JSON.parse(values).findIndex(
-                      (r: any) => r.id === item.value
-                    );
+                    elements = JSON.parse(values);
+                    index = elements.findIndex((r: any) => r === item.value);
                   } else {
-                    index = values.findIndex(
+                    elements = values;
+                    index = elements.findIndex(
                       (r: any) => r.id === params.row.id
                     );
                   }
-                  const newValues = [...values];
+                  const newValues = [...elements];
                   newValues.splice(index, 1);
                   setValue(fieldName, JSON.stringify(newValues));
                 }}
