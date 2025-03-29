@@ -1,6 +1,6 @@
 "use client";
 
-import NuevaOrdenForm from "@/components/orden-reparacion/NuevaOrdenForm";
+import NuevaOrdenForm from "@/components/orden-reparacion/formV2/nueva/NuevaOrdenForm";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader } from "@mui/material";
 import { useRouter } from "next/navigation";

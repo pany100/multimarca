@@ -1,0 +1,85 @@
+import CustomAutocompleteInput from "@/components/formV2/CustomAutocomplete";
+import CustomInputText from "@/components/formV2/CustomInputText";
+import CustomSelect from "@/components/formV2/CustomSelect";
+import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
+import useFixedSelectData from "@/hooks/useFixedSelectData";
+import useInitialKms from "@/hooks/useInitialKms";
+import useScrollToError from "@/hooks/useScrollToError";
+import { Grid } from "@mui/material";
+import { useFormContext } from "react-hook-form";
+
+function AutoSection() {
+  const {
+    formState: { errors, isSubmitted },
+  } = useFormContext();
+  const { registerFieldRef } = useScrollToError({ errors, isSubmitted });
+  const { searchAutos, initialAuto } = useAutosAutocomplete();
+  const { orepEstadoOptions } = useFixedSelectData();
+  useInitialKms();
+
+  return (
+    <Grid container spacing={3}>
+      <Grid item xs={12} md={4} ref={(el) => registerFieldRef("autoId", el)}>
+        <CustomAutocompleteInput
+          name="autoId"
+          label="Vehículo"
+          searchOptions={searchAutos}
+          initialOptions={initialAuto}
+        />
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        md={4}
+        ref={(el) => registerFieldRef("kilometros", el)}
+      >
+        <CustomInputText name="kilometros" label="Kilómetros" type="number" />
+      </Grid>
+      <Grid item xs={12} md={4} ref={(el) => registerFieldRef("estado", el)}>
+        <CustomSelect
+          name="estado"
+          label="Estado"
+          options={orepEstadoOptions}
+        />
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        md={4}
+        ref={(el) => registerFieldRef("fechaCreacion", el)}
+      >
+        <CustomInputText
+          name="fechaCreacion"
+          label="Fecha de Creación"
+          type="date"
+        />
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        md={4}
+        ref={(el) => registerFieldRef("fechaEntradaReparacion", el)}
+      >
+        <CustomInputText
+          name="fechaEntradaReparacion"
+          label="Fecha de Entrada a Reparación"
+          type="date"
+        />
+      </Grid>
+      <Grid
+        item
+        xs={12}
+        md={4}
+        ref={(el) => registerFieldRef("fechaSalidaReparacion", el)}
+      >
+        <CustomInputText
+          name="fechaSalidaReparacion"
+          label="Fecha de Salida de Reparación"
+          type="date"
+        />
+      </Grid>
+    </Grid>
+  );
+}
+
+export default AutoSection;
