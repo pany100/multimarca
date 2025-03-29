@@ -1,4 +1,6 @@
-import { Box } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import { Box, IconButton, Stack } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { useFormContext } from "react-hook-form";
 
@@ -36,11 +38,52 @@ function FormDataArrayWithModal({
     );
   }
 
+  function getItem(id: number) {
+    const rowsTransformed = rowsTransform ? rows.map(rowsTransform) : rows;
+    return rowsTransformed.find((r: any) => r.id === id);
+  }
+
+  const actionColumn: GridColDef = {
+    field: "actions",
+    headerName: "Acciones",
+    headerAlign: "center",
+    renderCell: (params) => (
+      <Stack
+        direction="row"
+        spacing={1}
+        justifyContent="center"
+        alignItems="center"
+        sx={{ width: "100%" }}
+      >
+        <IconButton
+          color="primary"
+          size="small"
+          onClick={() => {
+            const item = getItem(params.row.id);
+            console.log(item);
+          }}
+        >
+          <EditIcon fontSize="small" />
+        </IconButton>
+        <IconButton
+          color="error"
+          size="small"
+          onClick={() => {
+            const item = getItem(params.row.id);
+            console.log(item);
+          }}
+        >
+          <DeleteIcon fontSize="small" />
+        </IconButton>
+      </Stack>
+    ),
+  };
+
   return (
     <>
       <DataGrid
         rows={rowsTransform ? rows.map(rowsTransform) : rows}
-        columns={columns}
+        columns={[...columns, actionColumn]}
         getRowId={(row) => row.id}
         autoHeight
         hideFooter
@@ -57,6 +100,10 @@ function FormDataArrayWithModal({
           },
           "& .MuiDataGrid-filler": {
             backgroundColor: "primary.light",
+          },
+          "& .MuiDataGrid-cell": {
+            display: "flex",
+            alignItems: "center",
           },
         }}
       />
