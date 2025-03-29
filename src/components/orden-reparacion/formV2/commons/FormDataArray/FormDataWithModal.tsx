@@ -1,13 +1,14 @@
 import { FormDataWithModalProvider } from "@/contexts/FormDataWithModalContext";
-import { Box } from "@mui/material";
+import { Grid } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 import { useFormContext } from "react-hook-form";
+import FormDataAddButton from "./FormDataAddButton";
+import FormDataEmptyInfo from "./FormDataEmptyInfo";
 import FormDataModal from "./FormDataModal";
 import FormDataTable from "./FormDataTable";
 
 type Props = {
   fieldName: string;
-  emptyContent: React.ComponentType<any>;
   form: React.ComponentType<any>;
   columns: GridColDef[];
   rowsTransform?: (row: any, index: number) => any;
@@ -15,37 +16,33 @@ type Props = {
 
 function FormDataArrayWithModal({
   fieldName,
-  emptyContent: EmptyContent,
   form: InnerForm,
   columns,
   rowsTransform,
 }: Props) {
   const { watch } = useFormContext();
+
   const values = watch(fieldName);
   const rows = typeof values === "string" ? JSON.parse(values || "[]") : values;
 
   return (
     <FormDataWithModalProvider>
       {!rows || rows.length === 0 ? (
-        <Box
-          sx={{
-            p: 3,
-            textAlign: "center",
-            border: "1px dashed #ccc",
-            borderRadius: 1,
-            mb: 2,
-            backgroundColor: "action.hover",
-          }}
-        >
-          <EmptyContent />
-        </Box>
+        <FormDataEmptyInfo />
       ) : (
-        <FormDataTable
-          rowsTransform={rowsTransform}
-          columns={columns}
-          rows={rows}
-          fieldName={fieldName}
-        />
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            <FormDataTable
+              rowsTransform={rowsTransform}
+              columns={columns}
+              rows={rows}
+              fieldName={fieldName}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <FormDataAddButton />
+          </Grid>
+        </Grid>
       )}
       <FormDataModal fieldName={fieldName}>
         <InnerForm />

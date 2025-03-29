@@ -11,8 +11,8 @@ function InputObservationForm() {
       fullWidth
       multiline
       rows={4}
-      value={newItem}
       onChange={(e) => setNewItem(e.target.value)}
+      defaultValue={newItem || ""}
       placeholder="Describa el estado del vehículo al ingresar al taller"
       helperText="Incluya detalles como rasguños, abolladuras o cualquier detalle relevante sobre el estado del vehículo"
     />

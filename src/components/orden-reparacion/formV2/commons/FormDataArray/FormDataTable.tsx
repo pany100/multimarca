@@ -15,7 +15,7 @@ type Props = {
 
 function FormDataTable({ rowsTransform, columns, rows, fieldName }: Props) {
   const { setModalOpen } = useModalContext();
-  const { setCurrentItem } = useFormDataWithModalContext();
+  const { setCurrentItem, setNewItem } = useFormDataWithModalContext();
   const { watch, setValue } = useFormContext();
   const values = watch(fieldName);
 
@@ -48,8 +48,10 @@ function FormDataTable({ rowsTransform, columns, rows, fieldName }: Props) {
                   );
                   if (typeof values === "string") {
                     setCurrentItem(item?.value);
+                    setNewItem(item?.value);
                   } else {
                     setCurrentItem(item);
+                    setNewItem(item);
                   }
                   setModalOpen(true);
                 }}

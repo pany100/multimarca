@@ -16,8 +16,8 @@ type Props = {
 
 function FormDataModal({ children, fieldName }: Props) {
   const { modalOpen, setModalOpen } = useModalContext();
-  const { setValue, watch } = useFormContext();
-  const currentFormItems = watch(fieldName);
+  const { setValue, getValues } = useFormContext();
+
   const { currentItem, setCurrentItem, newItem, setNewItem } =
     useFormDataWithModalContext();
 
@@ -30,6 +30,7 @@ function FormDataModal({ children, fieldName }: Props) {
   const handleAddString = () => {
     const trimedValue = newItem.trim();
     if (trimedValue) {
+      const currentFormItems = JSON.parse(getValues(fieldName) || "[]");
       if (currentItem) {
         const updatedItems = currentFormItems.map((item: string) => {
           if (item === currentItem.trim()) {
@@ -45,6 +46,7 @@ function FormDataModal({ children, fieldName }: Props) {
   };
 
   const handleAddObject = () => {
+    const currentFormItems = getValues(fieldName) || [];
     if (currentItem) {
       const updatedItems = currentFormItems.map((item: any) => {
         if (item.id === currentItem.id) {
@@ -59,7 +61,7 @@ function FormDataModal({ children, fieldName }: Props) {
   };
 
   const handleAdd = () => {
-    if (typeof currentFormItems === "string") {
+    if (typeof newItem === "string") {
       handleAddString();
     } else {
       // handleAddObject();
@@ -81,7 +83,7 @@ function FormDataModal({ children, fieldName }: Props) {
           variant="contained"
           disabled={!newItem}
         >
-          Agregar
+          {currentItem ? "Actualizar" : "Agregar"}
         </Button>
       </DialogActions>
     </Dialog>
