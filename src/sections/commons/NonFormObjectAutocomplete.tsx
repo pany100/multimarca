@@ -1,6 +1,6 @@
 import { Autocomplete, FormControl, TextField } from "@mui/material";
 import debounce from "lodash/debounce";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface ObjectAutocomplete {
   object: any;
@@ -11,17 +11,41 @@ type Props = {
   searchOptions: (query: string) => Promise<ObjectAutocomplete[]>;
   selectOption: (option: ObjectAutocomplete | null) => void;
   getOptionLabel: (option: ObjectAutocomplete) => string;
+  initialValue?: string | number;
+  initialOptions: (id: string) => Promise<ObjectAutocomplete>;
   label: string;
 };
 
 function NonFormObjectAutocomplete({
   searchOptions,
+  initialOptions,
   selectOption,
   getOptionLabel,
+  initialValue,
   label,
 }: Props) {
   const [options, setOptions] = useState<ObjectAutocomplete[]>([]);
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    const fetchInitialOptions = async () => {
+      setLoading(true);
+      try {
+        if (!initialValue) {
+          return;
+        }
+        console.log(initialValue);
+        const option = await initialOptions(initialValue.toString());
+        console.log(option);
+        setOptions([option]);
+      } catch (error) {
+        setOptions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInitialOptions();
+  }, []);
 
   const fetchOptions = debounce(async (query: string) => {
     setLoading(true);
@@ -52,7 +76,12 @@ function NonFormObjectAutocomplete({
           }
         }}
         noOptionsText="No hay opciones"
-        isOptionEqualToValue={(option, value) => option.value === value.value}
+        isOptionEqualToValue={(option, value) => {
+          console.log("IS QUEAL");
+          console.log(option);
+          console.log(value);
+          return option.value === value.value;
+        }}
         getOptionLabel={getOptionLabel}
         renderInput={(params) => (
           <TextField {...params} label={label} fullWidth />

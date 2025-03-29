@@ -14,6 +14,9 @@ export async function GET(
         label: true,
         name: true,
         brand: true,
+        buyPrice: true,
+        markup: true,
+        id: true,
       },
     });
 

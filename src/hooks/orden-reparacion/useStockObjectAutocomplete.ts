@@ -27,7 +27,21 @@ function useStockObjectAutocomplete() {
       })
     );
   };
-  return { searchStockObject };
+
+  const initialStock = async (id: string) => {
+    const response = await authFetch(`/api/stock/${id}`);
+    const data = await response.json();
+    return {
+      object: {
+        buyPrice: data.buyPrice,
+        markup: data.markup,
+        name: data.name,
+        id: data.id,
+      },
+      value: data.id,
+    };
+  };
+  return { searchStockObject, initialStock };
 }
 
 export default useStockObjectAutocomplete;

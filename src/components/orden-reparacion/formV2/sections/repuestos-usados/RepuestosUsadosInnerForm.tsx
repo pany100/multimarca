@@ -9,7 +9,8 @@ import { Grid, TextField } from "@mui/material";
 
 function RepuestosUsadosInnerForm() {
   const { newItem, setNewItem, currentItem } = useFormDataWithModalContext();
-  const { searchStockObject } = useStockObjectAutocomplete();
+  const { searchStockObject, initialStock } = useStockObjectAutocomplete();
+
   return (
     <Grid container spacing={1}>
       <Grid item xs={12} sx={{ mb: 1 }}>
@@ -19,6 +20,8 @@ function RepuestosUsadosInnerForm() {
           getOptionLabel={(option: { object: StockObject }) =>
             option.object.name
           }
+          initialOptions={initialStock}
+          initialValue={currentItem?.stock?.id}
           selectOption={(option: ObjectAutocomplete | null) => {
             if (option) {
               const precioVentaCalculado =
