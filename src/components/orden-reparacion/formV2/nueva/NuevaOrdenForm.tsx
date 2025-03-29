@@ -9,6 +9,7 @@ import AutoSection from "../sections/autos/AutoSection";
 import ClientObservationSection from "../sections/client-observations/ClientObservationSection";
 import InputObservationSection from "../sections/input-observations/InputObservationsSection";
 import MechanicsSection from "../sections/mechanics/MechanicsSection";
+import RepuestosUsadosSection from "../sections/repuestos-usados/RepuestosUsadosSection";
 
 function NuevaOrdenForm() {
   const methods = useForm({
@@ -32,6 +33,9 @@ function NuevaOrdenForm() {
           </FormSection>
           <FormSection title="Mecánicos">
             <MechanicsSection />
+          </FormSection>
+          <FormSection title="Repuestos Usados">
+            <RepuestosUsadosSection />
           </FormSection>
         </form>
       </FormProvider>
