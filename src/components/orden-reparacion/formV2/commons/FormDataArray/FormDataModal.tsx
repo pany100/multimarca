@@ -50,13 +50,13 @@ function FormDataModal({ children, fieldName }: Props) {
     if (currentItem) {
       const updatedItems = currentFormItems.map((item: any) => {
         if (item.id === currentItem.id) {
-          return currentItem;
+          return newItem;
         }
         return item;
       });
-      setValue(fieldName, JSON.stringify(updatedItems));
+      setValue(fieldName, updatedItems);
     } else {
-      setValue(fieldName, JSON.stringify([...currentFormItems, newItem]));
+      setValue(fieldName, [...currentFormItems, newItem]);
     }
   };
 
@@ -64,7 +64,7 @@ function FormDataModal({ children, fieldName }: Props) {
     if (typeof newItem === "string") {
       handleAddString();
     } else {
-      // handleAddObject();
+      handleAddObject();
     }
     handleClose();
   };

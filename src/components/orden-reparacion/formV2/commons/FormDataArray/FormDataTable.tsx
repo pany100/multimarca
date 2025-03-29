@@ -70,9 +70,11 @@ function FormDataTable({ rowsTransform, columns, rows, fieldName }: Props) {
                   );
                   let elements = [];
                   let index = null;
+                  let isString = false;
                   if (typeof values === "string") {
                     elements = JSON.parse(values);
                     index = elements.findIndex((r: any) => r === item.value);
+                    isString = true;
                   } else {
                     elements = values;
                     index = elements.findIndex(
@@ -81,7 +83,11 @@ function FormDataTable({ rowsTransform, columns, rows, fieldName }: Props) {
                   }
                   const newValues = [...elements];
                   newValues.splice(index, 1);
-                  setValue(fieldName, JSON.stringify(newValues));
+                  if (isString) {
+                    setValue(fieldName, JSON.stringify(newValues));
+                  } else {
+                    setValue(fieldName, newValues);
+                  }
                 }}
               >
                 <DeleteIcon fontSize="small" />

@@ -5,10 +5,11 @@ type Props = {
   options: { value: string; label: string }[];
   onChange: (value: string) => void;
   label: string;
+  initialValue?: string;
 };
 
-function NonFormSelect({ options, onChange, label }: Props) {
-  const [value, setValue] = useState<string | null>("");
+function NonFormSelect({ options, onChange, label, initialValue }: Props) {
+  const [value, setValue] = useState<string | null>(initialValue || "");
 
   return (
     <FormControl fullWidth sx={{ mt: 1 }}>

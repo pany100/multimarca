@@ -8,12 +8,13 @@ import FormSection from "../commons/FormSection";
 import AutoSection from "../sections/autos/AutoSection";
 import ClientObservationSection from "../sections/client-observations/ClientObservationSection";
 import InputObservationSection from "../sections/input-observations/InputObservationsSection";
+import MechanicsSection from "../sections/mechanics/MechanicsSection";
 
 function NuevaOrdenForm() {
   const methods = useForm({
     resolver: yupResolver(schema),
   });
-  const { handleSubmit, control } = methods;
+  const { handleSubmit, control, watch } = methods;
   const { onSubmit } = useNuevaOrden({ control });
 
   return (
@@ -29,6 +30,10 @@ function NuevaOrdenForm() {
           <FormSection title="Observaciones de Entrada">
             <InputObservationSection />
           </FormSection>
+          <FormSection title="Mecánicos">
+            <MechanicsSection />
+          </FormSection>
+          {JSON.stringify(watch())}
         </form>
       </FormProvider>
       <FormSnackbar />
