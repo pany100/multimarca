@@ -23,6 +23,7 @@ function useStockObjectAutocomplete() {
         markup: number;
       }) => ({
         value: repuesto.id,
+        label: repuesto.name,
         object: repuesto,
       })
     );
@@ -38,6 +39,7 @@ function useStockObjectAutocomplete() {
         name: data.name,
         id: data.id,
       },
+      label: data.name,
       value: data.id,
     };
   };

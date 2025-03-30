@@ -5,11 +5,15 @@ import { useEffect, useState } from "react";
 export interface ObjectAutocomplete {
   object: any;
   value: string | number;
+  label: string;
 }
 
 type Props = {
   searchOptions: (query: string) => Promise<ObjectAutocomplete[]>;
-  selectOption: (option: ObjectAutocomplete | null) => void;
+  selectOption: (
+    option: ObjectAutocomplete | null,
+    initialRender?: boolean
+  ) => void;
   getOptionLabel: (option: ObjectAutocomplete) => string;
   initialValue?: string | number;
   initialOptions: (id: string) => Promise<ObjectAutocomplete>;
@@ -34,10 +38,9 @@ function NonFormObjectAutocomplete({
         if (!initialValue) {
           return;
         }
-        console.log(initialValue);
         const option = await initialOptions(initialValue.toString());
-        console.log(option);
         setOptions([option]);
+        selectOption(option, true);
       } catch (error) {
         setOptions([]);
       } finally {
@@ -66,7 +69,8 @@ function NonFormObjectAutocomplete({
         options={options}
         loading={loading}
         onChange={(_, newValue) => {
-          selectOption(newValue);
+          debugger;
+          selectOption(newValue, false);
         }}
         onInputChange={(_, newInputValue) => {
           if (newInputValue.length >= 2) {

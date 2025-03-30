@@ -1,79 +1,52 @@
 import { useFormDataWithModalContext } from "@/contexts/FormDataWithModalContext";
-import useStockObjectAutocomplete, {
-  StockObject,
-} from "@/hooks/orden-reparacion/useStockObjectAutocomplete";
-import NonFormObjectAutocomplete, {
-  ObjectAutocomplete,
-} from "@/sections/commons/NonFormObjectAutocomplete";
-import { Grid, TextField } from "@mui/material";
+import useRepuestosObjectAutocomplete from "@/hooks/orden-reparacion/useRepuestosObjectAutocomplete";
+import useStockObjectAutocomplete from "@/hooks/orden-reparacion/useStockObjectAutocomplete";
+import { Grid } from "@mui/material";
+import ORepObjectAutocomplete from "../../commons/inputs/ORepObjectAutocomplete";
+import ORepTextField from "../../commons/inputs/ORepTextField";
 
 function RepuestosUsadosInnerForm() {
   const { newItem, setNewItem, currentItem } = useFormDataWithModalContext();
   const { searchStockObject, initialStock } = useStockObjectAutocomplete();
+  const { selectOption } = useRepuestosObjectAutocomplete();
 
   return (
     <Grid container spacing={1}>
       <Grid item xs={12} sx={{ mb: 1 }}>
-        <NonFormObjectAutocomplete
+        <ORepObjectAutocomplete
           label="Repuesto"
           searchOptions={searchStockObject}
-          getOptionLabel={(option: { object: StockObject }) =>
-            option.object.name
-          }
           initialOptions={initialStock}
-          initialValue={currentItem?.stock?.id}
-          selectOption={(option: ObjectAutocomplete | null) => {
-            if (option) {
-              const precioVentaCalculado =
-                option.object.buyPrice *
-                (1 + (option.object.markup || 0) / 100);
-              setNewItem({
-                id: option.value,
-                ...newItem,
-                stock: {
-                  id: option.value,
-                  name: option.object.name,
-                },
-                precioCompra: option.object.buyPrice,
-                precioVenta: precioVentaCalculado.toFixed(2),
-              });
-            }
-          }}
+          selectOption={selectOption}
         />
       </Grid>
       <Grid item xs={12}>
-        <TextField
+        <ORepTextField
           label="Precio Compra"
           type="number"
-          value={newItem?.precioCompra || currentItem?.precioCompra || ""}
+          defaultValue={
+            newItem?.precioCompra || currentItem?.precioCompra || ""
+          }
           onChange={(e) =>
             setNewItem({ ...newItem, precioCompra: Number(e.target.value) })
           }
-          fullWidth
-          variant="outlined"
-          margin="normal"
-          InputLabelProps={{ shrink: true }}
         />
       </Grid>
       <Grid item xs={12}>
-        <TextField
+        <ORepTextField
           label="Precio Venta"
           type="number"
-          value={newItem?.precioVenta || currentItem?.precioVenta || ""}
+          defaultValue={newItem?.precioVenta || currentItem?.precioVenta || ""}
           onChange={(e) =>
             setNewItem({ ...newItem, precioVenta: Number(e.target.value) })
           }
-          fullWidth
-          variant="outlined"
-          margin="normal"
-          InputLabelProps={{ shrink: true }}
         />
       </Grid>
       <Grid item xs={12}>
-        <TextField
+        <ORepTextField
           label="Unidades Consumidas"
           type="number"
-          value={
+          defaultValue={
             newItem?.unidadesConsumidas || currentItem?.unidadesConsumidas || ""
           }
           onChange={(e) =>
@@ -82,10 +55,6 @@ function RepuestosUsadosInnerForm() {
               unidadesConsumidas: Number(e.target.value),
             })
           }
-          fullWidth
-          variant="outlined"
-          margin="normal"
-          InputLabelProps={{ shrink: true }}
         />
       </Grid>
     </Grid>
