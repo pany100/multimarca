@@ -33,12 +33,7 @@ function useStockObjectAutocomplete() {
     const response = await authFetch(`/api/stock/${id}`);
     const data = await response.json();
     return {
-      object: {
-        buyPrice: data.buyPrice,
-        markup: data.markup,
-        name: data.name,
-        id: data.id,
-      },
+      object: data,
       label: data.name,
       value: data.id,
     };

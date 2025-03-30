@@ -1,6 +1,6 @@
 import { Autocomplete, FormControl, TextField } from "@mui/material";
 import debounce from "lodash/debounce";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export interface AutocompleteObjectOption {
   label: string;
@@ -13,6 +13,7 @@ type Props = {
   searchOptions: (query: string) => Promise<AutocompleteObjectOption[]>;
   initialOptions: (id: string) => Promise<AutocompleteObjectOption>;
   selectOption: (option: AutocompleteObjectOption | null) => void;
+  initialValue?: string;
 };
 
 function ORepObjectAutocomplete({
@@ -20,9 +21,31 @@ function ORepObjectAutocomplete({
   searchOptions,
   selectOption,
   initialOptions,
+  initialValue,
 }: Props) {
   const [options, setOptions] = useState<AutocompleteObjectOption[]>([]);
   const [loading, setLoading] = useState(false);
+  const [selectedValue, setSelectedValue] =
+    useState<AutocompleteObjectOption | null>(null);
+
+  useEffect(() => {
+    const fetchInitialOptions = async () => {
+      setLoading(true);
+      try {
+        if (!initialValue) {
+          return;
+        }
+        const option = await initialOptions(initialValue);
+        setOptions([option]);
+        setSelectedValue(option);
+      } catch (error) {
+        setOptions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchInitialOptions();
+  }, []);
 
   const fetchOptions = debounce(async (query: string) => {
     setLoading(true);
@@ -41,8 +64,10 @@ function ORepObjectAutocomplete({
     <FormControl fullWidth sx={{ mt: 1 }}>
       <Autocomplete
         options={options}
+        value={selectedValue}
         loading={loading}
         onChange={(_, newValue) => {
+          setSelectedValue(newValue);
           selectOption(newValue);
         }}
         onInputChange={(_, newInputValue) => {

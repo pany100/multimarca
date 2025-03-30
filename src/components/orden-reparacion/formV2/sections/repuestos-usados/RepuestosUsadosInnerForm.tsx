@@ -9,7 +9,6 @@ function RepuestosUsadosInnerForm() {
   const { newItem, setNewItem, currentItem } = useFormDataWithModalContext();
   const { searchStockObject, initialStock } = useStockObjectAutocomplete();
   const { selectOption } = useRepuestosObjectAutocomplete();
-
   return (
     <Grid container spacing={1}>
       <Grid item xs={12} sx={{ mb: 1 }}>
@@ -18,6 +17,7 @@ function RepuestosUsadosInnerForm() {
           searchOptions={searchStockObject}
           initialOptions={initialStock}
           selectOption={selectOption}
+          initialValue={currentItem?.id}
         />
       </Grid>
       <Grid item xs={12}>
