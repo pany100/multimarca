@@ -6,17 +6,21 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Typography,
 } from "@mui/material";
+import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 type Props = {
   fieldName: string;
+  validateForm?: (newItem: any) => Record<string, string> | null;
   children: React.ReactNode;
 };
 
-function FormDataModal({ children, fieldName }: Props) {
+function FormDataModal({ children, fieldName, validateForm }: Props) {
   const { modalOpen, setModalOpen } = useModalContext();
   const { setValue, getValues } = useFormContext();
+  const [errors, setErrors] = useState<Record<string, string> | null>(null);
 
   const { currentItem, setCurrentItem, newItem, setNewItem } =
     useFormDataWithModalContext();
@@ -61,6 +65,13 @@ function FormDataModal({ children, fieldName }: Props) {
   };
 
   const handleAdd = () => {
+    if (validateForm) {
+      const errors = validateForm(newItem);
+      setErrors(errors);
+      if (errors) {
+        return;
+      }
+    }
     if (typeof newItem === "string") {
       handleAddString();
     } else {
@@ -74,7 +85,19 @@ function FormDataModal({ children, fieldName }: Props) {
       <DialogTitle>
         {currentItem ? "Actualizar elemento" : "Agregar elemento"}
       </DialogTitle>
-      <DialogContent>{children}</DialogContent>
+      <DialogContent>
+        {children}
+        {errors &&
+          Object.values(errors).map((error) => (
+            <Typography
+              color="error"
+              variant="caption"
+              sx={{ mt: 1, display: "block" }}
+            >
+              {error}
+            </Typography>
+          ))}
+      </DialogContent>
       <DialogActions sx={{ pr: 4, pb: 4 }}>
         <Button onClick={handleClose}>Cancelar</Button>
         <Button

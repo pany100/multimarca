@@ -12,6 +12,7 @@ type Props = {
   form: React.ComponentType<any>;
   columns: GridColDef[];
   rowsTransform?: (row: any, index: number) => any;
+  validateForm?: (newItem: any) => Record<string, string> | null;
   children: React.ReactNode;
 };
 
@@ -20,6 +21,7 @@ function FormDataArrayWithModal({
   form: InnerForm,
   columns,
   rowsTransform,
+  validateForm,
   children,
 }: Props) {
   const { watch } = useFormContext();
@@ -46,7 +48,7 @@ function FormDataArrayWithModal({
           </Grid>
         </Grid>
       )}
-      <FormDataModal fieldName={fieldName}>
+      <FormDataModal fieldName={fieldName} validateForm={validateForm}>
         <InnerForm />
       </FormDataModal>
     </FormDataWithModalProvider>
