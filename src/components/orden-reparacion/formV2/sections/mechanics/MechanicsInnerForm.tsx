@@ -26,13 +26,14 @@ function MechanicsInnerForm() {
       <Grid item xs={12}>
         <TextField
           label="Detalle del trabajo"
-          value={currentItem?.detalle}
+          defaultValue={currentItem?.detalle}
           onChange={(e) => setNewItem({ ...newItem, detalle: e.target.value })}
           multiline
           fullWidth
           rows={3}
           variant="outlined"
           placeholder="Descripción del trabajo a realizar..."
+          InputLabelProps={{ shrink: true }}
         />
       </Grid>
     </Grid>
