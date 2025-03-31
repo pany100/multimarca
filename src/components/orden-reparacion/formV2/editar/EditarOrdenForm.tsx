@@ -11,6 +11,7 @@ import ClientObservationSection from "../sections/client-observations/ClientObse
 import DetalleControlesSection from "../sections/detalle-controles/DetalleControlesSection";
 import InputObservationSection from "../sections/input-observations/InputObservationsSection";
 import MechanicsSection from "../sections/mechanics/MechanicsSection";
+import OutputObservationsSection from "../sections/output-observations/OutputObservationsSection";
 import ReparacionTercerosSection from "../sections/reparacion-terceros/ReparacionTercerosSection";
 import RepuestosUsadosSection from "../sections/repuestos-usados/RepuestosUsadosSection";
 import ResumenCostosSection from "../sections/resumen-costos/ResumenCostosSection";
@@ -161,6 +162,9 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         </FormSection>
         <FormSection title="Detalle de controles">
           <DetalleControlesSection />
+        </FormSection>
+        <FormSection title="Observaciones de salida">
+          <OutputObservationsSection />
         </FormSection>
         <FormSection title="Informe del Scanner">
           <ScannerForm
