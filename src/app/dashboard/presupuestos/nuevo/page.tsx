@@ -1,6 +1,8 @@
 "use client";
 
-import NuevoPresupuestoForm from "@/components/orden-reparacion/NuevoPresupuestoForm";
+import FormSnackbar from "@/components/orden-reparacion/formV2/commons/FormSnackbar";
+import NuevoPresupuestoForm from "@/components/presupuesto/NuevoPresupuestoForm";
+import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -30,7 +32,10 @@ const NuevaOrdenReparacionPage = () => {
         subheader="Complete los datos para crear un nuevo presupuesto"
       />
       <CardContent>
-        <NuevoPresupuestoForm templateId={templateIdInt} />
+        <SnackbarProvider>
+          <NuevoPresupuestoForm templateId={templateIdInt} />
+          <FormSnackbar />
+        </SnackbarProvider>
       </CardContent>
     </Card>
   );

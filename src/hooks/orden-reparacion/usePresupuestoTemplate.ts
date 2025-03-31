@@ -24,6 +24,7 @@ function usePresupuestoTemplate({ templateId, setValue }: Props) {
                 precioCompra: Number(repuesto.precioCompra),
                 precioVenta: Number(repuesto.precioVenta),
                 unidadesConsumidas: repuesto.unidadesConsumidas,
+                id: Math.floor(Math.random() * 1000000),
               }))
             );
             setValue(
@@ -36,6 +37,7 @@ function usePresupuestoTemplate({ templateId, setValue }: Props) {
                   id: reparacion.proveedorId,
                   name: reparacion.proveedor.name,
                 },
+                id: Math.floor(Math.random() * 1000000),
               }))
             );
             setValue(
@@ -44,6 +46,7 @@ function usePresupuestoTemplate({ templateId, setValue }: Props) {
                 manoDeObra: { name: trabajo.descripcion },
                 precioUnitario: Number(trabajo.precioUnitario),
                 diasParaRecordatorio: trabajo.diasParaRecordatorio,
+                id: Math.floor(Math.random() * 1000000),
               }))
             );
           } else {
