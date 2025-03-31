@@ -3,10 +3,12 @@ import schema from "@/sections/ordenes-reparacion/editar/schema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
+import ScannerForm from "../../ScannerForm";
 import FormActions from "../commons/FormActions";
 import FormSection from "../commons/FormSection";
 import AutoSection from "../sections/autos/AutoSection";
 import ClientObservationSection from "../sections/client-observations/ClientObservationSection";
+import DetalleControlesSection from "../sections/detalle-controles/DetalleControlesSection";
 import InputObservationSection from "../sections/input-observations/InputObservationsSection";
 import MechanicsSection from "../sections/mechanics/MechanicsSection";
 import ReparacionTercerosSection from "../sections/reparacion-terceros/ReparacionTercerosSection";
@@ -156,6 +158,16 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         </FormSection>
         <FormSection title="Trabajos Realizados">
           <TrabajosRealizadosSection />
+        </FormSection>
+        <FormSection title="Detalle de controles">
+          <DetalleControlesSection />
+        </FormSection>
+        <FormSection title="Informe del Scanner">
+          <ScannerForm
+            ordenReparacion={ordenReparacion}
+            selectedFile={selectedFile}
+            setSelectedFile={setSelectedFile}
+          />
         </FormSection>
         <FormSection title="Resumen de Costos">
           <ResumenCostosSection />
