@@ -5,8 +5,11 @@ import OtrosTrabajosForm from "./OtrosTrabajosForm";
 import TrabajoDeListaForm from "./TrabajoDeListaForm";
 
 function TrabajosRealizadosInnerForm() {
-  const [tipoTrabajo, setTipoTrabajo] = useState<"lista" | "otros">("lista");
-  const { newItem, setNewItem, currentItem } = useFormDataWithModalContext();
+  const { currentItem } = useFormDataWithModalContext();
+  const [tipoTrabajo, setTipoTrabajo] = useState<"lista" | "otros">(
+    currentItem?.manoDeObra?.id ? "lista" : "otros"
+  );
+  const { setNewItem } = useFormDataWithModalContext();
 
   return (
     <Box sx={{ mb: 3 }}>
@@ -19,6 +22,7 @@ function TrabajosRealizadosInnerForm() {
         ) => {
           if (newTipoTrabajo !== null) {
             setTipoTrabajo(newTipoTrabajo);
+            setNewItem(null);
           }
         }}
         aria-label="tipo de trabajo"
