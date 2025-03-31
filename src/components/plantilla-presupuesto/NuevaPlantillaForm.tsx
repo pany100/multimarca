@@ -1,6 +1,5 @@
 "use client";
 
-import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import usePlantillaForm from "@/hooks/plantilla/usePlantillaForm";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box } from "@mui/material";
@@ -21,28 +20,26 @@ function NuevaPlantillaForm() {
   const { onSubmit } = usePlantillaForm();
 
   return (
-    <SnackbarProvider>
-      <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(onSubmit)}>
-          <Box sx={{ pb: 2 }}>
-            <CustomInputText name="nombre" label="Nombre de la plantilla" />
-          </Box>
-          <FormSection title="Repuestos Usados">
-            <RepuestosUsadosSection />
-          </FormSection>
-          <FormSection title="Reparación / Repuestos de terceros">
-            <ReparacionTercerosSection />
-          </FormSection>
-          <FormSection title="Trabajos Realizados">
-            <TrabajosRealizadosSection />
-          </FormSection>
-          <FormActions
-            href="/dashboard/plantilla-presupuesto"
-            label="Plantilla"
-          />
-        </form>
-      </FormProvider>
-    </SnackbarProvider>
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <Box sx={{ pb: 2 }}>
+          <CustomInputText name="nombre" label="Nombre de la plantilla" />
+        </Box>
+        <FormSection title="Repuestos Usados">
+          <RepuestosUsadosSection />
+        </FormSection>
+        <FormSection title="Reparación / Repuestos de terceros">
+          <ReparacionTercerosSection />
+        </FormSection>
+        <FormSection title="Trabajos Realizados">
+          <TrabajosRealizadosSection />
+        </FormSection>
+        <FormActions
+          href="/dashboard/plantilla-presupuesto"
+          label="Plantilla"
+        />
+      </form>
+    </FormProvider>
   );
 }
 

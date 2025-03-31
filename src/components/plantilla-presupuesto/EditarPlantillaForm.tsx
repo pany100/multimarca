@@ -3,7 +3,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import schema from "./schema";
 
-import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { Box } from "@mui/material";
 import { FormProvider } from "react-hook-form";
 import CustomInputText from "../formV2/CustomInputText";
@@ -62,12 +61,14 @@ function EditarPlantillaForm({ plantilla }: Props) {
         manoDeObra: { name: trabajo.descripcion },
         precioUnitario: Number(trabajo.precioUnitario),
         diasParaRecordatorio: trabajo.diasParaRecordatorio,
+        id: Math.floor(Math.random() * 1000000),
       })),
       repuestosUsados: plantilla.repuestosUsados.map((repuesto) => ({
         stock: { id: repuesto.stockId, name: repuesto.stock.name },
         precioCompra: Number(repuesto.precioCompra),
         precioVenta: Number(repuesto.precioVenta),
         unidadesConsumidas: repuesto.unidadesConsumidas,
+        id: Math.floor(Math.random() * 1000000),
       })),
       reparacionesDeTercero: plantilla.reparacionesDeTercero.map(
         (reparacion) => ({
@@ -78,6 +79,7 @@ function EditarPlantillaForm({ plantilla }: Props) {
             id: reparacion.proveedorId,
             name: reparacion.proveedor.name,
           },
+          id: Math.floor(Math.random() * 1000000),
         })
       ),
     },
@@ -86,28 +88,26 @@ function EditarPlantillaForm({ plantilla }: Props) {
   const { onEditSubmit } = usePlantillaForm(plantilla.id);
 
   return (
-    <SnackbarProvider>
-      <FormProvider {...methods}>
-        <form onSubmit={handleSubmit(onEditSubmit)}>
-          <Box sx={{ pb: 2 }}>
-            <CustomInputText name="nombre" label="Nombre de la plantilla" />
-          </Box>
-          <FormSection title="Repuestos Usados">
-            <RepuestosUsadosSection />
-          </FormSection>
-          <FormSection title="Reparación / Repuestos de terceros">
-            <ReparacionTercerosSection />
-          </FormSection>
-          <FormSection title="Trabajos Realizados">
-            <TrabajosRealizadosSection />
-          </FormSection>
-          <FormActions
-            href="/dashboard/plantilla-presupuesto"
-            label="Plantilla"
-          />
-        </form>
-      </FormProvider>
-    </SnackbarProvider>
+    <FormProvider {...methods}>
+      <form onSubmit={handleSubmit(onEditSubmit)}>
+        <Box sx={{ pb: 2 }}>
+          <CustomInputText name="nombre" label="Nombre de la plantilla" />
+        </Box>
+        <FormSection title="Repuestos Usados">
+          <RepuestosUsadosSection />
+        </FormSection>
+        <FormSection title="Reparación / Repuestos de terceros">
+          <ReparacionTercerosSection />
+        </FormSection>
+        <FormSection title="Trabajos Realizados">
+          <TrabajosRealizadosSection />
+        </FormSection>
+        <FormActions
+          href="/dashboard/plantilla-presupuesto"
+          label="Plantilla"
+        />
+      </form>
+    </FormProvider>
   );
 }
 

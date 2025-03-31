@@ -1,7 +1,8 @@
 "use client";
 
-import EditarPlantillaForm from "@/components/orden-reparacion/EditarPlantillaForm";
+import EditarPlantillaForm from "@/components/plantilla-presupuesto/EditarPlantillaForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import {
   Box,
   Card,
@@ -62,7 +63,11 @@ const EditarPlantillaPage = ({ params }: { params: { id: string } }) => {
         subheader="Complete los datos para editar la plantilla"
       />
       <CardContent>
-        {plantilla && <EditarPlantillaForm plantilla={plantilla} />}
+        {plantilla && (
+          <SnackbarProvider>
+            <EditarPlantillaForm plantilla={plantilla} />
+          </SnackbarProvider>
+        )}
       </CardContent>
     </Card>
   );
