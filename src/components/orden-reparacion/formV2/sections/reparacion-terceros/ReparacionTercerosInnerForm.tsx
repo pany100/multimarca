@@ -1,6 +1,7 @@
+import ImageInput from "@/components/ImageInput";
 import { useFormDataWithModalContext } from "@/contexts/FormDataWithModalContext";
 import useReparacionTercerosObjectAutocomplete from "@/hooks/orden-reparacion/useReparacionTercerosObjectAutocomplete";
-import { Grid } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import ORepObjectAutocomplete from "../../commons/inputs/ORepObjectAutocomplete";
 import ORepTextField from "../../commons/inputs/ORepTextField";
 
@@ -53,6 +54,23 @@ function ReparacionTercerosInnerForm() {
             setNewItem({ ...newItem, precioVenta: Number(e.target.value) })
           }
         />
+      </Grid>
+      <Grid item xs={12}>
+        <Typography variant="subtitle2" gutterBottom>
+          Recibo
+        </Typography>
+        <Box sx={{ overflow: "hidden" }}>
+          <ImageInput
+            label=""
+            image={newItem?.recibo}
+            setImage={(image: string | null) => {
+              setNewItem({
+                ...newItem,
+                recibo: image,
+              });
+            }}
+          />
+        </Box>
       </Grid>
     </Grid>
   );
