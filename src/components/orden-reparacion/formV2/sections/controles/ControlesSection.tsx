@@ -9,8 +9,8 @@ function ControlesSection() {
   return (
     <Grid container spacing={3}>
       {checkControls.length > 0 && (
-        <Grid item xs={12}>
-          <CheckboxControls controls={checkControls} />
+        <Grid container item xs={12} spacing={2}>
+          <CheckboxControls />
         </Grid>
       )}
       {textControls.length > 0 && (
