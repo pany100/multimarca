@@ -11,6 +11,7 @@ import InputObservationSection from "../sections/input-observations/InputObserva
 import MechanicsSection from "../sections/mechanics/MechanicsSection";
 import ReparacionTercerosSection from "../sections/reparacion-terceros/ReparacionTercerosSection";
 import RepuestosUsadosSection from "../sections/repuestos-usados/RepuestosUsadosSection";
+import ResumenCostosSection from "../sections/resumen-costos/ResumenCostosSection";
 import TrabajosRealizadosSection from "../sections/trabajos-realizados/TrabajosRealizadosSection";
 
 function NuevaOrdenForm() {
@@ -44,6 +45,9 @@ function NuevaOrdenForm() {
           </FormSection>
           <FormSection title="Trabajos Realizados">
             <TrabajosRealizadosSection />
+          </FormSection>
+          <FormSection title="Resumen de Costos">
+            <ResumenCostosSection />
           </FormSection>
         </form>
       </FormProvider>
