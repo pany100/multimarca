@@ -13,6 +13,7 @@ import ReparacionTercerosSection from "../sections/reparacion-terceros/Reparacio
 import RepuestosUsadosSection from "../sections/repuestos-usados/RepuestosUsadosSection";
 import ResumenCostosSection from "../sections/resumen-costos/ResumenCostosSection";
 import TrabajosRealizadosSection from "../sections/trabajos-realizados/TrabajosRealizadosSection";
+import FormActions from "../commons/FormActions";
 
 function NuevaOrdenForm() {
   const methods = useForm({
@@ -49,6 +50,7 @@ function NuevaOrdenForm() {
           <FormSection title="Resumen de Costos">
             <ResumenCostosSection />
           </FormSection>
+          <FormActions />
         </form>
       </FormProvider>
       <FormSnackbar />
