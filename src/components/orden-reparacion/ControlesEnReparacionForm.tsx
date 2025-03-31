@@ -25,10 +25,9 @@ type Props = {
 };
 
 const ControlesEnReparacionForm: React.FC<Props> = ({ controlesMecanicos }) => {
-  const { handleControlChange, getGroupedControls, getControlStats, control } =
-    useControles({
-      controlesMecanicos,
-    });
+  const { handleControlChange, getGroupedControls, control } = useControles({
+    controlesMecanicos,
+  });
 
   const controlesEnForm = useWatch({ control, name: "controlesEnReparacion" });
   const controlGroups = getGroupedControls();

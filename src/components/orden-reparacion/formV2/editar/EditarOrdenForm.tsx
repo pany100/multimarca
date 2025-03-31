@@ -8,6 +8,7 @@ import FormActions from "../commons/FormActions";
 import FormSection from "../commons/FormSection";
 import AutoSection from "../sections/autos/AutoSection";
 import ClientObservationSection from "../sections/client-observations/ClientObservationSection";
+import ControlesSection from "../sections/controles/ControlesSection";
 import DetalleControlesSection from "../sections/detalle-controles/DetalleControlesSection";
 import InputObservationSection from "../sections/input-observations/InputObservationsSection";
 import MechanicsSection from "../sections/mechanics/MechanicsSection";
@@ -124,6 +125,8 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         (control) => ({
           id: control.id,
           valor: control.valor,
+          tipo: control.controlMecanico.type,
+          nombre: control.controlMecanico.name,
         })
       ),
     },
@@ -159,6 +162,9 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         </FormSection>
         <FormSection title="Trabajos Realizados">
           <TrabajosRealizadosSection />
+        </FormSection>
+        <FormSection title="Controles">
+          <ControlesSection />
         </FormSection>
         <FormSection title="Detalle de controles">
           <DetalleControlesSection />
