@@ -1,7 +1,8 @@
 "use client";
 
-import EditarOrdenReparacionForm from "@/components/orden-reparacion/EditarOrdenReparacionForm";
+import EditarOrdenForm from "@/components/orden-reparacion/formV2/editar/EditarOrdenForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import {
   Box,
   Card,
@@ -60,7 +61,9 @@ const EditarOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
 
       <CardContent>
         {ordenReparacion && (
-          <EditarOrdenReparacionForm ordenReparacion={ordenReparacion} />
+          <SnackbarProvider>
+            <EditarOrdenForm ordenReparacion={ordenReparacion} />
+          </SnackbarProvider>
         )}
       </CardContent>
     </Card>

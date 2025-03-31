@@ -1,11 +1,11 @@
 import { useFetch } from "@/contexts/FetchContext";
-import { useNuevaOrdenContext } from "@/contexts/NuevaOrdenContext";
+import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { useEffect, useRef, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 
 function usePrevOrdenes() {
   const { control, watch, setValue } = useFormContext();
-  const { setSnackbar } = useNuevaOrdenContext();
+  const { setSnackbar } = useSnackbarContext();
   const { authFetch } = useFetch();
   const [reparacionesAnteriores, setReparacionesAnteriores] = useState([]);
   const autoId = useWatch({ control, name: "autoId" });
