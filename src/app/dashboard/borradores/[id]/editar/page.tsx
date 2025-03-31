@@ -1,7 +1,8 @@
 "use client";
 
-import EditarBorradorForm from "@/components/orden-reparacion/EditarBorradorForm";
+import EditarBorradorForm from "@/components/borrador/EditarBorradorForm";
 import { useFetch } from "@/contexts/FetchContext";
+import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
 import {
   Box,
@@ -71,7 +72,11 @@ const EditarBorradorPage = ({ params }: { params: { id: string } }) => {
         subheader="Complete los datos para editar el borrador"
       />
       <CardContent>
-        {borrador && <EditarBorradorForm borrador={borrador} />}
+        {borrador && (
+          <SnackbarProvider>
+            <EditarBorradorForm borrador={borrador} />
+          </SnackbarProvider>
+        )}
       </CardContent>
     </Card>
   );
