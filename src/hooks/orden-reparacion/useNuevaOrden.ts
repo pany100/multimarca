@@ -1,10 +1,10 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import {
   calcularManoDeObra,
   calcularTotalOrdenReparacion,
 } from "@/utils/ordenHelper";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useWatch } from "react-hook-form";
 
 type Props = {
@@ -14,11 +14,7 @@ type Props = {
 function useNuevaOrden({ control }: Props) {
   const { authFetch } = useFetch();
   const router = useRouter();
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success",
-  });
+  const { snackbar, setSnackbar } = useSnackbarContext();
   const repuestosUsados = useWatch({ control, name: "repuestosUsados" });
   const reparacionesTerceros = useWatch({
     control,

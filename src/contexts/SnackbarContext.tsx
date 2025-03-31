@@ -6,16 +6,16 @@ interface SnackbarState {
   severity: "success" | "error" | "info" | "warning";
 }
 
-interface NuevaOrdenContextType {
+interface SnackbarContextType {
   snackbar: SnackbarState;
   setSnackbar: React.Dispatch<React.SetStateAction<SnackbarState>>;
 }
 
-const NuevaOrdenContext = createContext<NuevaOrdenContextType | undefined>(
+const SnackbarContext = createContext<SnackbarContextType | undefined>(
   undefined
 );
 
-export const NuevaOrdenProvider: React.FC<{ children: React.ReactNode }> = ({
+export const SnackbarProvider: React.FC<{ children: React.ReactNode }> = ({
   children,
 }) => {
   const [snackbar, setSnackbar] = useState<SnackbarState>({
@@ -25,18 +25,18 @@ export const NuevaOrdenProvider: React.FC<{ children: React.ReactNode }> = ({
   });
 
   return (
-    <NuevaOrdenContext.Provider value={{ snackbar, setSnackbar }}>
+    <SnackbarContext.Provider value={{ snackbar, setSnackbar }}>
       {children}
-    </NuevaOrdenContext.Provider>
+    </SnackbarContext.Provider>
   );
 };
 
-export const useNuevaOrdenContext = () => {
-  const context = useContext(NuevaOrdenContext);
+export const useSnackbarContext = () => {
+  const context = useContext(SnackbarContext);
   if (context === undefined) {
-    throw new Error("useNuevaOrden must be used within a NuevaOrdenProvider");
+    throw new Error("useSnackbar must be used within a SnackbarProvider");
   }
   return context;
 };
 
-export default NuevaOrdenContext;
+export default SnackbarContext;

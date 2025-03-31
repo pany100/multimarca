@@ -1,8 +1,10 @@
 "use client";
 
-import NuevaPlantillaForm from "@/components/orden-reparacion/NuevaPlantillaForm";
+import FormSnackbar from "@/components/orden-reparacion/formV2/commons/FormSnackbar";
+import NuevaPlantillaForm from "@/components/plantilla-presupuesto/NuevaPlantillaForm";
+import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
-import { Box, Paper, Typography } from "@mui/material";
+import { Card, CardContent, CardHeader } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -20,15 +22,19 @@ const NuevaOrdenReparacionPage = () => {
   }, [userData, router, isLoading]);
 
   return (
-    <Box sx={{ maxWidth: 800, margin: "0 auto", padding: 2 }}>
-      <Paper elevation={3} sx={{ padding: 3 }}>
-        <Typography variant="h4" component="h1" gutterBottom>
-          Nueva Plantilla de Presupuesto
-        </Typography>
+    <Card sx={{ padding: 3 }}>
+      <CardHeader
+        title="Nueva Plantilla de Presupuesto"
+        subheader="Complete los datos para crear una nueva plantilla de presupuesto"
+      />
 
-        <NuevaPlantillaForm />
-      </Paper>
-    </Box>
+      <CardContent>
+        <SnackbarProvider>
+          <NuevaPlantillaForm />
+          <FormSnackbar />
+        </SnackbarProvider>
+      </CardContent>
+    </Card>
   );
 };
 

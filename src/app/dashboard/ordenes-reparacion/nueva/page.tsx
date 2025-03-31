@@ -1,6 +1,8 @@
 "use client";
 
+import FormSnackbar from "@/components/orden-reparacion/formV2/commons/FormSnackbar";
 import NuevaOrdenForm from "@/components/orden-reparacion/formV2/nueva/NuevaOrdenForm";
+import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
 import { Card, CardContent, CardHeader } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -27,7 +29,10 @@ const NuevaOrdenReparacionPage = () => {
       />
 
       <CardContent>
-        <NuevaOrdenForm />
+        <SnackbarProvider>
+          <NuevaOrdenForm />
+          <FormSnackbar />
+        </SnackbarProvider>
       </CardContent>
     </Card>
   );

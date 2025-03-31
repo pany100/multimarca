@@ -7,7 +7,7 @@ import TrabajoDeListaForm from "./TrabajoDeListaForm";
 function TrabajosRealizadosInnerForm() {
   const { currentItem } = useFormDataWithModalContext();
   const [tipoTrabajo, setTipoTrabajo] = useState<"lista" | "otros">(
-    currentItem?.manoDeObra?.id ? "lista" : "otros"
+    !currentItem || currentItem?.manoDeObra?.id ? "lista" : "otros"
   );
   const { setNewItem } = useFormDataWithModalContext();
 

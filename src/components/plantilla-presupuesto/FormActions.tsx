@@ -16,7 +16,7 @@ function FormActions() {
         variant="outlined"
         startIcon={<ArrowBackIcon />}
         component={Link}
-        href="/dashboard/ordenes-reparacion"
+        href="/dashboard/plantilla-presupuesto"
       >
         Volver a la lista
       </Button>
@@ -32,7 +32,7 @@ function FormActions() {
           py: 1,
         }}
       >
-        Guardar Orden de Reparación
+        Guardar Plantilla
       </Button>
     </Box>
   );

@@ -1,0 +1,46 @@
+"use client";
+
+import { SnackbarProvider } from "@/contexts/SnackbarContext";
+import usePlantillaForm from "@/hooks/plantilla/usePlantillaForm";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { Box } from "@mui/material";
+import { FormProvider, useForm } from "react-hook-form";
+import CustomInputText from "../formV2/CustomInputText";
+import FormSection from "../orden-reparacion/formV2/commons/FormSection";
+import ReparacionTercerosSection from "../orden-reparacion/formV2/sections/reparacion-terceros/ReparacionTercerosSection";
+import RepuestosUsadosSection from "../orden-reparacion/formV2/sections/repuestos-usados/RepuestosUsadosSection";
+import TrabajosRealizadosSection from "../orden-reparacion/formV2/sections/trabajos-realizados/TrabajosRealizadosSection";
+import FormActions from "./FormActions";
+import schema from "./schema";
+
+function NuevaPlantillaForm() {
+  const methods = useForm({
+    resolver: yupResolver(schema),
+  });
+  const { handleSubmit } = methods;
+  const { onSubmit } = usePlantillaForm();
+
+  return (
+    <SnackbarProvider>
+      <FormProvider {...methods}>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <Box sx={{ pb: 2 }}>
+            <CustomInputText name="nombre" label="Nombre de la plantilla" />
+          </Box>
+          <FormSection title="Repuestos Usados">
+            <RepuestosUsadosSection />
+          </FormSection>
+          <FormSection title="Reparación / Repuestos de terceros">
+            <ReparacionTercerosSection />
+          </FormSection>
+          <FormSection title="Trabajos Realizados">
+            <TrabajosRealizadosSection />
+          </FormSection>
+          <FormActions />
+        </form>
+      </FormProvider>
+    </SnackbarProvider>
+  );
+}
+
+export default NuevaPlantillaForm;

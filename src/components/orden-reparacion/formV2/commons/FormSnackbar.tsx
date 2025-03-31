@@ -1,8 +1,8 @@
-import { useNuevaOrdenContext } from "@/contexts/NuevaOrdenContext";
+import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { Alert, Snackbar } from "@mui/material";
 
 function FormSnackbar() {
-  const { snackbar, setSnackbar } = useNuevaOrdenContext();
+  const { snackbar, setSnackbar } = useSnackbarContext();
   return (
     <Snackbar
       open={snackbar.open}
