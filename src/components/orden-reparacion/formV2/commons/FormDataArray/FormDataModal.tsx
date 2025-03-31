@@ -88,8 +88,9 @@ function FormDataModal({ children, fieldName, validateForm }: Props) {
       <DialogContent>
         {children}
         {errors &&
-          Object.values(errors).map((error) => (
+          Object.values(errors).map((error, index) => (
             <Typography
+              key={index}
               color="error"
               variant="caption"
               sx={{ mt: 1, display: "block" }}
