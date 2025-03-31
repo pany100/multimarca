@@ -9,6 +9,7 @@ import AutoSection from "../sections/autos/AutoSection";
 import ClientObservationSection from "../sections/client-observations/ClientObservationSection";
 import InputObservationSection from "../sections/input-observations/InputObservationsSection";
 import MechanicsSection from "../sections/mechanics/MechanicsSection";
+import ReparacionTercerosSection from "../sections/reparacion-terceros/ReparacionTercerosSection";
 import RepuestosUsadosSection from "../sections/repuestos-usados/RepuestosUsadosSection";
 
 function NuevaOrdenForm() {
@@ -36,6 +37,9 @@ function NuevaOrdenForm() {
           </FormSection>
           <FormSection title="Repuestos Usados">
             <RepuestosUsadosSection />
+          </FormSection>
+          <FormSection title="Reparación / Repuestos de terceros">
+            <ReparacionTercerosSection />
           </FormSection>
         </form>
       </FormProvider>
