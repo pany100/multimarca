@@ -47,7 +47,10 @@ function NuevaOrdenForm() {
         <FormSection title="Resumen de Costos">
           <ResumenCostosSection />
         </FormSection>
-        <FormActions />
+        <FormActions
+          href="/dashboard/ordenes-reparacion"
+          label="Orden de Reparación"
+        />
       </form>
     </FormProvider>
   );

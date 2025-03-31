@@ -2,7 +2,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import SaveIcon from "@mui/icons-material/Save";
 import { Box, Button, Link } from "@mui/material";
 
-function FormActions() {
+function FormActions({ href, label }: { href: string; label: string }) {
   return (
     <Box
       sx={{
@@ -16,7 +16,7 @@ function FormActions() {
         variant="outlined"
         startIcon={<ArrowBackIcon />}
         component={Link}
-        href="/dashboard/ordenes-reparacion"
+        href={href}
       >
         Volver a la lista
       </Button>
@@ -32,7 +32,7 @@ function FormActions() {
           py: 1,
         }}
       >
-        Guardar Orden de Reparación
+        Guardar {label}
       </Button>
     </Box>
   );

@@ -4,6 +4,7 @@ import useNuevaOrden from "@/hooks/orden-reparacion/useNuevaOrden";
 import { presupuestoSchema } from "@/sections/ordenes-reparacion/nueva/schema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormProvider, useForm } from "react-hook-form";
+import FormActions from "../orden-reparacion/formV2/commons/FormActions";
 import FormSection from "../orden-reparacion/formV2/commons/FormSection";
 import ClientObservationSection from "../orden-reparacion/formV2/sections/client-observations/ClientObservationSection";
 import ReparacionTercerosSection from "../orden-reparacion/formV2/sections/reparacion-terceros/ReparacionTercerosSection";
@@ -45,6 +46,7 @@ function NuevoPresupuestoForm({
         <FormSection title="Resumen de Costos">
           <ResumenCostosSection />
         </FormSection>
+        <FormActions href="/dashboard/presupuesto" label="Presupuesto" />
       </form>
     </FormProvider>
   );
