@@ -44,6 +44,43 @@ export async function PUT(
   }
 }
 
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+
+    if (isNaN(id)) {
+      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
+    }
+
+    const trabajo = await prisma.manoDeObra.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        name: true,
+        sellPrice: true,
+      },
+    });
+
+    if (!trabajo) {
+      return NextResponse.json(
+        { error: "Trabajo de mano de obra no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(trabajo);
+  } catch (error) {
+    console.error("Error al obtener trabajo de mano de obra:", error);
+    return NextResponse.json(
+      { error: "Error al obtener el trabajo de mano de obra" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }

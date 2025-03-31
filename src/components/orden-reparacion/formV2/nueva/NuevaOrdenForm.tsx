@@ -11,6 +11,7 @@ import InputObservationSection from "../sections/input-observations/InputObserva
 import MechanicsSection from "../sections/mechanics/MechanicsSection";
 import ReparacionTercerosSection from "../sections/reparacion-terceros/ReparacionTercerosSection";
 import RepuestosUsadosSection from "../sections/repuestos-usados/RepuestosUsadosSection";
+import TrabajosRealizadosSection from "../sections/trabajos-realizados/TrabajosRealizadosSection";
 
 function NuevaOrdenForm() {
   const methods = useForm({
@@ -40,6 +41,9 @@ function NuevaOrdenForm() {
           </FormSection>
           <FormSection title="Reparación / Repuestos de terceros">
             <ReparacionTercerosSection />
+          </FormSection>
+          <FormSection title="Trabajos Realizados">
+            <TrabajosRealizadosSection />
           </FormSection>
         </form>
       </FormProvider>
