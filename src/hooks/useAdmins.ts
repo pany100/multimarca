@@ -8,7 +8,7 @@ function useAdmins() {
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
-        const response = await authFetch("/api/usuarios/admins");
+        const response = await authFetch("/api/usuarios/admins-for-ingresos");
         const data = await response.json();
         const customUsuarios = data.map(
           (usuario: { id: number; fullName: string }) => ({

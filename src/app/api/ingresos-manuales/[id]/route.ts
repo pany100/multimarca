@@ -1,6 +1,6 @@
 import {
   chequeQueryData,
-  getChequeId,
+  getChequeIdAndValidate,
   returnModelWithChequeData,
   validateChequeRequest,
 } from "@/utils/chequeUtils";
@@ -93,8 +93,15 @@ export async function PUT(
       },
     });
 
-    const chequeIdToPass = await getChequeId(body, tipoExtraccion);
-
+    let chequeIdToPass = null;
+    try {
+      chequeIdToPass = await getChequeIdAndValidate(body, tipoExtraccion);
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Error al obtener el ID del cheque" },
+        { status: 400 }
+      );
+    }
     const ingresoActualizado = await prisma.ingresoManualDeDinero.update({
       where: { id },
       data: {

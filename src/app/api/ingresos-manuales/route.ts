@@ -1,11 +1,10 @@
 import {
   chequeQueryData,
-  getChequeId,
+  getChequeIdAndValidate,
   returnAllModelsWithChequeData,
   returnModelWithChequeData,
   validateChequeRequest,
 } from "@/utils/chequeUtils";
-import { TipoOperacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -62,14 +61,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const {
-      monto,
-      descripcion,
-      moneda,
-      fecha,
-      usuarioId,
-      tipoExtraccion,
-    } = body;
+    const { monto, descripcion, moneda, fecha, usuarioId, tipoExtraccion } =
+      body;
 
     if (!validateChequeRequest(body, tipoExtraccion)) {
       return NextResponse.json(
@@ -141,8 +134,15 @@ export async function POST(request: Request) {
       );
     }
 
-    const chequeIdToPass = await getChequeId(body, tipoExtraccion);
-
+    let chequeIdToPass = null;
+    try {
+      chequeIdToPass = await getChequeIdAndValidate(body, tipoExtraccion);
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Error al obtener el ID del cheque" },
+        { status: 400 }
+      );
+    }
     const nuevoIngreso = await prisma.ingresoManualDeDinero.create({
       data: {
         monto,
@@ -165,7 +165,9 @@ export async function POST(request: Request) {
       },
     });
 
-    return NextResponse.json(returnModelWithChequeData(nuevoIngreso), { status: 201 });
+    return NextResponse.json(returnModelWithChequeData(nuevoIngreso), {
+      status: 201,
+    });
   } catch (error) {
     console.error("Error al crear ingreso manual:", error);
     return NextResponse.json(

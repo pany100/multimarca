@@ -107,15 +107,6 @@ const saveCheque = async ({ cheque }: SaveChequeProps) => {
   return newCheque;
 };
 
-const getById = async (chequeId: number) => {
-  const cheque = await prisma.cheque.findUnique({
-    where: {
-      id: chequeId,
-    },
-  });
-  return cheque;
-};
-
 export const deleteCheque = async (idCheque: number) => {
   const cheque = await prisma.cheque.findFirst({
     where: {
@@ -222,7 +213,7 @@ export const validateChequeEditRequest = (data: ChequeEditRequestData) => {
   return true;
 };
 
-export const getChequeId = async (
+export const getChequeIdAndValidate = async (
   data: ChequeRequestData,
   operacion: TipoOperacion
 ) => {
@@ -230,6 +221,10 @@ export const getChequeId = async (
     return null;
   }
   if (data.chequeId) {
+    const operaciones = await getOperacionesByChequeId(parseInt(data.chequeId));
+    if (operaciones.length === 2) {
+      throw new Error("El cheque ya ha sido utilizado");
+    }
     return parseInt(data.chequeId);
   }
   const {

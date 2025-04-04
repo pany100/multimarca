@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import { getIO } from "@/lib/socketio";
 import {
   chequeQueryData,
-  getChequeId,
+  getChequeIdAndValidate,
   returnAllModelsWithChequeData,
   returnModelWithChequeData,
   validateChequeRequest,
@@ -123,7 +123,15 @@ export async function POST(request: Request) {
       },
     });
 
-    const chequeIdToPass = await getChequeId(body, tipoOperacion);
+    let chequeIdToPass = null;
+    try {
+      chequeIdToPass = await getChequeIdAndValidate(body, tipoOperacion);
+    } catch (error) {
+      return NextResponse.json(
+        { error: "Error al obtener el ID del cheque" },
+        { status: 400 }
+      );
+    }
 
     const venta = await prisma.venta.create({
       data: {
