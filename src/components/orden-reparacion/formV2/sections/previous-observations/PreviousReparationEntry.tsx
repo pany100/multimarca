@@ -17,6 +17,7 @@ type Props = {
     fechaCreacion: string;
     fechaSalidaReparacion: string;
     observacionesSalida: string;
+    kilometros: number;
   };
   index: number;
 };
@@ -47,38 +48,43 @@ function PreviousReparationEntry({ reparation, index }: Props) {
           )}
         </Box>
         <List dense disablePadding>
-          {observaciones.map((obs: string, obsIndex: number) => (
-            <ListItem
-              key={obsIndex}
-              sx={{ py: 0.5 }}
-              secondaryAction={
-                <Tooltip
-                  title={
-                    isObservationAlreadyAdded(obs)
-                      ? "Esta observación ya fue agregada"
-                      : "Agregar a observaciones actuales"
-                  }
-                >
-                  <span>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      onClick={() => handleAddPreviousObservation(obs)}
-                      color="primary"
-                      disabled={isObservationAlreadyAdded(obs)}
-                    >
-                      AGREGAR
-                    </Button>
-                  </span>
-                </Tooltip>
-              }
-            >
-              <ListItemText
-                primary={obs}
-                primaryTypographyProps={{ variant: "body2" }}
-              />
-            </ListItem>
-          ))}
+          {observaciones.map((obs: string, obsIndex: number) => {
+            const obsString = `${new Date(
+              reparation.fechaCreacion
+            ).toLocaleDateString()} - Kms: ${reparation.kilometros} - ${obs}`;
+            return (
+              <ListItem
+                key={obsIndex}
+                sx={{ py: 0.5 }}
+                secondaryAction={
+                  <Tooltip
+                    title={
+                      isObservationAlreadyAdded(obsString)
+                        ? "Esta observación ya fue agregada"
+                        : "Agregar a observaciones actuales"
+                    }
+                  >
+                    <span>
+                      <Button
+                        variant="contained"
+                        size="small"
+                        onClick={() => handleAddPreviousObservation(obsString)}
+                        color="primary"
+                        disabled={isObservationAlreadyAdded(obsString)}
+                      >
+                        AGREGAR
+                      </Button>
+                    </span>
+                  </Tooltip>
+                }
+              >
+                <ListItemText
+                  primary={obsString}
+                  primaryTypographyProps={{ variant: "body2" }}
+                />
+              </ListItem>
+            );
+          })}
         </List>
       </Box>
     </Box>

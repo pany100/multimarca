@@ -6,7 +6,6 @@ import PreviousReparationEntry from "./PreviousReparationEntry";
 
 function PreviousReparations() {
   const { reparacionesAnteriores } = usePrevOrdenes();
-
   return (
     <Box sx={{ mt: 4 }}>
       <Box display="flex" alignItems="center" mb={2}>
@@ -24,6 +23,7 @@ function PreviousReparations() {
                 fechaCreacion: string;
                 fechaSalidaReparacion: string;
                 observacionesSalida: string;
+                kilometros: number;
               },
               index: number
             ) => (

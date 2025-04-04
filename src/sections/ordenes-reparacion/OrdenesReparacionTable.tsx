@@ -145,8 +145,6 @@ const OrdenesReparacionTable = ({
   ];
 
   const customActions = (params: any) => {
-    console.log(params);
-    const isBorrador = params.ingresos === undefined;
     const defaultActions = extraActions ? extraActions(params) : [];
     const customActions: React.ReactNode[] = [
       <MenuItem

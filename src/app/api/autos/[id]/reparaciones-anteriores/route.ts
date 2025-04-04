@@ -25,6 +25,7 @@ export async function GET(
         fechaCreacion: true,
         fechaSalidaReparacion: true,
         observacionesSalida: true,
+        kilometros: true,
       },
       orderBy: {
         fechaCreacion: "desc",
