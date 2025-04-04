@@ -18,6 +18,7 @@ function TrabajoDeListaForm() {
             setNewItem({
               ...newItem,
               manoDeObra: option?.object,
+              precioUnitario: option?.object.sellPrice,
               id: Math.floor(Math.random() * 1000000),
             });
           }}
@@ -28,7 +29,9 @@ function TrabajoDeListaForm() {
         <ORepTextField
           label="Precio"
           type="number"
-          defaultValue={currentItem?.precioUnitario || ""}
+          defaultValue={
+            newItem?.precioUnitario || currentItem?.precioUnitario || ""
+          }
           onChange={(e) =>
             setNewItem({ ...newItem, precioUnitario: Number(e.target.value) })
           }
