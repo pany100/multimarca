@@ -35,11 +35,11 @@ function NuevaOrdenForm() {
         <FormSection title="Mecánicos">
           <MechanicsSection />
         </FormSection>
-        <FormSection title="Repuestos Usados">
-          <RepuestosUsadosSection />
-        </FormSection>
         <FormSection title="Reparación / Repuestos de terceros">
           <ReparacionTercerosSection />
+        </FormSection>
+        <FormSection title="Repuestos Usados">
+          <RepuestosUsadosSection />
         </FormSection>
         <FormSection title="Trabajos Realizados">
           <TrabajosRealizadosSection />

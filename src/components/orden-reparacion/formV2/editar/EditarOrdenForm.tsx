@@ -151,26 +151,29 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         <FormSection title="Observaciones de Entrada">
           <InputObservationSection />
         </FormSection>
-        <FormSection title="Mecánicos">
-          <MechanicsSection />
-        </FormSection>
-        <FormSection title="Repuestos Usados">
-          <RepuestosUsadosSection />
-        </FormSection>
-        <FormSection title="Reparación / Repuestos de terceros">
-          <ReparacionTercerosSection />
-        </FormSection>
-        <FormSection title="Trabajos Realizados">
-          <TrabajosRealizadosSection />
+        <FormSection title="Observaciones de salida">
+          <OutputObservationsSection />
         </FormSection>
         <FormSection title="Controles">
           <ControlesSection />
         </FormSection>
+        <FormSection title="Mecánicos">
+          <MechanicsSection />
+        </FormSection>
         <FormSection title="Detalle de controles">
           <DetalleControlesSection />
         </FormSection>
-        <FormSection title="Observaciones de salida">
-          <OutputObservationsSection />
+        <FormSection title="Reparación / Repuestos de terceros">
+          <ReparacionTercerosSection />
+        </FormSection>
+        <FormSection title="Repuestos Usados">
+          <RepuestosUsadosSection />
+        </FormSection>
+        <FormSection title="Trabajos Realizados">
+          <TrabajosRealizadosSection />
+        </FormSection>
+        <FormSection title="Resumen de Costos">
+          <ResumenCostosSection />
         </FormSection>
         <FormSection title="Informe del Scanner">
           <ScannerForm
@@ -178,9 +181,6 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
             selectedFile={selectedFile}
             setSelectedFile={setSelectedFile}
           />
-        </FormSection>
-        <FormSection title="Resumen de Costos">
-          <ResumenCostosSection />
         </FormSection>
         <FormActions
           href="/dashboard/ordenes-reparacion"
