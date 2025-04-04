@@ -1,5 +1,5 @@
 import useExportStock from "@/hooks/useExportStock";
-import { Box, Button } from "@mui/material";
+import { Box, Button, CircularProgress } from "@mui/material";
 import PreciosProveedorModal from "./PreciosProveedorModal";
 
 function StockExtraContent({
@@ -7,7 +7,7 @@ function StockExtraContent({
 }: {
   setRefreshTrigger: React.Dispatch<React.SetStateAction<number>>;
 }) {
-  const { exportToPdf } = useExportStock();
+  const { exportToPdf, isLoading } = useExportStock();
   return (
     <Box
       sx={{
@@ -20,8 +20,16 @@ function StockExtraContent({
       <Box sx={{ width: "20px" }} />
       <Box>
         <Box sx={{ width: "100%", mb: 2 }}>
-          <Button variant="contained" color="secondary" onClick={exportToPdf}>
-            Exportar lista de stock
+          <Button
+            variant="contained"
+            color="secondary"
+            onClick={exportToPdf}
+            disabled={isLoading}
+            startIcon={
+              isLoading ? <CircularProgress size={20} color="inherit" /> : null
+            }
+          >
+            {isLoading ? "Generando PDF..." : "Exportar lista de stock"}
           </Button>
         </Box>
       </Box>
