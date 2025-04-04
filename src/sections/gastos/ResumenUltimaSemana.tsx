@@ -111,7 +111,7 @@ function ResumenUltimaSemana() {
         Resumen Ultima Semana ({dateRangeText})
       </Typography>
 
-      <Box sx={{ height: 400, width: "100%", mt: 2 }}>
+      <Box sx={{ width: "100%", mt: 2 }}>
         <DataGrid
           rows={rows}
           columns={columns}

@@ -67,7 +67,7 @@ export async function PUT(
       chequeIdToPass = await getChequeIdAndValidate(body, tipoOperacion);
     } catch (error) {
       return NextResponse.json(
-        { error: "Error al obtener el ID del cheque" },
+        { error: "No se pudo usar el cheque" },
         { status: 400 }
       );
     }
