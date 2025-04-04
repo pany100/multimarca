@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
     const url = new URL(request.url);
     const año = url.searchParams.get("año");
     const mes = url.searchParams.get("mes");
-    const limite = parseInt(url.searchParams.get("limite") || "5", 10);
+    // Removed the limite parameter as we want to return all brands
 
     let sqlQuery = `
       SELECT 
@@ -44,9 +44,8 @@ export async function GET(request: NextRequest) {
     sqlQuery += `
       GROUP BY a.brand
       ORDER BY cantidad DESC
-      LIMIT ?
     `;
-    queryParams.push(limite);
+    // Removed the LIMIT clause to return all brands
 
     const marcasAtendidas = await prisma.$queryRawUnsafe<MarcaAuto[]>(
       sqlQuery,

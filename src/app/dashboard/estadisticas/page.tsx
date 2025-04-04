@@ -17,9 +17,16 @@ const EstadisticasPage = () => {
         Estadísticas
       </Typography>
       <Grid container spacing={2} sx={{ height: "100%" }}>
-        <Grid item xs={12}>
+        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
           <Card>
             <Balance />
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
+          <Card
+            sx={{ width: "100%", display: "flex", flexDirection: "column" }}
+          >
+            <Extracciones />
           </Card>
         </Grid>
         <Grid item xs={12} md={6} sx={{ display: "flex" }}>
@@ -43,18 +50,11 @@ const EstadisticasPage = () => {
             <Stock />
           </Card>
         </Grid>
-        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
+        <Grid item xs={12} md={12} sx={{ display: "flex" }}>
           <Card
             sx={{ width: "100%", display: "flex", flexDirection: "column" }}
           >
             <Marcas />
-          </Card>
-        </Grid>
-        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
-          <Card
-            sx={{ width: "100%", display: "flex", flexDirection: "column" }}
-          >
-            <Extracciones />
           </Card>
         </Grid>
         <Grid item xs={12} md={6} sx={{ display: "flex" }}>

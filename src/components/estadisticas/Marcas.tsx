@@ -29,13 +29,19 @@ import { Pie } from "react-chartjs-2";
 
 ChartJS.register(CategoryScale, LinearScale, ArcElement, Tooltip, Legend);
 
+interface MarcaData {
+  marca: string;
+  cantidad: number;
+  valorVisual?: number;
+}
+
 const Marcas = () => {
   const theme = useTheme();
   const [mesInput, setMesInput] = useState("");
   const [anioInput, setAnioInput] = useState("");
   const [mes, setMes] = useState("");
   const [anio, setAnio] = useState("");
-  const [datos, setDatos] = useState([]);
+  const [datos, setDatos] = useState<MarcaData[]>([]);
   const [cargando, setCargando] = useState(true);
   const { authFetch } = useFetch();
 
@@ -44,7 +50,6 @@ const Marcas = () => {
     const url = new URL("/api/estadisticas/autos", window.location.origin);
     if (mes) url.searchParams.append("mes", mes);
     if (anio) url.searchParams.append("año", anio);
-    url.searchParams.append("limite", "5");
 
     try {
       const respuesta = await authFetch(url.toString());
@@ -116,6 +121,50 @@ const Marcas = () => {
     "rgba(153, 102, 255, 1)",
   ];
 
+  // Color específico para la categoría "Otros" - un gris más oscuro y distinto
+  const colorOtros = "rgba(100, 100, 100, 0.7)";
+  const bordeColorOtros = "rgba(80, 80, 80, 1)";
+
+  const agruparMarcasParaGrafico = useCallback(
+    (datos: MarcaData[], maxMarcas = 5) => {
+      if (!Array.isArray(datos) || datos.length <= maxMarcas) {
+        return datos;
+      }
+
+      const datosOrdenados = [...datos].sort((a, b) => b.cantidad - a.cantidad);
+
+      // Encontrar la marca con menor cantidad entre las principales
+      const marcasPrincipales = datosOrdenados.slice(0, maxMarcas);
+      const menorCantidadPrincipal = Math.min(
+        ...marcasPrincipales.map((m) => m.cantidad)
+      );
+
+      const otrosMarcas = datosOrdenados.slice(maxMarcas);
+      const cantidadOtros = otrosMarcas.reduce(
+        (sum, marca) => sum + marca.cantidad,
+        0
+      );
+
+      if (cantidadOtros > 0) {
+        // Asegurar que "Otros" sea más pequeño que la marca más pequeña de las principales
+        // Usamos el 70% de la marca más pequeña para garantizar que sea visiblemente menor
+        const valorVisualOtros = Math.min(
+          cantidadOtros,
+          menorCantidadPrincipal * 0.7
+        );
+
+        marcasPrincipales.push({
+          marca: "OTROS",
+          cantidad: cantidadOtros,
+          valorVisual: valorVisualOtros,
+        });
+      }
+
+      return marcasPrincipales;
+    },
+    []
+  );
+
   const datosGrafico = React.useMemo(() => {
     if (datos.length === 0) {
       return {
@@ -131,22 +180,53 @@ const Marcas = () => {
       };
     }
 
+    const datosAgrupados = agruparMarcasParaGrafico(datos);
+
+    // Asegurar que "Otros" siempre tenga el color gris y sea el último
+    // Reordenar para que "Otros" siempre sea el último elemento
+    const datosReordenados = [...datosAgrupados];
+    const otrosIndex = datosReordenados.findIndex((d) => d.marca === "OTROS");
+
+    if (otrosIndex !== -1) {
+      const otrosItem = datosReordenados.splice(otrosIndex, 1)[0];
+      datosReordenados.push(otrosItem);
+    }
+
+    const backgroundColors = datosReordenados.map((marca, index) => {
+      if (marca.marca === "OTROS") {
+        return colorOtros;
+      }
+      return colores[index % colores.length];
+    });
+
+    const borderColors = datosReordenados.map((marca, index) => {
+      if (marca.marca === "OTROS") {
+        return bordeColorOtros;
+      }
+      return bordeColores[index % bordeColores.length];
+    });
+
     return {
-      labels: Array.isArray(datos)
-        ? datos.map((marca: { marca: string }) => marca.marca)
-        : [],
+      labels: datosReordenados.map((marca) => marca.marca),
       datasets: [
         {
-          data: Array.isArray(datos)
-            ? datos.map((marca: { cantidad: number }) => marca.cantidad)
-            : [],
-          backgroundColor: colores.slice(0, datos.length),
-          borderColor: bordeColores.slice(0, datos.length),
+          data: datosReordenados.map((marca) =>
+            marca.valorVisual !== undefined ? marca.valorVisual : marca.cantidad
+          ),
+          backgroundColor: backgroundColors,
+          borderColor: borderColors,
           borderWidth: 1,
         },
       ],
     };
-  }, [datos]);
+  }, [
+    datos,
+    agruparMarcasParaGrafico,
+    colores,
+    bordeColores,
+    colorOtros,
+    bordeColorOtros,
+  ]);
 
   const renderContent = () => {
     if (cargando) {
@@ -252,51 +332,40 @@ const Marcas = () => {
               </thead>
               <tbody>
                 {Array.isArray(datos) &&
-                  datos.map(
-                    (
-                      marca: {
-                        marca: string;
-                        cantidad: number;
-                      },
-                      index: number
-                    ) => {
-                      const total = datos.reduce(
-                        (sum: number, item: { cantidad: number }) =>
-                          sum + item.cantidad,
-                        0
-                      );
-                      const porcentaje = Math.round(
-                        (marca.cantidad * 100) / total
-                      );
+                  datos.map((marca: MarcaData, index: number) => {
+                    const total = datos.reduce(
+                      (sum: number, item: MarcaData) => sum + item.cantidad,
+                      0
+                    );
+                    const porcentaje = Math.round(
+                      (marca.cantidad * 100) / total
+                    );
 
-                      return (
-                        <tr
-                          key={index}
-                          style={{
-                            borderBottom: `1px solid ${theme.palette.divider}`,
-                            backgroundColor:
-                              index % 2 === 0
-                                ? "white"
-                                : theme.palette.background.default,
-                          }}
+                    return (
+                      <tr
+                        key={index}
+                        style={{
+                          borderBottom: `1px solid ${theme.palette.divider}`,
+                          backgroundColor:
+                            index % 2 === 0
+                              ? "white"
+                              : theme.palette.background.default,
+                        }}
+                      >
+                        <td style={{ padding: "10px 16px" }}>{marca.marca}</td>
+                        <td
+                          style={{ padding: "10px 16px", textAlign: "right" }}
                         >
-                          <td style={{ padding: "10px 16px" }}>
-                            {marca.marca}
-                          </td>
-                          <td
-                            style={{ padding: "10px 16px", textAlign: "right" }}
-                          >
-                            {marca.cantidad}
-                          </td>
-                          <td
-                            style={{ padding: "10px 16px", textAlign: "right" }}
-                          >
-                            {porcentaje}%
-                          </td>
-                        </tr>
-                      );
-                    }
-                  )}
+                          {marca.cantidad}
+                        </td>
+                        <td
+                          style={{ padding: "10px 16px", textAlign: "right" }}
+                        >
+                          {porcentaje}%
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </Box>
