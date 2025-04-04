@@ -92,8 +92,22 @@ function ResumenUltimaSemana() {
         return params.row.reparaciones ? (
           <Box>
             {params.row.reparaciones.map((rep: Reparacion) => (
-              <Typography key={rep.idOrep} variant="body2">
+              <Typography
+                key={rep.idOrep}
+                variant="body2"
+                sx={{
+                  "& a": {
+                    textDecoration: "none",
+                    color: "inherit",
+                    "&:hover": {
+                      textDecoration: "underline",
+                      color: "primary.main",
+                    },
+                  },
+                }}
+              >
                 <Link href={`/dashboard/ordenes-reparacion/${rep.idOrep}/ver`}>
+                  *{" "}
                   {`${rep.auto} - ${format(new Date(rep.fecha), "dd/MM/yyyy")}`}
                 </Link>
               </Typography>
@@ -140,9 +154,15 @@ function ResumenUltimaSemana() {
           pageSizeOptions={[5, 10, 25]}
           disableRowSelectionOnClick
           autoHeight
+          getRowHeight={() => "auto"}
           sx={{
             "& .MuiDataGrid-cell": {
               fontSize: "0.875rem",
+              whiteSpace: "normal",
+              padding: "8px",
+            },
+            "& .MuiDataGrid-row": {
+              alignItems: "flex-start",
             },
             backgroundColor: "background.paper",
             borderRadius: 1,
