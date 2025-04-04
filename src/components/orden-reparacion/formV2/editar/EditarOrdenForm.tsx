@@ -148,7 +148,7 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         <FormSection title="Observaciones del Cliente">
           <ClientObservationSection />
         </FormSection>
-        <FormSection title="Observaciones de Entrada">
+        <FormSection title="Observaciones último ingreso">
           <InputObservationSection />
         </FormSection>
         <FormSection title="Observaciones de salida">

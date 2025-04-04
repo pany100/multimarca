@@ -379,7 +379,7 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
                 mb: 1,
               }}
             >
-              Observaciones de Entrada:
+              Observaciones último ingreso:
             </Typography>
             <Typography
               variant="body1"
