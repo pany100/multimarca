@@ -4,6 +4,7 @@ import { Box, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { format, startOfDay } from "date-fns";
 import { es } from "date-fns/locale";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 type Reparacion = {
@@ -75,17 +76,33 @@ function ResumenUltimaSemana() {
     manoDeObraTotal: mecanico.manoDeObraTotal,
     manoDeObraPagada: mecanico.manoDeObraPagada,
     pendientePago: mecanico.manoDeObraTotal - mecanico.manoDeObraPagada,
+    reparaciones: mecanico.reparaciones,
   }));
 
   // Define columns for DataGrid
   const columns: GridColDef[] = [
     { field: "mecanicoNombre", headerName: "Mecánico", flex: 1 },
     {
-      field: "cantidadReparaciones",
+      field: "reparaciones",
       headerName: "Reparaciones",
-      flex: 0.7,
-      align: "center",
+      flex: 2,
+      align: "left",
       headerAlign: "center",
+      renderCell: (params) => {
+        return params.row.reparaciones ? (
+          <Box>
+            {params.row.reparaciones.map((rep: Reparacion) => (
+              <Typography key={rep.idOrep} variant="body2">
+                <Link href={`/dashboard/ordenes-reparacion/${rep.idOrep}/ver`}>
+                  {`${rep.auto} - ${format(new Date(rep.fecha), "dd/MM/yyyy")}`}
+                </Link>
+              </Typography>
+            ))}
+          </Box>
+        ) : (
+          <Typography variant="body2">-</Typography>
+        );
+      },
     },
     {
       field: "manoDeObraTotal",
