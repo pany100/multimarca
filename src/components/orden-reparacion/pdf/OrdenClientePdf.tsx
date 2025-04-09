@@ -32,7 +32,7 @@ export const OrdenClientePdf = React.forwardRef<any, Props>(
     return (
       <div ref={ref}>
         <style>{setPageStyles()}</style>
-        <PDFPage style={{ height: "auto" }}>
+        <PDFPage>
           <TemplateHeader />
           <Divider sx={{ borderColor: "common.black" }} />
           <CarHeader

@@ -77,6 +77,14 @@ function Header({ ordenReparacion }: { ordenReparacion: any }) {
     content: () => internClientOrderRef.current,
   });
 
+  // Handle PDF print directly using the URL
+  const handlePdfPrint = () => {
+    if (ordenReparacion.pdfPath) {
+      // Open the PDF in the same window
+      window.open(ordenReparacion.pdfPath, "_blank");
+    }
+  };
+
   // Menu handlers
   const handleOpenPrintMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
     setPrintMenuAnchor(event.currentTarget);
@@ -284,6 +292,20 @@ function Header({ ordenReparacion }: { ordenReparacion: any }) {
                     </ListItemIcon>
                     <ListItemText>Para cliente</ListItemText>
                   </MenuItem>
+                  <MenuItem
+                    onClick={() => {
+                      if (ordenReparacion.pdfPath) {
+                        handlePdfPrint();
+                      }
+                      handleClosePrintMenu();
+                    }}
+                    disabled={!ordenReparacion.pdfPath}
+                  >
+                    <ListItemIcon>
+                      <PrintIcon fontSize="small" color="action" />
+                    </ListItemIcon>
+                    <ListItemText>Salida del scanner</ListItemText>
+                  </MenuItem>
                 </Menu>
               </>
             ) : (
@@ -315,6 +337,18 @@ function Header({ ordenReparacion }: { ordenReparacion: any }) {
                   >
                     <PrintIcon />
                   </IconButton>
+                </Tooltip>
+                <Tooltip title="Imprimir salida de scanner">
+                  <span>
+                    <IconButton
+                      color="default"
+                      onClick={handlePdfPrint}
+                      aria-label="Imprimir salida de scanner"
+                      disabled={!ordenReparacion.pdfPath}
+                    >
+                      <PrintIcon />
+                    </IconButton>
+                  </span>
                 </Tooltip>
               </Box>
             )}

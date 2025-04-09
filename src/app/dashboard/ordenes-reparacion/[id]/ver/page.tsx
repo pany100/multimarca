@@ -5,6 +5,7 @@ import Details from "@/components/orden-reparacion/ver/Details";
 import Header from "@/components/orden-reparacion/ver/Header";
 import Mechanics from "@/components/orden-reparacion/ver/Mechanics";
 import PriceInfo from "@/components/orden-reparacion/ver/PriceInfo";
+import ScannerInfo from "@/components/orden-reparacion/ver/ScannerInfo";
 import { useFetch } from "@/contexts/FetchContext";
 import { useAuth } from "@/hooks/useAuth";
 import { Box, CircularProgress, Divider, Paper } from "@mui/material";
@@ -103,6 +104,8 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
       <Controls ordenReparacion={ordenReparacion} />
       <Divider sx={{ my: 2 }} />
       <Mechanics ordenReparacion={ordenReparacion} />
+      <Divider sx={{ my: 2 }} />
+      <ScannerInfo ordenReparacion={ordenReparacion} />
       <Divider sx={{ my: 2 }} />
       <PriceInfo ordenReparacion={ordenReparacion} />
     </Paper>
