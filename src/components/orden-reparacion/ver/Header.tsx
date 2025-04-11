@@ -39,6 +39,7 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import OrdenClienteInterna from "@/components/orden-reparacion/pdf/OrdenClienteInterna";
 import OrdenClientePdf from "@/components/orden-reparacion/pdf/OrdenClientePdf";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
+import { useGeneratePdf } from "@/hooks/orden-reparacion/useGeneratePdf";
 
 function Header({ ordenReparacion }: { ordenReparacion: any }) {
   const theme = useTheme();
@@ -57,6 +58,16 @@ function Header({ ordenReparacion }: { ordenReparacion: any }) {
     message: "",
     severity: "success" as "success" | "error",
   });
+  const { generatePdf } = useGeneratePdf({
+    onError: () => {
+      setSnackbar({
+        open: true,
+        message: "Error al generar el PDF del cliente",
+        severity: "error",
+      });
+    },
+    printDirectly: true,
+  });
 
   // State for print menu
   const [printMenuAnchor, setPrintMenuAnchor] = useState<null | HTMLElement>(
@@ -69,9 +80,14 @@ function Header({ ordenReparacion }: { ordenReparacion: any }) {
     content: () => mechanicOrderRef.current,
   });
 
-  const handleClientOrderPrint = useReactToPrint({
+  const handleClientOrderPrint2 = useReactToPrint({
     content: () => clientOrderRef.current,
   });
+  const handleClientOrderPrint = async () => {
+    await generatePdf(
+      `/api/orden-reparacion/${ordenReparacion.id}/pdf-completo`
+    );
+  };
 
   const handleInternClientOrderPrint = useReactToPrint({
     content: () => internClientOrderRef.current,
