@@ -44,7 +44,7 @@ export default function generateClientOrderHtml(repair: any): string {
       }
       .TypographyBody2 {
         margin: 0;
-         font-family: Inter, sans-serif;
+        font-family: "Roboto", "Helvetica", "Arial", sans-serif;
         font-size: 14px;
         font-weight: 400;
         color: black;
@@ -75,7 +75,8 @@ export default function generateClientOrderHtml(repair: any): string {
         flex-shrink: 0;
         border-width: 1px;
         border-style: solid;
-        margin: 0;
+        margin-bottom: 5px;
+        margin-top: 5px;
       }
       .TypographyH6 {
         margin: 0;
@@ -171,7 +172,7 @@ export default function generateClientOrderHtml(repair: any): string {
           letter-spacing: 0em;
           color: #000;
         '>
-        Km: ${repair.kilometros}
+        Km: ${repair.kilometros.toLocaleString("es-AR")}
         </h5>
         </div>
         <div style="display: grid;">
@@ -281,7 +282,7 @@ export default function generateClientOrderHtml(repair: any): string {
         repair.detalleControles &&
         JSON.parse(repair.detalleControles || "[]").length > 0
           ? `
-          <div class="TypographyBody1" style="font-weight: bold;">
+          <div class="TypographyBody1" style="font-weight: bold; margin-top: 4px; margin-bottom: 4px;">
             Trabajos Realizados
           </div>
           ${JSON.parse(repair.detalleControles || "[]")
@@ -302,7 +303,7 @@ export default function generateClientOrderHtml(repair: any): string {
         margin-top: 5px;
         margin-right: 15px;
       '>
-        <div class="TypographyBody1" style="font-weight: bold;">
+        <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
           Repuestos utilizados
         </div>
         <div class="TypographyBody1" style="text-align: right;font-weight: bold;">
@@ -366,7 +367,7 @@ export default function generateClientOrderHtml(repair: any): string {
           `
             : ""
         }
-        <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold;">
+        <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; margin-bottom: 20px;">
           Importe Total:
         </div>
         <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; text-align: right;">        
