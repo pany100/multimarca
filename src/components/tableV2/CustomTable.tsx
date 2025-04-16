@@ -10,7 +10,8 @@ import {
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
-import React, { useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
 export interface CustomTableProps {
   title: string;
@@ -42,6 +43,11 @@ function CustomTable<T extends { id: string }>({
   disableMenuForRow,
   refreshTrigger = 0,
 }: CustomTableProps) {
+  const searchParams = useSearchParams();
+  const isInitialMount = useRef(true);
+  const isUrlUpdateNeeded = useRef(true);
+  const pendingFetch = useRef(false);
+
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [totalItems, setTotalItems] = useState(0);
@@ -54,10 +60,157 @@ function CustomTable<T extends { id: string }>({
   });
   const { authFetch } = useFetch();
 
+  // Initialize state from URL parameters only on first mount
+  useEffect(() => {
+    if (isInitialMount.current) {
+      const page = searchParams.get("page");
+      const pageSize = searchParams.get("pageSize");
+      const query = searchParams.get("query");
+
+      let stateChanged = false;
+
+      // Initialize pagination from URL
+      if (page !== null && pageSize !== null) {
+        const pageNum = parseInt(page);
+        const pageSizeNum = parseInt(pageSize);
+
+        if (!isNaN(pageNum) && !isNaN(pageSizeNum)) {
+          setPaginationModel({
+            page: pageNum,
+            pageSize: pageSizeNum,
+          });
+          stateChanged = true;
+        }
+      }
+
+      // Initialize search term from URL
+      if (query !== null) {
+        setSearchTerm(query);
+        stateChanged = true;
+      }
+
+      isInitialMount.current = false;
+
+      // If we initialized state from URL, don't update URL on first fetch
+      if (stateChanged) {
+        isUrlUpdateNeeded.current = false;
+      }
+
+      // Set pendingFetch to true to trigger a fetch after initialization
+      pendingFetch.current = true;
+    }
+  }, [searchParams]);
+
+  // Listen for popstate events (browser back/forward navigation)
+  useEffect(() => {
+    const handlePopState = () => {
+      // Set loading to true to prevent showing stale data
+      setLoading(true);
+
+      const url = new URL(window.location.href);
+      const page = url.searchParams.get("page");
+      const pageSize = url.searchParams.get("pageSize");
+      const query = url.searchParams.get("query");
+
+      // Batch state updates to avoid multiple fetches
+      let updatedPagination = { ...paginationModel };
+      let updatedSearchTerm = searchTerm;
+
+      if (page !== null && pageSize !== null) {
+        const pageNum = parseInt(page);
+        const pageSizeNum = parseInt(pageSize);
+
+        if (!isNaN(pageNum) && !isNaN(pageSizeNum)) {
+          updatedPagination = {
+            page: pageNum,
+            pageSize: pageSizeNum,
+          };
+        }
+      }
+
+      if (query !== null) {
+        updatedSearchTerm = query;
+      } else {
+        updatedSearchTerm = "";
+      }
+
+      // Update state in a batch
+      setPaginationModel(updatedPagination);
+      setSearchTerm(updatedSearchTerm);
+
+      // Don't update URL when handling popstate
+      isUrlUpdateNeeded.current = false;
+
+      // Set pendingFetch to true to trigger a single fetch after all state updates
+      pendingFetch.current = true;
+    };
+
+    window.addEventListener("popstate", handlePopState);
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [paginationModel, searchTerm]);
+
+  // Update URL when pagination or search changes
+  const updateUrl = useCallback(
+    (page: number, pageSize: number, query: string) => {
+      if (!isUrlUpdateNeeded.current) {
+        isUrlUpdateNeeded.current = true;
+        return;
+      }
+
+      const url = new URL(window.location.href);
+
+      // Set parameters
+      url.searchParams.set("page", page.toString());
+      url.searchParams.set("pageSize", pageSize.toString());
+
+      if (query) {
+        url.searchParams.set("query", query);
+      } else {
+        url.searchParams.delete("query");
+      }
+
+      // Check for return parameters and preserve them
+      const returnParams: Record<string, string> = {};
+      url.searchParams.forEach((value, key) => {
+        if (key.startsWith("return")) {
+          returnParams[key] = value;
+        }
+      });
+
+      // Update browser history without reloading the page
+      window.history.pushState({ page, pageSize, query }, "", url.toString());
+    },
+    []
+  );
+
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
+      // Extract any additional query parameters from the current URL
+      const currentUrl = new URL(window.location.href);
+      const additionalParams: Record<string, string> = {};
+
+      // Get all query parameters except page, pageSize, and query which we'll set separately
+      currentUrl.searchParams.forEach((value, key) => {
+        if (
+          !["page", "pageSize", "query", "return"].some((param) =>
+            key.startsWith(param)
+          )
+        ) {
+          additionalParams[key] = value;
+        }
+      });
+
       const url = new URL(apiEndpoint, window.location.origin);
+
+      // Add all additional parameters first
+      Object.entries(additionalParams).forEach(([key, value]) => {
+        url.searchParams.append(key, value);
+      });
+
+      // Then add pagination and search parameters
       url.searchParams.append("page", paginationModel.page.toString());
       url.searchParams.append("size", paginationModel.pageSize.toString());
       if (searchTerm) url.searchParams.append("query", searchTerm);
@@ -72,9 +225,16 @@ function CustomTable<T extends { id: string }>({
           ? data.length
           : 0
       );
+
+      // Update URL with current state
+      updateUrl(paginationModel.page, paginationModel.pageSize, searchTerm);
+
+      // Reset pendingFetch flag
+      pendingFetch.current = false;
     } catch (error) {
       setItems([]);
       setTotalItems(0);
+      pendingFetch.current = false;
     } finally {
       setLoading(false);
     }
@@ -84,15 +244,26 @@ function CustomTable<T extends { id: string }>({
     paginationModel.pageSize,
     authFetch,
     searchTerm,
+    updateUrl,
   ]);
 
+  // Trigger fetch when dependencies change or when pendingFetch is true
   useEffect(() => {
-    fetchItems();
+    // Use a small timeout to batch potential multiple state changes
+    const timeoutId = setTimeout(() => {
+      if (pendingFetch.current || !isInitialMount.current) {
+        fetchItems();
+      }
+    }, 50);
+
+    return () => clearTimeout(timeoutId);
   }, [fetchItems, refreshTrigger]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
+    const newSearchTerm = e.target.value;
+    setSearchTerm(newSearchTerm);
     setPaginationModel({ ...paginationModel, page: 0 }); // Reset to first page on new search
+    pendingFetch.current = true;
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, item: T) => {
@@ -103,6 +274,12 @@ function CustomTable<T extends { id: string }>({
   const handleMenuClose = () => {
     setAnchorEl(null);
     setSelectedItem(null);
+  };
+
+  // Handle pagination model change
+  const handlePaginationModelChange = (newModel: any) => {
+    setPaginationModel(newModel);
+    pendingFetch.current = true;
   };
 
   return (
@@ -212,7 +389,7 @@ function CustomTable<T extends { id: string }>({
                 : []),
             ]}
             paginationModel={paginationModel}
-            onPaginationModelChange={setPaginationModel}
+            onPaginationModelChange={handlePaginationModelChange}
             pageSizeOptions={[10, 20, 30]}
             rowCount={totalItems}
             paginationMode="server"
