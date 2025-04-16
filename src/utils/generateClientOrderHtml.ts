@@ -163,7 +163,9 @@ export default function generateClientOrderHtml(repair: any): string {
         '>
         Patente: ${repair.auto.patent}
         </h5>
-        <h5 style='
+        ${
+          repair.estado !== EstadoOrdenReparacion.Presupuestado
+            ? `<h5 style='
           margin: 0;
           font-family: Inter, sans-serif;
           font-weight: 400;
@@ -172,8 +174,10 @@ export default function generateClientOrderHtml(repair: any): string {
           letter-spacing: 0em;
           color: #000;
         '>
-        Km: ${repair.kilometros.toLocaleString("es-AR")}
-        </h5>
+        Km: ${repair.kilometros?.toLocaleString("es-AR") || "N/A"}
+        </h5>`
+            : ""
+        }
         </div>
         <div style="display: grid;">
           <div class="TypographyBody1">
@@ -201,6 +205,9 @@ export default function generateClientOrderHtml(repair: any): string {
           <div class="TypographyBody1">
             Teléfono: ${repair.auto.owner.phone}
           </div>
+          ${
+            repair.estado !== "Presupuestado"
+              ? `
           <div class="TypographyBody1">
             Fecha Ingreso:
             ${
@@ -221,6 +228,9 @@ export default function generateClientOrderHtml(repair: any): string {
                 : "-"
             }
           </div>
+          `
+              : ""
+          }
         </div>
       </div>
       <hr class="divider" />
@@ -230,20 +240,27 @@ export default function generateClientOrderHtml(repair: any): string {
       <div class="TypographyBody1" style="width: 90%;">
         ${repair.observacionesCliente || "-"}
       </div>
-      <hr class="divider" />
+      
+      ${
+        repair.estado !== EstadoOrdenReparacion.Presupuestado
+          ? `
+        <hr class="divider" />
       <div class="TypographyBody1" style="font-weight: bold;">
         Observaciones del taller
       </div>
       <div class="TypographyBody1" style="width: 90%;">
         ${JSON.parse(repair.observacionesSalida || "[]").join(", ") || "-"}
       </div>
-      <hr class="divider" />
+      `
+          : ""
+      }
       ${
         repair.estado !== EstadoOrdenReparacion.Presupuestado &&
         repair.controlesEnReparacion.filter(
           (control: any) => control.valor === "true"
-        ).length > 0 &&
-        `
+        ).length > 0
+          ? `
+          <hr class="divider" />
         <div>
           <div class="TypographyBody1" style="font-weight: bold;">
             Controles Realizados
@@ -277,6 +294,7 @@ export default function generateClientOrderHtml(repair: any): string {
           .join("")}
         </div>
         `
+          : ""
       }
       ${
         repair.detalleControles &&
