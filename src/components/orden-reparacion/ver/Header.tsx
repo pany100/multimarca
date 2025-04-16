@@ -37,7 +37,6 @@ import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 
 // PDF components
 import OrdenClienteInterna from "@/components/orden-reparacion/pdf/OrdenClienteInterna";
-import OrdenClientePdf from "@/components/orden-reparacion/pdf/OrdenClientePdf";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
 import { useGeneratePdf } from "@/hooks/orden-reparacion/useGeneratePdf";
 
@@ -48,7 +47,6 @@ function Header({ ordenReparacion }: { ordenReparacion: any }) {
 
   // Refs for printing
   const mechanicOrderRef = useRef(null);
-  const clientOrderRef = useRef(null);
   const internClientOrderRef = useRef(null);
 
   // State for notification dialog and snackbar
@@ -78,10 +76,6 @@ function Header({ ordenReparacion }: { ordenReparacion: any }) {
   // Print handlers
   const handleMechanicOrderPrint = useReactToPrint({
     content: () => mechanicOrderRef.current,
-  });
-
-  const handleClientOrderPrint2 = useReactToPrint({
-    content: () => clientOrderRef.current,
   });
 
   const handleClientOrderPrint = async () => {
@@ -308,17 +302,6 @@ function Header({ ordenReparacion }: { ordenReparacion: any }) {
                       <PrintIcon fontSize="small" color="secondary" />
                     </ListItemIcon>
                     <ListItemText>Para cliente</ListItemText>
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      handleClientOrderPrint2();
-                      handleClosePrintMenu();
-                    }}
-                  >
-                    <ListItemIcon>
-                      <PrintIcon fontSize="small" color="secondary" />
-                    </ListItemIcon>
-                    <ListItemText>Para cliente (LEGACY)</ListItemText>
                   </MenuItem>
                   <MenuItem
                     onClick={() => {
@@ -613,9 +596,6 @@ function Header({ ordenReparacion }: { ordenReparacion: any }) {
       <div style={{ display: "none" }}>
         {ordenReparacion !== null && (
           <OrdenMecanicoPdf ref={mechanicOrderRef} repair={ordenReparacion} />
-        )}
-        {ordenReparacion !== null && (
-          <OrdenClientePdf ref={clientOrderRef} repair={ordenReparacion} />
         )}
         {ordenReparacion !== null && (
           <OrdenClienteInterna

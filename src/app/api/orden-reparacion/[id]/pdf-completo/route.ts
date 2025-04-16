@@ -40,6 +40,7 @@ export async function GET(
             controlMecanico: true,
           },
         },
+        ingresos: true,
       },
     });
 
