@@ -235,45 +235,6 @@ export default function generateClientOrderHtml(repair: any): string {
         </div>
       </div>
       ${
-        repair.ingresos && repair.ingresos.length > 0
-          ? `
-      <div class="TypographyBody1" style="display: flex; justify-content: space-between; margin-top: 5px;">
-        <div style="font-weight: bold;">
-          Monto abonado: ${new Intl.NumberFormat("es-AR", {
-            style: "currency",
-            currency: "ARS",
-          }).format(
-            repair.ingresos.reduce((sum: number, ingreso: any) => {
-              if (ingreso.moneda === "Dolar") {
-                return sum + Number(ingreso.monto) * Number(ingreso.dolar.blue);
-              }
-              return sum + Number(ingreso.monto);
-            }, 0)
-          )}
-        </div>
-        <div style="font-weight: bold;">
-          Falta pagar: ${new Intl.NumberFormat("es-AR", {
-            style: "currency",
-            currency: "ARS",
-          }).format(
-            Number(calcularTotalOrdenReparacion(repair)) -
-              (repair.ingresos
-                ? repair.ingresos.reduce((sum: number, ingreso: any) => {
-                    if (ingreso.moneda === "Dolar") {
-                      return (
-                        sum + Number(ingreso.monto) * Number(ingreso.dolar.blue)
-                      );
-                    }
-                    return sum + Number(ingreso.monto);
-                  }, 0)
-                : 0)
-          )}
-        </div>
-      </div>
-          `
-          : ""
-      }
-      ${
         repair.estado !== EstadoOrdenReparacion.Presupuestado
           ? `
         <hr class="divider" />
@@ -439,6 +400,49 @@ export default function generateClientOrderHtml(repair: any): string {
           )}
         </div>
       </div>
+             ${
+               repair.ingresos && repair.ingresos.length > 0
+                 ? `
+        <div class="TypographyBody1" style="display: flex;
+          justify-content: space-between; margin-bottom: 20px; margin-right: 15px;">
+          <div style="font-weight: bold;">
+            Monto abonado: ${new Intl.NumberFormat("es-AR", {
+              style: "currency",
+              currency: "ARS",
+            }).format(
+              repair.ingresos.reduce((sum: number, ingreso: any) => {
+                if (ingreso.moneda === "Dolar") {
+                  return (
+                    sum + Number(ingreso.monto) * Number(ingreso.dolar.blue)
+                  );
+                }
+                return sum + Number(ingreso.monto);
+              }, 0)
+            )}
+          </div>
+          <div style="font-weight: bold;">
+            Falta pagar: ${new Intl.NumberFormat("es-AR", {
+              style: "currency",
+              currency: "ARS",
+            }).format(
+              Number(calcularTotalOrdenReparacion(repair)) -
+                (repair.ingresos
+                  ? repair.ingresos.reduce((sum: number, ingreso: any) => {
+                      if (ingreso.moneda === "Dolar") {
+                        return (
+                          sum +
+                          Number(ingreso.monto) * Number(ingreso.dolar.blue)
+                        );
+                      }
+                      return sum + Number(ingreso.monto);
+                    }, 0)
+                  : 0)
+            )}
+          </div>
+        </div>
+            `
+                 : ""
+             }
       <div class="TypographyBody1">
       ${
         repair.mecanicos.length > 0 &&
