@@ -72,7 +72,7 @@ function PreciosModal({
   };
 
   return (
-    <>
+    <Box>
       <Box sx={{ width: "100%", mb: 2 }}>
         <Button
           variant="contained"
@@ -128,7 +128,7 @@ function PreciosModal({
       >
         <Alert severity={snackbar.severity}>{snackbar.message}</Alert>
       </Snackbar>
-    </>
+    </Box>
   );
 }
 
