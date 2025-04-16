@@ -8,8 +8,8 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 import { EstadoOrdenReparacion } from "@prisma/client";
-import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const estadosDisplay: Record<EstadoOrdenReparacion, string> = {
   [EstadoOrdenReparacion.Presupuestado]: "Presupuestado",
@@ -44,24 +44,32 @@ const OrdenesReparacionTable = ({
   ...rest
 }: InheritedTableProps) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
 
   const [tabValue, setTabValue] = useState(0);
   const [estadoActual, setEstadoActual] = useState<
     EstadoOrdenReparacion | string | null
   >(null);
 
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam !== null) {
+      const tabIndex = parseInt(tabParam);
+      if (!isNaN(tabIndex) && tabIndex >= 0 && tabIndex < estados.length) {
+        setTabValue(tabIndex);
+        setEstadoActual(tabIndex === 0 ? null : estados[tabIndex]);
+      }
+    }
+  }, [searchParams]);
+
   const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
     setEstadoActual(newValue === 0 ? null : estados[newValue]);
-  };
 
-  const getQueryParams = useCallback(() => {
-    const params: Record<string, string> = {};
-    if (estadoActual) {
-      params.estado = estadoActual;
-    }
-    return params;
-  }, [estadoActual]);
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", newValue.toString());
+    window.history.pushState({ tab: newValue }, "", url.toString());
+  };
 
   const columns: GridColDef[] = [
     { field: "id", headerName: "ID", flex: 0.3 },
