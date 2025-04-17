@@ -73,7 +73,7 @@ model Auto {
   color             String?           @db.VarChar(50)
   year              Int?
   kms               Int?
-  valves            Int?
+  valves            String?           @db.VarChar(255)
   ownerId           Int
   chassis_number    String?           @db.VarChar(150)
   engine_number     String?           @db.VarChar(150)

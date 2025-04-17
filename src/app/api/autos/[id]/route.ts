@@ -39,7 +39,7 @@ export async function PUT(
         color: color.toUpperCase(),
         year: year ? parseInt(year, 10) : null,
         kms: kms ? parseInt(kms, 10) : null,
-        valves: valves ? parseInt(valves, 10) : null,
+        valves,
         ownerId,
         chassis_number: chassis_number?.toUpperCase(),
         engine_number: engine_number?.toUpperCase(),

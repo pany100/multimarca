@@ -66,11 +66,7 @@ export async function POST(request: Request) {
         year:
           typeof body.year === "string" ? parseInt(body.year, 10) : body.year,
         kms: typeof body.kms === "string" ? parseInt(body.kms, 10) : body.kms,
-        valves: body.valves
-          ? typeof body.valves === "string"
-            ? parseInt(body.valves, 10)
-            : body.valves
-          : null,
+        valves: body.valves,
         ownerId: body.ownerId,
         chassis_number: body.chassis_number?.toUpperCase(),
         engine_number: body.engine_number?.toUpperCase(),

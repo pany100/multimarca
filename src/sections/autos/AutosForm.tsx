@@ -12,7 +12,7 @@ export const schema = yup.object({
   year: yup.number().required("El año es requerido"),
   color: yup.string().required("El color es requerido"),
   kms: yup.number().required("Kilometraje es requerido"),
-  valves: yup.number().nullable(),
+  valves: yup.string().nullable(),
   ownerId: yup.number().required("El propietario es requerido"),
   chassis_number: yup.string().nullable(),
   engine_number: yup.string().nullable(),
@@ -49,7 +49,7 @@ const AutosForm = () => {
           <CustomInputText name="kms" label="Kilómetros" type="number" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText name="valves" label="Válvulas" type="number" />
+          <CustomInputText name="valves" label="Motor" />
         </Grid>
         <Grid item xs={12} md={6}>
           <CustomAutocomplete
