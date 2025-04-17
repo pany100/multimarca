@@ -457,8 +457,8 @@ export default function generateClientOrderHtml(repair: any): string {
       <div class="TypographyBody1">
             ${
               repair.estado === EstadoOrdenReparacion.Presupuestado
-                ? "Presupuesto aproximado, valores al día, sin IVA, sujeto a desarme y re-ensamble."
-                : "Detalle del trabajo, sin IVA"
+                ? "Detalle de presupuesto solicitado, valores al día,  sin iva, sujeto a desarme"
+                : "Detalle del trabajo,  valores sin IVA"
             }
           </div>
     </div>

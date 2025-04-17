@@ -313,6 +313,7 @@ model OrdenReparacion {
   observacionesCliente   String                    @db.Text
   observacionesEntrada   String                    @db.Text
   observacionesSalida    String                    @db.Text
+  observacionesOcultas   String?                   @db.Text
   estado                 EstadoOrdenReparacion     @default(Presupuestado)
   pdfPath                String?                   @db.VarChar(255)
   descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)

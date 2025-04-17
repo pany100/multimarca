@@ -15,6 +15,7 @@ const schema = yup.object().shape({
   observacionesCliente: yup
     .string()
     .required("Debe ingresar las observaciones"),
+  observacionesOcultas: yup.string().nullable(),
   estado: yup
     .string()
     .oneOf(["Presupuestado", "EnProgreso", "Aceptado", "Terminado"])

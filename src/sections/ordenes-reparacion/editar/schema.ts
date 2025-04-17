@@ -93,6 +93,7 @@ const schema = yup.object().shape({
       recibo: yup.string().nullable(),
     })
   ),
+  observacionesOcultas: yup.string().nullable(),
   descuento: yup.number().nullable().min(0),
   descripcionDescuento: yup.string().nullable(),
   observacionesEntrada: yup.string(),

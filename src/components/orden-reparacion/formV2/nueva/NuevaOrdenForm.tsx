@@ -6,6 +6,7 @@ import FormActions from "../commons/FormActions";
 import FormSection from "../commons/FormSection";
 import AutoSection from "../sections/autos/AutoSection";
 import ClientObservationSection from "../sections/client-observations/ClientObservationSection";
+import HiddenObservationSection from "../sections/hidden-observations/HiddenObservationSection";
 import InputObservationSection from "../sections/input-observations/InputObservationsSection";
 import MechanicsSection from "../sections/mechanics/MechanicsSection";
 import ReparacionTercerosSection from "../sections/reparacion-terceros/ReparacionTercerosSection";
@@ -31,6 +32,9 @@ function NuevaOrdenForm() {
         </FormSection>
         <FormSection title="Observaciones último ingreso">
           <InputObservationSection />
+        </FormSection>
+        <FormSection title="Observaciones internas">
+          <HiddenObservationSection />
         </FormSection>
         <FormSection title="Mecánicos">
           <MechanicsSection />
