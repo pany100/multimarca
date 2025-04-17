@@ -8,6 +8,7 @@ import {
 } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -18,16 +19,34 @@ export async function GET(request: Request) {
 
     const skip = page * size;
 
+    // Build the base where clause
     const whereClause: any = {
       OR: [
         { auto: { patent: { contains: query } } },
         { id: { equals: parseInt(query) || undefined } },
         { auto: { owner: { fullName: { contains: query } } } },
+        { observacionesCliente: { contains: query } },
       ],
     };
 
+    // Add estado filter if provided
     if (estado) {
       whereClause.estado = estado;
+    }
+
+    // If there's a query, add formatted date search
+    if (query && query.trim() !== "") {
+      // Use raw query to find orders where the formatted date contains the query
+      const formattedDateMatches = await prisma.$queryRaw<{ id: number }[]>`
+        SELECT id FROM OrdenReparacion 
+        WHERE DATE_FORMAT(fechaEntradaReparacion, '%e/%c/%Y') LIKE ${`%${query}%`}
+      `;
+
+      // Only add to OR clause if we found matches
+      if (formattedDateMatches.length > 0) {
+        const matchingIds = formattedDateMatches.map((match) => match.id);
+        whereClause.OR.push({ id: { in: matchingIds } });
+      }
     }
 
     const [ordenesReparacion, total] = await Promise.all([
