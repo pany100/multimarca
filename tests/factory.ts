@@ -125,7 +125,7 @@ export async function createAuto(ownerId: number, overrides = {}) {
       color: faker.color.human(),
       year: faker.date.past().getFullYear(),
       kms: faker.number.int({ min: 0, max: 200000 }),
-      valves: faker.number.int({ min: 8, max: 32 }),
+      valves: faker.string.alphanumeric(10),
       ownerId,
       chassis_number: faker.string.alphanumeric(17),
       engine_number: faker.string.alphanumeric(10),
