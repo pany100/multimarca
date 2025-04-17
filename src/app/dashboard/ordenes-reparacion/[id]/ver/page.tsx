@@ -2,6 +2,7 @@
 import AutoInfo from "@/components/orden-reparacion/ver/AutoInfo";
 import Controls from "@/components/orden-reparacion/ver/Controls";
 import Details from "@/components/orden-reparacion/ver/Details";
+import DetalleTrabajo from "@/components/orden-reparacion/ver/DetalleTrabajo";
 import Header from "@/components/orden-reparacion/ver/Header";
 import Mechanics from "@/components/orden-reparacion/ver/Mechanics";
 import NotasInternas from "@/components/orden-reparacion/ver/NotasInternas";
@@ -102,6 +103,8 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
       <AutoInfo ordenReparacion={ordenReparacion} />
       <Divider sx={{ my: 2 }} />
       <Details ordenReparacion={ordenReparacion} />
+      <Divider sx={{ my: 2 }} />
+      <DetalleTrabajo ordenReparacion={ordenReparacion} />
       <Divider sx={{ my: 2 }} />
       <NotasInternas ordenReparacion={ordenReparacion} />
       <Divider sx={{ my: 2 }} />

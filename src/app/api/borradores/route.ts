@@ -63,6 +63,7 @@ export async function POST(request: Request) {
     const {
       autoId,
       observacionesCliente,
+      detallesDeTrabajo,
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
@@ -107,6 +108,7 @@ export async function POST(request: Request) {
         autoId: parseInt(autoId),
         observacionesCliente,
         descripcionDescuento,
+        detallesDeTrabajo,
         descuento: descuento
           ? new Prisma.Decimal(descuento)
           : new Prisma.Decimal(0),

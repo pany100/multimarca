@@ -7,6 +7,7 @@ import ClientObservationSection from "../orden-reparacion/formV2/sections/client
 import ReparacionTercerosSection from "../orden-reparacion/formV2/sections/reparacion-terceros/ReparacionTercerosSection";
 import RepuestosUsadosSection from "../orden-reparacion/formV2/sections/repuestos-usados/RepuestosUsadosSection";
 import ResumenCostosSection from "../orden-reparacion/formV2/sections/resumen-costos/ResumenCostosSection";
+import TrabajosARealizarSection from "../orden-reparacion/formV2/sections/trabajos-a-realizar/TrabajosARealizarSection";
 import TrabajosRealizadosSection from "../orden-reparacion/formV2/sections/trabajos-realizados/TrabajosRealizadosSection";
 import PresupuestoAutoSection from "../presupuesto/PresupuestoAutoSection";
 import schema from "./schema";
@@ -95,6 +96,9 @@ function EditarBorradorForm({ borrador }: Props) {
         </FormSection>
         <FormSection title="Observaciones del Cliente">
           <ClientObservationSection />
+        </FormSection>
+        <FormSection title="Pedido de cliente">
+          <TrabajosARealizarSection />
         </FormSection>
         <FormSection title="Repuestos Usados">
           <RepuestosUsadosSection />

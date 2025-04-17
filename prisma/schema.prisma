@@ -314,6 +314,7 @@ model OrdenReparacion {
   observacionesEntrada   String                    @db.Text
   observacionesSalida    String                    @db.Text
   observacionesOcultas   String?                   @db.Text
+  detallesDeTrabajo      String?                   @db.Text
   estado                 EstadoOrdenReparacion     @default(Presupuestado)
   pdfPath                String?                   @db.VarChar(255)
   descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
@@ -521,6 +522,7 @@ model Borrador {
   autoId                Int
   fechaCreacion         DateTime              @default(now())
   observacionesCliente  String                @db.Text
+  detallesDeTrabajo     String?               @db.Text
   descuento             Decimal               @default(0.00) @db.Decimal(10, 2)
   descripcionDescuento   String?                   @db.VarChar(255)
   auto                  Auto                  @relation("AutoBorrador", fields: [autoId], references: [id])

@@ -97,6 +97,7 @@ const presupuestoSchema = yup.object().shape({
   observacionesCliente: yup
     .string()
     .required("Debe ingresar las observaciones"),
+  detallesDeTrabajo: yup.string().nullable(),
   repuestosUsados: yup.array().of(
     yup.object().shape({
       stock: yup

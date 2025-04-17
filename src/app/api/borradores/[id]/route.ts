@@ -76,6 +76,7 @@ export async function PUT(
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
+      detallesDeTrabajo,
     } = body;
 
     const repuestosUsadosToPersist = prepareRepuestosToPersist(repuestosUsados);
@@ -88,6 +89,7 @@ export async function PUT(
       data: {
         autoId,
         descripcionDescuento,
+        detallesDeTrabajo,
         descuento: descuento
           ? new Prisma.Decimal(descuento)
           : new Prisma.Decimal(0),

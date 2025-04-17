@@ -10,6 +10,7 @@ import ClientObservationSection from "../orden-reparacion/formV2/sections/client
 import ReparacionTercerosSection from "../orden-reparacion/formV2/sections/reparacion-terceros/ReparacionTercerosSection";
 import RepuestosUsadosSection from "../orden-reparacion/formV2/sections/repuestos-usados/RepuestosUsadosSection";
 import ResumenCostosSection from "../orden-reparacion/formV2/sections/resumen-costos/ResumenCostosSection";
+import TrabajosARealizarSection from "../orden-reparacion/formV2/sections/trabajos-a-realizar/TrabajosARealizarSection";
 import TrabajosRealizadosSection from "../orden-reparacion/formV2/sections/trabajos-realizados/TrabajosRealizadosSection";
 import PresupuestoAutoSection from "./PresupuestoAutoSection";
 
@@ -31,8 +32,11 @@ function NuevoPresupuestoForm({
         <FormSection title="Información del Vehículo">
           <PresupuestoAutoSection />
         </FormSection>
-        <FormSection title="Observaciones del Cliente">
+        <FormSection title="Pedido del Cliente">
           <ClientObservationSection />
+        </FormSection>
+        <FormSection title="Trabajos a realizar">
+          <TrabajosARealizarSection />
         </FormSection>
         <FormSection title="Repuestos Usados">
           <RepuestosUsadosSection />

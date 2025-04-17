@@ -97,6 +97,7 @@ const schema = yup.object().shape({
   descuento: yup.number().nullable().min(0),
   descripcionDescuento: yup.string().nullable(),
   observacionesEntrada: yup.string(),
+  detallesDeTrabajo: yup.string().nullable(),
 });
 
 export default schema;

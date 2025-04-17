@@ -10,6 +10,7 @@ import AutoSection from "../sections/autos/AutoSection";
 import ClientObservationSection from "../sections/client-observations/ClientObservationSection";
 import ControlesSection from "../sections/controles/ControlesSection";
 import DetalleControlesSection from "../sections/detalle-controles/DetalleControlesSection";
+import HiddenObservationSection from "../sections/hidden-observations/HiddenObservationSection";
 import InputObservationSection from "../sections/input-observations/InputObservationsSection";
 import MechanicsSection from "../sections/mechanics/MechanicsSection";
 import OutputObservationsSection from "../sections/output-observations/OutputObservationsSection";
@@ -17,8 +18,8 @@ import ReparacionTercerosSection from "../sections/reparacion-terceros/Reparacio
 import RepuestosUsadosSection from "../sections/repuestos-usados/RepuestosUsadosSection";
 import ResumenCostosSection from "../sections/resumen-costos/ResumenCostosSection";
 import RevisionSection from "../sections/revision/RevisionSection";
+import TrabajosARealizarSection from "../sections/trabajos-a-realizar/TrabajosARealizarSection";
 import TrabajosRealizadosSection from "../sections/trabajos-realizados/TrabajosRealizadosSection";
-import HiddenObservationSection from "../sections/hidden-observations/HiddenObservationSection";
 
 type Props = {
   ordenReparacion: OrdenReparacion;
@@ -158,6 +159,9 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         </FormSection>
         <FormSection title="Observaciones internas">
           <HiddenObservationSection />
+        </FormSection>
+        <FormSection title="Trabajos a realizar">
+          <TrabajosARealizarSection />
         </FormSection>
         <FormSection title="Observaciones de salida">
           <OutputObservationsSection />
