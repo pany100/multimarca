@@ -17,14 +17,27 @@ type Control = {
   tipo: string;
   valor: string;
   nombre: string;
+  ordenEnPdf: number | null;
+  pdfName: string | null;
 };
+
+// Sort controls by ordenEnPdf field, same as in OrdenMecanicoPdf
+function sortControls(a: Control, b: Control) {
+  if (!a.ordenEnPdf || a.ordenEnPdf === null) return 1;
+  if (!b.ordenEnPdf || b.ordenEnPdf === null) return -1;
+  return (a.ordenEnPdf || 0) - (b.ordenEnPdf || 0);
+}
 
 function CheckboxControls() {
   const { checkControls, handleControlChange } = useControlesInnerForm();
-  const midpoint = Math.ceil(checkControls.length / 2);
-  const firstGroup = checkControls.slice(0, midpoint);
-  const secondGroup = checkControls.slice(midpoint);
+  // Sort controls using the same function as in OrdenMecanicoPdf
+  const sortedControls = [...checkControls].sort(sortControls);
+
+  const midpoint = Math.ceil(sortedControls.length / 2);
+  const firstGroup = sortedControls.slice(0, midpoint);
+  const secondGroup = sortedControls.slice(midpoint);
   const controlGroups = [firstGroup, secondGroup];
+
   return (
     <>
       {controlGroups.slice(0, 2).map(
@@ -82,7 +95,9 @@ function CheckboxControls() {
                           />
                         </ListItemIcon>
                         <ListItemText
-                          primary={getFormattedControlName(control.nombre)}
+                          primary={getFormattedControlName(
+                            control.pdfName || control.nombre
+                          )}
                           primaryTypographyProps={{
                             variant: "body2",
                             fontWeight: isChecked ? "medium" : "regular",
