@@ -21,6 +21,9 @@ type Control = {
   pdfName: string | null;
 };
 
+// Maximum length for control names, same as in OrdenMecanicoPdf
+const MAX_CONTROL_LENGTH = 24;
+
 // Sort controls by ordenEnPdf field, same as in OrdenMecanicoPdf
 function sortControls(a: Control, b: Control) {
   if (!a.ordenEnPdf || a.ordenEnPdf === null) return 1;
@@ -30,17 +33,34 @@ function sortControls(a: Control, b: Control) {
 
 function CheckboxControls() {
   const { checkControls, handleControlChange } = useControlesInnerForm();
+
   // Sort controls using the same function as in OrdenMecanicoPdf
   const sortedControls = [...checkControls].sort(sortControls);
 
-  const midpoint = Math.ceil(sortedControls.length / 2);
-  const firstGroup = sortedControls.slice(0, midpoint);
-  const secondGroup = sortedControls.slice(midpoint);
-  const controlGroups = [firstGroup, secondGroup];
+  // Separate controls by name length, same as in OrdenMecanicoPdf
+  const shortControls = sortedControls.filter(
+    (control) =>
+      getFormattedControlName(control.pdfName || control.nombre).length <=
+      MAX_CONTROL_LENGTH
+  );
+
+  const longControls = sortedControls.filter(
+    (control) =>
+      getFormattedControlName(control.pdfName || control.nombre).length >
+      MAX_CONTROL_LENGTH
+  );
+
+  // Combine short controls first, then long controls
+  const orderedControls = [...shortControls, ...longControls];
+
+  // Create two columns by alternating controls
+  const firstColumn = orderedControls.filter((_, index) => index % 2 === 0);
+  const secondColumn = orderedControls.filter((_, index) => index % 2 === 1);
+  const controlGroups = [firstColumn, secondColumn];
 
   return (
     <>
-      {controlGroups.slice(0, 2).map(
+      {controlGroups.map(
         (group, index) =>
           group.length > 0 && (
             <Grid item xs={12} md={6} key={index}>
@@ -57,6 +77,10 @@ function CheckboxControls() {
                 <List disablePadding>
                   {group.map((control: Control) => {
                     const isChecked = control.valor === "true";
+                    const controlName = control.pdfName || control.nombre;
+                    const isLongName =
+                      getFormattedControlName(controlName).length >
+                      MAX_CONTROL_LENGTH;
 
                     return (
                       <ListItemButton
@@ -95,12 +119,13 @@ function CheckboxControls() {
                           />
                         </ListItemIcon>
                         <ListItemText
-                          primary={getFormattedControlName(
-                            control.pdfName || control.nombre
-                          )}
+                          primary={getFormattedControlName(controlName)}
                           primaryTypographyProps={{
                             variant: "body2",
                             fontWeight: isChecked ? "medium" : "regular",
+                            ...(isLongName && {
+                              fontSize: "0.8rem",
+                            }),
                           }}
                         />
                       </ListItemButton>
