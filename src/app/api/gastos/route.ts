@@ -39,11 +39,12 @@ export async function GET(request: Request) {
     }
     const skip = page * size;
 
-    const whereClause = {
+    const whereClause: any = {
       OR: [
         { nombre: { contains: query } },
         { categoria: { nombre: { contains: query } } },
         { mecanico: { name: { contains: query } } },
+        { detalle: { contains: query } },
       ],
       AND: [
         {
@@ -56,6 +57,21 @@ export async function GET(request: Request) {
         },
       ],
     };
+
+    // If there's a query, add formatted date search
+    if (query && query.trim() !== "") {
+      // Use raw query to find gastos where the formatted date contains the query
+      const formattedDateMatches = await prisma.$queryRaw<{ id: number }[]>`
+        SELECT id FROM Gasto 
+        WHERE DATE_FORMAT(fecha, '%e/%c/%Y') LIKE ${`%${query}%`}
+      `;
+
+      // Only add to OR clause if we found matches
+      if (formattedDateMatches.length > 0) {
+        const matchingIds = formattedDateMatches.map((match) => match.id);
+        whereClause.OR.push({ id: { in: matchingIds } });
+      }
+    }
 
     const [gastos, total] = await Promise.all([
       prisma.gasto.findMany({
