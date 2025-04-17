@@ -1,14 +1,14 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { useEffect, useState } from "react";
 
-function useAdmins() {
+function useAdminsAndGaby() {
   const [admins, setAdmins] = useState<{ value: number; label: string }[]>([]);
   const { authFetch } = useFetch();
 
   useEffect(() => {
     const fetchUsuarios = async () => {
       try {
-        const response = await authFetch("/api/usuarios/admins");
+        const response = await authFetch("/api/usuarios/admins-for-ingresos");
         const data = await response.json();
         const customUsuarios = data.map(
           (usuario: { id: number; fullName: string }) => ({
@@ -27,4 +27,4 @@ function useAdmins() {
   return { admins };
 }
 
-export default useAdmins;
+export default useAdminsAndGaby;

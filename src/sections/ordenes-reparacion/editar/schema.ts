@@ -11,6 +11,7 @@ const schema = yup.object().shape({
       yup.ref("fechaEntradaReparacion"),
       "La fecha de salida debe ser posterior a la fecha de entrada"
     ),
+  revisadoPorId: yup.number().nullable(),
   kilometros: yup.number().min(0).integer(),
   observacionesCliente: yup.string(),
   observacionesSalida: yup

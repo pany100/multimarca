@@ -16,6 +16,7 @@ import OutputObservationsSection from "../sections/output-observations/OutputObs
 import ReparacionTercerosSection from "../sections/reparacion-terceros/ReparacionTercerosSection";
 import RepuestosUsadosSection from "../sections/repuestos-usados/RepuestosUsadosSection";
 import ResumenCostosSection from "../sections/resumen-costos/ResumenCostosSection";
+import RevisionSection from "../sections/revision/RevisionSection";
 import TrabajosRealizadosSection from "../sections/trabajos-realizados/TrabajosRealizadosSection";
 
 type Props = {
@@ -142,7 +143,6 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
     ordenReparacion,
     selectedFile,
   });
-
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(onSubmit)}>
@@ -178,6 +178,9 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         </FormSection>
         <FormSection title="Resumen de Costos">
           <ResumenCostosSection />
+        </FormSection>
+        <FormSection title="Revisión">
+          <RevisionSection />
         </FormSection>
         <FormSection title="Informe del Scanner">
           <ScannerForm

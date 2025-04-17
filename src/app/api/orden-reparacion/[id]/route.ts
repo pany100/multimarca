@@ -41,6 +41,7 @@ export async function GET(
           },
         },
         trabajosRealizados: true,
+        revisadoPor: true,
         controlesEnReparacion: {
           include: {
             controlMecanico: true,
@@ -98,6 +99,7 @@ export async function PUT(
       observacionesCliente,
       observacionesEntrada,
       observacionesSalida,
+      revisadoPorId,
       estado,
       pdfPath,
       mecanicos = [],
@@ -311,6 +313,7 @@ export async function PUT(
             observacionesEntrada,
             observacionesSalida,
             estado,
+            revisadoPorId,
             dolarId: dolar?.id,
             descuento: new Prisma.Decimal(descuento),
             mecanicos: {
@@ -351,6 +354,7 @@ export async function PUT(
                 owner: true,
               },
             },
+            revisadoPor: true,
             mecanicos: true,
             repuestosUsados: true,
             reparacionesDeTercero: true,

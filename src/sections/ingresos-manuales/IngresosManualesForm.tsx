@@ -3,7 +3,7 @@
 import ChequeData from "@/components/formV2/ChequeData";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
-import useAdmins from "@/hooks/useAdmins";
+import useAdminsAndGaby from "@/hooks/useAdminsAndGaby";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
 import { Grid, Typography } from "@mui/material";
@@ -35,7 +35,7 @@ export const schema = yup.object({
 });
 
 const IngresosManualesForm = () => {
-  const { admins } = useAdmins();
+  const { admins } = useAdminsAndGaby();
   const { currency, tipoOperacion } = useFixedSelectData();
   const { watch } = useFormContext();
   const operacionValue = watch("tipoExtraccion");

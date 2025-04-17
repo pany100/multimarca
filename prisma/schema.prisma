@@ -19,6 +19,7 @@ model Usuario {
   extracciones                 Extraccion[]
   ingresosManuales             IngresoManualDeDinero[]
   rol                          Rol                     @relation(fields: [rolId], references: [id])
+  ordenesReparacion            OrdenReparacion[]     @relation("OrdenReparacionRevisadaPor")
 
   @@index([fullName])
   @@index([username])
@@ -318,6 +319,8 @@ model OrdenReparacion {
   dolarId                Int?
   detalleControles       String?                   @db.Text
   descripcionDescuento   String?                   @db.VarChar(255)
+  revisadoPorId          Int?
+  revisadoPor            Usuario?                  @relation("OrdenReparacionRevisadaPor", fields: [revisadoPorId], references: [id])
   controlesEnReparacion  ControlEnReparacion[]     @relation("OrdenReparacionControlesEnReparacion")
   ingresos               IngresoPorReparacion[]    @relation("OrdenReparacionIngresos")
   notificacionesInternas NotificacionInterna[]     @relation("OrdenReparacionNotificacionesInternas")
