@@ -4,6 +4,8 @@ import PDFPage from "./PDFPage";
 import TemplateHeader from "./TemplateHeader";
 
 import CarHeader from "./CarHeader";
+import DetallesOrdenInterna from "./DetallesOrdenInterna";
+import OrdenInternaTotal from "./OrdenInternaTotal";
 
 type Props = {
   repair: any;
@@ -11,8 +13,6 @@ type Props = {
 
 const setPageStyles = () => {
   return `
-    @media print {
-      @page {
         margin: 10mm;
       }
       .pagebreak {
@@ -30,13 +30,16 @@ export const OrdenClienteInterna = React.forwardRef<any, Props>(
         <style>{setPageStyles()}</style>
         <PDFPage style={{ height: "auto" }}>
           <TemplateHeader />
-          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.gray" }} />
           <CarHeader
             car={repair.auto}
             repair={repair}
             owner={repair.auto.owner}
           />
-          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.black" }} />
+          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.gray" }} />
+          <OrdenInternaTotal repair={repair} />
+          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.gray" }} />
+          <DetallesOrdenInterna />
         </PDFPage>
       </div>
     );
