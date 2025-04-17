@@ -69,6 +69,7 @@ export async function PUT(
     const {
       autoId,
       descuento,
+      descripcionDescuento,
       fechaCreacion,
       id,
       observacionesCliente,
@@ -86,6 +87,7 @@ export async function PUT(
       where: { id },
       data: {
         autoId,
+        descripcionDescuento,
         descuento: descuento
           ? new Prisma.Decimal(descuento)
           : new Prisma.Decimal(0),
