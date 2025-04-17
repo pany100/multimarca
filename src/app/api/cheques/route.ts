@@ -11,19 +11,39 @@ export async function GET(request: Request) {
 
     const skip = page * size;
 
+    const whereClause: any = {
+      OR: [
+        { numero: { contains: query } },
+        { banco: { contains: query } },
+        { owner: { contains: query } },
+      ],
+    };
+
+    // If there's a query, add formatted date search for both fechaEmision and fechaCobro
+    if (query && query.trim() !== "") {
+      // Use raw query to find cheques where the formatted dates contain the query
+      const formattedDateMatches = await prisma.$queryRaw<{ id: number }[]>`
+        SELECT id FROM Cheque 
+        WHERE DATE_FORMAT(fechaEmision, '%e/%c/%Y') LIKE ${`%${query}%`}
+        OR DATE_FORMAT(fechaCobro, '%e/%c/%Y') LIKE ${`%${query}%`}
+      `;
+
+      // Only add to OR clause if we found matches
+      if (formattedDateMatches.length > 0) {
+        const matchingIds = formattedDateMatches.map((match) => match.id);
+        whereClause.OR.push({ id: { in: matchingIds } });
+      }
+    }
+
     const [cheques, total] = await Promise.all([
       prisma.cheque.findMany({
-        where: {
-          numero: { contains: query },
-        },
+        where: whereClause,
         skip,
         take: size,
         orderBy: { fechaCobro: "asc" },
       }),
       prisma.cheque.count({
-        where: {
-          numero: { contains: query },
-        },
+        where: whereClause,
       }),
     ]);
 
