@@ -211,8 +211,9 @@ model Extraccion {
   fecha          DateTime       @default(now())
   usuarioId      Int
   motivo         String         @db.VarChar(150)
-  tipoExtraccion TipoOperacion @default(EFECTIVO)
   tipoOperacionOld TipoOperacion @default(EFECTIVO)
+  tipoOperacionId Int?
+  tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
   moneda         Moneda         @default(Peso)
   dolarId        Int?
   dolar          Dolar?         @relation(fields: [dolarId], references: [id])
@@ -236,8 +237,9 @@ model Gasto {
   proveedorId Int?
   moneda      Moneda         @default(Peso)
   dolarId     Int?
-  tipo        TipoOperacion @default(EFECTIVO)
   tipoOperacionOld TipoOperacion @default(EFECTIVO)
+  tipoOperacionId Int?
+  tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
   categoria   CategoriaGasto @relation(fields: [categoriaId], references: [id])
   dolar       Dolar?         @relation(fields: [dolarId], references: [id])
   mecanico    Empleado?      @relation(fields: [mecanicoId], references: [id])
@@ -271,8 +273,9 @@ model Venta {
   cliente   Cliente?    @relation(fields: [clienteId], references: [id])
   dolar     Dolar?      @relation(fields: [dolarId], references: [id])
   items     VentaItem[] @relation("VentaToItems")
-  tipoOperacion TipoOperacion @default(EFECTIVO)
   tipoOperacionOld TipoOperacion @default(EFECTIVO)
+  tipoOperacionId Int?
+  tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
   chequeId  Int?
   cheque    Cheque?    @relation(fields: [chequeId], references: [id])
   presupuesto Boolean @default(false)
@@ -446,8 +449,9 @@ model IngresoPorReparacion {
   cliente           Cliente         @relation(fields: [clienteId], references: [id])
   dolar             Dolar?          @relation(fields: [dolarId], references: [id])
   ordenReparacion   OrdenReparacion @relation("OrdenReparacionIngresos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
-  tipoOperacion TipoOperacion @default(EFECTIVO)
   tipoOperacionOld TipoOperacion @default(EFECTIVO)
+  tipoOperacionId Int?
+  tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
   chequeId  Int?
   cheque    Cheque?    @relation(fields: [chequeId], references: [id])
 
@@ -545,8 +549,9 @@ model IngresoManualDeDinero {
   descripcion    String?        @db.Text
   moneda         Moneda         @default(Peso)
   dolarId        Int?
-  tipoExtraccion TipoOperacion @default(EFECTIVO)
   tipoOperacionOld TipoOperacion @default(EFECTIVO)
+  tipoOperacionId Int?
+  tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
   usuarioId      Int
   dolar          Dolar?         @relation(fields: [dolarId], references: [id])
   usuario        Usuario        @relation(fields: [usuarioId], references: [id])
@@ -573,6 +578,20 @@ model Cheque {
   ingresoPorReparacion IngresoPorReparacion[]
   ingresoManualDeDinero IngresoManualDeDinero[]
 }
+
+model TipoDeOperacion {
+  id                    Int                     @id @default(autoincrement())
+  label                 String                  @unique @db.VarChar(100)
+  extracciones          Extraccion[]
+  gastos                Gasto[]
+  ventas                Venta[]
+  ingresosPorReparacion IngresoPorReparacion[]
+  ingresosManualDeDinero IngresoManualDeDinero[]
+
+  @@index([label])
+}
+
+
 
 enum TipoEmpleado {
   Mecanico
