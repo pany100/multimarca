@@ -5,6 +5,7 @@ import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useAdminsAndGaby from "@/hooks/useAdminsAndGaby";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
+import useTipoOperacion from "@/hooks/useTipoOperacion";
 import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
 import { Grid, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
@@ -22,23 +23,16 @@ export const schema = yup.object({
     .required("La moneda es requerida"),
   usuarioId: yup.number().required("El usuario es requerido"),
   descripcion: yup.string().required("La descripción es requerida"),
-  tipoExtraccion: yup
-    .string()
-    .oneOf([
-      "EFECTIVO",
-      "TRANSFERENCIA",
-      "CHEQUE",
-      "DEBITO_AUTOMATICO_TARJETA_CREDITO",
-    ])
-    .required("El tipo de operación es requerido"),
-  ...getSchemaPropsForCheque("tipoExtraccion"),
+  tipoOperacionId: yup.number().required("El tipo de extracción es requerido"),
+  ...getSchemaPropsForCheque("tipoOperacionId"),
 });
 
 const IngresosManualesForm = () => {
   const { admins } = useAdminsAndGaby();
-  const { currency, tipoOperacion } = useFixedSelectData();
+  const { currency } = useFixedSelectData();
+  const { tiposOperacion } = useTipoOperacion();
   const { watch } = useFormContext();
-  const operacionValue = watch("tipoExtraccion");
+  const operacionValue = watch("tipoOperacionId");
   return (
     <>
       <Typography variant="h5" sx={{ mb: 2 }}>
@@ -63,12 +57,12 @@ const IngresosManualesForm = () => {
         </Grid>
         <Grid item xs={12}>
           <CustomSelect
-            options={tipoOperacion}
-            name="tipoExtraccion"
+            options={tiposOperacion}
+            name="tipoOperacionId"
             label="Tipo de Operación"
           />
         </Grid>
-        {operacionValue === "CHEQUE" && <ChequeData />}
+        {operacionValue === 3 && <ChequeData />}
       </Grid>
     </>
   );

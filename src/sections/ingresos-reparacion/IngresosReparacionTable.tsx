@@ -7,6 +7,7 @@ import useRecibo from "@/hooks/useRecibo";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import SendIcon from "@mui/icons-material/Send";
 import { Alert, Chip, MenuItem, Snackbar } from "@mui/material";
+import Link from "next/link";
 import { useState } from "react";
 import RecibosModal from "./RecibosModal";
 
@@ -56,23 +57,21 @@ function IngresosReparacionTable({
     },
     {
       field: "tipoOperacion",
-      headerName: "Tipo de Ingreso",
-      flex: 1,
+      headerName: "Tipo de Operación",
+      flex: 1.5,
       renderCell: (params: any) => {
-        if (params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO") {
-          return "DEBITO AUTOMATICO";
-        }
-        if (params.value === "CHEQUE") {
+        const value = params.value;
+        if (value.label === "Cheque" && params.row.chequeId) {
           return (
-            <a
+            <Link
               href={`/dashboard/cheques/${params.row.chequeId}`}
               style={{ textDecoration: "underline" }}
             >
-              CHEQUE
-            </a>
+              Cheque
+            </Link>
           );
         }
-        return params.value;
+        return value.label;
       },
     },
     { field: "descripcion", headerName: "Descripción", flex: 2 },

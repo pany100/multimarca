@@ -90,6 +90,7 @@ export async function GET(request: Request) {
               roles: true,
             },
           },
+          tipoOperacion: true,
           mecanico: true,
           proveedor: true,
           cheque: chequeQueryData,
@@ -124,13 +125,13 @@ export async function POST(request: Request) {
       fecha,
       categoriaId,
       mecanicoId,
-      tipo,
+      tipoOperacionId,
       proveedorId,
       moneda,
       detalle,
     } = body;
 
-    if (!validateChequeRequest(body, tipo)) {
+    if (!validateChequeRequest(body, tipoOperacionId)) {
       return NextResponse.json(
         { error: "Faltan datos para la operación de cheque" },
         { status: 400 }
@@ -164,7 +165,7 @@ export async function POST(request: Request) {
 
     let chequeIdToPass = null;
     try {
-      chequeIdToPass = await getChequeIdAndValidate(body, tipo);
+      chequeIdToPass = await getChequeIdAndValidate(body, tipoOperacionId);
     } catch (error) {
       return NextResponse.json(
         { error: "No se pudo usar el cheque" },
@@ -181,7 +182,7 @@ export async function POST(request: Request) {
         categoriaId,
         mecanicoId,
         proveedorId,
-        tipo,
+        tipoOperacionId,
         detalle,
         dolarId: dolar?.id,
         chequeId: chequeIdToPass,

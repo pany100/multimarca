@@ -7,6 +7,7 @@ import CustomSelect from "@/components/formV2/CustomSelect";
 import useClientesAutocomplete from "@/hooks/useClientesAutocomplete";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import useOrdenReparacionDelCliente from "@/hooks/useOrdenReparacionDelCliente";
+import useTipoOperacion from "@/hooks/useTipoOperacion";
 import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
 import { Grid, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
@@ -24,18 +25,19 @@ export const schema = yup.object({
   ordenReparacionId: yup
     .number()
     .required("La orden de reparación es requerida"),
-  tipoOperacion: yup.string().required("El tipo de operación es requerido"),
-  ...getSchemaPropsForCheque("tipoOperacion"),
+  tipoOperacionId: yup.number().required("El tipo de operación es requerido"),
+  ...getSchemaPropsForCheque("tipoOperacionId"),
 });
 
 const IngresosReparacionForm = () => {
   const { watch } = useFormContext();
 
-  const { currency, tipoOperacion } = useFixedSelectData();
+  const { currency } = useFixedSelectData();
   const { searchClientes, initialCliente } = useClientesAutocomplete();
+  const { tiposOperacion } = useTipoOperacion();
   const clienteId = watch("clienteId");
   const { ordenesReparacion } = useOrdenReparacionDelCliente(clienteId);
-  const operacionValue = watch("tipoOperacion");
+  const operacionValue = watch("tipoOperacionId");
   return (
     <>
       <Typography variant="h5" sx={{ mb: 2 }}>
@@ -54,12 +56,12 @@ const IngresosReparacionForm = () => {
         </Grid>
         <Grid item xs={12} md={6}>
           <CustomSelect
-            name="tipoOperacion"
+            name="tipoOperacionId"
             label="Tipo de Operación"
-            options={tipoOperacion}
+            options={tiposOperacion}
           />
         </Grid>
-        {operacionValue === "CHEQUE" && <ChequeData />}
+        {operacionValue === 3 && <ChequeData />}
         <Grid item xs={12}>
           <CustomAutocomplete
             name="clienteId"

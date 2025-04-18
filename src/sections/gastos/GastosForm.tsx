@@ -8,6 +8,7 @@ import useCategoriasGasto from "@/hooks/useCategoriasGasto";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import useMecanicoAutocomplete from "@/hooks/useMecanicoAutocomplete";
 import useProveedorAutocomplete from "@/hooks/useProveedorAutocomplete";
+import useTipoOperacion from "@/hooks/useTipoOperacion";
 import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
 import { Grid, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
@@ -36,22 +37,15 @@ export const schema = yup.object({
     then: (schema) => schema.required("El proveedor es requerido"),
     otherwise: (schema) => schema.nullable(),
   }),
-  tipo: yup
-    .string()
-    .oneOf([
-      "EFECTIVO",
-      "TRANSFERENCIA",
-      "CHEQUE",
-      "DEBITO_AUTOMATICO_TARJETA_CREDITO",
-    ])
-    .required("El tipo de operación es requerido"),
-  ...getSchemaPropsForCheque("tipo"),
+  tipoOperacionId: yup.number().required("El tipo de extracción es requerido"),
+  ...getSchemaPropsForCheque("tipoOperacionId"),
 });
 
 const GastosForm = () => {
-  const { currency, tipoOperacion } = useFixedSelectData();
+  const { currency } = useFixedSelectData();
+  const { tiposOperacion } = useTipoOperacion();
   const { watch } = useFormContext();
-  const operacionValue = watch("tipo");
+  const operacionValue = watch("tipoOperacionId");
   const categoriaId = watch("categoriaId");
   const { categorias } = useCategoriasGasto();
   const { searchProveedores, initialProveedor } = useProveedorAutocomplete();
@@ -108,12 +102,12 @@ const GastosForm = () => {
         </Grid>
         <Grid item xs={12}>
           <CustomSelect
-            options={tipoOperacion}
-            name="tipo"
+            options={tiposOperacion}
+            name="tipoOperacionId"
             label="Tipo de Operación"
           />
         </Grid>
-        {operacionValue === "CHEQUE" && <ChequeData />}
+        {operacionValue === 3 && <ChequeData />}
       </Grid>
     </>
   );

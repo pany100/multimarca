@@ -5,6 +5,7 @@ import CustomTable, {
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import { Box, Chip, Tab, Tabs, Typography } from "@mui/material";
+import Link from "next/link";
 import { useState } from "react";
 function VentasTable({
   extraActions,
@@ -44,20 +45,18 @@ function VentasTable({
       headerName: "Tipo de Operación",
       width: 180,
       renderCell: (params: any) => {
-        if (params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO") {
-          return "DEBITO AUTOMATICO";
-        }
-        if (params.value === "CHEQUE") {
+        const value = params.value;
+        if (value.label === "Cheque" && params.row.chequeId) {
           return (
-            <a
+            <Link
               href={`/dashboard/cheques/${params.row.chequeId}`}
               style={{ textDecoration: "underline" }}
             >
-              CHEQUE
-            </a>
+              Cheque
+            </Link>
           );
         }
-        return params.value;
+        return value.label;
       },
     },
     {

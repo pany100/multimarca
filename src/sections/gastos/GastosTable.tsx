@@ -35,24 +35,22 @@ function GastosTable({
       ),
     },
     {
-      field: "tipo",
-      headerName: "Tipo",
+      field: "tipoOperacion",
+      headerName: "Tipo Operación",
       flex: 1,
       renderCell: (params: any) => {
-        if (params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO") {
-          return "DEBITO AUTOMATICO";
-        }
-        if (params.value === "CHEQUE" && params.row.chequeId) {
+        const value = params.value;
+        if (value.label === "Cheque" && params.row.chequeId) {
           return (
             <Link
               href={`/dashboard/cheques/${params.row.chequeId}`}
               style={{ textDecoration: "underline" }}
             >
-              CHEQUE
+              Cheque
             </Link>
           );
         }
-        return params.value;
+        return value.label;
       },
     },
     { field: "detalle", headerName: "Detalle", flex: 1.5 },

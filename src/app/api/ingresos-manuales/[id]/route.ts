@@ -23,6 +23,7 @@ export async function GET(
             fullName: true,
           },
         },
+        tipoOperacion: true,
         cheque: chequeQueryData,
       },
     });
@@ -51,10 +52,10 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { monto, descripcion, usuarioId, moneda, fecha, tipoExtraccion } =
+    const { monto, descripcion, usuarioId, moneda, fecha, tipoOperacionId } =
       body;
 
-    if (!validateChequeRequest(body, tipoExtraccion)) {
+    if (!validateChequeRequest(body, tipoOperacionId)) {
       return NextResponse.json(
         { error: "Faltan datos para la operación de cheque" },
         { status: 400 }
@@ -95,7 +96,7 @@ export async function PUT(
 
     let chequeIdToPass = null;
     try {
-      chequeIdToPass = await getChequeIdAndValidate(body, tipoExtraccion);
+      chequeIdToPass = await getChequeIdAndValidate(body, tipoOperacionId);
     } catch (error) {
       return NextResponse.json(
         { error: "No se pudo usar el cheque" },
@@ -111,7 +112,7 @@ export async function PUT(
         moneda,
         usuarioId,
         dolarId: dolar?.id,
-        tipoExtraccion,
+        tipoOperacionId,
         chequeId: chequeIdToPass,
       },
       include: {

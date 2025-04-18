@@ -32,6 +32,7 @@ export async function GET(request: Request) {
               fullName: true,
             },
           },
+          tipoOperacion: true,
           cheque: chequeQueryData,
         },
       }),
@@ -61,10 +62,10 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { monto, descripcion, moneda, fecha, usuarioId, tipoExtraccion } =
+    const { monto, descripcion, moneda, fecha, usuarioId, tipoOperacionId } =
       body;
 
-    if (!validateChequeRequest(body, tipoExtraccion)) {
+    if (!validateChequeRequest(body, tipoOperacionId)) {
       return NextResponse.json(
         { error: "Faltan datos para la operación de cheque" },
         { status: 400 }
@@ -99,21 +100,6 @@ export async function POST(request: Request) {
       );
     }
 
-    if (
-      !tipoExtraccion ||
-      ![
-        "EFECTIVO",
-        "TRANSFERENCIA",
-        "CHEQUE",
-        "DEBITO_AUTOMATICO_TARJETA_CREDITO",
-      ].includes(tipoExtraccion)
-    ) {
-      return NextResponse.json(
-        { error: "Tipo de extracción inválido o faltante" },
-        { status: 400 }
-      );
-    }
-
     const dolar = await prisma.dolar.findFirst({
       where: {
         fecha: {
@@ -136,7 +122,7 @@ export async function POST(request: Request) {
 
     let chequeIdToPass = null;
     try {
-      chequeIdToPass = await getChequeIdAndValidate(body, tipoExtraccion);
+      chequeIdToPass = await getChequeIdAndValidate(body, tipoOperacionId);
     } catch (error) {
       return NextResponse.json(
         { error: "No se pudo usar el cheque" },
@@ -151,7 +137,7 @@ export async function POST(request: Request) {
         fecha: new Date(fecha),
         dolarId: dolar?.id,
         usuarioId,
-        tipoExtraccion,
+        tipoOperacionId,
         chequeId: chequeIdToPass,
       },
       include: {

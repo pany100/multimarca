@@ -1,5 +1,6 @@
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import { Chip } from "@mui/material";
+import Link from "next/link";
 import CustomTable, {
   InheritedTableProps,
 } from "../../components/tableV2/CustomTable";
@@ -44,24 +45,22 @@ function IngresosManualesTable({
     },
     { field: "descripcion", headerName: "Descripción", flex: 2 },
     {
-      field: "tipoExtraccion",
+      field: "tipoOperacion",
       headerName: "Tipo de Operación",
       flex: 1.5,
       renderCell: (params: any) => {
-        if (params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO") {
-          return "DEBITO AUTOMATICO";
-        }
-        if (params.value === "CHEQUE" && params.row.chequeId) {
+        const value = params.value;
+        if (value.label === "Cheque" && params.row.chequeId) {
           return (
-            <a
+            <Link
               href={`/dashboard/cheques/${params.row.chequeId}`}
               style={{ textDecoration: "underline" }}
             >
-              CHEQUE
-            </a>
+              Cheque
+            </Link>
           );
         }
-        return params.value;
+        return value.label;
       },
     },
   ];

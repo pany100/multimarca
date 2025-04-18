@@ -6,6 +6,7 @@ import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useClientesAutocomplete from "@/hooks/useClientesAutocomplete";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
+import useTipoOperacion from "@/hooks/useTipoOperacion";
 import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
 import {
   Box,
@@ -37,29 +38,19 @@ export const schema = yup.object({
       })
     )
     .min(1, "Debe agregar al menos un item"),
-  tipoOperacion: yup
-    .string()
-    .oneOf(
-      [
-        "EFECTIVO",
-        "TRANSFERENCIA",
-        "CHEQUE",
-        "DEBITO_AUTOMATICO_TARJETA_CREDITO",
-      ],
-      "Tipo de extracción inválido"
-    )
-    .required("El tipo de extracción es requerido"),
-  ...getSchemaPropsForCheque("tipoOperacion"),
+  tipoOperacionId: yup.number().required("El tipo de operación es requerido"),
+  ...getSchemaPropsForCheque("tipoOperacionId"),
 });
 
 function VentasForm() {
   const { searchClientes, initialCliente } = useClientesAutocomplete();
-  const { currency, tipoOperacion } = useFixedSelectData();
+  const { currency } = useFixedSelectData();
 
   const { watch } = useFormContext();
   const [openModal, setOpenModal] = useState(false);
   const clienteId = watch("clienteId");
-  const operacionValue = watch("tipoOperacion");
+  const operacionValue = watch("tipoOperacionId");
+  const { tiposOperacion } = useTipoOperacion();
   return (
     <>
       <Typography variant="h5" sx={{ mb: 2 }}>
@@ -114,12 +105,12 @@ function VentasForm() {
         </Grid>
         <Grid item xs={12}>
           <CustomSelect
-            options={tipoOperacion}
+            options={tiposOperacion}
             name="tipoOperacion"
             label="Tipo de Operación"
           />
         </Grid>
-        {operacionValue === "CHEQUE" && <ChequeData />}
+        {operacionValue === 3 && <ChequeData />}
         <Grid item xs={12} md={6}>
           <CustomSelect options={currency} name="moneda" label="Moneda" />
         </Grid>
