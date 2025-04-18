@@ -1,5 +1,4 @@
 import prisma from "@/lib/prisma";
-import { TipoOperacion } from "@prisma/client";
 import * as yup from "yup";
 import { deleteFileFromS3, moveFileInS3 } from "./s3Helper";
 
@@ -8,32 +7,32 @@ export const getSchemaPropsForCheque = (baseField: string) => {
     chequeId: yup.number().nullable(),
     fechaEmision: yup.mixed().when([baseField, "chequeId"], {
       is: (baseFieldValue: string, chequeIdValue: number | null) =>
-        baseFieldValue === "CHEQUE" && chequeIdValue === null,
+        baseFieldValue === "3" && chequeIdValue === null,
       then: (schema) => yup.date().required("La fecha de emisión es requerida"),
       otherwise: (schema) => yup.mixed(),
     }),
     fechaCobro: yup.mixed().when([baseField, "chequeId"], {
       is: (baseFieldValue: string, chequeIdValue: number | null) =>
-        baseFieldValue === "CHEQUE" && chequeIdValue === null,
+        baseFieldValue === "3" && chequeIdValue === null,
       then: (schema) => yup.date().required("La fecha de cobro es requerida"),
       otherwise: (schema) => yup.mixed(),
     }),
     numeroCheque: yup.mixed().when([baseField, "chequeId"], {
       is: (baseFieldValue: string, chequeIdValue: number | null) =>
-        baseFieldValue === "CHEQUE" && chequeIdValue === null,
+        baseFieldValue === "3" && chequeIdValue === null,
       then: (schema) =>
         yup.string().required("El número de cheque es requerido"),
       otherwise: (schema) => yup.mixed(),
     }),
     banco: yup.mixed().when([baseField, "chequeId"], {
       is: (baseFieldValue: string, chequeIdValue: number | null) =>
-        baseFieldValue === "CHEQUE" && chequeIdValue === null,
+        baseFieldValue === "3" && chequeIdValue === null,
       then: (schema) => yup.string().required("El banco es requerido"),
       otherwise: (schema) => yup.mixed(),
     }),
     importe: yup.mixed().when([baseField, "chequeId"], {
       is: (baseFieldValue: string, chequeIdValue: number | null) =>
-        baseFieldValue === "CHEQUE" && chequeIdValue === null,
+        baseFieldValue === "3" && chequeIdValue === null,
       then: (schema) =>
         yup
           .number()
@@ -43,13 +42,13 @@ export const getSchemaPropsForCheque = (baseField: string) => {
     }),
     emisor: yup.mixed().when([baseField, "chequeId"], {
       is: (baseFieldValue: string, chequeIdValue: number | null) =>
-        baseFieldValue === "CHEQUE" && chequeIdValue === null,
+        baseFieldValue === "3" && chequeIdValue === null,
       then: (schema) => yup.string().required("El emisor es requerido"),
       otherwise: (schema) => yup.mixed(),
     }),
     picturePath: yup.mixed().when([baseField, "chequeId"], {
       is: (baseFieldValue: string, chequeIdValue: number | null) =>
-        baseFieldValue === "CHEQUE" && chequeIdValue === null,
+        baseFieldValue === "3" && chequeIdValue === null,
       then: (schema) => yup.string().required("La foto es requerida"),
       otherwise: (schema) => yup.mixed(),
     }),
@@ -160,7 +159,7 @@ export const returnModelWithChequeData = (model: { cheque?: any }) => {
 
 export const validateChequeRequest = (
   data: ChequeRequestData,
-  operacion: TipoOperacion
+  operacion: number
 ) => {
   const {
     banco,
@@ -172,7 +171,7 @@ export const validateChequeRequest = (
     chequeId,
     picturePath,
   } = data;
-  if (operacion === TipoOperacion.CHEQUE) {
+  if (operacion === 3) {
     if (
       !chequeId &&
       (!banco ||
@@ -215,9 +214,9 @@ export const validateChequeEditRequest = (data: ChequeEditRequestData) => {
 
 export const getChequeIdAndValidate = async (
   data: ChequeRequestData,
-  operacion: TipoOperacion
+  operacion: number
 ) => {
-  if (operacion !== TipoOperacion.CHEQUE) {
+  if (operacion !== 3) {
     return null;
   }
   if (data.chequeId) {

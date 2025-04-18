@@ -5,6 +5,7 @@ import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useAdmins from "@/hooks/useAdmins";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
+import useTipoOperacion from "@/hooks/useTipoOperacion";
 import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
 import { Grid, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
@@ -22,23 +23,16 @@ export const schema = yup.object({
     .required("La moneda es requerida"),
   usuarioId: yup.number().required("El usuario es requerido"),
   motivo: yup.string().required("El motivo es requerido"),
-  tipoExtraccion: yup
-    .string()
-    .oneOf([
-      "EFECTIVO",
-      "TRANSFERENCIA",
-      "CHEQUE",
-      "DEBITO_AUTOMATICO_TARJETA_CREDITO",
-    ])
-    .required("El tipo de extracción es requerido"),
-  ...getSchemaPropsForCheque("tipoExtraccion"),
+  tipoOperacionId: yup.number().required("El tipo de extracción es requerido"),
+  ...getSchemaPropsForCheque("tipoOperacionId"),
 });
 
 const ExtraccionesForm = () => {
   const { admins } = useAdmins();
-  const { currency, tipoOperacion } = useFixedSelectData();
+  const { currency } = useFixedSelectData();
+  const { tiposOperacion } = useTipoOperacion();
   const { watch } = useFormContext();
-  const operacionValue = watch("tipoExtraccion");
+  const operacionValue = watch("tipoOperacionId");
 
   return (
     <>
@@ -64,12 +58,12 @@ const ExtraccionesForm = () => {
         </Grid>
         <Grid item xs={12}>
           <CustomSelect
-            options={tipoOperacion}
-            name="tipoExtraccion"
-            label="Tipo de Extracción"
+            options={tiposOperacion}
+            name="tipoOperacionId"
+            label="Tipo de Operación"
           />
         </Grid>
-        {operacionValue === "CHEQUE" && <ChequeData />}
+        {operacionValue === 3 && <ChequeData />}
       </Grid>
     </>
   );

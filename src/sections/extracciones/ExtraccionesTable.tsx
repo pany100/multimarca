@@ -45,24 +45,22 @@ function ExtraccionesTable({
     },
     { field: "motivo", headerName: "Motivo", flex: 2 },
     {
-      field: "tipoExtraccion",
+      field: "tipoOperacion",
       headerName: "Tipo de Extracción",
       flex: 1.5,
       renderCell: (params: any) => {
-        if (params.value === "DEBITO_AUTOMATICO_TARJETA_CREDITO") {
-          return "DEBITO AUTOMATICO";
-        }
-        if (params.value === "CHEQUE" && params.row.chequeId) {
+        const value = params.value;
+        if (value.label === "Cheque" && params.row.chequeId) {
           return (
             <Link
               href={`/dashboard/cheques/${params.row.chequeId}`}
               style={{ textDecoration: "underline" }}
             >
-              CHEQUE
+              Cheque
             </Link>
           );
         }
-        return params.value;
+        return value.label;
       },
     },
   ];
