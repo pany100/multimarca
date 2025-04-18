@@ -53,6 +53,7 @@ export const config = {
     "/api/proveedores/:path*",
     "/api/roles/:path*",
     "/api/ventas/:path*",
+    "/api/tipo-operacion/:path*",
     // Agrega aquí más rutas segn sea necesario
   ],
 };

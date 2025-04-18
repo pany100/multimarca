@@ -346,6 +346,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             ruta: "/dashboard/permisos-gasto",
           },
           {
+            permiso: "TipoDeOperacion",
+            texto: "Tipo de Operación",
+            icono: <ReceiptLongIcon />,
+            ruta: "/dashboard/tipo-de-operacion",
+          },
+          {
             permiso: "CategoriaGasto",
             texto: "Categorías de Gasto",
             icono: <CategoryIcon />,
