@@ -30,7 +30,11 @@ export async function GET(request: Request) {
         where,
         include: {
           cliente: true,
-          repuestosUsados: true,
+          repuestosUsados: {
+            include: {
+              stock: true,
+            },
+          },
           reparacionesDeTercero: true,
           trabajosRealizados: true,
         },
@@ -166,7 +170,11 @@ export async function POST(request: Request) {
       },
       include: {
         cliente: true,
-        repuestosUsados: true,
+        repuestosUsados: {
+          include: {
+            stock: true,
+          },
+        },
         reparacionesDeTercero: true,
         trabajosRealizados: true,
       },

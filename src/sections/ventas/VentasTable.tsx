@@ -4,12 +4,48 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
-import Link from "next/link";
+import { Box, Chip, MenuItem, Tab, Tabs } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+
+function Stock({ repuestos }: { repuestos: any[] }) {
+  return (
+    <Box>
+      {repuestos.map((repuesto) => (
+        <Box key={repuesto.id} sx={{ mb: 1 }}>
+          * {repuesto.stock.name} - {repuesto.unidadesConsumidas}u
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
+function Reparaciones({ reparaciones }: { reparaciones: any[] }) {
+  return (
+    <Box>
+      {reparaciones.map((reparacion) => (
+        <Box sx={{ mb: 1 }} key={reparacion.id}>
+          * {reparacion.nombre}
+        </Box>
+      ))}
+    </Box>
+  );
+}
+
+function Trabajos({ trabajos }: { trabajos: any[] }) {
+  return (
+    <Box>
+      {trabajos.map((trabajo) => (
+        <Box key={trabajo.id} sx={{ mb: 1 }}>
+          * {trabajo.descripcion}
+        </Box>
+      ))}
+    </Box>
+  );
+}
 
 function VentasTable({
   extraActions,
@@ -34,77 +70,11 @@ function VentasTable({
         new Date(fecha).toLocaleDateString("es-AR"),
     },
     {
-      field: "moneda",
-      headerName: "Moneda",
-      flex: 0.5,
-      renderCell: (params: any) => (
-        <Chip
-          label={params.value}
-          color={params.value === "Dolar" ? "success" : "warning"}
-          size="small"
-        />
-      ),
-    },
-    {
-      field: "tipoOperacion",
-      headerName: "Tipo de Operación",
-      width: 180,
-      renderCell: (params: any) => {
-        const value = params.value;
-        if (value.label === "Cheque" && params.row.chequeId) {
-          return (
-            <Link
-              href={`/dashboard/cheques/${params.row.chequeId}`}
-              style={{ textDecoration: "underline" }}
-            >
-              Cheque
-            </Link>
-          );
-        }
-        return value.label;
-      },
-    },
-    {
-      field: "total",
-      headerName: "Precio Total",
-      flex: 0.5,
-      valueGetter: (precioTotal: any) => getFormattedPrice(precioTotal),
-    },
-    {
       field: "cliente",
       headerName: "Cliente",
       width: 200,
       valueGetter: (cliente: any) => cliente?.fullName || "",
       flex: 1,
-    },
-    {
-      field: "detalle",
-      headerName: "Detalle",
-      width: 300,
-      renderCell: (params: any) => {
-        const items = params.row.items || [];
-        return (
-          <div
-            style={{
-              whiteSpace: "normal",
-              wordWrap: "break-word",
-              lineHeight: "1.2em",
-              padding: "10px 0",
-            }}
-          >
-            {items.map((item: any, index: number) => (
-              <Typography
-                key={index}
-                variant="body2"
-                style={{ marginBottom: "5px" }}
-              >
-                {item.stock.name}: {item.cantidad}
-              </Typography>
-            ))}
-          </div>
-        );
-      },
-      flex: 1.5,
     },
     {
       field: "presupuesto",
@@ -120,6 +90,35 @@ function VentasTable({
           }}
         />
       ),
+    },
+    {
+      field: "detalles",
+      headerName: "Detalles De Venta",
+      flex: 2,
+      renderCell: (params: any) => {
+        return (
+          <Box sx={{ mt: 1 }}>
+            <Stock repuestos={params.row.repuestosUsados} />
+            <Reparaciones reparaciones={params.row.reparacionesDeTercero} />
+            <Trabajos trabajos={params.row.trabajosRealizados} />
+          </Box>
+        );
+      },
+    },
+    {
+      field: "precioTotal",
+      headerName: "Precio Total",
+      flex: 0.5,
+      renderCell: (params: any) =>
+        getFormattedPrice(
+          calcularTotalOrdenReparacion({
+            repuestosUsados: params.row.repuestosUsados,
+            reparacionesDeTercero: params.row.reparacionesDeTercero,
+            trabajosRealizados: params.row.trabajosRealizados,
+            descuento: params.row.descuento,
+            incremento: params.row.incremento,
+          })
+        ),
     },
   ];
 
