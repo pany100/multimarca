@@ -92,6 +92,13 @@ export async function PUT(
       );
     }
 
+    if (!ventaActual.presupuesto && presupuesto) {
+      return NextResponse.json(
+        { error: "No se puede convertir una venta a presupuesto" },
+        { status: 400 }
+      );
+    }
+
     // Verificar stock si no es un presupuesto
     if (!presupuesto) {
       for (const repuesto of repuestosUsados) {
