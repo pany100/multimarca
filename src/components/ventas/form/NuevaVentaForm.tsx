@@ -9,6 +9,7 @@ import { schema } from "@/sections/ventas/schema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormProvider, useForm } from "react-hook-form";
 import VentasDatosGeneralesSection from "./VentasDatosGeneralesSection";
+import IncrementoSection from "@/components/orden-reparacion/formV2/sections/incremento/IncrementoSection";
 
 function NuevaVentaForm() {
   const methods = useForm({
@@ -30,6 +31,9 @@ function NuevaVentaForm() {
         </FormSection>
         <FormSection title="Trabajos Realizados">
           <TrabajosRealizadosSection />
+        </FormSection>
+        <FormSection title="Incremento">
+          <IncrementoSection />
         </FormSection>
         <FormSection title="Resumen de Costos">
           <ResumenCostosSection />

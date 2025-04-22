@@ -42,6 +42,7 @@ function calcularTotalOrdenReparacion(ordenReparacion: {
   reparacionesDeTercero: { precioVenta: number }[];
   trabajosRealizados: { precioUnitario: number }[];
   descuento: number;
+  incremento?: number;
 }): number {
   const totalRepuestos = Number(calcularTotalRepuestos(ordenReparacion));
 
@@ -54,8 +55,15 @@ function calcularTotalOrdenReparacion(ordenReparacion: {
   );
 
   const descuento = parseFloat(ordenReparacion.descuento.toString());
+  const incremento = parseFloat(ordenReparacion.incremento?.toString() || "0");
 
-  return totalRepuestos + totalReparacionesTerceros + manoDeObra - descuento;
+  return (
+    totalRepuestos +
+    totalReparacionesTerceros +
+    manoDeObra -
+    descuento +
+    incremento
+  );
 }
 
 function getStatusColor(estado: string): ChipProps["color"] {
