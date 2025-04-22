@@ -58,6 +58,7 @@ model Cliente {
   cars                      Auto[]
   conversacionesWhatsApp    ConversacionWhatsApp[]
   pagosDeReparaciones       IngresoPorReparacion[]
+  pagosDeVentas             IngresoPorVenta[]
   ventas                    Venta[]
 
   @@index([fullName])
@@ -278,6 +279,15 @@ model Venta {
   tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
   chequeId  Int?
   cheque    Cheque?    @relation(fields: [chequeId], references: [id])
+  descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
+  descripcionDescuento   String?                   @db.VarChar(255)
+  incremento             Decimal                   @default(0.00) @db.Decimal(10, 2)
+  descripcionIncremento  String?                   @db.VarChar(255)
+  reparacionesDeTercero  ReparacionDeTercero[]     @relation("VentaReparacionTercero")
+  repuestosUsados        RepuestoUsado[]           @relation("VentaRepuestos")
+  trabajosRealizados     TrabajoRealizado[]        @relation("VentaTrabajosRealizados")
+  ingresos               IngresoPorVenta[]         @relation("VentaIngresos")
+
   presupuesto Boolean @default(false)
 
   @@index([clienteId])
@@ -349,6 +359,7 @@ model OrdenReparacion {
 model RepuestoUsado {
   id                     Int                   @id @default(autoincrement())
   ordenReparacionId      Int?
+  ventaId                Int?
   stockId                Int
   precioCompra           Decimal               @db.Decimal(10, 2)
   precioVenta            Decimal               @db.Decimal(10, 2)
@@ -359,8 +370,10 @@ model RepuestoUsado {
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionRepuestos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoRepuestos", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   stock                  Stock                 @relation(fields: [stockId], references: [id])
+  venta                  Venta?                @relation("VentaRepuestos", fields: [ventaId], references: [id], onDelete: Cascade)
 
   @@index([ordenReparacionId])
+  @@index([ventaId], map: "RepuestoUsado_ventaId_fkey")
   @@index([stockId])
   @@index([plantillaPresupuestoId], map: "RepuestoUsado_plantillaPresupuestoId_fkey")
   @@index([borradorId], map: "RepuestoUsado_borradorId_fkey")
@@ -373,17 +386,20 @@ model ReparacionDeTercero {
   precioVenta            Decimal               @db.Decimal(10, 2)
   proveedorId            Int
   ordenReparacionId      Int?
+  ventaId                Int?
   plantillaPresupuestoId Int?
   borradorId             Int?
   recibo                 String?               @db.VarChar(255)
   borrador               Borrador?             @relation("BorradorReparacionTercero", fields: [borradorId], references: [id], onDelete: Cascade)
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionReparacionTercero", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
+  venta                  Venta?                @relation("VentaReparacionTercero", fields: [ventaId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoReparacionTercero", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   proveedor              Proveedor             @relation(fields: [proveedorId], references: [id])
 
   @@index([nombre])
   @@index([proveedorId])
   @@index([ordenReparacionId], map: "ReparacionDeTercero_ordenReparacionId_fkey")
+  @@index([ventaId], map: "ReparacionDeTercero_ventaId_fkey")
   @@index([plantillaPresupuestoId], map: "ReparacionDeTercero_plantillaPresupuestoId_fkey")
   @@index([borradorId], map: "ReparacionDeTercero_borradorId_fkey")
 }
@@ -391,6 +407,7 @@ model ReparacionDeTercero {
 model TrabajoRealizado {
   id                     Int                   @id @default(autoincrement())
   ordenReparacionId      Int?
+  ventaId                Int?
   precioUnitario         Decimal               @db.Decimal(10, 2)
   descripcion            String                @db.Text
   diasParaRecordatorio   Int?
@@ -399,8 +416,10 @@ model TrabajoRealizado {
   borrador               Borrador?             @relation("BorradorTrabajosRealizados", fields: [borradorId], references: [id], onDelete: Cascade)
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionTrabajosRealizados", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoTrabajosRealizados", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
+  venta                  Venta?                @relation("VentaTrabajosRealizados", fields: [ventaId], references: [id], onDelete: Cascade)
 
   @@index([ordenReparacionId])
+  @@index([ventaId], map: "TrabajoRealizado_ventaId_fkey")
   @@index([plantillaPresupuestoId], map: "TrabajoRealizado_plantillaPresupuestoId_fkey")
   @@index([borradorId], map: "TrabajoRealizado_borradorId_fkey")
 }
@@ -461,6 +480,31 @@ model IngresoPorReparacion {
   @@index([dolarId], map: "IngresoPorReparacion_dolarId_fkey")
 }
 
+
+model IngresoPorVenta {
+  id                Int             @id @default(autoincrement())
+  fecha             DateTime        @default(now())
+  clienteId         Int
+  monto             Decimal         @db.Decimal(10, 2)
+  descripcion       String          @db.Text
+  ventaId           Int
+  reciboEnviado     Boolean         @default(false)
+  moneda            Moneda          @default(Peso)
+  dolarId           Int?
+  cliente           Cliente         @relation(fields: [clienteId], references: [id])
+  dolar             Dolar?          @relation(fields: [dolarId], references: [id])
+  venta             Venta @relation("VentaIngresos", fields: [ventaId], references: [id], onDelete: Cascade)
+  tipoOperacionId Int?
+  tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
+  chequeId  Int?
+  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
+
+  @@index([fecha])
+  @@index([clienteId])
+  @@index([ventaId])
+  @@index([dolarId], map: "IngresoPorVenta_dolarId_fkey")
+}
+
 model Dolar {
   id                    Int                     @id @default(autoincrement())
   fecha                 DateTime                @unique @default(now())
@@ -470,6 +514,7 @@ model Dolar {
   gasto                 Gasto[]
   ingresoManualDeDinero IngresoManualDeDinero[]
   ingresosPorReparacion IngresoPorReparacion[]
+  ingresosPorVenta      IngresoPorVenta[]
   ordenReparacion       OrdenReparacion[]
   venta                 Venta[]
 
@@ -577,6 +622,7 @@ model Cheque {
   venta Venta[]
   ingresoPorReparacion IngresoPorReparacion[]
   ingresoManualDeDinero IngresoManualDeDinero[]
+  ingresoPorVenta IngresoPorVenta[]
 }
 
 model TipoDeOperacion {
@@ -587,6 +633,7 @@ model TipoDeOperacion {
   ventas                Venta[]
   ingresosPorReparacion IngresoPorReparacion[]
   ingresosManualDeDinero IngresoManualDeDinero[]
+  ingresosPorVenta IngresoPorVenta[]
 
   @@index([label])
 }
