@@ -1,12 +1,7 @@
 import prisma from "@/lib/prisma";
 import { getIO } from "@/lib/socketio";
-import {
-  chequeQueryData,
-  getChequeIdAndValidate,
-  returnModelWithChequeData,
-  validateChequeRequest,
-} from "@/utils/chequeUtils";
-import { TipoNotificacionInterna } from "@prisma/client";
+import { moveFileInS3 } from "@/utils/s3Helper";
+import { Prisma, TipoNotificacionInterna } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -67,72 +62,112 @@ export async function PUT(
     const body = await request.json();
     const {
       clienteId,
-      items,
-      moneda,
-      total,
+      descripcionDescuento,
+      descripcionIncremento,
+      descuento,
       fecha,
-      tipoOperacionId,
+      incremento,
       presupuesto,
+      repuestosUsados = [],
+      reparacionesDeTercero = [],
+      trabajosRealizados = [],
     } = body;
 
-    if (!validateChequeRequest(body, tipoOperacionId)) {
-      return NextResponse.json(
-        { error: "Faltan datos para la operación de cheque" },
-        { status: 400 }
-      );
-    }
-
-    if (!clienteId || !Array.isArray(items) || items.length === 0) {
-      return NextResponse.json(
-        { error: "Datos de venta inválidos o faltantes" },
-        { status: 400 }
-      );
-    }
-
-    if (!moneda || !["Dolar", "Peso"].includes(moneda)) {
-      return NextResponse.json(
-        { error: "Moneda inválida o faltante" },
-        { status: 400 }
-      );
-    }
-
-    // Obtener la venta actual para comparar items
+    // Obtener la venta actual
     const ventaActual = await prisma.venta.findUnique({
       where: { id },
       include: {
-        items: true,
+        repuestosUsados: {
+          include: {
+            stock: true,
+          },
+        },
       },
     });
 
     if (!ventaActual) {
-      throw new Error("Venta no encontrada");
-    }
-
-    // Verificar solo los items nuevos o modificados
-    for (const item of items) {
-      const itemExistente = ventaActual.items.find(
-        (i) => i.stockId === item.stockId && i.cantidad === item.cantidad
+      return NextResponse.json(
+        { error: "Venta no encontrada" },
+        { status: 404 }
       );
-      // Si el item ya existe con la misma cantidad, no necesita verificación
-      if (itemExistente) {
-        continue;
-      }
+    }
 
-      // Si es un item nuevo o modificado, verificar stock
-      const stock = await prisma.stock.findUnique({
-        where: { id: item.stockId },
-        select: { id: true, name: true, units: true, restockValue: true },
-      });
+    // Verificar stock si no es un presupuesto
+    if (!presupuesto) {
+      for (const repuesto of repuestosUsados) {
+        // Obtener la cantidad previa usada para este stock
+        const repuestoExistente = ventaActual.repuestosUsados.find(
+          (r) => r.stockId === repuesto.stock.id
+        );
+        const cantidadPrevia = repuestoExistente
+          ? repuestoExistente.unidadesConsumidas
+          : 0;
+        const cantidadAdicional = repuesto.unidadesConsumidas - cantidadPrevia;
 
-      const cantidadPrevia =
-        ventaActual.items.find((i) => i.stockId === item.stockId)?.cantidad ||
-        0;
-      const cantidadAdicional = item.cantidad - cantidadPrevia;
+        if (cantidadAdicional > 0) {
+          const stockActual = await prisma.stock.findUnique({
+            where: { id: repuesto.stock.id },
+            select: { units: true },
+          });
 
-      if (!stock || (stock.units ?? 0) - cantidadAdicional < 0) {
-        throw new Error(`Stock insuficiente para el ítem ${stock?.name}`);
+          if (!stockActual || (stockActual.units ?? 0) < cantidadAdicional) {
+            return NextResponse.json(
+              {
+                error: `Stock insuficiente para el repuesto ${repuesto.stock.name} con ID ${repuesto.stock.id}`,
+              },
+              { status: 400 }
+            );
+          }
+        }
       }
     }
+
+    // Preparar los datos para la actualización
+    const repuestosToPersist = repuestosUsados.map((repuesto: any) => ({
+      precioCompra: repuesto.precioCompra
+        ? new Prisma.Decimal(repuesto.precioCompra)
+        : new Prisma.Decimal(0),
+      precioVenta: repuesto.precioVenta
+        ? new Prisma.Decimal(repuesto.precioVenta)
+        : new Prisma.Decimal(0),
+      unidadesConsumidas: repuesto.unidadesConsumidas,
+      stock: { connect: { id: repuesto.stock.id } },
+    }));
+
+    // Obtener todas las reparaciones existentes para comparar
+    const reparacionesExistentes = await prisma.reparacionDeTercero.findMany({
+      where: {
+        ventaId: id,
+      },
+    });
+
+    const reparacionesDeTerceroToPersist = await Promise.all(
+      reparacionesDeTercero.map(async (reparacion: any) => {
+        let reciboUrl = reparacion.recibo;
+        if (reparacion.recibo && reparacion.recibo.includes("/tmp/")) {
+          reciboUrl = await moveFileInS3(reparacion.recibo, "recibos");
+        }
+        return {
+          nombre: reparacion.nombre,
+          precioCompra: reparacion.precioCompra
+            ? new Prisma.Decimal(reparacion.precioCompra)
+            : new Prisma.Decimal(0),
+          precioVenta: reparacion.precioVenta
+            ? new Prisma.Decimal(reparacion.precioVenta)
+            : new Prisma.Decimal(0),
+          proveedor: { connect: { id: reparacion.proveedor.id } },
+          recibo: reciboUrl,
+        };
+      })
+    );
+
+    const trabajosRealizadosToPersist = trabajosRealizados.map(
+      (trabajo: any) => ({
+        descripcion: trabajo.manoDeObra.name,
+        precioUnitario: new Prisma.Decimal(trabajo.precioUnitario),
+        diasParaRecordatorio: trabajo.diasParaRecordatorio,
+      })
+    );
 
     const dolar = await prisma.dolar.findFirst({
       where: {
@@ -145,104 +180,95 @@ export async function PUT(
       },
     });
 
-    let chequeIdToPass = null;
-    try {
-      chequeIdToPass = await getChequeIdAndValidate(body, tipoOperacionId);
-    } catch (error) {
-      return NextResponse.json(
-        { error: "No se pudo usar el cheque" },
-        { status: 400 }
-      );
-    }
-
+    // Actualizar la venta y el stock en una transacción
     const ventaActualizada = await prisma.$transaction(async (prisma) => {
-      const stockVerification = new Map();
-      for (const item of items) {
-        const stock = await prisma.stock.findUnique({
-          where: { id: item.stockId },
-          select: { id: true, name: true, units: true },
+      // Primero, restaurar el stock de los repuestos usados anteriormente
+      for (const repuestoUsado of ventaActual.repuestosUsados) {
+        await prisma.stock.update({
+          where: { id: repuestoUsado.stockId },
+          data: {
+            units: {
+              increment: repuestoUsado.unidadesConsumidas,
+            },
+          },
         });
-        if (!stock)
-          throw new Error(`Stock no encontrado para el ítem ${item.stockId}`);
-        stockVerification.set(item.stockId, stock.units ?? 0);
       }
 
-      // Sumar las devoluciones
-      for (const itemActual of ventaActual.items) {
-        const stockActual = stockVerification.get(itemActual.stockId) ?? 0;
-        stockVerification.set(
-          itemActual.stockId,
-          stockActual + itemActual.cantidad
-        );
-      }
-
-      for (const item of items) {
-        const stockDisponible = stockVerification.get(item.stockId) ?? 0;
-        if (stockDisponible - item.cantidad < 0) {
-          throw new Error(`Stock insuficiente para el ítem ${item.stockId}`);
-        }
-      }
-
-      const ventaActualizada = await prisma.venta.update({
+      // Actualizar la venta
+      const venta = await prisma.venta.update({
         where: { id },
         data: {
           clienteId,
-          total,
-          moneda,
-          dolarId: dolar?.id,
           fecha,
-          tipoOperacionId,
-          chequeId: chequeIdToPass,
+          dolarId: dolar?.id,
           presupuesto,
-          items: {
+          descuento: new Prisma.Decimal(descuento),
+          descripcionDescuento,
+          incremento: new Prisma.Decimal(incremento),
+          descripcionIncremento,
+          repuestosUsados: {
             deleteMany: {},
-            create: items.map((item) => ({
-              stockId: item.stockId,
-              cantidad: item.cantidad,
-            })),
+            create: repuestosToPersist,
+          },
+          reparacionesDeTercero: {
+            deleteMany: {},
+            create: reparacionesDeTerceroToPersist,
+          },
+          trabajosRealizados: {
+            deleteMany: {},
+            create: trabajosRealizadosToPersist,
           },
         },
         include: {
           cliente: true,
-          items: {
+          repuestosUsados: {
             include: {
               stock: true,
             },
           },
-          cheque: chequeQueryData,
+          reparacionesDeTercero: {
+            include: {
+              proveedor: true,
+            },
+          },
+          trabajosRealizados: true,
         },
       });
 
-      // Actualizar el stock en una sola operación por item
-      for (const itemActual of ventaActual.items) {
-        const itemNuevo = items.find(
-          (item) => item.stockId === itemActual.stockId
-        );
-        const diferencia = (itemNuevo?.cantidad ?? 0) - itemActual.cantidad;
+      // Actualizar el stock y crear notificaciones si es necesario
+      if (!presupuesto) {
+        for (const repuesto of repuestosUsados) {
+          const stockActualizado = await prisma.stock.update({
+            where: { id: repuesto.stock.id },
+            data: { units: { decrement: repuesto.unidadesConsumidas } },
+          });
 
-        await prisma.stock.update({
-          where: { id: itemActual.stockId },
-          data: {
-            units: {
-              decrement: diferencia,
-            },
-          },
-        });
+          if (
+            (stockActualizado.units ?? 0) <=
+            (stockActualizado.restockValue ?? 0)
+          ) {
+            await prisma.notificacionInterna.create({
+              data: {
+                fecha: new Date(),
+                titulo: `${stockActualizado.name} necesita reposición`,
+                texto: `El elemento ${stockActualizado.name} quedó con ${stockActualizado.units} unidades. Necesita reponer stock.`,
+                leida: false,
+                tipo: TipoNotificacionInterna.REPOSICION_STOCK,
+                stockId: stockActualizado.id,
+              },
+            });
+            const io = getIO();
+            if (io) {
+              io.emit("newNotification");
+            }
+          }
+        }
       }
 
-      return ventaActualizada;
+      return venta;
     });
 
-    const ventaToReturn = {
-      ...ventaActualizada,
-      items: ventaActualizada.items.map((item) => ({
-        ...item,
-        name: item.stock.name,
-        stockId: item.stock.id,
-      })),
-    };
-
-    return NextResponse.json(returnModelWithChequeData(ventaToReturn));
+    return NextResponse.json(ventaActualizada);
   } catch (error) {
     console.error("Error al actualizar venta:", error);
     return NextResponse.json(
@@ -251,7 +277,6 @@ export async function PUT(
     );
   }
 }
-
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }
@@ -267,15 +292,17 @@ export async function DELETE(
     }
 
     const ventaEliminada = await prisma.$transaction(async (prisma) => {
-      // Obtener la venta con sus items
+      // Obtener la venta con sus repuestos usados
       const venta = await prisma.venta.findUnique({
         where: { id },
         include: {
-          items: {
+          repuestosUsados: {
             include: {
               stock: true,
             },
           },
+          reparacionesDeTercero: true,
+          trabajosRealizados: true,
         },
       });
 
@@ -284,12 +311,12 @@ export async function DELETE(
       }
 
       // Restaurar el stock
-      for (const item of venta.items) {
+      for (const repuesto of venta.repuestosUsados) {
         const stockActualizado = await prisma.stock.update({
-          where: { id: item.stockId },
+          where: { id: repuesto.stockId },
           data: {
             units: {
-              increment: item.cantidad,
+              increment: repuesto.unidadesConsumidas,
             },
           },
         });
@@ -327,7 +354,7 @@ export async function DELETE(
   } catch (error) {
     console.error("Error al eliminar venta:", error);
     return NextResponse.json(
-      { error: "Error al eliminar la venta" },
+      { error: `Error al eliminar la venta: ${error}` },
       { status: 500 }
     );
   }
