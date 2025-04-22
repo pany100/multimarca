@@ -5,7 +5,6 @@ import {
 } from "./ordenHelper";
 
 export default function generateClientOrderHtml(repair: any): string {
-  console.log(repair);
   return `
   <!DOCTYPE html>
 

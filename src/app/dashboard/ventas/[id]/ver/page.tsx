@@ -1,15 +1,21 @@
 "use client";
 
 import { useFetch } from "@/contexts/FetchContext";
+import { useGeneratePdf } from "@/hooks/orden-reparacion/useGeneratePdf";
 import { useAuth } from "@/hooks/useAuth";
 import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
+import PrintIcon from "@mui/icons-material/Print";
+import ReceiptIcon from "@mui/icons-material/Receipt";
 import {
   Box,
+  Button,
   CircularProgress,
   Divider,
   Paper,
+  Tooltip,
   Typography,
 } from "@mui/material";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -37,27 +43,66 @@ function TabPanel(props: TabPanelProps) {
 
 // Header component for displaying venta basic info
 const VentaHeader = ({ venta }: { venta: any }) => {
+  const [printLoading, setPrintLoading] = useState(false);
+  const { generatePdf } = useGeneratePdf({
+    onError: () => {
+      console.error("Error al generar el PDF de la venta");
+      setPrintLoading(false);
+    },
+    printDirectly: true,
+  });
+
+  const handlePrintVenta = async () => {
+    setPrintLoading(true);
+    try {
+      await generatePdf(`/api/ventas/${venta.id}/pdf-completo`);
+    } finally {
+      setPrintLoading(false);
+    }
+  };
+
   return (
-    <Box>
-      <Typography variant="h4" gutterBottom>
-        Venta #{venta.id}
-      </Typography>
-      <Typography variant="subtitle1" color="text.secondary">
-        Fecha: {new Date(venta.fecha).toLocaleDateString("es-AR")}
-      </Typography>
-      {venta.cliente && (
-        <Typography variant="subtitle1">
-          Cliente: {venta.cliente.fullName}
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+      }}
+    >
+      <Box>
+        <Typography variant="h4" gutterBottom>
+          Venta #{venta.id}
         </Typography>
-      )}
-      {venta.presupuesto && (
-        <Typography
-          variant="subtitle1"
-          sx={{ color: "warning.main", fontWeight: "bold" }}
+        <Typography variant="subtitle1" color="text.secondary">
+          Fecha: {new Date(venta.fecha).toLocaleDateString("es-AR")}
+        </Typography>
+        {venta.cliente && (
+          <Typography variant="subtitle1">
+            Cliente: {venta.cliente.fullName}
+          </Typography>
+        )}
+        {venta.presupuesto && (
+          <Typography
+            variant="subtitle1"
+            sx={{ color: "warning.main", fontWeight: "bold" }}
+          >
+            PRESUPUESTO
+          </Typography>
+        )}
+      </Box>
+      <Tooltip title="Imprimir venta">
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={
+            printLoading ? <CircularProgress size={20} /> : <PrintIcon />
+          }
+          onClick={handlePrintVenta}
+          disabled={printLoading}
         >
-          PRESUPUESTO
-        </Typography>
-      )}
+          Imprimir
+        </Button>
+      </Tooltip>
     </Box>
   );
 };
@@ -148,6 +193,9 @@ const ReparacionesTerceros = ({ venta }: { venta: any }) => {
             <Box component="th" sx={{ p: 1, textAlign: "left" }}>
               Proveedor
             </Box>
+            <Box component="th" sx={{ p: 1, textAlign: "left" }}>
+              Recibo
+            </Box>
             <Box component="th" sx={{ p: 1, textAlign: "right" }}>
               Precio
             </Box>
@@ -165,6 +213,21 @@ const ReparacionesTerceros = ({ venta }: { venta: any }) => {
               </Box>
               <Box component="td" sx={{ p: 1 }}>
                 {reparacion.proveedor?.name || "N/A"}
+              </Box>
+              <Box component="td" sx={{ p: 1 }}>
+                {reparacion.recibo ? (
+                  <Link href={reparacion.recibo} target="_blank">
+                    <Button
+                      size="small"
+                      color="primary"
+                      startIcon={<ReceiptIcon />}
+                    >
+                      Ver recibo
+                    </Button>
+                  </Link>
+                ) : (
+                  "N/A"
+                )}
               </Box>
               <Box component="td" sx={{ p: 1, textAlign: "right" }}>
                 ${Number(reparacion.precioVenta).toLocaleString("es-AR")}
