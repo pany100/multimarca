@@ -4,9 +4,13 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { Box, Chip, Tab, Tabs, Typography } from "@mui/material";
+import EditIcon from "@mui/icons-material/Edit";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
+
 function VentasTable({
   extraActions,
   ctaCb,
@@ -14,6 +18,7 @@ function VentasTable({
   ...rest
 }: InheritedTableProps) {
   const [tabValue, setTabValue] = useState(0);
+  const router = useRouter();
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -118,6 +123,27 @@ function VentasTable({
     },
   ];
 
+  const customActions = (params: any) => {
+    const defaultActions = extraActions ? extraActions(params) : [];
+    const customActions: React.ReactNode[] = [
+      <MenuItem
+        key="edit"
+        onClick={() => router.push(`/dashboard/ventas/${params.id}/editar`)}
+      >
+        <EditIcon sx={{ mr: 1 }} />
+        Editar
+      </MenuItem>,
+      <MenuItem
+        key="view"
+        onClick={() => router.push(`/dashboard/ventas/${params.id}/ver`)}
+      >
+        <VisibilityIcon sx={{ mr: 1 }} />
+        Ver
+      </MenuItem>,
+    ];
+    return customActions.concat(defaultActions);
+  };
+
   return (
     <Box>
       <Tabs value={tabValue} onChange={handleTabChange}>
@@ -130,8 +156,8 @@ function VentasTable({
           <CustomTable
             title="Ventas"
             apiEndpoint="/api/ventas"
-            extraActions={extraActions}
-            ctaCb={ctaCb}
+            extraActions={customActions}
+            ctaCb={() => router.push("/dashboard/ventas/nueva")}
             columns={columns}
             {...rest}
           />
@@ -140,8 +166,8 @@ function VentasTable({
           <CustomTable
             title="Ventas"
             apiEndpoint="/api/ventas?presupuesto=false"
-            extraActions={extraActions}
-            ctaCb={ctaCb}
+            extraActions={customActions}
+            ctaCb={() => router.push("/dashboard/ventas/nueva")}
             columns={columns}
             {...rest}
           />
@@ -150,8 +176,8 @@ function VentasTable({
           <CustomTable
             title="Ventas"
             apiEndpoint="/api/ventas?presupuesto=true"
-            extraActions={extraActions}
-            ctaCb={ctaCb}
+            extraActions={customActions}
+            ctaCb={() => router.push("/dashboard/ventas/nueva")}
             columns={columns}
             {...rest}
           />
