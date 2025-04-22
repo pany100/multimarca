@@ -9,6 +9,55 @@ import {
 import { TipoNotificacionInterna } from "@prisma/client";
 import { NextResponse } from "next/server";
 
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: "ID de venta inválido" },
+        { status: 400 }
+      );
+    }
+
+    const venta = await prisma.venta.findUnique({
+      where: { id },
+      include: {
+        cliente: true,
+        repuestosUsados: {
+          include: {
+            stock: true,
+          },
+        },
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
+          },
+        },
+        trabajosRealizados: true,
+      },
+    });
+
+    if (!venta) {
+      return NextResponse.json(
+        { error: "Venta no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(venta);
+  } catch (error) {
+    console.error("Error al obtener la venta:", error);
+    return NextResponse.json(
+      { error: "Error al obtener la venta" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
