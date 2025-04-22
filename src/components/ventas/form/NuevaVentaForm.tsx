@@ -1,5 +1,6 @@
 import FormActions from "@/components/orden-reparacion/formV2/commons/FormActions";
 import FormSection from "@/components/orden-reparacion/formV2/commons/FormSection";
+import IncrementoSection from "@/components/orden-reparacion/formV2/sections/incremento/IncrementoSection";
 import ReparacionTercerosSection from "@/components/orden-reparacion/formV2/sections/reparacion-terceros/ReparacionTercerosSection";
 import RepuestosUsadosSection from "@/components/orden-reparacion/formV2/sections/repuestos-usados/RepuestosUsadosSection";
 import ResumenCostosSection from "@/components/orden-reparacion/formV2/sections/resumen-costos/ResumenCostosSection";
@@ -9,7 +10,6 @@ import { schema } from "@/sections/ventas/schema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormProvider, useForm } from "react-hook-form";
 import VentasDatosGeneralesSection from "./VentasDatosGeneralesSection";
-import IncrementoSection from "@/components/orden-reparacion/formV2/sections/incremento/IncrementoSection";
 
 function NuevaVentaForm() {
   const methods = useForm({

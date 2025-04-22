@@ -1,12 +1,6 @@
 import prisma from "@/lib/prisma";
 import { getIO } from "@/lib/socketio";
-import {
-  chequeQueryData,
-  getChequeIdAndValidate,
-  returnAllModelsWithChequeData,
-  returnModelWithChequeData,
-  validateChequeRequest,
-} from "@/utils/chequeUtils";
+import { moveFileInS3 } from "@/utils/s3Helper";
 import { Prisma, TipoNotificacionInterna } from "@prisma/client";
 import { NextResponse } from "next/server";
 
@@ -36,13 +30,9 @@ export async function GET(request: Request) {
         where,
         include: {
           cliente: true,
-          items: {
-            include: {
-              stock: true,
-            },
-          },
-          tipoOperacion: true,
-          cheque: chequeQueryData,
+          repuestosUsados: true,
+          reparacionesDeTercero: true,
+          trabajosRealizados: true,
         },
         skip: page * limit,
         take: limit,
@@ -50,17 +40,9 @@ export async function GET(request: Request) {
       }),
       prisma.venta.count({ where }),
     ]);
-    const ventasConItems = ventas.map((venta) => ({
-      ...venta,
-      items: venta.items.map((item) => ({
-        ...item,
-        name: item.stock.name,
-        stockId: item.stock.id,
-      })),
-    }));
 
     return NextResponse.json({
-      items: returnAllModelsWithChequeData(ventasConItems),
+      items: ventas,
       total,
       page,
       limit,
@@ -79,39 +61,76 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       clienteId,
-      items,
-      total,
-      moneda,
+      descripcionDescuento,
+      descripcionIncremento,
+      descuento,
       fecha,
-      tipoOperacionId,
+      incremento,
       presupuesto,
+      repuestosUsados = [],
+      reparacionesDeTercero = [],
+      trabajosRealizados = [],
     } = body;
 
-    if (!validateChequeRequest(body, tipoOperacionId)) {
-      return NextResponse.json(
-        { error: "Faltan datos para la operación de cheque" },
-        { status: 400 }
-      );
-    }
+    if (!presupuesto) {
+      for (const repuesto of repuestosUsados) {
+        const stockActual = await prisma.stock.findUnique({
+          where: { id: repuesto.stock.id },
+          select: { units: true },
+        });
 
-    // Verificar stock suficiente antes de crear la venta
-    for (const item of items) {
-      const stock = await prisma.stock.findUnique({
-        where: { id: item.stockId },
-        select: { id: true, name: true, units: true, restockValue: true },
-      });
-
-      if (!stock || (stock.units ?? 0) - item.cantidad < 0) {
-        throw new Error(`Stock insuficiente para el ítem ${stock?.name}`);
+        if (
+          !stockActual ||
+          (stockActual.units ?? 0) < repuesto.unidadesConsumidas
+        ) {
+          return NextResponse.json(
+            {
+              error: `Stock insuficiente para el repuesto ${repuesto.stock.name} con ID ${repuesto.stock.id}`,
+            },
+            { status: 400 }
+          );
+        }
       }
     }
 
-    if (!moneda || !["Dolar", "Peso"].includes(moneda)) {
-      return NextResponse.json(
-        { error: "Moneda inválida o faltante" },
-        { status: 400 }
-      );
-    }
+    const repuestosToPersist = repuestosUsados.map((repuesto: any) => ({
+      precioCompra: repuesto.precioCompra
+        ? new Prisma.Decimal(repuesto.precioCompra)
+        : new Prisma.Decimal(0),
+      precioVenta: repuesto.precioVenta
+        ? new Prisma.Decimal(repuesto.precioVenta)
+        : new Prisma.Decimal(0),
+      unidadesConsumidas: repuesto.unidadesConsumidas,
+      stock: { connect: { id: repuesto.stock.id } },
+    }));
+
+    const reparacionesDeTerceroToPersist = await Promise.all(
+      reparacionesDeTercero.map(async (reparacion: any) => {
+        let reciboUrl = reparacion.recibo;
+        if (reparacion.recibo && reparacion.recibo.includes("/tmp/")) {
+          reciboUrl = await moveFileInS3(reparacion.recibo, "recibos");
+        }
+        return {
+          nombre: reparacion.nombre,
+          precioCompra: reparacion.precioCompra
+            ? new Prisma.Decimal(reparacion.precioCompra)
+            : new Prisma.Decimal(0),
+          precioVenta: reparacion.precioVenta
+            ? new Prisma.Decimal(reparacion.precioVenta)
+            : new Prisma.Decimal(0),
+          proveedor: { connect: { id: reparacion.proveedor.id } },
+          recibo: reciboUrl,
+        };
+      })
+    );
+
+    const trabajosRealizadosToPersist = trabajosRealizados.map(
+      (trabajo: any) => ({
+        descripcion: trabajo.manoDeObra.name,
+        precioUnitario: new Prisma.Decimal(trabajo.precioUnitario),
+        diasParaRecordatorio: trabajo.diasParaRecordatorio,
+      })
+    );
 
     const dolar = await prisma.dolar.findFirst({
       where: {
@@ -124,84 +143,65 @@ export async function POST(request: Request) {
       },
     });
 
-    let chequeIdToPass = null;
-    try {
-      chequeIdToPass = await getChequeIdAndValidate(body, tipoOperacionId);
-    } catch (error) {
-      return NextResponse.json(
-        { error: "No se pudo usar el cheque" },
-        { status: 400 }
-      );
-    }
-
     const venta = await prisma.venta.create({
       data: {
         clienteId,
-        total,
+        total: 0,
         fecha,
-        moneda,
         dolarId: dolar?.id,
-        items: {
-          create: items.map((item: { stockId: number; cantidad: number }) => ({
-            stockId: item.stockId,
-            cantidad: item.cantidad,
-          })),
-        },
-        tipoOperacionId,
-        chequeId: chequeIdToPass,
         presupuesto,
+        descuento: new Prisma.Decimal(descuento),
+        descripcionDescuento,
+        incremento: new Prisma.Decimal(incremento),
+        descripcionIncremento,
+        repuestosUsados: {
+          create: repuestosToPersist,
+        },
+        reparacionesDeTercero: {
+          create: reparacionesDeTerceroToPersist,
+        },
+        trabajosRealizados: {
+          create: trabajosRealizadosToPersist,
+        },
       },
       include: {
         cliente: true,
-        items: {
-          include: {
-            stock: true,
-          },
-        },
-        cheque: chequeQueryData,
+        repuestosUsados: true,
+        reparacionesDeTercero: true,
+        trabajosRealizados: true,
       },
     });
 
     // Actualizar el stock y crear notificaciones si es necesario
-    for (const item of items) {
-      const stockActualizado = await prisma.stock.update({
-        where: { id: item.stockId },
-        data: {
-          units: {
-            decrement: item.cantidad,
-          },
-        },
-      });
-
-      if (
-        (stockActualizado.units ?? 0) <= (stockActualizado.restockValue ?? 0)
-      ) {
-        await prisma.notificacionInterna.create({
-          data: {
-            fecha: new Date(),
-            titulo: `${stockActualizado.name} necesita reposición`,
-            texto: `El elemento ${stockActualizado.name} quedó con ${stockActualizado.units} unidades. Necesita reponer stock.`,
-            leida: false,
-            tipo: TipoNotificacionInterna.REPOSICION_STOCK,
-            stockId: stockActualizado.id,
-          },
+    if (!presupuesto) {
+      for (const repuesto of repuestosUsados) {
+        const stockActualizado = await prisma.stock.update({
+          where: { id: repuesto.stock.id },
+          data: { units: { decrement: repuesto.unidadesConsumidas } },
         });
-        const io = getIO();
-        if (io) {
-          io.emit("newNotification");
+
+        if (
+          (stockActualizado.units ?? 0) <= (stockActualizado.restockValue ?? 0)
+        ) {
+          await prisma.notificacionInterna.create({
+            data: {
+              fecha: new Date(),
+              titulo: `${stockActualizado.name} necesita reposición`,
+              texto: `El elemento ${stockActualizado.name} quedó con ${stockActualizado.units} unidades. Necesita reponer stock.`,
+              leida: false,
+              tipo: TipoNotificacionInterna.REPOSICION_STOCK,
+              stockId: stockActualizado.id,
+            },
+          });
+          const io = getIO();
+          if (io) {
+            io.emit("newNotification");
+          }
         }
       }
     }
-    const ventaToReturn = {
-      ...venta,
-      items: venta.items.map((item) => ({
-        ...item,
-        name: item.stock.name,
-        stockId: item.stock.id,
-      })),
-    };
 
-    return NextResponse.json(returnModelWithChequeData(ventaToReturn), {
+    return NextResponse.json(venta, {
       status: 201,
     });
   } catch (error) {
