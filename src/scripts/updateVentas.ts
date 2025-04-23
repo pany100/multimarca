@@ -57,14 +57,14 @@ async function updateVentas() {
         );
       }
 
-      // 2. Create IngresoPorVenta if it doesn't exist
+      // 2. Create IngresoPorVenta if it doesn't exist and it's not a presupuesto
       const existingIngreso = await prisma.ingresoPorVenta.findFirst({
         where: {
           ventaId: venta.id,
         },
       });
 
-      if (!existingIngreso) {
+      if (!existingIngreso && !venta.presupuesto) {
         // Create base data for IngresoPorVenta
         const ingresoData: any = {
           fecha: venta.fecha,

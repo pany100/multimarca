@@ -363,6 +363,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             icono: <AccountBalanceIcon />,
             ruta: "/dashboard/ingresos-reparacion",
           },
+          {
+            permiso: "Ingresos",
+            texto: "Pagos de ventas",
+            icono: <AccountBalanceIcon />,
+            ruta: "/dashboard/ingresos-ventas",
+          },
         ],
       },
       {

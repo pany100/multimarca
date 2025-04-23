@@ -154,9 +154,9 @@ export async function POST(request: Request) {
         fecha,
         dolarId: dolar?.id,
         presupuesto,
-        descuento: new Prisma.Decimal(descuento),
+        descuento: descuento ? new Prisma.Decimal(descuento) : 0,
         descripcionDescuento,
-        incremento: new Prisma.Decimal(incremento),
+        incremento: incremento ? new Prisma.Decimal(incremento) : 0,
         descripcionIncremento,
         repuestosUsados: {
           create: repuestosToPersist,

@@ -1,4 +1,5 @@
 import { useFetch } from "@/contexts/FetchContext";
+import FormInfoProvider from "@/contexts/FormInfoContext";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
 import { Alert, MenuItem, Snackbar } from "@mui/material";
@@ -185,24 +186,28 @@ function ABMPage({
           open={isAddModalOpen}
           onClose={() => setIsAddModalOpen(false)}
         >
-          <CustomForm
-            onCancel={() => setIsAddModalOpen(false)}
-            onSubmit={handleAddSubmit}
-            schema={schema}
-            formDefinition={Form}
-          />
+          <FormInfoProvider isEditing={false}>
+            <CustomForm
+              onCancel={() => setIsAddModalOpen(false)}
+              onSubmit={handleAddSubmit}
+              schema={schema}
+              formDefinition={Form}
+            />
+          </FormInfoProvider>
         </FormModal>
       )}
 
       {Form && schema && crudActions.includes(CrudAction.EDIT) && (
         <FormModal open={isEditModalOpen} onClose={handleCloseEdit}>
-          <CustomForm
-            onCancel={handleCloseEdit}
-            initialValues={entity}
-            onSubmit={handleEditSubmit}
-            schema={schema}
-            formDefinition={Form}
-          />
+          <FormInfoProvider isEditing={true}>
+            <CustomForm
+              onCancel={handleCloseEdit}
+              initialValues={entity}
+              onSubmit={handleEditSubmit}
+              schema={schema}
+              formDefinition={Form}
+            />
+          </FormInfoProvider>
         </FormModal>
       )}
 

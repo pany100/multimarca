@@ -1,20 +1,24 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { useFormInfo } from "@/contexts/FormInfoContext";
 import { useEffect, useState } from "react";
 
 function useOrdenReparacionDelCliente(clienteId: number) {
+  const { isEditing } = useFormInfo();
   const [ordenesReparacion, setOrdenesReparacion] = useState<
     { value: number; label: string }[]
   >([]);
   const { authFetch } = useFetch();
-
   useEffect(() => {
     const fetchOrdenesReparacion = async () => {
-      if (!clienteId) return;
+      if (!clienteId) {
+        return;
+      }
 
       try {
-        const response = await authFetch(
-          `/api/clientes/${clienteId}/orden-reparacion?soloConDeuda=true&limit=10&page=0`
-        );
+        const url = isEditing
+          ? `/api/clientes/${clienteId}/orden-reparacion`
+          : `/api/clientes/${clienteId}/orden-reparacion?soloConDeuda=true&limit=10&page=0`;
+        const response = await authFetch(url);
         const data = await response.json();
         const ordenes = data.map((orden: any) => ({
           value: orden.id,
@@ -35,7 +39,7 @@ function useOrdenReparacionDelCliente(clienteId: number) {
     };
 
     fetchOrdenesReparacion();
-  }, [clienteId, authFetch]);
+  }, [clienteId, authFetch, isEditing]);
 
   return { ordenesReparacion };
 }

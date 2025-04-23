@@ -1,7 +1,7 @@
 import * as yup from "yup";
 
 export const schema = yup.object({
-  presupuesto: yup.boolean().required("El presupuesto es requerido"),
+  presupuesto: yup.boolean(),
   fecha: yup.date().required("La fecha es requerida"),
   clienteId: yup.number().required("El cliente es requerido"),
   repuestosUsados: yup.array().of(
@@ -64,8 +64,8 @@ export const schema = yup.object({
       recibo: yup.string().nullable(),
     })
   ),
-  descuento: yup.number().min(0),
+  descuento: yup.number().min(0).nullable(),
   descripcionDescuento: yup.string().nullable(),
-  incremento: yup.number().min(0),
+  incremento: yup.number().min(0).nullable(),
   descripcionIncremento: yup.string().nullable(),
 });

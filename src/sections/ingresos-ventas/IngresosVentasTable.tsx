@@ -1,0 +1,116 @@
+"use client";
+
+import CustomTable, {
+  InheritedTableProps,
+} from "@/components/tableV2/CustomTable";
+import { getFormattedPrice } from "@/utils/fieldHelper";
+import { Alert, Chip, Snackbar } from "@mui/material";
+import Link from "next/link";
+import { useState } from "react";
+
+function IngresosVentasTable({
+  extraActions,
+  ctaCb,
+  setRefreshTrigger,
+  ...rest
+}: InheritedTableProps) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: "",
+    severity: "success" as "success" | "error",
+  });
+  const columns = [
+    { field: "id", headerName: "ID", flex: 0.5 },
+    {
+      field: "fecha",
+      headerName: "Fecha",
+      flex: 1,
+      valueGetter: (value: any) => new Date(value).toLocaleDateString("es-AR"),
+    },
+    {
+      field: "monto",
+      headerName: "Monto",
+      flex: 1,
+      valueGetter: (value: any) => getFormattedPrice(value),
+    },
+    {
+      field: "moneda",
+      headerName: "Moneda",
+      flex: 1,
+      renderCell: (params: any) => (
+        <Chip
+          label={params.value}
+          color={params.value === "Dolar" ? "success" : "warning"}
+          size="small"
+        />
+      ),
+    },
+    {
+      field: "tipoOperacion",
+      headerName: "Tipo de Operación",
+      flex: 1.5,
+      renderCell: (params: any) => {
+        const value = params.value;
+        if (value.label === "Cheque" && params.row.chequeId) {
+          return (
+            <Link
+              href={`/dashboard/cheques/${params.row.chequeId}`}
+              style={{ textDecoration: "underline" }}
+            >
+              Cheque
+            </Link>
+          );
+        }
+        return value.label;
+      },
+    },
+    { field: "descripcion", headerName: "Descripción", flex: 2 },
+    {
+      field: "cliente",
+      headerName: "Cliente",
+      flex: 1.5,
+      valueGetter: (value: any) => value?.fullName || "",
+    },
+    {
+      field: "ventaId",
+      headerName: "Venta",
+      flex: 2,
+      renderCell: (params: any) => (
+        <Link
+          href={`/dashboard/ventas/${params.value}/ver`}
+          style={{ textDecoration: "underline" }}
+        >
+          Venta #{params.value}
+        </Link>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <CustomTable
+        title="Ingresos por Venta"
+        apiEndpoint="/api/ingresos-ventas"
+        extraActions={extraActions}
+        ctaCb={ctaCb}
+        columns={columns}
+        {...rest}
+      />
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </>
+  );
+}
+
+export default IngresosVentasTable;
