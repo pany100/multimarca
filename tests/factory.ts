@@ -93,26 +93,6 @@ export async function createVenta(
     },
   });
 
-  // Crear los items de la venta y actualizar el stock
-  for (const item of items) {
-    await prisma.ventaItem.create({
-      data: {
-        ventaId: venta.id,
-        stockId: item.stockId,
-        cantidad: item.cantidad,
-      },
-    });
-
-    await prisma.stock.update({
-      where: { id: item.stockId },
-      data: {
-        units: {
-          decrement: item.cantidad,
-        },
-      },
-    });
-  }
-
   return venta;
 }
 

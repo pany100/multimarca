@@ -175,7 +175,6 @@ model Stock {
   ordenDeCompraItems     OrdenDeCompraItem[]
   repuestosUsados        RepuestoUsado[]
   proveedor              Proveedor             @relation(fields: [proveedorId], references: [id])
-  ventas                 VentaItem[]
 
   @@index([name])
   @@index([brand])
@@ -212,7 +211,6 @@ model Extraccion {
   fecha          DateTime       @default(now())
   usuarioId      Int
   motivo         String         @db.VarChar(150)
-  tipoOperacionOld TipoOperacion @default(EFECTIVO)
   tipoOperacionId Int?
   tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
   moneda         Moneda         @default(Peso)
@@ -238,7 +236,6 @@ model Gasto {
   proveedorId Int?
   moneda      Moneda         @default(Peso)
   dolarId     Int?
-  tipoOperacionOld TipoOperacion @default(EFECTIVO)
   tipoOperacionId Int?
   tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
   categoria   CategoriaGasto @relation(fields: [categoriaId], references: [id])
@@ -268,17 +265,9 @@ model Venta {
   id        Int         @id @default(autoincrement())
   fecha     DateTime    @default(now())
   clienteId Int?
-  total     Decimal     @db.Decimal(10, 2)
   dolarId   Int?
-  moneda    Moneda      @default(Peso)
   cliente   Cliente?    @relation(fields: [clienteId], references: [id])
   dolar     Dolar?      @relation(fields: [dolarId], references: [id])
-  items     VentaItem[] @relation("VentaToItems")
-  tipoOperacionOld TipoOperacion @default(EFECTIVO)
-  tipoOperacionId Int?
-  tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
-  chequeId  Int?
-  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
   descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
   descripcionDescuento   String?                   @db.VarChar(255)
   incremento             Decimal                   @default(0.00) @db.Decimal(10, 2)
@@ -293,18 +282,6 @@ model Venta {
   @@index([clienteId])
   @@index([fecha])
   @@index([dolarId], map: "Venta_dolarId_fkey")
-}
-
-model VentaItem {
-  id       Int   @id @default(autoincrement())
-  ventaId  Int
-  stockId  Int
-  cantidad Int
-  stock    Stock @relation(fields: [stockId], references: [id])
-  venta    Venta @relation("VentaToItems", fields: [ventaId], references: [id], onDelete: Cascade)
-
-  @@index([ventaId])
-  @@index([stockId])
 }
 
 model NotificacionWhatsapp {
@@ -468,7 +445,6 @@ model IngresoPorReparacion {
   cliente           Cliente         @relation(fields: [clienteId], references: [id])
   dolar             Dolar?          @relation(fields: [dolarId], references: [id])
   ordenReparacion   OrdenReparacion @relation("OrdenReparacionIngresos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
-  tipoOperacionOld TipoOperacion @default(EFECTIVO)
   tipoOperacionId Int?
   tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
   chequeId  Int?
@@ -594,7 +570,6 @@ model IngresoManualDeDinero {
   descripcion    String?        @db.Text
   moneda         Moneda         @default(Peso)
   dolarId        Int?
-  tipoOperacionOld TipoOperacion @default(EFECTIVO)
   tipoOperacionId Int?
   tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
   usuarioId      Int
@@ -619,7 +594,6 @@ model Cheque {
 
   extraccion Extraccion[]
   gasto Gasto[]
-  venta Venta[]
   ingresoPorReparacion IngresoPorReparacion[]
   ingresoManualDeDinero IngresoManualDeDinero[]
   ingresoPorVenta IngresoPorVenta[]
@@ -630,7 +604,6 @@ model TipoDeOperacion {
   label                 String                  @unique @db.VarChar(100)
   extracciones          Extraccion[]
   gastos                Gasto[]
-  ventas                Venta[]
   ingresosPorReparacion IngresoPorReparacion[]
   ingresosManualDeDinero IngresoManualDeDinero[]
   ingresosPorVenta IngresoPorVenta[]
