@@ -23,25 +23,28 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // Construir la consulta SQL base para ventas
+    // Consulta para ventas
     let ventasQuery = `
-      SELECT 
-        ROUND(SUM(
-          CASE 
-            WHEN ? = 'USD' THEN 
-              CASE 
-                WHEN v.moneda = 'Dolar' THEN v.total
-                ELSE v.total / COALESCE(d.blue, 1)
-              END
-            ELSE 
-              CASE 
-                WHEN v.moneda = 'Dolar' THEN v.total * COALESCE(d.blue, 1)
-                ELSE v.total
-              END
-          END
-        )) as totalVentas
+      SELECT ROUND(SUM(
+        CASE 
+          WHEN ? = 'USD' THEN 
+            (COALESCE((SELECT SUM(tr.precioUnitario) FROM TrabajoRealizado tr WHERE tr.ventaId = v.id), 0) + 
+             COALESCE((SELECT SUM(ru.precioVenta) FROM RepuestoUsado ru WHERE ru.ventaId = v.id), 0) + 
+             COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ventaId = v.id), 0) + 
+             COALESCE(v.incremento, 0) - 
+             COALESCE(v.descuento, 0)
+            ) / COALESCE(d.blue, 1)
+          ELSE 
+            (COALESCE((SELECT SUM(tr.precioUnitario) FROM TrabajoRealizado tr WHERE tr.ventaId = v.id), 0) + 
+             COALESCE((SELECT SUM(ru.precioVenta) FROM RepuestoUsado ru WHERE ru.ventaId = v.id), 0) + 
+             COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ventaId = v.id), 0) + 
+             COALESCE(v.incremento, 0) - 
+             COALESCE(v.descuento, 0)
+            )
+        END
+      )) as totalVentas
       FROM Venta v
-      LEFT JOIN Dolar d ON d.id = v.dolarId
+      LEFT JOIN Dolar d ON d.fecha = DATE(v.fecha)
       WHERE v.presupuesto = false
     `;
 
