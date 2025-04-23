@@ -87,8 +87,8 @@ export async function GET(request: NextRequest) {
     );
 
     const clientesFormateados = clientesDetallados.map((cliente: any) => ({
-      id: cliente.id,
-      fullName: cliente.fullName,
+      id: cliente.clienteId,
+      fullName: cliente.clienteName,
       totalVentas: parseInt(cliente.totalVentas),
     }));
 
