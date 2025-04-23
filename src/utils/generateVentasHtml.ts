@@ -180,11 +180,14 @@ export default function generateClientOrderHtml(venta: any): string {
           <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
             Repuestos Usados
           </div>
-          <div style='
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            margin-top: 10px;
-            width: 100%;
+          ${
+            venta.repuestosUsados.length > 0
+              ? `
+            <div style='
+              display: grid;
+              grid-template-columns: 1fr 1fr 1fr;
+              margin-top: 10px;
+              width: 100%;
           '>
             <div class="TypographyBody1" style="font-weight: bold; margin-bottom: 4px;">
               Repuesto
@@ -214,54 +217,64 @@ export default function generateClientOrderHtml(venta: any): string {
                 `
               )
               .join("")}
-          </div>
+          </div>`
+              : `<div>No hay repuestos usados registrados</div>`
+          }
         </div>
         <hr class="divider" style="margin-top: 10px; margin-bottom: 10px;"/>
         <div>
           <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
             Reparaciones de Terceros
           </div>
-          <div style='
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            margin-top: 10px;
-            width: 100%;
-          '>
-            <div class="TypographyBody1" style="font-weight: bold; margin-bottom: 4px;">
-              Nombre
-            </div>
-            <div class="TypographyBody1" style="text-align: right;font-weight: bold; margin-bottom: 4px;">
-              Proveedor
-            </div>
-            <div class="TypographyBody1" style="text-align: right;font-weight: bold; margin-bottom: 4px;">
-              Importe
-            </div>
-            ${venta.reparacionesDeTercero
-              .map(
-                (el: {
-                  nombre: string;
-                  proveedor: { name: string };
-                  precioVenta: number;
-                }) => `
-                    <div class="TypographyBody1" style="margin-bottom: 4px;">
-                      ${el.nombre}
-                    </div>
-                    <div class="TypographyBody1" style="text-align: right;margin-bottom: 4px;">
-                      ${el.proveedor.name}
-                    </div>
-                    <div class="TypographyBody1" style="text-align: right;margin-bottom: 4px;">
-                      $${Number(el.precioVenta).toLocaleString("es-AR")}
-                    </div>
-                `
-              )
-              .join("")}
-          </div>
+          ${
+            venta.reparacionesDeTercero.length > 0
+              ? `
+            <div style='
+              display: grid;
+              grid-template-columns: 1fr 1fr 1fr;
+              margin-top: 10px;
+              width: 100%;
+            '>
+              <div class="TypographyBody1" style="font-weight: bold; margin-bottom: 4px;">
+                Nombre
+              </div>
+              <div class="TypographyBody1" style="text-align: right;font-weight: bold; margin-bottom: 4px;">
+                Proveedor
+              </div>
+              <div class="TypographyBody1" style="text-align: right;font-weight: bold; margin-bottom: 4px;">
+                Importe
+              </div>
+              ${venta.reparacionesDeTercero
+                .map(
+                  (el: {
+                    nombre: string;
+                    proveedor: { name: string };
+                    precioVenta: number;
+                  }) => `
+                      <div class="TypographyBody1" style="margin-bottom: 4px;">
+                        ${el.nombre}
+                      </div>
+                      <div class="TypographyBody1" style="text-align: right;margin-bottom: 4px;">
+                        ${el.proveedor.name}
+                      </div>
+                      <div class="TypographyBody1" style="text-align: right;margin-bottom: 4px;">
+                        $${Number(el.precioVenta).toLocaleString("es-AR")}
+                      </div>
+                  `
+                )
+                .join("")}
+            </div>`
+              : `<div>No hay reparaciones de tercero registradas</div>`
+          }
         </div>
         <hr class="divider" style="margin-top: 10px; margin-bottom: 10px;"/>
         <div>
           <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
             Trabajos Realizados
           </div>
+          ${
+            venta.trabajosRealizados.length > 0
+              ? `
           <div style='
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -286,13 +299,18 @@ export default function generateClientOrderHtml(venta: any): string {
                 `
               )
               .join("")}
-          </div>
+          </div>`
+              : `<div>No hay trabajos realizados registrados</div>`
+          }
         </div>
-        <hr class="divider" style="margin-top: 10px; margin-bottom: 10px;"/>
-        <div>
-          <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
-            Información Adicional
-          </div>
+        ${
+          venta.descuento > 0 || venta.incremento > 0
+            ? `
+          <hr class="divider" style="margin-top: 10px; margin-bottom: 10px;"/>
+          <div>
+            <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
+              Información Adicional
+            </div>
         ${
           venta.descuento > 0
             ? `
@@ -329,7 +347,9 @@ export default function generateClientOrderHtml(venta: any): string {
           `
             : ""
         }
-        </div>
+        </div>`
+            : ``
+        }
         <hr class="divider" style="margin-top: 10px; margin-bottom: 30px;"/>
         <div style='
             display: grid;

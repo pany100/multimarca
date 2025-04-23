@@ -45,6 +45,7 @@ export async function GET(request: Request) {
         { categoria: { nombre: { contains: query } } },
         { mecanico: { name: { contains: query } } },
         { detalle: { contains: query } },
+        { proveedor: { name: { contains: query } } },
       ],
       AND: [
         {
