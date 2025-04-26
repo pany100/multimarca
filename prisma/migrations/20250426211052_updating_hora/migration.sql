@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Turno` MODIFY `hora` VARCHAR(191) NOT NULL;

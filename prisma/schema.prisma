@@ -622,7 +622,7 @@ model Feriado {
 
 model Turno {
   id        Int      @id @default(autoincrement())
-  hora      DateTime
+  hora      String
   fecha     DateTime
   problema  String   @db.Text
   autoId    Int

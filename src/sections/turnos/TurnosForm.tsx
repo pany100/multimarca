@@ -38,7 +38,6 @@ const TurnosForm = () => {
       <Typography variant="h5" sx={{ mb: 2 }}>
         Información del Turno
       </Typography>
-      {JSON.stringify(watch)}
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
           <CustomInputDate name="fecha" label="Fecha" />

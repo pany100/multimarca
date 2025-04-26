@@ -62,7 +62,7 @@ export async function PUT(
     const turnoActualizado = await prisma.turno.update({
       where: { id: parseInt(id) },
       data: {
-        hora: new Date(hora),
+        hora,
         fecha: new Date(fecha),
         problema,
         autoId,
@@ -107,11 +107,6 @@ export async function DELETE(
 
     // Check if the turno is in the past
     const turnoDateTime = new Date(turno.fecha);
-    turnoDateTime.setHours(
-      new Date(turno.hora).getHours(),
-      new Date(turno.hora).getMinutes()
-    );
-
     const now = new Date();
     if (turnoDateTime < now) {
       return NextResponse.json(

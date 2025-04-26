@@ -104,7 +104,7 @@ export async function POST(request: Request) {
 
     const nuevoTurno = await prisma.turno.create({
       data: {
-        hora: new Date(hora),
+        hora,
         fecha: new Date(fecha),
         problema,
         autoId,
