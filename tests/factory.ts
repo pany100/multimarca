@@ -88,7 +88,6 @@ export async function createVenta(
     data: {
       fecha: faker.date.recent(),
       clienteId,
-      total,
       ...overrides,
     },
   });
