@@ -54,6 +54,8 @@ export const config = {
     "/api/roles/:path*",
     "/api/ventas/:path*",
     "/api/tipo-operacion/:path*",
+    "/api/turnos/:path*",
+    "/api/feriados/:path*",
     // Agrega aquí más rutas segn sea necesario
   ],
 };

@@ -1,3 +1,4 @@
+import prisma from "@/lib/prisma";
 import { addDays, format, startOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
 import { NextRequest, NextResponse } from "next/server";
@@ -5,17 +6,52 @@ import puppeteer from "puppeteer";
 
 export async function POST(request: NextRequest) {
   try {
-    const { weekData } = await request.json();
+    const { nextWeek } = await request.json();
 
     // Launch a browser instance
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
     // Get the dates for the week
-    const startDate = startOfWeek(new Date(weekData[0]?.fecha || new Date()), {
-      weekStartsOn: 1,
-    }); // Start on Monday
+    let startDate = startOfWeek(new Date(), {
+      weekStartsOn: 1, // Start on Monday
+    });
+
+    if (nextWeek) {
+      startDate = addDays(startDate, 7);
+    }
+
     const weekDays = Array.from({ length: 5 }, (_, i) => addDays(startDate, i)); // Monday to Friday
+
+    // Fetch feriados for the week
+    const feriados = await prisma.feriado.findMany({
+      where: {
+        fecha: {
+          gte: weekDays[0],
+          lte: weekDays[4],
+        },
+      },
+    });
+
+    // Fetch turnos for the week
+    const turnos = await prisma.turno.findMany({
+      where: {
+        fecha: {
+          gte: weekDays[0],
+          lte: weekDays[4],
+        },
+      },
+      include: {
+        auto: {
+          include: {
+            owner: true,
+          },
+        },
+      },
+      orderBy: {
+        hora: "asc",
+      },
+    });
 
     // Generate HTML content for the PDF
     const htmlContent = `
@@ -69,6 +105,15 @@ export async function POST(request: NextRequest) {
               color: white;
               text-align: center;
             }
+            .feriado {
+              background-color: #ffebee;
+              color: #c62828;
+            }
+            .feriado-description {
+              font-size: 10px;
+              font-style: italic;
+              color: #c62828;
+            }
           </style>
         </head>
         <body>
@@ -80,41 +125,64 @@ export async function POST(request: NextRequest) {
             <thead>
               <tr>
                 <th>Cliente</th>
-                <th>Patente</th>
-                <th>Descripción</th>
+                <th>Auto</th>
+                <th>Problema</th>
                 ${weekDays
-                  .map(
-                    (day) => `
-                  <th class="day-header">${format(day, "EEEE d", {
-                    locale: es,
-                  })}</th>
-                `
-                  )
+                  .map((day) => {
+                    const feriado = feriados.find(
+                      (f) =>
+                        format(new Date(f.fecha), "yyyy-MM-dd") ===
+                        format(day, "yyyy-MM-dd")
+                    );
+                    return `
+                      <th class="day-header ${feriado ? "feriado" : ""}">
+                        ${format(day, "EEEE d", { locale: es })}
+                        ${
+                          feriado
+                            ? `<br><span class="feriado-description">${feriado.descripcion}</span>`
+                            : ""
+                        }
+                      </th>
+                    `;
+                  })
                   .join("")}
               </tr>
             </thead>
             <tbody>
-              ${weekData
-                .map((turno: any) => {
+              ${turnos
+                .map((turno) => {
                   const turnoDate = new Date(turno.fecha);
                   const dayIndex = weekDays.findIndex(
-                    (d) => d.toDateString() === turnoDate.toDateString()
+                    (d) =>
+                      format(d, "yyyy-MM-dd") ===
+                      format(turnoDate, "yyyy-MM-dd")
                   );
 
                   return `
-                <tr>
-                  <td>${turno.auto.owner.fullName}</td>
-                  <td>${turno.auto.patent}</td>
-                  <td>${turno.problema}</td>
-                  ${weekDays
-                    .map((_, index) =>
-                      index === dayIndex
-                        ? `<td>${format(new Date(turno.hora), "HH:mm")}</td>`
-                        : "<td></td>"
-                    )
-                    .join("")}
-                </tr>
-              `;
+                    <tr>
+                      <td>${turno.auto?.owner?.fullName || "N/A"}</td>
+                      <td>${
+                        turno.auto
+                          ? `${turno.auto.brand} ${turno.auto.model} - ${turno.auto.patent}`
+                          : "N/A"
+                      }</td>
+                      <td>${turno.problema || ""}</td>
+                      ${weekDays
+                        .map((day, index) => {
+                          const feriado = feriados.find(
+                            (f) =>
+                              format(new Date(f.fecha), "yyyy-MM-dd") ===
+                              format(day, "yyyy-MM-dd")
+                          );
+                          return index === dayIndex
+                            ? `<td class="${feriado ? "feriado" : ""}">${
+                                turno.hora || ""
+                              }</td>`
+                            : `<td class="${feriado ? "feriado" : ""}"></td>`;
+                        })
+                        .join("")}
+                    </tr>
+                  `;
                 })
                 .join("")}
             </tbody>
@@ -151,10 +219,7 @@ export async function POST(request: NextRequest) {
     return new NextResponse(pdfBuffer, {
       headers: {
         "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="Agenda_Semanal_${format(
-          weekDays[0],
-          "yyyy-MM-dd"
-        )}.pdf"`,
+        "Content-Disposition": `attachment; filename="turnos-semana.pdf"`,
       },
     });
   } catch (error) {
