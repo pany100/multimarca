@@ -1,3 +1,4 @@
+import { useFetch } from "@/contexts/FetchContext";
 import { useCallback, useEffect, useState } from "react";
 
 interface Feriado {
@@ -10,13 +11,14 @@ export const useFeriados = () => {
   const [feriados, setFeriados] = useState<Feriado[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const { authFetch } = useFetch();
 
   useEffect(() => {
     const fetchFeriados = async () => {
       try {
-        const response = await fetch("/api/feriados?size=1000");
+        const response = await authFetch("/api/feriados/in-the-future");
         const data = await response.json();
-        setFeriados(data.items);
+        setFeriados(data);
         setError(null);
       } catch (err) {
         setError("Error al cargar los feriados");

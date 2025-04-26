@@ -1,8 +1,9 @@
 "use client";
 
 import CustomAutocompleteInput from "@/components/formV2/CustomAutocomplete";
-import CustomInputDateWithoutFeriados from "@/components/formV2/CustomInputDateWithoutFeriados";
+import CustomInputDate from "@/components/formV2/CustomInputDate"; // updated import
 import CustomInputText from "@/components/formV2/CustomInputText";
+import CustomInputTime from "@/components/formV2/CustomInputTime"; // new import
 import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
 import { Grid, Typography } from "@mui/material";
 import * as yup from "yup";
@@ -34,10 +35,16 @@ const TurnosForm = () => {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <CustomInputDateWithoutFeriados name="fecha" label="Fecha" />
+          <CustomInputDate name="fecha" label="Fecha" />
         </Grid>
         <Grid item xs={12} md={6}>
-          <CustomInputText name="hora" label="Hora" type="time" />
+          <CustomInputTime
+            name="hora"
+            label="Hora"
+            minTime="08:00"
+            maxTime="17:00"
+            minutesStep={30}
+          />
         </Grid>
         <Grid item xs={12}>
           <CustomAutocompleteInput

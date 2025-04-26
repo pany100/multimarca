@@ -253,27 +253,22 @@ export const getOperacionesByChequeId = async (chequeId: number) => {
   const operaciones = [];
 
   // Get Ventas
-  const ventas = await prisma.venta.findMany({
-    where: { chequeId, presupuesto: false },
+  const ingresosPorVentas = await prisma.ingresoPorVenta.findMany({
+    where: { chequeId },
     select: {
       id: true,
       fecha: true,
-      cliente: {
-        select: {
-          fullName: true,
-        },
-      },
+      descripcion: true,
+      venta: true,
     },
   });
 
-  for (const venta of ventas) {
+  for (const ingreso of ingresosPorVentas) {
     operaciones.push({
-      idOperacion: venta.id,
+      idOperacion: ingreso.id,
       tipo: "VENTA",
-      fecha: venta.fecha,
-      descripcion: `Venta a ${
-        venta.cliente?.fullName || "Cliente no especificado"
-      }`,
+      fecha: ingreso.fecha,
+      descripcion: `Venta a ${ingreso.descripcion || "No especificado"}`,
     });
   }
 
