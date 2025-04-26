@@ -24,36 +24,36 @@ function TurnosTable({
       field: "fecha",
       headerName: "Fecha",
       flex: 0.6,
-      valueGetter: (params: any) => {
-        return new Date(params.row.fecha).toLocaleDateString("es-AR");
+      valueGetter: (value: any) => {
+        return new Date(value).toLocaleDateString("es-AR");
       },
     },
     {
       field: "hora",
       headerName: "Hora",
       flex: 0.4,
-      valueGetter: (params: any) => {
-        return params.row.hora;
+    },
+    {
+      field: "cliente",
+      headerName: "Cliente",
+      flex: 0.4,
+      renderCell: (params: any) => {
+        const client = params.row.auto.owner;
+        return client ? `${client.fullName}` : "";
       },
     },
     {
       field: "auto",
       headerName: "Auto",
       flex: 1,
-      valueGetter: (params: any) => {
-        const auto = params.row.auto;
-        return auto ? `${auto.marca} ${auto.modelo} - ${auto.patente}` : "";
+      valueGetter: (value: any) => {
+        return value ? `${value.brand} ${value.model} - ${value.patent}` : "";
       },
     },
     {
       field: "problema",
       headerName: "Problema",
       flex: 1.5,
-    },
-    {
-      field: "estado",
-      headerName: "Estado",
-      flex: 0.5,
     },
   ];
 

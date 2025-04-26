@@ -35,6 +35,12 @@ const CustomInputDate = ({
       return true;
     }
 
+    // Disable weekends (Saturday = 6, Sunday = 0)
+    const dayOfWeek = dateAsDayjs.day();
+    if (dayOfWeek === 0 || dayOfWeek === 6) {
+      return true;
+    }
+
     // Check if it's a holiday
     return isFeriado(dateAsDayjs.toDate());
   };
