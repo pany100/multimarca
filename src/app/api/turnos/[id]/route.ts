@@ -42,6 +42,23 @@ export async function PUT(
       );
     }
 
+    // Check if the new date is a Feriado
+    const requestDate = new Date(fecha);
+    requestDate.setHours(0, 0, 0, 0); // Reset time to start of day for date comparison
+
+    const feriado = await prisma.feriado.findFirst({
+      where: {
+        fecha: requestDate,
+      },
+    });
+
+    if (feriado) {
+      return NextResponse.json(
+        { error: "No se pueden programar turnos en días feriados" },
+        { status: 400 }
+      );
+    }
+
     const turnoActualizado = await prisma.turno.update({
       where: { id: parseInt(id) },
       data: {

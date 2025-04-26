@@ -88,6 +88,20 @@ export async function POST(request: Request) {
       );
     }
 
+    // Check if the date is a Feriado
+    const feriado = await prisma.feriado.findFirst({
+      where: {
+        fecha: requestDate,
+      },
+    });
+
+    if (feriado) {
+      return NextResponse.json(
+        { error: "No se pueden crear turnos en días feriados" },
+        { status: 400 }
+      );
+    }
+
     const nuevoTurno = await prisma.turno.create({
       data: {
         hora: new Date(hora),

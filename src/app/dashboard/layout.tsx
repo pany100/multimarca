@@ -5,6 +5,7 @@ import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import BuildIcon from "@mui/icons-material/Build";
 import CalculateIcon from "@mui/icons-material/Calculate";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import ExpandLess from "@mui/icons-material/ExpandLess";
@@ -261,6 +262,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Feriados",
             icono: <HolidayVillageIcon />,
             ruta: "/dashboard/feriados",
+          },
+          {
+            permiso: "Agenda",
+            texto: "Turnos",
+            icono: <CalendarMonthIcon />,
+            ruta: "/dashboard/turnos",
           },
         ],
       },
