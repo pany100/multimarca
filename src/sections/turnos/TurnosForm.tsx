@@ -6,13 +6,18 @@ import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomInputTime from "@/components/formV2/CustomInputTime"; // new import
 import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
 import { Grid, Typography } from "@mui/material";
+import dayjs from "dayjs";
+import { useWatch } from "react-hook-form";
 import * as yup from "yup";
 
 export const schema = yup.object({
   fecha: yup
     .date()
     .required("La fecha es requerida")
-    .min(new Date(), "No se puede crear un turno para una fecha pasada"),
+    .min(
+      dayjs().startOf("day").toDate(),
+      "No se puede crear un turno para una fecha pasada"
+    ),
   hora: yup.string().required("La hora es requerida"),
   problema: yup
     .string()
@@ -26,13 +31,14 @@ export const schema = yup.object({
 
 const TurnosForm = () => {
   const { searchAutos, initialAuto } = useAutosAutocomplete();
+  const watch = useWatch();
 
   return (
     <>
       <Typography variant="h5" sx={{ mb: 2 }}>
         Información del Turno
       </Typography>
-
+      {JSON.stringify(watch)}
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
           <CustomInputDate name="fecha" label="Fecha" />

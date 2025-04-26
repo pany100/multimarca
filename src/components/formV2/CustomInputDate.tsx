@@ -48,6 +48,15 @@ const CustomInputDate = ({
           <DatePicker
             {...field}
             value={value ? dayjs(value) : null}
+            onChange={(newValue) => {
+              if (!newValue) {
+                onChange(null);
+                return;
+              }
+              // Ensure we're working with a Dayjs object
+              const date = dayjs.isDayjs(newValue) ? newValue : dayjs(newValue);
+              onChange(date.format("YYYY-MM-DD"));
+            }}
             minDate={minDate ? dayjs(minDate) : undefined}
             maxDate={maxDate ? dayjs(maxDate) : undefined}
             shouldDisableDate={shouldDisableDate}

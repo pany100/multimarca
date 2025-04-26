@@ -1,7 +1,7 @@
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { TimePicker } from "@mui/x-date-pickers/TimePicker";
-import { parse } from "date-fns";
+import { format, parse } from "date-fns";
 import { es } from "date-fns/locale";
 import { Controller, useFormContext } from "react-hook-form";
 
@@ -38,10 +38,20 @@ const CustomInputTime = ({
       <Controller
         name={name}
         control={control}
-        render={({ field: { value } }) => (
+        render={({ field: { value, onChange } }) => (
           <TimePicker
             label={label}
-            value={parseTimeString(value)}
+            value={value ? parseTimeString(value) : null}
+            onChange={(newValue) => {
+              if (!newValue) {
+                onChange(null);
+                return;
+              }
+              // Ensure we're working with a Date object
+              const dateValue =
+                newValue instanceof Date ? newValue : newValue.toDate();
+              onChange(format(dateValue, "HH:mm"));
+            }}
             minutesStep={minutesStep}
             minTime={minDate}
             maxTime={maxDate}
