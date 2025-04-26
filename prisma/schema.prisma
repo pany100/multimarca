@@ -84,6 +84,7 @@ model Auto {
   owner             Cliente           @relation(fields: [ownerId], references: [id])
   borradores        Borrador[]        @relation("AutoBorrador")
   ordenesReparacion OrdenReparacion[] @relation("AutoOrdenReparacion")
+  turnos            Turno[]
 
   @@index([patent])
   @@index([ownerId])
@@ -611,7 +612,25 @@ model TipoDeOperacion {
   @@index([label])
 }
 
+model Feriado {
+  id          Int      @id @default(autoincrement())
+  fecha       DateTime
+  descripcion String   @db.VarChar(255)
 
+  @@index([fecha])
+}
+
+model Turno {
+  id        Int      @id @default(autoincrement())
+  hora      DateTime
+  fecha     DateTime
+  problema  String   @db.Text
+  autoId    Int
+  auto      Auto     @relation(fields: [autoId], references: [id])
+
+  @@index([fecha])
+  @@index([autoId])
+}
 
 enum TipoEmpleado {
   Mecanico

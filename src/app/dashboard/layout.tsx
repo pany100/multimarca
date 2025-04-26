@@ -51,6 +51,7 @@ import CategoryIcon from "@mui/icons-material/Category";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import GroupIcon from "@mui/icons-material/Group";
+import HolidayVillageIcon from "@mui/icons-material/HolidayVillage";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import LogoutIcon from "@mui/icons-material/Logout";
 import MoneyOffIcon from "@mui/icons-material/MoneyOff";
@@ -254,6 +255,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Pagos a Mecánicos",
             icono: <PaymentIcon />,
             ruta: "/dashboard/pagos-a-mecanico",
+          },
+          {
+            permiso: "Agenda",
+            texto: "Feriados",
+            icono: <HolidayVillageIcon />,
+            ruta: "/dashboard/feriados",
           },
         ],
       },
