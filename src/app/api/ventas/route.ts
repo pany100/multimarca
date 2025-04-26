@@ -150,7 +150,6 @@ export async function POST(request: Request) {
     const venta = await prisma.venta.create({
       data: {
         clienteId,
-        total: 0,
         fecha,
         dolarId: dolar?.id,
         presupuesto,
