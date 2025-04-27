@@ -1,6 +1,7 @@
 "use client";
 
 import { FetchProvider } from "@/contexts/FetchContext";
+import NotificacionesClientSide from "@/sections/notificaciones-importantes/NotificacionesClientSide";
 import { PaletteMode } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
 import { ThemeProvider } from "@mui/material/styles";
@@ -18,7 +19,10 @@ export default function ClientLayout({
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <FetchProvider>{children}</FetchProvider>
+      <FetchProvider>
+        {children}
+        <NotificacionesClientSide />
+      </FetchProvider>
     </ThemeProvider>
   );
 }

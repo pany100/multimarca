@@ -44,14 +44,11 @@ function TrabajoDeListaForm() {
         <ORepTextField
           label="Días para Recordatorio"
           type="number"
-          defaultValue={currentItem?.manoDeObra?.diasParaRecordatorio || ""}
+          defaultValue={currentItem?.diasParaRecordatorio || ""}
           onChange={(e) =>
             setNewItem({
               ...newItem,
-              manoDeObra: {
-                ...newItem.manoDeObra,
-                diasParaRecordatorio: Number(e.target.value),
-              },
+              diasParaRecordatorio: Number(e.target.value),
             })
           }
         />

@@ -23,6 +23,7 @@ export function initCronJobs() {
   require("src/cron/birthdays").initCumpleañosCron();
   require("src/cron/recordatoriosTrabajos").initRecordatoriosTrabajosCron();
   require("src/cron/notificacionesCheques").initNotificacionesChequesCron();
+  require("src/cron/notificacionesImportantes").initNotificacionesImportantesCron();
 
   // Marcamos que los cron jobs se han iniciado
   global.cronJobsStarted = true;

@@ -1,19 +1,41 @@
 import { PrismaClient, TipoNotificacionInterna } from "@prisma/client";
+import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 import cron from "node-cron";
+
+// Configurar dayjs para usar timezone
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("America/Argentina/Buenos_Aires");
 
 const prisma = new PrismaClient();
 
 async function enviarNotificacionesTurnos() {
   try {
-    const hoy = new Date();
-    const fechaHoy = hoy.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+    // Get current date in Argentina's timezone
+    const today = dayjs().tz("America/Argentina/Buenos_Aires");
+    const startOfDay = today.startOf("day").toDate();
+    const endOfDay = today.endOf("day").toDate();
+
+    console.log("Fecha en Argentina:", today.format("YYYY-MM-DD"));
+    console.log(
+      "Buscando turnos entre:",
+      startOfDay.toLocaleString("es-AR", {
+        timeZone: "America/Argentina/Buenos_Aires",
+      }),
+      "y",
+      endOfDay.toLocaleString("es-AR", {
+        timeZone: "America/Argentina/Buenos_Aires",
+      })
+    );
 
     // Obtener turnos del día
     const turnosHoy = await prisma.turno.findMany({
       where: {
         fecha: {
-          gte: new Date(fechaHoy),
-          lt: new Date(new Date(fechaHoy).getTime() + 24 * 60 * 60 * 1000),
+          gte: startOfDay,
+          lte: endOfDay,
         },
       },
       include: {
@@ -26,6 +48,7 @@ async function enviarNotificacionesTurnos() {
     });
 
     if (turnosHoy.length > 0) {
+      console.log(`Turnos encontrados: ${turnosHoy.length}`);
       // Crear notificación interna para los turnos del día
       await prisma.notificacionInterna.create({
         data: {
@@ -43,6 +66,8 @@ async function enviarNotificacionesTurnos() {
           tipo: TipoNotificacionInterna.TURNOS_DEL_DIA,
         },
       });
+    } else {
+      console.log("No hay turnos encontrados");
     }
   } catch (error) {
     console.error("Error al procesar notificaciones de turnos:", error);
@@ -51,9 +76,9 @@ async function enviarNotificacionesTurnos() {
 
 async function enviarRecordatoriosMantenimiento() {
   try {
-    const hoy = new Date();
-    const fechaHoy = hoy.toISOString().split("T")[0]; // Formato YYYY-MM-DD
-
+    const today = dayjs().tz("America/Argentina/Buenos_Aires");
+    const fechaHoy = today.format("YYYY-MM-DD");
+    console.log(`Buscando recordatorios para el día ${fechaHoy}`);
     const trabajosParaRecordar: {
       fullName: string;
       phone: string;

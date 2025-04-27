@@ -21,7 +21,7 @@ const TrabajosRealizadosTableColumns: GridColDef[] = [
     headerName: "Recordatorio (días)",
     flex: 1,
     renderCell: (params) => {
-      const { diasParaRecordatorio } = params.row.manoDeObra;
+      const diasParaRecordatorio = params.row.diasParaRecordatorio;
       if (!diasParaRecordatorio) {
         return (
           <Typography variant="body2" color="text.secondary">
