@@ -74,7 +74,7 @@ export default function NotificacionesImportantesModal({
           {currentIndex + 1} de {notificaciones.length}
         </Typography>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ p: 3 }}>
         <Button onClick={handleClose} variant="contained">
           {currentIndex < notificaciones.length - 1 ? "Siguiente" : "Cerrar"}
         </Button>
