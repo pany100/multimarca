@@ -655,6 +655,8 @@ enum TipoNotificacionInterna {
   REPOSICION_STOCK
   REPARACION_TERMINADA
   CHEQUE_POR_VENCER
+  TURNOS_DEL_DIA
+  RECORDATORIOS_MANO_DE_OBRA
 }
 
 enum EstadoConversacion {
