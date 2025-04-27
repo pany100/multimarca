@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
+import { getCurrentUser } from "src/utils/authFetch";
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
@@ -8,17 +9,27 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get("page") || "0");
     const size = parseInt(searchParams.get("size") || "10");
     const leidas = searchParams.get("leidas");
+    const user = await getCurrentUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
 
     const skip = page * size;
 
-    const where =
-      leidas === null
-        ? {}
-        : leidas === "true"
-        ? { leida: true }
-        : leidas === "false"
-        ? { leida: false }
-        : {};
+    const where = {
+      AND: [
+        leidas === null
+          ? {}
+          : leidas === "true"
+          ? { leida: true }
+          : leidas === "false"
+          ? { leida: false }
+          : {},
+        {
+          OR: [{ userId: null }, { userId: user.id }],
+        },
+      ],
+    };
 
     const [notificaciones, total] = await Promise.all([
       prisma.notificacionInterna.findMany({

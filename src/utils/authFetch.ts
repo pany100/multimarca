@@ -1,4 +1,5 @@
 import { getCookie } from "cookies-next";
+import prisma from "src/lib/prisma";
 
 const authFetch = async (
   url: string,
@@ -37,5 +38,23 @@ const authFetch = async (
 
   return fetch(fullUrl, { ...options, headers });
 };
+
+export async function getCurrentUser(request: Request) {
+  const authHeader = request.headers.get("authorization");
+  if (!authHeader) {
+    throw new Error("No autorizado");
+  }
+
+  const token = authHeader.split(" ")[1];
+  const decodedToken = JSON.parse(atob(token.split(".")[1]));
+  // Obtener el rol del usuario desde la base de datos
+  const user = await prisma.usuario.findUnique({
+    where: { id: decodedToken.userId },
+    include: {
+      rol: true,
+    },
+  });
+  return user;
+}
 
 export default authFetch;

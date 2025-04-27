@@ -1,3 +1,4 @@
+import { getUsersToNotify } from "@/utils/notificationUtils";
 import { PrismaClient, TipoNotificacionInterna } from "@prisma/client";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
@@ -50,22 +51,26 @@ async function enviarNotificacionesTurnos() {
     if (turnosHoy.length > 0) {
       console.log(`Turnos encontrados: ${turnosHoy.length}`);
       // Crear notificación interna para los turnos del día
-      await prisma.notificacionInterna.create({
-        data: {
-          fecha: new Date(),
-          titulo: `Turnos del día`,
-          texto: `Hay ${
-            turnosHoy.length
-          } turno(s) programado(s) para hoy:\n${turnosHoy
-            .map(
-              (turno) =>
-                `- ${turno.hora} - ${turno.auto.owner.fullName} (${turno.auto.patent})`
-            )
-            .join("\n")}`,
-          leida: false,
-          tipo: TipoNotificacionInterna.TURNOS_DEL_DIA,
-        },
-      });
+      const users = await getUsersToNotify();
+      for (const user of users) {
+        await prisma.notificacionInterna.create({
+          data: {
+            fecha: new Date(),
+            titulo: `Turnos del día`,
+            texto: `Hay ${
+              turnosHoy.length
+            } turno(s) programado(s) para hoy:\n${turnosHoy
+              .map(
+                (turno) =>
+                  `- ${turno.hora} - ${turno.auto.owner.fullName} (${turno.auto.patent})`
+              )
+              .join("\n")}`,
+            leida: false,
+            tipo: TipoNotificacionInterna.TURNOS_DEL_DIA,
+            userId: user.id,
+          },
+        });
+      }
     } else {
       console.log("No hay turnos encontrados");
     }
@@ -111,23 +116,27 @@ async function enviarRecordatoriosMantenimiento() {
     `;
 
     if (trabajosParaRecordar.length > 0) {
+      const users = await getUsersToNotify();
       // Crear notificación interna para los recordatorios
-      await prisma.notificacionInterna.create({
-        data: {
-          fecha: new Date(),
-          titulo: `Recordatorios de mantenimiento`,
-          texto: `Hay ${
-            trabajosParaRecordar.length
-          } recordatorio(s) de mantenimiento para hoy:\n${trabajosParaRecordar
-            .map(
-              (trabajo) =>
-                `- ${trabajo.fullName} (${trabajo.patent}) - ${trabajo.descripcion}`
-            )
-            .join("\n")}`,
-          leida: false,
-          tipo: TipoNotificacionInterna.RECORDATORIOS_MANO_DE_OBRA,
-        },
-      });
+      for (const user of users) {
+        await prisma.notificacionInterna.create({
+          data: {
+            fecha: new Date(),
+            titulo: `Recordatorios de mantenimiento`,
+            texto: `Hay ${
+              trabajosParaRecordar.length
+            } recordatorio(s) de mantenimiento para hoy:\n${trabajosParaRecordar
+              .map(
+                (trabajo) =>
+                  `- ${trabajo.fullName} (${trabajo.patent}) - ${trabajo.descripcion}`
+              )
+              .join("\n")}`,
+            leida: false,
+            tipo: TipoNotificacionInterna.RECORDATORIOS_MANO_DE_OBRA,
+            userId: user.id,
+          },
+        });
+      }
     }
   } catch (error) {
     console.error("Error al enviar recordatorios de mantenimiento:", error);

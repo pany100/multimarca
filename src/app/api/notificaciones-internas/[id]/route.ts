@@ -1,13 +1,39 @@
 import { getIO } from "@/lib/socketio";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
+import { getCurrentUser } from "src/utils/authFetch";
 
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    const user = await getCurrentUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const id = parseInt(params.id);
+
+    // Verify notification ownership
+    const notificacion = await prisma.notificacionInterna.findUnique({
+      where: { id },
+    });
+
+    if (!notificacion) {
+      return NextResponse.json(
+        { error: "Notificación no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    if (notificacion.userId !== null && notificacion.userId !== user.id) {
+      return NextResponse.json(
+        { error: "No tienes permiso para modificar esta notificación" },
+        { status: 403 }
+      );
+    }
+
     const body = await request.json();
     const { leida } = body;
 
@@ -49,7 +75,31 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const user = await getCurrentUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const id = parseInt(params.id);
+
+    // Verify notification ownership
+    const notificacion = await prisma.notificacionInterna.findUnique({
+      where: { id },
+    });
+
+    if (!notificacion) {
+      return NextResponse.json(
+        { error: "Notificación no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    if (notificacion.userId !== null && notificacion.userId !== user.id) {
+      return NextResponse.json(
+        { error: "No tienes permiso para eliminar esta notificación" },
+        { status: 403 }
+      );
+    }
 
     const notificacionEliminada = await prisma.notificacionInterna.delete({
       where: { id },

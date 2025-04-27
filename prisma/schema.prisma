@@ -20,7 +20,8 @@ model Usuario {
   ingresosManuales             IngresoManualDeDinero[]
   rol                          Rol                     @relation(fields: [rolId], references: [id])
   ordenesReparacion            OrdenReparacion[]     @relation("OrdenReparacionRevisadaPor")
-
+  notificacionesInternas       NotificacionInterna[]
+  
   @@index([fullName])
   @@index([username])
   @@index([rolId], map: "Usuario_rolId_fkey")
@@ -509,12 +510,14 @@ model NotificacionInterna {
   ordenReparacionId Int?
   ordenReparacion   OrdenReparacion?        @relation("OrdenReparacionNotificacionesInternas", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   stock             Stock?                  @relation(fields: [stockId], references: [id])
-
+  userId            Int?
+  user              Usuario?                @relation(fields: [userId], references: [id])
   @@index([fecha])
   @@index([leida])
   @@index([tipo])
   @@index([stockId])
   @@index([ordenReparacionId])
+  @@index([userId])
 }
 
 model ConversacionWhatsApp {
