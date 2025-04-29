@@ -444,18 +444,23 @@ export default function generateClientOrderHtml(repair: any): string {
              }
       <div class="TypographyBody1">
       ${
-        repair.mecanicos.length > 0 &&
-        (repair.mecanicos.length === 1
+        repair.mecanicos.length > 0 && repair.mecanicos.length === 1
           ? `Realizó: ${repair.mecanicos[0].mecanico.name}`
-          : `Realizaron: ${repair.mecanicos
+          : ""
+      }
+      ${
+        repair.mecanicos.length > 0 && repair.mecanicos.length > 1
+          ? `Realizaron: ${repair.mecanicos
               .map((m: any) => m.mecanico.name)
-              .join(", ")}`)
+              .join(", ")}`
+          : ""
       }
       </div>
       <hr class="divider" />
       <div class="TypographyBody1">
             ${
-              repair.estado === EstadoOrdenReparacion.Presupuestado
+              repair.estado === EstadoOrdenReparacion.Presupuestado ||
+              repair.estado === EstadoOrdenReparacion.Aceptado
                 ? "Detalle de presupuesto solicitado, valores al día,  sin iva, sujeto a desarme"
                 : "Detalle del trabajo,  valores sin IVA"
             }
