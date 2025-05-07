@@ -39,7 +39,6 @@ export async function sincronizarControles() {
             ordenReparacionId: orden.id,
             controlMecanicoId: controlMecanico.id,
             valor: "",
-            detalle: "",
           });
         }
       }

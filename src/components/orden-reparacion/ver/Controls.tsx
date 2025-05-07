@@ -43,7 +43,7 @@ function Controls({ ordenReparacion }: { ordenReparacion: any }) {
   const textControls = ordenReparacion.controlesEnReparacion
     ? ordenReparacion.controlesEnReparacion.filter(
         (control: { controlMecanico: { type: string } }) =>
-          control.controlMecanico.type !== "checkbox"
+          control.controlMecanico.type === "texto"
       )
     : [];
 
