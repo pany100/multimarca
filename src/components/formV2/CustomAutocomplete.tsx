@@ -74,7 +74,7 @@ const CustomAutocompleteInput = ({
             loading={loading}
             value={currentValue}
             onChange={(_, newValue, reason) => {
-              onChange(newValue?.value);
+              onChange(newValue?.value || null);
             }}
             onInputChange={(_, newInputValue, reason) => {
               if (newInputValue.length >= 2 && reason !== "reset") {

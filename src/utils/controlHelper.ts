@@ -5,8 +5,14 @@ export async function sincronizarControles() {
     // Obtener todas las órdenes de reparación existentes
     const ordenesReparacion = await prisma.ordenReparacion.findMany();
 
-    // Obtener todos los controles mecánicos existentes
-    const controlesMecanicos = await prisma.controlMecanico.findMany();
+    // Obtener todos los controles mecánicos existentes de tipo checkbox o texto
+    const controlesMecanicos = await prisma.controlMecanico.findMany({
+      where: {
+        type: {
+          in: ["checkbox", "texto"],
+        },
+      },
+    });
 
     // Obtener los controles en reparación existentes
     const controlesEnReparacionExistentes =

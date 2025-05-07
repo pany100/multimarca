@@ -9,7 +9,7 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { name, type, pdfName, ordenEnPdf } = body;
+    const { name, type, pdfName, ordenEnPdf, parentId } = body;
 
     if (!name || !type) {
       return NextResponse.json(
@@ -25,6 +25,10 @@ export async function PUT(
         type,
         ordenEnPdf,
         pdfName,
+        parentId,
+      },
+      include: {
+        parent: true,
       },
     });
     sincronizarControles();

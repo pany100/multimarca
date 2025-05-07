@@ -13,19 +13,26 @@ function ControlesTable({
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
-    { field: "name", headerName: "Nombre del Control", flex: 1.5 },
+    { field: "name", headerName: "Nombre", flex: 1.5 },
     { field: "type", headerName: "Tipo", flex: 1 },
     {
       field: "pdfName",
       headerName: "Nombre para el detalle",
       flex: 1.5,
-      renderCell: (params: any) => params.row.pdfName || params.row.name,
+      renderCell: (params: any) =>
+        params.row.pdfName || "Sin Detallar (se usa el nombre)",
     },
     {
       field: "ordenEnPdf",
       headerName: "Orden en PDF",
       flex: 1,
       renderCell: (params: any) => params.value || "N/A",
+    },
+    {
+      field: "parent",
+      headerName: "Control padre",
+      flex: 1,
+      renderCell: (params: any) => params.value?.name || "N/A",
     },
   ];
 

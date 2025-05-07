@@ -97,9 +97,13 @@ model ControlMecanico {
   type                  String                @db.VarChar(10)
   ordenEnPdf            Int?
   pdfName               String?
+  parentId              Int?                  
+  parent                ControlMecanico?      @relation("Subcontroles", fields: [parentId], references: [id])
+  subcontroles          ControlMecanico[]     @relation("Subcontroles")
   controlesEnReparacion ControlEnReparacion[]
 
   @@index([name])
+  @@index([parentId])
 }
 
 model ManoDeObra {

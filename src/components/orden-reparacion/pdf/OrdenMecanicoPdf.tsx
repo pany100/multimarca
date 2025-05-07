@@ -8,7 +8,7 @@ import TextWithFillLine from "./TextWithFillLine";
 
 import Checkbox from "@mui/material/Checkbox";
 
-import { getFormattedControlName, getFormattedDate } from "@/utils/fieldHelper";
+import { getFormattedDate } from "@/utils/fieldHelper";
 import { styled } from "@mui/material/styles";
 
 const CheckTypeControlsTwoColumns = styled("div")(() => ({
@@ -194,8 +194,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                 .filter(
                   (e: { controlMecanico: { type: string; name: string } }) =>
                     e.controlMecanico.type === "checkbox" &&
-                    getFormattedControlName(e.controlMecanico.name).length <=
-                      MAX_CONTROL_LENGTH
+                    e.controlMecanico.name.length <= MAX_CONTROL_LENGTH
                 )
                 .sort(sortControls)
                 .map(
@@ -218,9 +217,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                       <span style={{ marginRight: "8px", flexShrink: 0 }}>
                         *
                       </span>
-                      <span style={{ flex: 1 }}>
-                        {getFormattedControlName(el.controlMecanico.name)}
-                      </span>
+                      <span style={{ flex: 1 }}>{el.controlMecanico.name}</span>
                       <Checkbox sx={{ color: "common.black", pt: 0, ml: 1 }} />
                     </Typography>
                   )
@@ -237,8 +234,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                     };
                   }) =>
                     e.controlMecanico.type === "checkbox" &&
-                    getFormattedControlName(e.controlMecanico.name).length >
-                      MAX_CONTROL_LENGTH
+                    e.controlMecanico.name.length > MAX_CONTROL_LENGTH
                 )
                 .sort((a: any, b: any) => {
                   if (a.controlMecanico.ordenEnPdf === null) return 1;
@@ -272,9 +268,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                       <span style={{ marginRight: "8px", flexShrink: 0 }}>
                         *
                       </span>
-                      <span style={{ flex: 1 }}>
-                        {getFormattedControlName(el.controlMecanico.name)}
-                      </span>
+                      <span style={{ flex: 1 }}>{el.controlMecanico.name}</span>
                       <Checkbox
                         sx={{
                           color: "common.black",
@@ -314,9 +308,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                         fontSize: 18,
                         lineHeight: "30px",
                       }}
-                    >{`* ${getFormattedControlName(
-                      el.controlMecanico.name
-                    )}`}</TextWithFillLine>
+                    >{`* ${el.controlMecanico.name}`}</TextWithFillLine>
                   )
                 )}
             </div>

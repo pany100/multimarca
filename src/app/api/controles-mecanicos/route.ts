@@ -19,6 +19,9 @@ export async function GET(request: Request) {
         skip,
         take: size,
         orderBy: { name: "asc" },
+        include: {
+          parent: true,
+        },
       }),
       prisma.controlMecanico.count({
         where: {
@@ -46,7 +49,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, type, pdfName, ordenEnPdf } = body;
+    const { name, type, pdfName, ordenEnPdf, parentId } = body;
 
     if (!name || typeof name !== "string") {
       return NextResponse.json(
@@ -68,6 +71,10 @@ export async function POST(request: Request) {
         type,
         ordenEnPdf,
         pdfName,
+        parentId,
+      },
+      include: {
+        parent: true,
       },
     });
     sincronizarControles();

@@ -1,5 +1,4 @@
 import useControlesInnerForm from "@/hooks/orden-reparacion/useControlesInnerForm";
-import { getFormattedControlName } from "@/utils/fieldHelper";
 import { Box, Chip, TextField, Typography } from "@mui/material";
 
 type Control = {
@@ -19,7 +18,7 @@ function TextControls() {
       <Box key={control.id} sx={{ mb: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
           <Typography variant="body2" sx={{ mr: 1 }}>
-            {getFormattedControlName(control.nombre)}
+            {control.nombre}
           </Typography>
           {hasValue && (
             <Chip
@@ -33,9 +32,7 @@ function TextControls() {
         <TextField
           fullWidth
           size="small"
-          placeholder={`Ingrese información sobre ${getFormattedControlName(
-            control.nombre.toLowerCase()
-          )}`}
+          placeholder={`Ingrese información sobre ${control.nombre.toLowerCase()}`}
           defaultValue={currentValue}
           onBlur={(e) => handleControlChange(control.id, e.target.value)}
           sx={{

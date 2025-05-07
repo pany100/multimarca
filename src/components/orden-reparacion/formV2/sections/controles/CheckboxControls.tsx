@@ -1,5 +1,4 @@
 import useControlesInnerForm from "@/hooks/orden-reparacion/useControlesInnerForm";
-import { getFormattedControlName } from "@/utils/fieldHelper";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import {
@@ -38,17 +37,15 @@ function CheckboxControls() {
   const sortedControls = [...checkControls].sort(sortControls);
 
   // Separate controls by name length, same as in OrdenMecanicoPdf
-  const shortControls = sortedControls.filter(
-    (control) =>
-      getFormattedControlName(control.pdfName || control.nombre).length <=
-      MAX_CONTROL_LENGTH
-  );
+  const shortControls = sortedControls.filter((control) => {
+    const controlName = control.pdfName || control.nombre;
+    return controlName.length <= MAX_CONTROL_LENGTH;
+  });
 
-  const longControls = sortedControls.filter(
-    (control) =>
-      getFormattedControlName(control.pdfName || control.nombre).length >
-      MAX_CONTROL_LENGTH
-  );
+  const longControls = sortedControls.filter((control) => {
+    const controlName = control.pdfName || control.nombre;
+    return controlName.length > MAX_CONTROL_LENGTH;
+  });
 
   // Combine short controls first, then long controls
   const orderedControls = [...shortControls, ...longControls];
@@ -78,9 +75,7 @@ function CheckboxControls() {
                   {group.map((control: Control) => {
                     const isChecked = control.valor === "true";
                     const controlName = control.pdfName || control.nombre;
-                    const isLongName =
-                      getFormattedControlName(controlName).length >
-                      MAX_CONTROL_LENGTH;
+                    const isLongName = controlName.length > MAX_CONTROL_LENGTH;
 
                     return (
                       <ListItemButton
@@ -119,7 +114,7 @@ function CheckboxControls() {
                           />
                         </ListItemIcon>
                         <ListItemText
-                          primary={getFormattedControlName(controlName)}
+                          primary={controlName}
                           primaryTypographyProps={{
                             variant: "body2",
                             fontWeight: isChecked ? "medium" : "regular",

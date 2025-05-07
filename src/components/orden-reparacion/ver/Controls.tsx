@@ -1,5 +1,4 @@
 "use client";
-import { getFormattedControlName } from "@/utils/fieldHelper";
 import BuildCircleIcon from "@mui/icons-material/BuildCircle";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
@@ -128,9 +127,7 @@ function Controls({ ordenReparacion }: { ordenReparacion: any }) {
                           />
                         </ListItemIcon>
                         <ListItemText
-                          primary={getFormattedControlName(
-                            control.controlMecanico.name
-                          )}
+                          primary={control.controlMecanico.name}
                           primaryTypographyProps={{
                             variant: "body2",
                             fontWeight: isChecked ? 500 : 400,
@@ -189,9 +186,7 @@ function Controls({ ordenReparacion }: { ordenReparacion: any }) {
                           />
                         </ListItemIcon>
                         <ListItemText
-                          primary={getFormattedControlName(
-                            control.controlMecanico.name
-                          )}
+                          primary={control.controlMecanico.name}
                           primaryTypographyProps={{
                             variant: "body2",
                             fontWeight: isChecked ? 500 : 400,
@@ -247,10 +242,7 @@ function Controls({ ordenReparacion }: { ordenReparacion: any }) {
                                   mr: 0.5,
                                 }}
                               >
-                                {getFormattedControlName(
-                                  control.controlMecanico.name
-                                )}
-                                :
+                                {control.controlMecanico.name}:
                               </Typography>
                               <Typography variant="body2">
                                 {control.valor || "-"}
