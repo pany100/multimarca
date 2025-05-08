@@ -1,3 +1,5 @@
+import { ControlMecanico } from "@/hooks/orden-reparacion/useControles";
+
 function getFormattedPrice(price: number | string) {
   return `$${parseFloat(price.toString()).toLocaleString("es-AR", {
     minimumFractionDigits: 2,
@@ -44,9 +46,63 @@ function getOperacionChequeLabel({
   )}: ${descripcion}`;
 }
 
+const sortControlsByOrdenEnPdf = (
+  a: { ordenEnPdf?: number | null },
+  b: { ordenEnPdf?: number | null }
+) => {
+  // Handle undefined or null ordenEnPdf values
+  const aOrder = a.ordenEnPdf ?? Number.MAX_SAFE_INTEGER;
+  const bOrder = b.ordenEnPdf ?? Number.MAX_SAFE_INTEGER;
+  return aOrder - bOrder;
+};
+
+function getSortedCheckControls(controlesList: ControlMecanico[]) {
+  return controlesList
+    .filter(
+      (control: ControlMecanico) =>
+        control.type === "checkbox" && control.parent === null
+    )
+    .sort(sortControlsByOrdenEnPdf);
+}
+
+function getSortedTextControls(controlesList: ControlMecanico[]) {
+  return controlesList
+    .filter(
+      (control: ControlMecanico) =>
+        control.type === "texto" && control.parent === null
+    )
+    .sort(sortControlsByOrdenEnPdf);
+}
+
+function getSortedGroupControls(controlesList: ControlMecanico[]) {
+  const groupChecks = controlesList.filter(
+    (control: ControlMecanico) => control.parent !== null
+  );
+  const uniqueParentIds = Array.from(
+    new Set(groupChecks.map((control) => control.parent?.id).filter(Boolean))
+  );
+  return uniqueParentIds.map((parentId) => {
+    const childControls = groupChecks
+      .filter((control) => control.parent && control.parent.id === parentId)
+      .sort(sortControlsByOrdenEnPdf);
+
+    // Use the parent name from the first child control that has this parent
+    const parentName = childControls[0]?.parent?.name;
+
+    return {
+      name: parentName,
+      controls: childControls,
+    };
+  });
+}
+
 export {
   getFormattedChequeType,
   getFormattedDate,
   getFormattedPrice,
   getOperacionChequeLabel,
+  getSortedCheckControls,
+  getSortedGroupControls,
+  getSortedTextControls,
+  sortControlsByOrdenEnPdf,
 };

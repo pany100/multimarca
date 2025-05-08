@@ -274,6 +274,7 @@ export default function generateClientOrderHtml(repair: any): string {
           .filter(
             (control: any) => control.valor !== "false" && control.valor !== ""
           )
+          .filter((control: any) => control.controlMecanico.type !== "group")
           .sort((a: any, b: any) => {
             if (a.controlMecanico.ordenEnPdf === null) return 1;
             if (b.controlMecanico.ordenEnPdf === null) return -1;
