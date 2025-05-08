@@ -83,7 +83,11 @@ function Controls({ ordenReparacion }: { ordenReparacion: any }) {
                 sx={{ display: "grid", gridTemplateColumns: "auto auto" }}
               >
                 {checkControls.map((control) => {
-                  const isChecked = control.valor === "true";
+                  const controlEnReparacion =
+                    ordenReparacion.controlesEnReparacion.find(
+                      (c: any) => c.controlMecanico.id === control.id
+                    );
+                  const isChecked = controlEnReparacion?.valor === "true";
                   return (
                     <ListItem
                       key={control.id}
@@ -151,7 +155,12 @@ function Controls({ ordenReparacion }: { ordenReparacion: any }) {
                     >
                       {checkboxControls.length > 0 &&
                         checkboxControls.map((control: ControlMecanico) => {
-                          const isChecked = control.valor === "true";
+                          const controlEnReparacion =
+                            ordenReparacion.controlesEnReparacion.find(
+                              (c: any) => c.controlMecanico.id === control.id
+                            );
+                          const isChecked =
+                            controlEnReparacion?.valor === "true";
                           return (
                             <ListItem
                               key={control.id}
@@ -211,35 +220,42 @@ function Controls({ ordenReparacion }: { ordenReparacion: any }) {
                   Controles Adicionales
                 </Typography>
                 <List disablePadding>
-                  {textControls.map((control) => (
-                    <ListItem
-                      key={control.id}
-                      sx={{
-                        px: 1,
-                        py: 0.75,
-                        borderRadius: 1,
-                      }}
-                    >
-                      <ListItemText
-                        primary={
-                          <Box sx={{ display: "flex" }}>
-                            <Typography
-                              variant="body2"
-                              sx={{
-                                fontWeight: 500,
-                                mr: 0.5,
-                              }}
-                            >
-                              {control.name}:
-                            </Typography>
-                            <Typography variant="body2">
-                              {control.valor || "-"}
-                            </Typography>
-                          </Box>
-                        }
-                      />
-                    </ListItem>
-                  ))}
+                  {textControls.map((control) => {
+                    const controlEnReparacion =
+                      ordenReparacion.controlesEnReparacion.find(
+                        (c: any) => c.controlMecanico.id === control.id
+                      );
+                    const currentValue = controlEnReparacion?.valor;
+                    return (
+                      <ListItem
+                        key={control.id}
+                        sx={{
+                          px: 1,
+                          py: 0.75,
+                          borderRadius: 1,
+                        }}
+                      >
+                        <ListItemText
+                          primary={
+                            <Box sx={{ display: "flex" }}>
+                              <Typography
+                                variant="body2"
+                                sx={{
+                                  fontWeight: 500,
+                                  mr: 0.5,
+                                }}
+                              >
+                                {control.name}:
+                              </Typography>
+                              <Typography variant="body2">
+                                {currentValue || "-"}
+                              </Typography>
+                            </Box>
+                          }
+                        />
+                      </ListItem>
+                    );
+                  })}
                 </List>
               </Paper>
             </Grid>

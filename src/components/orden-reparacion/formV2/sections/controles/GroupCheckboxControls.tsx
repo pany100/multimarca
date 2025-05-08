@@ -1,3 +1,4 @@
+import { ControlMecanico } from "@/hooks/orden-reparacion/useControles";
 import useControlesInnerForm from "@/hooks/orden-reparacion/useControlesInnerForm";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
@@ -8,18 +9,17 @@ import {
   ListItemIcon,
   ListItemText,
 } from "@mui/material";
-import { Control } from "./CheckboxControls";
 
-function GroupCheckboxControls({ controls }: { controls: any }) {
+function GroupCheckboxControls({ controls }: { controls: ControlMecanico[] }) {
   const { handleControlChange } = useControlesInnerForm();
   return (
     <List
       disablePadding
       sx={{ display: "grid", gridTemplateColumns: "auto auto" }}
     >
-      {controls.map((control: Control) => {
+      {controls.map((control: ControlMecanico) => {
         const isChecked = control.valor === "true";
-        const controlName = control.pdfName || control.nombre;
+        const controlName = control.pdfName || control.name;
         return (
           <ListItemButton
             key={control.id}

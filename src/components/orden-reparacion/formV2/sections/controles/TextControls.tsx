@@ -1,14 +1,9 @@
-import useControles from "@/hooks/orden-reparacion/useControles";
+import useControles, {
+  ControlMecanico,
+} from "@/hooks/orden-reparacion/useControles";
 import useControlesInnerForm from "@/hooks/orden-reparacion/useControlesInnerForm";
 import { Box, Chip, TextField, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
-
-type Control = {
-  id: number;
-  tipo: string;
-  valor: string;
-  nombre: string;
-};
 
 function TextControls() {
   const { watch } = useFormContext();
@@ -19,7 +14,7 @@ function TextControls() {
     controlesList: controlesEnReparacion,
   });
 
-  return textControls.map((control: Control) => {
+  return textControls.map((control: ControlMecanico) => {
     const hasValue = control.valor !== "";
     const currentValue = control.valor;
 
@@ -27,7 +22,7 @@ function TextControls() {
       <Box key={control.id} sx={{ mb: 2 }}>
         <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
           <Typography variant="body2" sx={{ mr: 1 }}>
-            {control.nombre}
+            {control.name}
           </Typography>
           {hasValue && (
             <Chip
@@ -41,7 +36,7 @@ function TextControls() {
         <TextField
           fullWidth
           size="small"
-          placeholder={`Ingrese información sobre ${control.nombre.toLowerCase()}`}
+          placeholder={`Ingrese información sobre ${control.name.toLowerCase()}`}
           defaultValue={currentValue}
           onBlur={(e) => handleControlChange(control.id, e.target.value)}
           sx={{

@@ -15,15 +15,6 @@ import {
 } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 
-export type Control = {
-  id: number;
-  tipo: string;
-  valor: string;
-  nombre: string;
-  ordenEnPdf: number | null;
-  pdfName: string | null;
-};
-
 const MAX_CONTROL_LENGTH = 25;
 
 function CheckboxControls() {
@@ -55,7 +46,7 @@ function CheckboxControls() {
         >
           {checkControls.map((control: ControlMecanico) => {
             const isChecked = control.valor === "true";
-            const controlName = control.pdfName || control.nombre;
+            const controlName = control.pdfName || control.name;
             const isLongName = controlName.length > MAX_CONTROL_LENGTH;
 
             return (
