@@ -134,8 +134,8 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         (control) => ({
           id: control.id,
           valor: control.valor,
-          tipo: control.controlMecanico.type,
-          nombre: control.controlMecanico.name,
+          type: control.controlMecanico.type,
+          name: control.controlMecanico.name,
           ordenEnPdf: control.controlMecanico.ordenEnPdf,
           pdfName: control.controlMecanico.pdfName,
           parent: control.controlMecanico.parent,

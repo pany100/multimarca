@@ -1,7 +1,7 @@
 export type ControlMecanico = {
   id: number;
-  nombre: string;
-  tipo: "checkbox" | "texto";
+  name: string;
+  type: "checkbox" | "texto";
   valor: string;
   ordenEnPdf?: number;
   pdfName?: string;
@@ -29,13 +29,13 @@ const useControles = ({
   const checkControls = controlesList
     .filter(
       (control: ControlMecanico) =>
-        control.tipo === "checkbox" && control.parent === null
+        control.type === "checkbox" && control.parent === null
     )
     .sort(sortControlsByOrdenEnPdf);
   const textControls = controlesList
     .filter(
       (control: ControlMecanico) =>
-        control.tipo === "texto" && control.parent === null
+        control.type === "texto" && control.parent === null
     )
     .sort(sortControlsByOrdenEnPdf);
   const groupChecks = controlesList.filter(

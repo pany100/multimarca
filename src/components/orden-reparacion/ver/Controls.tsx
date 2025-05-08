@@ -1,4 +1,7 @@
 "use client";
+import useControles, {
+  ControlMecanico,
+} from "@/hooks/orden-reparacion/useControles";
 import BuildCircleIcon from "@mui/icons-material/BuildCircle";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
@@ -32,30 +35,13 @@ function Controls({ ordenReparacion }: { ordenReparacion: any }) {
     }
   };
 
-  // Extract and prepare data
-  const checkboxControls = ordenReparacion.controlesEnReparacion
-    ? ordenReparacion.controlesEnReparacion.filter(
-        (control: { controlMecanico: { type: string } }) =>
-          control.controlMecanico.type === "checkbox"
-      )
-    : [];
-
-  const textControls = ordenReparacion.controlesEnReparacion
-    ? ordenReparacion.controlesEnReparacion.filter(
-        (control: { controlMecanico: { type: string } }) =>
-          control.controlMecanico.type === "texto"
-      )
-    : [];
+  const { checkControls, textControls, groupControls } = useControles({
+    controlesList: ordenReparacion.controlesEnReparacion.map(
+      (control: any) => control.controlMecanico
+    ),
+  });
 
   const detalleControles = safeParseArray(ordenReparacion.detalleControles);
-
-  // Group checkbox controls into two columns
-  const leftColumnControls = checkboxControls.filter(
-    (_: any, index: number) => index % 2 === 0
-  );
-  const rightColumnControls = checkboxControls.filter(
-    (_: any, index: number) => index % 2 === 1
-  );
 
   return (
     <Paper
@@ -82,8 +68,7 @@ function Controls({ ordenReparacion }: { ordenReparacion: any }) {
 
       <Box sx={{ p: 2 }}>
         <Grid container spacing={2}>
-          {/* Left column of checkbox controls */}
-          <Grid item xs={12} md={6}>
+          <Grid item xs={12}>
             <Paper
               elevation={0}
               sx={{
@@ -93,112 +78,120 @@ function Controls({ ordenReparacion }: { ordenReparacion: any }) {
                 height: "100%",
               }}
             >
-              <List disablePadding>
-                {leftColumnControls.map(
-                  (control: {
-                    id: string;
-                    controlMecanico: { name: string };
-                    valor: string;
-                  }) => {
-                    const isChecked = control.valor === "true";
-                    return (
-                      <ListItem
-                        key={control.id}
-                        dense
-                        sx={{
-                          borderRadius: 1,
-                          mb: 0.5,
-                          py: 0.75,
-                          bgcolor: isChecked
-                            ? "rgba(25, 118, 210, 0.08)"
-                            : "transparent",
-                        }}
-                      >
-                        <ListItemIcon sx={{ minWidth: 36 }}>
-                          <Checkbox
-                            edge="start"
-                            checked={isChecked}
-                            disabled
-                            disableRipple
-                            icon={<RadioButtonUncheckedIcon />}
-                            checkedIcon={
-                              <CheckCircleOutlineIcon color="primary" />
-                            }
-                          />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={control.controlMecanico.name}
-                          primaryTypographyProps={{
-                            variant: "body2",
-                            fontWeight: isChecked ? 500 : 400,
-                          }}
+              <List
+                disablePadding
+                sx={{ display: "grid", gridTemplateColumns: "auto auto" }}
+              >
+                {checkControls.map((control) => {
+                  const isChecked = control.valor === "true";
+                  return (
+                    <ListItem
+                      key={control.id}
+                      dense
+                      sx={{
+                        borderRadius: 1,
+                        mb: 0.5,
+                        py: 0.75,
+                        bgcolor: isChecked
+                          ? "rgba(25, 118, 210, 0.08)"
+                          : "transparent",
+                      }}
+                    >
+                      <ListItemIcon sx={{ minWidth: 36 }}>
+                        <Checkbox
+                          edge="start"
+                          checked={isChecked}
+                          disabled
+                          disableRipple
+                          icon={<RadioButtonUncheckedIcon />}
+                          checkedIcon={
+                            <CheckCircleOutlineIcon color="primary" />
+                          }
                         />
-                      </ListItem>
-                    );
-                  }
-                )}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={control.name}
+                        primaryTypographyProps={{
+                          variant: "body2",
+                          fontWeight: isChecked ? 500 : 400,
+                        }}
+                      />
+                    </ListItem>
+                  );
+                })}
               </List>
             </Paper>
           </Grid>
 
-          {/* Right column of checkbox controls */}
-          <Grid item xs={12} md={6}>
-            <Paper
-              elevation={0}
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                backgroundColor: theme.palette.background.default,
-                height: "100%",
-              }}
-            >
-              <List disablePadding>
-                {rightColumnControls.map(
-                  (control: {
-                    id: string;
-                    controlMecanico: { name: string };
-                    valor: string;
-                  }) => {
-                    const isChecked = control.valor === "true";
-                    return (
-                      <ListItem
-                        key={control.id}
-                        dense
-                        sx={{
-                          borderRadius: 1,
-                          mb: 0.5,
-                          py: 0.75,
-                          bgcolor: isChecked
-                            ? "rgba(25, 118, 210, 0.08)"
-                            : "transparent",
-                        }}
-                      >
-                        <ListItemIcon sx={{ minWidth: 36 }}>
-                          <Checkbox
-                            edge="start"
-                            checked={isChecked}
-                            disabled
-                            disableRipple
-                            icon={<RadioButtonUncheckedIcon />}
-                            checkedIcon={
-                              <CheckCircleOutlineIcon color="primary" />
-                            }
-                          />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={control.controlMecanico.name}
-                          primaryTypographyProps={{
-                            variant: "body2",
-                            fontWeight: isChecked ? 500 : 400,
-                          }}
-                        />
-                      </ListItem>
-                    );
-                  }
-                )}
-              </List>
-            </Paper>
-          </Grid>
+          {groupControls.length > 0 &&
+            groupControls.map((groupControl: any) => {
+              const checkboxControls = groupControl.controls.filter(
+                (control: any) => control.type === "checkbox"
+              );
+
+              return (
+                <Grid item xs={12} key={groupControl.name}>
+                  <Paper
+                    elevation={0}
+                    sx={{
+                      p: 2,
+                      borderRadius: 2,
+                      backgroundColor: theme.palette.background.default,
+                    }}
+                  >
+                    <Typography
+                      variant="subtitle1"
+                      sx={{ fontWeight: 500, mb: 1.5 }}
+                    >
+                      {groupControl.name}
+                    </Typography>
+                    <List
+                      disablePadding
+                      sx={{ display: "grid", gridTemplateColumns: "auto auto" }}
+                    >
+                      {checkboxControls.length > 0 &&
+                        checkboxControls.map((control: ControlMecanico) => {
+                          const isChecked = control.valor === "true";
+                          return (
+                            <ListItem
+                              key={control.id}
+                              dense
+                              sx={{
+                                borderRadius: 1,
+                                mb: 0.5,
+                                py: 0.75,
+                                bgcolor: isChecked
+                                  ? "rgba(25, 118, 210, 0.08)"
+                                  : "transparent",
+                              }}
+                            >
+                              <ListItemIcon sx={{ minWidth: 36 }}>
+                                <Checkbox
+                                  edge="start"
+                                  checked={isChecked}
+                                  disabled
+                                  disableRipple
+                                  icon={<RadioButtonUncheckedIcon />}
+                                  checkedIcon={
+                                    <CheckCircleOutlineIcon color="primary" />
+                                  }
+                                />
+                              </ListItemIcon>
+                              <ListItemText
+                                primary={control.name}
+                                primaryTypographyProps={{
+                                  variant: "body2",
+                                  fontWeight: isChecked ? 500 : 400,
+                                }}
+                              />
+                            </ListItem>
+                          );
+                        })}
+                    </List>
+                  </Paper>
+                </Grid>
+              );
+            })}
 
           {/* Text controls */}
           {textControls.length > 0 && (
@@ -218,41 +211,35 @@ function Controls({ ordenReparacion }: { ordenReparacion: any }) {
                   Controles Adicionales
                 </Typography>
                 <List disablePadding>
-                  {textControls.map(
-                    (control: {
-                      id: string;
-                      controlMecanico: { name: string };
-                      valor: string;
-                    }) => (
-                      <ListItem
-                        key={control.id}
-                        sx={{
-                          px: 1,
-                          py: 0.75,
-                          borderRadius: 1,
-                        }}
-                      >
-                        <ListItemText
-                          primary={
-                            <Box sx={{ display: "flex" }}>
-                              <Typography
-                                variant="body2"
-                                sx={{
-                                  fontWeight: 500,
-                                  mr: 0.5,
-                                }}
-                              >
-                                {control.controlMecanico.name}:
-                              </Typography>
-                              <Typography variant="body2">
-                                {control.valor || "-"}
-                              </Typography>
-                            </Box>
-                          }
-                        />
-                      </ListItem>
-                    )
-                  )}
+                  {textControls.map((control) => (
+                    <ListItem
+                      key={control.id}
+                      sx={{
+                        px: 1,
+                        py: 0.75,
+                        borderRadius: 1,
+                      }}
+                    >
+                      <ListItemText
+                        primary={
+                          <Box sx={{ display: "flex" }}>
+                            <Typography
+                              variant="body2"
+                              sx={{
+                                fontWeight: 500,
+                                mr: 0.5,
+                              }}
+                            >
+                              {control.name}:
+                            </Typography>
+                            <Typography variant="body2">
+                              {control.valor || "-"}
+                            </Typography>
+                          </Box>
+                        }
+                      />
+                    </ListItem>
+                  ))}
                 </List>
               </Paper>
             </Grid>
