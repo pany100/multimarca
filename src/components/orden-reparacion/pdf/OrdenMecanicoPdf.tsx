@@ -8,13 +8,22 @@ import TextWithFillLine from "./TextWithFillLine";
 
 import Checkbox from "@mui/material/Checkbox";
 
+import useControles from "@/hooks/orden-reparacion/useControles";
 import { getFormattedDate } from "@/utils/fieldHelper";
 import { styled } from "@mui/material/styles";
 
 const CheckTypeControlsTwoColumns = styled("div")(() => ({
   display: "grid",
   gridTemplateColumns: "50% 50%",
-  width: "730px",
+}));
+
+const GroupContainer = styled("div")(() => ({
+  border: "1px solid black",
+  borderRadius: "4px",
+  marginTop: "10px",
+  marginBottom: "10px",
+  width: "98%",
+  padding: "10px",
 }));
 
 type Props = {
@@ -47,6 +56,11 @@ function sortControls(a: any, b: any) {
 
 export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
   ({ repair }, ref) => {
+    const { checkControls, textControls, groupControls } = useControles({
+      controlesList: repair.controlesEnReparacion.map(
+        (control: any) => control.controlMecanico
+      ),
+    });
     return (
       <div ref={ref}>
         <style>{setPageStyles()}</style>
@@ -190,127 +204,81 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
           >
             <TextWithBlackBackground>Controles</TextWithBlackBackground>
             <CheckTypeControlsTwoColumns>
-              {repair.controlesEnReparacion
-                .filter(
-                  (e: { controlMecanico: { type: string; name: string } }) =>
-                    e.controlMecanico.type === "checkbox" &&
-                    e.controlMecanico.name.length <= MAX_CONTROL_LENGTH
-                )
-                .sort(sortControls)
-                .map(
-                  (el: {
-                    id: string;
-                    controlMecanico: { type: string; name: string };
-                  }) => (
-                    <Typography
-                      variant="overline"
-                      sx={{
-                        color: "common.black",
-                        textTransform: "uppercase",
-                        fontSize: 18,
-                        lineHeight: "30px",
-                        display: "flex",
-                        alignItems: "flex-start",
-                      }}
-                      key={el.id}
-                    >
-                      <span style={{ marginRight: "8px", flexShrink: 0 }}>
-                        *
-                      </span>
-                      <span style={{ flex: 1 }}>{el.controlMecanico.name}</span>
-                      <Checkbox sx={{ color: "common.black", pt: 0, ml: 1 }} />
-                    </Typography>
-                  )
-                )}
+              {checkControls.map((control) => (
+                <Typography
+                  variant="overline"
+                  sx={{
+                    color: "common.black",
+                    textTransform: "uppercase",
+                    fontSize: 18,
+                    lineHeight: "30px",
+                    display: "flex",
+                    alignItems: "flex-start",
+                  }}
+                  key={control.id}
+                >
+                  <span style={{ marginRight: "8px", flexShrink: 0 }}>*</span>
+                  <span style={{ flex: 1 }}>{control.name}</span>
+                  <Checkbox sx={{ color: "common.black", pt: 0, ml: 1 }} />
+                </Typography>
+              ))}
             </CheckTypeControlsTwoColumns>
-            <div style={{ width: "730px" }}>
-              {repair.controlesEnReparacion
-                .filter(
-                  (e: {
-                    controlMecanico: {
-                      type: string;
-                      name: string;
-                      ordenEnPdf: number | null;
-                    };
-                  }) =>
-                    e.controlMecanico.type === "checkbox" &&
-                    e.controlMecanico.name.length > MAX_CONTROL_LENGTH
-                )
-                .sort((a: any, b: any) => {
-                  if (a.controlMecanico.ordenEnPdf === null) return 1;
-                  if (b.controlMecanico.ordenEnPdf === null) return -1;
-                  return (
-                    (a.controlMecanico.ordenEnPdf || 0) -
-                    (b.controlMecanico.ordenEnPdf || 0)
-                  );
-                })
-                .map(
-                  (el: {
-                    id: string;
-                    controlMecanico: {
-                      type: string;
-                      name: string;
-                      ordenEnPdf: number | null;
-                    };
-                  }) => (
-                    <Typography
-                      variant="overline"
-                      sx={{
-                        color: "common.black",
-                        textTransform: "uppercase",
-                        fontSize: 18,
-                        lineHeight: "30px",
-                        display: "flex",
-                        alignItems: "flex-start",
-                      }}
-                      key={el.id}
-                    >
-                      <span style={{ marginRight: "8px", flexShrink: 0 }}>
-                        *
-                      </span>
-                      <span style={{ flex: 1 }}>{el.controlMecanico.name}</span>
-                      <Checkbox
-                        sx={{
-                          color: "common.black",
-                          pt: 0,
-                          mr: 1,
-                          height: 24,
-                          width: 24,
-                        }}
-                      />
-                    </Typography>
-                  )
-                )}
-              {repair.controlesEnReparacion
-                .filter(
-                  (e: { controlMecanico: { type: string } }) =>
-                    e.controlMecanico.type !== "checkbox"
-                )
-                .sort((a: any, b: any) => {
-                  if (a.controlMecanico.ordenEnPdf === null) return 1;
-                  if (b.controlMecanico.ordenEnPdf === null) return -1;
-                  return (
-                    (a.controlMecanico.ordenEnPdf || 0) -
-                    (b.controlMecanico.ordenEnPdf || 0)
-                  );
-                })
-                .map(
-                  (el: {
-                    id: string;
-                    controlMecanico: { type: string; name: string };
-                  }) => (
-                    <TextWithFillLine
-                      key={el.controlMecanico.name}
-                      variant="overline"
-                      sx={{
-                        color: "common.black",
-                        textTransform: "uppercase",
-                        fontSize: 18,
-                        lineHeight: "30px",
-                      }}
-                    >{`* ${el.controlMecanico.name}`}</TextWithFillLine>
-                  )
-                )}
+            <div>
+              {groupControls.map((control) => (
+                <GroupContainer
+                  sx={{
+                    color: "common.black",
+                    textTransform: "uppercase",
+                    fontSize: 18,
+                    lineHeight: "30px",
+                  }}
+                  key={control.name}
+                >
+                  {`${control.name}`}
+                  <CheckTypeControlsTwoColumns sx={{ mt: 2 }}>
+                    {control.controls
+                      .filter((control: any) => control.type === "checkbox")
+                      .map((control: any) => (
+                        <Typography
+                          variant="overline"
+                          sx={{
+                            color: "common.black",
+                            textTransform: "uppercase",
+                            fontSize: 18,
+                            lineHeight: "30px",
+                            display: "flex",
+                            alignItems: "flex-start",
+                          }}
+                          key={control.id}
+                        >
+                          <span style={{ marginRight: "8px", flexShrink: 0 }}>
+                            *
+                          </span>
+                          <span style={{ flex: 1 }}>{control.name}</span>
+                          <Checkbox
+                            sx={{ color: "common.black", pt: 0, ml: 1 }}
+                          />
+                        </Typography>
+                      ))}
+                  </CheckTypeControlsTwoColumns>
+                </GroupContainer>
+              ))}
+            </div>
+            <div>
+              {textControls.map((control) => (
+                <TextWithFillLine
+                  key={control.id}
+                  variant="overline"
+                  sx={{
+                    color: "common.black",
+                    textTransform: "uppercase",
+                    fontSize: 18,
+                    lineHeight: "30px",
+                  }}
+                >
+                  {`* ${control.name}`}
+                </TextWithFillLine>
+              ))}
             </div>
           </div>
           <div
