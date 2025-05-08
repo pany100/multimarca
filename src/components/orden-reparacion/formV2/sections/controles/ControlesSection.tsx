@@ -1,16 +1,23 @@
 import useControlesInnerForm from "@/hooks/orden-reparacion/useControlesInnerForm";
 import { Grid, Paper, Typography } from "@mui/material";
 import CheckboxControls from "./CheckboxControls";
+import GroupControls from "./GroupControls";
 import TextControls from "./TextControls";
 
 function ControlesSection() {
-  const { checkControls, textControls } = useControlesInnerForm();
+  const { checkControls, textControls, groupControls } =
+    useControlesInnerForm();
 
   return (
     <Grid container spacing={3}>
       {checkControls.length > 0 && (
         <Grid container item xs={12} spacing={2}>
           <CheckboxControls />
+        </Grid>
+      )}
+      {groupControls.length > 0 && (
+        <Grid container item xs={12} spacing={2}>
+          <GroupControls />
         </Grid>
       )}
       {textControls.length > 0 && (

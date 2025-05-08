@@ -11,7 +11,7 @@ import {
   Paper,
 } from "@mui/material";
 
-type Control = {
+export type Control = {
   id: number;
   tipo: string;
   valor: string;

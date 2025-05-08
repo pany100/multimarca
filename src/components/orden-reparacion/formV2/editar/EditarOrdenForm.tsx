@@ -85,6 +85,10 @@ type OrdenReparacion = {
       type: string;
       ordenEnPdf: number | null;
       pdfName: string | null;
+      parent: {
+        id: number;
+        name: string;
+      } | null;
     };
   }[];
   descuento: number;
@@ -134,6 +138,7 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
           nombre: control.controlMecanico.name,
           ordenEnPdf: control.controlMecanico.ordenEnPdf,
           pdfName: control.controlMecanico.pdfName,
+          parent: control.controlMecanico.parent,
         })
       ),
     },

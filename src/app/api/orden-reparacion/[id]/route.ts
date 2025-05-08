@@ -44,7 +44,11 @@ export async function GET(
         revisadoPor: true,
         controlesEnReparacion: {
           include: {
-            controlMecanico: true,
+            controlMecanico: {
+              include: {
+                parent: true,
+              },
+            },
           },
         },
         pagos: true,
