@@ -1,12 +1,17 @@
-import useControlesInnerForm from "@/hooks/orden-reparacion/useControlesInnerForm";
+import useControles from "@/hooks/orden-reparacion/useControles";
 import { Grid, Paper, Typography } from "@mui/material";
+import { useFormContext } from "react-hook-form";
 import CheckboxControls from "./CheckboxControls";
 import GroupControls from "./GroupControls";
 import TextControls from "./TextControls";
 
 function ControlesSection() {
-  const { checkControls, textControls, groupControls } =
-    useControlesInnerForm();
+  const { watch } = useFormContext();
+  const controlesEnReparacion = watch("controlesEnReparacion");
+
+  const { checkControls, textControls, groupControls } = useControles({
+    controlesList: controlesEnReparacion,
+  });
 
   return (
     <Grid container spacing={3}>

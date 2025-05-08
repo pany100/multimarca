@@ -1,86 +1,66 @@
-import { useFormContext } from "react-hook-form";
-
 export type ControlMecanico = {
   id: number;
   nombre: string;
   tipo: "checkbox" | "texto";
   valor: string;
+  ordenEnPdf?: number;
+  pdfName?: string;
+  parent: {
+    id: number;
+    name: string;
+  } | null;
 };
 
-type UseControlesProps = {
-  controlesMecanicos: ControlMecanico[];
+export const sortControlsByOrdenEnPdf = (
+  a: { ordenEnPdf?: number | null },
+  b: { ordenEnPdf?: number | null }
+) => {
+  // Handle undefined or null ordenEnPdf values
+  const aOrder = a.ordenEnPdf ?? Number.MAX_SAFE_INTEGER;
+  const bOrder = b.ordenEnPdf ?? Number.MAX_SAFE_INTEGER;
+  return aOrder - bOrder;
 };
 
-type ControlGroup = {
-  title: string;
-  controls: ControlMecanico[];
-};
+const useControles = ({
+  controlesList,
+}: {
+  controlesList: ControlMecanico[];
+}) => {
+  const checkControls = controlesList
+    .filter(
+      (control: ControlMecanico) =>
+        control.tipo === "checkbox" && control.parent === null
+    )
+    .sort(sortControlsByOrdenEnPdf);
+  const textControls = controlesList
+    .filter(
+      (control: ControlMecanico) =>
+        control.tipo === "texto" && control.parent === null
+    )
+    .sort(sortControlsByOrdenEnPdf);
+  const groupChecks = controlesList.filter(
+    (control: ControlMecanico) => control.parent !== null
+  );
+  const uniqueParentIds = Array.from(
+    new Set(groupChecks.map((control) => control.parent?.id).filter(Boolean))
+  );
+  const groupControls = uniqueParentIds.map((parentId) => {
+    const childControls = groupChecks
+      .filter((control) => control.parent && control.parent.id === parentId)
+      .sort(sortControlsByOrdenEnPdf);
 
-const useControles = ({ controlesMecanicos }: UseControlesProps) => {
-  const { control, getValues, setValue } = useFormContext();
-
-  // Helper function to handle control changes
-  const handleControlChange = (id: number, valor: string) => {
-    const controlesEnReparacion = getValues("controlesEnReparacion");
-    const controlesActualizados = controlesEnReparacion.map(
-      (control: ControlMecanico) => {
-        if (control.id === id) {
-          return { id, valor };
-        }
-        return control;
-      }
-    );
-    setValue("controlesEnReparacion", controlesActualizados);
-  };
-
-  // Group controls by type for better organization
-  const getGroupedControls = (): ControlGroup[] => {
-    // Split the checkbox controls into two roughly equal groups
-    const checkboxControls = controlesMecanicos.filter(
-      (control) => control.tipo === "checkbox"
-    );
-
-    const midpoint = Math.ceil(checkboxControls.length / 2);
-    const firstGroup = checkboxControls.slice(0, midpoint);
-    const secondGroup = checkboxControls.slice(midpoint);
-
-    const textControls = controlesMecanicos.filter(
-      (control) => control.tipo === "texto"
-    );
-
-    return [
-      { title: "Controles del Vehículo", controls: firstGroup },
-      { title: "Controles Adicionales", controls: secondGroup },
-      { title: "Información Adicional", controls: textControls },
-    ];
-  };
-
-  // Get stats about completed controls
-  const getControlStats = () => {
-    const checkboxControls = controlesMecanicos.filter(
-      (control) => control.tipo === "checkbox"
-    );
-    const completedControls = checkboxControls.filter(
-      (control) => control.valor === "true"
-    );
+    // Use the parent name from the first child control that has this parent
+    const parentName = childControls[0]?.parent?.name;
 
     return {
-      total: checkboxControls.length,
-      completed: completedControls.length,
-      percentage:
-        checkboxControls.length === 0
-          ? 0
-          : Math.round(
-              (completedControls.length / checkboxControls.length) * 100
-            ),
+      name: parentName,
+      controls: childControls,
     };
-  };
-
+  });
   return {
-    handleControlChange,
-    getGroupedControls,
-    getControlStats,
-    control,
+    checkControls,
+    textControls,
+    groupControls,
   };
 };
 

@@ -1,3 +1,6 @@
+import useControles, {
+  ControlMecanico,
+} from "@/hooks/orden-reparacion/useControles";
 import useControlesInnerForm from "@/hooks/orden-reparacion/useControlesInnerForm";
 import CheckCircleOutlineIcon from "@mui/icons-material/CheckCircleOutline";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
@@ -10,6 +13,7 @@ import {
   ListItemText,
   Paper,
 } from "@mui/material";
+import { useFormContext } from "react-hook-form";
 
 export type Control = {
   id: number;
@@ -20,118 +24,83 @@ export type Control = {
   pdfName: string | null;
 };
 
-// Maximum length for control names, same as in OrdenMecanicoPdf
-const MAX_CONTROL_LENGTH = 24;
-
-// Sort controls by ordenEnPdf field, same as in OrdenMecanicoPdf
-function sortControls(a: Control, b: Control) {
-  if (!a.ordenEnPdf || a.ordenEnPdf === null) return 1;
-  if (!b.ordenEnPdf || b.ordenEnPdf === null) return -1;
-  return (a.ordenEnPdf || 0) - (b.ordenEnPdf || 0);
-}
+const MAX_CONTROL_LENGTH = 25;
 
 function CheckboxControls() {
-  const { checkControls, handleControlChange } = useControlesInnerForm();
+  const { watch } = useFormContext();
+  const controlesEnReparacion = watch("controlesEnReparacion");
 
-  // Sort controls using the same function as in OrdenMecanicoPdf
-  const sortedControls = [...checkControls].sort(sortControls);
-
-  // Separate controls by name length, same as in OrdenMecanicoPdf
-  const shortControls = sortedControls.filter((control) => {
-    const controlName = control.pdfName || control.nombre;
-    return controlName.length <= MAX_CONTROL_LENGTH;
+  const { handleControlChange } = useControlesInnerForm();
+  const { checkControls } = useControles({
+    controlesList: controlesEnReparacion,
   });
-
-  const longControls = sortedControls.filter((control) => {
-    const controlName = control.pdfName || control.nombre;
-    return controlName.length > MAX_CONTROL_LENGTH;
-  });
-
-  // Combine short controls first, then long controls
-  const orderedControls = [...shortControls, ...longControls];
-
-  // Create two columns by alternating controls
-  const firstColumn = orderedControls.filter((_, index) => index % 2 === 0);
-  const secondColumn = orderedControls.filter((_, index) => index % 2 === 1);
-  const controlGroups = [firstColumn, secondColumn];
-
   return (
-    <>
-      {controlGroups.map(
-        (group, index) =>
-          group.length > 0 && (
-            <Grid item xs={12} md={6} key={index}>
-              <Paper
-                elevation={0}
+    <Grid item xs={12}>
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          borderRadius: 2,
+          border: "1px solid",
+          borderColor: "divider",
+          height: "100%",
+        }}
+      >
+        <List
+          disablePadding
+          sx={{
+            display: "grid",
+            gridTemplateColumns: "auto auto",
+          }}
+        >
+          {checkControls.map((control: ControlMecanico) => {
+            const isChecked = control.valor === "true";
+            const controlName = control.pdfName || control.nombre;
+            const isLongName = controlName.length > MAX_CONTROL_LENGTH;
+
+            return (
+              <ListItemButton
+                key={control.id}
+                dense
+                onClick={() =>
+                  handleControlChange(control.id, isChecked ? "false" : "true")
+                }
                 sx={{
-                  p: 2,
-                  borderRadius: 2,
-                  border: "1px solid",
-                  borderColor: "divider",
-                  height: "100%",
+                  borderRadius: 1,
+                  mb: 0.5,
+                  transition: "all 0.2s",
+                  bgcolor: isChecked ? "primary.lighter" : "transparent",
+                  "&:hover": {
+                    bgcolor: isChecked ? "primary.lighter" : "action.hover",
+                  },
                 }}
               >
-                <List disablePadding>
-                  {group.map((control: Control) => {
-                    const isChecked = control.valor === "true";
-                    const controlName = control.pdfName || control.nombre;
-                    const isLongName = controlName.length > MAX_CONTROL_LENGTH;
-
-                    return (
-                      <ListItemButton
-                        key={control.id}
-                        dense
-                        onClick={() =>
-                          handleControlChange(
-                            control.id,
-                            isChecked ? "false" : "true"
-                          )
-                        }
-                        sx={{
-                          borderRadius: 1,
-                          mb: 0.5,
-                          transition: "all 0.2s",
-                          bgcolor: isChecked
-                            ? "primary.lighter"
-                            : "transparent",
-                          "&:hover": {
-                            bgcolor: isChecked
-                              ? "primary.lighter"
-                              : "action.hover",
-                          },
-                        }}
-                      >
-                        <ListItemIcon sx={{ minWidth: 36 }}>
-                          <Checkbox
-                            edge="start"
-                            checked={isChecked}
-                            tabIndex={-1}
-                            disableRipple
-                            icon={<RadioButtonUncheckedIcon />}
-                            checkedIcon={
-                              <CheckCircleOutlineIcon color="primary" />
-                            }
-                          />
-                        </ListItemIcon>
-                        <ListItemText
-                          primary={controlName}
-                          primaryTypographyProps={{
-                            variant: "body2",
-                            fontWeight: isChecked ? "medium" : "regular",
-                            ...(isLongName && {
-                              fontSize: "0.8rem",
-                            }),
-                          }}
-                        />
-                      </ListItemButton>
-                    );
-                  })}
-                </List>
-              </Paper>
-            </Grid>
-          )
-      )}
-    </>
+                <ListItemIcon sx={{ minWidth: 36 }}>
+                  <Checkbox
+                    edge="start"
+                    checked={isChecked}
+                    tabIndex={-1}
+                    disableRipple
+                    icon={<RadioButtonUncheckedIcon />}
+                    checkedIcon={<CheckCircleOutlineIcon color="primary" />}
+                  />
+                </ListItemIcon>
+                <ListItemText
+                  primary={controlName}
+                  primaryTypographyProps={{
+                    variant: "body2",
+                    fontWeight: isChecked ? "medium" : "regular",
+                    ...(isLongName && {
+                      fontSize: "0.8rem",
+                    }),
+                  }}
+                />
+              </ListItemButton>
+            );
+          })}
+        </List>
+      </Paper>
+    </Grid>
   );
 }
 

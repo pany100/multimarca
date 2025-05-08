@@ -1,10 +1,16 @@
-import useControlesInnerForm from "@/hooks/orden-reparacion/useControlesInnerForm";
+import useControles from "@/hooks/orden-reparacion/useControles";
 import { Grid, Paper, Typography } from "@mui/material";
+import { useFormContext } from "react-hook-form";
 import GroupCheckboxControls from "./GroupCheckboxControls";
 import GroupTextControls from "./GroupTextControls";
 
 function GroupControls() {
-  const { groupControls } = useControlesInnerForm();
+  const { watch } = useFormContext();
+  const controlesEnReparacion = watch("controlesEnReparacion");
+
+  const { groupControls } = useControles({
+    controlesList: controlesEnReparacion,
+  });
 
   return (
     <>

@@ -1,5 +1,7 @@
+import useControles from "@/hooks/orden-reparacion/useControles";
 import useControlesInnerForm from "@/hooks/orden-reparacion/useControlesInnerForm";
 import { Box, Chip, TextField, Typography } from "@mui/material";
+import { useFormContext } from "react-hook-form";
 
 type Control = {
   id: number;
@@ -9,7 +11,14 @@ type Control = {
 };
 
 function TextControls() {
-  const { textControls, handleControlChange } = useControlesInnerForm();
+  const { watch } = useFormContext();
+  const controlesEnReparacion = watch("controlesEnReparacion");
+  const { handleControlChange } = useControlesInnerForm();
+
+  const { textControls } = useControles({
+    controlesList: controlesEnReparacion,
+  });
+
   return textControls.map((control: Control) => {
     const hasValue = control.valor !== "";
     const currentValue = control.valor;
