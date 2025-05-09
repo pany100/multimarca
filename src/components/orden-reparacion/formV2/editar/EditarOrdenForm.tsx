@@ -93,6 +93,8 @@ type OrdenReparacion = {
   }[];
   descuento: number;
   descripcionDescuento: string;
+  incremento: number;
+  descripcionIncremento: string;
   detalleControles: string;
 };
 
@@ -103,6 +105,8 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
       ...ordenReparacion,
       descuento: ordenReparacion.descuento,
       descripcionDescuento: ordenReparacion.descripcionDescuento,
+      incremento: ordenReparacion.incremento,
+      descripcionIncremento: ordenReparacion.descripcionIncremento,
       trabajosRealizados: ordenReparacion.trabajosRealizados.map((trabajo) => ({
         manoDeObra: { name: trabajo.descripcion },
         precioUnitario: Number(trabajo.precioUnitario),

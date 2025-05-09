@@ -116,6 +116,8 @@ export async function PUT(
       detalleControles,
       descuento,
       descripcionDescuento,
+      incremento,
+      descripcionIncremento,
     } = body;
 
     // Obtener la orden de reparación actual
@@ -355,6 +357,8 @@ export async function PUT(
             detalleControles,
             descripcionDescuento,
             pdfPath: permanentUrl,
+            incremento: new Prisma.Decimal(incremento),
+            descripcionIncremento,
           },
           include: {
             auto: {

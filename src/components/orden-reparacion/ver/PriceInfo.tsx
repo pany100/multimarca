@@ -99,6 +99,17 @@ function PriceInfo({ ordenReparacion }: { ordenReparacion: any }) {
                   {getFormattedPrice(ordenReparacion.descuento)}
                 </TableCell>
               </TableRow>
+              <TableRow>
+                <TableCell component="th" scope="row">
+                  Incremento
+                  {ordenReparacion.descripcionIncremento && (
+                    <>: {ordenReparacion.descripcionIncremento}</>
+                  )}
+                </TableCell>
+                <TableCell align="right">
+                  {getFormattedPrice(ordenReparacion.incremento)}
+                </TableCell>
+              </TableRow>
               <TableRow
                 sx={{
                   backgroundColor: theme.palette.action.hover,

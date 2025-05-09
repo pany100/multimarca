@@ -96,6 +96,8 @@ const schema = yup.object().shape({
   observacionesOcultas: yup.string().nullable(),
   descuento: yup.number().nullable().min(0),
   descripcionDescuento: yup.string().nullable(),
+  incremento: yup.number().nullable().min(0),
+  descripcionIncremento: yup.string().nullable(),
   observacionesEntrada: yup.string(),
   detallesDeTrabajo: yup.string().nullable(),
 });

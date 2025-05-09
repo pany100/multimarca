@@ -29,6 +29,20 @@ function ResumenCostosSection() {
           label="Descripción del descuento"
         />
       </Grid>
+      <Grid item xs={4} ref={(el) => registerFieldRef("incremento", el)}>
+        <CustomInputText name="incremento" label="Incremento" type="number" />
+      </Grid>
+
+      <Grid
+        item
+        xs={8}
+        ref={(el) => registerFieldRef("descripcionIncremento", el)}
+      >
+        <CustomInputText
+          name="descripcionIncremento"
+          label="Descripción del incremento"
+        />
+      </Grid>
       <Grid item xs={12}>
         <Paper
           elevation={0}

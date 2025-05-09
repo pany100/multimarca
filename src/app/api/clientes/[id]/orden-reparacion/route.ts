@@ -53,6 +53,7 @@ export async function GET(
           precioUnitario: Number(t.precioUnitario),
         })),
         descuento: Number(orden.descuento),
+        incremento: Number(orden.incremento),
       };
       const totalAPagar = calcularTotalOrdenReparacion(ordenParaCalculo);
       const totalPagado = orden.ingresos.reduce((sum, ingreso) => {
