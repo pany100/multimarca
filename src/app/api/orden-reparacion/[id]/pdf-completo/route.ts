@@ -34,6 +34,7 @@ export async function GET(
             proveedor: true,
           },
         },
+        revisadoPor: true,
         trabajosRealizados: true,
         controlesEnReparacion: {
           include: {

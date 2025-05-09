@@ -14,7 +14,7 @@ import { useEffect, useState } from "react";
 const estadosDisplay: Record<EstadoOrdenReparacion, string> = {
   [EstadoOrdenReparacion.Presupuestado]: "Presupuestado",
   [EstadoOrdenReparacion.Aceptado]: "Aceptado",
-  [EstadoOrdenReparacion.EnProgreso]: "En Progreso",
+  [EstadoOrdenReparacion.EnProgreso]: "En Proceso",
   [EstadoOrdenReparacion.Terminado]: "Terminado",
 };
 

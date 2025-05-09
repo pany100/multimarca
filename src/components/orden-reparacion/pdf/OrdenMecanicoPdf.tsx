@@ -74,9 +74,31 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
               Orden Reparación Nro: {repair.id}
             </Typography>
           </div>
-          <TextWithBlackBackground>
-            Colocar cubrevolante, cubreasiento
-          </TextWithBlackBackground>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "auto 1fr",
+              gap: "10px",
+              marginBottom: 30,
+            }}
+          >
+            <div
+              style={{
+                marginTop: 0,
+                marginRight: "auto",
+                marginLeft: 0,
+                padding: 10,
+                backgroundColor: "black",
+              }}
+            >
+              <Typography variant="h6" sx={{ color: "common.white" }}>
+                Colocar cubrevolante, cubreasiento
+              </Typography>
+            </div>
+            <TextWithFillLine sx={{ alignSelf: "center" }}>
+              EN PROCESO CON
+            </TextWithFillLine>
+          </div>
           <div
             style={{
               display: "grid",
@@ -96,7 +118,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
                 Vehículo: {repair.auto.brand} {repair.auto.model}
               </Typography>
               <Typography variant="h6" sx={{ color: "common.black" }}>
-                Motor: {repair.auto.valves}
+                Motor: ....... / ....... V
               </Typography>
             </div>
             <div>
@@ -291,6 +313,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
             </TextWithBlackBackground>
           </div>
           <TextWithFillLine>Realizado Por</TextWithFillLine>
+          <TextWithFillLine>Revisado Por</TextWithFillLine>
         </PDFPage>
       </div>
     );

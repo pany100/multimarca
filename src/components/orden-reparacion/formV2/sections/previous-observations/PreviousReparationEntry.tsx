@@ -52,6 +52,7 @@ function PreviousReparationEntry({ reparation, index }: Props) {
             const obsString = `${new Date(
               reparation.fechaCreacion
             ).toLocaleDateString()} - Kms: ${reparation.kilometros} - ${obs}`;
+            const ultimoIngreso = `Observación último ingreso: ${obsString}`;
             return (
               <ListItem
                 key={obsIndex}
@@ -59,7 +60,7 @@ function PreviousReparationEntry({ reparation, index }: Props) {
                 secondaryAction={
                   <Tooltip
                     title={
-                      isObservationAlreadyAdded(obsString)
+                      isObservationAlreadyAdded(ultimoIngreso)
                         ? "Esta observación ya fue agregada"
                         : "Agregar a observaciones actuales"
                     }
@@ -68,9 +69,11 @@ function PreviousReparationEntry({ reparation, index }: Props) {
                       <Button
                         variant="contained"
                         size="small"
-                        onClick={() => handleAddPreviousObservation(obsString)}
+                        onClick={() =>
+                          handleAddPreviousObservation(ultimoIngreso)
+                        }
                         color="primary"
-                        disabled={isObservationAlreadyAdded(obsString)}
+                        disabled={isObservationAlreadyAdded(ultimoIngreso)}
                       >
                         AGREGAR
                       </Button>

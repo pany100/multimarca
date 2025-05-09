@@ -180,6 +180,9 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         <FormSection title="Mecánicos">
           <MechanicsSection />
         </FormSection>
+        <FormSection title="Revisión">
+          <RevisionSection />
+        </FormSection>
         <FormSection title="Reparación / Repuestos de terceros">
           <ReparacionTercerosSection />
         </FormSection>
@@ -191,9 +194,6 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         </FormSection>
         <FormSection title="Resumen de Costos">
           <ResumenCostosSection />
-        </FormSection>
-        <FormSection title="Revisión">
-          <RevisionSection />
         </FormSection>
         <FormSection title="Informe del Scanner">
           <ScannerForm

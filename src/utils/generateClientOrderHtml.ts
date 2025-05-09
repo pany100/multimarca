@@ -233,19 +233,20 @@ export default function generateClientOrderHtml(repair: any): string {
           }
         </div>
       </div>
-      ${
-        repair.estado !== EstadoOrdenReparacion.Presupuestado
-          ? `
-        <hr class="divider" />
+      <hr class="divider" />
       <div class="TypographyBody1" style="font-weight: bold;">
-        Observaciones del cliente
+        Pedido del cliente
       </div>
       <div class="TypographyBody1" style="width: 90%;">
         ${repair.observacionesCliente || "-"}
       </div>
-      `
-          : ""
-      }
+      <hr class="divider" />
+      <div class="TypographyBody1" style="font-weight: bold;">
+        Trabajo a realizar
+      </div>
+      <div class="TypographyBody1" style="width: 90%;">
+        ${repair.detallesDeTrabajo || "-"}
+      </div>
       ${
         repair.estado !== EstadoOrdenReparacion.Presupuestado
           ? `
@@ -456,6 +457,13 @@ export default function generateClientOrderHtml(repair: any): string {
               .join(", ")}`
           : ""
       }
+      </div>
+      <div class="TypographyBody1" style="margin-top: 5px;">
+        ${
+          repair.revisadoPor !== null
+            ? `Revisado por: ${repair.revisadoPor.fullName}`
+            : ""
+        }
       </div>
       <hr class="divider" />
       <div class="TypographyBody1">
