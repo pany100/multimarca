@@ -4,7 +4,6 @@ import PDFPage from "./PDFPage";
 import TemplateHeader from "./TemplateHeader";
 
 import CarHeader from "./CarHeader";
-import DetallesOrdenInterna from "./DetallesOrdenInterna";
 import OrdenInternaTotal from "./OrdenInternaTotal";
 
 type Props = {
@@ -38,8 +37,6 @@ export const OrdenClienteInterna = React.forwardRef<any, Props>(
           />
           <Divider sx={{ mt: 2, mb: 2, borderColor: "common.gray" }} />
           <OrdenInternaTotal repair={repair} />
-          <Divider sx={{ mt: 2, mb: 2, borderColor: "common.gray" }} />
-          <DetallesOrdenInterna />
         </PDFPage>
       </div>
     );

@@ -2,11 +2,20 @@
 
 import { CrudAction } from "@/components/formV2/constants";
 import ABMPage from "@/components/pageV2/ABMPage";
+import { useAuth } from "@/hooks/useAuth";
 import ManoDeObraExtraContent from "@/sections/mano-de-obra/ManoDeObraExtraContent";
 import ManoDeObraForm, { schema } from "@/sections/mano-de-obra/ManoDeObraForm";
 import ManoDeObraTable from "@/sections/mano-de-obra/ManoDeObraTable";
 
 const ManoDeObraPage = () => {
+  const { userData } = useAuth();
+  const permisos = userData?.permisos || [];
+  const crudActions = [CrudAction.ADD, CrudAction.DELETE];
+
+  if (permisos.includes("EditarManoObra")) {
+    crudActions.push(CrudAction.EDIT);
+  }
+
   return (
     <>
       <ABMPage
@@ -14,7 +23,7 @@ const ManoDeObraPage = () => {
         extraContent={ManoDeObraExtraContent}
         table={ManoDeObraTable}
         form={ManoDeObraForm}
-        crudActions={[CrudAction.ADD, CrudAction.EDIT, CrudAction.DELETE]}
+        crudActions={crudActions}
         schema={schema}
       />
     </>

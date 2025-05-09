@@ -36,10 +36,19 @@ function TurnosTable({
     {
       field: "cliente",
       headerName: "Cliente",
-      flex: 0.4,
+      flex: 1,
       renderCell: (params: any) => {
         const client = params.row.auto.owner;
         return client ? `${client.fullName}` : "";
+      },
+    },
+    {
+      field: "telefono",
+      headerName: "Teléfono",
+      flex: 1,
+      renderCell: (params: any) => {
+        const client = params.row.auto.owner;
+        return client ? `${client.phone}` : "";
       },
     },
     {

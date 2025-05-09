@@ -125,6 +125,7 @@ export async function POST(request: NextRequest) {
             <thead>
               <tr>
                 <th>Cliente</th>
+                <th>Teléfono</th>
                 <th>Auto</th>
                 <th>Problema</th>
                 ${weekDays
@@ -161,6 +162,7 @@ export async function POST(request: NextRequest) {
                   return `
                     <tr>
                       <td>${turno.auto?.owner?.fullName || "N/A"}</td>
+                      <td>${turno.auto?.owner?.phone || "N/A"}</td>
                       <td>${
                         turno.auto
                           ? `${turno.auto.brand} ${turno.auto.model} - ${turno.auto.patent}`

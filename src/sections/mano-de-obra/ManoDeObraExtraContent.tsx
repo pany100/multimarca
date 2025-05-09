@@ -1,3 +1,4 @@
+import { useAuth } from "@/hooks/useAuth";
 import useExportarManoDeObra from "@/hooks/useExportarManoDeObra";
 import { Box, Button, CircularProgress } from "@mui/material";
 import PreciosModal from "./PreciosModal";
@@ -7,6 +8,8 @@ function ManoDeObraExtraContent({
 }: {
   setRefreshTrigger: React.Dispatch<React.SetStateAction<number>>;
 }) {
+  const { userData } = useAuth();
+  const permisos = userData?.permisos || [];
   const { exportToPdf, isLoading } = useExportarManoDeObra();
 
   return (
@@ -17,8 +20,12 @@ function ManoDeObraExtraContent({
         justifyContent: "flex-start",
       }}
     >
-      <PreciosModal setRefreshTrigger={setRefreshTrigger} />
-      <Box sx={{ width: "20px" }} />
+      {permisos.includes("EditarManoObra") && (
+        <>
+          <PreciosModal setRefreshTrigger={setRefreshTrigger} />
+          <Box sx={{ width: "20px" }} />
+        </>
+      )}
       <Box>
         <Box sx={{ width: "100%", mb: 2 }}>
           <Button

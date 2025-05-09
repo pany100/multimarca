@@ -105,10 +105,14 @@ async function enviarRecordatoriosMantenimiento() {
         Cliente c ON a.ownerId = c.id
       JOIN 
         TrabajoRealizado tr ON orep.id = tr.ordenReparacionId
+      JOIN
+        ManoDeObra mo ON tr.descripcion = mo.name
       WHERE 
         orep.estado = 'Terminado'
       AND 
         c.can_receive_notifications = true
+      AND 
+        mo.id IN (106, 108, 110, 289)
       AND 
         tr.diasParaRecordatorio IS NOT NULL
       AND 
