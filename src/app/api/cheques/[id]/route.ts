@@ -83,6 +83,10 @@ export async function PUT(
       picturePath,
       numero,
       owner,
+      rechazado,
+      fechaRechazo,
+      gastosAdministrativos,
+      observaciones,
     } = body;
 
     // Validate request data
@@ -103,6 +107,15 @@ export async function PUT(
         { error: "Cheque no encontrado" },
         { status: 404 }
       );
+    }
+    const isRechazado = rechazado === "Si" ? true : false;
+    if (isRechazado) {
+      if (!fechaRechazo || gastosAdministrativos === null || !observaciones) {
+        return NextResponse.json(
+          { error: "Faltan datos requeridos para el rechazo" },
+          { status: 400 }
+        );
+      }
     }
 
     // Handle picture path if needed
@@ -131,6 +144,10 @@ export async function PUT(
         owner,
         importe,
         numero,
+        rechazado: isRechazado,
+        fechaRechazo,
+        gastosAdministrativos,
+        observaciones,
       },
       select: {
         ...chequeQueryData.select,

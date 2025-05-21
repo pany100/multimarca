@@ -21,7 +21,7 @@ function ChequesTable({
     {
       field: "id",
       headerName: "ID",
-      flex: 1,
+      flex: 0.1,
       renderCell: (params) => (
         <Link
           href={`/dashboard/cheques/${params.row.id}`}
@@ -103,6 +103,39 @@ function ChequesTable({
         );
         return <Grid>{operaciones}</Grid>;
       },
+    },
+    {
+      field: "rechazado",
+      headerName: "Rechazado",
+      flex: 1,
+      renderCell: (params) => {
+        return params.row.rechazado ? "Sí" : "No";
+      },
+    },
+    {
+      field: "fechaRechazo",
+      headerName: "Fecha de rechazo",
+      flex: 1,
+      renderCell: (params) => {
+        return params.row.fechaRechazo
+          ? new Date(params.row.fechaRechazo).toLocaleDateString("es-AR")
+          : "";
+      },
+    },
+    {
+      field: "gastosAdministrativos",
+      headerName: "Gastos administrativos",
+      flex: 1,
+      renderCell: (params) => {
+        return params.row.gastosAdministrativos
+          ? getFormattedPrice(params.row.gastosAdministrativos)
+          : "-";
+      },
+    },
+    {
+      field: "observaciones",
+      headerName: "Observaciones",
+      flex: 1,
     },
   ];
 

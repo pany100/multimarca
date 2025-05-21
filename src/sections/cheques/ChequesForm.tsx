@@ -1,7 +1,9 @@
 "use client";
 
 import CustomInputText from "@/components/formV2/CustomInputText";
+import CustomSelect from "@/components/formV2/CustomSelect";
 import ImageInput from "@/components/ImageInput";
+import useFixedSelectData from "@/hooks/useFixedSelectData";
 import { getFormattedChequeType } from "@/utils/fieldHelper";
 import {
   Box,
@@ -28,6 +30,31 @@ export const schema = yup.object({
     .required("El importe es requerido"),
   owner: yup.string().required("El emisor es requerido"),
   picturePath: yup.string().required("La foto es requerida"),
+  rechazado: yup
+    .string()
+    .oneOf(["Si", "No"])
+    .required("El rechazado es requerido"),
+  fechaRechazo: yup.date().when("rechazado", {
+    is: "Si",
+    then: (schema) => schema.required("La fecha de rechazo es requerida"),
+    otherwise: (schema) => schema.notRequired().nullable(),
+  }),
+  gastosAdministrativos: yup
+    .number()
+    .typeError("El gasto administrativo debe ser un número")
+    .when("rechazado", {
+      is: "Si",
+      then: (schema) => schema.required("El gasto administrativo es requerido"),
+      otherwise: (schema) => schema.notRequired().nullable(),
+    }),
+  observaciones: yup.string().when("rechazado", {
+    is: "Si",
+    then: (schema) =>
+      schema.required(
+        "Las observaciones son requeridas cuando el cheque es rechazado"
+      ),
+    otherwise: (schema) => schema.optional(),
+  }),
 });
 
 const ChequesForm = () => {
@@ -37,7 +64,9 @@ const ChequesForm = () => {
     formState: { errors },
   } = useFormContext();
   const picturePath = watch("picturePath");
+  const { siNo } = useFixedSelectData();
   const operaciones = watch("operaciones") || [];
+  const rechazado = watch("rechazado");
   return (
     <>
       <Typography variant="h5" sx={{ mb: 2 }}>
@@ -122,6 +151,34 @@ const ChequesForm = () => {
             </Typography>
           )}
         </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomSelect name="rechazado" label="Rechazado" options={siNo} />
+        </Grid>
+        {rechazado === "Si" && (
+          <>
+            <Grid item xs={12} md={6}>
+              <CustomInputText
+                name="fechaRechazo"
+                label="Fecha de rechazo"
+                type="date"
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <CustomInputText
+                name="gastosAdministrativos"
+                label="Gastos administrativos"
+                type="number"
+              />
+            </Grid>
+            <Grid item xs={12} md={6}>
+              <CustomInputText
+                name="observaciones"
+                label="Observaciones"
+                type="text"
+              />
+            </Grid>
+          </>
+        )}
       </Grid>
     </>
   );

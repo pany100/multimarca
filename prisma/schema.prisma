@@ -602,6 +602,11 @@ model Cheque {
   owner String @db.VarChar(255)
   picturePath String @db.VarChar(255)
 
+  rechazado           Boolean     @default(false)
+  fechaRechazo        DateTime?  
+  gastosAdministrativos Decimal? @db.Decimal(10, 2)
+  observaciones        String?     @db.Text
+
   extraccion Extraccion[]
   gasto Gasto[]
   ingresoPorReparacion IngresoPorReparacion[]
