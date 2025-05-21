@@ -18,6 +18,7 @@ import PeopleIcon from "@mui/icons-material/People";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import {
+  Alert,
   AppBar,
   Badge,
   Box,
@@ -30,6 +31,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  Snackbar,
   Toolbar,
   Typography,
   useMediaQuery,
@@ -79,6 +81,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>(
     {}
   );
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const [notificationMessage, setNotificationMessage] = useState("");
   const pathname = usePathname();
   const { isLoading, authFetch } = useFetch();
   const socket = useSocket();
@@ -126,6 +130,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     if (socket) {
       socket.on("newNotification", () => {
         setCantidadNotificaciones((prev) => prev + 1);
+        setNotificationMessage("Has recibido una nueva notificación");
+        setNotificationOpen(true);
       });
 
       socket.on("whatsappNotification", () => {
@@ -856,6 +862,21 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           </Container>
         </Box>
       </Box>
+      <Snackbar
+        open={notificationOpen}
+        autoHideDuration={5000}
+        onClose={() => setNotificationOpen(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+        sx={{ mt: "40px" }}
+      >
+        <Alert
+          onClose={() => setNotificationOpen(false)}
+          severity="success"
+          sx={{ width: "100%" }}
+        >
+          {notificationMessage}
+        </Alert>
+      </Snackbar>
     </ProtectedRoute>
   );
 };
