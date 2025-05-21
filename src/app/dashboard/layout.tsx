@@ -17,6 +17,7 @@ import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import PeopleIcon from "@mui/icons-material/People";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
+import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
 import {
   Alert,
   AppBar,
@@ -390,6 +391,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Pagos de ventas",
             icono: <AccountBalanceIcon />,
             ruta: "/dashboard/ingresos-ventas",
+          },
+          {
+            permiso: "Ingresos",
+            texto: "Deudores",
+            icono: <RequestQuoteIcon />,
+            ruta: "/dashboard/deudores",
           },
         ],
       },
