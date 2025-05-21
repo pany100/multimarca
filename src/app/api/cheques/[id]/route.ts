@@ -191,7 +191,13 @@ export async function PUT(
       });
       const io = getIO();
       if (io) {
-        io.emit("newNotification");
+        io.emit("newNotification", {
+          texto: `El cheque ${
+            existingCheque.numero
+          } se ha rechazado. Debe revisar las siguientes operaciones: ${operacionesLinks.join(
+            ", "
+          )}`,
+        });
       }
     }
 
