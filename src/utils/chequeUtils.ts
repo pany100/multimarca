@@ -134,6 +134,7 @@ export const chequeQueryData = {
     fechaEmision: true,
     owner: true,
     picturePath: true,
+    rechazado: true,
   },
 };
 

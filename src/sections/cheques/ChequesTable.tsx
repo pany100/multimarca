@@ -108,9 +108,6 @@ function ChequesTable({
       field: "rechazado",
       headerName: "Rechazado",
       flex: 1,
-      renderCell: (params) => {
-        return params.row.rechazado ? "Sí" : "No";
-      },
     },
     {
       field: "fechaRechazo",

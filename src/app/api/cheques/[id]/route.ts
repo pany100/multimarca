@@ -1,11 +1,14 @@
 import prisma from "@/lib/prisma";
+import { getIO } from "@/lib/socketio";
 import {
   chequeQueryData,
   deleteCheque,
+  getOperacionesByChequeId,
   validateBeforeDelete,
   validateChequeEditRequest,
 } from "@/utils/chequeUtils";
 import { deleteFileFromS3, moveFileInS3 } from "@/utils/s3Helper";
+import { TipoNotificacionInterna } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -26,7 +29,10 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(cheque);
+    return NextResponse.json({
+      ...cheque,
+      rechazado: cheque.rechazado ? "Si" : "No",
+    });
   } catch (error) {
     console.error("Error al obtener el cheque:", error);
     return NextResponse.json(
@@ -145,14 +151,49 @@ export async function PUT(
         importe,
         numero,
         rechazado: isRechazado,
-        fechaRechazo,
-        gastosAdministrativos,
-        observaciones,
+        fechaRechazo: isRechazado ? fechaRechazo : null,
+        gastosAdministrativos: isRechazado ? gastosAdministrativos : null,
+        observaciones: isRechazado ? observaciones : null,
       },
       select: {
         ...chequeQueryData.select,
       },
     });
+    if (existingCheque.rechazado === false && isRechazado) {
+      const operaciones = await getOperacionesByChequeId(existingCheque.id);
+      const operacionesLinks = operaciones.map((operacion) => {
+        if (operacion.tipo === "INGRESO_MANUAL") {
+          return `Ingreso Manual ID: ${operacion.idOperacion}`;
+        }
+        if (operacion.tipo === "INGRESO_REPARACION") {
+          return `Ingreso por reparacion ID: ${operacion.idOperacion}`;
+        }
+        if (operacion.tipo === "EXTRACCION") {
+          return `Extraccion ID: ${operacion.idOperacion}`;
+        }
+        if (operacion.tipo === "GASTO") {
+          return `Gasto ID: ${operacion.idOperacion}`;
+        }
+        return `Venta ID: ${operacion.idOperacion}`;
+      });
+      await prisma.notificacionInterna.create({
+        data: {
+          fecha: new Date(),
+          titulo: "Hay operaciones a revisar",
+          texto: `El cheque ${
+            existingCheque.numero
+          } se ha rechazado. Debe revisar las siguientes operaciones: ${operacionesLinks.join(
+            ", "
+          )}`,
+          leida: false,
+          tipo: TipoNotificacionInterna.CHEQUE_RECHAZADO,
+        },
+      });
+      const io = getIO();
+      if (io) {
+        io.emit("newNotification");
+      }
+    }
 
     return NextResponse.json(updatedCheque);
   } catch (error) {

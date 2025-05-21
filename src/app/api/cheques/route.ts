@@ -53,6 +53,7 @@ export async function GET(request: Request) {
         const operaciones = await getOperacionesByChequeId(cheque.id);
         return {
           ...cheque,
+          rechazado: cheque.rechazado ? "Si" : "No",
           operaciones,
         };
       })

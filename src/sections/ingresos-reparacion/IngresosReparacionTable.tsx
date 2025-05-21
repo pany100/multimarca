@@ -7,6 +7,7 @@ import useRecibo from "@/hooks/useRecibo";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import SendIcon from "@mui/icons-material/Send";
 import { Alert, Chip, MenuItem, Snackbar } from "@mui/material";
+import { GridRowParams } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useState } from "react";
 import RecibosModal from "./RecibosModal";
@@ -62,12 +63,13 @@ function IngresosReparacionTable({
       renderCell: (params: any) => {
         const value = params.value;
         if (value.label === "Cheque" && params.row.chequeId) {
+          const cheque = params.row.cheque;
           return (
             <Link
               href={`/dashboard/cheques/${params.row.chequeId}`}
               style={{ textDecoration: "underline" }}
             >
-              Cheque
+              Cheque {cheque.rechazado ? "(Rechazado, revisar)" : ""}
             </Link>
           );
         }
@@ -129,6 +131,16 @@ function IngresosReparacionTable({
     return customActions.concat(defaultActions);
   };
 
+  const getRowClassName = (params: GridRowParams) => {
+    if (params.row.chequeId) {
+      const cheque = params.row.cheque;
+      if (cheque.rechazado) {
+        return "low-stock-row";
+      }
+    }
+    return "";
+  };
+
   return (
     <>
       <CustomTable
@@ -137,6 +149,7 @@ function IngresosReparacionTable({
         extraActions={customActions}
         ctaCb={ctaCb}
         columns={columns}
+        getRowClassName={getRowClassName}
         {...rest}
       />
       {selectedIngreso && (

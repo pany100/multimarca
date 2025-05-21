@@ -5,6 +5,7 @@ import CustomTable, {
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import { Alert, Chip, Snackbar } from "@mui/material";
+import { GridRowParams } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -53,12 +54,13 @@ function IngresosVentasTable({
       renderCell: (params: any) => {
         const value = params.value;
         if (value.label === "Cheque" && params.row.chequeId) {
+          const cheque = params.row.cheque;
           return (
             <Link
               href={`/dashboard/cheques/${params.row.chequeId}`}
               style={{ textDecoration: "underline" }}
             >
-              Cheque
+              Cheque {cheque.rechazado ? "(Rechazado, revisar)" : ""}
             </Link>
           );
         }
@@ -87,6 +89,16 @@ function IngresosVentasTable({
     },
   ];
 
+  const getRowClassName = (params: GridRowParams) => {
+    if (params.row.chequeId) {
+      const cheque = params.row.cheque;
+      if (cheque.rechazado) {
+        return "low-stock-row";
+      }
+    }
+    return "";
+  };
+
   return (
     <>
       <CustomTable
@@ -95,6 +107,7 @@ function IngresosVentasTable({
         extraActions={extraActions}
         ctaCb={ctaCb}
         columns={columns}
+        getRowClassName={getRowClassName}
         {...rest}
       />
       <Snackbar

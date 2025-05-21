@@ -671,6 +671,7 @@ enum TipoNotificacionInterna {
   CHEQUE_POR_VENCER
   TURNOS_DEL_DIA
   RECORDATORIOS_MANO_DE_OBRA
+  CHEQUE_RECHAZADO
 }
 
 enum EstadoConversacion {

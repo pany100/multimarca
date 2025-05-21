@@ -5,6 +5,7 @@ import CustomTable, {
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import { Chip } from "@mui/material";
+import { GridRowParams } from "@mui/x-data-grid";
 import Link from "next/link";
 
 function GastosTable({
@@ -41,12 +42,13 @@ function GastosTable({
       renderCell: (params: any) => {
         const value = params.value;
         if (value.label === "Cheque" && params.row.chequeId) {
+          const cheque = params.row.cheque;
           return (
             <Link
               href={`/dashboard/cheques/${params.row.chequeId}`}
               style={{ textDecoration: "underline" }}
             >
-              Cheque
+              Cheque {cheque.rechazado ? "(Rechazado, revisar)" : ""}
             </Link>
           );
         }
@@ -80,6 +82,16 @@ function GastosTable({
     },
   ];
 
+  const getRowClassName = (params: GridRowParams) => {
+    if (params.row.chequeId) {
+      const cheque = params.row.cheque;
+      if (cheque.rechazado) {
+        return "low-stock-row";
+      }
+    }
+    return "";
+  };
+
   return (
     <CustomTable
       title="Gastos"
@@ -87,6 +99,7 @@ function GastosTable({
       extraActions={extraActions}
       ctaCb={ctaCb}
       columns={columns}
+      getRowClassName={getRowClassName}
       {...rest}
     />
   );

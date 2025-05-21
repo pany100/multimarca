@@ -1,5 +1,6 @@
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import { Chip } from "@mui/material";
+import { GridRowParams } from "@mui/x-data-grid";
 import Link from "next/link";
 import CustomTable, {
   InheritedTableProps,
@@ -51,12 +52,13 @@ function IngresosManualesTable({
       renderCell: (params: any) => {
         const value = params.value;
         if (value.label === "Cheque" && params.row.chequeId) {
+          const cheque = params.row.cheque;
           return (
             <Link
               href={`/dashboard/cheques/${params.row.chequeId}`}
               style={{ textDecoration: "underline" }}
             >
-              Cheque
+              Cheque {cheque.rechazado ? "(Rechazado, revisar)" : ""}
             </Link>
           );
         }
@@ -65,6 +67,16 @@ function IngresosManualesTable({
     },
   ];
 
+  const getRowClassName = (params: GridRowParams) => {
+    if (params.row.chequeId) {
+      const cheque = params.row.cheque;
+      if (cheque.rechazado) {
+        return "low-stock-row";
+      }
+    }
+    return "";
+  };
+
   return (
     <CustomTable
       title="Ingresos Manuales"
@@ -72,6 +84,7 @@ function IngresosManualesTable({
       extraActions={extraActions}
       ctaCb={ctaCb}
       columns={columns}
+      getRowClassName={getRowClassName}
       {...rest}
     />
   );
