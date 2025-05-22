@@ -1,4 +1,3 @@
-import { EstadoOrdenReparacion } from "@prisma/client";
 import {
   calcularManoDeObra,
   calcularTotalOrdenReparacion,
@@ -296,78 +295,16 @@ export default function generateBudgetHtml(repair: any): string {
           )}
         </div>
       </div>
-             ${
-               repair.ingresos && repair.ingresos.length > 0
-                 ? `
-        <div class="TypographyBody1" style="display: flex;
-          justify-content: space-between; margin-bottom: 20px; margin-right: 15px;">
-          <div style="font-weight: bold;">
-            Monto abonado: ${new Intl.NumberFormat("es-AR", {
-              style: "currency",
-              currency: "ARS",
-            }).format(
-              repair.ingresos.reduce((sum: number, ingreso: any) => {
-                if (ingreso.moneda === "Dolar") {
-                  return (
-                    sum + Number(ingreso.monto) * Number(ingreso.dolar.blue)
-                  );
-                }
-                return sum + Number(ingreso.monto);
-              }, 0)
-            )}
-          </div>
-          <div style="font-weight: bold;">
-            Falta pagar: ${new Intl.NumberFormat("es-AR", {
-              style: "currency",
-              currency: "ARS",
-            }).format(
-              Number(calcularTotalOrdenReparacion(repair)) -
-                (repair.ingresos
-                  ? repair.ingresos.reduce((sum: number, ingreso: any) => {
-                      if (ingreso.moneda === "Dolar") {
-                        return (
-                          sum +
-                          Number(ingreso.monto) * Number(ingreso.dolar.blue)
-                        );
-                      }
-                      return sum + Number(ingreso.monto);
-                    }, 0)
-                  : 0)
-            )}
-          </div>
-        </div>
-            `
-                 : ""
-             }
-      <div class="TypographyBody1">
-      ${
-        repair.mecanicos.length > 0 && repair.mecanicos.length === 1
-          ? `Realizó: ${repair.mecanicos[0].mecanico.name}`
-          : ""
-      }
-      ${
-        repair.mecanicos.length > 0 && repair.mecanicos.length > 1
-          ? `Realizaron: ${repair.mecanicos
-              .map((m: any) => m.mecanico.name)
-              .join(", ")}`
-          : ""
-      }
-      </div>
       <div class="TypographyBody1" style="margin-top: 5px;">
         ${
-          repair.revisadoPor !== null
-            ? `Revisado por: ${repair.revisadoPor.fullName}`
+          repair.administrativo !== null
+            ? `Administrativo: ${repair.administrativo.fullName}`
             : ""
         }
       </div>
       <hr class="divider" />
       <div class="TypographyBody1">
-            ${
-              repair.estado === EstadoOrdenReparacion.Presupuestado ||
-              repair.estado === EstadoOrdenReparacion.Aceptado
-                ? "Detalle de presupuesto solicitado, valores al día,  sin iva, sujeto a desarme"
-                : "Detalle del trabajo,  valores sin IVA"
-            }
+            Detalle de presupuesto solicitado, valores al día,  sin iva, sujeto a desarme
           </div>
     </div>
   </body>

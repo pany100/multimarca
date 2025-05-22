@@ -84,7 +84,7 @@ function EditarPresupuestoForm({ presupuesto }: { presupuesto: any }) {
         <FormSection title="Resumen de Costos">
           <ResumenCostosSection />
         </FormSection>
-        <FormActions href="/dashboard/presupuesto" label="Presupuesto" />
+        <FormActions href="/dashboard/presupuestos" label="Presupuesto" />
       </form>
     </FormProvider>
   );

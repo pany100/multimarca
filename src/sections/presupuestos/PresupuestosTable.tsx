@@ -30,15 +30,15 @@ const mapEstadoPresupuesto = (estado: string) => {
 const mapEstadoColor = (estado: string) => {
   switch (estado) {
     case "EnPreparacion":
-      return "#FFA500";
+      return "#FFA500"; // Orange
     case "Enviado":
-      return "#FFA500";
+      return "#3498db"; // Blue
     case "Aceptado":
-      return "#FFA500";
+      return "#2ecc71"; // Green
     case "Rechazado":
-      return "#FFA500";
+      return "#e74c3c"; // Red
     default:
-      return "#FFA500";
+      return "#95a5a6"; // Gray
   }
 };
 
@@ -90,7 +90,7 @@ function PresupuestosTable({
       field: "administrativo",
       headerName: "Administrativo",
       flex: 1,
-      renderCell: (params: any) => params.row.administrativo.fullName,
+      renderCell: (params: any) => params.row.administrativo?.fullName || "-",
     },
     {
       field: "estado",

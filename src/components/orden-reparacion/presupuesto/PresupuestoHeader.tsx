@@ -1,4 +1,5 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { useGeneratePdf } from "@/hooks/orden-reparacion/useGeneratePdf";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import {
@@ -21,15 +22,11 @@ import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import Link from "next/link";
 import { useRef, useState } from "react";
-import { useReactToPrint } from "react-to-print";
 
 // Icons
 import EditIcon from "@mui/icons-material/Edit";
 import PrintIcon from "@mui/icons-material/Print";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-
-// PDF components
-import { useGeneratePdf } from "@/hooks/orden-reparacion/useGeneratePdf";
 
 // Helper function to map estado to a readable string
 const mapEstadoPresupuesto = (estado: string) => {
@@ -67,7 +64,16 @@ function PresupuestoHeader({ presupuesto }: { presupuesto: any }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { authFetch } = useFetch();
-
+  const { generatePdf } = useGeneratePdf({
+    onError: () => {
+      setSnackbar({
+        open: true,
+        message: "Error al generar el PDF del cliente",
+        severity: "error",
+      });
+    },
+    printDirectly: true,
+  });
   // Ref for printing
   const clientePresupuestoRef = useRef(null);
 
@@ -78,22 +84,11 @@ function PresupuestoHeader({ presupuesto }: { presupuesto: any }) {
     message: "",
     severity: "success" as "success" | "error",
   });
-  const { generatePdf } = useGeneratePdf({
-    onError: () => {
-      setSnackbar({
-        open: true,
-        message: "Error al generar el PDF del presupuesto",
-        severity: "error",
-      });
-    },
-    printDirectly: true,
-  });
 
   // Print handlers
-  const handleClientePresupuestoPrint = useReactToPrint({
-    content: () => clientePresupuestoRef.current,
-  });
-
+  const handleClientePresupuestoPrint = async () => {
+    await generatePdf(`/api/presupuestos/${presupuesto.id}/pdf-completo`);
+  };
   // Notification handlers
   const handleOpenConfirmModal = () => {
     setOpenConfirmModal(true);
@@ -331,13 +326,6 @@ function PresupuestoHeader({ presupuesto }: { presupuesto: any }) {
           {snackbar.message}
         </Alert>
       </Snackbar>
-
-      {/* Hidden component for printing */}
-      <div style={{ display: "none" }}>
-        <div ref={clientePresupuestoRef}>
-          {/* <PresupuestoClientePdf presupuesto={presupuesto} /> */}
-        </div>
-      </div>
     </>
   );
 }

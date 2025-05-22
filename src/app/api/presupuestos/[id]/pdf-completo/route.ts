@@ -17,6 +17,7 @@ export async function GET(
             owner: true,
           },
         },
+        administrativo: true,
         repuestosUsados: {
           include: {
             stock: true,
@@ -62,14 +63,7 @@ async function generateBasePdf(presupuesto: any): Promise<Buffer> {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  // Establecer el estado del presupuesto como "Presupuestado" para que el HTML
-  // se genere correctamente con el formato de presupuesto
-  const presupuestoConEstado = {
-    ...presupuesto,
-    estado: "Presupuestado",
-  };
-
-  const html = generateBudgetHtml(presupuestoConEstado);
+  const html = generateBudgetHtml(presupuesto);
   await page.setContent(html);
 
   const pdfBuffer = await page.pdf({
