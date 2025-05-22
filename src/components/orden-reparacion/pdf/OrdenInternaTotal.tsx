@@ -10,7 +10,12 @@ import {
 
 function OrdenInternaTotal({ repair }: { repair: any }) {
   const total = calcularTotalOrdenReparacion(repair);
-
+  const aCuenta =
+    repair.ingresos?.reduce(
+      (acc: number, ingreso: any) => acc + Number(ingreso.monto),
+      0
+    ) || 0;
+  const deuda = total - aCuenta;
   const paymentMethods = [
     "Efectivo",
     "Transferencia",
@@ -29,22 +34,42 @@ function OrdenInternaTotal({ repair }: { repair: any }) {
         sx={{
           display: "flex",
           justifyContent: "space-between",
+          alignItems: "center",
           width: "100%",
           gap: 8, // Add significant gap between the sections
         }}
       >
         {/* Total amount on the left */}
         <Box sx={{ display: "flex", alignItems: "center", minWidth: "40%" }}>
-          <Typography variant="h6" sx={{ fontWeight: "bold", mr: 1 }}>
-            Total a pagar:
-          </Typography>
-          <Typography variant="h6" sx={{ fontWeight: "bold" }}>
-            $
-            {total.toLocaleString("es-AR", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            })}
-          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <Typography variant="h6" sx={{ fontWeight: "bold", mr: 1 }}>
+                Total a pagar: $
+                {total.toLocaleString("es-AR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                A cuenta: $
+                {aCuenta.toLocaleString("es-AR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </Typography>
+            </Grid>
+            <Grid item xs={12}>
+              <Typography variant="h6" sx={{ fontWeight: "bold" }}>
+                Resta: $
+                {deuda.toLocaleString("es-AR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}
+              </Typography>
+            </Grid>
+          </Grid>
         </Box>
 
         {/* Payment methods in two columns on the right */}

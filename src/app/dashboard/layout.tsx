@@ -130,9 +130,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (socket) {
-      socket.on("newNotification", (data: { texto: string }) => {
+      socket.on("newNotification", (data?: { texto: string }) => {
         setCantidadNotificaciones((prev) => prev + 1);
-        if (data.texto) {
+        if (data?.texto) {
           setNotificationMessage(data.texto);
           setNotificationOpen(true);
         }
