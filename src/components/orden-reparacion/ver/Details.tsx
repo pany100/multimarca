@@ -362,68 +362,72 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
             </Typography>
           </Paper>
 
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
-              mb: 2,
-              backgroundColor: theme.palette.background.default,
-              borderRadius: "4px",
-            }}
-          >
-            <Typography
-              variant="subtitle1"
+          {observacionesEntrada.length > 0 && (
+            <Paper
+              elevation={0}
               sx={{
-                fontWeight: 500,
-                color: theme.palette.text.primary,
-                mb: 1,
+                p: 2,
+                mb: 2,
+                backgroundColor: theme.palette.background.default,
+                borderRadius: "4px",
               }}
             >
-              Observaciones último ingreso:
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                pl: 1,
-                whiteSpace: "pre-line",
-              }}
-            >
-              {observacionesEntrada.length > 0
-                ? observacionesEntrada.join(", ")
-                : "-"}
-            </Typography>
-          </Paper>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 500,
+                  color: theme.palette.text.primary,
+                  mb: 1,
+                }}
+              >
+                Observaciones último ingreso:
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  pl: 1,
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {observacionesEntrada.length > 0
+                  ? observacionesEntrada.join(", ")
+                  : "-"}
+              </Typography>
+            </Paper>
+          )}
 
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
-              backgroundColor: theme.palette.background.default,
-              borderRadius: "4px",
-            }}
-          >
-            <Typography
-              variant="subtitle1"
+          {observacionesSalida.length > 0 && (
+            <Paper
+              elevation={0}
               sx={{
-                fontWeight: 500,
-                color: theme.palette.text.primary,
-                mb: 1,
+                p: 2,
+                backgroundColor: theme.palette.background.default,
+                borderRadius: "4px",
               }}
             >
-              Observaciones de Salida:
-            </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                pl: 1,
-                whiteSpace: "pre-line",
-              }}
-            >
-              {observacionesSalida.length > 0
-                ? observacionesSalida.join(", ")
-                : "-"}
-            </Typography>
-          </Paper>
+              <Typography
+                variant="subtitle1"
+                sx={{
+                  fontWeight: 500,
+                  color: theme.palette.text.primary,
+                  mb: 1,
+                }}
+              >
+                Observaciones de Salida:
+              </Typography>
+              <Typography
+                variant="body1"
+                sx={{
+                  pl: 1,
+                  whiteSpace: "pre-line",
+                }}
+              >
+                {observacionesSalida.length > 0
+                  ? observacionesSalida.join(", ")
+                  : "-"}
+              </Typography>
+            </Paper>
+          )}
         </Box>
       </TabPanel>
     </Paper>

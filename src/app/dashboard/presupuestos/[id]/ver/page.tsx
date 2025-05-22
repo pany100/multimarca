@@ -2,6 +2,8 @@
 import PresupuestoAutoInfo from "@/components/orden-reparacion/presupuesto/PresupuestoAutoInfo";
 import PresupuestoHeader from "@/components/orden-reparacion/presupuesto/PresupuestoHeader";
 import Details from "@/components/orden-reparacion/ver/Details";
+import DetalleTrabajo from "@/components/orden-reparacion/ver/DetalleTrabajo";
+import PriceInfo from "@/components/orden-reparacion/ver/PriceInfo";
 import { useFetch } from "@/contexts/FetchContext";
 import { useAuth } from "@/hooks/useAuth";
 import { Box, CircularProgress, Divider, Paper } from "@mui/material";
@@ -97,22 +99,9 @@ const VerPresupuestosPage = ({ params }: { params: { id: string } }) => {
       <Divider sx={{ my: 2 }} />
       <Details ordenReparacion={presupuesto} />
       <Divider sx={{ my: 2 }} />
-      {/*
-      <DetalleTrabajo ordenReparacion={ordenReparacion} />
+      <DetalleTrabajo ordenReparacion={presupuesto} />
       <Divider sx={{ my: 2 }} />
-      <NotasInternas ordenReparacion={ordenReparacion} />
-      <Divider sx={{ my: 2 }} />
-      <Controls ordenReparacion={ordenReparacion} />
-      <Divider sx={{ my: 2 }} />
-      <Mechanics ordenReparacion={ordenReparacion} />
-      <Divider sx={{ my: 2 }} />
-      <RevisadoPor ordenReparacion={ordenReparacion} />
-      <Divider sx={{ my: 2 }} />
-      <ScannerInfo ordenReparacion={ordenReparacion} />
-      <Divider sx={{ my: 2 }} />
-      <Recibos ordenReparacion={ordenReparacion} />
-      <Divider sx={{ my: 2 }} />
-      <PriceInfo ordenReparacion={ordenReparacion} /> */}
+      <PriceInfo ordenReparacion={presupuesto} />
     </Paper>
   );
 };
