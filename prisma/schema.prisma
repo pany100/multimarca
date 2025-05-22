@@ -647,6 +647,15 @@ model Turno {
   @@index([autoId])
 }
 
+model RecordatorioAgenda {
+  id          Int       @id @default(autoincrement())
+  titulo      String    @db.VarChar(255)
+  descripcion String?   @db.Text
+  fecha       DateTime
+  hecho       Boolean   @default(false)  
+  @@index([fecha])
+}
+
 enum TipoEmpleado {
   Mecanico
   Administrativo
