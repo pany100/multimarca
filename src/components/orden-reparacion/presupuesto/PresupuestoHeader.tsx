@@ -202,24 +202,9 @@ function PresupuestoHeader({ presupuesto }: { presupuesto: any }) {
                 Fecha:{" "}
                 {format(new Date(presupuesto.fecha), "PPP", { locale: es })}
               </Typography>
-
-              {presupuesto.fechaEnvio && (
-                <Typography variant="body2" color="text.secondary">
-                  Fecha de envío:{" "}
-                  {format(new Date(presupuesto.fechaEnvio), "PPP", {
-                    locale: es,
-                  })}
-                </Typography>
-              )}
-
-              {presupuesto.fechaRespuesta && (
-                <Typography variant="body2" color="text.secondary">
-                  Fecha de respuesta:{" "}
-                  {format(new Date(presupuesto.fechaRespuesta), "PPP", {
-                    locale: es,
-                  })}
-                </Typography>
-              )}
+              <Typography variant="body2" color="text.secondary">
+                Administrativo: {presupuesto.administrativo?.fullName}
+              </Typography>
             </Box>
           </Box>
         </Grid>

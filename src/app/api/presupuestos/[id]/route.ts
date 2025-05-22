@@ -19,6 +19,7 @@ export async function GET(
           },
         },
         dolar: true,
+        administrativo: true,
         repuestosUsados: {
           include: {
             stock: true,
