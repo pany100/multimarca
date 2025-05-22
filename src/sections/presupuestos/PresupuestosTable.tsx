@@ -11,6 +11,37 @@ import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import AddPresupuestoModal from "./AddPresupuestoModal";
+
+const mapEstadoPresupuesto = (estado: string) => {
+  switch (estado) {
+    case "EnPreparacion":
+      return "En Preparación";
+    case "Enviado":
+      return "Enviado";
+    case "Aceptado":
+      return "Aceptado";
+    case "Rechazado":
+      return "Rechazado";
+    default:
+      return "Estado Desconocido";
+  }
+};
+
+const mapEstadoColor = (estado: string) => {
+  switch (estado) {
+    case "EnPreparacion":
+      return "#FFA500";
+    case "Enviado":
+      return "#FFA500";
+    case "Aceptado":
+      return "#FFA500";
+    case "Rechazado":
+      return "#FFA500";
+    default:
+      return "#FFA500";
+  }
+};
+
 function PresupuestosTable({
   extraActions,
   ctaCb,
@@ -60,12 +91,12 @@ function PresupuestosTable({
       headerName: "Estado",
       flex: 1,
       renderCell: (params: any) => {
-        if (params.row.ingresos !== undefined) {
+        if (params.row.estado !== undefined) {
           return (
             <Chip
-              label="Presupuestado"
+              label={mapEstadoPresupuesto(params.row.estado)}
               sx={{
-                backgroundColor: "#FFA500",
+                backgroundColor: mapEstadoColor(params.row.estado),
                 color: "white",
                 fontWeight: "bold",
               }}
@@ -100,8 +131,7 @@ function PresupuestosTable({
   ];
 
   const customActions = (params: any) => {
-    console.log(params);
-    const isBorrador = params.ingresos === undefined;
+    const isBorrador = params.estado === undefined;
     const defaultActions = extraActions ? extraActions(params) : [];
     let customActions: React.ReactNode[];
     if (isBorrador) {
@@ -121,7 +151,7 @@ function PresupuestosTable({
         <MenuItem
           key="edit"
           onClick={() =>
-            router.push(`/dashboard/ordenes-reparacion/${params.id}/editar`)
+            router.push(`/dashboard/presupuestos/${params.id}/editar`)
           }
         >
           <EditIcon sx={{ mr: 1 }} />
@@ -130,7 +160,7 @@ function PresupuestosTable({
         <MenuItem
           key="view"
           onClick={() =>
-            router.push(`/dashboard/ordenes-reparacion/${params.id}/ver`)
+            router.push(`/dashboard/presupuestos/${params.id}/ver`)
           }
         >
           <VisibilityIcon sx={{ mr: 1 }} />
@@ -151,7 +181,7 @@ function PresupuestosTable({
         {tabValue === 0 ? (
           <CustomTable
             title="Presupuestos"
-            apiEndpoint="/api/orden-reparacion?estado=Presupuestado"
+            apiEndpoint="/api/presupuestos"
             extraActions={customActions}
             ctaCb={() => setAddModalOpen(true)}
             columns={columns}

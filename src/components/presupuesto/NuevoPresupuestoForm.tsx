@@ -13,6 +13,7 @@ import ResumenCostosSection from "../orden-reparacion/formV2/sections/resumen-co
 import TrabajosARealizarSection from "../orden-reparacion/formV2/sections/trabajos-a-realizar/TrabajosARealizarSection";
 import TrabajosRealizadosSection from "../orden-reparacion/formV2/sections/trabajos-realizados/TrabajosRealizadosSection";
 import PresupuestoAutoSection from "./PresupuestoAutoSection";
+import PresupuestoInformacionGeneral from "./PresupuestoInformacionGeneral";
 
 function NuevoPresupuestoForm({
   templateId,
@@ -29,6 +30,9 @@ function NuevoPresupuestoForm({
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(presupuestoSubmit)}>
+        <FormSection title="Información General">
+          <PresupuestoInformacionGeneral />
+        </FormSection>
         <FormSection title="Información del Vehículo">
           <PresupuestoAutoSection />
         </FormSection>

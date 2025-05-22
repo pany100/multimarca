@@ -94,6 +94,9 @@ const schema = yup.object().shape({
 
 const presupuestoSchema = yup.object().shape({
   autoId: yup.string().required("Debe seleccionar un auto"),
+  fecha: yup.date().required("La fecha es requerida"),
+  fechaEnvio: yup.date().nullable(),
+  fechaRespuesta: yup.date().nullable(),
   observacionesCliente: yup
     .string()
     .required("Debe ingresar las observaciones"),
@@ -175,6 +178,13 @@ const presupuestoSchema = yup.object().shape({
   descuento: yup.number().min(0),
   observacionesEntrada: yup.string(),
   esBorrador: yup.boolean(),
+  descripcionDescuento: yup.string().nullable(),
+  incremento: yup.number().min(0),
+  descripcionIncremento: yup.string().nullable(),
+  estado: yup
+    .string()
+    .oneOf(["EnPreparacion", "Enviado", "Aceptado", "Rechazado"])
+    .required(),
 });
 
 export default schema;

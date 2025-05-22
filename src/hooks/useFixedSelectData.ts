@@ -20,11 +20,24 @@ function useFixedSelectData() {
     { value: "Terminado", label: "Terminado" },
   ];
 
+  const presupuestoEstadoOptions = [
+    { value: "EnPreparacion", label: "En Preparación" },
+    { value: "Enviado", label: "Enviado" },
+    { value: "Aceptado", label: "Aceptado" },
+    { value: "Rechazado", label: "Rechazado" },
+  ];
+
   const siNo = [
     { value: "Si", label: "Si" },
     { value: "No", label: "No" },
   ];
-  return { tipoOperacion, currency, orepEstadoOptions, siNo };
+  return {
+    tipoOperacion,
+    currency,
+    orepEstadoOptions,
+    siNo,
+    presupuestoEstadoOptions,
+  };
 }
 
 export default useFixedSelectData;

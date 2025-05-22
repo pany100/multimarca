@@ -85,6 +85,7 @@ model Auto {
   owner             Cliente           @relation(fields: [ownerId], references: [id])
   borradores        Borrador[]        @relation("AutoBorrador")
   ordenesReparacion OrdenReparacion[] @relation("AutoOrdenReparacion")
+  presupuestos      Presupuesto[]     @relation("AutoPresupuesto")
   turnos            Turno[]
 
   @@index([patent])
@@ -335,17 +336,44 @@ model OrdenReparacion {
   reparacionesDeTercero  ReparacionDeTercero[]     @relation("OrdenReparacionReparacionTercero")
   repuestosUsados        RepuestoUsado[]           @relation("OrdenReparacionRepuestos")
   trabajosRealizados     TrabajoRealizado[]        @relation("OrdenReparacionTrabajosRealizados")
-
+  
   @@index([autoId])
   @@index([fechaCreacion])
   @@index([estado])
   @@index([dolarId], map: "OrdenReparacion_dolarId_fkey")
 }
 
+model Presupuesto {
+  id                     Int                       @id @default(autoincrement())
+  autoId                 Int
+  auto                   Auto                      @relation("AutoPresupuesto", fields: [autoId], references: [id])
+  fecha                  DateTime                  @default(now())
+  fechaEnvio             DateTime?
+  fechaRespuesta         DateTime?
+  observacionesCliente   String                    @db.Text
+  detallesDeTrabajo      String?                   @db.Text
+  descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
+  descripcionDescuento   String?                   @db.VarChar(255)
+  dolarId                Int?
+  dolar                  Dolar?                    @relation(fields: [dolarId], references: [id])
+  incremento             Decimal                   @default(0.00) @db.Decimal(10, 2)
+  descripcionIncremento  String?                   @db.VarChar(255)
+  reparacionesDeTercero  ReparacionDeTercero[]     @relation("PresupuestoReparacionTercero")
+  repuestosUsados        RepuestoUsado[]           @relation("PresupuestoRepuestos")
+  trabajosRealizados     TrabajoRealizado[]        @relation("PresupuestoTrabajosRealizados")
+  estado                 EstadoPresupuesto         @default(EnPreparacion)
+  
+  @@index([autoId])
+  @@index([fecha])
+  @@index([estado])
+  @@index([dolarId], map: "Presupuesto_dolarId_fkey")
+}
+
 model RepuestoUsado {
   id                     Int                   @id @default(autoincrement())
   ordenReparacionId      Int?
   ventaId                Int?
+  presupuestoId          Int?
   stockId                Int
   precioCompra           Decimal               @db.Decimal(10, 2)
   precioVenta            Decimal               @db.Decimal(10, 2)
@@ -357,6 +385,7 @@ model RepuestoUsado {
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoRepuestos", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   stock                  Stock                 @relation(fields: [stockId], references: [id])
   venta                  Venta?                @relation("VentaRepuestos", fields: [ventaId], references: [id], onDelete: Cascade)
+  presupuesto            Presupuesto?          @relation("PresupuestoRepuestos", fields: [presupuestoId], references: [id], onDelete: Cascade)
 
   @@index([ordenReparacionId])
   @@index([ventaId], map: "RepuestoUsado_ventaId_fkey")
@@ -373,6 +402,7 @@ model ReparacionDeTercero {
   proveedorId            Int
   ordenReparacionId      Int?
   ventaId                Int?
+  presupuestoId          Int?
   plantillaPresupuestoId Int?
   borradorId             Int?
   recibo                 String?               @db.VarChar(255)
@@ -381,6 +411,7 @@ model ReparacionDeTercero {
   venta                  Venta?                @relation("VentaReparacionTercero", fields: [ventaId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoReparacionTercero", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   proveedor              Proveedor             @relation(fields: [proveedorId], references: [id])
+  presupuesto            Presupuesto?          @relation("PresupuestoReparacionTercero", fields: [presupuestoId], references: [id], onDelete: Cascade)
 
   @@index([nombre])
   @@index([proveedorId])
@@ -388,12 +419,14 @@ model ReparacionDeTercero {
   @@index([ventaId], map: "ReparacionDeTercero_ventaId_fkey")
   @@index([plantillaPresupuestoId], map: "ReparacionDeTercero_plantillaPresupuestoId_fkey")
   @@index([borradorId], map: "ReparacionDeTercero_borradorId_fkey")
+  
 }
 
 model TrabajoRealizado {
   id                     Int                   @id @default(autoincrement())
   ordenReparacionId      Int?
   ventaId                Int?
+  presupuestoId          Int?
   precioUnitario         Decimal               @db.Decimal(10, 2)
   descripcion            String                @db.Text
   diasParaRecordatorio   Int?
@@ -403,11 +436,13 @@ model TrabajoRealizado {
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionTrabajosRealizados", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoTrabajosRealizados", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   venta                  Venta?                @relation("VentaTrabajosRealizados", fields: [ventaId], references: [id], onDelete: Cascade)
+  presupuesto            Presupuesto?          @relation("PresupuestoTrabajosRealizados", fields: [presupuestoId], references: [id], onDelete: Cascade)
 
   @@index([ordenReparacionId])
   @@index([ventaId], map: "TrabajoRealizado_ventaId_fkey")
   @@index([plantillaPresupuestoId], map: "TrabajoRealizado_plantillaPresupuestoId_fkey")
   @@index([borradorId], map: "TrabajoRealizado_borradorId_fkey")
+  @@index([presupuestoId], map: "TrabajoRealizado_presupuestoId_fkey")
 }
 
 model PlantillaPresupuesto {
@@ -502,6 +537,7 @@ model Dolar {
   ingresosPorVenta      IngresoPorVenta[]
   ordenReparacion       OrdenReparacion[]
   venta                 Venta[]
+  presupuesto           Presupuesto[]
 
   @@index([fecha])
 }
@@ -673,6 +709,13 @@ enum EstadoOrdenReparacion {
   EnProgreso
   Aceptado
   Terminado
+}
+
+enum EstadoPresupuesto {
+  EnPreparacion
+  Enviado
+  Aceptado
+  Rechazado
 }
 
 enum TipoNotificacionInterna {

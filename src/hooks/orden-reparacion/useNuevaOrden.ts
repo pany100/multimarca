@@ -73,7 +73,7 @@ function useNuevaOrden({ control }: Props) {
     try {
       const endpoint = data.esBorrador
         ? "/api/borradores"
-        : "/api/orden-reparacion";
+        : "/api/presupuestos";
       const response = await authFetch(endpoint, {
         method: "POST",
         headers: {
