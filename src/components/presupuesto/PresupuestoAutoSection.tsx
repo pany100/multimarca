@@ -13,7 +13,7 @@ function PresupuestoAutoSection() {
 
   return (
     <Grid container spacing={3}>
-      <Grid item xs={12} md={6} ref={(el) => registerFieldRef("autoId", el)}>
+      <Grid item xs={12} ref={(el) => registerFieldRef("autoId", el)}>
         <CustomAutocompleteInput
           name="autoId"
           label="Vehículo"

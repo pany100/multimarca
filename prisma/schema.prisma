@@ -596,23 +596,6 @@ model MensajeWhatsApp {
   @@index([conversacionId])
 }
 
-model Borrador {
-  id                    Int                   @id @default(autoincrement())
-  autoId                Int
-  fechaCreacion         DateTime              @default(now())
-  observacionesCliente  String                @db.Text
-  detallesDeTrabajo     String?               @db.Text
-  descuento             Decimal               @default(0.00) @db.Decimal(10, 2)
-  descripcionDescuento   String?                   @db.VarChar(255)
-  auto                  Auto                  @relation("AutoBorrador", fields: [autoId], references: [id])
-  reparacionesDeTercero ReparacionDeTercero[] @relation("BorradorReparacionTercero")
-  repuestosUsados       RepuestoUsado[]       @relation("BorradorRepuestos")
-  trabajosRealizados    TrabajoRealizado[]    @relation("BorradorTrabajosRealizados")
-
-  @@index([autoId])
-  @@index([fechaCreacion])
-}
-
 model IngresoManualDeDinero {
   id             Int            @id @default(autoincrement())
   monto          Decimal        @db.Decimal(10, 2)
