@@ -21,6 +21,7 @@ model Usuario {
   rol                          Rol                     @relation(fields: [rolId], references: [id])
   ordenesReparacion            OrdenReparacion[]     @relation("OrdenReparacionRevisadaPor")
   notificacionesInternas       NotificacionInterna[]
+  presupuestos                 Presupuesto[]         @relation("PresupuestoAdministrativo")
   
   @@index([fullName])
   @@index([username])
@@ -347,6 +348,8 @@ model Presupuesto {
   id                     Int                       @id @default(autoincrement())
   autoId                 Int
   auto                   Auto                      @relation("AutoPresupuesto", fields: [autoId], references: [id])
+  administrativoId       Int
+  administrativo         Usuario                  @relation("PresupuestoAdministrativo", fields: [administrativoId], references: [id])
   fecha                  DateTime                  @default(now())
   fechaEnvio             DateTime?
   fechaRespuesta         DateTime?

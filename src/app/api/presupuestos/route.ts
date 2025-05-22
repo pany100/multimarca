@@ -52,6 +52,7 @@ export async function GET(request: Request) {
               owner: true,
             },
           },
+          administrativo: true,
           dolar: true,
           repuestosUsados: {
             include: {
@@ -95,6 +96,7 @@ export async function POST(request: Request) {
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
+      administrativoId,
       descuento = 0,
       descripcionDescuento,
       incremento = 0,
@@ -175,6 +177,7 @@ export async function POST(request: Request) {
         observacionesCliente,
         detallesDeTrabajo,
         estado,
+        administrativoId,
         dolarId: dolar?.id,
         descuento: new Prisma.Decimal(descuento),
         descripcionDescuento,

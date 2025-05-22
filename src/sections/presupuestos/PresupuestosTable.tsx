@@ -87,6 +87,12 @@ function PresupuestosTable({
       ),
     },
     {
+      field: "administrativo",
+      headerName: "Administrativo",
+      flex: 1,
+      renderCell: (params: any) => params.row.administrativo.fullName,
+    },
+    {
       field: "estado",
       headerName: "Estado",
       flex: 1,
