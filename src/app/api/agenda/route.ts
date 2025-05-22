@@ -66,7 +66,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { titulo, descripcion, fecha } = body;
+    const { titulo, descripcion, fecha, hecho } = body;
 
     if (!titulo || !fecha) {
       return NextResponse.json(
@@ -90,7 +90,7 @@ export async function POST(request: Request) {
         titulo,
         descripcion,
         fecha: fechaDate,
-        hecho: false, // Default to false for new recordatorios
+        hecho,
       },
     });
 

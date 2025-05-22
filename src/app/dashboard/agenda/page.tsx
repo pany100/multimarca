@@ -81,6 +81,12 @@ export default function AgendaPage() {
   // Estado para errores
   const [error, setError] = useState<string | null>(null);
 
+  // Estado para el diálogo de confirmación de eliminación
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [recordatorioToDelete, setRecordatorioToDelete] = useState<
+    number | null
+  >(null);
+
   // Cargar recordatorios del mes actual
   useEffect(() => {
     const fetchRecordatorios = async () => {
@@ -327,6 +333,10 @@ export default function AgendaPage() {
         if (modalMode === "edit" && selectedRecordatorio?.id === id) {
           setOpenModal(false);
         }
+
+        // Cerrar el diálogo de confirmación
+        setDeleteConfirmOpen(false);
+        setRecordatorioToDelete(null);
       } else {
         const data = await response.json();
         console.error("Error al eliminar recordatorio:", data.error);
@@ -334,6 +344,12 @@ export default function AgendaPage() {
     } catch (error) {
       console.error("Error al eliminar recordatorio:", error);
     }
+  };
+
+  // Abrir diálogo de confirmación para eliminar
+  const confirmDelete = (id: number) => {
+    setRecordatorioToDelete(id);
+    setDeleteConfirmOpen(true);
   };
 
   // Marcar recordatorio como completado/pendiente
@@ -422,7 +438,7 @@ export default function AgendaPage() {
                     <Paper
                       sx={{
                         p: 1,
-                        height: 150,
+                        height: 170,
                         bgcolor: theme.palette.grey[100],
                       }}
                     />
@@ -442,49 +458,59 @@ export default function AgendaPage() {
                   <Paper
                     sx={{
                       p: 1,
-                      height: 150,
+                      height: 170, // Increased height
                       overflow: "auto",
                       position: "relative",
                       border: isToday
                         ? `2px solid ${theme.palette.primary.main}`
                         : "none",
                       bgcolor: esFeriado ? "#FAA0A0" : "white",
+                      minWidth: 180, // Added minimum width
                     }}
                   >
                     <Box
                       sx={{
                         display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        mb: 1,
+                        flexDirection: "column",
+                        height: "100%",
                       }}
                     >
-                      <Typography
-                        variant="subtitle1"
+                      {/* Header with date and add button */}
+                      <Box
                         sx={{
-                          fontWeight: isToday ? "bold" : "normal",
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                          mb: 1,
                         }}
                       >
-                        {format(day, "d")}
-                      </Typography>
+                        <Typography
+                          variant="subtitle1"
+                          sx={{
+                            fontWeight: isToday ? "bold" : "normal",
+                          }}
+                        >
+                          {format(day, "d")}
+                        </Typography>
 
-                      <Tooltip
-                        title={
-                          esFeriado
-                            ? "No se pueden crear eventos en días feriados"
-                            : ""
-                        }
-                      >
-                        <span>
-                          <IconButton
-                            size="small"
-                            onClick={() => handleCreateRecordatorio(day)}
-                            disabled={esFeriado}
-                          >
-                            <AddIcon fontSize="small" />
-                          </IconButton>
-                        </span>
-                      </Tooltip>
+                        <Tooltip
+                          title={
+                            esFeriado
+                              ? "No se pueden crear eventos en días feriados"
+                              : ""
+                          }
+                        >
+                          <span>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleCreateRecordatorio(day)}
+                              disabled={esFeriado}
+                            >
+                              <AddIcon fontSize="small" />
+                            </IconButton>
+                          </span>
+                        </Tooltip>
+                      </Box>
 
                       {/* Mostrar descripción del feriado si es un día feriado */}
                       {esFeriado && (
@@ -501,62 +527,92 @@ export default function AgendaPage() {
                         </Typography>
                       )}
 
-                      {/* Mostrar recordatorios del día */}
-                      {dayRecordatorios.map((recordatorio) => (
-                        <Box
-                          key={recordatorio.id}
-                          sx={{
-                            mb: 1,
-                            p: 0.5,
-                            bgcolor: recordatorio.hecho
-                              ? "rgba(76, 175, 80, 0.1)"
-                              : "rgba(33, 150, 243, 0.1)",
-                            borderRadius: 1,
-                            display: "flex",
-                            alignItems: "center",
-                          }}
-                        >
-                          <IconButton
-                            size="small"
-                            onClick={() => handleToggleHecho(recordatorio)}
-                            sx={{ mr: 0.5 }}
-                          >
-                            {recordatorio.hecho ? (
-                              <CheckCircleIcon
-                                fontSize="small"
-                                color="success"
-                              />
-                            ) : (
-                              <RadioButtonUncheckedIcon
-                                fontSize="small"
-                                color="primary"
-                              />
-                            )}
-                          </IconButton>
-
-                          <Typography
-                            variant="caption"
+                      {/* Contenedor para los recordatorios con scroll */}
+                      <Box
+                        sx={{
+                          overflowY: "auto",
+                          flexGrow: 1,
+                          display: "flex",
+                          flexDirection: "column",
+                          gap: 1,
+                        }}
+                      >
+                        {/* Mostrar recordatorios del día */}
+                        {dayRecordatorios.map((recordatorio) => (
+                          <Box
+                            key={recordatorio.id}
                             sx={{
-                              flexGrow: 1,
-                              overflow: "hidden",
-                              textOverflow: "ellipsis",
-                              whiteSpace: "nowrap",
-                              textDecoration: recordatorio.hecho
-                                ? "line-through"
-                                : "none",
+                              p: 0.5,
+                              bgcolor: recordatorio.hecho
+                                ? "rgba(76, 175, 80, 0.1)"
+                                : "rgba(33, 150, 243, 0.1)",
+                              borderRadius: 1,
+                              display: "flex",
+                              alignItems: "center",
+                              width: "100%",
                             }}
                           >
-                            {recordatorio.titulo}
-                          </Typography>
+                            <IconButton
+                              size="small"
+                              onClick={() => handleToggleHecho(recordatorio)}
+                              sx={{ mr: 0.5 }}
+                            >
+                              {recordatorio.hecho ? (
+                                <CheckCircleIcon
+                                  fontSize="small"
+                                  color="success"
+                                />
+                              ) : (
+                                <RadioButtonUncheckedIcon
+                                  fontSize="small"
+                                  color="primary"
+                                />
+                              )}
+                            </IconButton>
 
-                          <IconButton
-                            size="small"
-                            onClick={() => handleEditRecordatorio(recordatorio)}
-                          >
-                            <EditIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
-                      ))}
+                            <Tooltip
+                              title={
+                                recordatorio.descripcion || "Sin descripción"
+                              }
+                              arrow
+                              placement="top"
+                            >
+                              <Typography
+                                variant="caption"
+                                sx={{
+                                  flexGrow: 1,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                  textDecoration: recordatorio.hecho
+                                    ? "line-through"
+                                    : "none",
+                                  cursor: "default", // Add cursor style to indicate it's hoverable
+                                }}
+                              >
+                                {recordatorio.titulo}
+                              </Typography>
+                            </Tooltip>
+
+                            <IconButton
+                              size="small"
+                              onClick={() =>
+                                handleEditRecordatorio(recordatorio)
+                              }
+                            >
+                              <EditIcon fontSize="small" />
+                            </IconButton>
+
+                            <IconButton
+                              size="small"
+                              onClick={() => confirmDelete(recordatorio.id)}
+                              color="error"
+                            >
+                              <DeleteIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        ))}
+                      </Box>
                     </Box>
                   </Paper>
                 </Grid>
@@ -587,7 +643,7 @@ export default function AgendaPage() {
                 onChange={(e) => setTitulo(e.target.value)}
                 margin="normal"
                 required
-                error={error && !titulo}
+                error={error && !titulo ? true : false}
                 helperText={error && !titulo ? "El título es obligatorio" : ""}
               />
 
@@ -631,20 +687,6 @@ export default function AgendaPage() {
           </DialogContent>
 
           <DialogActions>
-            {modalMode === "edit" && (
-              <Button
-                color="error"
-                startIcon={<DeleteIcon />}
-                onClick={() =>
-                  selectedRecordatorio &&
-                  handleDeleteRecordatorio(selectedRecordatorio.id)
-                }
-                sx={{ mr: "auto" }}
-              >
-                Eliminar
-              </Button>
-            )}
-
             <Button onClick={() => setOpenModal(false)}>Cancelar</Button>
 
             <Button
@@ -653,6 +695,36 @@ export default function AgendaPage() {
               onClick={handleSaveRecordatorio}
             >
               Guardar
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Modal de confirmación de eliminación */}
+        <Dialog
+          open={deleteConfirmOpen}
+          onClose={() => setDeleteConfirmOpen(false)}
+          maxWidth="xs"
+          fullWidth
+        >
+          <DialogTitle>Confirmar eliminación</DialogTitle>
+          <DialogContent>
+            <Typography>
+              ¿Está seguro que desea eliminar este recordatorio?
+            </Typography>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setDeleteConfirmOpen(false)}>
+              Cancelar
+            </Button>
+            <Button
+              color="error"
+              variant="contained"
+              onClick={() =>
+                recordatorioToDelete &&
+                handleDeleteRecordatorio(recordatorioToDelete)
+              }
+            >
+              Eliminar
             </Button>
           </DialogActions>
         </Dialog>
