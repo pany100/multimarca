@@ -94,9 +94,10 @@ function ChequesTable({
       headerName: "Operaciones",
       flex: 1,
       renderCell: (params) => {
+        const chequeId = params.row.id;
         const operaciones = params.row.operaciones.map(
           (operacion: { fecha: Date; tipo: string; descripcion: string }) => (
-            <Box key={operacion.fecha.toString()}>
+            <Box key={`${chequeId}-${operacion.fecha.toString()}`}>
               * {getOperacionChequeLabel(operacion)}
             </Box>
           )

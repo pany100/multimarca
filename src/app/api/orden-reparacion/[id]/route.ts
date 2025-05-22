@@ -306,14 +306,31 @@ export async function PUT(
       permanentUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${s3ObjectKey}`;
     }
 
-    const recibosUrls = await Promise.all(
-      recibos.map(async (recibo: string) => {
-        if (recibo && recibo.includes("/tmp/")) {
-          return await moveFileInS3(recibo, "recibos");
-        }
-        return recibo;
-      })
-    );
+    let recibosUrls: string[] = [];
+    if (recibos?.length > 0) {
+      recibosUrls = await Promise.all(
+        recibos.map(async (recibo: string) => {
+          if (recibo && recibo.includes("/tmp/")) {
+            return await moveFileInS3(recibo, "recibos");
+          }
+          return recibo;
+        })
+      );
+    }
+    if (
+      ordenActual.recibos &&
+      Array.isArray(ordenActual.recibos) &&
+      ordenActual.recibos.length > 0
+    ) {
+      const recibosToDelete = ordenActual.recibos.filter(
+        (recibo) => !recibos.includes(recibo)
+      );
+      await Promise.all(
+        recibosToDelete.map(async (recibo) => {
+          await deleteFileFromS3(recibo as string);
+        })
+      );
+    }
 
     const dolar = await getDolarForDate(fechaCreacion);
     // Actualizar la orden de reparación y el stock en una transacción

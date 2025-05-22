@@ -100,6 +100,7 @@ const schema = yup.object().shape({
   descripcionIncremento: yup.string().nullable(),
   observacionesEntrada: yup.string(),
   detallesDeTrabajo: yup.string().nullable(),
+  recibos: yup.array().of(yup.string()).nullable(),
 });
 
 export default schema;

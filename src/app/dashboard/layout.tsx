@@ -673,7 +673,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       </List>
     </Box>
   );
-
   return (
     <ProtectedRoute>
       {isLoading && (
@@ -841,7 +840,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             </IconButton>
           )}
           <Toolbar />
-          <Container maxWidth="lg">
+          <Container>
             <Box
               sx={{
                 mb: 3,

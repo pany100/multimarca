@@ -155,34 +155,23 @@ export default function AgendaPage() {
     end: monthEnd,
   });
 
-  // Crear un array para los días laborables (lunes a viernes)
-  const daysInMonth = allDaysInMonth.filter((day) => {
-    const dayOfWeek = getDay(day);
-    return dayOfWeek !== 0 && dayOfWeek !== 6; // Excluir domingo (0) y sábado (6)
-  });
-
   // Crear un array para representar el calendario completo con las posiciones correctas
   const calendarGrid: (Date | null)[][] = [];
-  let currentWeek: (Date | null)[] = Array(5).fill(null); // 5 días por semana (lunes a viernes)
+  let currentWeek: (Date | null)[] = Array(7).fill(null); // 7 días por semana (incluyendo fines de semana)
   let currentWeekIndex = 0;
 
   // Procesar todos los días del mes
   allDaysInMonth.forEach((day) => {
     const dayOfWeek = getDay(day);
 
-    // Saltarse fines de semana
-    if (dayOfWeek === 0 || dayOfWeek === 6) {
-      return;
-    }
-
-    // Convertir día de la semana a índice de 0-4 (lunes-viernes)
-    // 1 (lunes) -> 0, 2 (martes) -> 1, ..., 5 (viernes) -> 4
-    const weekdayIndex = dayOfWeek === 0 ? 4 : dayOfWeek - 1;
+    // Convertir día de la semana a índice de 0-6 (domingo-sábado)
+    // 0 (domingo) -> 0, 1 (lunes) -> 1, ..., 6 (sábado) -> 6
+    const weekdayIndex = dayOfWeek;
 
     // Si estamos en una nueva semana, añadir la semana anterior al grid y crear una nueva
     if (weekdayIndex < currentWeekIndex) {
       calendarGrid.push([...currentWeek]);
-      currentWeek = Array(5).fill(null);
+      currentWeek = Array(7).fill(null);
       currentWeekIndex = 0;
     }
 
@@ -411,10 +400,35 @@ export default function AgendaPage() {
         </Paper>
 
         {/* Calendario */}
-        <Grid container spacing={2}>
-          {/* Encabezados de días de la semana (excluyendo sábado y domingo) */}
-          {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes"].map((day) => (
-            <Grid item xs={12 / 5} key={day}>
+        <Grid
+          container
+          spacing={1}
+          sx={{
+            width: "100%",
+            mx: "auto",
+          }}
+        >
+          {/* Encabezados de días de la semana */}
+          {[
+            "Domingo",
+            "Lunes",
+            "Martes",
+            "Miércoles",
+            "Jueves",
+            "Viernes",
+            "Sábado",
+          ].map((day) => (
+            <Grid
+              item
+              xs={12 / 7}
+              sm={12 / 7}
+              md={12 / 7}
+              key={day}
+              sx={{
+                minWidth: { xs: "auto", sm: "120px" },
+                px: 0.5,
+              }}
+            >
               <Paper
                 sx={{
                   p: 1,
@@ -423,7 +437,14 @@ export default function AgendaPage() {
                   color: "white",
                 }}
               >
-                <Typography variant="subtitle2">{day}</Typography>
+                <Typography
+                  variant="subtitle2"
+                  sx={{
+                    fontSize: { xs: "0.7rem", sm: "0.8rem", md: "0.875rem" },
+                  }}
+                >
+                  {day}
+                </Typography>
               </Paper>
             </Grid>
           ))}
@@ -434,11 +455,21 @@ export default function AgendaPage() {
               if (day === null) {
                 // Celda vacía
                 return (
-                  <Grid item xs={12 / 5} key={`empty-${weekIndex}-${dayIndex}`}>
+                  <Grid
+                    item
+                    xs={12 / 7}
+                    sm={12 / 7}
+                    md={12 / 7}
+                    key={`empty-${weekIndex}-${dayIndex}`}
+                    sx={{
+                      minWidth: { xs: "auto", sm: "120px" },
+                      px: 0.5,
+                    }}
+                  >
                     <Paper
                       sx={{
                         p: 1,
-                        height: 170,
+                        height: { xs: 120, sm: 140, md: 160 },
                         bgcolor: theme.palette.grey[100],
                       }}
                     />
@@ -454,18 +485,27 @@ export default function AgendaPage() {
                 : "";
 
               return (
-                <Grid item xs={12 / 5} key={day.toISOString()}>
+                <Grid
+                  item
+                  xs={12 / 7}
+                  sm={12 / 7}
+                  md={12 / 7}
+                  key={day.toISOString()}
+                  sx={{
+                    minWidth: { xs: "auto", sm: "120px" },
+                    px: 0.5,
+                  }}
+                >
                   <Paper
                     sx={{
                       p: 1,
-                      height: 170, // Increased height
+                      height: { xs: 120, sm: 140, md: 160 },
                       overflow: "auto",
                       position: "relative",
                       border: isToday
                         ? `2px solid ${theme.palette.primary.main}`
                         : "none",
                       bgcolor: esFeriado ? "#FAA0A0" : "white",
-                      minWidth: 180, // Added minimum width
                     }}
                   >
                     <Box

@@ -53,7 +53,7 @@ export const schema = yup.object({
       schema.required(
         "Las observaciones son requeridas cuando el cheque es rechazado"
       ),
-    otherwise: (schema) => schema.optional(),
+    otherwise: (schema) => schema.notRequired().nullable(),
   }),
 });
 
