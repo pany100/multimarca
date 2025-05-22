@@ -316,6 +316,7 @@ model OrdenReparacion {
   detallesDeTrabajo      String?                   @db.Text
   estado                 EstadoOrdenReparacion     @default(Presupuestado)
   pdfPath                String?                   @db.VarChar(255)
+  recibos                Json?
   descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
   dolarId                Int?
   detalleControles       String?                   @db.Text

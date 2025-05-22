@@ -5,6 +5,7 @@ import { useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import FormActions from "../commons/FormActions";
 import FormSection from "../commons/FormSection";
+import RecibosSection from "../commons/RecibosSection";
 import ScannerForm from "../commons/ScannerForm";
 import AutoSection from "../sections/autos/AutoSection";
 import ClientObservationSection from "../sections/client-observations/ClientObservationSection";
@@ -96,6 +97,7 @@ type OrdenReparacion = {
   incremento: number;
   descripcionIncremento: string;
   detalleControles: string;
+  recibos: string[];
 };
 
 function EditarOrdenForm({ ordenReparacion }: Props) {
@@ -205,6 +207,9 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
             selectedFile={selectedFile}
             setSelectedFile={setSelectedFile}
           />
+        </FormSection>
+        <FormSection title="Recibos">
+          <RecibosSection />
         </FormSection>
         <FormActions
           href="/dashboard/ordenes-reparacion"

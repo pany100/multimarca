@@ -7,6 +7,7 @@ import Header from "@/components/orden-reparacion/ver/Header";
 import Mechanics from "@/components/orden-reparacion/ver/Mechanics";
 import NotasInternas from "@/components/orden-reparacion/ver/NotasInternas";
 import PriceInfo from "@/components/orden-reparacion/ver/PriceInfo";
+import Recibos from "@/components/orden-reparacion/ver/Recibos";
 import RevisadoPor from "@/components/orden-reparacion/ver/RevisadoPor";
 import ScannerInfo from "@/components/orden-reparacion/ver/ScannerInfo";
 import { useFetch } from "@/contexts/FetchContext";
@@ -115,6 +116,8 @@ const VerOrdenReparacionPage = ({ params }: { params: { id: string } }) => {
       <RevisadoPor ordenReparacion={ordenReparacion} />
       <Divider sx={{ my: 2 }} />
       <ScannerInfo ordenReparacion={ordenReparacion} />
+      <Divider sx={{ my: 2 }} />
+      <Recibos ordenReparacion={ordenReparacion} />
       <Divider sx={{ my: 2 }} />
       <PriceInfo ordenReparacion={ordenReparacion} />
     </Paper>

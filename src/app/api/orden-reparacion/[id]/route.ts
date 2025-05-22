@@ -113,6 +113,7 @@ export async function PUT(
       reparacionesDeTercero = [],
       trabajosRealizados = [],
       controlesEnReparacion = [],
+      recibos,
       detalleControles,
       descuento,
       descripcionDescuento,
@@ -305,6 +306,15 @@ export async function PUT(
       permanentUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${s3ObjectKey}`;
     }
 
+    const recibosUrls = await Promise.all(
+      recibos.map(async (recibo: string) => {
+        if (recibo && recibo.includes("/tmp/")) {
+          return await moveFileInS3(recibo, "recibos");
+        }
+        return recibo;
+      })
+    );
+
     const dolar = await getDolarForDate(fechaCreacion);
     // Actualizar la orden de reparación y el stock en una transacción
     const [ordenReparacionActualizada] = await prisma.$transaction(
@@ -323,6 +333,7 @@ export async function PUT(
             observacionesSalida,
             detallesDeTrabajo,
             estado,
+            recibos: recibosUrls,
             revisadoPorId,
             dolarId: dolar?.id,
             descuento: new Prisma.Decimal(descuento),
