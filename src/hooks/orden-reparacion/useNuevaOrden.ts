@@ -111,9 +111,47 @@ function useNuevaOrden({ control }: Props) {
     }
   };
 
+  const handlePresupuestoEdit = async (data: any) => {
+    try {
+      const response = await authFetch(`/api/presupuestos/${data.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (response.ok) {
+        setSnackbar({
+          open: true,
+          message: "Presupuesto actualizado con éxito",
+          severity: "success",
+        });
+        router.push("/dashboard/presupuestos");
+      } else {
+        const errorData = await response.json();
+        setSnackbar({
+          open: true,
+          message: errorData.error || "Error al actualizar el presupuesto",
+          severity: "error",
+        });
+      }
+    } catch (error) {
+      console.error("Error al enviar la solicitud:", error);
+      setSnackbar({
+        open: true,
+        message: `Error al realizar la solicitud de creación: ${
+          error instanceof Error ? error.message : "Error desconocido"
+        }`,
+        severity: "error",
+      });
+    }
+  };
+
   return {
     presupuestoSubmit,
     onSubmit,
+    handlePresupuestoEdit,
     snackbar,
     setSnackbar,
     manoDeObra,
