@@ -8,9 +8,19 @@ import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import AddPresupuestoModal from "./AddPresupuestoModal";
+
+// Define the estados for the presupuestos
+const estados = ["TODOS", "EnPreparacion", "Enviado", "Aceptado", "Rechazado"];
+
+const estadosDisplay = {
+  EnPreparacion: "En Preparación",
+  Enviado: "Enviado",
+  Aceptado: "Aceptado",
+  Rechazado: "Rechazado",
+};
 
 const mapEstadoPresupuesto = (estado: string) => {
   switch (estado) {
@@ -49,12 +59,31 @@ function PresupuestosTable({
   ...rest
 }: InheritedTableProps) {
   const router = useRouter();
-  const [tabValue, setTabValue] = useState<number>(0);
+  const searchParams = useSearchParams();
+  const [tabValue, setTabValue] = useState(0);
+  const [estadoActual, setEstadoActual] = useState<string | null>(null);
   const [addModalOpen, setAddModalOpen] = useState(false);
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam !== null) {
+      const tabIndex = parseInt(tabParam);
+      if (!isNaN(tabIndex) && tabIndex >= 0 && tabIndex < estados.length) {
+        setTabValue(tabIndex);
+        setEstadoActual(tabIndex === 0 ? null : estados[tabIndex]);
+      }
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+    setEstadoActual(newValue === 0 ? null : estados[newValue]);
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", newValue.toString());
+    window.history.pushState({ tab: newValue }, "", url.toString());
   };
+
   const columns = [
     { field: "id", headerName: "ID", flex: 0.3 },
     {
@@ -149,18 +178,67 @@ function PresupuestosTable({
 
   return (
     <Box>
-      <Tabs value={tabValue} onChange={handleTabChange}>
-        <Tab label="Presupuestos" />
-      </Tabs>
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
+        <Tabs value={tabValue} onChange={handleTabChange}>
+          {estados.map((estado, index) => (
+            <Tab
+              key={estado}
+              label={estado === "TODOS" ? estado : estadosDisplay[estado]}
+            />
+          ))}
+        </Tabs>
+      </Box>
       <Box mt={2}>
-        <CustomTable
-          title="Presupuestos"
-          apiEndpoint="/api/presupuestos"
-          extraActions={customActions}
-          ctaCb={() => setAddModalOpen(true)}
-          columns={columns}
-          {...rest}
-        />
+        {estadoActual === null && (
+          <CustomTable
+            title="Presupuestos"
+            apiEndpoint="/api/presupuestos"
+            extraActions={customActions}
+            ctaCb={() => setAddModalOpen(true)}
+            columns={columns}
+            {...rest}
+          />
+        )}
+        {estadoActual === "EnPreparacion" && (
+          <CustomTable
+            title="Presupuestos en Preparación"
+            apiEndpoint="/api/presupuestos?estado=EnPreparacion"
+            extraActions={customActions}
+            ctaCb={() => setAddModalOpen(true)}
+            columns={columns}
+            {...rest}
+          />
+        )}
+        {estadoActual === "Enviado" && (
+          <CustomTable
+            title="Presupuestos Enviados"
+            apiEndpoint="/api/presupuestos?estado=Enviado"
+            extraActions={customActions}
+            ctaCb={() => setAddModalOpen(true)}
+            columns={columns}
+            {...rest}
+          />
+        )}
+        {estadoActual === "Aceptado" && (
+          <CustomTable
+            title="Presupuestos Aceptados"
+            apiEndpoint="/api/presupuestos?estado=Aceptado"
+            extraActions={customActions}
+            ctaCb={() => setAddModalOpen(true)}
+            columns={columns}
+            {...rest}
+          />
+        )}
+        {estadoActual === "Rechazado" && (
+          <CustomTable
+            title="Presupuestos Rechazados"
+            apiEndpoint="/api/presupuestos?estado=Rechazado"
+            extraActions={customActions}
+            ctaCb={() => setAddModalOpen(true)}
+            columns={columns}
+            {...rest}
+          />
+        )}
       </Box>
       <AddPresupuestoModal
         open={addModalOpen}
