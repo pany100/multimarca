@@ -64,7 +64,7 @@ function EditarPresupuestoForm({ presupuesto }: { presupuesto: any }) {
           <PresupuestoInformacionGeneral />
         </FormSection>
         <FormSection title="Información del Vehículo">
-          <PresupuestoAutoSection showBorrador={false} />
+          <PresupuestoAutoSection />
         </FormSection>
         <FormSection title="Pedido del Cliente">
           <ClientObservationSection />

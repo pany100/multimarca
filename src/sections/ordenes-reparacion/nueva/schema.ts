@@ -111,20 +111,20 @@ const presupuestoSchema = yup.object().shape({
           name: yup.string().required(),
         })
         .required("El repuesto es requerido"),
-      precioCompra: yup.mixed().when("$esBorrador", {
-        is: false,
+      precioCompra: yup.mixed().when("$estado", {
+        is: "EnPreparacion",
         then: () =>
           yup.number().positive().required("El precio de compra es requerido"),
         otherwise: () => yup.mixed(),
       }),
-      precioVenta: yup.mixed().when("$esBorrador", {
-        is: false,
+      precioVenta: yup.mixed().when("$estado", {
+        is: "EnPreparacion",
         then: () =>
           yup.number().positive().required("El precio de venta es requerido"),
         otherwise: () => yup.mixed(),
       }),
-      unidadesConsumidas: yup.mixed().when("$esBorrador", {
-        is: false,
+      unidadesConsumidas: yup.mixed().when("$estado", {
+        is: "EnPreparacion",
         then: () =>
           yup
             .number()
@@ -144,8 +144,8 @@ const presupuestoSchema = yup.object().shape({
           diasParaRecordatorio: yup.number().positive().integer().nullable(),
         })
         .required("La mano de obra es requerida"),
-      precioUnitario: yup.mixed().when("$esBorrador", {
-        is: false,
+      precioUnitario: yup.mixed().when("$estado", {
+        is: "EnPreparacion",
         then: () =>
           yup.number().positive().required("El precio unitario es requerido"),
         otherwise: () => yup.mixed(),
@@ -155,14 +155,14 @@ const presupuestoSchema = yup.object().shape({
   reparacionesDeTercero: yup.array().of(
     yup.object().shape({
       nombre: yup.string().required("El nombre de la reparación es requerido"),
-      precioCompra: yup.mixed().when("$esBorrador", {
-        is: false,
+      precioCompra: yup.mixed().when("$estado", {
+        is: "EnPreparacion",
         then: () =>
           yup.number().positive().required("El precio de compra es requerido"),
         otherwise: () => yup.mixed(),
       }),
-      precioVenta: yup.mixed().when("$esBorrador", {
-        is: false,
+      precioVenta: yup.mixed().when("$estado", {
+        is: "EnPreparacion",
         then: () =>
           yup.number().positive().required("El precio de venta es requerido"),
         otherwise: () => yup.mixed(),
@@ -178,7 +178,6 @@ const presupuestoSchema = yup.object().shape({
   ),
   descuento: yup.number().min(0),
   observacionesEntrada: yup.string(),
-  esBorrador: yup.boolean(),
   descripcionDescuento: yup.string().nullable(),
   incremento: yup.number().min(0),
   descripcionIncremento: yup.string().nullable(),

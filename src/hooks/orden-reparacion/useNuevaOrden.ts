@@ -71,9 +71,7 @@ function useNuevaOrden({ control }: Props) {
 
   const presupuestoSubmit = async (data: any) => {
     try {
-      const endpoint = data.esBorrador
-        ? "/api/borradores"
-        : "/api/presupuestos";
+      const endpoint = "/api/presupuestos";
       const response = await authFetch(endpoint, {
         method: "POST",
         headers: {
@@ -85,9 +83,7 @@ function useNuevaOrden({ control }: Props) {
       if (response.ok) {
         setSnackbar({
           open: true,
-          message: data.esBorrador
-            ? "Borrador guardado con éxito"
-            : "Presupuesto creado con éxito",
+          message: "Presupuesto creado con éxito",
           severity: "success",
         });
         router.push("/dashboard/presupuestos");
@@ -95,7 +91,7 @@ function useNuevaOrden({ control }: Props) {
         const errorData = await response.json();
         setSnackbar({
           open: true,
-          message: errorData.error || "Error al crear la orden de reparación",
+          message: errorData.error || "Error al crear el presupuesto",
           severity: "error",
         });
       }

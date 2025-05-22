@@ -97,23 +97,11 @@ function PresupuestosTable({
       headerName: "Estado",
       flex: 1,
       renderCell: (params: any) => {
-        if (params.row.estado !== undefined) {
-          return (
-            <Chip
-              label={mapEstadoPresupuesto(params.row.estado)}
-              sx={{
-                backgroundColor: mapEstadoColor(params.row.estado),
-                color: "white",
-                fontWeight: "bold",
-              }}
-            />
-          );
-        }
         return (
           <Chip
-            label="Borrador"
+            label={mapEstadoPresupuesto(params.row.estado)}
             sx={{
-              backgroundColor: "#808080",
+              backgroundColor: mapEstadoColor(params.row.estado),
               color: "white",
               fontWeight: "bold",
             }}
@@ -137,43 +125,25 @@ function PresupuestosTable({
   ];
 
   const customActions = (params: any) => {
-    const isBorrador = params.estado === undefined;
     const defaultActions = extraActions ? extraActions(params) : [];
-    let customActions: React.ReactNode[];
-    if (isBorrador) {
-      customActions = [
-        <MenuItem
-          key="edit"
-          onClick={() =>
-            router.push(`/dashboard/borradores/${params.id}/editar`)
-          }
-        >
-          <EditIcon sx={{ mr: 1 }} />
-          Editar
-        </MenuItem>,
-      ];
-    } else {
-      customActions = [
-        <MenuItem
-          key="edit"
-          onClick={() =>
-            router.push(`/dashboard/presupuestos/${params.id}/editar`)
-          }
-        >
-          <EditIcon sx={{ mr: 1 }} />
-          Editar
-        </MenuItem>,
-        <MenuItem
-          key="view"
-          onClick={() =>
-            router.push(`/dashboard/presupuestos/${params.id}/ver`)
-          }
-        >
-          <VisibilityIcon sx={{ mr: 1 }} />
-          Ver
-        </MenuItem>,
-      ];
-    }
+    const customActions: React.ReactNode[] = [
+      <MenuItem
+        key="edit"
+        onClick={() =>
+          router.push(`/dashboard/presupuestos/${params.id}/editar`)
+        }
+      >
+        <EditIcon sx={{ mr: 1 }} />
+        Editar
+      </MenuItem>,
+      <MenuItem
+        key="view"
+        onClick={() => router.push(`/dashboard/presupuestos/${params.id}/ver`)}
+      >
+        <VisibilityIcon sx={{ mr: 1 }} />
+        Ver
+      </MenuItem>,
+    ];
     return customActions.concat(defaultActions);
   };
 
@@ -181,28 +151,16 @@ function PresupuestosTable({
     <Box>
       <Tabs value={tabValue} onChange={handleTabChange}>
         <Tab label="Presupuestos" />
-        <Tab label="Borradores" />
       </Tabs>
       <Box mt={2}>
-        {tabValue === 0 ? (
-          <CustomTable
-            title="Presupuestos"
-            apiEndpoint="/api/presupuestos"
-            extraActions={customActions}
-            ctaCb={() => setAddModalOpen(true)}
-            columns={columns}
-            {...rest}
-          />
-        ) : (
-          <CustomTable
-            title="Borradores"
-            apiEndpoint="/api/borradores"
-            extraActions={customActions}
-            ctaCb={() => setAddModalOpen(true)}
-            columns={columns}
-            {...rest}
-          />
-        )}
+        <CustomTable
+          title="Presupuestos"
+          apiEndpoint="/api/presupuestos"
+          extraActions={customActions}
+          ctaCb={() => setAddModalOpen(true)}
+          columns={columns}
+          {...rest}
+        />
       </Box>
       <AddPresupuestoModal
         open={addModalOpen}

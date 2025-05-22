@@ -27,6 +27,7 @@ export async function GET(request: Request) {
         { auto: { patent: { contains: query } } },
         { auto: { owner: { fullName: { contains: query } } } },
         { observacionesCliente: { contains: query } },
+        { administrativo: { fullName: { contains: query } } },
       ],
     };
 
