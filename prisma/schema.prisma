@@ -84,7 +84,6 @@ model Auto {
   transmission_type String?           @db.VarChar(20)
   cedulaVerdePath   String?           @db.VarChar(1000)
   owner             Cliente           @relation(fields: [ownerId], references: [id])
-  borradores        Borrador[]        @relation("AutoBorrador")
   ordenesReparacion OrdenReparacion[] @relation("AutoOrdenReparacion")
   presupuestos      Presupuesto[]     @relation("AutoPresupuesto")
   turnos            Turno[]
@@ -382,8 +381,6 @@ model RepuestoUsado {
   precioVenta            Decimal               @db.Decimal(10, 2)
   unidadesConsumidas     Int
   plantillaPresupuestoId Int?
-  borradorId             Int?
-  borrador               Borrador?             @relation("BorradorRepuestos", fields: [borradorId], references: [id], onDelete: Cascade)
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionRepuestos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoRepuestos", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   stock                  Stock                 @relation(fields: [stockId], references: [id])
@@ -394,7 +391,6 @@ model RepuestoUsado {
   @@index([ventaId], map: "RepuestoUsado_ventaId_fkey")
   @@index([stockId])
   @@index([plantillaPresupuestoId], map: "RepuestoUsado_plantillaPresupuestoId_fkey")
-  @@index([borradorId], map: "RepuestoUsado_borradorId_fkey")
 }
 
 model ReparacionDeTercero {
@@ -407,9 +403,7 @@ model ReparacionDeTercero {
   ventaId                Int?
   presupuestoId          Int?
   plantillaPresupuestoId Int?
-  borradorId             Int?
   recibo                 String?               @db.VarChar(255)
-  borrador               Borrador?             @relation("BorradorReparacionTercero", fields: [borradorId], references: [id], onDelete: Cascade)
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionReparacionTercero", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   venta                  Venta?                @relation("VentaReparacionTercero", fields: [ventaId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoReparacionTercero", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
@@ -421,7 +415,6 @@ model ReparacionDeTercero {
   @@index([ordenReparacionId], map: "ReparacionDeTercero_ordenReparacionId_fkey")
   @@index([ventaId], map: "ReparacionDeTercero_ventaId_fkey")
   @@index([plantillaPresupuestoId], map: "ReparacionDeTercero_plantillaPresupuestoId_fkey")
-  @@index([borradorId], map: "ReparacionDeTercero_borradorId_fkey")
   
 }
 
@@ -434,8 +427,6 @@ model TrabajoRealizado {
   descripcion            String                @db.Text
   diasParaRecordatorio   Int?
   plantillaPresupuestoId Int?
-  borradorId             Int?
-  borrador               Borrador?             @relation("BorradorTrabajosRealizados", fields: [borradorId], references: [id], onDelete: Cascade)
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionTrabajosRealizados", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoTrabajosRealizados", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   venta                  Venta?                @relation("VentaTrabajosRealizados", fields: [ventaId], references: [id], onDelete: Cascade)
@@ -444,7 +435,6 @@ model TrabajoRealizado {
   @@index([ordenReparacionId])
   @@index([ventaId], map: "TrabajoRealizado_ventaId_fkey")
   @@index([plantillaPresupuestoId], map: "TrabajoRealizado_plantillaPresupuestoId_fkey")
-  @@index([borradorId], map: "TrabajoRealizado_borradorId_fkey")
   @@index([presupuestoId], map: "TrabajoRealizado_presupuestoId_fkey")
 }
 

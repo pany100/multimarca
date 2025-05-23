@@ -183,7 +183,7 @@ function PresupuestosTable({
           {estados.map((estado, index) => (
             <Tab
               key={estado}
-              label={estado === "TODOS" ? estado : estadosDisplay[estado]}
+              label={estado === "TODOS" ? estado : mapEstadoPresupuesto(estado)}
             />
           ))}
         </Tabs>
