@@ -20,6 +20,7 @@ export async function GET(
         },
         dolar: true,
         administrativo: true,
+        creador: true,
         repuestosUsados: {
           include: {
             stock: true,
@@ -61,6 +62,8 @@ export async function PUT(
     const {
       autoId,
       observacionesCliente,
+      creadorId,
+      administrativoId,
       detallesDeTrabajo,
       repuestosUsados = [],
       reparacionesDeTercero = [],
@@ -188,6 +191,8 @@ export async function PUT(
         autoId: parseInt(autoId),
         observacionesCliente,
         detallesDeTrabajo,
+        creadorId,
+        administrativoId,
         estado,
         dolarId: dolar?.id,
         descuento: new Prisma.Decimal(descuento),

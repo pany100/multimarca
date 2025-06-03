@@ -99,27 +99,41 @@ function PresupuestosTable({
       field: "vehículo",
       headerName: "Auto",
       flex: 2,
-      renderCell: (params: any) => (
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            height: "100%",
-          }}
-        >
-          <Typography variant="body2">
-            {params.row.auto.brand} {params.row.auto.model}
-          </Typography>
-          <Typography>{params.row.auto.patent}</Typography>
-        </Box>
-      ),
+      renderCell: (params: any) => {
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              height: "100%",
+            }}
+          >
+            {params.row.auto ? (
+              <>
+                <Typography variant="body2">
+                  {params.row.auto.brand} {params.row.auto.model}
+                </Typography>
+                <Typography>{params.row.auto.patent}</Typography>
+              </>
+            ) : (
+              "No Ingresado"
+            )}
+          </Box>
+        );
+      },
     },
     {
       field: "administrativo",
-      headerName: "Administrativo",
+      headerName: "Creado Por",
       flex: 1,
       renderCell: (params: any) => params.row.administrativo?.fullName || "-",
+    },
+    {
+      field: "creador",
+      headerName: "Completado Por",
+      flex: 1,
+      renderCell: (params: any) => params.row.creador?.fullName || "-",
     },
     {
       field: "estado",
@@ -142,7 +156,8 @@ function PresupuestosTable({
       field: "cliente",
       headerName: "Cliente",
       flex: 1,
-      renderCell: (params: any) => params.row.auto.owner.fullName,
+      renderCell: (params: any) =>
+        params.row.auto?.owner?.fullName || "No Ingresado",
     },
     {
       field: "totalAPagar",

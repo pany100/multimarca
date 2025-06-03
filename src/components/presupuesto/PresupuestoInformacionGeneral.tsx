@@ -51,7 +51,15 @@ function PresupuestoInformacionGeneral() {
       >
         <CustomAutocompleteInput
           name="administrativoId"
-          label="Administrativo"
+          label="Administrativo que ingresa"
+          searchOptions={searchUsers}
+          initialOptions={initialUser}
+        />
+      </Grid>
+      <Grid item xs={12} md={6} ref={(el) => registerFieldRef("creadorId", el)}>
+        <CustomAutocompleteInput
+          name="creadorId"
+          label="Administrativo que carga"
           searchOptions={searchUsers}
           initialOptions={initialUser}
         />

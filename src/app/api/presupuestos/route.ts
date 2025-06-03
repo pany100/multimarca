@@ -54,6 +54,7 @@ export async function GET(request: Request) {
             },
           },
           administrativo: true,
+          creador: true,
           dolar: true,
           repuestosUsados: {
             include: {
@@ -98,6 +99,7 @@ export async function POST(request: Request) {
       reparacionesDeTercero = [],
       trabajosRealizados = [],
       administrativoId,
+      creadorId,
       descuento = 0,
       descripcionDescuento,
       incremento = 0,
@@ -105,9 +107,9 @@ export async function POST(request: Request) {
       estado = EstadoPresupuestoType.EnPreparacion,
     } = body;
 
-    if (!autoId || !observacionesCliente) {
+    if (!observacionesCliente) {
       return NextResponse.json(
-        { error: "El auto y las observaciones del cliente son obligatorios" },
+        { error: "Las observaciones del cliente son obligatorios" },
         { status: 400 }
       );
     }
@@ -179,6 +181,7 @@ export async function POST(request: Request) {
         detallesDeTrabajo,
         estado,
         administrativoId,
+        creadorId,
         dolarId: dolar?.id,
         descuento: new Prisma.Decimal(descuento),
         descripcionDescuento,
