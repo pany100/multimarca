@@ -222,7 +222,7 @@ export const getChequeIdAndValidate = async (
   }
   if (data.chequeId) {
     const operaciones = await getOperacionesByChequeId(parseInt(data.chequeId));
-    if (operaciones.length === 2) {
+    if (operaciones.length > 3) {
       throw new Error("El cheque ya ha sido utilizado");
     }
     return parseInt(data.chequeId);
