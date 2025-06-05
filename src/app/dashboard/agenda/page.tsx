@@ -9,6 +9,7 @@ import {
   Delete as DeleteIcon,
   Edit as EditIcon,
   Event as EventIcon,
+  MoreVert as MoreVertIcon,
   RadioButtonUnchecked as RadioButtonUncheckedIcon,
 } from "@mui/icons-material";
 import {
@@ -20,6 +21,8 @@ import {
   DialogTitle,
   Grid,
   IconButton,
+  Menu,
+  MenuItem,
   Paper,
   TextField,
   Tooltip,
@@ -86,6 +89,11 @@ export default function AgendaPage() {
   const [recordatorioToDelete, setRecordatorioToDelete] = useState<
     number | null
   >(null);
+
+  // Estado para el menú
+  const [menuAnchorEl, setMenuAnchorEl] = useState<null | HTMLElement>(null);
+  const [activeRecordatorio, setActiveRecordatorio] =
+    useState<RecordatorioAgenda | null>(null);
 
   // Cargar recordatorios del mes actual
   useEffect(() => {
@@ -370,6 +378,36 @@ export default function AgendaPage() {
     }
   };
 
+  // Handle menu open
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLButtonElement>,
+    recordatorio: RecordatorioAgenda
+  ) => {
+    setMenuAnchorEl(event.currentTarget);
+    setActiveRecordatorio(recordatorio);
+  };
+
+  // Handle menu close
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
+
+  // Handle edit from menu
+  const handleMenuEdit = () => {
+    if (activeRecordatorio) {
+      handleEditRecordatorio(activeRecordatorio);
+    }
+    handleMenuClose();
+  };
+
+  // Handle delete from menu
+  const handleMenuDelete = () => {
+    if (activeRecordatorio) {
+      confirmDelete(activeRecordatorio.id);
+    }
+    handleMenuClose();
+  };
+
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
       <Box sx={{ p: 3, width: "100%" }}>
@@ -588,67 +626,70 @@ export default function AgendaPage() {
                                 : "rgba(33, 150, 243, 0.1)",
                               borderRadius: 1,
                               display: "flex",
-                              alignItems: "center",
+                              flexWrap: "wrap",
+                              alignItems: "flex-start",
                               width: "100%",
                             }}
                           >
-                            <IconButton
-                              size="small"
-                              onClick={() => handleToggleHecho(recordatorio)}
-                              sx={{ mr: 0.1 }}
+                            <Box
+                              sx={{
+                                display: "flex",
+                                alignItems: "flex-start",
+                                flexGrow: 1,
+                                width: "calc(100% - 40px)", // Reserve space for the menu button
+                              }}
                             >
-                              {recordatorio.hecho ? (
-                                <CheckCircleIcon
-                                  fontSize="small"
-                                  color="success"
-                                />
-                              ) : (
-                                <RadioButtonUncheckedIcon
-                                  fontSize="small"
-                                  color="primary"
-                                />
-                              )}
-                            </IconButton>
-
-                            <Tooltip
-                              title={
-                                recordatorio.descripcion || "Sin descripción"
-                              }
-                              arrow
-                              placement="top"
-                            >
-                              <Typography
-                                variant="caption"
-                                sx={{
-                                  flexGrow: 1,
-                                  overflow: "hidden",
-                                  textOverflow: "ellipsis",
-                                  whiteSpace: "nowrap",
-                                  textDecoration: recordatorio.hecho
-                                    ? "line-through"
-                                    : "none",
-                                  cursor: "default", // Add cursor style to indicate it's hoverable
-                                }}
+                              <IconButton
+                                size="small"
+                                onClick={() => handleToggleHecho(recordatorio)}
+                                sx={{ mr: 0.1, mt: 0 }}
                               >
-                                {recordatorio.titulo}
-                              </Typography>
-                            </Tooltip>
+                                {recordatorio.hecho ? (
+                                  <CheckCircleIcon
+                                    fontSize="small"
+                                    color="success"
+                                  />
+                                ) : (
+                                  <RadioButtonUncheckedIcon
+                                    fontSize="small"
+                                    color="primary"
+                                  />
+                                )}
+                              </IconButton>
+
+                              <Tooltip
+                                title={
+                                  recordatorio.descripcion || "Sin descripción"
+                                }
+                                arrow
+                                placement="top"
+                              >
+                                <Typography
+                                  variant="caption"
+                                  sx={{
+                                    flexGrow: 1,
+                                    overflow: "visible",
+                                    whiteSpace: "normal",
+                                    wordBreak: "break-word",
+                                    textDecoration: recordatorio.hecho
+                                      ? "line-through"
+                                      : "none",
+                                    cursor: "default",
+                                  }}
+                                >
+                                  {recordatorio.titulo}
+                                </Typography>
+                              </Tooltip>
+                            </Box>
 
                             <IconButton
                               size="small"
-                              onClick={() =>
-                                handleEditRecordatorio(recordatorio)
+                              onClick={(event) =>
+                                handleMenuOpen(event, recordatorio)
                               }
+                              sx={{ alignSelf: "flex-start" }}
                             >
-                              <EditIcon fontSize="small" />
-                            </IconButton>
-
-                            <IconButton
-                              size="small"
-                              onClick={() => confirmDelete(recordatorio.id)}
-                              color="error"
-                            >
-                              <DeleteIcon fontSize="small" />
+                              <MoreVertIcon fontSize="small" />
                             </IconButton>
                           </Box>
                         ))}
@@ -660,6 +701,30 @@ export default function AgendaPage() {
             })
           )}
         </Grid>
+
+        {/* Menu for edit/delete options */}
+        <Menu
+          anchorEl={menuAnchorEl}
+          open={Boolean(menuAnchorEl)}
+          onClose={handleMenuClose}
+          anchorOrigin={{
+            vertical: "bottom",
+            horizontal: "right",
+          }}
+          transformOrigin={{
+            vertical: "top",
+            horizontal: "right",
+          }}
+        >
+          <MenuItem onClick={handleMenuEdit}>
+            <EditIcon fontSize="small" sx={{ mr: 1 }} />
+            Editar
+          </MenuItem>
+          <MenuItem onClick={handleMenuDelete} sx={{ color: "error.main" }}>
+            <DeleteIcon fontSize="small" sx={{ mr: 1 }} />
+            Eliminar
+          </MenuItem>
+        </Menu>
 
         {/* Modal de creación/edición */}
         <Dialog
