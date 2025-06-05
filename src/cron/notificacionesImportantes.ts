@@ -147,6 +147,72 @@ async function enviarRecordatoriosMantenimiento() {
   }
 }
 
+async function enviarNotificacionesAgenda() {
+  try {
+    // Get current date in Argentina's timezone
+    const today = dayjs().tz("America/Argentina/Buenos_Aires");
+    const startOfDay = today.startOf("day").toDate();
+    const endOfDay = today.endOf("day").toDate();
+
+    console.log("Fecha en Argentina:", today.format("YYYY-MM-DD"));
+    console.log(
+      "Buscando eventos de agenda entre:",
+      startOfDay.toLocaleString("es-AR", {
+        timeZone: "America/Argentina/Buenos_Aires",
+      }),
+      "y",
+      endOfDay.toLocaleString("es-AR", {
+        timeZone: "America/Argentina/Buenos_Aires",
+      })
+    );
+
+    // Obtener eventos de agenda del día
+    const eventosHoy = await prisma.recordatorioAgenda.findMany({
+      where: {
+        fecha: {
+          gte: startOfDay,
+          lte: endOfDay,
+        },
+        hecho: false,
+      },
+    });
+
+    if (eventosHoy.length > 0) {
+      console.log(`Eventos de agenda encontrados: ${eventosHoy.length}`);
+      // Crear notificación interna para los eventos del día
+      const users = await getUsersToNotify();
+      for (const user of users) {
+        await prisma.notificacionInterna.create({
+          data: {
+            fecha: new Date(),
+            titulo: `Eventos de agenda para hoy`,
+            texto: `Hay ${
+              eventosHoy.length
+            } evento(s) programado(s) para hoy:\n${eventosHoy
+              .map(
+                (evento) =>
+                  `- ${dayjs(evento.fecha).format("HH:mm")} - ${evento.titulo}${
+                    evento.descripcion ? `: ${evento.descripcion}` : ""
+                  }`
+              )
+              .join("\n")}`,
+            leida: false,
+            tipo: TipoNotificacionInterna.EVENTO_AGENDA,
+            userId: user.id,
+          },
+        });
+      }
+    } else {
+      console.log("No hay eventos de agenda encontrados para hoy");
+    }
+  } catch (error) {
+    console.error(
+      "Error al procesar notificaciones de eventos de agenda:",
+      error
+    );
+  }
+}
+
 async function procesarNotificacionesImportantes() {
   try {
     console.log(
@@ -156,6 +222,7 @@ async function procesarNotificacionesImportantes() {
     await Promise.all([
       enviarNotificacionesTurnos(),
       enviarRecordatoriosMantenimiento(),
+      enviarNotificacionesAgenda(),
     ]);
 
     console.log(

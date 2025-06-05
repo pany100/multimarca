@@ -19,25 +19,17 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
-    // Get start and end of today in Argentina's timezone
-    const today = dayjs().tz("America/Argentina/Buenos_Aires");
-    const startOfDay = today.startOf("day").toDate();
-    const endOfDay = today.endOf("day").toDate();
-
     const notificaciones = await prisma.notificacionInterna.findMany({
       where: {
         AND: [
           {
             leida: false,
-            fecha: {
-              gte: startOfDay,
-              lte: endOfDay,
-            },
             tipo: {
               in: [
                 TipoNotificacionInterna.TURNOS_DEL_DIA,
                 TipoNotificacionInterna.CHEQUE_POR_VENCER,
                 TipoNotificacionInterna.RECORDATORIOS_MANO_DE_OBRA,
+                TipoNotificacionInterna.EVENTO_AGENDA,
               ],
             },
           },

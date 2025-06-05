@@ -704,6 +704,7 @@ enum TipoNotificacionInterna {
   TURNOS_DEL_DIA
   RECORDATORIOS_MANO_DE_OBRA
   CHEQUE_RECHAZADO
+  EVENTO_AGENDA
 }
 
 enum EstadoConversacion {
