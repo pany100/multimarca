@@ -179,28 +179,36 @@ async function enviarNotificacionesAgenda() {
 
     if (eventosHoy.length > 0) {
       console.log(`Eventos de agenda encontrados: ${eventosHoy.length}`);
-      // Crear notificación interna para los eventos del día
-      const users = await getUsersToNotify();
-      for (const user of users) {
+
+      // Procesar cada evento individualmente
+      for (const evento of eventosHoy) {
+        // Si el evento no tiene usuario creador, lo saltamos
+        if (!evento.userId) {
+          console.log(
+            `Evento "${evento.titulo}" no tiene usuario creador, saltando notificación`
+          );
+          continue;
+        }
+
+        // Enviar notificación solo al creador del evento
         await prisma.notificacionInterna.create({
           data: {
             fecha: new Date(),
-            titulo: `Eventos de agenda para hoy`,
-            texto: `Hay ${
-              eventosHoy.length
-            } evento(s) programado(s) para hoy:\n${eventosHoy
-              .map(
-                (evento) =>
-                  `- ${dayjs(evento.fecha).format("HH:mm")} - ${evento.titulo}${
-                    evento.descripcion ? `: ${evento.descripcion}` : ""
-                  }`
-              )
-              .join("\n")}`,
+            titulo: `Evento de agenda para hoy`,
+            texto: `Tienes un evento programado para hoy:\n- ${dayjs(
+              evento.fecha
+            ).format("HH:mm")} - ${evento.titulo}${
+              evento.descripcion ? `: ${evento.descripcion}` : ""
+            }`,
             leida: false,
             tipo: TipoNotificacionInterna.EVENTO_AGENDA,
-            userId: user.id,
+            userId: evento.userId,
           },
         });
+
+        console.log(
+          `Notificación enviada al usuario ${evento.userId} para el evento "${evento.titulo}"`
+        );
       }
     } else {
       console.log("No hay eventos de agenda encontrados para hoy");

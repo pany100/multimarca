@@ -23,7 +23,7 @@ model Usuario {
   notificacionesInternas       NotificacionInterna[]
   presupuestos                 Presupuesto[]         @relation("PresupuestoAdministrativo")
   presupuestosCreados          Presupuesto[]         @relation("PresupuestoCreador")
-  
+  recordatoriosAgenda          RecordatorioAgenda[]
   @@index([fullName])
   @@index([username])
   @@index([rolId], map: "Usuario_rolId_fkey")
@@ -664,6 +664,8 @@ model Turno {
 
 model RecordatorioAgenda {
   id          Int       @id @default(autoincrement())
+  userId      Int?
+  user        Usuario?  @relation(fields: [userId], references: [id])
   titulo      String    @db.VarChar(255)
   descripcion String?   @db.Text
   fecha       DateTime

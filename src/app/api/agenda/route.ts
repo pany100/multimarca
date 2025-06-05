@@ -1,5 +1,6 @@
 import prisma from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { getCurrentUser } from "src/utils/authFetch";
 
 export async function GET(request: Request) {
   try {
@@ -68,6 +69,10 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { titulo, descripcion, fecha, hecho } = body;
 
+    const user = await getCurrentUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
     if (!titulo || !fecha) {
       return NextResponse.json(
         { error: "El título y la fecha son campos requeridos" },
@@ -91,6 +96,7 @@ export async function POST(request: Request) {
         descripcion,
         fecha: fechaDate,
         hecho,
+        userId: user.id,
       },
     });
 
