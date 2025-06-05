@@ -146,7 +146,10 @@ export default function generateBudgetHtml(repair: any): string {
         </div>
       </div>
       <hr class="divider" />
-      <div>
+      ${
+        repair.auto
+          ? `
+        <div>
         <div style='
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -173,11 +176,11 @@ export default function generateBudgetHtml(repair: any): string {
           </div>
           <div class="TypographyBody1">
             Vehículo: ${repair.auto.brand} ${repair.auto.model} ${
-    repair.auto.color
-  }
+              repair.auto.color
+            }
             ${repair.auto.transmission_type === "Manual" ? "MT" : "AT"} - ${
-    repair.auto.year
-  }
+              repair.auto.year
+            }
           </div>
           <div class="TypographyBody1">
             Patente: ${repair.auto.patent}
@@ -187,6 +190,34 @@ export default function generateBudgetHtml(repair: any): string {
           </div>
         </div>
       </div>
+      `
+          : `
+         <div>
+        <div style='
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        '>
+        <h5 style='
+          margin: 0;
+          font-family: Inter, sans-serif;
+          font-weight: 400;
+          font-size: 1.5rem;
+          line-height: 1.334;
+          letter-spacing: 0em;
+          color: #000;
+        '>
+        Vehículo no ingresado
+        </h5>
+        </div>
+        <div style="display: grid;">
+          <div class="TypographyBody1">
+            Presupuesto Nro: 
+            ${repair.id}
+          </div>
+        </div>
+      </div>
+      `
+      }
       <hr class="divider" />
       <div class="TypographyBody1" style="font-weight: bold;">
         Pedido del cliente

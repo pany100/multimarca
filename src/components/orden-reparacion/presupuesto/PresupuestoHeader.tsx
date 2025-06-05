@@ -198,7 +198,10 @@ function PresupuestoHeader({ presupuesto }: { presupuesto: any }) {
                 {format(new Date(presupuesto.fecha), "PPP", { locale: es })}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Administrativo: {presupuesto.administrativo?.fullName}
+                Ingresado Por: {presupuesto.administrativo?.fullName}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Cargado por: {presupuesto.creador?.fullName}
               </Typography>
             </Box>
           </Box>
