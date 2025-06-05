@@ -840,7 +840,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             </IconButton>
           )}
           <Toolbar />
-          <Container>
+          <Container maxWidth={false} sx={{ m: 0 }}>
             <Box
               sx={{
                 mb: 3,

@@ -372,7 +372,7 @@ export default function AgendaPage() {
 
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
-      <Box sx={{ p: 3 }}>
+      <Box sx={{ p: 3, width: "100%" }}>
         <Typography variant="h4" gutterBottom>
           Agenda
         </Typography>
@@ -595,7 +595,7 @@ export default function AgendaPage() {
                             <IconButton
                               size="small"
                               onClick={() => handleToggleHecho(recordatorio)}
-                              sx={{ mr: 0.5 }}
+                              sx={{ mr: 0.1 }}
                             >
                               {recordatorio.hecho ? (
                                 <CheckCircleIcon
