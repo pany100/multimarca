@@ -24,6 +24,7 @@ model Usuario {
   presupuestos                 Presupuesto[]         @relation("PresupuestoAdministrativo")
   presupuestosCreados          Presupuesto[]         @relation("PresupuestoCreador")
   recordatoriosAgenda          RecordatorioAgenda[]
+  tareasAdministrativas        TareaAdministrativa[] @relation("UsuarioTareas")
   @@index([fullName])
   @@index([username])
   @@index([rolId], map: "Usuario_rolId_fkey")
@@ -367,6 +368,7 @@ model Presupuesto {
   repuestosUsados        RepuestoUsado[]           @relation("PresupuestoRepuestos")
   trabajosRealizados     TrabajoRealizado[]        @relation("PresupuestoTrabajosRealizados")
   estado                 EstadoPresupuesto         @default(EnPreparacion)
+  tareasAdministrativas  TareaAdministrativa[]     @relation("PresupuestoTareas")
   
   @@index([autoId])
   @@index([fecha])
@@ -671,6 +673,18 @@ model RecordatorioAgenda {
   fecha       DateTime
   hecho       Boolean   @default(false)  
   @@index([fecha])
+}
+
+model TareaAdministrativa {
+  id            Int         @id @default(autoincrement())
+  descripcion   String      @db.Text
+  presupuestoId Int
+  usuarioId     Int
+  presupuesto   Presupuesto @relation("PresupuestoTareas", fields: [presupuestoId], references: [id])
+  usuario       Usuario     @relation("UsuarioTareas", fields: [usuarioId], references: [id])
+
+  @@index([presupuestoId])
+  @@index([usuarioId])
 }
 
 enum TipoEmpleado {
