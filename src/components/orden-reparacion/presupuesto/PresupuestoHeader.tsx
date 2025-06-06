@@ -197,12 +197,24 @@ function PresupuestoHeader({ presupuesto }: { presupuesto: any }) {
                 Fecha:{" "}
                 {format(new Date(presupuesto.fecha), "PPP", { locale: es })}
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Ingresado Por: {presupuesto.administrativo?.fullName}
+              <Typography
+                variant="body2"
+                sx={{
+                  fontWeight: 600,
+                  fontSize: { xs: "0.8rem", md: "1.5rem" },
+                }}
+              >
+                Administrativos:
               </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Cargado por: {presupuesto.creador?.fullName}
-              </Typography>
+              {presupuesto.tareasAdministrativas.map((tarea: any) => (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  key={tarea.id}
+                >
+                  {tarea.usuario.fullName} - {tarea.descripcion}
+                </Typography>
+              ))}
             </Box>
           </Box>
         </Grid>

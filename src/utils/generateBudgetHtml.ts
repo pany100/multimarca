@@ -328,8 +328,10 @@ export default function generateBudgetHtml(repair: any): string {
       </div>
       <div class="TypographyBody1" style="margin-top: 5px;">
         ${
-          repair.administrativo !== null
-            ? `Administrativo: ${repair.administrativo.fullName}`
+          repair.tareasAdministrativas.length > 0
+            ? `Administrativos: ${repair.tareasAdministrativas
+                .map((tarea: any) => tarea.usuario.fullName)
+                .join(", ")}`
             : ""
         }
       </div>

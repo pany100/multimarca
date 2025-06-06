@@ -66,6 +66,11 @@ export async function GET(request: Request) {
               proveedor: true,
             },
           },
+          tareasAdministrativas: {
+            include: {
+              usuario: true,
+            },
+          },
           trabajosRealizados: true,
         },
       }),
@@ -98,8 +103,7 @@ export async function POST(request: Request) {
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
-      administrativoId,
-      creadorId,
+      tareasAdministrativas = [],
       descuento = 0,
       descripcionDescuento,
       incremento = 0,
@@ -118,7 +122,8 @@ export async function POST(request: Request) {
     if (
       !Array.isArray(repuestosUsados) ||
       !Array.isArray(reparacionesDeTercero) ||
-      !Array.isArray(trabajosRealizados)
+      !Array.isArray(trabajosRealizados) ||
+      !Array.isArray(tareasAdministrativas)
     ) {
       return NextResponse.json(
         { error: "Los repuestos, reparaciones y trabajos deben ser arrays" },
@@ -180,8 +185,6 @@ export async function POST(request: Request) {
         observacionesCliente,
         detallesDeTrabajo,
         estado,
-        administrativoId,
-        creadorId,
         dolarId: dolar?.id,
         descuento: new Prisma.Decimal(descuento),
         descripcionDescuento,
@@ -195,6 +198,9 @@ export async function POST(request: Request) {
         },
         trabajosRealizados: {
           create: trabajosRealizadosToPersist,
+        },
+        tareasAdministrativas: {
+          create: tareasAdministrativas,
         },
       },
       include: {

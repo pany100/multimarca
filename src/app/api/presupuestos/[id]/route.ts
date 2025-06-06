@@ -32,6 +32,11 @@ export async function GET(
           },
         },
         trabajosRealizados: true,
+        tareasAdministrativas: {
+          include: {
+            usuario: true,
+          },
+        },
       },
     });
 
@@ -62,9 +67,8 @@ export async function PUT(
     const {
       autoId,
       observacionesCliente,
-      creadorId,
-      administrativoId,
       detallesDeTrabajo,
+      tareasAdministrativas = [],
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
@@ -98,7 +102,8 @@ export async function PUT(
     if (
       !Array.isArray(repuestosUsados) ||
       !Array.isArray(reparacionesDeTercero) ||
-      !Array.isArray(trabajosRealizados)
+      !Array.isArray(trabajosRealizados) ||
+      !Array.isArray(tareasAdministrativas)
     ) {
       return NextResponse.json(
         { error: "Los repuestos, reparaciones y trabajos deben ser arrays" },
@@ -180,6 +185,13 @@ export async function PUT(
       })
     );
 
+    const tareasAdministrativasToPersist = tareasAdministrativas.map(
+      (tarea: any) => ({
+        usuarioId: tarea.usuarioId,
+        descripcion: tarea.descripcion,
+      })
+    );
+
     // Obtener el dólar actual si no existe
     const fechaActual = new Date();
     const dolar = await getDolarForDate(fechaActual);
@@ -191,8 +203,6 @@ export async function PUT(
         autoId: parseInt(autoId),
         observacionesCliente,
         detallesDeTrabajo,
-        creadorId,
-        administrativoId,
         estado,
         dolarId: dolar?.id,
         descuento: new Prisma.Decimal(descuento),
@@ -213,6 +223,10 @@ export async function PUT(
           deleteMany: {},
           create: trabajosRealizadosToPersist,
         },
+        tareasAdministrativas: {
+          deleteMany: {},
+          create: tareasAdministrativasToPersist,
+        },
       },
       include: {
         auto: {
@@ -232,6 +246,11 @@ export async function PUT(
           },
         },
         trabajosRealizados: true,
+        tareasAdministrativas: {
+          include: {
+            usuario: true,
+          },
+        },
       },
     });
 

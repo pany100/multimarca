@@ -29,6 +29,11 @@ export async function GET(
           },
         },
         trabajosRealizados: true,
+        tareasAdministrativas: {
+          include: {
+            usuario: true,
+          },
+        },
         dolar: true,
       },
     });

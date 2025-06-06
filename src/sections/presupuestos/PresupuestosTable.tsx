@@ -98,7 +98,7 @@ function PresupuestosTable({
     {
       field: "vehículo",
       headerName: "Auto",
-      flex: 2,
+      flex: 1,
       renderCell: (params: any) => {
         return (
           <Box
@@ -124,16 +124,29 @@ function PresupuestosTable({
       },
     },
     {
-      field: "administrativo",
-      headerName: "Creado Por",
-      flex: 1,
-      renderCell: (params: any) => params.row.administrativo?.fullName || "-",
-    },
-    {
-      field: "creador",
-      headerName: "Completado Por",
-      flex: 1,
-      renderCell: (params: any) => params.row.creador?.fullName || "-",
+      field: "tareasAdministrativas",
+      headerName: "Tareas Administrativas",
+      flex: 2,
+      renderCell: (params: any) => {
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              height: "100%",
+            }}
+          >
+            {params.row.tareasAdministrativas.length > 0
+              ? params.row.tareasAdministrativas.map((tarea: any) => (
+                  <Typography variant="body2" key={tarea.id}>
+                    {tarea.usuario.fullName} - {tarea.descripcion}
+                  </Typography>
+                ))
+              : "No Ingresado"}
+          </Box>
+        );
+      },
     },
     {
       field: "estado",

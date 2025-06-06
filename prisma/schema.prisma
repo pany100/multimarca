@@ -349,8 +349,8 @@ model Presupuesto {
   id                     Int                       @id @default(autoincrement())
   autoId                 Int?
   auto                   Auto?                     @relation("AutoPresupuesto", fields: [autoId], references: [id])
-  administrativoId       Int
-  administrativo         Usuario                  @relation("PresupuestoAdministrativo", fields: [administrativoId], references: [id])
+  administrativoId       Int?
+  administrativo         Usuario?                  @relation("PresupuestoAdministrativo", fields: [administrativoId], references: [id])
   creadorId              Int?
   creador                Usuario?                 @relation("PresupuestoCreador", fields: [creadorId], references: [id])
   fecha                  DateTime                  @default(now())

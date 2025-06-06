@@ -94,11 +94,18 @@ const schema = yup.object().shape({
 
 const presupuestoSchema = yup.object().shape({
   autoId: yup.string().nullable(),
-  administrativoId: yup.number().required("Debe seleccionar un administrativo"),
-  creadorId: yup.number().nullable(),
   fecha: yup.date().required("La fecha es requerida"),
   fechaEnvio: yup.date().nullable(),
   fechaRespuesta: yup.date().nullable(),
+  tareasAdministrativas: yup
+    .array()
+    .of(
+      yup.object().shape({
+        usuarioId: yup.number().required(),
+        descripcion: yup.string().required(),
+      })
+    )
+    .min(1, "Debe agregar al menos una tarea administrativa"),
   observacionesCliente: yup
     .string()
     .required("Debe ingresar las observaciones"),
