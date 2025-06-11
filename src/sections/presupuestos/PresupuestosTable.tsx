@@ -117,7 +117,7 @@ function PresupuestosTable({
                 <Typography>{params.row.auto.patent}</Typography>
               </>
             ) : (
-              "No Ingresado"
+              params.row.informacionAuto || "No ingresado"
             )}
           </Box>
         );
@@ -170,7 +170,9 @@ function PresupuestosTable({
       headerName: "Cliente",
       flex: 1,
       renderCell: (params: any) =>
-        params.row.auto?.owner?.fullName || "No Ingresado",
+        params.row.auto?.owner?.fullName ||
+        params.row.informacionCliente ||
+        "No Ingresado",
     },
     {
       field: "totalAPagar",

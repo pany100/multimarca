@@ -192,7 +192,7 @@ export default function generateBudgetHtml(repair: any): string {
       </div>
       `
           : `
-         <div>
+          <div>
         <div style='
           display: grid;
           grid-template-columns: 1fr 1fr;
@@ -206,7 +206,7 @@ export default function generateBudgetHtml(repair: any): string {
           letter-spacing: 0em;
           color: #000;
         '>
-        Vehículo no ingresado
+        Información
         </h5>
         </div>
         <div style="display: grid;">
@@ -214,9 +214,15 @@ export default function generateBudgetHtml(repair: any): string {
             Presupuesto Nro: 
             ${repair.id}
           </div>
+          <div class="TypographyBody1">
+            Titular: ${repair.informacionCliente || "N/A"}
+          </div>
+          <div class="TypographyBody1">
+            Vehículo: ${repair.informacionAuto || "N/A"}
+          </div>
         </div>
       </div>
-      `
+          `
       }
       <hr class="divider" />
       <div class="TypographyBody1" style="font-weight: bold;">

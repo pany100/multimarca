@@ -23,6 +23,8 @@ export async function GET(request: Request) {
     let where: any = {
       OR: [
         { auto: { brand: { contains: query } } },
+        { informacionAuto: { contains: query } },
+        { informacionCliente: { contains: query } },
         { auto: { model: { contains: query } } },
         { auto: { patent: { contains: query } } },
         { auto: { owner: { fullName: { contains: query } } } },
@@ -100,6 +102,8 @@ export async function POST(request: Request) {
       autoId,
       observacionesCliente,
       detallesDeTrabajo,
+      informacionAuto,
+      informacionCliente,
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
@@ -184,6 +188,8 @@ export async function POST(request: Request) {
         fecha: fechaActual,
         observacionesCliente,
         detallesDeTrabajo,
+        informacionAuto,
+        informacionCliente,
         estado,
         dolarId: dolar?.id,
         descuento: new Prisma.Decimal(descuento),

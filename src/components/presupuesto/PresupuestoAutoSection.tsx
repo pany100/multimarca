@@ -9,10 +9,16 @@ import CustomInputText from "../formV2/CustomInputText";
 function PresupuestoAutoSection() {
   const {
     formState: { errors, isSubmitted },
+    watch,
   } = useFormContext();
   const { registerFieldRef } = useScrollToError({ errors, isSubmitted });
   const { searchAutos, initialAuto } = useAutosAutocomplete();
-  const [tabValue, setTabValue] = useState(0);
+
+  const autoId = watch("autoId");
+  const informacionAuto = watch("informacionAuto");
+  const [tabValue, setTabValue] = useState(
+    autoId || (!autoId && !informacionAuto) ? 0 : 1
+  );
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };

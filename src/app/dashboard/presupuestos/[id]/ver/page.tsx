@@ -1,5 +1,6 @@
 "use client";
 import PresupuestoAutoInfo from "@/components/orden-reparacion/presupuesto/PresupuestoAutoInfo";
+import PresupuestoAutoNoEnSistema from "@/components/orden-reparacion/presupuesto/PresupuestoAutoNoEnSistema";
 import PresupuestoAutoNoIngresado from "@/components/orden-reparacion/presupuesto/PresupuestoAutoNoIngresado";
 import PresupuestoHeader from "@/components/orden-reparacion/presupuesto/PresupuestoHeader";
 import Details from "@/components/orden-reparacion/ver/Details";
@@ -96,10 +97,12 @@ const VerPresupuestosPage = ({ params }: { params: { id: string } }) => {
     >
       <PresupuestoHeader presupuesto={presupuesto} />
       <Divider sx={{ my: 3 }} />
-      {presupuesto.auto ? (
-        <PresupuestoAutoInfo presupuesto={presupuesto} />
-      ) : (
-        <PresupuestoAutoNoIngresado />
+      {presupuesto.auto && <PresupuestoAutoInfo presupuesto={presupuesto} />}
+      {!presupuesto.auto && presupuesto.informacionAuto && (
+        <PresupuestoAutoNoEnSistema presupuesto={presupuesto} />
+      )}
+      {!presupuesto.auto && !presupuesto.informacionAuto && (
+        <PresupuestoAutoNoIngresado presupuesto={presupuesto} />
       )}
       <Divider sx={{ my: 2 }} />
       <Details ordenReparacion={presupuesto} />

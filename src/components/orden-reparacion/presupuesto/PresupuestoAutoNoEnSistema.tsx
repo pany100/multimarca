@@ -10,7 +10,7 @@ import {
   useTheme,
 } from "@mui/material";
 
-function PresupuestoAutoNoIngresado({ presupuesto }: { presupuesto: any }) {
+function PresupuestoAutoNoEnSistema({ presupuesto }: { presupuesto: any }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -87,7 +87,9 @@ function PresupuestoAutoNoIngresado({ presupuesto }: { presupuesto: any }) {
               </Typography>
             </Grid>
             <Grid item xs={8} sm={9}>
-              <Typography variant="body2">N/A</Typography>
+              <Typography variant="body2">
+                {presupuesto.informacionAuto}
+              </Typography>
             </Grid>
 
             <Grid item xs={4} sm={3}>
@@ -292,4 +294,4 @@ function PresupuestoAutoNoIngresado({ presupuesto }: { presupuesto: any }) {
   );
 }
 
-export default PresupuestoAutoNoIngresado;
+export default PresupuestoAutoNoEnSistema;
