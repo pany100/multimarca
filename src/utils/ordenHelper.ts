@@ -37,6 +37,19 @@ function calcularManoDeObra(
   );
 }
 
+function calcularTotalManoDeObra(
+  trabajosRealizados: {
+    precioUnitario: number;
+  }[]
+): string {
+  return trabajosRealizados
+    .reduce(
+      (total, trabajo) => total + parseFloat(trabajo.precioUnitario.toString()),
+      0
+    )
+    .toFixed(2);
+}
+
 function calcularTotalOrdenReparacion(ordenReparacion: {
   repuestosUsados: { precioVenta: number; unidadesConsumidas: number }[];
   reparacionesDeTercero: { precioVenta: number }[];
@@ -83,6 +96,7 @@ function getStatusColor(estado: string): ChipProps["color"] {
 
 export {
   calcularManoDeObra,
+  calcularTotalManoDeObra,
   calcularTotalOrdenReparacion,
   calcularTotalReparacionesTerceros,
   calcularTotalRepuestos,

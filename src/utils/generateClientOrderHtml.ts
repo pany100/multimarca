@@ -386,7 +386,10 @@ export default function generateClientOrderHtml(repair: any): string {
           repair.incremento > 0
             ? `
             <div class="TypographyBody1" style="margin-top: 20px;">
-              Otros
+              Otros ${
+                repair.descripcionIncremento &&
+                `- ${repair.descripcionIncremento}`
+              }
             </div>
             <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
               $${Number(repair.incremento).toLocaleString("es-AR")}

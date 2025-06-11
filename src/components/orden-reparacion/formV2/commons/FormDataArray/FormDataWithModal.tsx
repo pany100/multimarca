@@ -14,6 +14,7 @@ type Props = {
   rowsTransform?: (row: any, index: number) => any;
   validateForm?: (newItem: any) => Record<string, string> | null;
   children: React.ReactNode;
+  extraContent?: React.ReactNode;
 };
 
 function FormDataArrayWithModal({
@@ -23,6 +24,7 @@ function FormDataArrayWithModal({
   rowsTransform,
   validateForm,
   children,
+  extraContent,
 }: Props) {
   const { watch } = useFormContext();
 
@@ -43,6 +45,11 @@ function FormDataArrayWithModal({
               fieldName={fieldName}
             />
           </Grid>
+          {extraContent && (
+            <Grid item xs={12}>
+              {extraContent}
+            </Grid>
+          )}
           <Grid item xs={12}>
             <FormDataAddButton />
           </Grid>
