@@ -349,6 +349,8 @@ model Presupuesto {
   id                     Int                       @id @default(autoincrement())
   autoId                 Int?
   auto                   Auto?                     @relation("AutoPresupuesto", fields: [autoId], references: [id])
+  informacionAuto        String?                   @db.Text
+  informacionCliente     String?                   @db.Text
   administrativoId       Int?
   administrativo         Usuario?                  @relation("PresupuestoAdministrativo", fields: [administrativoId], references: [id])
   creadorId              Int?
@@ -680,7 +682,7 @@ model TareaAdministrativa {
   descripcion   String      @db.Text
   presupuestoId Int
   usuarioId     Int
-  presupuesto   Presupuesto @relation("PresupuestoTareas", fields: [presupuestoId], references: [id])
+  presupuesto   Presupuesto @relation("PresupuestoTareas", fields: [presupuestoId], references: [id], onDelete: Cascade)
   usuario       Usuario     @relation("UsuarioTareas", fields: [usuarioId], references: [id])
 
   @@index([presupuestoId])

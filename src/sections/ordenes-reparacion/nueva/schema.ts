@@ -94,6 +94,8 @@ const schema = yup.object().shape({
 
 const presupuestoSchema = yup.object().shape({
   autoId: yup.string().nullable(),
+  informacionAuto: yup.string().nullable(),
+  informacionCliente: yup.string().nullable(),
   fecha: yup.date().required("La fecha es requerida"),
   fechaEnvio: yup.date().nullable(),
   fechaRespuesta: yup.date().nullable(),
