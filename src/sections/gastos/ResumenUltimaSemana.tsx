@@ -1,11 +1,12 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { Box, Typography } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { format, startOfDay } from "date-fns";
-import { es } from "date-fns/locale";
+import { format } from "date-fns";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import WeekPicker from "./WeekPicker";
+import useWeek from "./hooks/useWeek";
 
 type Reparacion = {
   idOrep: number;
@@ -28,24 +29,21 @@ function ResumenUltimaSemana() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { authFetch } = useFetch();
-
-  // Calculate the date range (last Sunday to today)
-  const today = new Date();
-  const lastSunday = new Date(today);
-  const currentDay = today.getDay();
-  lastSunday.setDate(today.getDate() - currentDay);
-  const startDate = startOfDay(lastSunday);
-
-  const dateRangeText = `${format(startDate, "d 'de' MMMM", {
-    locale: es,
-  })} - ${format(today, "d 'de' MMMM", { locale: es })}`;
+  const { startDate, endDate } = useWeek();
+  const [dateRange, setDateRange] = useState<{
+    start: Date | null;
+    end: Date | null;
+  }>({
+    start: startDate,
+    end: endDate,
+  });
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchData = async (start: Date, end: Date) => {
       setLoading(true);
       try {
         const response = await authFetch(
-          `/api/gastos/ultima-semana?start=${startDate.toISOString()}&end=${today.toISOString()}`
+          `/api/gastos/ultima-semana?start=${start.toISOString()}&end=${end.toISOString()}`
         );
         if (!response.ok) {
           throw new Error("Error al obtener los datos");
@@ -60,13 +58,14 @@ function ResumenUltimaSemana() {
       }
     };
 
-    fetchData();
-  }, [authFetch]);
+    if (dateRange.start && dateRange.end) {
+      fetchData(dateRange.start, dateRange.end);
+    }
+  }, [authFetch, dateRange]);
 
-  // If loading or error, return null
-  if (loading) return null;
-  if (error) return null;
-  if (!data || data.length === 0) return null;
+  const handleWeekChange = (week: { start: Date; end: Date }) => {
+    setDateRange(week);
+  };
 
   // Prepare rows for DataGrid
   const rows = data.map((mecanico) => ({
@@ -138,9 +137,16 @@ function ResumenUltimaSemana() {
 
   return (
     <Box sx={{ width: "100%", mb: 8 }}>
-      <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
-        Resumen Ultima Semana ({dateRangeText})
-      </Typography>
+      <Grid container alignItems="center">
+        <Grid item xs={12} md={6}>
+          <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
+            Resumen semanal por mecánico
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <WeekPicker onWeekChange={handleWeekChange} />
+        </Grid>
+      </Grid>
 
       <Box sx={{ width: "100%", mt: 2 }}>
         <DataGrid
