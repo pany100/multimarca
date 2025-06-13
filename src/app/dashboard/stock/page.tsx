@@ -13,7 +13,7 @@ const StockPage = () => {
       extraContent={StockExtraContent}
       table={StockTable}
       form={StockForm}
-      crudActions={[CrudAction.EDIT, CrudAction.DELETE]}
+      crudActions={[CrudAction.ADD, CrudAction.EDIT, CrudAction.DELETE]}
       schema={schema}
     />
   );
