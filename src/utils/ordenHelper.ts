@@ -6,6 +6,9 @@ function calcularTotalRepuestos(ordenReparacion: {
     unidadesConsumidas: number;
   }[];
 }): string {
+  if (!ordenReparacion.repuestosUsados) {
+    return "0";
+  }
   return ordenReparacion.repuestosUsados
     .reduce(
       (total, repuesto) => total + parseFloat(repuesto.precioVenta.toString()),
@@ -17,6 +20,9 @@ function calcularTotalRepuestos(ordenReparacion: {
 function calcularTotalReparacionesTerceros(ordenReparacion: {
   reparacionesDeTercero: { precioVenta: number }[];
 }): string {
+  if (!ordenReparacion.reparacionesDeTercero) {
+    return "0";
+  }
   return ordenReparacion.reparacionesDeTercero
     .reduce(
       (total, reparacion) =>
@@ -42,6 +48,9 @@ function calcularTotalManoDeObra(
     precioUnitario: number;
   }[]
 ): string {
+  if (!trabajosRealizados) {
+    return "0";
+  }
   return trabajosRealizados
     .reduce(
       (total, trabajo) => total + parseFloat(trabajo.precioUnitario.toString()),
