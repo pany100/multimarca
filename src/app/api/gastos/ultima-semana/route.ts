@@ -1,142 +1,10 @@
-import { EstadoOrdenReparacion } from "@prisma/client";
-import { startOfDay } from "date-fns";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
-
-/**
- * Checks if the user has permission to access "Pago Empleados" category
- * @param request The incoming request
- * @returns NextResponse with error or null if user has permission
- */
-export async function checkUserPermission(request: Request) {
-  const authHeader = request.headers.get("authorization");
-  if (!authHeader) {
-    return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-  }
-
-  const token = authHeader.split(" ")[1];
-  const decodedToken = JSON.parse(atob(token.split(".")[1]));
-
-  // Get user role from database
-  const user = await prisma.usuario.findUnique({
-    where: { id: decodedToken.userId },
-    include: {
-      rol: true,
-    },
-  });
-
-  if (!user || !user.rol) {
-    return NextResponse.json(
-      { error: "Usuario no tiene rol asignado" },
-      { status: 403 }
-    );
-  }
-
-  // Check if user has permission to view "Pago Empleados"
-  const categoriaGasto = await prisma.categoriaGasto.findFirst({
-    where: {
-      nombre: "Pago Empleados",
-    },
-    include: {
-      roles: true,
-    },
-  });
-
-  // If category exists and has roles assigned, check if user's role is included
-  if (categoriaGasto && categoriaGasto.roles.length > 0) {
-    const hasPermission = categoriaGasto.roles.some(
-      (rol) => rol.id === user.rol.id
-    );
-
-    if (!hasPermission) {
-      // User doesn't have permission, return empty array
-      return NextResponse.json([]);
-    }
-  }
-
-  // Return null if user has permission
-  return null;
-}
-
-export async function getReparacionesTerminadasForMecanico(
-  startDate: Date,
-  endDate: Date,
-  mecanicoId: number
-) {
-  return await prisma.ordenReparacion.findMany({
-    where: {
-      fechaSalidaReparacion: {
-        gte: startDate,
-        lte: endDate,
-      },
-      estado: EstadoOrdenReparacion.Terminado,
-      mecanicos: {
-        some: {
-          mecanicoId,
-        },
-      },
-    },
-    include: {
-      mecanicos: true, // Include all mechanics to count them later
-      trabajosRealizados: {
-        select: {
-          descripcion: true,
-          precioUnitario: true,
-        },
-      },
-      auto: {
-        select: {
-          patent: true,
-        },
-      },
-      pagos: {
-        select: {
-          id: true,
-          monto: true,
-          fechaPago: true,
-        },
-      },
-    },
-  });
-}
-
-/**
- * Gets date range from request parameters or defaults to last Sunday to today
- */
-export function getDateRange(request: Request): {
-  startDate: Date;
-  endDate: Date;
-} {
-  // Get date parameters from request URL
-  const url = new URL(request.url);
-  const startParam = url.searchParams.get("start");
-  const endParam = url.searchParams.get("end");
-
-  // Set default dates if not provided
-  let startDate: Date;
-  let endDate: Date;
-
-  if (startParam && endParam) {
-    // Use provided dates
-    startDate = startOfDay(new Date(startParam));
-    endDate = new Date(endParam);
-  } else {
-    // Calculate default dates (last Sunday to today)
-    const today = new Date();
-    const lastSunday = new Date(today);
-    const currentDay = today.getDay(); // 0 is Sunday, 1 is Monday, etc.
-
-    // If today is Sunday, we use today as the start date
-    // Otherwise, we go back to the previous Sunday
-    lastSunday.setDate(today.getDate() - currentDay);
-
-    // Set time to beginning of the day (00:00:00)
-    startDate = startOfDay(lastSunday);
-    endDate = today;
-  }
-
-  return { startDate, endDate };
-}
+import {
+  checkUserPermission,
+  getReparacionesTerminadasForMecanico,
+  getWeekDateRange,
+} from "src/utils/gastosUtils";
 
 export async function GET(request: Request) {
   try {
@@ -145,7 +13,7 @@ export async function GET(request: Request) {
       return checkPermissionError;
     }
 
-    const { startDate, endDate } = getDateRange(request);
+    const { startDate, endDate } = getWeekDateRange(request);
 
     const mecanicos = await prisma.empleado.findMany({
       where: {
