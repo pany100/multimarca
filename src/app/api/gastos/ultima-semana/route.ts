@@ -1,3 +1,4 @@
+import { EstadoOrdenReparacion } from "@prisma/client";
 import { startOfDay } from "date-fns";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
@@ -102,6 +103,7 @@ export async function GET(request: Request) {
                   gte: startDate,
                   lte: endDate,
                 },
+                estado: EstadoOrdenReparacion.Terminado,
               },
             },
             select: {
