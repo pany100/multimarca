@@ -24,8 +24,21 @@ type MecanicoData = {
   manoDeObraPagada: number;
 };
 
+type ReparacionCompartida = {
+  id: number;
+  fecha: string;
+  auto: string;
+  mechanics: {
+    id: number;
+    name: string;
+  }[];
+  manoDeObraTotal: number;
+  manoDeObraPagada: number;
+};
+
 function ResumenUltimaSemana() {
   const [data, setData] = useState<MecanicoData[]>([]);
+  const [compartida, setCompartida] = useState<ReparacionCompartida[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { authFetch } = useFetch();
@@ -45,11 +58,16 @@ function ResumenUltimaSemana() {
         const response = await authFetch(
           `/api/gastos/ultima-semana?start=${start.toISOString()}&end=${end.toISOString()}`
         );
-        if (!response.ok) {
+        const response2 = await authFetch(
+          `/api/gastos/ultima-semana-compartida?start=${start.toISOString()}&end=${end.toISOString()}`
+        );
+        if (!response.ok || !response2.ok) {
           throw new Error("Error al obtener los datos");
         }
         const result = await response.json();
         setData(result);
+        const result2 = await response2.json();
+        setCompartida(result2);
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Error al cargar los datos");
@@ -138,6 +156,76 @@ function ResumenUltimaSemana() {
     },
   ];
 
+  const columnsCompartida: GridColDef[] = [
+    {
+      field: "reparación",
+      headerName: "Reparación",
+      flex: 1.5,
+      renderCell: (params) => {
+        return (
+          <Link href={`/dashboard/ordenes-reparacion/${params.row.id}/ver`}>
+            *{" "}
+            {`${params.row.auto} - ${format(
+              new Date(params.row.fecha),
+              "dd/MM/yyyy"
+            )}`}
+          </Link>
+        );
+      },
+    },
+    {
+      field: "mechanics",
+      headerName: "Mecánicos",
+      flex: 2,
+      align: "left",
+      headerAlign: "center",
+      renderCell: (params) => {
+        return params.row.mechanics ? (
+          <Box>
+            {params.row.mechanics.map((mechanic: any) => (
+              <Typography
+                key={mechanic.id}
+                variant="body2"
+                sx={{
+                  "& a": {
+                    textDecoration: "none",
+                    color: "inherit",
+                    "&:hover": {
+                      textDecoration: "underline",
+                      color: "primary.main",
+                    },
+                  },
+                }}
+              >
+                <Link href={`/dashboard/mecanicos/${mechanic.id}/ver`}>
+                  * {mechanic.name}
+                </Link>
+              </Typography>
+            ))}
+          </Box>
+        ) : (
+          <Typography variant="body2">-</Typography>
+        );
+      },
+    },
+    {
+      field: "manoDeObraTotal",
+      headerName: "Mano de Obra Total",
+      flex: 1,
+      align: "right",
+      headerAlign: "right",
+      valueGetter: (value) => getFormattedPrice(value),
+    },
+    {
+      field: "manoDeObraPagada",
+      headerName: "Mano de Obra Pagada",
+      flex: 1,
+      align: "right",
+      headerAlign: "right",
+      valueGetter: (value) => getFormattedPrice(value),
+    },
+  ];
+
   return (
     <Box sx={{ width: "100%", mb: 8 }}>
       <Grid container alignItems="center">
@@ -150,11 +238,44 @@ function ResumenUltimaSemana() {
           <WeekPicker onWeekChange={handleWeekChange} />
         </Grid>
       </Grid>
-
+      <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
+        Reparaciones por mecánico
+      </Typography>
       <Box sx={{ width: "100%", mt: 2 }}>
         <DataGrid
           rows={rows}
           columns={columns}
+          initialState={{
+            pagination: {
+              paginationModel: { page: 0, pageSize: 10 },
+            },
+          }}
+          pageSizeOptions={[5, 10, 25]}
+          disableRowSelectionOnClick
+          autoHeight
+          getRowHeight={() => "auto"}
+          sx={{
+            "& .MuiDataGrid-cell": {
+              fontSize: "0.875rem",
+              whiteSpace: "normal",
+              padding: "8px",
+            },
+            "& .MuiDataGrid-row": {
+              alignItems: "flex-start",
+            },
+            backgroundColor: "background.paper",
+            borderRadius: 1,
+            boxShadow: 1,
+          }}
+        />
+      </Box>
+      <Typography variant="h5" sx={{ fontWeight: 600, mb: 1, mt: 4 }}>
+        Reparaciones compartidas entre varios mecánicos
+      </Typography>
+      <Box sx={{ width: "100%", mt: 2 }}>
+        <DataGrid
+          rows={compartida}
+          columns={columnsCompartida}
           initialState={{
             pagination: {
               paginationModel: { page: 0, pageSize: 10 },

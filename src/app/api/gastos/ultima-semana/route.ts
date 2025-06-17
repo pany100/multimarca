@@ -8,7 +8,7 @@ import prisma from "src/lib/prisma";
  * @param request The incoming request
  * @returns NextResponse with error or null if user has permission
  */
-async function checkUserPermission(request: Request) {
+export async function checkUserPermission(request: Request) {
   const authHeader = request.headers.get("authorization");
   if (!authHeader) {
     return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -58,7 +58,7 @@ async function checkUserPermission(request: Request) {
   return null;
 }
 
-async function getReparacionesTerminadasForMecanico(
+export async function getReparacionesTerminadasForMecanico(
   startDate: Date,
   endDate: Date,
   mecanicoId: number
@@ -103,7 +103,10 @@ async function getReparacionesTerminadasForMecanico(
 /**
  * Gets date range from request parameters or defaults to last Sunday to today
  */
-function getDateRange(request: Request): { startDate: Date; endDate: Date } {
+export function getDateRange(request: Request): {
+  startDate: Date;
+  endDate: Date;
+} {
   // Get date parameters from request URL
   const url = new URL(request.url);
   const startParam = url.searchParams.get("start");
