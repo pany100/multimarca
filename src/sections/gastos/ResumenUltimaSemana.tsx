@@ -84,7 +84,7 @@ function ResumenUltimaSemana() {
     {
       field: "reparaciones",
       headerName: "Reparaciones",
-      flex: 2,
+      flex: 1.2,
       align: "left",
       headerAlign: "center",
       renderCell: (params) => {
@@ -107,7 +107,10 @@ function ResumenUltimaSemana() {
               >
                 <Link href={`/dashboard/ordenes-reparacion/${rep.idOrep}/ver`}>
                   *{" "}
-                  {`${rep.auto} - ${format(new Date(rep.fecha), "dd/MM/yyyy")}`}
+                  {`${rep.auto} - ${format(
+                    new Date(rep.fecha),
+                    "dd/MM/yyyy"
+                  )}: ${getFormattedPrice(rep.manoDeObra)}`}
                 </Link>
               </Typography>
             ))}
