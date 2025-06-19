@@ -432,7 +432,7 @@ const EstadisticasMecanicosPage = () => {
         }}
       >
         <Typography variant="h5" component="h1" sx={{ fontWeight: "bold" }}>
-          Estadísticas de Mecánicos
+          Estadísticas de Mecánicos (Sin incluir reparaciones compartidas)
         </Typography>
         <Box>
           <Typography

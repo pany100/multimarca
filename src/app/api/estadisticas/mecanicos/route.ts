@@ -97,9 +97,13 @@ export async function GET(request: NextRequest) {
           AND orm.mecanicoId = ?
           AND orep.fechaSalidaReparacion >= ?
           AND orep.fechaSalidaReparacion <= ?
+          AND (
+            SELECT COUNT(*) 
+            FROM OrdenReparacionMecanico suborm 
+            WHERE suborm.ordenReparacionId = orep.id
+          ) = 1
           GROUP BY orep.id
         `;
-
         const params = [moneda, mecanico.id, startDate, endDate];
 
         const [resultado] = await prisma.$queryRawUnsafe<
