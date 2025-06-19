@@ -1,6 +1,7 @@
 "use client";
 import { useFetch } from "@/contexts/FetchContext";
 import { useAuth } from "@/hooks/useAuth";
+import UltimaSemana from "@/sections/mecanicos/UltimaSemana";
 import PersonIcon from "@mui/icons-material/Person";
 import {
   Box,
@@ -49,7 +50,6 @@ const VerEmpleadoPage = ({ params }: { params: { id: string } }) => {
 
     fetchEmpleado();
   }, [params.id, authFetch]);
-
   if (loading) {
     return (
       <Box
@@ -66,75 +66,111 @@ const VerEmpleadoPage = ({ params }: { params: { id: string } }) => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Paper elevation={3} sx={{ p: 3, m: 2 }}>
-        <Typography variant="h4" gutterBottom>
-          Empleado: {empleado.name}
-        </Typography>
-        <Divider sx={{ my: 2 }} />
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Typography variant="h6" gutterBottom>
-              <PersonIcon sx={{ mr: 1, verticalAlign: "middle" }} />
-              Información del Empleado
-            </Typography>
-            <Typography>
-              <strong>Nombre:</strong> {empleado.name}
-            </Typography>
-            <Typography>
-              <strong>DNI:</strong> {empleado.dni}
-            </Typography>
-            <Typography>
-              <strong>Email:</strong> {empleado.email}
-            </Typography>
-            <Typography>
-              <strong>Teléfono:</strong> {empleado.phone}
-            </Typography>
-            <Typography>
-              <strong>Dirección:</strong> {empleado.address}
-            </Typography>
-            <Typography>
-              <strong>Ciudad:</strong> {empleado.city}
-            </Typography>
-            <Typography>
-              <strong>Provincia:</strong> {empleado.state}
-            </Typography>
-            <Typography>
-              <strong>Código Postal:</strong> {empleado.postal_code}
-            </Typography>
-            <Typography>
-              <strong>Tipo:</strong> {empleado.tipo}
-            </Typography>
-            <Typography>
-              <strong>Fecha de inicio:</strong>{" "}
-              {empleado.start_date
-                ? new Date(empleado.start_date).toLocaleDateString()
-                : "-"}
-            </Typography>
-            <Typography>
-              <strong>Fecha de nacimiento:</strong>{" "}
-              {empleado.birthday
-                ? new Date(empleado.birthday).toLocaleDateString()
-                : "-"}
-            </Typography>
-            {empleado.dniImagePath && (
-              <Box mt={2}>
-                <Typography variant="h6" gutterBottom>
-                  Imagen del DNI
-                </Typography>
-                <Image
-                  src={empleado.dniImagePath}
-                  alt="DNI del empleado"
-                  width={300}
-                  height={200}
-                  style={{ width: "300px", height: "auto" }}
-                />
-              </Box>
-            )}
+    <>
+      <Box sx={{ p: 3 }}>
+        <Paper elevation={3} sx={{ p: 3, m: 2 }}>
+          <Typography variant="h4" gutterBottom>
+            Empleado: {empleado.name}
+          </Typography>
+          <Divider sx={{ my: 2 }} />
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Typography variant="h6" gutterBottom>
+                <PersonIcon sx={{ mr: 1, verticalAlign: "middle" }} />
+                Información del Empleado
+              </Typography>
+              <Typography>
+                <strong>Nombre:</strong> {empleado.name}
+              </Typography>
+              <Typography>
+                <strong>DNI:</strong> {empleado.dni}
+              </Typography>
+              <Typography>
+                <strong>Email:</strong> {empleado.email}
+              </Typography>
+              <Typography>
+                <strong>Teléfono:</strong> {empleado.phone}
+              </Typography>
+              <Typography>
+                <strong>Dirección:</strong> {empleado.address}
+              </Typography>
+              <Typography>
+                <strong>Ciudad:</strong> {empleado.city}
+              </Typography>
+              <Typography>
+                <strong>Provincia:</strong> {empleado.state}
+              </Typography>
+              <Typography>
+                <strong>Código Postal:</strong> {empleado.postal_code}
+              </Typography>
+              <Typography>
+                <strong>Tipo:</strong> {empleado.tipo}
+              </Typography>
+              <Typography>
+                <strong>Fecha de inicio:</strong>{" "}
+                {empleado.start_date
+                  ? new Date(empleado.start_date).toLocaleDateString()
+                  : "-"}
+              </Typography>
+              <Typography>
+                <strong>Fecha de nacimiento:</strong>{" "}
+                {empleado.birthday
+                  ? new Date(empleado.birthday).toLocaleDateString()
+                  : "-"}
+              </Typography>
+              {empleado.dniImagePath && (
+                <Box mt={2}>
+                  <Typography variant="h6" gutterBottom>
+                    Imagen del DNI
+                  </Typography>
+                  <Image
+                    src={empleado.dniImagePath}
+                    alt="DNI del empleado"
+                    width={300}
+                    height={200}
+                    style={{ width: "300px", height: "auto" }}
+                  />
+                </Box>
+              )}
+            </Grid>
           </Grid>
-        </Grid>
-      </Paper>
-    </Box>
+        </Paper>
+      </Box>
+      {empleado?.tipo === "Mecanico" && (
+        <>
+          <Box sx={{ p: 3 }}>
+            <Paper elevation={3} sx={{ p: 3, m: 2 }}>
+              <UltimaSemana
+                mecanicoId={empleado.id}
+                enProgreso={false}
+                compartidas={false}
+                title="Últimas reparaciones terminadas"
+              />
+            </Paper>
+          </Box>
+          <Box sx={{ p: 3 }}>
+            <Paper elevation={3} sx={{ p: 3, m: 2 }}>
+              <UltimaSemana
+                mecanicoId={empleado.id}
+                enProgreso={false}
+                compartidas={true}
+                title="Últimas reparaciones compartidas terminadas"
+              />
+            </Paper>
+          </Box>
+          <Box sx={{ p: 3 }}>
+            <Paper elevation={3} sx={{ p: 3, m: 2 }}>
+              <UltimaSemana
+                mecanicoId={empleado.id}
+                enProgreso={true}
+                compartidas={false}
+                title="Últimas reparaciones en progreso"
+              />
+            </Paper>
+          </Box>
+        </>
+      )}
+    </>
   );
 };
 

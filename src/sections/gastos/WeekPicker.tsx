@@ -26,7 +26,9 @@ const WeekPicker = ({ onWeekChange }: WeekPickerProps) => {
   const goToPrevWeek = () => {
     const newDate = subWeeks(currentDate, 1);
     const newEndDate = new Date(newDate);
+    console.log("newDate", newDate);
     newEndDate.setDate(newDate.getDate() + 4);
+    console.log("newEndDate", newEndDate);
     setCurrentDate(newDate);
     setCurrentEndDate(newEndDate);
     onWeekChange({ start: newDate, end: newEndDate });
@@ -35,13 +37,17 @@ const WeekPicker = ({ onWeekChange }: WeekPickerProps) => {
   const goToNextWeek = () => {
     const newDate = addWeeks(currentDate, 1);
     const newEndDate = new Date(newDate);
+    console.log("newDate", newDate);
     newEndDate.setDate(newDate.getDate() + 4);
+    console.log("newEndDate", newEndDate);
     setCurrentDate(newDate);
     setCurrentEndDate(newEndDate);
     onWeekChange({ start: newDate, end: newEndDate });
   };
 
   const formatDateRange = () => {
+    console.log("currentDate", currentDate);
+    console.log("currentEndDate", currentEndDate);
     return `${format(currentDate, "d 'de' MMMM", { locale: es })} - ${format(
       currentEndDate,
       "d 'de' MMMM",

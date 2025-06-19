@@ -114,13 +114,27 @@ export async function getReparacionesTerminadasForMecanico(
   endDate: Date,
   mecanicoId: number
 ) {
+  return getReparacionesForMecanico(
+    startDate,
+    endDate,
+    mecanicoId,
+    EstadoOrdenReparacion.Terminado
+  );
+}
+
+export async function getReparacionesForMecanico(
+  startDate: Date,
+  endDate: Date,
+  mecanicoId: number,
+  estado: EstadoOrdenReparacion
+) {
   return await prisma.ordenReparacion.findMany({
     where: {
       fechaSalidaReparacion: {
         gte: startDate,
         lte: endDate,
       },
-      estado: EstadoOrdenReparacion.Terminado,
+      estado,
       mecanicos: {
         some: {
           mecanicoId,
@@ -128,7 +142,16 @@ export async function getReparacionesTerminadasForMecanico(
       },
     },
     include: {
-      mecanicos: true, // Include all mechanics to count them later
+      mecanicos: {
+        include: {
+          mecanico: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      },
       trabajosRealizados: {
         select: {
           descripcion: true,
