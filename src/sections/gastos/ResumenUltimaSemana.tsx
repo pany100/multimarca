@@ -89,6 +89,7 @@ function ResumenUltimaSemana() {
   const rows = data.map((mecanico) => ({
     id: mecanico.mecanicoId,
     mecanicoNombre: mecanico.mecanicoNombre,
+    mecanicoId: mecanico.mecanicoId,
     cantidadReparaciones: mecanico.reparaciones.length,
     manoDeObraTotal: mecanico.manoDeObraTotal,
     manoDeObraPagada: mecanico.manoDeObraPagada,
@@ -98,7 +99,33 @@ function ResumenUltimaSemana() {
 
   // Define columns for DataGrid
   const columns: GridColDef[] = [
-    { field: "mecanicoNombre", headerName: "Mecánico", flex: 1 },
+    {
+      field: "mecanicoNombre",
+      headerName: "Mecánico",
+      flex: 1,
+      renderCell: (params) => {
+        return (
+          <Typography
+            key={params.row.id}
+            variant="body2"
+            sx={{
+              "& a": {
+                textDecoration: "none",
+                color: "inherit",
+                "&:hover": {
+                  textDecoration: "underline",
+                  color: "primary.main",
+                },
+              },
+            }}
+          >
+            <Link href={`/dashboard/mecanicos/${params.row.mecanicoId}/ver`}>
+              {params.row.mecanicoNombre}
+            </Link>
+          </Typography>
+        );
+      },
+    },
     {
       field: "reparaciones",
       headerName: "Reparaciones",
@@ -163,13 +190,28 @@ function ResumenUltimaSemana() {
       flex: 1.5,
       renderCell: (params) => {
         return (
-          <Link href={`/dashboard/ordenes-reparacion/${params.row.id}/ver`}>
-            *{" "}
-            {`${params.row.auto} - ${format(
-              new Date(params.row.fecha),
-              "dd/MM/yyyy"
-            )}`}
-          </Link>
+          <Typography
+            key={params.row.id}
+            variant="body2"
+            sx={{
+              "& a": {
+                textDecoration: "none",
+                color: "inherit",
+                "&:hover": {
+                  textDecoration: "underline",
+                  color: "primary.main",
+                },
+              },
+            }}
+          >
+            <Link href={`/dashboard/ordenes-reparacion/${params.row.id}/ver`}>
+              *{" "}
+              {`${params.row.auto} - ${format(
+                new Date(params.row.fecha),
+                "dd/MM/yyyy"
+              )}`}
+            </Link>
+          </Typography>
         );
       },
     },
