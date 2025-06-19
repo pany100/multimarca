@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
         )) as totalReparaciones
         FROM OrdenReparacion orep
         LEFT JOIN Dolar d ON d.id = orep.dolarId
-        WHERE orep.estado != 'Presupuestado'
+        WHERE orep.estado = 'Terminado'
         AND orep.fechaCreacion >= ? AND orep.fechaCreacion <= ?
       `;
 

@@ -51,7 +51,7 @@ export async function GET(request: NextRequest) {
     JOIN Auto a ON c.id = a.ownerId
     JOIN OrdenReparacion orep ON a.id = orep.autoId
     LEFT JOIN Dolar d ON d.id = orep.dolarId
-    WHERE orep.estado != 'Presupuestado'
+    WHERE orep.estado = 'Terminado'
 `;
 
     const queryParams: any[] = [moneda];

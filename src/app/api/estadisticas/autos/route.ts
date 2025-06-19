@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
         COUNT(DISTINCT orep.id) as cantidad
       FROM Auto a
       JOIN OrdenReparacion orep ON a.id = orep.autoId
-      WHERE 1=1
+      WHERE orep.estado = 'Terminado'
     `;
 
     const queryParams: any[] = [];
