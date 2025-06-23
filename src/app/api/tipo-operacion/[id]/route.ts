@@ -33,7 +33,11 @@ export async function PUT(
 
     const updatedTipoOperacion = await prisma.tipoDeOperacion.update({
       where: { id },
-      data: { label: body.label },
+      data: {
+        label: body.label,
+        esIngreso: body.esIngreso,
+        esGasto: body.esGasto,
+      },
     });
 
     return NextResponse.json(updatedTipoOperacion);

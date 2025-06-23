@@ -1,9 +1,23 @@
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    // Get the URL from the request
+    const url = new URL(request.url);
+    // Get the 'tipo' parameter from the URL
+    const tipo = url.searchParams.get("tipo");
+
+    // Define the where clause based on the tipo parameter
+    let whereClause = {};
+    if (tipo === "ingreso") {
+      whereClause = { esIngreso: true };
+    } else if (tipo === "egreso") {
+      whereClause = { esGasto: true };
+    }
+
     const tiposOperacion = await prisma.tipoDeOperacion.findMany({
+      where: whereClause,
       orderBy: {
         id: "asc",
       },
@@ -31,7 +45,11 @@ export async function POST(request: Request) {
     }
 
     const existingTipo = await prisma.tipoDeOperacion.findUnique({
-      where: { label: body.label },
+      where: {
+        label: body.label,
+        esIngreso: body.esIngreso,
+        esGasto: body.esGasto,
+      },
     });
 
     if (existingTipo) {

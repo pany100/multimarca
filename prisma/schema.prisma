@@ -639,6 +639,8 @@ model TipoDeOperacion {
   label                 String                  @unique @db.VarChar(100)
   extracciones          Extraccion[]
   gastos                Gasto[]
+  esIngreso             Boolean @default(true)
+  esGasto               Boolean @default(true)
   ingresosPorReparacion IngresoPorReparacion[]
   ingresosManualDeDinero IngresoManualDeDinero[]
   ingresosPorVenta IngresoPorVenta[]
