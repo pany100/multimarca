@@ -1,7 +1,9 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { useEffect, useState } from "react";
 
-export default function useTipoOperacion() {
+export type TipoOperacion = "ingreso" | "gasto" | "todos";
+
+export default function useTipoOperacion(tipo: TipoOperacion) {
   const { authFetch } = useFetch();
   const [tiposOperacion, setTiposOperacion] = useState<
     { value: number; label: string }[]
@@ -13,7 +15,11 @@ export default function useTipoOperacion() {
     const fetchTiposOperacion = async () => {
       try {
         setLoading(true);
-        const response = await authFetch("/api/tipo-operacion");
+        let url = "/api/tipo-operacion";
+        if (tipo !== "todos") {
+          url += "?tipo=" + tipo;
+        }
+        const response = await authFetch(url);
         const data = await response.json();
 
         if (data) {

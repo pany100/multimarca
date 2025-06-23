@@ -34,7 +34,7 @@ const IngresosReparacionForm = () => {
 
   const { currency } = useFixedSelectData();
   const { searchClientes, initialCliente } = useClientesAutocomplete();
-  const { tiposOperacion } = useTipoOperacion();
+  const { tiposOperacion } = useTipoOperacion("ingreso");
   const clienteId = watch("clienteId");
   const { ordenesReparacion } = useOrdenReparacionDelCliente(clienteId);
   const operacionValue = watch("tipoOperacionId");

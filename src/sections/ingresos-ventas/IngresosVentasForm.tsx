@@ -31,7 +31,7 @@ const IngresosVentasForm = () => {
   const { watch } = useFormContext();
   const { currency } = useFixedSelectData();
   const { searchClientes, initialCliente } = useClientesAutocomplete();
-  const { tiposOperacion } = useTipoOperacion();
+  const { tiposOperacion } = useTipoOperacion("ingreso");
   const clienteId = watch("clienteId");
   const { ventas } = useVentasDelCliente(clienteId);
   const operacionValue = watch("tipoOperacionId");

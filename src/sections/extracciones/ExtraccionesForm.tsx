@@ -30,7 +30,7 @@ export const schema = yup.object({
 const ExtraccionesForm = () => {
   const { admins } = useAdmins();
   const { currency } = useFixedSelectData();
-  const { tiposOperacion } = useTipoOperacion();
+  const { tiposOperacion } = useTipoOperacion("gasto");
   const { watch } = useFormContext();
   const operacionValue = watch("tipoOperacionId");
 
