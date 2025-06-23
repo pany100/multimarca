@@ -60,7 +60,11 @@ export async function POST(request: Request) {
     }
 
     const newTipoOperacion = await prisma.tipoDeOperacion.create({
-      data: { label: body.label },
+      data: {
+        label: body.label,
+        esIngreso: body.esIngreso,
+        esGasto: body.esGasto,
+      },
     });
 
     return NextResponse.json(newTipoOperacion, { status: 201 });
