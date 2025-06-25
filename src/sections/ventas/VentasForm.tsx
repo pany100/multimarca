@@ -50,7 +50,7 @@ function VentasForm() {
   const [openModal, setOpenModal] = useState(false);
   const clienteId = watch("clienteId");
   const operacionValue = watch("tipoOperacionId");
-  const { tiposOperacion } = useTipoOperacion();
+  const { tiposOperacion } = useTipoOperacion("ingreso");
   return (
     <>
       <Typography variant="h5" sx={{ mb: 2 }}>
