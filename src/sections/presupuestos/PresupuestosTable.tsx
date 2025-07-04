@@ -270,6 +270,7 @@ function PresupuestosTable({
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -280,6 +281,7 @@ function PresupuestosTable({
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -290,6 +292,7 @@ function PresupuestosTable({
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -300,6 +303,7 @@ function PresupuestosTable({
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -310,6 +314,7 @@ function PresupuestosTable({
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -320,6 +325,7 @@ function PresupuestosTable({
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -330,6 +336,7 @@ function PresupuestosTable({
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}

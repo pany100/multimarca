@@ -6,10 +6,19 @@ import {
   Button,
   IconButton,
   Menu,
+  Stack,
   TextField,
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef, GridRowParams } from "@mui/x-data-grid";
+import {
+  DateValidationError,
+  PickerChangeHandlerContext,
+} from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { PickerValue } from "@mui/x-date-pickers/internals";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
@@ -22,6 +31,7 @@ export interface CustomTableProps {
   getRowClassName?: (params: GridRowParams) => string;
   refreshTrigger?: number;
   disableMenuForRow?: (item: any) => boolean;
+  searchByDate?: boolean;
 }
 
 export type InheritedTableProps = {
@@ -42,12 +52,15 @@ function CustomTable<T extends { id: string }>({
   getRowClassName,
   disableMenuForRow,
   refreshTrigger = 0,
+  searchByDate = false,
 }: CustomTableProps) {
   const searchParams = useSearchParams();
   const isInitialMount = useRef(true);
   const isUrlUpdateNeeded = useRef(true);
   const pendingFetch = useRef(false);
 
+  const [fromDate, setFromDate] = useState<Date | null>(null);
+  const [toDate, setToDate] = useState<Date | null>(null);
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [totalItems, setTotalItems] = useState(0);
@@ -171,6 +184,23 @@ function CustomTable<T extends { id: string }>({
         url.searchParams.delete("query");
       }
 
+      // Add date parameters if searchByDate is true
+      if (searchByDate) {
+        if (fromDate) {
+          const formattedDate = fromDate.toISOString().split("T")[0];
+          url.searchParams.set("from", formattedDate);
+        } else {
+          url.searchParams.delete("from");
+        }
+
+        if (toDate) {
+          const formattedDate = toDate.toISOString().split("T")[0];
+          url.searchParams.set("to", formattedDate);
+        } else {
+          url.searchParams.delete("to");
+        }
+      }
+
       // Check for return parameters and preserve them
       const returnParams: Record<string, string> = {};
       url.searchParams.forEach((value, key) => {
@@ -182,7 +212,7 @@ function CustomTable<T extends { id: string }>({
       // Update browser history without reloading the page
       window.history.pushState({ page, pageSize, query }, "", url.toString());
     },
-    []
+    [searchByDate, fromDate, toDate]
   );
 
   const fetchItems = useCallback(async () => {
@@ -195,7 +225,7 @@ function CustomTable<T extends { id: string }>({
       // Get all query parameters except page, pageSize, and query which we'll set separately
       currentUrl.searchParams.forEach((value, key) => {
         if (
-          !["page", "pageSize", "query", "return"].some((param) =>
+          !["page", "pageSize", "query", "from", "to", "return"].some((param) =>
             key.startsWith(param)
           )
         ) {
@@ -214,6 +244,18 @@ function CustomTable<T extends { id: string }>({
       url.searchParams.append("page", paginationModel.page.toString());
       url.searchParams.append("size", paginationModel.pageSize.toString());
       if (searchTerm) url.searchParams.append("query", searchTerm);
+
+      // Add date parameters if searchByDate is true
+      if (searchByDate) {
+        if (fromDate) {
+          const formattedDate = fromDate.toISOString().split("T")[0];
+          url.searchParams.append("from", formattedDate);
+        }
+        if (toDate) {
+          const formattedDate = toDate.toISOString().split("T")[0];
+          url.searchParams.append("to", formattedDate);
+        }
+      }
 
       const response = await authFetch(url.toString());
       const data = await response.json();
@@ -244,6 +286,9 @@ function CustomTable<T extends { id: string }>({
     paginationModel.pageSize,
     authFetch,
     searchTerm,
+    fromDate,
+    toDate,
+    searchByDate,
     updateUrl,
   ]);
 
@@ -258,6 +303,42 @@ function CustomTable<T extends { id: string }>({
 
     return () => clearTimeout(timeoutId);
   }, [fetchItems, refreshTrigger]);
+
+  const handleFromDateChange = (
+    value: PickerValue,
+    context: PickerChangeHandlerContext<DateValidationError>
+  ) => {
+    if (context.validationError) {
+      return; // No actualizar si hay error de validación
+    }
+    // Convertir el valor a Date si es necesario
+    const dateValue =
+      value instanceof Date ? value : value && new Date(value.toString());
+    setFromDate(dateValue);
+    setPaginationModel({ ...paginationModel, page: 0 }); // Reset to first page on date change
+    // Trigger fetch immediately
+    setTimeout(() => {
+      fetchItems();
+    }, 0);
+  };
+
+  const handleToDateChange = (
+    value: PickerValue,
+    context: PickerChangeHandlerContext<DateValidationError>
+  ) => {
+    if (context.validationError) {
+      return; // No actualizar si hay error de validación
+    }
+    // Convertir el valor a Date si es necesario
+    const dateValue =
+      value instanceof Date ? value : value && new Date(value.toString());
+    setToDate(dateValue);
+    setPaginationModel({ ...paginationModel, page: 0 }); // Reset to first page on date change
+    // Trigger fetch immediately
+    setTimeout(() => {
+      fetchItems();
+    }, 0);
+  };
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newSearchTerm = e.target.value;
@@ -310,29 +391,74 @@ function CustomTable<T extends { id: string }>({
             gap: 2,
           }}
         >
-          <TextField
-            placeholder="Buscar..."
-            variant="outlined"
-            size="small"
-            value={searchTerm}
-            onChange={handleSearchChange}
-            sx={{
-              width: 300,
-              "& .MuiOutlinedInput-root": {
-                backgroundColor: "background.paper",
-                "&:hover fieldset": {
-                  borderColor: "primary.main",
+          <Stack
+            direction="row"
+            spacing={2}
+            alignItems="center"
+            sx={{ flexWrap: "wrap" }}
+          >
+            <TextField
+              placeholder="Buscar..."
+              variant="outlined"
+              size="small"
+              value={searchTerm}
+              onChange={handleSearchChange}
+              sx={{
+                width: 300,
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "background.paper",
+                  "&:hover fieldset": {
+                    borderColor: "primary.main",
+                  },
                 },
-              },
-            }}
-            InputProps={{
-              startAdornment: (
-                <Box component="span" sx={{ color: "text.secondary", mr: 1 }}>
-                  🔍
-                </Box>
-              ),
-            }}
-          />
+              }}
+              InputProps={{
+                startAdornment: (
+                  <Box component="span" sx={{ color: "text.secondary", mr: 1 }}>
+                    🔍
+                  </Box>
+                ),
+              }}
+            />
+            {searchByDate && (
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <Stack direction="row" spacing={1} alignItems="center">
+                  <DatePicker
+                    label="Desde"
+                    value={fromDate}
+                    onChange={handleFromDateChange}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        sx: {
+                          width: 150,
+                          "& .MuiOutlinedInput-root": {
+                            backgroundColor: "background.paper",
+                          },
+                        },
+                      },
+                    }}
+                  />
+                  <DatePicker
+                    label="Hasta"
+                    value={toDate}
+                    onChange={handleToDateChange}
+                    slotProps={{
+                      textField: {
+                        size: "small",
+                        sx: {
+                          width: 150,
+                          "& .MuiOutlinedInput-root": {
+                            backgroundColor: "background.paper",
+                          },
+                        },
+                      },
+                    }}
+                  />
+                </Stack>
+              </LocalizationProvider>
+            )}
+          </Stack>
           {ctaCb && (
             <Button
               variant="contained"
