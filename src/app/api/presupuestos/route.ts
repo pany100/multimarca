@@ -30,6 +30,7 @@ export async function GET(request: Request) {
         { auto: { owner: { fullName: { contains: query } } } },
         { observacionesCliente: { contains: query } },
         { administrativo: { fullName: { contains: query } } },
+        { detallesDeTrabajo: { contains: query } },
       ],
     };
 
