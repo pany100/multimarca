@@ -10,28 +10,41 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import AddPresupuestoModal from "./AddPresupuestoModal";
 
 // Define the estados for the presupuestos
-const estados = ["TODOS", "EnPreparacion", "Enviado", "Aceptado", "Rechazado"];
+const estados = [
+  "TODOS",
+  "EnPreparacion",
+  "Terminado",
+  "Enviado",
+  "Aceptado",
+  "Rechazado",
+  "Descartado",
+];
 
 const estadosDisplay = {
   EnPreparacion: "En Preparación",
+  Terminado: "Terminado",
   Enviado: "Enviado",
   Aceptado: "Aceptado",
   Rechazado: "Rechazado",
+  Descartado: "Descartado",
 };
 
 const mapEstadoPresupuesto = (estado: string) => {
   switch (estado) {
     case "EnPreparacion":
       return "En Preparación";
+    case "Terminado":
+      return "Terminado";
     case "Enviado":
       return "Enviado";
     case "Aceptado":
       return "Aceptado";
     case "Rechazado":
       return "Rechazado";
+    case "Descartado":
+      return "Descartado";
     default:
       return "Estado Desconocido";
   }
@@ -41,12 +54,16 @@ const mapEstadoColor = (estado: string) => {
   switch (estado) {
     case "EnPreparacion":
       return "#FFA500"; // Orange
+    case "Terminado":
+      return "#FFD700"; // Dark green
     case "Enviado":
       return "#3498db"; // Blue
     case "Aceptado":
       return "#2ecc71"; // Green
     case "Rechazado":
       return "#e74c3c"; // Red
+    case "Descartado":
+      return "#9b59b6"; // Purple light
     default:
       return "#95a5a6"; // Gray
   }
@@ -62,7 +79,6 @@ function PresupuestosTable({
   const searchParams = useSearchParams();
   const [tabValue, setTabValue] = useState(0);
   const [estadoActual, setEstadoActual] = useState<string | null>(null);
-  const [addModalOpen, setAddModalOpen] = useState(false);
 
   useEffect(() => {
     const tabParam = searchParams.get("tab");
@@ -87,12 +103,19 @@ function PresupuestosTable({
   const columns = [
     { field: "id", headerName: "ID", flex: 0.3 },
     {
-      field: "fechaCreacion",
+      field: "fecha",
       headerName: "Fecha De Creación",
       flex: 1,
-      valueGetter: (fechaCreacion: string) =>
-        fechaCreacion
-          ? new Date(fechaCreacion).toLocaleDateString("es-AR")
+      valueGetter: (fecha: string) =>
+        fecha ? new Date(fecha).toLocaleDateString("es-AR") : "No ingresado",
+    },
+    {
+      field: "fechaEnvio",
+      headerName: "Fecha De Envío",
+      flex: 1,
+      valueGetter: (fechaEnvio: string) =>
+        fechaEnvio
+          ? new Date(fechaEnvio).toLocaleDateString("es-AR")
           : "No ingresado",
     },
     {
@@ -119,6 +142,26 @@ function PresupuestosTable({
             ) : (
               params.row.informacionAuto || "No ingresado"
             )}
+          </Box>
+        );
+      },
+    },
+    {
+      headerName: "Tema",
+      flex: 2,
+      renderCell: (params: any) => {
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              height: "100%",
+            }}
+          >
+            {params.row.detallesDeTrabajo ||
+              params.row.observacionesCliente ||
+              "No ingresado"}
           </Box>
         );
       },
@@ -224,7 +267,7 @@ function PresupuestosTable({
             title="Presupuestos"
             apiEndpoint="/api/presupuestos"
             extraActions={customActions}
-            ctaCb={() => setAddModalOpen(true)}
+            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
             columns={columns}
             {...rest}
           />
@@ -234,7 +277,17 @@ function PresupuestosTable({
             title="Presupuestos en Preparación"
             apiEndpoint="/api/presupuestos?estado=EnPreparacion"
             extraActions={customActions}
-            ctaCb={() => setAddModalOpen(true)}
+            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
+            columns={columns}
+            {...rest}
+          />
+        )}
+        {estadoActual === "Terminado" && (
+          <CustomTable
+            title="Presupuestos Terminados"
+            apiEndpoint="/api/presupuestos?estado=Terminado"
+            extraActions={customActions}
+            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
             columns={columns}
             {...rest}
           />
@@ -244,7 +297,7 @@ function PresupuestosTable({
             title="Presupuestos Enviados"
             apiEndpoint="/api/presupuestos?estado=Enviado"
             extraActions={customActions}
-            ctaCb={() => setAddModalOpen(true)}
+            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
             columns={columns}
             {...rest}
           />
@@ -254,7 +307,7 @@ function PresupuestosTable({
             title="Presupuestos Aceptados"
             apiEndpoint="/api/presupuestos?estado=Aceptado"
             extraActions={customActions}
-            ctaCb={() => setAddModalOpen(true)}
+            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
             columns={columns}
             {...rest}
           />
@@ -264,16 +317,22 @@ function PresupuestosTable({
             title="Presupuestos Rechazados"
             apiEndpoint="/api/presupuestos?estado=Rechazado"
             extraActions={customActions}
-            ctaCb={() => setAddModalOpen(true)}
+            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
+            columns={columns}
+            {...rest}
+          />
+        )}
+        {estadoActual === "Descartado" && (
+          <CustomTable
+            title="Presupuestos Descartados"
+            apiEndpoint="/api/presupuestos?estado=Descartado"
+            extraActions={customActions}
+            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
             columns={columns}
             {...rest}
           />
         )}
       </Box>
-      <AddPresupuestoModal
-        open={addModalOpen}
-        onClose={() => setAddModalOpen(false)}
-      />
     </Box>
   );
 }

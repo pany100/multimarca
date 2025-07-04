@@ -712,9 +712,11 @@ enum EstadoOrdenReparacion {
 
 enum EstadoPresupuesto {
   EnPreparacion
+  Terminado
   Enviado
   Aceptado
   Rechazado
+  Descartado
 }
 
 enum TipoNotificacionInterna {

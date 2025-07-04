@@ -193,7 +193,14 @@ const presupuestoSchema = yup.object().shape({
   descripcionIncremento: yup.string().nullable(),
   estado: yup
     .string()
-    .oneOf(["EnPreparacion", "Enviado", "Aceptado", "Rechazado"])
+    .oneOf([
+      "EnPreparacion",
+      "Enviado",
+      "Aceptado",
+      "Rechazado",
+      "Descartado",
+      "Terminado",
+    ])
     .required(),
 });
 

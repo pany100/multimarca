@@ -252,12 +252,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "Reparaciones",
-            texto: "Plantilla Presupuesto",
-            icono: <ContentPasteIcon />,
-            ruta: "/dashboard/plantilla-presupuesto",
-          },
-          {
-            permiso: "Reparaciones",
             texto: "Órdenes de Reparación",
             icono: <AssignmentIcon />,
             ruta: "/dashboard/ordenes-reparacion",

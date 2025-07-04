@@ -22,9 +22,11 @@ function useFixedSelectData() {
 
   const presupuestoEstadoOptions = [
     { value: "EnPreparacion", label: "En Preparación" },
+    { value: "Terminado", label: "Terminado" },
     { value: "Enviado", label: "Enviado" },
     { value: "Aceptado", label: "Aceptado" },
     { value: "Rechazado", label: "Rechazado" },
+    { value: "Descartado", label: "Descartado" },
   ];
 
   const siNo = [

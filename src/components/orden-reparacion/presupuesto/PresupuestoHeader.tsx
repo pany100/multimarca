@@ -33,12 +33,16 @@ const mapEstadoPresupuesto = (estado: string) => {
   switch (estado) {
     case "EnPreparacion":
       return "En Preparación";
+    case "Terminado":
+      return "Terminado";
     case "Enviado":
       return "Enviado";
     case "Aceptado":
       return "Aceptado";
     case "Rechazado":
       return "Rechazado";
+    case "Descartado":
+      return "Descartado";
     default:
       return "Estado Desconocido";
   }
@@ -49,12 +53,16 @@ const mapEstadoColor = (estado: string) => {
   switch (estado) {
     case "EnPreparacion":
       return "#FFA500"; // Orange
+    case "Terminado":
+      return "#FFD700"; // Amarillo fuerte
     case "Enviado":
       return "#3498db"; // Blue
     case "Aceptado":
       return "#2ecc71"; // Green
     case "Rechazado":
       return "#e74c3c"; // Red
+    case "Descartado":
+      return "#9b59b6"; // Purple light
     default:
       return "#95a5a6"; // Gray
   }
