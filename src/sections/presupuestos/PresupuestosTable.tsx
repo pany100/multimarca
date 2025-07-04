@@ -147,6 +147,7 @@ function PresupuestosTable({
       },
     },
     {
+      field: "tema",
       headerName: "Tema",
       flex: 2,
       renderCell: (params: any) => {
