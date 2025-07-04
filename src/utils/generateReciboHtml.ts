@@ -25,9 +25,9 @@ export default function generateReciboHtml(ingresoPorReparacion: any): string {
       <p>Recibido de: <strong>${
         ingresoPorReparacion.cliente.fullName
       }</strong></p>
-      <p>La suma de: <strong>$${ingresoPorReparacion.monto.toFixed(2)}${
-    ingresoPorReparacion.moneda
-  }</strong></p>
+      <p>La suma de: <strong>$${Number(
+        ingresoPorReparacion.monto
+      ).toLocaleString("es-AR")}</strong></p>
       <p>En concepto de la reparación: <strong>#${
         ingresoPorReparacion.ordenReparacionId
       } - ${ingresoPorReparacion.ordenReparacion.auto.brand} ${
