@@ -427,6 +427,7 @@ function CustomTable<T extends { id: string }>({
                     label="Desde"
                     value={fromDate}
                     onChange={handleFromDateChange}
+                    format="dd-MM-yyyy"
                     slotProps={{
                       textField: {
                         size: "small",
@@ -443,6 +444,7 @@ function CustomTable<T extends { id: string }>({
                     label="Hasta"
                     value={toDate}
                     onChange={handleToDateChange}
+                    format="dd-MM-yyyy"
                     slotProps={{
                       textField: {
                         size: "small",

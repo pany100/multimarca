@@ -16,6 +16,9 @@ export async function GET(request: Request) {
     const estado = searchParams.get("estado") as EstadoPresupuestoType | null;
     const sortBy = searchParams.get("sortBy") || "fecha";
     const sortOrder = searchParams.get("sortOrder") || "desc";
+    // Obtener parámetros de fecha
+    const fromDate = searchParams.get("from");
+    const toDate = searchParams.get("to");
 
     const skip = page * size;
 
@@ -37,6 +40,22 @@ export async function GET(request: Request) {
     // Filter by estado if provided
     if (estado) {
       where.estado = estado;
+    }
+
+    if (fromDate || toDate) {
+      where.fecha = {};
+
+      if (fromDate) {
+        // Convertir YYYY-MM-DD a objeto Date
+        where.fecha.gte = new Date(fromDate);
+      }
+
+      if (toDate) {
+        // Convertir YYYY-MM-DD a objeto Date y establecer a final del día
+        const endDate = new Date(toDate);
+        endDate.setHours(23, 59, 59, 999);
+        where.fecha.lte = endDate;
+      }
     }
 
     // Build the orderBy object
