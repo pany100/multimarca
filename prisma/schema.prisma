@@ -25,6 +25,7 @@ model Usuario {
   presupuestosCreados          Presupuesto[]         @relation("PresupuestoCreador")
   recordatoriosAgenda          RecordatorioAgenda[]
   tareasAdministrativas        TareaAdministrativa[] @relation("UsuarioTareas")
+  tareasDiarias                TareaDiaria[]
   @@index([fullName])
   @@index([username])
   @@index([rolId], map: "Usuario_rolId_fkey")
@@ -688,6 +689,18 @@ model TareaAdministrativa {
   usuario       Usuario     @relation("UsuarioTareas", fields: [usuarioId], references: [id])
 
   @@index([presupuestoId])
+  @@index([usuarioId])
+}
+
+model TareaDiaria {
+  id          Int       @id @default(autoincrement())
+  descripcion String    @db.Text
+  realizado   Boolean   @default(false)
+  fecha       DateTime  @default(now())
+  usuarioId   Int?
+  usuario     Usuario?  @relation(fields: [usuarioId], references: [id])
+
+  @@index([fecha])
   @@index([usuarioId])
 }
 

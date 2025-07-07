@@ -6,6 +6,7 @@ import AssessmentIcon from "@mui/icons-material/Assessment";
 import BuildIcon from "@mui/icons-material/Build";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import ChecklistIcon from "@mui/icons-material/Checklist";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
@@ -279,6 +280,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Agenda",
             icono: <DateRangeIcon />,
             ruta: "/dashboard/agenda",
+          },
+          {
+            permiso: "Agenda",
+            texto: "Tareas Diarias",
+            icono: <ChecklistIcon />,
+            ruta: "/dashboard/tareas-diarias",
           },
         ],
       },
