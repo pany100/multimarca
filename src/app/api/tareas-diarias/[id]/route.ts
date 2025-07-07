@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { getIO } from "@/lib/socketio";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "src/utils/authFetch";
 
@@ -73,6 +74,16 @@ export async function PATCH(
         },
       },
     });
+    const io = getIO();
+    if (updatedTarea.realizado) {
+      if (io) {
+        io.emit("deleteTarea");
+      }
+    } else {
+      if (io) {
+        io.emit("newTarea");
+      }
+    }
 
     return NextResponse.json(updatedTarea);
   } catch (error) {
@@ -121,6 +132,11 @@ export async function DELETE(
     await prisma.tareaDiaria.delete({
       where: { id },
     });
+
+    const io = getIO();
+    if (io) {
+      io.emit("deleteTarea");
+    }
 
     return NextResponse.json(
       { message: "Tarea eliminada con éxito" },

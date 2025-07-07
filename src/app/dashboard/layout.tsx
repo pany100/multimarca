@@ -48,6 +48,7 @@ import "src/app/globals.css";
 import { useFetch } from "@/contexts/FetchContext";
 import { useSocket } from "@/hooks/useSocket";
 
+import useTareasDiarias from "@/sections/tareas-diarias/hooks/useTareasDiarias";
 import { boschColors } from "@/theme";
 import AlarmIcon from "@mui/icons-material/Alarm";
 import AssignmentIcon from "@mui/icons-material/Assignment";
@@ -93,6 +94,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const [cantidadNotificaciones, setCantidadNotificaciones] = useState(0);
   const [notificacionesWhatsappNoLeidas, setNotificacionesWhatsappNoLeidas] =
     useState(0);
+  const { tareas, obtenerTareasDiarias } = useTareasDiarias();
+  const [cantidadTareas, setCantidadTareas] = useState(0);
 
   useEffect(() => {
     const fetchNotificaciones = async () => {
@@ -111,6 +114,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
     fetchNotificaciones();
   }, [authFetch]);
+
+  useEffect(() => {
+    obtenerTareasDiarias(new Date().toISOString().split("T")[0], true);
+  }, [authFetch]);
+
+  useEffect(() => {
+    setCantidadTareas(tareas?.filter((tarea) => !tarea.realizado).length || 0);
+  }, [tareas]);
 
   const fetchWhatsappNoLeido = useCallback(async () => {
     try {
@@ -146,6 +157,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
       socket.on("readNotification", () => {
         setCantidadNotificaciones((prev) => Math.max(0, prev - 1));
+      });
+
+      socket.on("newTarea", () => {
+        setCantidadTareas((prev) => prev + 1);
+      });
+
+      socket.on("deleteTarea", () => {
+        setCantidadTareas((prev) => Math.max(0, prev - 1));
       });
 
       return () => {
@@ -284,7 +303,11 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           {
             permiso: "Agenda",
             texto: "Tareas Diarias",
-            icono: <ChecklistIcon />,
+            icono: (
+              <Badge badgeContent={cantidadTareas} color="error">
+                <ChecklistIcon />
+              </Badge>
+            ),
             ruta: "/dashboard/tareas-diarias",
           },
         ],
@@ -472,7 +495,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         ],
       },
     ],
-    [cantidadNotificaciones, notificacionesWhatsappNoLeidas]
+    [cantidadNotificaciones, notificacionesWhatsappNoLeidas, cantidadTareas]
   );
 
   useEffect(() => {

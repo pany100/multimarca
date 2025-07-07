@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { getIO } from "@/lib/socketio";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "src/utils/authFetch";
 
@@ -96,6 +97,10 @@ export async function POST(request: Request) {
         usuarioId: user.id,
       },
     });
+    const io = getIO();
+    if (io) {
+      io.emit("newTarea");
+    }
 
     return NextResponse.json(tarea, { status: 201 });
   } catch (error) {
