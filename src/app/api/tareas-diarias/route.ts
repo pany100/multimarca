@@ -28,6 +28,9 @@ export async function GET(request: Request) {
     };
     const fechaDate = new Date(fecha);
 
+    const fechaLimite = new Date(fechaDate);
+    fechaLimite.setDate(fechaLimite.getDate() - 5);
+
     // Incluir tareas pendientes de fechas anteriores si se solicita
     if (incluirAnteriores) {
       where = {
@@ -39,8 +42,7 @@ export async function GET(request: Request) {
             },
           },
           {
-            fecha: { lt: fechaDate },
-            realizado: false,
+            fecha: { lt: fechaDate, gte: fechaLimite },
           },
         ],
       };
