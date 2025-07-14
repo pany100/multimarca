@@ -3,6 +3,7 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { useGeneratePdf } from "@/hooks/orden-reparacion/useGeneratePdf";
 import { useAuth } from "@/hooks/useAuth";
+import { getFormattedDate, getFormattedPrice } from "@/utils/fieldHelper";
 import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import PrintIcon from "@mui/icons-material/Print";
 import ReceiptIcon from "@mui/icons-material/Receipt";
@@ -24,23 +25,6 @@ interface TabPanelProps {
   index: number;
   value: number;
 }
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
-
 // Header component for displaying venta basic info
 const VentaHeader = ({ venta }: { venta: any }) => {
   const [printLoading, setPrintLoading] = useState(false);
@@ -74,7 +58,7 @@ const VentaHeader = ({ venta }: { venta: any }) => {
           Venta #{venta.id}
         </Typography>
         <Typography variant="subtitle1" color="text.secondary">
-          Fecha: {new Date(venta.fecha).toLocaleDateString("es-AR")}
+          Fecha: {getFormattedDate(venta.fecha)}
         </Typography>
         {venta.cliente && (
           <Typography variant="subtitle1">
@@ -230,7 +214,7 @@ const ReparacionesTerceros = ({ venta }: { venta: any }) => {
                 )}
               </Box>
               <Box component="td" sx={{ p: 1, textAlign: "right" }}>
-                ${Number(reparacion.precioVenta).toLocaleString("es-AR")}
+                {getFormattedPrice(reparacion.precioVenta)}
               </Box>
             </Box>
           ))}
@@ -280,7 +264,7 @@ const TrabajosRealizados = ({ venta }: { venta: any }) => {
                 {trabajo.descripcion}
               </Box>
               <Box component="td" sx={{ p: 1, textAlign: "right" }}>
-                ${Number(trabajo.precioUnitario).toLocaleString("es-AR")}
+                {getFormattedPrice(trabajo.precioUnitario)}
               </Box>
             </Box>
           ))}
@@ -316,12 +300,9 @@ const PrecioInfo = ({ venta }: { venta: any }) => {
                 Subtotal:
               </Box>
               <Box component="td" sx={{ p: 1, textAlign: "right" }}>
-                $
-                {(
-                  total +
-                  Number(venta.descuento) -
-                  Number(venta.incremento)
-                ).toLocaleString("es-AR")}
+                {getFormattedPrice(
+                  total + Number(venta.descuento) - Number(venta.incremento)
+                )}
               </Box>
             </Box>
             {Number(venta.descuento) > 0 && (
@@ -334,7 +315,7 @@ const PrecioInfo = ({ venta }: { venta: any }) => {
                     component="td"
                     sx={{ p: 1, textAlign: "right", color: "error.main" }}
                   >
-                    -${Number(venta.descuento).toLocaleString("es-AR")}
+                    -{getFormattedPrice(venta.descuento)}
                   </Box>
                 </Box>
                 {venta.descripcionDescuento && (
@@ -365,7 +346,7 @@ const PrecioInfo = ({ venta }: { venta: any }) => {
                     component="td"
                     sx={{ p: 1, textAlign: "right", color: "success.main" }}
                   >
-                    +${Number(venta.incremento).toLocaleString("es-AR")}
+                    +{getFormattedPrice(venta.incremento)}
                   </Box>
                 </Box>
                 {venta.descripcionIncremento && (
@@ -394,9 +375,89 @@ const PrecioInfo = ({ venta }: { venta: any }) => {
                 component="td"
                 sx={{ p: 1, textAlign: "right", fontWeight: "bold" }}
               >
-                ${total.toLocaleString("es-AR")}
+                {getFormattedPrice(total)}
               </Box>
             </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
+  );
+};
+
+const PagosInfo = ({ venta }: { venta: any }) => {
+  const total = calcularTotalOrdenReparacion({
+    repuestosUsados: venta.repuestosUsados || [],
+    reparacionesDeTercero: venta.reparacionesDeTercero || [],
+    trabajosRealizados: venta.trabajosRealizados || [],
+    descuento: venta.descuento || 0,
+    incremento: venta.incremento || 0,
+  });
+  const totalPagos = venta.ingresos.reduce(
+    (total: number, ingreso: any) => total + ingreso.monto,
+    0
+  );
+  return (
+    <Box>
+      <Typography variant="h6" gutterBottom>
+        Pagos
+      </Typography>
+      <Box component="table" sx={{ width: "100%", borderCollapse: "collapse" }}>
+        <Box component="thead">
+          <Box component="tr" sx={{ borderBottom: 1, borderColor: "divider" }}>
+            <Box component="th" sx={{ p: 1, textAlign: "left" }}>
+              Fecha
+            </Box>
+            <Box component="th" sx={{ p: 1, textAlign: "right" }}>
+              Monto
+            </Box>
+          </Box>
+        </Box>
+        <Box component="tbody">
+          {venta.ingresos.map((ingreso: any) => (
+            <Box
+              component="tr"
+              key={ingreso.id}
+              sx={{ borderBottom: 1, borderColor: "divider" }}
+            >
+              <Box component="td" sx={{ p: 1 }}>
+                {getFormattedDate(ingreso.fecha)}
+              </Box>
+              <Box component="td" sx={{ p: 1, textAlign: "right" }}>
+                {getFormattedPrice(ingreso.monto)}
+              </Box>
+            </Box>
+          ))}
+        </Box>
+        <Box component="tr" sx={{ borderTop: 1, borderColor: "divider" }}>
+          <Box component="td" sx={{ p: 1, fontWeight: "bold" }}>
+            Total Pagos:
+          </Box>
+          <Box
+            component="td"
+            sx={{ p: 1, textAlign: "right", fontWeight: "bold" }}
+          >
+            {getFormattedPrice(totalPagos)}
+          </Box>
+        </Box>
+        <Box
+          component="tr"
+          sx={{
+            borderTop: 1,
+            borderColor: "divider",
+            backgroundColor: totalPagos > total ? "#e6f7e6" : "#efb6a9",
+          }}
+        >
+          <Box component="td" sx={{ p: 1, fontWeight: "bold" }}>
+            {totalPagos > total ? "A favor" : "Falta"}
+          </Box>
+          <Box
+            component="td"
+            sx={{ p: 1, textAlign: "right", fontWeight: "bold" }}
+          >
+            {getFormattedPrice(
+              totalPagos > total ? totalPagos - total : total - totalPagos
+            )}
           </Box>
         </Box>
       </Box>
@@ -475,6 +536,8 @@ const VerVentaPage = ({ params }: { params: { id: string } }) => {
       <TrabajosRealizados venta={venta} />
       <Divider sx={{ my: 2 }} />
       <PrecioInfo venta={venta} />
+      <Divider sx={{ my: 2 }} />
+      <PagosInfo venta={venta} />
     </Paper>
   );
 };

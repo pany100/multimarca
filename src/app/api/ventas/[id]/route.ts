@@ -33,6 +33,7 @@ export async function GET(
           },
         },
         trabajosRealizados: true,
+        ingresos: true,
       },
     });
 
