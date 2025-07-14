@@ -36,7 +36,12 @@ type OrdenReparacion = {
   observacionesCliente: string;
   observacionesEntrada: string;
   observacionesSalida: string;
-  estado: "Presupuestado" | "EnProgreso" | "Aceptado" | "Terminado";
+  estado:
+    | "Presupuestado"
+    | "EnProgreso"
+    | "Aceptado"
+    | "Terminado"
+    | "SeRetira";
   pdfPath: string | null;
   manoDeObra: number;
   auto: {

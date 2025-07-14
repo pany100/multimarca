@@ -16,6 +16,7 @@ model Usuario {
   reset_password_token         String?                 @db.VarChar(255)
   reset_password_token_expired DateTime?
   rolId                        Int
+  activo                       Boolean                 @default(true)
   extracciones                 Extraccion[]
   ingresosManuales             IngresoManualDeDinero[]
   rol                          Rol                     @relation(fields: [rolId], references: [id])
@@ -721,6 +722,7 @@ enum EstadoOrdenReparacion {
   EnProgreso
   Aceptado
   Terminado
+  SeRetira
 }
 
 enum EstadoPresupuesto {

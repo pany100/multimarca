@@ -7,6 +7,7 @@ interface SignupData {
   username: string;
   password: string;
   rolId: number; // Asumimos que el rol se identifica por un ID
+  activo: boolean;
 }
 
 export async function signupUser({
@@ -15,6 +16,7 @@ export async function signupUser({
   username,
   password,
   rolId,
+  activo,
 }: SignupData) {
   try {
     // Hashear la contraseña
@@ -33,6 +35,7 @@ export async function signupUser({
         rol: {
           connect: { id: rolId },
         },
+        activo,
       },
       include: {
         rol: true,
@@ -59,12 +62,14 @@ export async function updateUser({
   username,
   password,
   rolId,
+  activo,
 }: UpdateData) {
   try {
     const dataToUpdate: any = {
       email,
       fullName,
       username,
+      activo,
     };
 
     if (password) {

@@ -29,6 +29,7 @@ export async function GET(request: Request) {
           email: true,
           fullName: true,
           username: true,
+          activo: true,
           rolId: true,
           rol: {
             select: {

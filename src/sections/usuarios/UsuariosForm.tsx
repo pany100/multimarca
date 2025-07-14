@@ -1,3 +1,4 @@
+import CustomInputBoolean from "@/components/formV2/CustomInputBoolean";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useRoles from "@/hooks/useRoles";
@@ -16,6 +17,7 @@ export const schema = yup.object().shape({
     .number()
     .typeError("Seleccione un rol válido")
     .required("El rol es requerido"),
+  activo: yup.boolean(),
 });
 
 const UsuariosForm = () => {
@@ -42,6 +44,9 @@ const UsuariosForm = () => {
         </Grid>
         <Grid item xs={12} md={6}>
           <CustomSelect options={roles} label="Rol" name="rolId" />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomInputBoolean name="activo" label="Activo?" />
         </Grid>
       </Grid>
     </>

@@ -4,6 +4,7 @@ import useUsersAutocomplete from "@/hooks/useUsersAutocomplete";
 import { Grid } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import CustomInputDate from "../formV2/CustomInputDate";
+import CustomInputText from "../formV2/CustomInputText";
 import CustomSelect from "../formV2/CustomSelect";
 import TareasAdministrativas from "./TareasAdministrativas";
 
@@ -25,7 +26,7 @@ function PresupuestoInformacionGeneral() {
         />
       </Grid>
       <Grid item xs={12} md={6} ref={(el) => registerFieldRef("fecha", el)}>
-        <CustomInputDate name="fecha" label="Fecha de creación" />
+        <CustomInputText name="fecha" label="Fecha de Creación" type="date" />
       </Grid>
       <Grid
         item
@@ -33,7 +34,7 @@ function PresupuestoInformacionGeneral() {
         md={6}
         ref={(el) => registerFieldRef("fechaEnvio", el)}
       >
-        <CustomInputDate name="fechaEnvio" label="Fecha de envio" />
+        <CustomInputText name="fechaEnvio" label="Fecha de envio" type="date" />
       </Grid>
       <Grid
         item

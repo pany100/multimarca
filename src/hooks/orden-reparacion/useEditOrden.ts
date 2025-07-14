@@ -31,7 +31,6 @@ function useEditOrden({ control, ordenReparacion, selectedFile }: Props) {
           body: formData,
         }
       );
-
       if (response.ok) {
         setSnackbar({
           open: true,

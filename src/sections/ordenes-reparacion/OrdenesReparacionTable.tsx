@@ -16,6 +16,7 @@ const estadosDisplay: Record<EstadoOrdenReparacion, string> = {
   [EstadoOrdenReparacion.Aceptado]: "Aceptado",
   [EstadoOrdenReparacion.EnProgreso]: "En Proceso",
   [EstadoOrdenReparacion.Terminado]: "Terminado",
+  [EstadoOrdenReparacion.SeRetira]: "Se Retira",
 };
 
 const estadoColors = {
@@ -23,6 +24,7 @@ const estadoColors = {
   [EstadoOrdenReparacion.Aceptado]: "#FFD700",
   [EstadoOrdenReparacion.EnProgreso]: "#4169E1",
   [EstadoOrdenReparacion.Terminado]: "#32CD32",
+  [EstadoOrdenReparacion.SeRetira]: "#FF0000",
 };
 
 const estados = [
@@ -30,6 +32,7 @@ const estados = [
   EstadoOrdenReparacion.Presupuestado,
   EstadoOrdenReparacion.Aceptado,
   EstadoOrdenReparacion.EnProgreso,
+  EstadoOrdenReparacion.SeRetira,
   EstadoOrdenReparacion.Terminado,
 ];
 
@@ -228,6 +231,16 @@ const OrdenesReparacionTable = ({
           <CustomTable
             title="Orden de reparación"
             apiEndpoint="/api/orden-reparacion?estado=EnProgreso"
+            extraActions={customActions}
+            ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
+            columns={columns}
+            {...rest}
+          />
+        )}
+        {estadoActual === EstadoOrdenReparacion.SeRetira && (
+          <CustomTable
+            title="Orden de reparación"
+            apiEndpoint="/api/orden-reparacion?estado=SeRetira"
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
             columns={columns}

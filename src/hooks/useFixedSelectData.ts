@@ -18,6 +18,7 @@ function useFixedSelectData() {
     { value: "EnProgreso", label: "En Proceso" },
     { value: "Aceptado", label: "Aceptado" },
     { value: "Terminado", label: "Terminado" },
+    { value: "SeRetira", label: "Se Retira" },
   ];
 
   const presupuestoEstadoOptions = [

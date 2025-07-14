@@ -48,6 +48,9 @@ export async function PUT(
   try {
     const user = await prisma.usuario.findUnique({
       where: { id: parseInt(params.id) },
+      include: {
+        rol: true,
+      },
     });
 
     if (!user) {
@@ -56,7 +59,14 @@ export async function PUT(
         { status: 404 }
       );
     }
-    const { fullName, username, email, rolId, password } = await request.json();
+    const { fullName, username, email, rolId, password, activo } =
+      await request.json();
+
+    // Si el usuario es Administrador, forzar activo a true
+    let isActive = activo;
+    if (user.rol?.name === "Administrador" || rolId === 1) {
+      isActive = true;
+    }
 
     const updatedUser = await updateUser({
       id: user.id,
@@ -65,6 +75,7 @@ export async function PUT(
       email,
       rolId,
       password,
+      activo: isActive,
     });
 
     const usuarioConRol = {
@@ -102,7 +113,7 @@ export async function DELETE(
     const authUserId = request.headers.get("x-user-id");
     if (user.id === parseInt(authUserId || "0")) {
       return NextResponse.json(
-        { error: "No puedes borrarte a ti mismo" },
+        { error: "No puedes desactivar tu propio usuario" },
         { status: 403 }
       );
     }
@@ -114,22 +125,24 @@ export async function DELETE(
 
     if (!authUser || authUser.rol?.name !== "Administrador") {
       return NextResponse.json(
-        { error: "Solo los administradores pueden eliminar usuarios" },
+        { error: "Solo los administradores pueden desactivar usuarios" },
         { status: 403 }
       );
     }
 
-    await prisma.usuario.delete({
+    // Implementar borrado lógico en lugar de físico
+    await prisma.usuario.update({
       where: { id: user.id },
+      data: { activo: false },
     });
 
     return NextResponse.json({
-      msg: "Usuario eliminado exitosamente",
+      msg: "Usuario desactivado exitosamente",
     });
   } catch (error) {
-    console.error("Error al eliminar usuario:", error);
+    console.error("Error al desactivar usuario:", error);
     return NextResponse.json(
-      { error: "No se pudo eliminar el usuario" },
+      { error: "No se pudo desactivar el usuario" },
       { status: 500 }
     );
   }

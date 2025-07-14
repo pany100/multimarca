@@ -12,6 +12,11 @@ export async function loginUser(email: string, password: string) {
     throw new Error("Usuario no encontrado");
   }
 
+  // Verificar si el usuario está activo
+  if (!user.activo) {
+    throw new Error("Usuario desactivado");
+  }
+
   const isPasswordValid = await bcrypt.compare(password, user.password);
   if (!isPasswordValid) {
     throw new Error("Contraseña incorrecta");
