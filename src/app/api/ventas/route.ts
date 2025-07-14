@@ -37,6 +37,7 @@ export async function GET(request: Request) {
           },
           reparacionesDeTercero: true,
           trabajosRealizados: true,
+          ingresos: true,
         },
         skip: page * limit,
         take: limit,

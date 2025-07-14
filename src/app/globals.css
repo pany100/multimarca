@@ -113,3 +113,11 @@ a {
 .low-stock-row:hover {
   background-color: #efb6a9 !important;
 }
+
+.high-row {
+  background-color: #e6f7e6;
+}
+
+.high-row:hover {
+  background-color: #e6f7e6 !important;
+}

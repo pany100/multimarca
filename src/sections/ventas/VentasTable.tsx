@@ -8,6 +8,7 @@ import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs } from "@mui/material";
+import { GridRowParams } from "@mui/x-data-grid";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -61,7 +62,7 @@ function VentasTable({
   };
 
   const columns = [
-    { field: "id", headerName: "ID", flex: 0.5 },
+    { field: "id", headerName: "ID", flex: 0.3 },
     {
       field: "fecha",
       headerName: "Fecha",
@@ -108,7 +109,7 @@ function VentasTable({
     {
       field: "precioTotal",
       headerName: "Precio Total",
-      flex: 0.5,
+      flex: 1,
       renderCell: (params: any) =>
         getFormattedPrice(
           calcularTotalOrdenReparacion({
@@ -120,7 +121,44 @@ function VentasTable({
           })
         ),
     },
+    {
+      field: "pagos",
+      headerName: "Pagos",
+      flex: 1,
+      renderCell: (params: any) => {
+        return (
+          <Box>
+            {getFormattedPrice(
+              params.row.ingresos.reduce(
+                (total: number, ingreso: any) => total + ingreso.monto,
+                0
+              )
+            )}
+          </Box>
+        );
+      },
+    },
   ];
+
+  const getRowClassName = (params: GridRowParams) => {
+    const totalIngresos = params.row.ingresos.reduce(
+      (total: number, ingreso: any) => total + ingreso.monto,
+      0
+    );
+    const total = calcularTotalOrdenReparacion({
+      repuestosUsados: params.row.repuestosUsados,
+      reparacionesDeTercero: params.row.reparacionesDeTercero,
+      trabajosRealizados: params.row.trabajosRealizados,
+      descuento: params.row.descuento,
+      incremento: params.row.incremento,
+    });
+    if (totalIngresos < total) {
+      return "low-stock-row";
+    } else if (totalIngresos > total) {
+      return "high-row";
+    }
+    return "";
+  };
 
   const customActions = (params: any) => {
     const defaultActions = extraActions ? extraActions(params) : [];
@@ -158,6 +196,7 @@ function VentasTable({
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/ventas/nueva")}
             columns={columns}
+            getRowClassName={getRowClassName}
             {...rest}
           />
         )}
@@ -168,6 +207,7 @@ function VentasTable({
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/ventas/nueva")}
             columns={columns}
+            getRowClassName={getRowClassName}
             {...rest}
           />
         )}
