@@ -4,9 +4,11 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { Chip } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Chip, MenuItem } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 function GastosTable({
   extraActions,
@@ -14,6 +16,8 @@ function GastosTable({
   setRefreshTrigger,
   ...rest
 }: InheritedTableProps) {
+  const router = useRouter();
+
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "nombre", headerName: "Descripción", flex: 1.5 },
@@ -92,11 +96,25 @@ function GastosTable({
     return "";
   };
 
+  const customActions = (params: any) => {
+    const defaultActions = extraActions ? extraActions(params) : [];
+    const customActions: React.ReactNode[] = [
+      <MenuItem
+        key="view"
+        onClick={() => router.push(`/dashboard/gastos/${params.id}/ver`)}
+      >
+        <VisibilityIcon sx={{ mr: 1 }} />
+        Ver
+      </MenuItem>,
+    ];
+    return customActions.concat(defaultActions);
+  };
+
   return (
     <CustomTable
       title="Gastos"
       apiEndpoint="/api/gastos"
-      extraActions={extraActions}
+      extraActions={customActions}
       ctaCb={ctaCb}
       columns={columns}
       getRowClassName={getRowClassName}

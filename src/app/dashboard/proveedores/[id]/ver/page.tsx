@@ -48,7 +48,9 @@ function VerPage({ params }: { params: { id: string } }) {
             py: 1,
           }}
         >
-          {params.value}
+          <a href={params.row.ref} style={{ textDecoration: "underline" }}>
+            {params.value}
+          </a>
         </Box>
       ),
     },

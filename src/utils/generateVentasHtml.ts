@@ -231,15 +231,12 @@ export default function generateClientOrderHtml(venta: any): string {
               ? `
             <div style='
               display: grid;
-              grid-template-columns: 1fr 1fr 1fr;
+              grid-template-columns: 1fr 1fr;
               margin-top: 10px;
               width: 100%;
             '>
               <div class="TypographyBody1" style="font-weight: bold; margin-bottom: 4px;">
                 Nombre
-              </div>
-              <div class="TypographyBody1" style="text-align: right;font-weight: bold; margin-bottom: 4px;">
-                Proveedor
               </div>
               <div class="TypographyBody1" style="text-align: right;font-weight: bold; margin-bottom: 4px;">
                 Importe
@@ -253,9 +250,6 @@ export default function generateClientOrderHtml(venta: any): string {
                   }) => `
                       <div class="TypographyBody1" style="margin-bottom: 4px;">
                         ${el.nombre}
-                      </div>
-                      <div class="TypographyBody1" style="text-align: right;margin-bottom: 4px;">
-                        ${el.proveedor.name}
                       </div>
                       <div class="TypographyBody1" style="text-align: right;margin-bottom: 4px;">
                         $${Number(el.precioVenta).toLocaleString("es-AR")}

@@ -101,6 +101,52 @@ export async function PUT(
   }
 }
 
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: "ID de gasto inválido" },
+        { status: 400 }
+      );
+    }
+
+    const gasto = await prisma.gasto.findUnique({
+      where: { id },
+      include: {
+        categoria: {
+          include: {
+            roles: true,
+          },
+        },
+        tipoOperacion: true,
+        mecanico: true,
+        proveedor: true,
+        cheque: chequeQueryData,
+      },
+    });
+
+    if (!gasto) {
+      return NextResponse.json(
+        { error: "Gasto no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(returnModelWithChequeData(gasto));
+  } catch (error) {
+    console.error("Error al obtener gasto:", error);
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function DELETE(
   request: Request,
   { params }: { params: { id: string } }

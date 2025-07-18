@@ -31,6 +31,7 @@ export async function GET(
     const ordenesDeCompra = await prisma.ordenDeCompra.findMany({
       where: { proveedorId: id },
       select: {
+        id: true,
         fecha: true,
         precioTotal: true,
       },
@@ -38,7 +39,7 @@ export async function GET(
 
     // Obtener reparaciones de terceros del proveedor
     const reparacionesTercero = await prisma.reparacionDeTercero.findMany({
-      where: { proveedorId: id },
+      where: { proveedorId: id, ordenReparacion: { isNot: null } },
       select: {
         precioCompra: true,
         nombre: true,
@@ -74,12 +75,14 @@ export async function GET(
         descripcion: `Orden de compra del ${new Date(
           oc.fecha
         ).toLocaleDateString()}`,
+        ref: `/dashboard/orden-de-compra/${oc.id}/ver`,
       })),
       ...reparacionesTercero.map((rt) => ({
         fecha: rt.ordenReparacion?.fechaCreacion || new Date(),
         monto: Number(rt.precioCompra),
         tipo: "Deuda" as const,
         descripcion: `Reparación de tercero: ${rt.nombre} - Orden #${rt.ordenReparacion?.id}`,
+        ref: `/dashboard/ordenes-reparacion/${rt.ordenReparacion?.id}/ver`,
       })),
       ...pagos.map((p) => ({
         fecha: p.fecha,
@@ -89,6 +92,7 @@ export async function GET(
             : Number(p.precio),
         tipo: "Pago" as const,
         descripcion: p.detalle || "Pago a proveedor",
+        ref: `/dashboard/gastos/${p.id}`,
       })),
     ].sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
 

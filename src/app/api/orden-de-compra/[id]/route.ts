@@ -177,3 +177,55 @@ export async function DELETE(
     );
   }
 }
+
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: "ID de orden de compra inválido" },
+        { status: 400 }
+      );
+    }
+
+    const ordenDeCompra = await prisma.ordenDeCompra.findUnique({
+      where: { id },
+      include: {
+        proveedor: true,
+        items: {
+          include: {
+            stock: true,
+          },
+        },
+      },
+    });
+
+    if (!ordenDeCompra) {
+      return NextResponse.json(
+        { error: "Orden de compra no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    const ordenDeCompraConLabel = {
+      ...ordenDeCompra,
+      items: ordenDeCompra.items.map((item) => ({
+        ...item,
+        name: item.stock.name,
+        stockId: item.stock.id,
+      })),
+    };
+
+    return NextResponse.json(ordenDeCompraConLabel);
+  } catch (error) {
+    console.error("Error al obtener orden de compra:", error);
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
+  }
+}
