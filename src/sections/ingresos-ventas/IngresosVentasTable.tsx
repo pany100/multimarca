@@ -3,7 +3,7 @@
 import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
-import { getFormattedPrice } from "@/utils/fieldHelper";
+import { getFormattedDate, getFormattedPrice } from "@/utils/fieldHelper";
 import { Alert, Chip, Snackbar } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import Link from "next/link";
@@ -78,14 +78,17 @@ function IngresosVentasTable({
       field: "ventaId",
       headerName: "Venta",
       flex: 2,
-      renderCell: (params: any) => (
-        <Link
-          href={`/dashboard/ventas/${params.value}/ver`}
-          style={{ textDecoration: "underline" }}
-        >
-          Venta #{params.value}
-        </Link>
-      ),
+      renderCell: (params: any) => {
+        const venta = params.row.venta;
+        return (
+          <Link
+            href={`/dashboard/ventas/${venta.id}/ver`}
+            style={{ textDecoration: "underline" }}
+          >
+            Venta #{venta.id} - {getFormattedDate(venta.fecha)}
+          </Link>
+        );
+      },
     },
   ];
 

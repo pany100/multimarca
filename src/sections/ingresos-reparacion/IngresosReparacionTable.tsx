@@ -95,6 +95,14 @@ function IngresosReparacionTable({
             ? new Date(value.fechaEntradaReparacion).toLocaleDateString("es-AR")
             : "Sin Fecha de entrada"
         }`,
+      renderCell: (params: any) => (
+        <Link
+          href={`/dashboard/ingresos-reparacion/${params.row.ordenReparacion.id}`}
+          style={{ textDecoration: "underline" }}
+        >
+          {params.value}
+        </Link>
+      ),
     },
     {
       field: "reciboEnviado",
