@@ -11,6 +11,12 @@ export async function GET(
     const page = parseInt(searchParams.get("page") || "1");
     const pageSize = parseInt(searchParams.get("pageSize") || "10");
     const skip = (page - 1) * pageSize;
+    // Obtener parámetros de fecha
+    const from = searchParams.get("from");
+    const to = searchParams.get("to");
+
+    const fromDate = from ? new Date(from) : new Date(2000, 0, 1); // 1 de enero de 2000 como fecha muy antigua
+    const toDate = to ? new Date(to) : new Date(2100, 0, 1);
 
     // Obtener datos del proveedor
     const proveedor = await prisma.proveedor.findUnique({
@@ -29,7 +35,13 @@ export async function GET(
 
     // Obtener órdenes de compra del proveedor
     const ordenesDeCompra = await prisma.ordenDeCompra.findMany({
-      where: { proveedorId: id },
+      where: {
+        proveedorId: id,
+        fecha: {
+          gte: fromDate,
+          lte: toDate,
+        },
+      },
       select: {
         id: true,
         fecha: true,
@@ -39,7 +51,18 @@ export async function GET(
 
     // Obtener reparaciones de terceros del proveedor
     const reparacionesTercero = await prisma.reparacionDeTercero.findMany({
-      where: { proveedorId: id, ordenReparacion: { isNot: null } },
+      where: {
+        proveedorId: id,
+        ordenReparacionId: {
+          not: null,
+        },
+        ordenReparacion: {
+          fechaCreacion: {
+            gte: fromDate,
+            lte: toDate,
+          },
+        },
+      },
       select: {
         precioCompra: true,
         nombre: true,
@@ -59,6 +82,10 @@ export async function GET(
         proveedorId: id,
         categoria: {
           nombre: "Pago Proveedores",
+        },
+        fecha: {
+          gte: fromDate,
+          lte: toDate,
         },
       },
       include: {

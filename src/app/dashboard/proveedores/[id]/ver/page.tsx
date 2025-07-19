@@ -2,8 +2,16 @@
 
 import { useFetch } from "@/contexts/FetchContext";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { Box, Chip, Typography } from "@mui/material";
+import ClearIcon from "@mui/icons-material/Clear";
+import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import {
+  DateValidationError,
+  PickerChangeHandlerContext,
+} from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useCallback, useEffect, useState } from "react";
 
 function VerPage({ params }: { params: { id: string } }) {
@@ -14,7 +22,36 @@ function VerPage({ params }: { params: { id: string } }) {
   const [totalRows, setTotalRows] = useState(0);
   const [estadoDeuda, setEstadoDeuda] = useState(0);
   const [nombreProveedor, setNombreProveedor] = useState("");
+  const [fromDate, setFromDate] = useState<Date | null>(null);
+  const [toDate, setToDate] = useState<Date | null>(null);
   const { authFetch } = useFetch();
+
+  // Handlers para los cambios de fecha
+  const handleFromDateChange = (
+    value: Date | null | any,
+    context: PickerChangeHandlerContext<DateValidationError>
+  ) => {
+    if (context.validationError) {
+      return; // No actualizar si hay error de validación
+    }
+    // Convertir el valor a Date si es necesario
+    const dateValue =
+      value instanceof Date ? value : value && new Date(value.toString());
+    setFromDate(dateValue);
+  };
+
+  const handleToDateChange = (
+    value: Date | null | any,
+    context: PickerChangeHandlerContext<DateValidationError>
+  ) => {
+    if (context.validationError) {
+      return; // No actualizar si hay error de validación
+    }
+    // Convertir el valor a Date si es necesario
+    const dateValue =
+      value instanceof Date ? value : value && new Date(value.toString());
+    setToDate(dateValue);
+  };
 
   const columns: GridColDef[] = [
     {
@@ -76,6 +113,17 @@ function VerPage({ params }: { params: { id: string } }) {
       url.searchParams.append("page", (page + 1).toString());
       url.searchParams.append("pageSize", pageSize.toString());
 
+      // Agregar parámetros de fecha si están definidos
+      if (fromDate) {
+        const formattedFromDate = fromDate.toISOString().split("T")[0];
+        url.searchParams.append("from", formattedFromDate);
+      }
+
+      if (toDate) {
+        const formattedToDate = toDate.toISOString().split("T")[0];
+        url.searchParams.append("to", formattedToDate);
+      }
+
       const respuesta = await authFetch(url.toString());
       const data = await respuesta.json();
 
@@ -88,11 +136,16 @@ function VerPage({ params }: { params: { id: string } }) {
     } finally {
       setCargando(false);
     }
-  }, [authFetch, params.id, page, pageSize]);
+  }, [authFetch, params.id, page, pageSize, fromDate, toDate]);
 
   useEffect(() => {
     obtenerDatos();
   }, [obtenerDatos]);
+
+  const handleClearFilters = () => {
+    setFromDate(null);
+    setToDate(null);
+  };
 
   return (
     <Box sx={{ width: "100%", p: 2 }}>
@@ -107,6 +160,55 @@ function VerPage({ params }: { params: { id: string } }) {
           </Typography>
         </>
       )}
+
+      <Box
+        sx={{
+          mb: 3,
+          display: "flex",
+          flexDirection: { xs: "column", md: "row" },
+          gap: 2,
+          alignItems: "center",
+        }}
+      >
+        <Typography variant="subtitle1">Filtrar por fecha:</Typography>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+          <Stack direction="row" spacing={2} alignItems="center">
+            <DatePicker
+              label="Desde"
+              value={fromDate}
+              onChange={handleFromDateChange}
+              format="dd-MM-yyyy"
+              slotProps={{
+                textField: {
+                  size: "small",
+                  sx: { width: 150 },
+                },
+              }}
+            />
+            <DatePicker
+              label="Hasta"
+              value={toDate}
+              onChange={handleToDateChange}
+              format="dd-MM-yyyy"
+              slotProps={{
+                textField: {
+                  size: "small",
+                  sx: { width: 150 },
+                },
+              }}
+            />
+            <Button
+              variant="outlined"
+              startIcon={<ClearIcon />}
+              onClick={handleClearFilters}
+              size="medium"
+            >
+              Limpiar
+            </Button>
+          </Stack>
+        </LocalizationProvider>
+      </Box>
+
       <DataGrid
         rows={datos}
         columns={columns}
