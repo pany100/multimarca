@@ -16,6 +16,9 @@ export async function GET(
         ordenReparacion: {
           include: {
             auto: true,
+            repuestosUsados: true,
+            reparacionesDeTercero: true,
+            trabajosRealizados: true,
           },
         },
       },
