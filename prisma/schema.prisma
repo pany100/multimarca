@@ -276,6 +276,7 @@ model Venta {
   id        Int         @id @default(autoincrement())
   fecha     DateTime    @default(now())
   clienteId Int?
+  informacionCliente     String? @db.Text
   dolarId   Int?
   cliente   Cliente?    @relation(fields: [clienteId], references: [id])
   dolar     Dolar?      @relation(fields: [dolarId], references: [id])
@@ -506,14 +507,15 @@ model IngresoPorReparacion {
 model IngresoPorVenta {
   id                Int             @id @default(autoincrement())
   fecha             DateTime        @default(now())
-  clienteId         Int
+  clienteId         Int?
+  informacionCliente String? @db.Text
   monto             Decimal         @db.Decimal(10, 2)
   descripcion       String          @db.Text
   ventaId           Int
   reciboEnviado     Boolean         @default(false)
   moneda            Moneda          @default(Peso)
   dolarId           Int?
-  cliente           Cliente         @relation(fields: [clienteId], references: [id])
+  cliente           Cliente?         @relation(fields: [clienteId], references: [id])
   dolar             Dolar?          @relation(fields: [dolarId], references: [id])
   venta             Venta @relation("VentaIngresos", fields: [ventaId], references: [id], onDelete: Cascade)
   tipoOperacionId Int?
