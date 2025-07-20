@@ -7,17 +7,13 @@ export async function GET(
   { params }: { params: { slug: string } }
 ) {
   try {
-    const { slug } = params;
     const { searchParams } = new URL(request.url);
     const soloConDeuda = searchParams.get("soloConDeuda") === "true";
 
-    // Descodificar el slug para manejar caracteres especiales en informacionCliente
-    const informacionCliente = decodeURIComponent(slug);
-
-    // Query para ventas con el informacionCliente específico con datos relacionados
     const ventas = await prisma.venta.findMany({
       where: {
-        informacionCliente: informacionCliente,
+        informacionCliente: params.slug,
+        presupuesto: false,
       },
       include: {
         repuestosUsados: true,
@@ -34,7 +30,6 @@ export async function GET(
       },
     });
 
-    // Calcular deuda y total para cada venta
     const ventasConDeuda = ventas.map((venta) => {
       const ventaParaCalculo = {
         ...venta,
@@ -51,7 +46,6 @@ export async function GET(
         descuento: Number(venta.descuento),
         incremento: Number(venta.incremento),
       };
-
       const totalAPagar = calcularTotalOrdenReparacion(ventaParaCalculo);
       const totalPagado = venta.ingresos.reduce((sum, ingreso) => {
         if (ingreso.moneda === "Dolar") {
@@ -67,31 +61,19 @@ export async function GET(
         deuda: totalAPagar - totalPagado,
       };
     });
+    if (soloConDeuda) {
+      return NextResponse.json(
+        ventasConDeuda.filter(
+          (venta) => venta.deuda > 0 || venta.totalAPagar === 0
+        )
+      );
+    }
 
-    // Aplicar filtro de solo con deuda si es necesario
-    const ventasFiltradas = soloConDeuda
-      ? ventasConDeuda.filter((venta) => venta.deuda > 0)
-      : ventasConDeuda;
-
-    // Formatear los resultados para devolver opciones para el select
-    const ventasOptions = ventasFiltradas.map((venta) => ({
-      value: venta.id,
-      label: `${new Date(venta.fecha).toLocaleDateString()} - $${
-        venta.totalAPagar
-      } ${venta.deuda > 0 ? ` (Deuda: $${venta.deuda.toFixed(2)})` : ""}`,
-      venta: {
-        ...venta,
-        totalAPagar: venta.totalAPagar,
-        totalPagado: venta.totalPagado,
-        deuda: venta.deuda,
-      },
-    }));
-
-    return NextResponse.json(ventasOptions);
+    return NextResponse.json(ventasConDeuda);
   } catch (error) {
-    console.error("Error fetching ventas by informacionCliente:", error);
+    console.error("Error al obtener ventas del cliente:", error);
     return NextResponse.json(
-      { error: "Error fetching ventas" },
+      { error: "Error interno del servidor" },
       { status: 500 }
     );
   }
