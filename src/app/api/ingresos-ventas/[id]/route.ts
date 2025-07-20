@@ -16,6 +16,7 @@ export async function PUT(
     const body = await request.json();
     const {
       clienteId,
+      informacionCliente,
       fecha,
       monto,
       moneda,
@@ -31,7 +32,14 @@ export async function PUT(
       );
     }
 
-    if (!clienteId || !monto || !descripcion || !ventaId || !tipoOperacionId) {
+    if (!clienteId && !informacionCliente) {
+      return NextResponse.json(
+        { error: "Datos de ingreso por venta inválidos o faltantes" },
+        { status: 400 }
+      );
+    }
+
+    if (!monto || !descripcion || !ventaId || !tipoOperacionId) {
       return NextResponse.json(
         { error: "Datos de ingreso por venta inválidos o faltantes" },
         { status: 400 }
@@ -70,6 +78,7 @@ export async function PUT(
       where: { id },
       data: {
         clienteId,
+        informacionCliente,
         monto,
         moneda,
         descripcion,

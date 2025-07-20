@@ -82,7 +82,8 @@ function IngresosVentasTable({
       field: "cliente",
       headerName: "Cliente",
       flex: 1.5,
-      valueGetter: (value: any) => value?.fullName || "",
+      renderCell: (params: any) =>
+        params.row.cliente?.fullName || params.row.informacionCliente,
     },
     {
       field: "ventaId",

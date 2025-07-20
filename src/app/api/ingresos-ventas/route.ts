@@ -20,7 +20,10 @@ export async function GET(request: Request) {
     const [ingresos, total] = await Promise.all([
       prisma.ingresoPorVenta.findMany({
         where: {
-          OR: [{ cliente: { fullName: { contains: query } } }],
+          OR: [
+            { cliente: { fullName: { contains: query } } },
+            { informacionCliente: { contains: query } },
+          ],
         },
         skip,
         take: size,
@@ -60,6 +63,7 @@ export async function POST(request: Request) {
     const body = await request.json();
     const {
       clienteId,
+      informacionCliente,
       monto,
       fecha,
       moneda,
@@ -75,8 +79,14 @@ export async function POST(request: Request) {
       );
     }
 
+    if (!clienteId && !informacionCliente) {
+      return NextResponse.json(
+        { error: "Datos de ingreso por venta inválidos o faltantes" },
+        { status: 400 }
+      );
+    }
+
     if (
-      !clienteId ||
       !monto ||
       !fecha ||
       !moneda ||
@@ -122,6 +132,7 @@ export async function POST(request: Request) {
     const nuevoIngreso = await prisma.ingresoPorVenta.create({
       data: {
         clienteId,
+        informacionCliente,
         monto,
         moneda,
         descripcion,
