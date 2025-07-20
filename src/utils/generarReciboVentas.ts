@@ -148,7 +148,7 @@ export default function generateReciboVentas(ingresoPorVenta: any): string {
     calcularTotalOrdenReparacion(ingresoPorVenta.venta)
   )}</strong></p>
     <p>Recibido de: <strong>${
-      ingresoPorVenta.cliente.fullName || ingresoPorVenta.informacionCliente
+      ingresoPorVenta.cliente?.fullName || ingresoPorVenta.informacionCliente
     }</strong></p>
     <p>La suma de: <strong>$${Number(ingresoPorVenta.monto).toLocaleString(
       "es-AR"
