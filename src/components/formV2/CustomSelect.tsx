@@ -14,12 +14,14 @@ type CustomSelectProps = SelectProps & {
   placeholder?: string;
   options: { value: string | number; label: string }[];
   helperText?: string;
+  noOptionsText?: string;
 };
 
 const CustomSelect = ({
   helperText,
   placeholder = "Seleccionar opción",
   options = [],
+  noOptionsText = "No hay opciones disponibles",
   ...props
 }: CustomSelectProps) => {
   const {
@@ -57,28 +59,35 @@ const CustomSelect = ({
               }
               {...props}
             >
-              {options.map((option) => {
-                return (
-                  <MenuItem key={option.value} value={option.value}>
-                    {props.multiple ? (
-                      <>
-                        <Checkbox
-                          checked={
-                            Array.isArray(currentValue) &&
-                            currentValue.some(
-                              (itemValue) =>
-                                itemValue.toString() === option.value.toString()
-                            )
-                          }
-                        />
-                        <ListItemText primary={option.label} />
-                      </>
-                    ) : (
-                      option.label
-                    )}
-                  </MenuItem>
-                );
-              })}
+              {options.length > 0 ? (
+                options.map((option) => {
+                  return (
+                    <MenuItem key={option.value} value={option.value}>
+                      {props.multiple ? (
+                        <>
+                          <Checkbox
+                            checked={
+                              Array.isArray(currentValue) &&
+                              currentValue.some(
+                                (itemValue) =>
+                                  itemValue.toString() ===
+                                  option.value.toString()
+                              )
+                            }
+                          />
+                          <ListItemText primary={option.label} />
+                        </>
+                      ) : (
+                        option.label
+                      )}
+                    </MenuItem>
+                  );
+                })
+              ) : (
+                <MenuItem disabled value="">
+                  <em>{noOptionsText}</em>
+                </MenuItem>
+              )}
             </Select>
             {(helperText || errors[props.name as string]?.message) && (
               <FormHelperText error={!!errors[props.name as string]}>

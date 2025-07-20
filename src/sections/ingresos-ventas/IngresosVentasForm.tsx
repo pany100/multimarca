@@ -1,10 +1,8 @@
 "use client";
 
 import ChequeData from "@/components/formV2/ChequeData";
-import CustomAutocomplete from "@/components/formV2/CustomAutocomplete";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
-import useClientesAutocomplete from "@/hooks/useClientesAutocomplete";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import useTipoOperacion from "@/hooks/useTipoOperacion";
 import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
@@ -12,6 +10,7 @@ import { Grid, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
 import useVentasDelCliente from "../ventas/hooks/useVentasDelCliente";
+import IngresoVentaClienteSection from "./IngresoVentaClienteSection";
 
 export const schema = yup.object({
   fecha: yup.date().required("La fecha es requerida"),
@@ -21,7 +20,8 @@ export const schema = yup.object({
     .min(0, "El monto debe ser mayor a 0"),
   moneda: yup.string().required("La moneda es requerida"),
   descripcion: yup.string().required("La descripción es requerida"),
-  clienteId: yup.number().required("El cliente es requerido"),
+  clienteId: yup.number().nullable(),
+  informacionCliente: yup.string().nullable(),
   ventaId: yup.number().required("La venta es requerida"),
   tipoOperacionId: yup.number().required("El tipo de operación es requerido"),
   ...getSchemaPropsForCheque("tipoOperacionId"),
@@ -30,10 +30,9 @@ export const schema = yup.object({
 const IngresosVentasForm = () => {
   const { watch } = useFormContext();
   const { currency } = useFixedSelectData();
-  const { searchClientes, initialCliente } = useClientesAutocomplete();
   const { tiposOperacion } = useTipoOperacion("ingreso");
-  const clienteId = watch("clienteId");
-  const { ventas } = useVentasDelCliente(clienteId);
+
+  const { ventas } = useVentasDelCliente();
   const operacionValue = watch("tipoOperacionId");
   return (
     <>
@@ -59,13 +58,12 @@ const IngresosVentasForm = () => {
           />
         </Grid>
         {operacionValue === 3 && <ChequeData />}
-        <Grid item xs={12}>
-          <CustomAutocomplete
-            name="clienteId"
-            label="Cliente"
-            searchOptions={searchClientes}
-            initialOptions={initialCliente}
-          />
+        <Grid
+          item
+          xs={12}
+          sx={{ border: "1px solid #ccc", ml: 2, mt: 2, mb: 2, p: 2 }}
+        >
+          <IngresoVentaClienteSection />
         </Grid>
         <Grid item xs={12}>
           <CustomSelect name="ventaId" label="Venta" options={ventas} />

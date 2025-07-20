@@ -1,19 +1,32 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { useFormInfo } from "@/contexts/FormInfoContext";
 import { useEffect, useState } from "react";
+import { useFormContext } from "react-hook-form";
 
-function useVentasDelCliente(clienteId: number) {
+function useVentasDelCliente() {
   const { isEditing } = useFormInfo();
+  const { watch } = useFormContext();
+
+  const clienteId = watch("clienteId");
+  const informacionCliente = watch("informacionCliente");
   const [ventas, setVentas] = useState<{ value: number; label: string }[]>([]);
   const { authFetch } = useFetch();
 
   useEffect(() => {
+    let url = "";
     const fetchVentas = async () => {
-      if (!clienteId) return;
-      const url = isEditing
-        ? `/api/clientes/${clienteId}/ventas`
-        : `/api/clientes/${clienteId}/ventas?soloConDeuda=true`;
+      if (!clienteId && !informacionCliente) return;
+      if (clienteId) {
+        url = isEditing
+          ? `/api/clientes/${clienteId}/ventas`
+          : `/api/clientes/${clienteId}/ventas?soloConDeuda=true`;
+      } else {
+        url = isEditing
+          ? `/api/ventas/informacion-cliente/${informacionCliente}`
+          : `/api/ventas/informacion-cliente/${informacionCliente}?soloConDeuda=true`;
+      }
       try {
+        console.log(url);
         const response = await authFetch(url);
         const data = await response.json();
         const ventasFormateadas = data.map((venta: any) => ({
@@ -29,7 +42,7 @@ function useVentasDelCliente(clienteId: number) {
     };
 
     fetchVentas();
-  }, [clienteId, authFetch, isEditing]);
+  }, [clienteId, authFetch, isEditing, informacionCliente]);
 
   return { ventas };
 }
