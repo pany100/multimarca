@@ -3,7 +3,8 @@ import * as yup from "yup";
 export const schema = yup.object({
   presupuesto: yup.boolean(),
   fecha: yup.date().required("La fecha es requerida"),
-  clienteId: yup.number().required("El cliente es requerido"),
+  clienteId: yup.number().nullable(),
+  informacionCliente: yup.string().nullable(),
   repuestosUsados: yup.array().of(
     yup.object().shape({
       stock: yup

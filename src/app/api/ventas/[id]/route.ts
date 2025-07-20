@@ -67,6 +67,7 @@ export async function PUT(
       descripcionIncremento,
       descuento,
       fecha,
+      informacionCliente,
       incremento,
       presupuesto,
       repuestosUsados = [],
@@ -128,6 +129,12 @@ export async function PUT(
           }
         }
       }
+    }
+    if (!clienteId && !informacionCliente) {
+      return NextResponse.json(
+        { error: "Debe proporcionar un cliente o información del cliente" },
+        { status: 400 }
+      );
     }
 
     // Preparar los datos para la actualización
@@ -207,6 +214,7 @@ export async function PUT(
         where: { id },
         data: {
           clienteId,
+          informacionCliente,
           fecha,
           dolarId: dolar?.id,
           presupuesto,

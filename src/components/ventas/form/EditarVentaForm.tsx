@@ -8,7 +8,9 @@ import TrabajosRealizadosSection from "@/components/orden-reparacion/formV2/sect
 import useEditVenta from "@/sections/ventas/hooks/useEditVenta";
 import { schema } from "@/sections/ventas/schema";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { Box } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
+import VentasClienteSection from "./VentasClienteSection";
 import VentasDatosGeneralesSection from "./VentasDatosGeneralesSection";
 
 type Venta = {
@@ -98,6 +100,9 @@ function EditarVentaForm({ venta }: { venta: Venta }) {
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormSection title="Datos Generales">
           <VentasDatosGeneralesSection />
+          <Box sx={{ mt: 2 }}>
+            <VentasClienteSection />
+          </Box>
         </FormSection>
         <FormSection title="Reparación / Repuestos de terceros">
           <ReparacionTercerosSection />

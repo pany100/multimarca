@@ -1,4 +1,3 @@
-import CustomAutocompleteInput from "@/components/formV2/CustomAutocomplete";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import useClientesAutocomplete from "@/hooks/useClientesAutocomplete";
 import { Checkbox, FormControlLabel, Grid } from "@mui/material";
@@ -11,14 +10,6 @@ function VentasDatosGeneralesSection() {
     <Grid container spacing={3}>
       <Grid item xs={6} md={4}>
         <CustomInputText name="fecha" label="Fecha" type="date" />
-      </Grid>
-      <Grid item xs={6} md={4}>
-        <CustomAutocompleteInput
-          name="clienteId"
-          label="Cliente"
-          searchOptions={searchClientes}
-          initialOptions={initialCliente}
-        />
       </Grid>
       <Grid item xs={6} md={4}>
         <FormControlLabel

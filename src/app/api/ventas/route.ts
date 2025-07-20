@@ -20,6 +20,7 @@ export async function GET(request: Request) {
     const where: Prisma.VentaWhereInput = {
       OR: [
         { cliente: { fullName: { contains: query } } },
+        { informacionCliente: { contains: query } },
         { id: { equals: parseInt(query) || undefined } },
       ],
       presupuesto,
@@ -70,6 +71,7 @@ export async function POST(request: Request) {
       descripcionIncremento,
       descuento,
       fecha,
+      informacionCliente,
       incremento,
       presupuesto,
       repuestosUsados = [],
@@ -96,6 +98,12 @@ export async function POST(request: Request) {
           );
         }
       }
+    }
+    if (!clienteId && !informacionCliente) {
+      return NextResponse.json(
+        { error: "Debe proporcionar un cliente o información del cliente" },
+        { status: 400 }
+      );
     }
 
     const repuestosToPersist = repuestosUsados.map((repuesto: any) => ({
@@ -151,6 +159,7 @@ export async function POST(request: Request) {
     const venta = await prisma.venta.create({
       data: {
         clienteId,
+        informacionCliente,
         fecha,
         dolarId: dolar?.id,
         presupuesto,

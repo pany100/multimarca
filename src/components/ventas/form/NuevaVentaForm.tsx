@@ -9,7 +9,9 @@ import useNuevaVenta from "@/sections/ventas/hooks/useNuevaVenta";
 import { schema } from "@/sections/ventas/schema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { FormProvider, useForm } from "react-hook-form";
+import VentasClienteSection from "./VentasClienteSection";
 import VentasDatosGeneralesSection from "./VentasDatosGeneralesSection";
+import { Box } from "@mui/material";
 
 function NuevaVentaForm() {
   const methods = useForm({
@@ -22,6 +24,9 @@ function NuevaVentaForm() {
       <form onSubmit={handleSubmit(onSubmit)}>
         <FormSection title="Datos Generales">
           <VentasDatosGeneralesSection />
+          <Box sx={{ mt: 2 }}>
+            <VentasClienteSection />
+          </Box>
         </FormSection>
         <FormSection title="Reparación / Repuestos de terceros">
           <ReparacionTercerosSection />

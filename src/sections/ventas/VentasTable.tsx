@@ -74,7 +74,13 @@ function VentasTable({
       field: "cliente",
       headerName: "Cliente",
       width: 200,
-      valueGetter: (cliente: any) => cliente?.fullName || "",
+      renderCell: (params: any) => {
+        return (
+          <Box>
+            {params.row.cliente?.fullName || params.row.informacionCliente}
+          </Box>
+        );
+      },
       flex: 1,
     },
     {
