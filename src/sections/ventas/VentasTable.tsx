@@ -130,15 +130,55 @@ function VentasTable({
     {
       field: "pagos",
       headerName: "Pagos",
-      flex: 1,
+      flex: 1.5,
       renderCell: (params: any) => {
+        const totalPagos = params.row.ingresos.reduce(
+          (total: number, ingreso: any) => total + ingreso.monto,
+          0
+        );
+
         return (
-          <Box>
-            {getFormattedPrice(
-              params.row.ingresos.reduce(
-                (total: number, ingreso: any) => total + ingreso.monto,
-                0
-              )
+          <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
+            {params.row.ingresos.length > 0 ? (
+              <>
+                {params.row.ingresos.map((ingreso: any) => (
+                  <Box
+                    key={ingreso.id}
+                    sx={{
+                      mb: 0.5,
+                      display: "flex",
+                      justifyContent: "space-between",
+                      cursor: "pointer",
+                      "&:hover": {
+                        textDecoration: "underline",
+                        color: "primary.main",
+                      },
+                    }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      router.push(
+                        `/dashboard/ingresos-ventas/${ingreso.id}/ver`
+                      );
+                    }}
+                  >
+                    <Box sx={{ display: "flex", alignItems: "center" }}>
+                      {new Date(ingreso.fecha).toLocaleDateString("es-AR")}:{" "}
+                      {getFormattedPrice(ingreso.monto)}
+                      {ingreso.moneda === "Dolar" && (
+                        <Chip
+                          size="small"
+                          label="USD"
+                          sx={{ ml: 0.5, height: 16, fontSize: "0.6rem" }}
+                        />
+                      )}
+                    </Box>
+                  </Box>
+                ))}
+              </>
+            ) : (
+              <Box sx={{ color: "text.secondary", fontStyle: "italic" }}>
+                Sin pagos
+              </Box>
             )}
           </Box>
         );

@@ -6,9 +6,11 @@ import CustomTable, {
 import useRecibo from "@/hooks/useRecibo";
 import { getFormattedDate, getFormattedPrice } from "@/utils/fieldHelper";
 import SendIcon from "@mui/icons-material/Send";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Alert, Chip, MenuItem, Snackbar } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import RecibosModal from "../ingresos-reparacion/RecibosModal";
 
@@ -18,6 +20,8 @@ function IngresosVentasTable({
   setRefreshTrigger,
   ...rest
 }: InheritedTableProps) {
+  const router = useRouter();
+
   const [selectedIngreso, setSelectedIngreso] = useState<{
     id: string;
   } | null>(null);
@@ -132,6 +136,16 @@ function IngresosVentasTable({
         <SendIcon sx={{ mr: 1 }} />
         Enviar recibo
       </MenuItem>,
+      <MenuItem
+        key="edit"
+        onClick={() =>
+          router.push(`/dashboard/ingresos-ventas/${params.id}/ver`)
+        }
+      >
+        <VisibilityIcon sx={{ mr: 1 }} />
+        Ver
+      </MenuItem>,
+      ,
     ];
     return customActions.concat(defaultActions);
   };
