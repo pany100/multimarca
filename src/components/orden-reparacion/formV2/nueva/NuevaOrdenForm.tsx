@@ -12,7 +12,6 @@ import MechanicsSection from "../sections/mechanics/MechanicsSection";
 import ReparacionTercerosSection from "../sections/reparacion-terceros/ReparacionTercerosSection";
 import RepuestosUsadosSection from "../sections/repuestos-usados/RepuestosUsadosSection";
 import ResumenCostosSection from "../sections/resumen-costos/ResumenCostosSection";
-import TrabajosARealizarSection from "../sections/trabajos-a-realizar/TrabajosARealizarSection";
 import TrabajosRealizadosSection from "../sections/trabajos-realizados/TrabajosRealizadosSection";
 
 function NuevaOrdenForm() {
@@ -36,9 +35,6 @@ function NuevaOrdenForm() {
         </FormSection>
         <FormSection title="Observaciones internas">
           <HiddenObservationSection />
-        </FormSection>
-        <FormSection title="Trabajos a realizar">
-          <TrabajosARealizarSection />
         </FormSection>
         <FormSection title="Mecánicos">
           <MechanicsSection />

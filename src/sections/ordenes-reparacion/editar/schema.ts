@@ -99,7 +99,6 @@ const schema = yup.object().shape({
   incremento: yup.number().nullable().min(0),
   descripcionIncremento: yup.string().nullable(),
   observacionesEntrada: yup.string(),
-  detallesDeTrabajo: yup.string().nullable(),
   recibos: yup.array().of(yup.string()).nullable(),
 });
 

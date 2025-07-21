@@ -19,7 +19,6 @@ import ReparacionTercerosSection from "../sections/reparacion-terceros/Reparacio
 import RepuestosUsadosSection from "../sections/repuestos-usados/RepuestosUsadosSection";
 import ResumenCostosSection from "../sections/resumen-costos/ResumenCostosSection";
 import RevisionSection from "../sections/revision/RevisionSection";
-import TrabajosARealizarSection from "../sections/trabajos-a-realizar/TrabajosARealizarSection";
 import TrabajosRealizadosSection from "../sections/trabajos-realizados/TrabajosRealizadosSection";
 
 type Props = {
@@ -175,9 +174,6 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         </FormSection>
         <FormSection title="Observaciones internas">
           <HiddenObservationSection />
-        </FormSection>
-        <FormSection title="Trabajos a realizar">
-          <TrabajosARealizarSection />
         </FormSection>
         <FormSection title="Observaciones de salida">
           <OutputObservationsSection />

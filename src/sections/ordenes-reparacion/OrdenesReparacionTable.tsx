@@ -29,7 +29,6 @@ const estadoColors = {
 
 const estados = [
   "TODOS",
-  EstadoOrdenReparacion.Presupuestado,
   EstadoOrdenReparacion.Aceptado,
   EstadoOrdenReparacion.EnProgreso,
   EstadoOrdenReparacion.SeRetira,
@@ -201,16 +200,6 @@ const OrdenesReparacionTable = ({
           <CustomTable
             title="Ordenes de reparación"
             apiEndpoint="/api/orden-reparacion"
-            extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
-            columns={columns}
-            {...rest}
-          />
-        )}
-        {estadoActual === EstadoOrdenReparacion.Presupuestado && (
-          <CustomTable
-            title="Orden de reparación"
-            apiEndpoint="/api/orden-reparacion?estado=Presupuestado"
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
             columns={columns}

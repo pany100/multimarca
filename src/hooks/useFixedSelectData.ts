@@ -14,7 +14,6 @@ function useFixedSelectData() {
   ];
 
   const orepEstadoOptions = [
-    { value: "Presupuestado", label: "Presupuestado" },
     { value: "EnProgreso", label: "En Proceso" },
     { value: "Aceptado", label: "Aceptado" },
     { value: "Terminado", label: "Terminado" },

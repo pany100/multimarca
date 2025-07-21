@@ -241,19 +241,6 @@ export default function generateClientOrderHtml(repair: any): string {
         ${repair.observacionesCliente || "-"}
       </div>
       ${
-        repair.estado === EstadoOrdenReparacion.Presupuestado
-          ? `
-        <hr class="divider" />
-        <div class="TypographyBody1" style="font-weight: bold;">
-          Trabajo a realizar
-        </div>
-        <div class="TypographyBody1" style="width: 90%;">
-          ${repair.detallesDeTrabajo || "-"}
-        </div>
-      `
-          : ""
-      }
-      ${
         repair.estado !== EstadoOrdenReparacion.Presupuestado
           ? `
         <hr class="divider" />
