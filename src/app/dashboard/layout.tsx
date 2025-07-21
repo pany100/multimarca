@@ -16,6 +16,7 @@ import InventoryIcon from "@mui/icons-material/Inventory";
 import LockIcon from "@mui/icons-material/Lock";
 import MenuIcon from "@mui/icons-material/Menu";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
+import MoneyOffIcon from "@mui/icons-material/MoneyOff";
 import PeopleIcon from "@mui/icons-material/People";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
@@ -62,7 +63,6 @@ import GroupWorkIcon from "@mui/icons-material/GroupWork";
 import HolidayVillageIcon from "@mui/icons-material/HolidayVillage";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import LogoutIcon from "@mui/icons-material/Logout";
-import MoneyOffIcon from "@mui/icons-material/MoneyOff";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import PaymentIcon from "@mui/icons-material/Payment";
 import PersonIcon from "@mui/icons-material/Person";
@@ -399,6 +399,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Gastos",
             icono: <AttachMoneyIcon />,
             ruta: "/dashboard/gastos",
+          },
+          {
+            permiso: "Gastos",
+            texto: "Perdida",
+            icono: <MoneyOffIcon />,
+            ruta: "/dashboard/perdida",
           },
           {
             permiso: "GastosExclusivos",

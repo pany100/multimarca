@@ -32,13 +32,13 @@ const PerdidaForm = () => {
       </Typography>
 
       <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={4}>
           <CustomInputText name="fecha" label="Fecha" type="date" />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={4}>
           <CustomInputText name="monto" label="Monto" type="number" />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} md={4}>
           <CustomSelect options={currency} name="moneda" label="Moneda" />
         </Grid>
         <Grid item xs={12}>
