@@ -542,6 +542,7 @@ model Dolar {
   ordenReparacion       OrdenReparacion[]
   venta                 Venta[]
   presupuesto           Presupuesto[]
+  perdidas              Perdidas[]
 
   @@index([fecha])
 }
@@ -705,6 +706,17 @@ model TareaDiaria {
 
   @@index([fecha])
   @@index([usuarioId])
+}
+
+model Perdidas { 
+  id          Int       @id @default(autoincrement())
+  fecha       DateTime  @default(now())
+  monto       Decimal   @db.Decimal(10, 2)
+  descripcion String    @db.VarChar(255)
+  moneda      Moneda    @default(Peso)
+  dolar       Dolar?    @relation(fields: [dolarId], references: [id])
+  dolarId     Int?
+  cancelado   Boolean   @default(false)
 }
 
 enum TipoEmpleado {
