@@ -38,7 +38,11 @@ export async function GET(
         trabajosRealizados: true,
         controlesEnReparacion: {
           include: {
-            controlMecanico: true,
+            controlMecanico: {
+              include: {
+                parent: true,
+              },
+            },
           },
         },
         ingresos: true,
@@ -99,7 +103,6 @@ export async function GET(
 async function generateBasePdf(repair: any): Promise<Buffer> {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-
   const html = generateClientOrderHtml(repair);
   await page.setContent(html);
 

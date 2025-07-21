@@ -281,8 +281,12 @@ export default function generateClientOrderHtml(repair: any): string {
             (control: any) => `
             <div class="TypographyBody1">
               - ${
-                control.controlMecanico.pdfName || control.controlMecanico.name
-              }
+                control.controlMecanico.parent
+                  ? `${control.controlMecanico.parent.pdfName} `
+                  : ""
+              }${
+              control.controlMecanico.pdfName || control.controlMecanico.name
+            }
               ${
                 control.controlMecanico.type === "texto"
                   ? `: ${control.valor}`
