@@ -290,6 +290,7 @@ model Venta {
   ingresos               IngresoPorVenta[]         @relation("VentaIngresos")
 
   presupuesto Boolean @default(false)
+  estado                 EstadoVenta               @default(Presupuestado)
 
   @@index([clienteId])
   @@index([fecha])
@@ -766,4 +767,11 @@ enum EstadoConversacion {
 enum Moneda {
   Dolar
   Peso
+}
+
+enum EstadoVenta {
+  Presupuestado
+  Preparado
+  Entregado
+  Cerrado
 }
