@@ -30,7 +30,9 @@ export async function GET(request: Request) {
       const ventas = await prisma.venta.findMany({
         where: {
           clienteId: cliente.id,
-          presupuesto: false, // Only actual sales, not quotes
+          estado: {
+            not: "Presupuestado",
+          },
         },
         include: {
           ingresos: true,
