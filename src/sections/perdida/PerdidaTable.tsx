@@ -5,10 +5,11 @@ import CustomTable, {
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import BalanceIcon from "@mui/icons-material/Balance";
-import CancelIcon from "@mui/icons-material/Cancel";
-import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { Chip, MenuItem, Typography } from "@mui/material";
+import { Box, MenuItem, Typography } from "@mui/material";
+import { format } from "date-fns";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+
 function PerdidaTable({
   extraActions,
   ctaCb,
@@ -70,18 +71,87 @@ function PerdidaTable({
       ),
     },
     {
-      field: "cancelado",
-      headerName: "Estado",
-      flex: 0.8,
+      field: "pendiente",
+      headerName: "Pendiente a Recuperar",
+      flex: 1,
       renderCell: (params: any) => {
-        const cancelado = params.row.cancelado;
+        const monto = Number(params.row.monto);
+        const moneda = params.row.moneda;
+        const recuperaciones = params.row.recuperaciones || [];
+
+        const totalRecuperado = recuperaciones.reduce(
+          (acc: number, rec: any) => acc + Number(rec.monto),
+          0
+        );
+
+        const pendiente = monto - totalRecuperado;
+        const porcentajePendiente = monto > 0 ? (pendiente / monto) * 100 : 0;
+
+        let formattedPendiente;
+        if (moneda === "Dolar") {
+          formattedPendiente = `U$D ${pendiente.toFixed(2)}`;
+
+          // If there's dolar info, show the equivalent in pesos
+          if (params.row.dolar) {
+            const pesosEquivalent = pendiente * Number(params.row.dolar.blue);
+            formattedPendiente += ` (${getFormattedPrice(pesosEquivalent)})`;
+          }
+        } else {
+          formattedPendiente = getFormattedPrice(pendiente);
+        }
+
         return (
-          <Chip
-            icon={cancelado ? <CheckCircleIcon /> : <CancelIcon />}
-            label={cancelado ? "Cancelado" : "Pendiente"}
-            color={cancelado ? "success" : "error"}
-            size="small"
-          />
+          <Box>
+            <Typography variant="body2" fontWeight="bold">
+              {formattedPendiente}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              {porcentajePendiente.toFixed(2)}% pendiente
+            </Typography>
+          </Box>
+        );
+      },
+    },
+    {
+      field: "recuperaciones",
+      headerName: "Recuperaciones",
+      flex: 1.5,
+      renderCell: (params: any) => {
+        const recuperaciones = params.row.recuperaciones || [];
+        const moneda = params.row.moneda;
+
+        return recuperaciones.length > 0 ? (
+          <Box>
+            {recuperaciones.map((rec: any) => (
+              <Typography
+                key={rec.id}
+                variant="body2"
+                sx={{
+                  "& a": {
+                    textDecoration: "none",
+                    color: "inherit",
+                    "&:hover": {
+                      textDecoration: "underline",
+                      color: "primary.main",
+                    },
+                  },
+                  mb: 0.5,
+                }}
+              >
+                <Link href={`/dashboard/perdida/${params.row.id}/recupero`}>
+                  * {format(new Date(rec.fecha), "dd/MM/yyyy")}:{" "}
+                  {moneda === "Dolar"
+                    ? `U$D ${Number(rec.monto).toFixed(2)}`
+                    : getFormattedPrice(rec.monto)}
+                  {rec.detalle ? ` - ${rec.detalle}` : ""}
+                </Link>
+              </Typography>
+            ))}
+          </Box>
+        ) : (
+          <Typography variant="body2" color="text.secondary">
+            Sin recuperaciones
+          </Typography>
         );
       },
     },

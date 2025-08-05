@@ -18,6 +18,7 @@ type Props = {
   form?: React.ComponentType<any>;
   crudActions: CrudAction[];
   schema?: yup.ObjectSchema<any>;
+  postCallbackFn?: () => void;
 };
 
 function ABMPage({
@@ -28,6 +29,7 @@ function ABMPage({
   form: Form,
   crudActions,
   schema,
+  postCallbackFn,
 }: Props) {
   const { authFetch } = useFetch();
 
@@ -74,6 +76,7 @@ function ABMPage({
           type: "success",
         });
         setRefreshTrigger((prev) => prev + 1);
+        postCallbackFn?.();
       } else {
         const errorMessage = await response.json();
         setFeedback({
@@ -108,6 +111,7 @@ function ABMPage({
           type: "success",
         });
         setRefreshTrigger((prev) => prev + 1);
+        postCallbackFn?.();
       } else {
         const errorMessage = await response.json();
         setFeedback({
@@ -220,7 +224,10 @@ function ABMPage({
           onClose={handleCloseDelete}
           entity={entity}
           setFeedback={setFeedback}
-          onSuccess={() => setRefreshTrigger((prev) => prev + 1)}
+          onSuccess={() => {
+            setRefreshTrigger((prev) => prev + 1);
+            postCallbackFn?.();
+          }}
         />
       )}
 

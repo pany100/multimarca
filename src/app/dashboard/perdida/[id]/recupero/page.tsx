@@ -1,6 +1,11 @@
 "use client";
 
+import { CrudAction } from "@/components/formV2/constants";
+import ABMPage from "@/components/pageV2/ABMPage";
+import { RecuperacionProvider } from "@/sections/perdida/context/RecuperacionContext";
 import usePerdida from "@/sections/perdida/hooks/usePerdida";
+import RecuperoForm, { schema } from "@/sections/perdida/RecuperoForm";
+import RecuperoTable from "@/sections/perdida/RecuperoTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   Box,
@@ -15,7 +20,8 @@ import { useEffect, useState } from "react";
 
 function RecuperoPage({ params }: { params: { id: string } }) {
   const { id } = params;
-  const { perdida, loading, error } = usePerdida(parseInt(id));
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const { perdida, loading, error } = usePerdida(parseInt(id), refreshTrigger);
   const [totalRecuperado, setTotalRecuperado] = useState(0);
 
   useEffect(() => {
@@ -51,91 +57,104 @@ function RecuperoPage({ params }: { params: { id: string } }) {
   const porcentajeRecuperado = (totalRecuperado / montoOriginal) * 100;
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Paper elevation={0} sx={{ p: 3, mb: 4 }}>
-        <Typography variant="h5" gutterBottom>
-          Detalle de Pérdida
-        </Typography>
-        <Divider sx={{ mb: 2 }} />
+    <RecuperacionProvider perdidaId={parseInt(id)}>
+      <Box sx={{ p: 3 }}>
+        <Paper elevation={0} sx={{ p: 3, mb: 4 }}>
+          <Typography variant="h5" gutterBottom>
+            Detalle de Pérdida
+          </Typography>
+          <Divider sx={{ mb: 2 }} />
 
-        <Grid container spacing={2}>
-          <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" gutterBottom>
-              <strong>Fecha:</strong>{" "}
-              {new Date(perdida.fecha).toLocaleDateString("es-AR")}
-            </Typography>
-            <Typography variant="subtitle1" gutterBottom>
-              <strong>Descripción:</strong> {perdida.descripcion}
-            </Typography>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <Typography variant="subtitle1" gutterBottom>
-              <strong>Moneda:</strong> {perdida.moneda}
-            </Typography>
-            <Typography variant="subtitle1" gutterBottom>
-              <strong>Monto original:</strong>{" "}
-              {perdida.moneda === "Dolar"
-                ? `U$D ${Number(perdida.monto).toFixed(2)}`
-                : getFormattedPrice(perdida.monto)}
-            </Typography>
-          </Grid>
-        </Grid>
-
-        <Box sx={{ mt: 3 }}>
           <Grid container spacing={2}>
-            <Grid item xs={12} md={4}>
-              <Card sx={{ bgcolor: "#e3f2fd", height: "100%" }}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Total Recuperado
-                  </Typography>
-                  <Typography variant="h5" color="primary">
-                    {perdida.moneda === "Dolar"
-                      ? `U$D ${totalRecuperado.toFixed(2)}`
-                      : getFormattedPrice(totalRecuperado)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {porcentajeRecuperado.toFixed(2)}% del monto original
-                  </Typography>
-                </CardContent>
-              </Card>
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" gutterBottom>
+                <strong>Fecha:</strong>{" "}
+                {new Date(perdida.fecha).toLocaleDateString("es-AR")}
+              </Typography>
+              <Typography variant="subtitle1" gutterBottom>
+                <strong>Descripción:</strong> {perdida.descripcion}
+              </Typography>
             </Grid>
-            <Grid item xs={12} md={4}>
-              <Card sx={{ bgcolor: "#fff8e1", height: "100%" }}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Monto Restante
-                  </Typography>
-                  <Typography variant="h5" color="warning.main">
-                    {perdida.moneda === "Dolar"
-                      ? `U$D ${montoRestante.toFixed(2)}`
-                      : getFormattedPrice(montoRestante)}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    {(100 - porcentajeRecuperado).toFixed(2)}% pendiente
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
-            <Grid item xs={12} md={4}>
-              <Card sx={{ bgcolor: "#fafafa", height: "100%" }}>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom>
-                    Cantidad de Recuperos
-                  </Typography>
-                  <Typography variant="h5">
-                    {perdida.recuperaciones.length}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Registros de recuperación
-                  </Typography>
-                </CardContent>
-              </Card>
+            <Grid item xs={12} md={6}>
+              <Typography variant="subtitle1" gutterBottom>
+                <strong>Moneda:</strong> {perdida.moneda}
+              </Typography>
+              <Typography variant="subtitle1" gutterBottom>
+                <strong>Monto original:</strong>{" "}
+                {perdida.moneda === "Dolar"
+                  ? `U$D ${Number(perdida.monto).toFixed(2)}`
+                  : getFormattedPrice(perdida.monto)}
+              </Typography>
             </Grid>
           </Grid>
-        </Box>
-      </Paper>
-    </Box>
+
+          <Box sx={{ mt: 3 }}>
+            <Grid container spacing={2}>
+              <Grid item xs={12} md={4}>
+                <Card sx={{ bgcolor: "#e3f2fd", height: "100%" }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Total Recuperado
+                    </Typography>
+                    <Typography variant="h5" color="primary">
+                      {perdida.moneda === "Dolar"
+                        ? `U$D ${totalRecuperado.toFixed(2)}`
+                        : getFormattedPrice(totalRecuperado)}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {porcentajeRecuperado.toFixed(2)}% del monto original
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Card sx={{ bgcolor: "#fff8e1", height: "100%" }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Monto Restante
+                    </Typography>
+                    <Typography variant="h5" color="warning.main">
+                      {perdida.moneda === "Dolar"
+                        ? `U$D ${montoRestante.toFixed(2)}`
+                        : getFormattedPrice(montoRestante)}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      {(100 - porcentajeRecuperado).toFixed(2)}% pendiente
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+              <Grid item xs={12} md={4}>
+                <Card sx={{ bgcolor: "#fafafa", height: "100%" }}>
+                  <CardContent>
+                    <Typography variant="h6" gutterBottom>
+                      Cantidad de Recuperos
+                    </Typography>
+                    <Typography variant="h5">
+                      {perdida.recuperaciones.length}
+                    </Typography>
+                    <Typography variant="body2" color="text.secondary">
+                      Registros de recuperación
+                    </Typography>
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+          </Box>
+
+          <Box sx={{ mt: 3 }}>
+            <ABMPage
+              apiEndpoint={`/api/perdida/${id}/recuperacion`}
+              table={RecuperoTable}
+              form={RecuperoForm}
+              crudActions={[CrudAction.ADD, CrudAction.EDIT, CrudAction.DELETE]}
+              schema={schema}
+              postCallbackFn={() => setRefreshTrigger((prev) => prev + 1)}
+            />
+          </Box>
+        </Paper>
+      </Box>
+    </RecuperacionProvider>
   );
 }
 

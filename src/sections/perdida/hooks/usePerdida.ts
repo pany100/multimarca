@@ -27,7 +27,7 @@ interface Perdida {
   recuperaciones: Recuperacion[];
 }
 
-export const usePerdida = (id: number) => {
+export const usePerdida = (id: number, refreshTrigger?: number) => {
   const [perdida, setPerdida] = useState<Perdida | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -57,7 +57,7 @@ export const usePerdida = (id: number) => {
     };
 
     fetchPerdida();
-  }, [id, authFetch]);
+  }, [id, authFetch, refreshTrigger]);
 
   return { perdida, loading, error };
 };
