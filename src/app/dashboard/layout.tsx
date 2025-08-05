@@ -204,6 +204,24 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  const currentUrlRef = React.useRef<string>("");
+
+  const handleBackNavigation = () => {
+    const currentUrl = new URL(window.location.href);
+    currentUrlRef.current = currentUrl.origin + currentUrl.pathname;
+
+    router.back();
+
+    setTimeout(() => {
+      const newUrl = new URL(window.location.href);
+      const newUrlPath = newUrl.origin + newUrl.pathname;
+
+      if (newUrlPath === currentUrlRef.current) {
+        router.back();
+      }
+    }, 100);
+  };
+
   const menuSections = useMemo(
     () => [
       {
@@ -888,7 +906,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
               <Typography
                 variant="body2"
                 component="a"
-                onClick={() => window.history.back()}
+                onClick={handleBackNavigation}
                 sx={{
                   cursor: "pointer",
                   color: "text.secondary",
