@@ -234,6 +234,7 @@ export default function generateClientOrderHtml(repair: any): string {
         </div>
       </div>
       <hr class="divider" />
+
       <div class="TypographyBody1" style="font-weight: bold;">
         Pedido del cliente
       </div>
@@ -433,25 +434,31 @@ export default function generateClientOrderHtml(repair: any): string {
               }, 0)
             )}
           </div>
-          <div style="font-weight: bold;">
-            Falta pagar: ${new Intl.NumberFormat("es-AR", {
-              style: "currency",
-              currency: "ARS",
-            }).format(
+          ${(() => {
+            const faltaPagar =
               Number(calcularTotalOrdenReparacion(repair)) -
-                (repair.ingresos
-                  ? repair.ingresos.reduce((sum: number, ingreso: any) => {
-                      if (ingreso.moneda === "Dolar") {
-                        return (
-                          sum +
-                          Number(ingreso.monto) * Number(ingreso.dolar.blue)
-                        );
-                      }
-                      return sum + Number(ingreso.monto);
-                    }, 0)
-                  : 0)
-            )}
-          </div>
+              (repair.ingresos
+                ? repair.ingresos.reduce((sum: number, ingreso: any) => {
+                    if (ingreso.moneda === "Dolar") {
+                      return (
+                        sum + Number(ingreso.monto) * Number(ingreso.dolar.blue)
+                      );
+                    }
+                    return sum + Number(ingreso.monto);
+                  }, 0)
+                : 0);
+
+            return faltaPagar > 0
+              ? `
+              <div style="font-weight: bold;">
+                Falta pagar: ${new Intl.NumberFormat("es-AR", {
+                  style: "currency",
+                  currency: "ARS",
+                }).format(faltaPagar)}
+              </div>
+            `
+              : "";
+          })()}
         </div>
             `
                  : ""

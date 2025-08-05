@@ -45,7 +45,11 @@ export async function GET(
             },
           },
         },
-        ingresos: true,
+        ingresos: {
+          include: {
+            dolar: true,
+          },
+        },
       },
     });
 
