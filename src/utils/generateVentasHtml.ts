@@ -157,7 +157,7 @@ export default function generateClientOrderHtml(venta: any): string {
               letter-spacing: 0em;
               color: #000;
             '>
-              ${venta.presupuesto ? "Presupuesto #" : "Venta #"}
+              ${venta.estado === "Presupuestado" ? "Presupuesto #" : "Venta #"}
               ${venta.id}
             </h4>
           </div>
@@ -367,7 +367,7 @@ export default function generateClientOrderHtml(venta: any): string {
           <hr class="divider" />
           <div class="TypographyBody1">
             ${
-              venta.presupuesto
+              venta.estado === "Presupuestado"
                 ? "Detalle de presupuesto solicitado, valores al día,  sin iva, sujeto a desarme"
                 : "Detalle del trabajo,  valores sin IVA"
             }

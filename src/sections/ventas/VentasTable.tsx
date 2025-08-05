@@ -9,8 +9,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { EstadoVenta } from "@prisma/client";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 
 function Stock({ repuestos }: { repuestos: any[] }) {
   return (
@@ -48,17 +49,61 @@ function Trabajos({ trabajos }: { trabajos: any[] }) {
   );
 }
 
+// Define estado display names and colors
+const estadosDisplay: Record<EstadoVenta, string> = {
+  [EstadoVenta.Presupuestado]: "Presupuestado",
+  [EstadoVenta.Preparado]: "Preparado",
+  [EstadoVenta.Entregado]: "Entregado",
+  [EstadoVenta.Cerrado]: "Cerrado",
+};
+
+const estadoColors: Record<EstadoVenta, string> = {
+  [EstadoVenta.Presupuestado]: "#4169E1", // Royal Blue
+  [EstadoVenta.Preparado]: "#FF8C00", // Dark Orange
+  [EstadoVenta.Entregado]: "#32CD32", // Lime Green
+  [EstadoVenta.Cerrado]: "#8A2BE2", // Blue Violet
+};
+
+const estados = [
+  "TODOS",
+  EstadoVenta.Presupuestado,
+  EstadoVenta.Preparado,
+  EstadoVenta.Entregado,
+  EstadoVenta.Cerrado,
+];
+
 function VentasTable({
   extraActions,
   ctaCb,
   setRefreshTrigger,
   ...rest
 }: InheritedTableProps) {
-  const [tabValue, setTabValue] = useState(0);
   const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+  const [tabValue, setTabValue] = useState(0);
+  const [estadoActual, setEstadoActual] = useState<EstadoVenta | string | null>(
+    null
+  );
+
+  useEffect(() => {
+    const tabParam = searchParams.get("tab");
+    if (tabParam !== null) {
+      const tabIndex = parseInt(tabParam);
+      if (!isNaN(tabIndex) && tabIndex >= 0 && tabIndex < estados.length) {
+        setTabValue(tabIndex);
+        setEstadoActual(tabIndex === 0 ? null : estados[tabIndex]);
+      }
+    }
+  }, [searchParams]);
+
+  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
+    setEstadoActual(newValue === 0 ? null : estados[newValue]);
+
+    const url = new URL(window.location.href);
+    url.searchParams.set("tab", newValue.toString());
+    window.history.pushState({ tab: newValue }, "", url.toString());
   };
 
   const columns = [
@@ -84,14 +129,15 @@ function VentasTable({
       flex: 1,
     },
     {
-      field: "presupuesto",
-      headerName: "Presupuesto",
+      field: "estado",
+      headerName: "Estado",
       flex: 1,
       renderCell: (params: any) => (
         <Chip
-          label={params.value ? "Presupuesto" : "Terminada"}
+          label={estadosDisplay[params.value as EstadoVenta] || params.value}
           sx={{
-            backgroundColor: params.value ? "#4169E1" : "#32CD32",
+            backgroundColor:
+              estadoColors[params.value as EstadoVenta] || "#757575",
             color: "white",
             fontWeight: "bold",
           }}
@@ -229,13 +275,22 @@ function VentasTable({
 
   return (
     <Box>
-      <Tabs value={tabValue} onChange={handleTabChange}>
-        <Tab label="Todos" />
-        <Tab label="Terminados" />
-        <Tab label="Presupuestos" />
-      </Tabs>
+      <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
+        <Tabs value={tabValue} onChange={handleTabChange}>
+          {estados.map((estado, index) => (
+            <Tab
+              key={estado}
+              label={
+                estado === "TODOS"
+                  ? estado
+                  : estadosDisplay[estado as EstadoVenta]
+              }
+            />
+          ))}
+        </Tabs>
+      </Box>
       <Box mt={2}>
-        {tabValue === 0 && (
+        {estadoActual === null && (
           <CustomTable
             title="Ventas"
             apiEndpoint="/api/ventas"
@@ -246,10 +301,10 @@ function VentasTable({
             {...rest}
           />
         )}
-        {tabValue === 1 && (
+        {estadoActual === EstadoVenta.Presupuestado && (
           <CustomTable
             title="Ventas"
-            apiEndpoint="/api/ventas?presupuesto=false"
+            apiEndpoint="/api/ventas?estado=Presupuestado"
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/ventas/nueva")}
             columns={columns}
@@ -257,13 +312,36 @@ function VentasTable({
             {...rest}
           />
         )}
-        {tabValue === 2 && (
+        {estadoActual === EstadoVenta.Preparado && (
           <CustomTable
             title="Ventas"
-            apiEndpoint="/api/ventas?presupuesto=true"
+            apiEndpoint="/api/ventas?estado=Preparado"
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/ventas/nueva")}
             columns={columns}
+            getRowClassName={getRowClassName}
+            {...rest}
+          />
+        )}
+        {estadoActual === EstadoVenta.Entregado && (
+          <CustomTable
+            title="Ventas"
+            apiEndpoint="/api/ventas?estado=Entregado"
+            extraActions={customActions}
+            ctaCb={() => router.push("/dashboard/ventas/nueva")}
+            columns={columns}
+            getRowClassName={getRowClassName}
+            {...rest}
+          />
+        )}
+        {estadoActual === EstadoVenta.Cerrado && (
+          <CustomTable
+            title="Ventas"
+            apiEndpoint="/api/ventas?estado=Cerrado"
+            extraActions={customActions}
+            ctaCb={() => router.push("/dashboard/ventas/nueva")}
+            columns={columns}
+            getRowClassName={getRowClassName}
             {...rest}
           />
         )}

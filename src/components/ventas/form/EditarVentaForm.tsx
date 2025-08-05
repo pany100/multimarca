@@ -17,7 +17,7 @@ type Venta = {
   id: number;
   fecha: Date;
   clienteId: number;
-  presupuesto: boolean;
+  estado: string;
   repuestosUsados: {
     id: number;
     ventaId: number;

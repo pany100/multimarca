@@ -69,11 +69,14 @@ export async function PUT(
       fecha,
       informacionCliente,
       incremento,
-      presupuesto,
+      estado,
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
     } = body;
+
+    // Determinar si es presupuesto basado en el estado
+    const isPresupuesto = estado === "Presupuestado";
 
     // Obtener la venta actual
     const ventaActual = await prisma.venta.findUnique({
@@ -94,7 +97,11 @@ export async function PUT(
       );
     }
 
-    if (!ventaActual.presupuesto && presupuesto) {
+    // Determinar si la venta actual es un presupuesto
+    const ventaActualIsPresupuesto = ventaActual.estado === "Presupuestado";
+
+    // No permitir cambiar de venta a presupuesto
+    if (!ventaActualIsPresupuesto && isPresupuesto) {
       return NextResponse.json(
         { error: "No se puede convertir una venta a presupuesto" },
         { status: 400 }
@@ -102,7 +109,7 @@ export async function PUT(
     }
 
     // Verificar stock si no es un presupuesto
-    if (!presupuesto) {
+    if (!isPresupuesto) {
       for (const repuesto of repuestosUsados) {
         // Obtener la cantidad previa usada para este stock
         const repuestoExistente = ventaActual.repuestosUsados.find(
@@ -217,7 +224,7 @@ export async function PUT(
           informacionCliente,
           fecha,
           dolarId: dolar?.id,
-          presupuesto,
+          estado,
           descuento: new Prisma.Decimal(descuento),
           descripcionDescuento,
           incremento: new Prisma.Decimal(incremento),
@@ -252,7 +259,7 @@ export async function PUT(
       });
 
       // Actualizar el stock y crear notificaciones si es necesario
-      if (!presupuesto) {
+      if (!isPresupuesto) {
         for (const repuesto of repuestosUsados) {
           const stockActualizado = await prisma.stock.update({
             where: { id: repuesto.stock.id },

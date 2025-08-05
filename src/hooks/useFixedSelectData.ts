@@ -20,6 +20,13 @@ function useFixedSelectData() {
     { value: "SeRetira", label: "Se Retira" },
   ];
 
+  const ventaEstadoOptions = [
+    { value: "Presupuestado", label: "Presupuestado" },
+    { value: "Preparado", label: "Preparado" },
+    { value: "Entregado", label: "Entregado" },
+    { value: "Cerrado", label: "Cerrado" },
+  ];
+
   const presupuestoEstadoOptions = [
     { value: "EnPreparacion", label: "En Preparación" },
     { value: "Terminado", label: "Terminado" },
@@ -37,6 +44,7 @@ function useFixedSelectData() {
     tipoOperacion,
     currency,
     orepEstadoOptions,
+    ventaEstadoOptions,
     siNo,
     presupuestoEstadoOptions,
   };

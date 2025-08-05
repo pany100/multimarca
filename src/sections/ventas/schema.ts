@@ -1,10 +1,13 @@
 import * as yup from "yup";
 
 export const schema = yup.object({
-  presupuesto: yup.boolean(),
   fecha: yup.date().required("La fecha es requerida"),
   clienteId: yup.number().nullable(),
   informacionCliente: yup.string().nullable(),
+  estado: yup
+    .string()
+    .oneOf(["Presupuestado", "Preparado", "Entregado", "Cerrado"])
+    .required(),
   repuestosUsados: yup.array().of(
     yup.object().shape({
       stock: yup

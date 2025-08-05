@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { getIO } from "@/lib/socketio";
 import { moveFileInS3 } from "@/utils/s3Helper";
-import { Prisma, TipoNotificacionInterna } from "@prisma/client";
+import { EstadoVenta, Prisma, TipoNotificacionInterna } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -10,21 +10,20 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get("page") || "0");
     const limit = parseInt(searchParams.get("limit") || "10");
     const query = searchParams.get("query") || "";
-    const presupuestoInput = searchParams.get("presupuesto");
-    let presupuesto = undefined;
-    if (presupuestoInput === "true") {
-      presupuesto = true;
-    } else if (presupuestoInput === "false") {
-      presupuesto = false;
-    }
+    const estado = searchParams.get("estado");
+
     const where: Prisma.VentaWhereInput = {
       OR: [
         { cliente: { fullName: { contains: query } } },
         { informacionCliente: { contains: query } },
         { id: { equals: parseInt(query) || undefined } },
       ],
-      presupuesto,
     };
+
+    // Add estado filter if provided
+    if (estado) {
+      where.estado = estado as EstadoVenta;
+    }
 
     const [ventas, total] = await Promise.all([
       prisma.venta.findMany({
@@ -73,13 +72,15 @@ export async function POST(request: Request) {
       fecha,
       informacionCliente,
       incremento,
-      presupuesto,
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
+      estado,
     } = body;
 
-    if (!presupuesto) {
+    const isPresupuesto = estado === "Presupuestado";
+
+    if (!isPresupuesto) {
       for (const repuesto of repuestosUsados) {
         const stockActual = await prisma.stock.findUnique({
           where: { id: repuesto.stock.id },
@@ -162,7 +163,7 @@ export async function POST(request: Request) {
         informacionCliente,
         fecha,
         dolarId: dolar?.id,
-        presupuesto,
+        estado,
         descuento: descuento ? new Prisma.Decimal(descuento) : 0,
         descripcionDescuento,
         incremento: incremento ? new Prisma.Decimal(incremento) : 0,
@@ -189,8 +190,7 @@ export async function POST(request: Request) {
       },
     });
 
-    // Actualizar el stock y crear notificaciones si es necesario
-    if (!presupuesto) {
+    if (!isPresupuesto) {
       for (const repuesto of repuestosUsados) {
         const stockActualizado = await prisma.stock.update({
           where: { id: repuesto.stock.id },

@@ -289,8 +289,7 @@ model Venta {
   trabajosRealizados     TrabajoRealizado[]        @relation("VentaTrabajosRealizados")
   ingresos               IngresoPorVenta[]         @relation("VentaIngresos")
 
-  presupuesto Boolean @default(false)
-  estado                 EstadoVenta               @default(Presupuestado)
+  estado                 EstadoVenta               @default(Entregado)
 
   @@index([clienteId])
   @@index([fecha])

@@ -13,7 +13,9 @@ export async function GET(
     const ventas = await prisma.venta.findMany({
       where: {
         informacionCliente: params.slug,
-        presupuesto: false,
+        estado: {
+          not: "Presupuestado",
+        },
       },
       include: {
         repuestosUsados: true,
