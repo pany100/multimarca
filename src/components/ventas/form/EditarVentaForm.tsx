@@ -9,6 +9,7 @@ import useEditVenta from "@/sections/ventas/hooks/useEditVenta";
 import { schema } from "@/sections/ventas/schema";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box } from "@mui/material";
+import { EstadoVenta } from "@prisma/client";
 import { FormProvider, useForm } from "react-hook-form";
 import VentasClienteSection from "./VentasClienteSection";
 import VentasDatosGeneralesSection from "./VentasDatosGeneralesSection";
@@ -64,6 +65,7 @@ function EditarVentaForm({ venta }: { venta: Venta }) {
       descripcionDescuento: venta.descripcionDescuento,
       incremento: venta.incremento,
       descripcionIncremento: venta.descripcionIncremento,
+      estado: venta.estado as EstadoVenta,
       trabajosRealizados: venta.trabajosRealizados.map((trabajo) => ({
         manoDeObra: { name: trabajo.descripcion },
         precioUnitario: Number(trabajo.precioUnitario),
