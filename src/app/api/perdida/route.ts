@@ -41,6 +41,7 @@ export async function GET(request: Request) {
         orderBy: { fecha: "desc" },
         include: {
           dolar: true,
+          recuperaciones: true,
         },
       }),
       prisma.perdidas.count({
@@ -107,7 +108,6 @@ export async function POST(request: Request) {
         descripcion: descripcion.trim(),
         moneda: moneda || undefined,
         dolarId: dolar?.id || undefined,
-        cancelado: cancelado || false,
       },
       include: {
         dolar: true,

@@ -12,6 +12,7 @@ export async function GET(
       where: { id },
       include: {
         dolar: true,
+        recuperaciones: true,
       },
     });
 
@@ -92,7 +93,6 @@ export async function PUT(
         descripcion: descripcion.trim(),
         moneda: moneda || undefined,
         dolarId: dolar?.id || undefined,
-        cancelado: cancelado !== undefined ? cancelado : undefined,
       },
       include: {
         dolar: true,

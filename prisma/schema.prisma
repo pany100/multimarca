@@ -717,7 +717,16 @@ model Perdidas {
   moneda      Moneda    @default(Peso)
   dolar       Dolar?    @relation(fields: [dolarId], references: [id])
   dolarId     Int?
-  cancelado   Boolean   @default(false)
+  recuperaciones Recuperacion[]
+}
+
+model Recuperacion {
+  id          Int       @id @default(autoincrement())
+  fecha       DateTime  @default(now())
+  monto       Decimal   @db.Decimal(10, 2)
+  perdida     Perdidas  @relation(fields: [perdidaId], references: [id], onDelete: Cascade)
+  perdidaId   Int
+  detalle     String?   @db.VarChar(255)
 }
 
 enum TipoEmpleado {

@@ -4,11 +4,11 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import BalanceIcon from "@mui/icons-material/Balance";
 import CancelIcon from "@mui/icons-material/Cancel";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
-import { Chip, Typography } from "@mui/material";
+import { Chip, MenuItem, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
-
 function PerdidaTable({
   extraActions,
   ctaCb,
@@ -87,11 +87,25 @@ function PerdidaTable({
     },
   ];
 
+  const customActions = (params: any) => {
+    const defaultActions = extraActions ? extraActions(params) : [];
+    const customActions: React.ReactNode[] = [
+      <MenuItem
+        key="edit"
+        onClick={() => router.push(`/dashboard/perdida/${params.id}/recupero`)}
+      >
+        <BalanceIcon sx={{ mr: 1 }} />
+        Recuperos
+      </MenuItem>,
+    ];
+    return customActions.concat(defaultActions);
+  };
+
   return (
     <CustomTable
       title="Pérdidas"
       apiEndpoint="/api/perdida"
-      extraActions={extraActions}
+      extraActions={customActions}
       ctaCb={ctaCb}
       columns={columns}
       {...rest}
