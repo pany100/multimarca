@@ -54,7 +54,7 @@ export async function GET(request: NextRequest) {
       FROM Cliente c
       LEFT JOIN Venta v ON c.id = v.clienteId
       LEFT JOIN Dolar d ON d.fecha = DATE(v.fecha)
-      WHERE v.presupuesto = false
+      WHERE v.estado = 'Entregado'
     `;
 
     const queryParams: any[] = [moneda];
