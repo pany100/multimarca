@@ -313,8 +313,9 @@ export default function generateBudgetHtml(repair: any): string {
               <div class="TypographyBody1" style="margin-top: 20px;">
                 Descuento
                 ${
-                  repair.descripcionDescuento &&
-                  `${repair.descripcionDescuento}`
+                  repair.descripcionDescuento !== null
+                    ? `${repair.descripcionDescuento} `
+                    : ""
                 }
               </div>
               <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
