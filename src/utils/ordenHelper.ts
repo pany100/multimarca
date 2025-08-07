@@ -103,10 +103,35 @@ function getStatusColor(estado: string): ChipProps["color"] {
   }
 }
 
+function calcularTotalPagos(ordenReparacion: {
+  ingresos?: {
+    monto: number;
+    moneda: string;
+    dolar?: {
+      blue: number;
+    };
+  }[];
+}): number {
+  if (!ordenReparacion.ingresos || ordenReparacion.ingresos.length === 0) {
+    return 0;
+  }
+
+  return ordenReparacion.ingresos.reduce((total, ingreso) => {
+    if (ingreso.moneda === "Dolar") {
+      return (
+        total +
+        parseFloat(ingreso.monto.toString()) * Number(ingreso.dolar?.blue || 0)
+      );
+    }
+    return total + parseFloat(ingreso.monto.toString());
+  }, 0);
+}
+
 export {
   calcularManoDeObra,
   calcularTotalManoDeObra,
   calcularTotalOrdenReparacion,
+  calcularTotalPagos,
   calcularTotalReparacionesTerceros,
   calcularTotalRepuestos,
   getStatusColor,

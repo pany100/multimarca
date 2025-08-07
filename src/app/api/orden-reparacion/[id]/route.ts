@@ -40,7 +40,11 @@ export async function GET(
             proveedor: true,
           },
         },
-        ingresos: true,
+        ingresos: {
+          include: {
+            dolar: true,
+          },
+        },
         trabajosRealizados: true,
         revisadoPor: true,
         controlesEnReparacion: {

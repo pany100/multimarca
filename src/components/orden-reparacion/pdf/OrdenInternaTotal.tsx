@@ -1,4 +1,7 @@
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
+import {
+  calcularTotalOrdenReparacion,
+  calcularTotalPagos,
+} from "@/utils/ordenHelper";
 import {
   Box,
   Checkbox,
@@ -10,11 +13,7 @@ import {
 
 function OrdenInternaTotal({ repair }: { repair: any }) {
   const total = calcularTotalOrdenReparacion(repair);
-  const aCuenta =
-    repair.ingresos?.reduce(
-      (acc: number, ingreso: any) => acc + Number(ingreso.monto),
-      0
-    ) || 0;
+  const aCuenta = calcularTotalPagos(repair);
   const deuda = total - aCuenta;
   const paymentMethods = [
     "Efectivo",
