@@ -57,6 +57,19 @@ const CarInfoDoubleColumn = styled("div")(() => ({
   gridTemplateColumns: "460px auto",
 }));
 
+const KilometerAndDate = styled("div")(() => ({
+  display: "grid",
+  gridTemplateColumns: "auto auto",
+  justifyContent: "space-between",
+}));
+
+const DatePart = styled("div")(() => ({
+  display: "grid",
+  gridTemplateColumns: "auto auto auto",
+  gridGap: "20px",
+  paddingRight: "50px",
+}));
+
 const CarInfoFourColumn = styled("div")(() => ({
   borderBottom: "1px solid black",
   width: "100%",
@@ -183,16 +196,50 @@ const BoschTemplate = React.forwardRef<HTMLDivElement>((_, ref) => {
         <Section>
           <SectionText>Observaciones (accesorios)*</SectionText>
         </Section>
-        <LightLine />
-        <WhiteLine />
-        <LightLine />
-        <WhiteLine />
-        <LightLine />
-        <WhiteLine />
-        <LightLine />
+        <CarInfo>
+          <CarInfoDoubleColumn>
+            <div>TUERCA A/R: </div>
+            <div>HECHO EN MT:</div>
+          </CarInfoDoubleColumn>
+          <CarInfoDoubleColumn>
+            <div>CÉDULA (FOTO F Y D) QUEDA EN:</div>
+            <KilometerAndDate>
+              <div>SERVICE DE MOTOR:</div>
+              <DatePart>
+                <div>km-</div>
+                <div>/</div>
+                <div>/</div>
+              </DatePart>
+            </KilometerAndDate>
+          </CarInfoDoubleColumn>
+          <CarInfoDoubleColumn>
+            <div>SEGURO, QUEDA EN:</div>
+            <KilometerAndDate>
+              <div>DISTRIBUCIÓN:</div>
+              <DatePart>
+                <div>km-</div>
+                <div>/</div>
+                <div>/</div>
+              </DatePart>
+            </KilometerAndDate>
+          </CarInfoDoubleColumn>
+          <CarInfoDoubleColumn>
+            <div>COLOR:</div>
+            <KilometerAndDate>
+              <div>ACEITE DE CAJA:</div>
+              <DatePart>
+                <div>km-</div>
+                <div>/</div>
+                <div>/</div>
+              </DatePart>
+            </KilometerAndDate>
+          </CarInfoDoubleColumn>
+          <CarInfoLine>TRANSMISIÓN:</CarInfoLine>
+        </CarInfo>
         <Section>
           <SectionText>
-            Servicios solicitados (inspección / mantenimiento / reparación)
+            Servicios solicitados (inspección / mantenimiento / reparación) /
+            Cliente solicita turno por:
           </SectionText>
         </Section>
         <LightLine />
