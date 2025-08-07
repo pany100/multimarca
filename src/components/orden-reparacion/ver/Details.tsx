@@ -218,6 +218,8 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
               <TableHead>
                 <TableRow sx={{ backgroundColor: theme.palette.action.hover }}>
                   <TableCell sx={{ fontWeight: 500 }}>Repuesto</TableCell>
+                  <TableCell sx={{ fontWeight: 500 }}>Proveedor</TableCell>
+                  <TableCell sx={{ fontWeight: 500 }}>Rótulo</TableCell>
                   <TableCell sx={{ fontWeight: 500 }}>Cantidad</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 500 }}>
                     Precio
@@ -229,7 +231,11 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
                   (
                     repuesto: {
                       id: string;
-                      stock: { name: string };
+                      stock: {
+                        name: string;
+                        proveedor: { name: string };
+                        label: string;
+                      };
                       unidadesConsumidas: number;
                       precioVenta: number;
                     },
@@ -238,6 +244,12 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
                     <TableRow key={repuesto.id || index}>
                       <TableCell component="th" scope="row">
                         {repuesto.stock?.name || "Sin nombre"}
+                      </TableCell>
+                      <TableCell>
+                        {repuesto.stock?.proveedor?.name || "Sin nombre"}
+                      </TableCell>
+                      <TableCell>
+                        {repuesto.stock?.label || "Sin rotulo"}
                       </TableCell>
                       <TableCell>{repuesto.unidadesConsumidas || 0}</TableCell>
                       <TableCell align="right">
