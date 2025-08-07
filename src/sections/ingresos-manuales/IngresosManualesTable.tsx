@@ -1,7 +1,9 @@
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { Chip } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { Chip, MenuItem } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import CustomTable, {
   InheritedTableProps,
 } from "../../components/tableV2/CustomTable";
@@ -12,6 +14,8 @@ function IngresosManualesTable({
   setRefreshTrigger,
   ...rest
 }: InheritedTableProps) {
+  const router = useRouter();
+
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     {
@@ -77,11 +81,27 @@ function IngresosManualesTable({
     return "";
   };
 
+  const customActions = (params: any) => {
+    const defaultActions = extraActions ? extraActions(params) : [];
+    const customActions: React.ReactNode[] = [
+      <MenuItem
+        key="edit"
+        onClick={() =>
+          router.push(`/dashboard/ingresos-manuales/${params.id}/ver`)
+        }
+      >
+        <VisibilityIcon sx={{ mr: 1 }} />
+        Ver
+      </MenuItem>,
+    ];
+    return customActions.concat(defaultActions);
+  };
+
   return (
     <CustomTable
       title="Ingresos Manuales"
       apiEndpoint="/api/ingresos-manuales"
-      extraActions={extraActions}
+      extraActions={customActions}
       ctaCb={ctaCb}
       columns={columns}
       getRowClassName={getRowClassName}
