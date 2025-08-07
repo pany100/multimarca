@@ -17,6 +17,7 @@ const estados = [
   "EnPreparacion",
   "Terminado",
   "Enviado",
+  "ADefinir",
   "Aceptado",
   "Rechazado",
   "Descartado",
@@ -39,6 +40,8 @@ const mapEstadoPresupuesto = (estado: string) => {
       return "Terminado";
     case "Enviado":
       return "Enviado";
+    case "ADefinir":
+      return "A Definir";
     case "Aceptado":
       return "Aceptado";
     case "Rechazado":
@@ -63,6 +66,8 @@ const mapEstadoColor = (estado: string) => {
     case "Rechazado":
       return "#e74c3c"; // Red
     case "Descartado":
+      return "#9b59b6"; // Purple light
+    case "ADefinir":
       return "#9b59b6"; // Purple light
     default:
       return "#95a5a6"; // Gray
@@ -300,6 +305,17 @@ function PresupuestosTable({
           <CustomTable
             title="Presupuestos Enviados"
             apiEndpoint="/api/presupuestos?estado=Enviado"
+            extraActions={customActions}
+            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
+            columns={columns}
+            searchByDate={true}
+            {...rest}
+          />
+        )}
+        {estadoActual === "ADefinir" && (
+          <CustomTable
+            title="Presupuestos A Definir"
+            apiEndpoint="/api/presupuestos?estado=ADefinir"
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
             columns={columns}

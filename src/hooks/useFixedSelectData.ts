@@ -31,6 +31,7 @@ function useFixedSelectData() {
     { value: "EnPreparacion", label: "En Preparación" },
     { value: "Terminado", label: "Terminado" },
     { value: "Enviado", label: "Enviado" },
+    { value: "ADefinir", label: "A Definir" },
     { value: "Aceptado", label: "Aceptado" },
     { value: "Rechazado", label: "Rechazado" },
     { value: "Descartado", label: "Descartado" },

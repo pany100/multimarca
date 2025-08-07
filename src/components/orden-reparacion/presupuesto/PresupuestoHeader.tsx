@@ -37,6 +37,8 @@ const mapEstadoPresupuesto = (estado: string) => {
       return "Terminado";
     case "Enviado":
       return "Enviado";
+    case "ADefinir":
+      return "A Definir";
     case "Aceptado":
       return "Aceptado";
     case "Rechazado":

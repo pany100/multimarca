@@ -196,6 +196,7 @@ const presupuestoSchema = yup.object().shape({
     .oneOf([
       "EnPreparacion",
       "Enviado",
+      "ADefinir",
       "Aceptado",
       "Rechazado",
       "Descartado",
