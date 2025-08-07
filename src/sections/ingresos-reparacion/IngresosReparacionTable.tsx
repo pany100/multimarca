@@ -6,9 +6,11 @@ import CustomTable, {
 import useRecibo from "@/hooks/useRecibo";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import SendIcon from "@mui/icons-material/Send";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Alert, Chip, MenuItem, Snackbar } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import RecibosModal from "./RecibosModal";
 
@@ -18,6 +20,8 @@ function IngresosReparacionTable({
   setRefreshTrigger,
   ...rest
 }: InheritedTableProps) {
+  const router = useRouter();
+
   const [selectedIngreso, setSelectedIngreso] = useState<{
     id: string;
   } | null>(null);
@@ -131,6 +135,15 @@ function IngresosReparacionTable({
   const customActions = (params: any) => {
     const defaultActions = extraActions ? extraActions(params) : [];
     const customActions: React.ReactNode[] = [
+      <MenuItem
+        key="edit"
+        onClick={() =>
+          router.push(`/dashboard/ingresos-reparacion/${params.id}/ver`)
+        }
+      >
+        <VisibilityIcon sx={{ mr: 1 }} />
+        Ver
+      </MenuItem>,
       <MenuItem key="recibo" onClick={() => handleExtraAction(params.id)}>
         <SendIcon sx={{ mr: 1 }} />
         Enviar recibo

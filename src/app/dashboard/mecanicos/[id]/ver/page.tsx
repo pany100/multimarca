@@ -83,7 +83,7 @@ const VerEmpleadoPage = ({ params }: { params: { id: string } }) => {
                 <strong>Nombre:</strong> {empleado.name}
               </Typography>
               <Typography>
-                <strong>DNI:</strong> {empleado.dni}
+                <strong>CUIT/CUIL:</strong> {empleado.dni}
               </Typography>
               <Typography>
                 <strong>Email:</strong> {empleado.email}

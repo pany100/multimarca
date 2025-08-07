@@ -153,6 +153,7 @@ export async function GET(
             auto: true,
           },
         },
+        tipoOperacion: true,
         cheque: chequeQueryData,
       },
     });
