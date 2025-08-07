@@ -163,8 +163,11 @@ export default function generateReciboHtml(ingresoPorReparacion: any): string {
         calcularTotalPagos(ingresoPorReparacion.ordenReparacion)
       )}</strong></p>
       <p>Resta pagar (en pesos): <strong>${getFormattedPrice(
-        calcularTotalOrdenReparacion(ingresoPorReparacion.ordenReparacion) -
-          calcularTotalPagos(ingresoPorReparacion.ordenReparacion)
+        Math.max(
+          0,
+          calcularTotalOrdenReparacion(ingresoPorReparacion.ordenReparacion) -
+            calcularTotalPagos(ingresoPorReparacion.ordenReparacion)
+        )
       )}</strong></p>
       <div style="margin-top: 50px; border-top: 1px solid #000; padding-top: 10px; text-align: center;">
         <p>Gracias por su pago</p>

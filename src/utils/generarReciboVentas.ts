@@ -1,5 +1,8 @@
 import { getFormattedPrice } from "./fieldHelper";
-import { calcularTotalOrdenReparacion } from "./ordenHelper";
+import {
+  calcularTotalOrdenReparacion,
+  calcularTotalPagos,
+} from "./ordenHelper";
 
 export default function generateReciboVentas(ingresoPorVenta: any): string {
   return `
@@ -142,18 +145,26 @@ export default function generateReciboVentas(ingresoPorVenta: any): string {
     <p style="text-align: right;">Fecha: ${new Date(
       ingresoPorVenta.fecha
     ).toLocaleDateString("es-AR")}</p>
-    <p>En concepto de la venta: <strong>#${
-      ingresoPorVenta.ventaId
-    }</strong> cuyo importe total a pagar es <strong>${getFormattedPrice(
-    calcularTotalOrdenReparacion(ingresoPorVenta.venta)
+    <p>En concepto de la venta: <strong>#${ingresoPorVenta.ventaId}</strong></p>
+    <p>Del total del monto: <strong>${getFormattedPrice(
+      calcularTotalOrdenReparacion(ingresoPorVenta.venta)
+    )}</strong> se paga <strong>$${Number(ingresoPorVenta.monto).toLocaleString(
+    "es-AR"
   )}</strong></p>
     <p>Recibido de: <strong>${
       ingresoPorVenta.cliente?.fullName || ingresoPorVenta.informacionCliente
     }</strong></p>
-    <p>La suma de: <strong>$${Number(ingresoPorVenta.monto).toLocaleString(
-      "es-AR"
-    )}</strong></p>
     <p>Descripción: ${ingresoPorVenta.descripcion}</p>
+    <p>Total abonado hasta el momento (en pesos): <strong>${getFormattedPrice(
+      calcularTotalPagos(ingresoPorVenta.venta)
+    )}</strong></p>
+     <p>Resta pagar (en pesos): <strong>${getFormattedPrice(
+       Math.max(
+         0,
+         calcularTotalOrdenReparacion(ingresoPorVenta.venta) -
+           calcularTotalPagos(ingresoPorVenta.venta)
+       )
+     )}</strong></p>
     <div style="margin-top: 50px; border-top: 1px solid #000; padding-top: 10px; text-align: center;">
       <p>Gracias por su pago</p>
     </div>

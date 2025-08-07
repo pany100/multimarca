@@ -20,6 +20,11 @@ export async function POST(
             repuestosUsados: true,
             reparacionesDeTercero: true,
             trabajosRealizados: true,
+            ingresos: {
+              include: {
+                dolar: true,
+              },
+            },
           },
         },
       },

@@ -171,7 +171,7 @@ export default function generateClientOrderHtml(venta: any): string {
               }
             </div>
             <div class="TypographyBody1" style="margin-bottom: 3px;">
-              Cliente: ${venta.cliente.fullName}
+              Cliente: ${venta.cliente?.fullName || venta.informacionCliente}
             </div>
           </div>
         </div>
