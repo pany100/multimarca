@@ -18,6 +18,8 @@ function useRepuestosObjectAutocomplete() {
             id: option.value,
             name: option.object.name,
           },
+          label: option.object.label,
+          proveedor: option.object.proveedor,
           precioCompra: option.object.buyPrice,
           precioVenta: precioVentaCalculado.toFixed(2),
         });
@@ -29,6 +31,8 @@ function useRepuestosObjectAutocomplete() {
             id: option.value,
             name: option.object.name,
           },
+          label: option.object.label,
+          proveedor: option.object.proveedor,
         });
       }
     }

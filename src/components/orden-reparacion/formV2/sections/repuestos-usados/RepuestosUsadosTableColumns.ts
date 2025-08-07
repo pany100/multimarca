@@ -9,6 +9,18 @@ const RepuestosUsadosTableColumns: GridColDef[] = [
     valueFormatter: (value: { name: string }) => value?.name,
   },
   {
+    field: "proveedor",
+    headerName: "Proveedor",
+    flex: 1,
+    valueFormatter: (value: { name: string }) => value?.name,
+  },
+  {
+    field: "label",
+    headerName: "Label",
+    flex: 1,
+    valueFormatter: (value: { name: string }) => value?.name,
+  },
+  {
     field: "precioCompra",
     headerName: "Precio Compra",
     flex: 1,
