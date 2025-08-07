@@ -7,6 +7,53 @@ import {
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: "ID de extracción inválido" },
+        { status: 400 }
+      );
+    }
+
+    const extraccion = await prisma.extraccion.findUnique({
+      where: { id },
+      include: {
+        usuario: {
+          select: {
+            id: true,
+            fullName: true,
+            email: true,
+          },
+        },
+        tipoOperacion: true,
+        dolar: true,
+        cheque: chequeQueryData,
+      },
+    });
+
+    if (!extraccion) {
+      return NextResponse.json(
+        { error: "Extracción no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(returnModelWithChequeData(extraccion));
+  } catch (error) {
+    console.error("Error al obtener extracción:", error);
+    return NextResponse.json(
+      { error: "Error al obtener la extracción" },
+      { status: 500 }
+    );
+  }
+}
+
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
