@@ -23,9 +23,13 @@ export async function GET(request: Request) {
     }
 
     // Construir la condición de búsqueda
-    let where: any = {
-      usuarioId: user.id,
-    };
+    let where: any = {};
+
+    // Solo filtrar por usuario si no es administrador
+    if (user.rol.name !== "Administrador") {
+      where.usuarioId = user.id;
+    }
+
     const fechaDate = new Date(fecha);
 
     const fechaLimite = new Date(fechaDate);
