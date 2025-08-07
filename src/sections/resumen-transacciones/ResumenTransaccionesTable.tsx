@@ -86,7 +86,20 @@ function ResumenTransaccionesTable({
       field: "tipoOperacion",
       headerName: "Operación",
       flex: 1,
-      valueGetter: (value: any) => value?.label || "N/A",
+      renderCell: (params: any) => {
+        const label = params.row.tipoOperacion?.label || "N/A";
+        // Determine color based on operation type
+        let color = "default";
+
+        // Common operation types and their colors
+        if (label.toLowerCase().includes("efectivo")) color = "primary";
+        else if (label.toLowerCase().includes("transferencia")) color = "info";
+        else if (label.toLowerCase().includes("cheque")) color = "secondary";
+        else if (label.toLowerCase().includes("tarjeta")) color = "success";
+        else if (label.toLowerCase().includes("mercado")) color = "warning";
+
+        return <Chip label={label} color={color as any} size="small" />;
+      },
     },
     {
       field: "monto",
