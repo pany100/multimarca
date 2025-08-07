@@ -57,7 +57,12 @@ type OrdenReparacion = {
     stock: {
       id: number;
       name: string;
+      label: string;
+      proveedor: {
+        name: string;
+      };
     };
+    label: string;
     precioCompra: number;
     precioVenta: number;
     unidadesConsumidas: number;
@@ -121,6 +126,8 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
       })),
       repuestosUsados: ordenReparacion.repuestosUsados.map((repuesto) => ({
         stock: { id: repuesto.stockId, name: repuesto.stock.name },
+        proveedor: repuesto.stock.proveedor.name,
+        label: repuesto.stock.label,
         precioCompra: Number(repuesto.precioCompra),
         precioVenta: Number(repuesto.precioVenta),
         unidadesConsumidas: repuesto.unidadesConsumidas,

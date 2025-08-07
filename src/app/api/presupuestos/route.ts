@@ -26,6 +26,7 @@ export async function GET(request: Request) {
     let where: any = {
       OR: [
         { auto: { brand: { contains: query } } },
+        { id: { equals: parseInt(query) || undefined } },
         { informacionAuto: { contains: query } },
         { informacionCliente: { contains: query } },
         { auto: { model: { contains: query } } },

@@ -32,7 +32,11 @@ export async function GET(
         },
         repuestosUsados: {
           include: {
-            stock: true,
+            stock: {
+              include: {
+                proveedor: true,
+              },
+            },
           },
         },
         reparacionesDeTercero: {
