@@ -366,11 +366,7 @@ export default function generateClientOrderHtml(venta: any): string {
         ">
           <hr class="divider" />
           <div class="TypographyBody1">
-            ${
-              venta.estado === "Presupuestado"
-                ? "Detalle de presupuesto solicitado, valores al día,  sin iva, sujeto a desarme"
-                : "Detalle del trabajo,  valores sin IVA"
-            }
+            Detalle de presupuesto solicitado, valores al día, sujeto a desarme
           </div>
         </div>
       </div>

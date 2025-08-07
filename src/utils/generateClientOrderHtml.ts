@@ -484,15 +484,22 @@ export default function generateClientOrderHtml(repair: any): string {
             : ""
         }
       </div>
+      <div style="
+          position: fixed;
+          bottom: 0;
+          left: 0;
+          width: 100%;
+        ">
       <hr class="divider" />
       <div class="TypographyBody1">
             ${
               repair.estado === EstadoOrdenReparacion.Presupuestado ||
               repair.estado === EstadoOrdenReparacion.Aceptado
                 ? "Detalle de presupuesto solicitado, valores al día,  sin iva, sujeto a desarme"
-                : "Detalle del trabajo,  valores sin IVA"
+                : "Detalle del trabajo"
             }
           </div>
+      </div>
     </div>
   </body>
   
