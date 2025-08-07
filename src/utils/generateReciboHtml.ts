@@ -1,5 +1,8 @@
 import { getFormattedPrice } from "./fieldHelper";
-import { calcularTotalOrdenReparacion } from "./ordenHelper";
+import {
+  calcularTotalOrdenReparacion,
+  calcularTotalPagos,
+} from "./ordenHelper";
 
 export default function generateReciboHtml(ingresoPorReparacion: any): string {
   return `
@@ -146,18 +149,23 @@ export default function generateReciboHtml(ingresoPorReparacion: any): string {
         ingresoPorReparacion.ordenReparacionId
       } - ${ingresoPorReparacion.ordenReparacion.auto.brand} ${
     ingresoPorReparacion.ordenReparacion.auto.model
-  } (${
-    ingresoPorReparacion.ordenReparacion.auto.patent
-  })</strong> cuyo importe total a pagar es <strong>${getFormattedPrice(
-    calcularTotalOrdenReparacion(ingresoPorReparacion.ordenReparacion)
-  )}</strong></p>
+  } (${ingresoPorReparacion.ordenReparacion.auto.patent})</strong></p>
+      <p>Del total del monto: <strong>${getFormattedPrice(
+        calcularTotalOrdenReparacion(ingresoPorReparacion.ordenReparacion)
+      )}</strong> se paga <strong>$${Number(
+    ingresoPorReparacion.monto
+  ).toLocaleString("es-AR")}</strong></p>
       <p>Recibido de: <strong>${
         ingresoPorReparacion.cliente.fullName
       }</strong></p>
-      <p>La suma de: <strong>$${Number(
-        ingresoPorReparacion.monto
-      ).toLocaleString("es-AR")}</strong></p>
       <p>Descripción: ${ingresoPorReparacion.descripcion}</p>
+      <p>Total abonado hasta el momento (en pesos): <strong>${getFormattedPrice(
+        calcularTotalPagos(ingresoPorReparacion.ordenReparacion)
+      )}</strong></p>
+      <p>Resta pagar (en pesos): <strong>${getFormattedPrice(
+        calcularTotalOrdenReparacion(ingresoPorReparacion.ordenReparacion) -
+          calcularTotalPagos(ingresoPorReparacion.ordenReparacion)
+      )}</strong></p>
       <div style="margin-top: 50px; border-top: 1px solid #000; padding-top: 10px; text-align: center;">
         <p>Gracias por su pago</p>
       </div>

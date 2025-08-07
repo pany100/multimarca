@@ -19,6 +19,11 @@ export async function GET(
             repuestosUsados: true,
             reparacionesDeTercero: true,
             trabajosRealizados: true,
+            ingresos: {
+              include: {
+                dolar: true,
+              },
+            },
           },
         },
       },

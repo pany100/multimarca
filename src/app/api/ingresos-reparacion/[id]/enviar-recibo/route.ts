@@ -17,6 +17,11 @@ export async function POST(
         ordenReparacion: {
           include: {
             auto: true,
+            ingresos: {
+              include: {
+                dolar: true,
+              },
+            },
           },
         },
       },
