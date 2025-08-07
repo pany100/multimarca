@@ -149,6 +149,7 @@ export async function GET(
         cliente: true,
         venta: true,
         cheque: chequeQueryData,
+        tipoOperacion: true,
       },
     });
 

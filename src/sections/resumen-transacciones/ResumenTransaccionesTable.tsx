@@ -116,16 +116,17 @@ function ResumenTransaccionesTable({
       headerName: "Descripción",
       flex: 1.5,
     },
+    {
+      field: "Ver",
+      headerName: "Ver",
+      flex: 0.5,
+      renderCell: (params: any) => (
+        <Link href={getViewLink(params.row)}>
+          <VisibilityIcon color="primary" />
+        </Link>
+      ),
+    },
   ];
-
-  const customActions = useCallback((item: any) => {
-    const viewLink = getViewLink(item);
-    return [
-      <Link key="view" href={viewLink}>
-        <VisibilityIcon color="primary" />
-      </Link>,
-    ];
-  }, []);
 
   const getViewLink = (item: any) => {
     const { tipo, id } = item;
@@ -193,28 +194,6 @@ function ResumenTransaccionesTable({
 
     router.push(`?${url.searchParams.toString()}`);
   };
-
-  // Custom date filter handler to ensure we use 'from' and 'to' parameters
-  const handleDateFilter = useCallback(
-    (startDate: Date | null, endDate: Date | null) => {
-      const params = new URLSearchParams(window.location.search);
-
-      if (startDate) {
-        params.set("from", startDate.toISOString().split("T")[0]);
-      } else {
-        params.delete("from");
-      }
-
-      if (endDate) {
-        params.set("to", endDate.toISOString().split("T")[0]);
-      } else {
-        params.delete("to");
-      }
-
-      return params.toString();
-    },
-    []
-  );
 
   return (
     <Box sx={{ width: "100%" }}>
