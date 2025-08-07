@@ -62,7 +62,7 @@ const IngresosManualesForm = () => {
             label="Tipo de Operación"
           />
         </Grid>
-        {operacionValue === 3 && <ChequeData />}
+        {(operacionValue === 3 || operacionValue === 9) && <ChequeData />}
       </Grid>
     </>
   );

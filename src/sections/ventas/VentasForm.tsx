@@ -110,7 +110,7 @@ function VentasForm() {
             label="Tipo de Operación"
           />
         </Grid>
-        {operacionValue === 3 && <ChequeData />}
+        {(operacionValue === 3 || operacionValue === 9) && <ChequeData />}
         <Grid item xs={12} md={6}>
           <CustomSelect options={currency} name="moneda" label="Moneda" />
         </Grid>

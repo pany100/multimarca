@@ -57,7 +57,7 @@ const IngresosVentasForm = () => {
             options={tiposOperacion}
           />
         </Grid>
-        {operacionValue === 3 && <ChequeData />}
+        {(operacionValue === 3 || operacionValue === 9) && <ChequeData />}
         <Grid
           item
           xs={12}

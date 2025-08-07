@@ -130,6 +130,8 @@ async function truncateTables(): Promise<void> {
     "NotificacionWhatsapp",
     "RecordatorioAgenda",
     "Turno",
+    "TareaDiaria",
+    "Perdidas",
 
     // Tablas con múltiples dependencias
     "OrdenDeCompra",
@@ -152,6 +154,7 @@ async function truncateTables(): Promise<void> {
     "ConversacionWhatsApp",
     "MensajeWhatsApp",
     "TareaAdministrativa",
+    "Recuperacion",
   ];
 
   try {
