@@ -83,7 +83,7 @@ function MecanicosTable({
         return new Date(start_date).toLocaleDateString("es-ES");
       },
     },
-    { field: "dni", headerName: "DNI", flex: 1 },
+    { field: "dni", headerName: "CUIT/CUIL", flex: 1 },
     { field: "email", headerName: "Email", flex: 1.5 },
     { field: "tipo", headerName: "Tipo", flex: 1 },
     { field: "phone", headerName: "Teléfono", flex: 1 },
@@ -124,7 +124,7 @@ function MecanicosTable({
   return (
     <>
       <CustomTable
-        title="Mecánicos"
+        title="Colaboradores"
         columns={columns}
         apiEndpoint="/api/mecanicos"
         ctaCb={ctaCb}

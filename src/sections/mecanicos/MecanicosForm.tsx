@@ -7,7 +7,10 @@ export const schema = yup.object({
   name: yup.string().required("El nombre es requerido"),
   dni: yup
     .string()
-    .matches(/^\d+$/, "El DNI debe contener solo nmeros")
+    .matches(
+      /^(\d{2}-\d{8}-\d|\d{11})$/,
+      "El CUIT/CUIL debe tener formato 00-00000000-0 o solo números"
+    )
     .nullable(),
   email: yup.string().email("El email es inválido").nullable(),
   phone: yup.string().nullable(),
@@ -49,7 +52,7 @@ const MecanicosForm = () => {
           />
         </Grid>
         <Grid item xs={12} md={4}>
-          <CustomInputText name="dni" label="DNI" />
+          <CustomInputText name="dni" label="CUIT/CUIL" />
         </Grid>
         <Grid item xs={12} md={6}>
           <CustomInputText name="address" label="Direccion" />

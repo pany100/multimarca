@@ -7,6 +7,7 @@ import BuildIcon from "@mui/icons-material/Build";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ChecklistIcon from "@mui/icons-material/Checklist";
+import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import DateRangeIcon from "@mui/icons-material/DateRange";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
@@ -242,7 +243,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "Mecanicos",
-            texto: "Mecánicos",
+            texto: "Colaboradores",
             icono: <BuildIcon />,
             ruta: "/dashboard/mecanicos",
           },
@@ -459,6 +460,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Deudores",
             icono: <RequestQuoteIcon />,
             ruta: "/dashboard/deudores",
+          },
+          {
+            permiso: "Ingresos",
+            texto: "Resumen Transacciones",
+            icono: <CompareArrowsIcon />,
+            ruta: "/dashboard/resumen-transacciones",
           },
         ],
       },
