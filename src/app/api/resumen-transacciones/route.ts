@@ -28,7 +28,8 @@ export async function GET(request: Request) {
     const size = parseInt(searchParams.get("size") || "10");
     const query = searchParams.get("query") || "";
     const tipoOperacionId = searchParams.get("tipoOperacionId") || null;
-
+    const fromDate = searchParams.get("from");
+    const toDate = searchParams.get("to");
     // Obtener el token de la cabecera de autorización
     const authHeader = request.headers.get("authorization");
     if (!authHeader) {
@@ -60,15 +61,33 @@ export async function GET(request: Request) {
       ? { tipoOperacionId: parseInt(tipoOperacionId) }
       : {};
 
+    const ingresoManualWhere: any = {
+      ...tipoOperacionFilter,
+      OR: [
+        { usuario: { fullName: { contains: query } } },
+        { descripcion: { contains: query } },
+      ],
+    };
+
+    if (fromDate || toDate) {
+      ingresoManualWhere.fecha = {};
+
+      if (fromDate) {
+        // Convertir YYYY-MM-DD a objeto Date
+        ingresoManualWhere.fecha.gte = new Date(fromDate);
+      }
+
+      if (toDate) {
+        // Convertir YYYY-MM-DD a objeto Date y establecer a final del día
+        const endDate = new Date(toDate);
+        endDate.setHours(23, 59, 59, 999);
+        ingresoManualWhere.fecha.lte = endDate;
+      }
+    }
+
     // Búsqueda en IngresoManualDeDinero
     const ingresoManualPromise = prisma.ingresoManualDeDinero.findMany({
-      where: {
-        ...tipoOperacionFilter,
-        OR: [
-          { usuario: { fullName: { contains: query } } },
-          { descripcion: { contains: query } },
-        ],
-      },
+      where: ingresoManualWhere,
       include: {
         usuario: true,
         tipoOperacion: true,
@@ -76,16 +95,34 @@ export async function GET(request: Request) {
       orderBy: { fecha: "desc" },
     });
 
+    const ingresoPorVentaWhere: any = {
+      ...tipoOperacionFilter,
+      OR: [
+        { cliente: { fullName: { contains: query } } },
+        { informacionCliente: { contains: query } },
+        { descripcion: { contains: query } },
+      ],
+    };
+
+    if (fromDate || toDate) {
+      ingresoPorVentaWhere.fecha = {};
+
+      if (fromDate) {
+        // Convertir YYYY-MM-DD a objeto Date
+        ingresoPorVentaWhere.fecha.gte = new Date(fromDate);
+      }
+
+      if (toDate) {
+        // Convertir YYYY-MM-DD a objeto Date y establecer a final del día
+        const endDate = new Date(toDate);
+        endDate.setHours(23, 59, 59, 999);
+        ingresoPorVentaWhere.fecha.lte = endDate;
+      }
+    }
+
     // Búsqueda en IngresoPorVenta
     const ingresoPorVentaPromise = prisma.ingresoPorVenta.findMany({
-      where: {
-        ...tipoOperacionFilter,
-        OR: [
-          { cliente: { fullName: { contains: query } } },
-          { informacionCliente: { contains: query } },
-          { descripcion: { contains: query } },
-        ],
-      },
+      where: ingresoPorVentaWhere,
       include: {
         cliente: true,
         tipoOperacion: true,
@@ -93,16 +130,34 @@ export async function GET(request: Request) {
       orderBy: { fecha: "desc" },
     });
 
+    const ingresoPorReparacionWhere: any = {
+      ...tipoOperacionFilter,
+      OR: [
+        { cliente: { fullName: { contains: query } } },
+        { ordenReparacion: { auto: { patent: { contains: query } } } },
+        { descripcion: { contains: query } },
+      ],
+    };
+
+    if (fromDate || toDate) {
+      ingresoPorReparacionWhere.fecha = {};
+
+      if (fromDate) {
+        // Convertir YYYY-MM-DD a objeto Date
+        ingresoPorReparacionWhere.fecha.gte = new Date(fromDate);
+      }
+
+      if (toDate) {
+        // Convertir YYYY-MM-DD a objeto Date y establecer a final del día
+        const endDate = new Date(toDate);
+        endDate.setHours(23, 59, 59, 999);
+        ingresoPorReparacionWhere.fecha.lte = endDate;
+      }
+    }
+
     // Búsqueda en IngresoPorReparacion
     const ingresoPorReparacionPromise = prisma.ingresoPorReparacion.findMany({
-      where: {
-        ...tipoOperacionFilter,
-        OR: [
-          { cliente: { fullName: { contains: query } } },
-          { ordenReparacion: { auto: { patent: { contains: query } } } },
-          { descripcion: { contains: query } },
-        ],
-      },
+      where: ingresoPorReparacionWhere,
       include: {
         cliente: true,
         ordenReparacion: {
@@ -115,27 +170,45 @@ export async function GET(request: Request) {
       orderBy: { fecha: "desc" },
     });
 
+    const gastoWhere: any = {
+      ...tipoOperacionFilter,
+      OR: [
+        { categoria: { nombre: { contains: query } } },
+        { proveedor: { name: { contains: query } } },
+        { nombre: { contains: query } },
+        { detalle: { contains: query } },
+      ],
+      AND: [
+        {
+          categoria: {
+            OR: [
+              { roles: { none: {} } },
+              { roles: { some: { name: user.rol.name } } },
+            ],
+          },
+        },
+      ],
+    };
+
+    if (fromDate || toDate) {
+      gastoWhere.fecha = {};
+
+      if (fromDate) {
+        // Convertir YYYY-MM-DD a objeto Date
+        gastoWhere.fecha.gte = new Date(fromDate);
+      }
+
+      if (toDate) {
+        // Convertir YYYY-MM-DD a objeto Date y establecer a final del día
+        const endDate = new Date(toDate);
+        endDate.setHours(23, 59, 59, 999);
+        gastoWhere.fecha.lte = endDate;
+      }
+    }
+
     // Búsqueda en Gasto
     const gastoPromise = prisma.gasto.findMany({
-      where: {
-        ...tipoOperacionFilter,
-        OR: [
-          { categoria: { nombre: { contains: query } } },
-          { proveedor: { name: { contains: query } } },
-          { nombre: { contains: query } },
-          { detalle: { contains: query } },
-        ],
-        AND: [
-          {
-            categoria: {
-              OR: [
-                { roles: { none: {} } },
-                { roles: { some: { name: user.rol.name } } },
-              ],
-            },
-          },
-        ],
-      },
+      where: gastoWhere,
       include: {
         categoria: true,
         proveedor: true,
@@ -144,15 +217,33 @@ export async function GET(request: Request) {
       orderBy: { fecha: "desc" },
     });
 
+    const extraccionWhere: any = {
+      ...tipoOperacionFilter,
+      OR: [
+        { usuario: { fullName: { contains: query } } },
+        { motivo: { contains: query } },
+      ],
+    };
+
+    if (fromDate || toDate) {
+      extraccionWhere.fecha = {};
+
+      if (fromDate) {
+        // Convertir YYYY-MM-DD a objeto Date
+        extraccionWhere.fecha.gte = new Date(fromDate);
+      }
+
+      if (toDate) {
+        // Convertir YYYY-MM-DD a objeto Date y establecer a final del día
+        const endDate = new Date(toDate);
+        endDate.setHours(23, 59, 59, 999);
+        extraccionWhere.fecha.lte = endDate;
+      }
+    }
+
     // Búsqueda en Extraccion
     const extraccionPromise = prisma.extraccion.findMany({
-      where: {
-        ...tipoOperacionFilter,
-        OR: [
-          { usuario: { fullName: { contains: query } } },
-          { motivo: { contains: query } },
-        ],
-      },
+      where: extraccionWhere,
       include: {
         usuario: true,
         tipoOperacion: true,
@@ -178,25 +269,11 @@ export async function GET(request: Request) {
       ingresoPorReparacionPromise,
       gastoPromise,
       extraccionPromise,
-      prisma.ingresoManualDeDinero.count({ where: { ...tipoOperacionFilter } }),
-      prisma.ingresoPorVenta.count({ where: { ...tipoOperacionFilter } }),
-      prisma.ingresoPorReparacion.count({ where: { ...tipoOperacionFilter } }),
-      prisma.gasto.count({
-        where: {
-          ...tipoOperacionFilter,
-          AND: [
-            {
-              categoria: {
-                OR: [
-                  { roles: { none: {} } },
-                  { roles: { some: { name: user.rol.name } } },
-                ],
-              },
-            },
-          ],
-        },
-      }),
-      prisma.extraccion.count({ where: { ...tipoOperacionFilter } }),
+      prisma.ingresoManualDeDinero.count({ where: ingresoManualWhere }),
+      prisma.ingresoPorVenta.count({ where: ingresoPorVentaWhere }),
+      prisma.ingresoPorReparacion.count({ where: ingresoPorReparacionWhere }),
+      prisma.gasto.count({ where: gastoWhere }),
+      prisma.extraccion.count({ where: extraccionWhere }),
     ]);
 
     // Mapear los resultados a un formato común
