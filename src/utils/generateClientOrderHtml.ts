@@ -371,9 +371,10 @@ export default function generateClientOrderHtml(repair: any): string {
           Mano de Obra
         </div>
         <div class="TypographyBody1" style="text-align: right;">
-          $${calcularManoDeObra(repair.trabajosRealizados).toLocaleString(
-            "es-AR"
-          )}
+          $${(
+            calcularManoDeObra(repair.trabajosRealizados) +
+            Number(repair.incrementoInterno || 0)
+          ).toLocaleString("es-AR")}
         </div>
         ${
           repair.incremento > 0

@@ -131,6 +131,7 @@ export async function POST(request: Request) {
       tareasAdministrativas = [],
       descuento = 0,
       descripcionDescuento,
+      incrementoInterno = 0,
       incremento = 0,
       descripcionIncremento,
       estado = EstadoPresupuestoType.EnPreparacion,
@@ -215,6 +216,7 @@ export async function POST(request: Request) {
         dolarId: dolar?.id,
         descuento: new Prisma.Decimal(descuento),
         descripcionDescuento,
+        incrementoInterno: new Prisma.Decimal(incrementoInterno),
         incremento: new Prisma.Decimal(incremento),
         descripcionIncremento,
         repuestosUsados: {

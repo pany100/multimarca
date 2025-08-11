@@ -65,6 +65,7 @@ function calcularTotalOrdenReparacion(ordenReparacion: {
   trabajosRealizados: { precioUnitario: number }[];
   descuento: number;
   incremento?: number;
+  incrementoInterno?: number;
 }): number {
   const totalRepuestos = Number(calcularTotalRepuestos(ordenReparacion));
 
@@ -78,11 +79,14 @@ function calcularTotalOrdenReparacion(ordenReparacion: {
 
   const descuento = parseFloat(ordenReparacion.descuento.toString());
   const incremento = parseFloat(ordenReparacion.incremento?.toString() || "0");
-
+  const incrementoInterno = parseFloat(
+    ordenReparacion.incrementoInterno?.toString() || "0"
+  );
   return (
     totalRepuestos +
     totalReparacionesTerceros +
-    manoDeObra -
+    manoDeObra +
+    incrementoInterno -
     descuento +
     incremento
   );

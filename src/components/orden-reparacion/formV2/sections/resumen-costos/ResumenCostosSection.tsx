@@ -15,6 +15,19 @@ function ResumenCostosSection() {
 
   return (
     <Grid container spacing={2}>
+      <Grid item xs={4} ref={(el) => registerFieldRef("incrementoInterno", el)}>
+        <CustomInputText
+          name="incrementoInterno"
+          label="Incremento Interno"
+          type="number"
+        />
+      </Grid>
+      <Grid item xs={8}>
+        <Typography variant="body1">
+          Este incremento va a mostrarse como parte de la mano de obra cuando se
+          imprima el informe al cliente
+        </Typography>
+      </Grid>
       <Grid item xs={4} ref={(el) => registerFieldRef("descuento", el)}>
         <CustomInputText name="descuento" label="Descuento" type="number" />
       </Grid>

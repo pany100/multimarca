@@ -189,6 +189,7 @@ const presupuestoSchema = yup.object().shape({
   descuento: yup.number().min(0),
   observacionesEntrada: yup.string(),
   descripcionDescuento: yup.string().nullable(),
+  incrementoInterno: yup.number().min(0),
   incremento: yup.number().min(0),
   descripcionIncremento: yup.string().nullable(),
   estado: yup

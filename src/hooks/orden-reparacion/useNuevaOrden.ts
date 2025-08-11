@@ -23,6 +23,8 @@ function useNuevaOrden({ control }: Props) {
   const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
   const descuento = useWatch({ control, name: "descuento" }) || 0;
   const incremento = useWatch({ control, name: "incremento" }) || 0;
+  const incrementoInterno =
+    useWatch({ control, name: "incrementoInterno" }) || 0;
   const manoDeObra = calcularManoDeObra(trabajosRealizados ?? []);
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
     repuestosUsados: repuestosUsados ?? [],
@@ -30,6 +32,7 @@ function useNuevaOrden({ control }: Props) {
     trabajosRealizados: trabajosRealizados ?? [],
     descuento,
     incremento,
+    incrementoInterno,
   });
 
   const onSubmit = async (data: any) => {

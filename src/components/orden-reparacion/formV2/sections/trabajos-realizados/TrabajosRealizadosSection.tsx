@@ -17,6 +17,11 @@ function TrabajosRealizadosSection() {
     name: "trabajosRealizados",
     control,
   });
+  const incrementoInterno =
+    useWatch({
+      name: "incrementoInterno",
+      control,
+    }) || 0;
   return (
     <ModalProvider>
       <FormDataArrayWithModal
