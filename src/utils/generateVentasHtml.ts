@@ -358,17 +358,6 @@ export default function generateClientOrderHtml(venta: any): string {
             )}
           </h2>
         </div>
-        <div style="
-          position: fixed;
-          bottom: 0;
-          left: 0;
-          width: 100%;
-        ">
-          <hr class="divider" />
-          <div class="TypographyBody1">
-            Detalle de presupuesto solicitado, valores al día, sujeto a desarme
-          </div>
-        </div>
       </div>
     </body>
   </html>

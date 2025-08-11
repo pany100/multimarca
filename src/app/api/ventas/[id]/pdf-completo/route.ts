@@ -66,9 +66,19 @@ async function generateBasePdf(venta: any): Promise<Buffer> {
     margin: {
       top: "20px",
       right: "20px",
-      bottom: "20px",
+      bottom: "60px",
       left: "20px",
     },
+    displayHeaderFooter: true,
+    headerTemplate: "<div></div>",
+    footerTemplate: `
+          <div style="margin: 0 25px; padding: 0 20px; width: 100%; font-family: Arial, sans-serif;">
+            <div style="border-top: 1px solid black; width: 100%;"></div>
+            <div style="text-align: left; font-size: 12px; margin-top: 8px;">
+             Detalle de presupuesto solicitado, valores al día, sujeto a desarme
+            </div>
+          </div>
+        `,
   });
 
   await browser.close();
