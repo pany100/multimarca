@@ -1,5 +1,6 @@
 import generateClientOrderHtml from "@/utils/generateClientOrderHtml";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { EstadoOrdenReparacion } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { PDFDocument, rgb } from "pdf-lib";
 import puppeteer from "puppeteer";
@@ -116,9 +117,24 @@ async function generateBasePdf(repair: any): Promise<Buffer> {
     margin: {
       top: "20px",
       right: "20px",
-      bottom: "20px",
+      bottom: "60px",
       left: "20px",
     },
+    displayHeaderFooter: true,
+    headerTemplate: "<div></div>",
+    footerTemplate: `
+      <div style="margin: 0 25px; padding: 0 20px; width: 100%; font-family: Arial, sans-serif;">
+        <div style="border-top: 1px solid black; width: 100%;"></div>
+        <div style="text-align: left; font-size: 12px; margin-top: 8px;">
+          ${
+            repair.estado === EstadoOrdenReparacion.Presupuestado ||
+            repair.estado === EstadoOrdenReparacion.Aceptado
+              ? "Detalle de presupuesto solicitado, valores al día, sin iva, sujeto a desarme"
+              : "Detalle del trabajo"
+          }
+        </div>
+      </div>
+    `,
   });
 
   await browser.close();
