@@ -66,7 +66,7 @@ async function generateBasePdf(venta: any): Promise<Buffer> {
     margin: {
       top: "20px",
       right: "20px",
-      bottom: "60px",
+      bottom: "20px",
       left: "20px",
     },
     displayHeaderFooter: true,

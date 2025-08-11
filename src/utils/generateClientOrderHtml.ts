@@ -15,6 +15,7 @@ export default function generateClientOrderHtml(repair: any): string {
       @media print {
         @page {
           margin: 10mm;
+          margin-bottom: 13mm;
         }
         .pagebreak {
           clear: both;

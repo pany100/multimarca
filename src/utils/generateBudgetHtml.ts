@@ -14,6 +14,7 @@ export default function generateBudgetHtml(repair: any): string {
       @media print {
         @page {
           margin: 10mm;
+          margin-bottom: 13mm;
         }
         .pagebreak {
           clear: both;
@@ -342,10 +343,6 @@ export default function generateBudgetHtml(repair: any): string {
             : ""
         }
       </div>
-      <hr class="divider" />
-      <div class="TypographyBody1">
-            Detalle de presupuesto solicitado, valores al día,  sin iva, sujeto a desarme
-          </div>
     </div>
   </body>
   
