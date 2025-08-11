@@ -155,8 +155,29 @@ export default function generateReciboVentas(ingresoPorVenta: any): string {
       ingresoPorVenta.cliente?.fullName || ingresoPorVenta.informacionCliente
     }</strong></p>
     <p>Descripción: ${ingresoPorVenta.descripcion}</p>
+    ${
+      ingresoPorVenta.venta.ingresos.length > 1 &&
+      `<p>
+          Pagos anteriores: 
+          ${ingresoPorVenta.venta.ingresos
+            .filter((ingreso: any) => ingreso.id !== ingresoPorVenta.id)
+            .map((ingreso: any) => {
+              return `<p key={ingreso.id}><strong>
+            * ${new Date(ingreso.fecha).toLocaleDateString(
+              "es-AR"
+            )}</strong>: ${getFormattedPrice(ingreso.monto)}${
+                ingreso.moneda === "Dolar" ? " Dolares" : " Pesos"
+              }
+          </p>`;
+            })
+            .join("")}
+        </p>`
+    }
     <p>Total abonado hasta el momento (en pesos): <strong>${getFormattedPrice(
-      calcularTotalPagos(ingresoPorVenta.venta)
+      Math.min(
+        calcularTotalPagos(ingresoPorVenta.venta),
+        calcularTotalOrdenReparacion(ingresoPorVenta.venta)
+      )
     )}</strong></p>
      <p>Resta pagar (en pesos): <strong>${getFormattedPrice(
        Math.max(

@@ -159,8 +159,29 @@ export default function generateReciboHtml(ingresoPorReparacion: any): string {
         ingresoPorReparacion.cliente.fullName
       }</strong></p>
       <p>Descripción: ${ingresoPorReparacion.descripcion}</p>
+      ${
+        ingresoPorReparacion.ordenReparacion.ingresos.length > 1 &&
+        `<p>
+            Pagos anteriores: 
+            ${ingresoPorReparacion.ordenReparacion.ingresos
+              .filter((ingreso: any) => ingreso.id !== ingresoPorReparacion.id)
+              .map((ingreso: any) => {
+                return `<p key={ingreso.id}><strong>
+              * ${new Date(ingreso.fecha).toLocaleDateString(
+                "es-AR"
+              )}</strong>: ${getFormattedPrice(ingreso.monto)}${
+                  ingreso.moneda === "Dolar" ? " Dolares" : " Pesos"
+                }
+            </p>`;
+              })
+              .join("")}
+          </p>`
+      }
       <p>Total abonado hasta el momento (en pesos): <strong>${getFormattedPrice(
-        calcularTotalPagos(ingresoPorReparacion.ordenReparacion)
+        Math.min(
+          calcularTotalPagos(ingresoPorReparacion.ordenReparacion),
+          calcularTotalOrdenReparacion(ingresoPorReparacion.ordenReparacion)
+        )
       )}</strong></p>
       <p>Resta pagar (en pesos): <strong>${getFormattedPrice(
         Math.max(
