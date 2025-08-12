@@ -156,8 +156,8 @@ export default function generateReciboVentas(ingresoPorVenta: any): string {
     }</strong></p>
     <p>Descripción: ${ingresoPorVenta.descripcion}</p>
     ${
-      ingresoPorVenta.venta.ingresos.length > 1 &&
-      `<p>
+      ingresoPorVenta.venta.ingresos.length > 1
+        ? `<p>
           Pagos anteriores: 
           ${ingresoPorVenta.venta.ingresos
             .filter((ingreso: any) => ingreso.id !== ingresoPorVenta.id)
@@ -172,6 +172,7 @@ export default function generateReciboVentas(ingresoPorVenta: any): string {
             })
             .join("")}
         </p>`
+        : ""
     }
     <p>Total abonado hasta el momento (en pesos): <strong>${getFormattedPrice(
       Math.min(

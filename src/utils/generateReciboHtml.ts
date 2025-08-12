@@ -160,8 +160,8 @@ export default function generateReciboHtml(ingresoPorReparacion: any): string {
       }</strong></p>
       <p>Descripción: ${ingresoPorReparacion.descripcion}</p>
       ${
-        ingresoPorReparacion.ordenReparacion.ingresos.length > 1 &&
-        `<p>
+        ingresoPorReparacion.ordenReparacion.ingresos.length > 1
+          ? `<p>
             Pagos anteriores: 
             ${ingresoPorReparacion.ordenReparacion.ingresos
               .filter((ingreso: any) => ingreso.id !== ingresoPorReparacion.id)
@@ -176,6 +176,7 @@ export default function generateReciboHtml(ingresoPorReparacion: any): string {
               })
               .join("")}
           </p>`
+          : ""
       }
       <p>Total abonado hasta el momento (en pesos): <strong>${getFormattedPrice(
         Math.min(
