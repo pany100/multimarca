@@ -129,7 +129,7 @@ async function generateBasePdf(repair: any): Promise<Buffer> {
           ${
             repair.estado === EstadoOrdenReparacion.Presupuestado ||
             repair.estado === EstadoOrdenReparacion.Aceptado
-              ? "Detalle de presupuesto solicitado, valores al día, sin iva, sujeto a desarme"
+              ? "Detalle de presupuesto solicitado, valores al día, sujeto a desarme"
               : "Detalle del trabajo"
           }
         </div>

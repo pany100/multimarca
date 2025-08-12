@@ -189,6 +189,14 @@ export default function generateBudgetHtml(repair: any): string {
           <div class="TypographyBody1">
             Teléfono: ${repair.auto.owner.phone}
           </div>
+          <div class="TypographyBody1">
+            Fecha Envio:
+            ${
+              repair.fechaEnvio
+                ? new Date(repair.fechaEnvio).toLocaleDateString("es-AR")
+                : "-"
+            }
+          </div>
         </div>
       </div>
       `
@@ -220,6 +228,14 @@ export default function generateBudgetHtml(repair: any): string {
           </div>
           <div class="TypographyBody1">
             Vehículo: ${repair.informacionAuto || "N/A"}
+          </div>
+           <div class="TypographyBody1">
+            Fecha Envio:
+            ${
+              repair.fechaEnvio
+                ? new Date(repair.fechaEnvio).toLocaleDateString("es-AR")
+                : "-"
+            }
           </div>
         </div>
       </div>

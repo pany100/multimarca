@@ -86,7 +86,7 @@ async function generateBasePdf(presupuesto: any): Promise<Buffer> {
       <div style="margin: 0 25px; padding: 0 20px; width: 100%; font-family: Arial, sans-serif;">
         <div style="border-top: 1px solid black; width: 100%;"></div>
         <div style="text-align: left; font-size: 12px; margin-top: 8px;">
-           Detalle de presupuesto solicitado, valores al día,  sin iva, sujeto a desarme
+           Detalle de presupuesto solicitado, valores al día, sujeto a desarme
         </div>
       </div>
     `,
