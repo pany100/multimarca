@@ -19,6 +19,11 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
+    // Obtener la fecha actual en Argentina
+    const hoy = dayjs().tz("America/Argentina/Buenos_Aires");
+    const inicioDia = hoy.startOf("day").toDate();
+    const finDia = hoy.endOf("day").toDate();
+
     const notificaciones = await prisma.notificacionInterna.findMany({
       where: {
         AND: [
@@ -31,6 +36,10 @@ export async function GET(request: Request) {
                 TipoNotificacionInterna.RECORDATORIOS_MANO_DE_OBRA,
                 TipoNotificacionInterna.EVENTO_AGENDA,
               ],
+            },
+            fecha: {
+              gte: inicioDia,
+              lte: finDia,
             },
           },
           {
