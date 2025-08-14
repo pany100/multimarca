@@ -35,9 +35,9 @@ export async function GET(request: NextRequest) {
         ROUND(SUM(
           CASE 
             WHEN ? = 'USD' THEN 
-              (ru.unidadesConsumidas * (ru.precioVenta - ru.precioCompra)) / COALESCE(d.blue, 1)
+              (ru.unidadesConsumidas * ((ru.precioVenta + ru.previoVenta * (orep.porcentajeRecargo / 100)) - ru.precioCompra)) / COALESCE(d.blue, 1)
             ELSE 
-              (ru.unidadesConsumidas * (ru.precioVenta - ru.precioCompra))
+              (ru.unidadesConsumidas * ((ru.precioVenta + ru.previoVenta * (orep.porcentajeRecargo / 100)) - ru.precioCompra))
           END
         ), 2) as gananciaTotal
       FROM Stock s

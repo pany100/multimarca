@@ -119,7 +119,7 @@ function EditarVentaForm({ venta }: { venta: Venta }) {
           <IncrementoSection />
         </FormSection>
         <FormSection title="Resumen de Costos">
-          <ResumenCostosSection />
+          <ResumenCostosSection isVenta={true} />
         </FormSection>
         <FormActions href="/dashboard/ventas" label="Ventas" />
       </form>
