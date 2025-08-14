@@ -1,5 +1,6 @@
 import {
   calcularManoDeObra,
+  calcularPrecioFinal,
   calcularTotalOrdenReparacion,
 } from "./ordenHelper";
 
@@ -277,7 +278,12 @@ export default function generateBudgetHtml(repair: any): string {
                   ${el.nombre}
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(el.precioVenta).toLocaleString("es-AR")}
+                  $${Number(
+                    calcularPrecioFinal(
+                      el.precioVenta,
+                      repair.porcentajeRecargo
+                    )
+                  ).toLocaleString("es-AR")}
                 </div>
               `
           )
@@ -292,7 +298,12 @@ export default function generateBudgetHtml(repair: any): string {
                   ${el.stock.name}
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(el.precioVenta).toLocaleString("es-AR")}
+                  $${Number(
+                    calcularPrecioFinal(
+                      el.precioVenta,
+                      repair.porcentajeRecargo
+                    )
+                  ).toLocaleString("es-AR")}
                 </div>
             `
           )
