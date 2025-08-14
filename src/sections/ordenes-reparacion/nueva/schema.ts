@@ -90,6 +90,8 @@ const schema = yup.object().shape({
   descuento: yup.number().min(0),
   descripcionDescuento: yup.string().nullable(),
   observacionesEntrada: yup.string(),
+  porcentajeRecargo: yup.number().min(0),
+  incrementoInterno: yup.number().min(0),
 });
 
 const presupuestoSchema = yup.object().shape({
@@ -190,6 +192,7 @@ const presupuestoSchema = yup.object().shape({
   observacionesEntrada: yup.string(),
   descripcionDescuento: yup.string().nullable(),
   incrementoInterno: yup.number().min(0),
+  porcentajeRecargo: yup.number().min(0),
   incremento: yup.number().min(0),
   descripcionIncremento: yup.string().nullable(),
   estado: yup

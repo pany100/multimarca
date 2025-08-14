@@ -52,7 +52,7 @@ function NuevoPresupuestoForm({
           <TrabajosRealizadosSection />
         </FormSection>
         <FormSection title="Resumen de Costos">
-          <ResumenCostosSection />
+          <ResumenCostosSection isVenta={true} />
         </FormSection>
         <FormActions href="/dashboard/presupuestos" label="Presupuesto" />
       </form>

@@ -8,10 +8,10 @@ import TrabajosRealizadosSection from "@/components/orden-reparacion/formV2/sect
 import useNuevaVenta from "@/sections/ventas/hooks/useNuevaVenta";
 import { schema } from "@/sections/ventas/schema";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { Box } from "@mui/material";
 import { FormProvider, useForm } from "react-hook-form";
 import VentasClienteSection from "./VentasClienteSection";
 import VentasDatosGeneralesSection from "./VentasDatosGeneralesSection";
-import { Box } from "@mui/material";
 
 function NuevaVentaForm() {
   const methods = useForm({
@@ -41,7 +41,7 @@ function NuevaVentaForm() {
           <IncrementoSection />
         </FormSection>
         <FormSection title="Resumen de Costos">
-          <ResumenCostosSection />
+          <ResumenCostosSection isVenta={true} />
         </FormSection>
         <FormActions href="/dashboard/ventas" label="Ventas" />
       </form>

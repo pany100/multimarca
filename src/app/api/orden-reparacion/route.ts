@@ -122,6 +122,7 @@ export async function POST(request: Request) {
       incremento = 0,
       descripcionIncremento,
       incrementoInterno = 0,
+      porcentajeRecargo = 0,
     } = body;
 
     if (estado === EstadoOrdenReparacion.Terminado) {
@@ -250,6 +251,7 @@ export async function POST(request: Request) {
           incremento: new Prisma.Decimal(incremento),
           descripcionIncremento,
           incrementoInterno: new Prisma.Decimal(incrementoInterno),
+          porcentajeRecargo: new Prisma.Decimal(porcentajeRecargo),
           mecanicos: {
             create: mecanicosToPersist,
           },

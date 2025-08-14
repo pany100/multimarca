@@ -128,6 +128,7 @@ export async function PUT(
       incremento,
       descripcionIncremento,
       incrementoInterno,
+      porcentajeRecargo,
     } = body;
 
     // Obtener la orden de reparación actual
@@ -362,6 +363,7 @@ export async function PUT(
             revisadoPorId,
             dolarId: dolar?.id,
             descuento: new Prisma.Decimal(descuento),
+            porcentajeRecargo: new Prisma.Decimal(porcentajeRecargo),
             mecanicos: {
               deleteMany: {},
               create: mecanicosToPersist,

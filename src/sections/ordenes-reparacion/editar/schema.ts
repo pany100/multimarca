@@ -105,6 +105,8 @@ const schema = yup.object().shape({
   descripcionDescuento: yup.string().nullable(),
   incremento: yup.number().nullable().min(0),
   descripcionIncremento: yup.string().nullable(),
+  porcentajeRecargo: yup.number().nullable().min(0),
+  incrementoInterno: yup.number().nullable().min(0),
   observacionesEntrada: yup.string(),
   recibos: yup.array().of(yup.string()).nullable(),
 });

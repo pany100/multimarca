@@ -5,7 +5,11 @@ import useScrollToError from "@/hooks/useScrollToError";
 import { Box, Grid, Paper, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 
-function ResumenCostosSection() {
+type Props = {
+  isVenta?: boolean;
+};
+
+function ResumenCostosSection({ isVenta = false }: Props) {
   const {
     control,
     formState: { errors, isSubmitted },
@@ -15,19 +19,48 @@ function ResumenCostosSection() {
 
   return (
     <Grid container spacing={2}>
-      <Grid item xs={4} ref={(el) => registerFieldRef("incrementoInterno", el)}>
-        <CustomInputText
-          name="incrementoInterno"
-          label="Incremento Interno"
-          type="number"
-        />
-      </Grid>
-      <Grid item xs={8}>
-        <Typography variant="body1">
-          Este incremento va a mostrarse como parte de la mano de obra cuando se
-          imprima el informe al cliente
-        </Typography>
-      </Grid>
+      {!isVenta && (
+        <>
+          <Grid
+            item
+            xs={4}
+            ref={(el) => registerFieldRef("incrementoInterno", el)}
+          >
+            <CustomInputText
+              name="incrementoInterno"
+              label="Incremento Interno"
+              type="number"
+            />
+          </Grid>
+          <Grid item xs={8}>
+            <Typography variant="body1">
+              Este incremento va a mostrarse como parte de la mano de obra
+              cuando se imprima el informe al cliente
+            </Typography>
+          </Grid>
+        </>
+      )}
+      {!isVenta && (
+        <>
+          <Grid
+            item
+            xs={4}
+            ref={(el) => registerFieldRef("porcentajeRecargo", el)}
+          >
+            <CustomInputText
+              name="porcentajeRecargo"
+              label="Porcentaje de recargo"
+              type="number"
+            />
+          </Grid>
+          <Grid item xs={8}>
+            <Typography variant="body1">
+              Recargo aplicado a las reparaciones de terceros y repuestos
+              utilizados
+            </Typography>
+          </Grid>
+        </>
+      )}
       <Grid item xs={4} ref={(el) => registerFieldRef("descuento", el)}>
         <CustomInputText name="descuento" label="Descuento" type="number" />
       </Grid>

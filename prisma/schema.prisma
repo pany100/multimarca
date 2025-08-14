@@ -326,6 +326,7 @@ model OrdenReparacion {
   descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
   dolarId                Int?
   detalleControles       String?                   @db.Text
+  porcentajeRecargo      Decimal                   @default(0.00) @db.Decimal(10, 2)
   descripcionDescuento   String?                   @db.VarChar(255)
   incrementoInterno      Decimal                   @default(0.00) @db.Decimal(10, 2)
   incremento             Decimal                   @default(0.00) @db.Decimal(10, 2)
@@ -368,6 +369,7 @@ model Presupuesto {
   descripcionDescuento   String?                   @db.VarChar(255)
   dolarId                Int?
   dolar                  Dolar?                    @relation(fields: [dolarId], references: [id])
+  porcentajeRecargo      Decimal                   @default(0.00) @db.Decimal(10, 2)
   incrementoInterno      Decimal                   @default(0.00) @db.Decimal(10, 2)
   incremento             Decimal                   @default(0.00) @db.Decimal(10, 2)
   descripcionIncremento  String?                   @db.VarChar(255)
