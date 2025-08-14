@@ -35,13 +35,13 @@ export async function GET(request: NextRequest) {
             WHEN ? = 'USD' THEN 
               (COALESCE((SELECT SUM(tr.precioUnitario) FROM TrabajoRealizado tr WHERE tr.ordenReparacionId = orep.id), 0) + 
                COALESCE((SELECT SUM(ru.precioVenta + ru.precioVenta * (orep.porcentajeRecargo / 100)) FROM RepuestoUsado ru WHERE ru.ordenReparacionId = orep.id), 0) + 
-               COALESCE((SELECT SUM(rt.precioVenta + ru.precioVenta * (orep.porcentajeRecargo / 100)) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0) - 
+               COALESCE((SELECT SUM(rt.precioVenta + rt.precioVenta * (orep.porcentajeRecargo / 100)) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0) - 
                COALESCE(orep.descuento, 0)
               ) / COALESCE(d.blue, 1)
             ELSE 
               (COALESCE((SELECT SUM(tr.precioUnitario) FROM TrabajoRealizado tr WHERE tr.ordenReparacionId = orep.id), 0) + 
                COALESCE((SELECT SUM(ru.precioVenta + ru.precioVenta * (orep.porcentajeRecargo / 100)) FROM RepuestoUsado ru WHERE ru.ordenReparacionId = orep.id), 0) + 
-               COALESCE((SELECT SUM(rt.precioVenta + ru.precioVenta * (orep.porcentajeRecargo / 100)) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0) - 
+               COALESCE((SELECT SUM(rt.precioVenta + rt.precioVenta * (orep.porcentajeRecargo / 100)) FROM ReparacionDeTercero rt WHERE rt.ordenReparacionId = orep.id), 0) - 
                COALESCE(orep.descuento, 0)
               )
           END
