@@ -25,6 +25,8 @@ function useNuevaOrden({ control }: Props) {
   const incremento = useWatch({ control, name: "incremento" }) || 0;
   const incrementoInterno =
     useWatch({ control, name: "incrementoInterno" }) || 0;
+  const porcentajeRecargo =
+    useWatch({ control, name: "porcentajeRecargo" }) || 0;
   const manoDeObra = calcularManoDeObra(trabajosRealizados ?? []);
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
     repuestosUsados: repuestosUsados ?? [],
@@ -33,6 +35,7 @@ function useNuevaOrden({ control }: Props) {
     descuento,
     incremento,
     incrementoInterno,
+    porcentajeRecargo,
   });
 
   const onSubmit = async (data: any) => {

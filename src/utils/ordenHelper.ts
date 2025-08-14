@@ -1,17 +1,32 @@
 import { ChipProps } from "@mui/material";
 
+function calcularPrecioFinal(
+  precio: number,
+  porcentajeRecargo?: number
+): number {
+  return parseFloat(
+    (precio + (precio * (porcentajeRecargo || 0)) / 100).toFixed(2)
+  );
+}
+
 function calcularTotalRepuestos(ordenReparacion: {
   repuestosUsados: {
     precioVenta: number;
     unidadesConsumidas: number;
   }[];
+  porcentajeRecargo?: number;
 }): string {
   if (!ordenReparacion.repuestosUsados) {
     return "0";
   }
   return ordenReparacion.repuestosUsados
     .reduce(
-      (total, repuesto) => total + parseFloat(repuesto.precioVenta.toString()),
+      (total, repuesto) =>
+        total +
+        calcularPrecioFinal(
+          parseFloat(repuesto.precioVenta.toString()),
+          ordenReparacion.porcentajeRecargo
+        ),
       0
     )
     .toFixed(2);
@@ -19,6 +34,7 @@ function calcularTotalRepuestos(ordenReparacion: {
 
 function calcularTotalReparacionesTerceros(ordenReparacion: {
   reparacionesDeTercero: { precioVenta: number }[];
+  porcentajeRecargo?: number;
 }): string {
   if (!ordenReparacion.reparacionesDeTercero) {
     return "0";
@@ -26,7 +42,11 @@ function calcularTotalReparacionesTerceros(ordenReparacion: {
   return ordenReparacion.reparacionesDeTercero
     .reduce(
       (total, reparacion) =>
-        total + parseFloat(reparacion.precioVenta.toString()),
+        total +
+        calcularPrecioFinal(
+          parseFloat(reparacion.precioVenta.toString()),
+          ordenReparacion.porcentajeRecargo
+        ),
       0
     )
     .toFixed(2);
@@ -66,6 +86,7 @@ function calcularTotalOrdenReparacion(ordenReparacion: {
   descuento: number;
   incremento?: number;
   incrementoInterno?: number;
+  porcentajeRecargo?: number;
 }): number {
   const totalRepuestos = Number(calcularTotalRepuestos(ordenReparacion));
 
@@ -133,6 +154,7 @@ function calcularTotalPagos(ordenReparacion: {
 
 export {
   calcularManoDeObra,
+  calcularPrecioFinal,
   calcularTotalManoDeObra,
   calcularTotalOrdenReparacion,
   calcularTotalPagos,

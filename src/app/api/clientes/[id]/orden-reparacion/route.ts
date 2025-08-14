@@ -55,6 +55,7 @@ export async function GET(
         descuento: Number(orden.descuento),
         incremento: Number(orden.incremento),
         incrementoInterno: Number(orden.incrementoInterno),
+        porcentajeRecargo: Number(orden.porcentajeRecargo),
       };
       const totalAPagar = calcularTotalOrdenReparacion(ordenParaCalculo);
       const totalPagado = orden.ingresos.reduce((sum, ingreso) => {
