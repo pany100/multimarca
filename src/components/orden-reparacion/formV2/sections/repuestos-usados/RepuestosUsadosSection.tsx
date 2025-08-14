@@ -8,7 +8,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import FormDataArrayWithModal from "../../commons/FormDataArray/FormDataWithModal";
 import ResumenCostosFooter from "../resumen-costos/ResumenCostosFooter";
 import RepuestosUsadosInnerForm from "./RepuestosUsadosInnerForm";
-import RepuestosUsadosTableColumns from "./RepuestosUsadosTableColumns";
+import { getRepuestosUsadosTableColumns } from "./RepuestosUsadosTableColumns";
 
 function RepuestosUsadosSection() {
   const { validateRepuestosUsados } = useRepuestosUsadosInnerForm();
@@ -18,11 +18,16 @@ function RepuestosUsadosSection() {
     control,
   });
 
+  const porcentajeRecargo = useWatch({
+    name: "porcentajeRecargo",
+    control,
+  });
+
   return (
     <ModalProvider>
       <FormDataArrayWithModal
         fieldName="repuestosUsados"
-        columns={RepuestosUsadosTableColumns}
+        columns={getRepuestosUsadosTableColumns(porcentajeRecargo)}
         form={RepuestosUsadosInnerForm}
         validateForm={validateRepuestosUsados}
         extraContent={

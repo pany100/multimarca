@@ -8,7 +8,7 @@ import { useFormContext, useWatch } from "react-hook-form";
 import FormDataArrayWithModal from "../../commons/FormDataArray/FormDataWithModal";
 import ResumenCostosFooter from "../resumen-costos/ResumenCostosFooter";
 import ReparacionTercerosInnerForm from "./ReparacionTercerosInnerForm";
-import { ReparacionTercerosTableColumns } from "./ReparacionTercerosTableColumns";
+import { getReparacionTercerosTableColumns } from "./ReparacionTercerosTableColumns";
 
 function ReparacionTercerosSection() {
   const { validator } = useReparacionTercerosFormValidator();
@@ -17,19 +17,26 @@ function ReparacionTercerosSection() {
     name: "reparacionesDeTercero",
     control,
   });
+  const porcentajeRecargo = useWatch({
+    name: "porcentajeRecargo",
+    control,
+  });
 
   return (
     <ModalProvider>
       <FormDataArrayWithModal
         fieldName="reparacionesDeTercero"
-        columns={ReparacionTercerosTableColumns}
+        columns={getReparacionTercerosTableColumns(porcentajeRecargo)}
         form={ReparacionTercerosInnerForm}
         validateForm={validator}
         extraContent={
           <ResumenCostosFooter
             descripcion="Total Reparaciones de Terceros"
             total={getFormattedPrice(
-              calcularTotalReparacionesTerceros({ reparacionesDeTercero })
+              calcularTotalReparacionesTerceros({
+                reparacionesDeTercero,
+                porcentajeRecargo,
+              })
             )}
           />
         }

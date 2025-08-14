@@ -1,10 +1,13 @@
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import { calcularPrecioFinal } from "@/utils/ordenHelper";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import { Button, Typography } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 
-export const ReparacionTercerosTableColumns: GridColDef[] = [
+export const getReparacionTercerosTableColumns = (
+  porcentajeRecargo?: number | string
+): GridColDef[] => [
   {
     field: "proveedor",
     headerName: "Proveedor",
@@ -27,6 +30,17 @@ export const ReparacionTercerosTableColumns: GridColDef[] = [
     headerName: "Precio Venta",
     flex: 1,
     valueFormatter: (value: number) => getFormattedPrice(value),
+  },
+  {
+    field: "precioConRecargo",
+    headerName: `Precio con recargo (${porcentajeRecargo || 0}%)`,
+    flex: 1,
+    renderCell: (params: any) => {
+      const precioVenta = params.row.precioVenta;
+      return getFormattedPrice(
+        calcularPrecioFinal(precioVenta, porcentajeRecargo)
+      );
+    },
   },
   {
     field: "recibo",
