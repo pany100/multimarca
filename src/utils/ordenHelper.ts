@@ -2,11 +2,14 @@ import { ChipProps } from "@mui/material";
 
 function calcularPrecioFinal(
   precio: number,
-  porcentajeRecargo?: number
+  porcentajeRecargo?: number | string
 ): number {
-  return parseFloat(
-    (precio + (precio * (porcentajeRecargo || 0)) / 100).toFixed(2)
-  );
+  const precioNum = Number(precio);
+  const recargoNum = Number(porcentajeRecargo) || 0;
+  const recargo = (precioNum * recargoNum) / 100;
+  const total = precioNum + recargo;
+
+  return parseFloat(total.toFixed(2));
 }
 
 function calcularTotalRepuestos(ordenReparacion: {

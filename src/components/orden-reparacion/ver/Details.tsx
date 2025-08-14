@@ -1,5 +1,6 @@
 "use client";
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import { calcularPrecioFinal } from "@/utils/ordenHelper";
 import BuildIcon from "@mui/icons-material/Build";
 import CommentIcon from "@mui/icons-material/Comment";
 import EngineeringIcon from "@mui/icons-material/Engineering";
@@ -224,6 +225,10 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
                   <TableCell align="right" sx={{ fontWeight: 500 }}>
                     Precio
                   </TableCell>
+                  <TableCell align="right" sx={{ fontWeight: 500 }}>
+                    Precio Con recargo ({ordenReparacion.porcentajeRecargo || 0}
+                    %)
+                  </TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -255,6 +260,14 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
                       <TableCell align="right">
                         {getFormattedPrice(repuesto.precioVenta)}
                       </TableCell>
+                      <TableCell align="right">
+                        {getFormattedPrice(
+                          calcularPrecioFinal(
+                            repuesto.precioVenta,
+                            ordenReparacion.porcentajeRecargo
+                          )
+                        )}
+                      </TableCell>
                     </TableRow>
                   )
                 )}
@@ -284,6 +297,10 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
                   <TableCell sx={{ fontWeight: 500 }}>
                     Precio de venta
                   </TableCell>
+                  <TableCell sx={{ fontWeight: 500 }}>
+                    Precio con recargo ({ordenReparacion.porcentajeRecargo || 0}
+                    %)
+                  </TableCell>
                   <TableCell sx={{ fontWeight: 500 }}></TableCell>
                 </TableRow>
               </TableHead>
@@ -312,6 +329,14 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
                       </TableCell>
                       <TableCell>
                         {getFormattedPrice(reparacion.precioVenta)}
+                      </TableCell>
+                      <TableCell>
+                        {getFormattedPrice(
+                          calcularPrecioFinal(
+                            Number(reparacion.precioVenta),
+                            ordenReparacion.porcentajeRecargo
+                          )
+                        )}
                       </TableCell>
                       <TableCell align="center">
                         {reparacion.recibo && (

@@ -62,7 +62,8 @@ function PriceInfo({ ordenReparacion }: { ordenReparacion: any }) {
             <TableBody>
               <TableRow>
                 <TableCell component="th" scope="row">
-                  Repuestos
+                  Repuestos (con el {ordenReparacion.porcentajeRecargo}% de
+                  recargo)
                 </TableCell>
                 <TableCell align="right">
                   {getFormattedPrice(calcularTotalRepuestos(ordenReparacion))}
