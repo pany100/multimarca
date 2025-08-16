@@ -112,7 +112,7 @@ async function enviarRecordatoriosMantenimiento() {
       AND 
         c.can_receive_notifications = true
       AND 
-        mo.id IN (106, 108, 110, 289)
+        mo.id IN (106, 108, 110, 289, 1, 2, 304, 153, 320, 9, 156, 4, 154, 7, 8, 155, 157, 10, 11)
       AND 
         tr.diasParaRecordatorio IS NOT NULL
       AND 

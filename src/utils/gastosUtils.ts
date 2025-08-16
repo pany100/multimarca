@@ -82,29 +82,6 @@ export async function checkUserPermission(request: Request) {
       { status: 403 }
     );
   }
-
-  // Check if user has permission to view "Pago Empleados"
-  const categoriaGasto = await prisma.categoriaGasto.findFirst({
-    where: {
-      nombre: "Pago Empleados",
-    },
-    include: {
-      roles: true,
-    },
-  });
-
-  // If category exists and has roles assigned, check if user's role is included
-  if (categoriaGasto && categoriaGasto.roles.length > 0) {
-    const hasPermission = categoriaGasto.roles.some(
-      (rol) => rol.id === user.rol.id
-    );
-
-    if (!hasPermission) {
-      // User doesn't have permission, return empty array
-      return NextResponse.json([]);
-    }
-  }
-
   // Return null if user has permission
   return null;
 }

@@ -34,7 +34,7 @@ function RepuestosUsadosSection() {
           <ResumenCostosFooter
             descripcion="Total Repuestos"
             total={getFormattedPrice(
-              calcularTotalRepuestos({ repuestosUsados })
+              calcularTotalRepuestos({ repuestosUsados, porcentajeRecargo })
             )}
           />
         }
