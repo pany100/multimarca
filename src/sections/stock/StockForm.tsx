@@ -14,6 +14,17 @@ export const schema = yup.object({
   proveedorId: yup.number().required("El proveedor es requerido"),
 });
 
+export const unitsSchema = yup.object({
+  units: yup.number().required("Las unidades son requeridas"),
+  name: yup.string().required("El nombre es requerido"),
+  brand: yup.string().required("La marca es requerida"),
+  buyPrice: yup.number().nullable(),
+  restockValue: yup.number().nullable(),
+  label: yup.string().nullable(),
+  markup: yup.number().nullable(),
+  proveedorId: yup.number().required("El proveedor es requerido"),
+});
+
 const StockForm = () => {
   const { searchProveedores, initialProveedor } = useProveedorAutocomplete();
 

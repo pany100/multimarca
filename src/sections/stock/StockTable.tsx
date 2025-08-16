@@ -1,10 +1,12 @@
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { Box, Tab, Tabs } from "@mui/material";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import { Alert, Box, MenuItem, Snackbar, Tab, Tabs } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import { useState } from "react";
 import CustomTable, {
   InheritedTableProps,
 } from "../../components/tableV2/CustomTable";
+import UpdateStockModal from "./UpdateStockModal";
 
 function StockTable({
   extraActions,
@@ -13,7 +15,13 @@ function StockTable({
   ...rest
 }: InheritedTableProps) {
   const [tabValue, setTabValue] = useState(0);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedStock, setSelectedStock] = useState<any | null>(null);
 
+  const [feedback, setFeedback] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
   };
@@ -55,6 +63,23 @@ function StockTable({
     return "";
   };
 
+  const customActions = (params: any) => {
+    const defaultActions = extraActions ? extraActions(params) : [];
+    const customActions: React.ReactNode[] = [
+      <MenuItem
+        key="update-stock"
+        onClick={() => {
+          setSelectedStock(params);
+          setIsEditModalOpen(true);
+        }}
+      >
+        <Inventory2Icon sx={{ mr: 1 }} />
+        Actualizar Stock
+      </MenuItem>,
+    ];
+    return customActions.concat(defaultActions);
+  };
+
   return (
     <Box>
       <Tabs value={tabValue} onChange={handleTabChange}>
@@ -66,7 +91,7 @@ function StockTable({
           <CustomTable
             title="Stock Bajo"
             apiEndpoint="/api/stock?needsRestock=true"
-            extraActions={extraActions}
+            extraActions={customActions}
             ctaCb={ctaCb}
             columns={columns}
             getRowClassName={getRowClassName}
@@ -76,7 +101,7 @@ function StockTable({
           <CustomTable
             title="Stock"
             apiEndpoint="/api/stock"
-            extraActions={extraActions}
+            extraActions={customActions}
             ctaCb={ctaCb}
             columns={columns}
             getRowClassName={getRowClassName}
@@ -84,6 +109,46 @@ function StockTable({
           />
         )}
       </Box>
+      {selectedStock && (
+        <UpdateStockModal
+          isEditModalOpen={isEditModalOpen}
+          handleCloseEdit={() => setIsEditModalOpen(false)}
+          handleEditSuccess={() => {
+            setFeedback({
+              type: "success",
+              message: "Stock actualizado correctamente",
+            });
+            setSelectedStock(null);
+            setIsEditModalOpen(false);
+            setRefreshTrigger && setRefreshTrigger((prev) => prev + 1);
+          }}
+          handleEditError={() => {
+            setFeedback({
+              type: "error",
+              message: "Error al actualizar stock",
+            });
+            setSelectedStock(null);
+            setIsEditModalOpen(false);
+          }}
+          entity={selectedStock}
+        />
+      )}
+      <Snackbar
+        open={!!feedback}
+        autoHideDuration={6000}
+        onClose={() => setFeedback(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        {feedback ? (
+          <Alert
+            onClose={() => setFeedback(null)}
+            severity={feedback.type}
+            variant="filled"
+          >
+            {feedback.message}
+          </Alert>
+        ) : undefined}
+      </Snackbar>
     </Box>
   );
 }
