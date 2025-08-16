@@ -1,3 +1,4 @@
+import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -73,28 +74,23 @@ export async function GET(request: Request) {
       // Calculate total amount for sales
       const ventasDeuda = ventas
         .map((venta) => {
-          // Calculate total cost of the sale
-          const repuestosTotal = venta.repuestosUsados.reduce(
-            (sum, repuesto) =>
-              sum + Number(repuesto.precioVenta) * repuesto.unidadesConsumidas,
-            0
-          );
-
-          const trabajosTotal = venta.trabajosRealizados.reduce(
-            (sum, trabajo) => sum + Number(trabajo.precioUnitario),
-            0
-          );
-
-          const reparacionesTerceroTotal = venta.reparacionesDeTercero.reduce(
-            (sum, reparacion) => sum + Number(reparacion.precioVenta),
-            0
-          );
-
-          // Apply discount and increment
-          const subtotal =
-            repuestosTotal + trabajosTotal + reparacionesTerceroTotal;
-          const totalConDescuento = subtotal - Number(venta.descuento);
-          const totalFinal = totalConDescuento + Number(venta.incremento);
+          const ventaParaCalculo = {
+            ...venta,
+            repuestosUsados: venta.repuestosUsados.map((r) => ({
+              precioVenta: Number(r.precioVenta),
+              unidadesConsumidas: r.unidadesConsumidas,
+            })),
+            reparacionesDeTercero: venta.reparacionesDeTercero.map((r) => ({
+              precioVenta: Number(r.precioVenta),
+            })),
+            trabajosRealizados: venta.trabajosRealizados.map((t) => ({
+              precioUnitario: Number(t.precioUnitario),
+            })),
+            descuento: Number(venta.descuento),
+            incremento: Number(venta.incremento),
+            porcentajeRecargo: Number(venta.porcentajeRecargo),
+          };
+          const totalFinal = calcularTotalOrdenReparacion(ventaParaCalculo);
 
           // Calculate total payments
           const pagosTotal = venta.ingresos.reduce(
@@ -119,28 +115,24 @@ export async function GET(request: Request) {
       // Calculate total amount for repair orders
       const reparacionesDeuda = ordenesReparacion
         .map((orden) => {
-          // Calculate total cost of the repair
-          const repuestosTotal = orden.repuestosUsados.reduce(
-            (sum, repuesto) =>
-              sum + Number(repuesto.precioVenta) * repuesto.unidadesConsumidas,
-            0
-          );
-
-          const trabajosTotal = orden.trabajosRealizados.reduce(
-            (sum, trabajo) => sum + Number(trabajo.precioUnitario),
-            0
-          );
-
-          const reparacionesTerceroTotal = orden.reparacionesDeTercero.reduce(
-            (sum, reparacion) => sum + Number(reparacion.precioVenta),
-            0
-          );
-
-          // Apply discount and increment
-          const subtotal =
-            repuestosTotal + trabajosTotal + reparacionesTerceroTotal;
-          const totalConDescuento = subtotal - Number(orden.descuento);
-          const totalFinal = totalConDescuento + Number(orden.incremento);
+          const ordenParaCalculo = {
+            ...orden,
+            repuestosUsados: orden.repuestosUsados.map((r) => ({
+              precioVenta: Number(r.precioVenta),
+              unidadesConsumidas: r.unidadesConsumidas,
+            })),
+            reparacionesDeTercero: orden.reparacionesDeTercero.map((r) => ({
+              precioVenta: Number(r.precioVenta),
+            })),
+            trabajosRealizados: orden.trabajosRealizados.map((t) => ({
+              precioUnitario: Number(t.precioUnitario),
+            })),
+            descuento: Number(orden.descuento),
+            incremento: Number(orden.incremento),
+            incrementoInterno: Number(orden.incrementoInterno),
+            porcentajeRecargo: Number(orden.porcentajeRecargo),
+          };
+          const totalFinal = calcularTotalOrdenReparacion(ordenParaCalculo);
 
           // Calculate total payments
           const pagosTotal = orden.ingresos.reduce(

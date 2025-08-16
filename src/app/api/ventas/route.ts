@@ -72,6 +72,7 @@ export async function POST(request: Request) {
       fecha,
       informacionCliente,
       incremento,
+      porcentajeRecargo,
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
@@ -168,6 +169,7 @@ export async function POST(request: Request) {
         descripcionDescuento,
         incremento: incremento ? new Prisma.Decimal(incremento) : 0,
         descripcionIncremento,
+        porcentajeRecargo,
         repuestosUsados: {
           create: repuestosToPersist,
         },

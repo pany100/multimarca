@@ -70,6 +70,7 @@ export async function PUT(
       informacionCliente,
       incremento,
       estado,
+      porcentajeRecargo,
       repuestosUsados = [],
       reparacionesDeTercero = [],
       trabajosRealizados = [],
@@ -229,6 +230,7 @@ export async function PUT(
           descripcionDescuento,
           incremento: new Prisma.Decimal(incremento),
           descripcionIncremento,
+          porcentajeRecargo,
           repuestosUsados: {
             deleteMany: {},
             create: repuestosToPersist,

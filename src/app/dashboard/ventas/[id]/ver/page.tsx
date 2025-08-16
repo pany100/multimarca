@@ -4,7 +4,10 @@ import { useFetch } from "@/contexts/FetchContext";
 import { useGeneratePdf } from "@/hooks/orden-reparacion/useGeneratePdf";
 import { useAuth } from "@/hooks/useAuth";
 import { getFormattedDate, getFormattedPrice } from "@/utils/fieldHelper";
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
+import {
+  calcularPrecioFinal,
+  calcularTotalOrdenReparacion,
+} from "@/utils/ordenHelper";
 import PrintIcon from "@mui/icons-material/Print";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import {
@@ -121,6 +124,9 @@ const RepuestosUsados = ({ venta }: { venta: any }) => {
             <Box component="th" sx={{ p: 1, textAlign: "right" }}>
               Subtotal
             </Box>
+            <Box component="th" sx={{ p: 1, textAlign: "right" }}>
+              Subtotal ({venta.porcentajeRecargo}% de recargo)
+            </Box>
           </Box>
         </Box>
         <Box component="tbody">
@@ -138,6 +144,15 @@ const RepuestosUsados = ({ venta }: { venta: any }) => {
               </Box>
               <Box component="td" sx={{ p: 1, textAlign: "right" }}>
                 ${Number(repuesto.precioVenta).toLocaleString("es-AR")}
+              </Box>
+              <Box component="td" sx={{ p: 1, textAlign: "right" }}>
+                $
+                {Number(
+                  calcularPrecioFinal(
+                    repuesto.precioVenta,
+                    venta.porcentajeRecargo
+                  )
+                ).toLocaleString("es-AR")}
               </Box>
             </Box>
           ))}
@@ -183,6 +198,9 @@ const ReparacionesTerceros = ({ venta }: { venta: any }) => {
             <Box component="th" sx={{ p: 1, textAlign: "right" }}>
               Precio
             </Box>
+            <Box component="th" sx={{ p: 1, textAlign: "right" }}>
+              Precio ({venta.porcentajeRecargo}% de recargo)
+            </Box>
           </Box>
         </Box>
         <Box component="tbody">
@@ -215,6 +233,14 @@ const ReparacionesTerceros = ({ venta }: { venta: any }) => {
               </Box>
               <Box component="td" sx={{ p: 1, textAlign: "right" }}>
                 {getFormattedPrice(reparacion.precioVenta)}
+              </Box>
+              <Box component="td" sx={{ p: 1, textAlign: "right" }}>
+                {getFormattedPrice(
+                  calcularPrecioFinal(
+                    reparacion.precioVenta,
+                    venta.porcentajeRecargo
+                  )
+                )}
               </Box>
             </Box>
           ))}
@@ -282,6 +308,7 @@ const PrecioInfo = ({ venta }: { venta: any }) => {
     trabajosRealizados: venta.trabajosRealizados || [],
     descuento: venta.descuento || 0,
     incremento: venta.incremento || 0,
+    porcentajeRecargo: venta.porcentajeRecargo || 0,
   });
 
   return (
@@ -392,6 +419,7 @@ const PagosInfo = ({ venta }: { venta: any }) => {
     trabajosRealizados: venta.trabajosRealizados || [],
     descuento: venta.descuento || 0,
     incremento: venta.incremento || 0,
+    porcentajeRecargo: venta.porcentajeRecargo || 0,
   });
   const totalPagos = venta.ingresos.reduce(
     (total: number, ingreso: any) => total + ingreso.monto,

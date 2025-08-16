@@ -170,6 +170,7 @@ function VentasTable({
             trabajosRealizados: params.row.trabajosRealizados,
             descuento: params.row.descuento,
             incremento: params.row.incremento,
+            porcentajeRecargo: params.row.porcentajeRecargo,
           })
         ),
     },
@@ -243,6 +244,7 @@ function VentasTable({
       trabajosRealizados: params.row.trabajosRealizados,
       descuento: params.row.descuento,
       incremento: params.row.incremento,
+      porcentajeRecargo: params.row.porcentajeRecargo,
     });
     if (totalIngresos < total) {
       return "low-stock-row";

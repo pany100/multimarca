@@ -1,4 +1,7 @@
-import { calcularTotalOrdenReparacion } from "./ordenHelper";
+import {
+  calcularPrecioFinal,
+  calcularTotalOrdenReparacion,
+} from "./ordenHelper";
 
 export default function generateClientOrderHtml(venta: any): string {
   return `
@@ -213,7 +216,12 @@ export default function generateClientOrderHtml(venta: any): string {
                       ${el.unidadesConsumidas}
                     </div>
                     <div class="TypographyBody1" style="text-align: right;margin-bottom: 4px;">
-                      $${Number(el.precioVenta).toLocaleString("es-AR")}
+                      $${Number(
+                        calcularPrecioFinal(
+                          el.precioVenta,
+                          venta.porcentajeRecargo
+                        )
+                      ).toLocaleString("es-AR")}
                     </div>
                 `
               )
@@ -253,7 +261,12 @@ export default function generateClientOrderHtml(venta: any): string {
                         ${el.nombre}
                       </div>
                       <div class="TypographyBody1" style="text-align: right;margin-bottom: 4px;">
-                        $${Number(el.precioVenta).toLocaleString("es-AR")}
+                        $${Number(
+                          calcularPrecioFinal(
+                            el.precioVenta,
+                            venta.porcentajeRecargo
+                          )
+                        ).toLocaleString("es-AR")}
                       </div>
                   `
                 )

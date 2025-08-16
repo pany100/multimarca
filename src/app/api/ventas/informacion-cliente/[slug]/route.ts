@@ -47,6 +47,7 @@ export async function GET(
         })),
         descuento: Number(venta.descuento),
         incremento: Number(venta.incremento),
+        porcentajeRecargo: Number(venta.porcentajeRecargo),
       };
       const totalAPagar = calcularTotalOrdenReparacion(ventaParaCalculo);
       const totalPagado = venta.ingresos.reduce((sum, ingreso) => {

@@ -72,4 +72,5 @@ export const schema = yup.object({
   descripcionDescuento: yup.string().nullable(),
   incremento: yup.number().min(0).nullable(),
   descripcionIncremento: yup.string().nullable(),
+  porcentajeRecargo: yup.number().min(0).nullable(),
 });

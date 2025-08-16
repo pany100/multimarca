@@ -29,15 +29,15 @@ export async function GET(request: NextRequest) {
         CASE 
           WHEN ? = 'USD' THEN 
             (COALESCE((SELECT SUM(tr.precioUnitario) FROM TrabajoRealizado tr WHERE tr.ventaId = v.id), 0) + 
-             COALESCE((SELECT SUM(ru.precioVenta) FROM RepuestoUsado ru WHERE ru.ventaId = v.id), 0) + 
-             COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ventaId = v.id), 0) + 
+             COALESCE((SELECT SUM(ru.precioVenta + ru.precioVenta * (v.porcentajeRecargo / 100)) FROM RepuestoUsado ru WHERE ru.ventaId = v.id), 0) + 
+             COALESCE((SELECT SUM(rt.precioVenta + rt.precioVenta * (v.porcentajeRecargo / 100)) FROM ReparacionDeTercero rt WHERE rt.ventaId = v.id), 0) + 
              COALESCE(v.incremento, 0) - 
              COALESCE(v.descuento, 0)
             ) / COALESCE(d.blue, 1)
           ELSE 
             (COALESCE((SELECT SUM(tr.precioUnitario) FROM TrabajoRealizado tr WHERE tr.ventaId = v.id), 0) + 
-             COALESCE((SELECT SUM(ru.precioVenta) FROM RepuestoUsado ru WHERE ru.ventaId = v.id), 0) + 
-             COALESCE((SELECT SUM(rt.precioVenta) FROM ReparacionDeTercero rt WHERE rt.ventaId = v.id), 0) + 
+             COALESCE((SELECT SUM(ru.precioVenta + ru.precioVenta * (v.porcentajeRecargo / 100)) FROM RepuestoUsado ru WHERE ru.ventaId = v.id), 0) + 
+             COALESCE((SELECT SUM(rt.precioVenta + rt.precioVenta * (v.porcentajeRecargo / 100)) FROM ReparacionDeTercero rt WHERE rt.ventaId = v.id), 0) + 
              COALESCE(v.incremento, 0) - 
              COALESCE(v.descuento, 0)
             )

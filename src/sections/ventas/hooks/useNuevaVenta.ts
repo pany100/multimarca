@@ -22,12 +22,17 @@ function useNuevaVenta({ control }: Props) {
   });
   const trabajosRealizados = useWatch({ control, name: "trabajosRealizados" });
   const descuento = useWatch({ control, name: "descuento" }) || 0;
+  const incremento = useWatch({ control, name: "incremento" }) || 0;
+  const porcentajeRecargo =
+    useWatch({ control, name: "porcentajeRecargo" }) || 0;
   const manoDeObra = calcularManoDeObra(trabajosRealizados ?? []);
   const totalOrdenReparacion = calcularTotalOrdenReparacion({
     repuestosUsados: repuestosUsados ?? [],
     reparacionesDeTercero: reparacionesTerceros ?? [],
     trabajosRealizados: trabajosRealizados ?? [],
     descuento,
+    incremento: incremento || 0,
+    porcentajeRecargo: porcentajeRecargo || 0,
   });
 
   const onSubmit = async (data: any) => {

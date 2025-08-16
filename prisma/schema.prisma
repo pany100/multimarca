@@ -288,6 +288,7 @@ model Venta {
   repuestosUsados        RepuestoUsado[]           @relation("VentaRepuestos")
   trabajosRealizados     TrabajoRealizado[]        @relation("VentaTrabajosRealizados")
   ingresos               IngresoPorVenta[]         @relation("VentaIngresos")
+  porcentajeRecargo      Decimal                   @default(0.00) @db.Decimal(10, 2)
 
   estado                 EstadoVenta               @default(Presupuestado)
 
