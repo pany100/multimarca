@@ -40,27 +40,6 @@ function ResumenCostosSection({ isVenta = false }: Props) {
           </Grid>
         </>
       )}
-      {!isVenta && (
-        <>
-          <Grid
-            item
-            xs={4}
-            ref={(el) => registerFieldRef("porcentajeRecargo", el)}
-          >
-            <CustomInputText
-              name="porcentajeRecargo"
-              label="Porcentaje de recargo"
-              type="number"
-            />
-          </Grid>
-          <Grid item xs={8}>
-            <Typography variant="body1">
-              Recargo aplicado a las reparaciones de terceros y repuestos
-              utilizados
-            </Typography>
-          </Grid>
-        </>
-      )}
       <Grid item xs={4} ref={(el) => registerFieldRef("descuento", el)}>
         <CustomInputText name="descuento" label="Descuento" type="number" />
       </Grid>

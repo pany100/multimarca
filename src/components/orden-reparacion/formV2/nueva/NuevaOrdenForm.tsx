@@ -9,6 +9,7 @@ import ClientObservationSection from "../sections/client-observations/ClientObse
 import HiddenObservationSection from "../sections/hidden-observations/HiddenObservationSection";
 import InputObservationSection from "../sections/input-observations/InputObservationsSection";
 import MechanicsSection from "../sections/mechanics/MechanicsSection";
+import RecargoSection from "../sections/recargo-section/RecargoSection";
 import ReparacionTercerosSection from "../sections/reparacion-terceros/ReparacionTercerosSection";
 import RepuestosUsadosSection from "../sections/repuestos-usados/RepuestosUsadosSection";
 import ResumenCostosSection from "../sections/resumen-costos/ResumenCostosSection";
@@ -44,6 +45,9 @@ function NuevaOrdenForm() {
         </FormSection>
         <FormSection title="Repuestos Usados">
           <RepuestosUsadosSection />
+        </FormSection>
+        <FormSection title="Recargo">
+          <RecargoSection />
         </FormSection>
         <FormSection title="Trabajos Realizados">
           <TrabajosRealizadosSection />

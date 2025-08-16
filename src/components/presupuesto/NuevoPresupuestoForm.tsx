@@ -7,6 +7,7 @@ import { FormProvider, useForm } from "react-hook-form";
 import FormActions from "../orden-reparacion/formV2/commons/FormActions";
 import FormSection from "../orden-reparacion/formV2/commons/FormSection";
 import ClientObservationSection from "../orden-reparacion/formV2/sections/client-observations/ClientObservationSection";
+import RecargoSection from "../orden-reparacion/formV2/sections/recargo-section/RecargoSection";
 import ReparacionTercerosSection from "../orden-reparacion/formV2/sections/reparacion-terceros/ReparacionTercerosSection";
 import RepuestosUsadosSection from "../orden-reparacion/formV2/sections/repuestos-usados/RepuestosUsadosSection";
 import ResumenCostosSection from "../orden-reparacion/formV2/sections/resumen-costos/ResumenCostosSection";
@@ -47,6 +48,9 @@ function NuevoPresupuestoForm({
         </FormSection>
         <FormSection title="Reparación / Repuestos de terceros">
           <ReparacionTercerosSection />
+        </FormSection>
+        <FormSection title="Recargo">
+          <RecargoSection />
         </FormSection>
         <FormSection title="Trabajos Realizados">
           <TrabajosRealizadosSection />
