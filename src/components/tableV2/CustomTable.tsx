@@ -58,6 +58,7 @@ function CustomTable<T extends { id: string }>({
   const isInitialMount = useRef(true);
   const isUrlUpdateNeeded = useRef(true);
   const pendingFetch = useRef(false);
+  const currentRequestId = useRef<number>(0);
 
   const [fromDate, setFromDate] = useState<Date | null>(null);
   const [toDate, setToDate] = useState<Date | null>(null);
@@ -218,6 +219,9 @@ function CustomTable<T extends { id: string }>({
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
+      // Generate a unique request ID for this fetch
+      const requestId = ++currentRequestId.current;
+
       // Extract any additional query parameters from the current URL
       const currentUrl = new URL(window.location.href);
       const additionalParams: Record<string, string> = {};
@@ -259,17 +263,21 @@ function CustomTable<T extends { id: string }>({
 
       const response = await authFetch(url.toString());
       const data = await response.json();
-      setItems(Array.isArray(data) ? data : data.items || []);
-      setTotalItems(
-        typeof data.total === "number"
-          ? data.total
-          : Array.isArray(data)
-          ? data.length
-          : 0
-      );
 
-      // Update URL with current state
-      updateUrl(paginationModel.page, paginationModel.pageSize, searchTerm);
+      // Only update state if this is the most recent request
+      if (requestId === currentRequestId.current) {
+        setItems(Array.isArray(data) ? data : data.items || []);
+        setTotalItems(
+          typeof data.total === "number"
+            ? data.total
+            : Array.isArray(data)
+            ? data.length
+            : 0
+        );
+
+        // Update URL with current state
+        updateUrl(paginationModel.page, paginationModel.pageSize, searchTerm);
+      }
 
       // Reset pendingFetch flag
       pendingFetch.current = false;
