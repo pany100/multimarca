@@ -1,5 +1,4 @@
 import generateVentasHtml from "@/utils/generateVentasHtml";
-import { NextResponse } from "next/server";
 import puppeteer from "puppeteer";
 import prisma from "src/lib/prisma";
 
@@ -28,17 +27,19 @@ export async function GET(
     });
 
     if (!venta) {
-      return NextResponse.json(
-        { error: "Venta no encontrada" },
-        { status: 404 }
-      );
+      return new Response(JSON.stringify({ error: "Venta no encontrada" }), {
+        status: 404,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
     }
 
     // 1. Generar el PDF base usando puppeteer
     const basePdfBuffer = await generateBasePdf(venta);
 
-    // 5. Devolver el PDF base como descarga
-    return new NextResponse(basePdfBuffer, {
+    // 5. Devolver el PDF base como descarga - convert Buffer to Uint8Array for compatibility
+    return new Response(new Uint8Array(basePdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="venta-${id}.pdf"`,
@@ -46,9 +47,14 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error al generar el PDF completo:", error);
-    return NextResponse.json(
-      { error: "Error al generar el PDF completo" },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ error: "Error al generar el PDF completo" }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
   }
 }
