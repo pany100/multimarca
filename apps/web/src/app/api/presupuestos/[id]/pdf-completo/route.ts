@@ -1,5 +1,4 @@
 import generateBudgetHtml from "@/utils/generateBudgetHtml";
-import { NextResponse } from "next/server";
 import puppeteer from "puppeteer";
 import prisma from "src/lib/prisma";
 
@@ -39,17 +38,22 @@ export async function GET(
     });
 
     if (!presupuesto) {
-      return NextResponse.json(
-        { error: "Presupuesto no encontrado" },
-        { status: 404 }
+      return new Response(
+        JSON.stringify({ error: "Presupuesto no encontrado" }),
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
     // Generar el PDF base usando puppeteer
     const pdfBuffer = await generateBasePdf(presupuesto);
 
-    // Devolver el PDF como descarga
-    return new NextResponse(pdfBuffer, {
+    // Devolver el PDF como descarga - convert Buffer to Uint8Array for compatibility
+    return new Response(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="presupuesto-${id}.pdf"`,
@@ -57,9 +61,14 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error al generar el PDF del presupuesto:", error);
-    return NextResponse.json(
-      { error: "Error al generar el PDF del presupuesto" },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ error: "Error al generar el PDF del presupuesto" }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
   }
 }
