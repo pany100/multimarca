@@ -1,5 +1,4 @@
 import generarReciboVentas from "@/utils/generarReciboVentas";
-import { NextResponse } from "next/server";
 import puppeteer from "puppeteer";
 import prisma from "src/lib/prisma";
 
@@ -30,15 +29,21 @@ export async function GET(
     });
 
     if (!ingresoPorVenta) {
-      return NextResponse.json(
-        { error: "Ingreso por venta no encontrado" },
-        { status: 404 }
+      return new Response(
+        JSON.stringify({ error: "Ingreso por venta no encontrado" }),
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
     const pdfBuffer = await generarPdfRecibo(ingresoPorVenta);
 
-    return new NextResponse(pdfBuffer, {
+    // Convert Buffer to Uint8Array which is compatible with Response
+    return new Response(new Uint8Array(pdfBuffer), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
@@ -47,9 +52,14 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error al generar el recibo:", error);
-    return NextResponse.json(
-      { error: "Error al generar el recibo" },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ error: "Error al generar el recibo" }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
   }
 }
