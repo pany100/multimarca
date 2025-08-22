@@ -38,7 +38,8 @@ export async function GET(
 
     const pdfBuffer = await generarPdfRecibo(ingresoPorReparacion);
 
-    return new NextResponse(pdfBuffer, {
+    // Convert Buffer to ArrayBuffer which is compatible with BodyInit
+    return new NextResponse(new Blob([pdfBuffer]), {
       status: 200,
       headers: {
         "Content-Type": "application/pdf",
