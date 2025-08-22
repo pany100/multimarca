@@ -1,7 +1,6 @@
 import generateClientOrderHtml from "@/utils/generateClientOrderHtml";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { EstadoOrdenReparacion } from "@prisma/client";
-import { NextResponse } from "next/server";
 import { PDFDocument, rgb } from "pdf-lib";
 import puppeteer from "puppeteer";
 import prisma from "src/lib/prisma";
@@ -55,9 +54,14 @@ export async function GET(
     });
 
     if (!ordenReparacion) {
-      return NextResponse.json(
-        { error: "Orden de reparación no encontrada" },
-        { status: 404 }
+      return new Response(
+        JSON.stringify({ error: "Orden de reparación no encontrada" }),
+        {
+          status: 404,
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
       );
     }
 
@@ -90,7 +94,7 @@ export async function GET(
     }
 
     // 4. Devolver el PDF final como descarga
-    return new NextResponse(finalPdfBuffer, {
+    return new Response(new Uint8Array(finalPdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="orden-reparacion-completa-${id}.pdf"`,
@@ -98,9 +102,14 @@ export async function GET(
     });
   } catch (error) {
     console.error("Error al generar el PDF completo:", error);
-    return NextResponse.json(
-      { error: "Error al generar el PDF completo" },
-      { status: 500 }
+    return new Response(
+      JSON.stringify({ error: "Error al generar el PDF completo" }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
   }
 }
