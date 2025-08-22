@@ -110,7 +110,7 @@ async function uploadMedia(pdfBuffer: Buffer): Promise<string> {
   const formData = new FormData();
   formData.append(
     "file",
-    new Blob([pdfBuffer], { type: "application/pdf" }),
+    new Blob([new Uint8Array(pdfBuffer)], { type: "application/pdf" }),
     "resumen.pdf"
   );
   formData.append("messaging_product", "whatsapp");
