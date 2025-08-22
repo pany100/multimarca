@@ -1,7 +1,7 @@
 import prisma from "@/lib/prisma";
 import { addDays, format, startOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import puppeteer from "puppeteer";
 
 export async function POST(request: NextRequest) {
@@ -217,8 +217,8 @@ export async function POST(request: NextRequest) {
     // Close the browser
     await browser.close();
 
-    // Return the PDF as a response
-    return new NextResponse(pdfBuffer, {
+    // Return the PDF as a response - convert Buffer to Uint8Array for compatibility
+    return new Response(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="turnos-semana.pdf"`,
@@ -226,9 +226,11 @@ export async function POST(request: NextRequest) {
     });
   } catch (error) {
     console.error("Error generating PDF:", error);
-    return NextResponse.json(
-      { error: "Error generating PDF" },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: "Error generating PDF" }), {
+      status: 500,
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
   }
 }
