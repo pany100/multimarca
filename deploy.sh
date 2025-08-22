@@ -3,79 +3,65 @@
 # Variables
 REMOTE_HOST="ubuntu@ec2-3-22-211-91.us-east-2.compute.amazonaws.com"
 PEM_PATH="/Users/luispaniagua/scripts/mtservice.pem"
-REMOTE_PATH="/home/ubuntu/multimarca"
+REPO_ROOT="/home/ubuntu/multimarca"
+REMOTE_PATH="$REPO_ROOT/apps/web"   # <- ahora apuntamos a apps/web
 START_TIME=$(date +%s)
 
-# Función para manejar errores
 handle_error() {
-    echo "❌ Error: $1"
-    exit 1
+  echo "❌ Error: $1"
+  exit 1
 }
 
-# Cargar NVM
+# Cargar NVM local y build
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+echo "🚀 Iniciando despliegue"
+nvm use 18.17.0 || handle_error "Falló NVM"
+echo "📦 Build local (apps/web)"
+yarn --cwd apps/web build || handle_error "Falló el build local"
 
-echo "🚀 Iniciando proceso de despliegue..."
-echo "📦 Construyendo la aplicación localmente..."
-nvm use 18.17.0 || handle_error "Falló la carga de NVM"
-npm run build || handle_error "Falló el build local"
+echo "📤 Copiando .next a servidor..."
+scp -i "$PEM_PATH" -r apps/web/.next "$REMOTE_HOST:$REMOTE_PATH/.next2" \
+  || handle_error "Falló la copia de .next"
 
-if [ $? -ne 0 ]; then
-    handle_error "Falló la ejecución de comandos en el servidor"
-fi
-
-echo "\n📤 Copiando archivos de build al servidor..."
-echo "⏳ Esto puede tomar unos minutos dependiendo del tamaño..."
-scp -i "$PEM_PATH" -r ../multimarca/.next $REMOTE_HOST:$REMOTE_PATH/.next2 || handle_error "Falló la copia de archivos al servidor"
-
-echo "\n🔄 Deteniendo y actualizando la aplicación en el servidor..."
+echo "🔄 Actualizando en servidor..."
 ssh -i "$PEM_PATH" $REMOTE_HOST << 'EOF'
   set -e
-  
-  # Cargar NVM y Node nuevamente
+
   export NVM_DIR="$HOME/.nvm"
   [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-  
-  cd multimarca || exit 1
-  nvm use 18.17.0 || exit 1
 
-  echo "🛑 Deteniendo aplicación actual..."
-  npm list -g pm2 || npm install -g pm2
+  # Asegurar Node/PM2
+  nvm use 18.17.0
+  npm list -g pm2 >/dev/null 2>&1 || npm install -g pm2
+
+  # Actualizar código
+  git -C /home/ubuntu/multimarca pull
+
+  # Ir a apps/web para todo lo demás
+  cd /home/ubuntu/multimarca/apps/web
+
+  echo "🛑 Deteniendo PM2..."
   pm2 stop next-app || true
-  
-  echo "🗑️  Eliminando instancia anterior de PM2..."
   pm2 delete next-app || true
-  
-  echo "⬇️  Actualizando código desde Git..."
-  git pull || exit 1
-  
-  echo "🔄 Ejecutando migraciones de Prisma..."
-  npx prisma migrate deploy || exit 1
-  
-  echo "⚙️  Generando cliente Prisma..."
-  npx prisma generate || exit 1
-  
-  echo "🏗️  Ejecutando prebuild..."
-  npm run prebuild || exit 1
-  
-  echo "🔄 Actualizando carpeta .next..."
+
+  echo "🔄 Migraciones Prisma..."
+  npx prisma migrate deploy
+  echo "⚙️  Generando Prisma client..."
+  npx prisma generate
+
+  echo "🏗️  Prebuild (si existe)..."
+  npm run prebuild || true
+
+  echo "📦 Switcheando .next..."
   rm -rf .next
   mv .next2 .next
-  
-  echo "🚀 Iniciando aplicación con PM2..."
-  pm2 start npm --name "next-app" -- run start || exit 1
+
+  echo "🚀 Iniciando Next con PM2..."
+  pm2 start npm --name "next-app" -- run start
 EOF
 
-if [ $? -ne 0 ]; then
-    handle_error "Falló el inicio de la aplicación en el servidor"
-fi
+[ $? -ne 0 ] && handle_error "Fallo remoto"
 
-echo "\n✅ ¡Despliegue completado exitosamente!"
-END_TIME=$(date +%s)
-DURATION=$((END_TIME - START_TIME))
-MINUTES=$((DURATION / 60))
-SECONDS=$((DURATION % 60))
-
-echo "⏱️  Tiempo total de despliegue: $MINUTES minutos y $SECONDS segundos"
-echo "🌐 La aplicación debería estar disponible en unos momentos."
+echo "✅ ¡Despliegue completado!"
+END_TIME=$(date +%s); DURATION=$((END_TIME - START_TIME)); echo "⏱️ ${DURATION}s"

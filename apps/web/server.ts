@@ -1,7 +1,12 @@
+import pkg from "@next/env";
 import { createServer } from "http";
 import next from "next";
+import path from "path";
 import { Server as SocketIOServer } from "socket.io";
 import { parse } from "url";
+
+const { loadEnvConfig } = pkg;
+loadEnvConfig(path.resolve(process.cwd(), "../.."), true);
 
 const dev = process.env.NODE_ENV !== "production";
 const app = next({ dev });
