@@ -1,67 +1,114 @@
-#!/bin/bash
+#!/usr/bin/env bash
+set -euo pipefail
 
-# Variables
+# ========= Config =========
 REMOTE_HOST="ubuntu@ec2-3-22-211-91.us-east-2.compute.amazonaws.com"
 PEM_PATH="/Users/luispaniagua/scripts/mtservice.pem"
 REPO_ROOT="/home/ubuntu/multimarca"
-REMOTE_PATH="$REPO_ROOT/apps/web"   # <- ahora apuntamos a apps/web
+REMOTE_PATH="$REPO_ROOT/apps/web"
+TUNNEL_PORT=2222
+
+NODE_VER="18.17.0"
+NEXT_APP_NAME="next-app"
+
+# ========= Util =========
 START_TIME=$(date +%s)
+TMP_TAR="/tmp/next_temp.$$.tar.gz"
 
-handle_error() {
-  echo "❌ Error: $1"
-  exit 1
+handle_error() { echo "❌ Error: $1"; exit 1; }
+
+cleanup() {
+  # borrar paquete temporal
+  rm -f "$TMP_TAR" 2>/dev/null || true
+  # cerrar túnel si quedó abierto
+  pkill -f "ssh .* -L ${TUNNEL_PORT}:localhost:22 .* ${REMOTE_HOST}" >/dev/null 2>&1 || true
 }
+trap cleanup EXIT
 
-# Cargar NVM local y build
+# ========= Build local =========
 export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 echo "🚀 Iniciando despliegue"
-nvm use 18.17.0 || handle_error "Falló NVM"
+nvm use "$NODE_VER" || handle_error "Falló NVM"
 echo "📦 Build local (apps/web)"
 yarn --cwd apps/web build || handle_error "Falló el build local"
 
-echo "📤 Copiando .next a servidor..."
-scp -i "$PEM_PATH" -r apps/web/.next "$REMOTE_HOST:$REMOTE_PATH/.next2" \
-  || handle_error "Falló la copia de .next"
+# ========= Túnel SSH (local 2222 -> remoto 22) =========
+echo "🛣️  Abriendo túnel SSH en localhost:${TUNNEL_PORT} → ${REMOTE_HOST}:22 ..."
+ssh -i "$PEM_PATH" \
+  -f -N \
+  -o ExitOnForwardFailure=yes \
+  -o ServerAliveInterval=30 -o ServerAliveCountMax=3 \
+  -L "${TUNNEL_PORT}:localhost:22" \
+  "$REMOTE_HOST"
 
-echo "🔄 Actualizando en servidor..."
-ssh -i "$PEM_PATH" $REMOTE_HOST << 'EOF'
-  set -e
+# Comprobación rápida del túnel
+sleep 1
+if ! nc -z localhost "$TUNNEL_PORT" 2>/dev/null; then
+  handle_error "No se pudo abrir el túnel en localhost:${TUNNEL_PORT}"
+fi
 
-  export NVM_DIR="$HOME/.nvm"
-  [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+# ========= Empaquetado y copia por túnel =========
+echo "🧩 Empaquetando .next → $TMP_TAR"
+tar -C apps/web -czf "$TMP_TAR" .next
 
-  # Asegurar Node/PM2
-  nvm use 18.17.0
-  npm list -g pm2 >/dev/null 2>&1 || npm install -g pm2
+echo "📤 Subiendo paquete por túnel (scp -P ${TUNNEL_PORT})..."
+scp -P "$TUNNEL_PORT" \
+    -o StrictHostKeyChecking=accept-new \
+    -i "$PEM_PATH" \
+    "$TMP_TAR" "ubuntu@localhost:${REMOTE_PATH}/" \
+    || handle_error "Falló la copia de $TMP_TAR"
 
-  # Actualizar código
-  git -C /home/ubuntu/multimarca pull
+# ========= Operaciones remotas (extract, swap, pm2) vía túnel =========
+echo "🔧 Actualizando en servidor..."
+ssh -p "$TUNNEL_PORT" \
+    -o StrictHostKeyChecking=accept-new \
+    -i "$PEM_PATH" ubuntu@localhost \
+    bash -lc "
+      set -e
 
-  # Ir a apps/web para todo lo demás
-  cd /home/ubuntu/multimarca/apps/web
+      export NVM_DIR=\"\$HOME/.nvm\"
+      [ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\"
 
-  echo "🛑 Deteniendo PM2..."
-  pm2 stop next-app || true
-  pm2 delete next-app || true
+      # Node y PM2
+      nvm use ${NODE_VER}
+      npm list -g pm2 >/dev/null 2>&1 || npm install -g pm2
 
-  echo "🔄 Migraciones Prisma..."
-  npx prisma migrate deploy
-  echo "⚙️  Generando Prisma client..."
-  npx prisma generate
+      # Código al día
+      git -C ${REPO_ROOT} pull
 
-  echo "🏗️  Prebuild (si existe)..."
-  npm run prebuild || true
+      # Entrar a apps/web
+      cd ${REMOTE_PATH}
 
-  echo "📦 Switcheando .next..."
-  rm -rf .next
-  mv .next2 .next
+      echo '🛑 Deteniendo PM2...'
+      pm2 stop ${NEXT_APP_NAME} || true
+      pm2 delete ${NEXT_APP_NAME} || true
 
-  echo "🚀 Iniciando Next con PM2..."
-  pm2 start npm --name "next-app" -- run start
-EOF
+      echo '🗜️  Extrayendo paquete a .next2...'
+      rm -rf .next2
+      mkdir -p .next2
+      tar -xzf next_temp.tar.gz -C .next2 --strip-components=1 || true
+      # si el nombre no matchea, probamos con el que mandaste:
+      if [ ! -d .next2/_next ] && [ -f \"$(basename "$TMP_TAR")\" ]; then
+        tar -xzf \"$(basename "$TMP_TAR")\" -C .next2 --strip-components=1
+      fi
+      rm -f next_temp.tar.gz \"$(basename "$TMP_TAR")\" 2>/dev/null || true
 
-[ $? -ne 0 ] && handle_error "Fallo remoto"
+      echo '🔄 Migraciones Prisma...'
+      npx prisma migrate deploy --schema=apps/web/prisma/schema.prisma
+      echo '⚙️  Generando Prisma client...'
+      npx prisma generate --schema=apps/web/prisma/schema.prisma
 
-echo "✅ ¡Despliegue completado!"
-END_TIME=$(date +%s); DURATION=$((END_TIME - START_TIME)); echo "⏱️ ${DURATION}s"
+      echo '🏗️  Prebuild (si existe)...'
+      yarn --cwd apps/web prebuild || true
+      echo '📦 Switcheando .next...'
+      rm -rf .next
+      mv .next2 .next
+
+      echo '🚀 Iniciando Next con PM2...'
+      pm2 start npm --name "$NEXT_APP_NAME" --cwd /home/ubuntu/multimarca/apps/web -- run start
+    " || handle_error "Fallo remoto"
+
+# ========= Fin =========
+END_TIME=$(date +%s); DURATION=$((END_TIME - START_TIME))
+echo "✅ ¡Despliegue completado! ⏱️ ${DURATION}s"
