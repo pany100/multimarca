@@ -88,10 +88,7 @@ ssh -p "$TUNNEL_PORT" \
       rm -rf .next2
       mkdir -p .next2
       tar -xzf next_temp.tar.gz -C .next2 --strip-components=1 || true
-      # si el nombre no matchea, probamos con el que mandaste:
-      if [ ! -d .next2/_next ] && [ -f \"$(basename "$TMP_TAR")\" ]; then
-        tar -xzf \"$(basename "$TMP_TAR")\" -C .next2 --strip-components=1
-      fi
+      
       rm -f next_temp.tar.gz \"$(basename "$TMP_TAR")\" 2>/dev/null || true
 
       echo '🔄 Migraciones Prisma...'
