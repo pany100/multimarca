@@ -37,7 +37,7 @@ export function normalizePageSize(
 }
 
 export function getSkipTake(page: number, size: number) {
-  return { skip: (page - 1) * size, take: size };
+  return { skip: page * size, take: size };
 }
 
 export function monthYearToRange(

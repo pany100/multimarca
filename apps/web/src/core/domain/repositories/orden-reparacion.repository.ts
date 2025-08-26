@@ -1,3 +1,4 @@
+import { PageResult } from "@/shared/utils/pagination";
 import { EstadoOrdenReparacion, Prisma } from "@prisma/client";
 
 export type ListOrdenesParams = {
@@ -12,7 +13,7 @@ export type CreateOrdenPersist = {
 };
 
 export interface OrdenReparacionRepository {
-  list(params: ListOrdenesParams): Promise<{ items: any[]; total: number }>;
+  listPaged(params: ListOrdenesParams): Promise<PageResult<any>>;
   findMatchingIdsByFormattedDate(query: string): Promise<number[]>;
   create(tx: any, payload: CreateOrdenPersist["data"]): Promise<any>;
 }

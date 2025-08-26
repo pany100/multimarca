@@ -4,12 +4,17 @@ import type {
   OrdenReparacionRepository,
 } from "@/core/domain/repositories/orden-reparacion.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
+import { PageResult, prismaPaged } from "@/shared/utils/pagination";
 
 export class PrismaOrdenReparacionRepository
   implements OrdenReparacionRepository
 {
-  async list({ page, size, query = "", estado }: ListOrdenesParams) {
-    const skip = page * size;
+  async listPaged<T = any>({
+    page,
+    size,
+    query = "",
+    estado,
+  }: ListOrdenesParams): Promise<PageResult<T>> {
     const where: any = {
       OR: [
         { auto: { patent: { contains: query } } },
@@ -19,15 +24,20 @@ export class PrismaOrdenReparacionRepository
       ],
     };
     if (estado) where.estado = estado;
+
     if (query?.trim()) {
-      const matchingIds = await this.findMatchingIdsByFormattedDate(query);
-      if (matchingIds.length) where.OR.push({ id: { in: matchingIds } });
+      const rows = await prisma.$queryRaw<{ id: number }[]>`
+        SELECT id FROM OrdenReparacion
+        WHERE DATE_FORMAT(fechaEntradaReparacion, '%e/%c/%Y') LIKE ${`%${query}%`}
+      `;
+      const ids = rows.map((r) => r.id);
+      if (ids.length) where.OR.push({ id: { in: ids } });
     }
-    const [items, total] = await Promise.all([
-      prisma.ordenReparacion.findMany({
+
+    return prismaPaged<T>(
+      prisma.ordenReparacion,
+      {
         where,
-        skip,
-        take: size,
         orderBy: { id: "desc" },
         include: {
           auto: { include: { owner: true } },
@@ -38,10 +48,10 @@ export class PrismaOrdenReparacionRepository
           trabajosRealizados: true,
           ingresos: { include: { dolar: true } },
         },
-      }),
-      prisma.ordenReparacion.count({ where }),
-    ]);
-    return { items, total };
+      },
+      page,
+      size
+    );
   }
 
   async findMatchingIdsByFormattedDate(query: string) {
