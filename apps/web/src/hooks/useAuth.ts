@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 interface UserData {
   permisos: string[];
   fullName: string;
+  id: number;
 }
 
 export const useAuth = () => {

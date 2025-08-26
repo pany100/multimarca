@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/hooks/useAuth";
 import useTareasDiarias from "@/sections/tareas-diarias/hooks/useTareasDiarias";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
@@ -54,7 +55,8 @@ const TareasDiariasPage = () => {
   const [tareaEditando, setTareaEditando] = useState<TareaDiaria | null>(null);
   const [dialogoEliminarAbierto, setDialogoEliminarAbierto] = useState(false);
   const [tareaEliminar, setTareaEliminar] = useState<TareaDiaria | null>(null);
-
+  const { userData } = useAuth();
+  console.log(userData);
   const {
     tareas,
     loading,
@@ -203,11 +205,13 @@ const TareasDiariasPage = () => {
                         onChange={(e) =>
                           cambiarEstadoTarea(tarea.id, e.target.checked)
                         }
+                        disabled={userData?.id !== tarea.usuarioId}
                       />
                       <IconButton
                         edge="end"
                         aria-label="edit"
                         onClick={() => handleEditarTarea(tarea)}
+                        disabled={userData?.id !== tarea.usuarioId}
                       >
                         <EditIcon />
                       </IconButton>
@@ -218,6 +222,7 @@ const TareasDiariasPage = () => {
                           setTareaEliminar(tarea);
                           setDialogoEliminarAbierto(true);
                         }}
+                        disabled={userData?.id !== tarea.usuarioId}
                       >
                         <DeleteIcon />
                       </IconButton>
@@ -225,10 +230,11 @@ const TareasDiariasPage = () => {
                   }
                 >
                   <ListItemText
-                    primary={tarea.descripcion}
+                    primary={`${tarea.usuario?.fullName} - ${tarea.descripcion}`}
                     sx={{
                       textDecoration: tarea.realizado ? "line-through" : "none",
                       color: tarea.realizado ? "text.disabled" : "text.primary",
+                      marginRight: "64px",
                     }}
                   />
                 </ListItem>

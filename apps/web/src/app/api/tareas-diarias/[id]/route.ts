@@ -1,97 +1,50 @@
-import prisma from "@/lib/prisma";
-import { getIO } from "@/lib/socketio";
+import { TareaDiariaService } from "@/core/application/services/tarea-diaria.service";
+import { DeleteTareaUseCase } from "@/core/application/use-cases/tarea-diaria/delete-tarea.use-case";
+import { UpdateTareaUseCase } from "@/core/application/use-cases/tarea-diaria/update-tarea.use-case";
+import { PrismaTareaDiariaRepository } from "@/core/infrastructure/database/repositories/prisma-tarea-diaria.repository";
+import { SocketNotifier } from "@/core/infrastructure/external/socket-notifier";
+import { updateTareaSchema } from "@/core/infrastructure/validation/schemas/tarea-diaria.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
+import { getCurrentUser } from "@/utils/authFetch";
 import { NextResponse } from "next/server";
-import { getCurrentUser } from "src/utils/authFetch";
+
+function buildService() {
+  return new TareaDiariaService(new PrismaTareaDiariaRepository());
+}
+
+function parseIdParam(raw: string) {
+  const id = Number(raw);
+  if (!Number.isFinite(id) || id < 1) throw new Error("ID inválido");
+  return id;
+}
 
 export async function PATCH(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
+    const id = parseIdParam(params.id);
     const body = await request.json();
+    const dto = await validateRequest(body, updateTareaSchema);
 
-    // Obtener el usuario actual para verificar permisos
     const user = await getCurrentUser(request);
-    if (!user) {
+    if (!user)
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
 
-    // Verificar que la tarea exista y pertenezca al usuario actual
-    const tarea = await prisma.tareaDiaria.findUnique({
-      where: { id },
-    });
-
-    if (!tarea) {
-      return NextResponse.json(
-        { error: "Tarea no encontrada" },
-        { status: 404 }
-      );
-    }
-
-    // Verificar que la tarea pertenece al usuario actual (a menos que sea admin)
-    if (tarea.usuarioId !== user.id && user.rol?.name !== "Admin") {
-      return NextResponse.json(
-        { error: "No tienes permiso para modificar esta tarea" },
-        { status: 403 }
-      );
-    }
-
-    // Validar los campos
-    const updateData: any = {};
-
-    if (body.descripcion !== undefined) {
-      if (typeof body.descripcion !== "string" || !body.descripcion.trim()) {
-        return NextResponse.json(
-          { error: "La descripción es requerida y debe ser un texto válido" },
-          { status: 400 }
-        );
-      }
-      updateData.descripcion = body.descripcion;
-    }
-
-    if (body.realizado !== undefined) {
-      if (typeof body.realizado !== "boolean") {
-        return NextResponse.json(
-          { error: "El estado 'realizado' debe ser un valor booleano" },
-          { status: 400 }
-        );
-      }
-      updateData.realizado = body.realizado;
-    }
-
-    // Actualizar la tarea
-    const updatedTarea = await prisma.tareaDiaria.update({
-      where: { id },
-      data: updateData,
-      include: {
-        usuario: {
-          select: {
-            id: true,
-            fullName: true,
-            username: true,
-          },
-        },
-      },
-    });
-    const io = getIO();
-    if (updatedTarea.realizado) {
-      if (io) {
-        io.emit("deleteTarea");
-      }
-    } else {
-      if (io) {
-        io.emit("newTarea");
-      }
-    }
-
-    return NextResponse.json(updatedTarea);
-  } catch (error) {
-    console.error("Error al actualizar tarea diaria:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
+    const useCase = new UpdateTareaUseCase(
+      buildService(),
+      new SocketNotifier()
     );
+    const updated = await useCase.execute({
+      id,
+      user: { id: Number(user.id), rol: user.rol },
+      data: dto,
+    });
+
+    return NextResponse.json(updated, { status: 200 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }
 
@@ -100,53 +53,23 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
+    const id = parseIdParam(params.id);
 
-    // Obtener el usuario actual para verificar permisos
     const user = await getCurrentUser(request);
-    if (!user) {
+    if (!user)
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
 
-    // Verificar que la tarea exista y pertenezca al usuario actual
-    const tarea = await prisma.tareaDiaria.findUnique({
-      where: { id },
+    const useCase = new DeleteTareaUseCase(
+      buildService(),
+      new SocketNotifier()
+    );
+    const result = await useCase.execute({
+      id,
+      user: { id: Number(user.id), rol: user.rol },
     });
 
-    if (!tarea) {
-      return NextResponse.json(
-        { error: "Tarea no encontrada" },
-        { status: 404 }
-      );
-    }
-
-    // Verificar que la tarea pertenece al usuario actual (a menos que sea admin)
-    if (tarea.usuarioId !== user.id && user.rol?.name !== "Admin") {
-      return NextResponse.json(
-        { error: "No tienes permiso para eliminar esta tarea" },
-        { status: 403 }
-      );
-    }
-
-    // Eliminar la tarea
-    await prisma.tareaDiaria.delete({
-      where: { id },
-    });
-
-    const io = getIO();
-    if (io) {
-      io.emit("deleteTarea");
-    }
-
-    return NextResponse.json(
-      { message: "Tarea eliminada con éxito" },
-      { status: 200 }
-    );
-  } catch (error) {
-    console.error("Error al eliminar tarea diaria:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+    return NextResponse.json(result, { status: 200 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }
