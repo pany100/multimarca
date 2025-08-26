@@ -22,7 +22,7 @@ export function normalizePageSize(
   sizeRaw?: number | string | null,
   opt: { defaultPage?: number; defaultSize?: number; maxSize?: number } = {}
 ) {
-  const defaultPage = opt.defaultPage ?? 1;
+  const defaultPage = opt.defaultPage ?? 0;
   const defaultSize = opt.defaultSize ?? 50;
   const maxSize = opt.maxSize ?? 200;
 
