@@ -13,7 +13,7 @@ NEXT_APP_NAME="next-app"
 
 # ========= Util =========
 START_TIME=$(date +%s)
-TMP_TAR="/tmp/next_temp.$$.tar.gz"
+TMP_TAR="/tmp/next_temp.tar.gz" #esto queda en /tmp! no en el folder del proyecto
 
 handle_error() { echo "❌ Error: $1"; exit 1; }
 
@@ -87,10 +87,12 @@ ssh -p "$TUNNEL_PORT" \
       echo '🗜️  Extrayendo paquete a .next2...'
       rm -rf .next2
       mkdir -p .next2
+      pwd
       tar -xzf next_temp.tar.gz -C .next2 --strip-components=1 || true
       
-      rm -f next_temp.tar.gz \"$(basename "$TMP_TAR")\" 2>/dev/null || true
-
+      rm -f next_temp.tar.gz  2>/dev/null || true
+      cd ..
+      cd ..
       echo '🔄 Migraciones Prisma...'
       npx prisma migrate deploy --schema=apps/web/prisma/schema.prisma
       echo '⚙️  Generando Prisma client...'
@@ -99,8 +101,8 @@ ssh -p "$TUNNEL_PORT" \
       echo '🏗️  Prebuild (si existe)...'
       yarn --cwd apps/web prebuild || true
       echo '📦 Switcheando .next...'
-      rm -rf .next
-      mv .next2 .next
+      rm -rf apps/web/.next
+      mv apps/web/.next2 apps/web/.next
 
       echo '🚀 Iniciando Next con PM2...'
       pm2 start npm --name "$NEXT_APP_NAME" --cwd /home/ubuntu/multimarca/apps/web -- run start
