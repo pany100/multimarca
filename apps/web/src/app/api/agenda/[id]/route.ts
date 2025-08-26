@@ -1,154 +1,60 @@
-import prisma from "@/lib/prisma";
+import { AgendaService } from "@/core/application/services/agenda.service";
+import { DeleteAgendaUseCase } from "@/core/application/use-cases/agenda/delete-agenda.use-case";
+import { GetAgendaUseCase } from "@/core/application/use-cases/agenda/get-agenda.use-case";
+import { UpdateAgendaUseCase } from "@/core/application/use-cases/agenda/update-agenda.use-case";
+import { PrismaAgendaRepository } from "@/core/infrastructure/database/repositories/prisma-agenda.repository";
+import { updateAgendaSchema } from "@/core/infrastructure/validation/schemas/agenda.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
+import { parseIdParam } from "@/shared/utils/params";
 import { NextResponse } from "next/server";
 
-// GET a single recordatorio by ID
+function buildService() {
+  return new AgendaService(new PrismaAgendaRepository());
+}
+
 export async function GET(
-  request: Request,
+  _req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
-
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { error: "ID de recordatorio inválido" },
-        { status: 400 }
-      );
-    }
-
-    const recordatorio = await prisma.recordatorioAgenda.findUnique({
-      where: { id },
-    });
-
-    if (!recordatorio) {
-      return NextResponse.json(
-        { error: "Recordatorio no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(recordatorio);
-  } catch (error) {
-    console.error("Error al obtener recordatorio:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+    const id = parseIdParam(params.id);
+    const data = await new GetAgendaUseCase(buildService()).execute(id);
+    return NextResponse.json(data, { status: 200 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }
 
-// PUT to update a recordatorio
 export async function PUT(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
-
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { error: "ID de recordatorio inválido" },
-        { status: 400 }
-      );
-    }
-
-    // Check if recordatorio exists
-    const existingRecordatorio = await prisma.recordatorioAgenda.findUnique({
-      where: { id },
-    });
-
-    if (!existingRecordatorio) {
-      return NextResponse.json(
-        { error: "Recordatorio no encontrado" },
-        { status: 404 }
-      );
-    }
-
+    const id = parseIdParam(params.id);
     const body = await request.json();
-    const { titulo, descripcion, fecha, hecho } = body;
+    const dto = await validateRequest(body, updateAgendaSchema);
 
-    // Validate required fields
-    if (!titulo) {
-      return NextResponse.json(
-        { error: "El título es un campo requerido" },
-        { status: 400 }
-      );
-    }
-
-    // Validate fecha if provided
-    let fechaDate = existingRecordatorio.fecha;
-    if (fecha) {
-      fechaDate = new Date(fecha);
-      if (isNaN(fechaDate.getTime())) {
-        return NextResponse.json(
-          { error: "La fecha proporcionada no es válida" },
-          { status: 400 }
-        );
-      }
-    }
-
-    // Update the recordatorio
-    const updatedRecordatorio = await prisma.recordatorioAgenda.update({
-      where: { id },
-      data: {
-        titulo,
-        descripcion: descripcion ?? existingRecordatorio.descripcion,
-        fecha: fechaDate,
-        hecho: hecho !== undefined ? hecho : existingRecordatorio.hecho,
-      },
-    });
-
-    return NextResponse.json(updatedRecordatorio);
-  } catch (error) {
-    console.error("Error al actualizar recordatorio:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+    // si querés exigir título en update, dejalo en schema .min(1) sin .optional()
+    const data = await new UpdateAgendaUseCase(buildService()).execute(id, dto);
+    return NextResponse.json(data, { status: 200 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }
 
-// DELETE a recordatorio
 export async function DELETE(
-  request: Request,
+  _req: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
-
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { error: "ID de recordatorio inválido" },
-        { status: 400 }
-      );
-    }
-
-    // Check if recordatorio exists
-    const existingRecordatorio = await prisma.recordatorioAgenda.findUnique({
-      where: { id },
-    });
-
-    if (!existingRecordatorio) {
-      return NextResponse.json(
-        { error: "Recordatorio no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    // Delete the recordatorio
-    await prisma.recordatorioAgenda.delete({
-      where: { id },
-    });
-
+    const id = parseIdParam(params.id);
+    await new DeleteAgendaUseCase(buildService()).execute(id);
     return NextResponse.json(
       { message: "Recordatorio eliminado correctamente" },
       { status: 200 }
     );
-  } catch (error) {
-    console.error("Error al eliminar recordatorio:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+  } catch (e) {
+    return handleApiError(e);
   }
 }

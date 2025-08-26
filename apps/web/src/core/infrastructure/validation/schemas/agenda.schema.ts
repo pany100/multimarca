@@ -16,3 +16,11 @@ export const createAgendaSchema = z.object({
   hecho: z.boolean().optional(),
 });
 export type CreateAgendaSchema = z.infer<typeof createAgendaSchema>;
+
+export const updateAgendaSchema = z.object({
+  titulo: z.string().min(1, "El título es requerido").optional(),
+  descripcion: z.string().nullable().optional(),
+  fecha: z.coerce.date().optional(),
+  hecho: z.boolean().optional(),
+});
+export type UpdateAgendaSchema = z.infer<typeof updateAgendaSchema>;

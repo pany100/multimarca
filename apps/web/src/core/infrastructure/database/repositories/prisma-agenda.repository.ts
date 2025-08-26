@@ -47,4 +47,16 @@ export class PrismaAgendaRepository implements AgendaRepository {
   async create(input: CreateAgendaInput) {
     return prisma.recordatorioAgenda.create({ data: input });
   }
+
+  async findById(id: number) {
+    return prisma.recordatorioAgenda.findUnique({ where: { id } });
+  }
+
+  async update(id: number, data: Partial<CreateAgendaInput>) {
+    return prisma.recordatorioAgenda.update({ where: { id }, data });
+  }
+
+  async delete(id: number) {
+    await prisma.recordatorioAgenda.delete({ where: { id } });
+  }
 }

@@ -14,4 +14,16 @@ export class AgendaService {
   create(input: CreateAgendaInput) {
     return this.repo.create(input);
   }
+
+  findById(id: number) {
+    return this.repo.findById(id);
+  }
+
+  update(id: number, data: Partial<CreateAgendaInput>) {
+    return this.repo.update(id, data);
+  }
+
+  delete(id: number) {
+    return this.repo.delete(id);
+  }
 }
