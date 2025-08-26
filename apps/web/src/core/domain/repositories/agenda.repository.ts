@@ -1,0 +1,21 @@
+export type ListAgendaParams = {
+  page: number;
+  size: number;
+  query?: string;
+  month?: number; // 1..12
+  year?: number; // yyyy
+  onlyPending?: boolean;
+};
+
+export type CreateAgendaInput = {
+  titulo: string;
+  descripcion?: string | null;
+  fecha: Date;
+  hecho?: boolean;
+  userId: number;
+};
+
+export interface AgendaRepository {
+  list(params: ListAgendaParams): Promise<{ items: any[]; total: number }>;
+  create(input: CreateAgendaInput): Promise<any>;
+}

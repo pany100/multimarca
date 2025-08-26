@@ -1,111 +1,52 @@
-import prisma from "@/lib/prisma";
+import { AgendaService } from "@/core/application/services/agenda.service";
+import { CreateAgendaUseCase } from "@/core/application/use-cases/agenda/create-agenda.use-case";
+import { ListAgendaUseCase } from "@/core/application/use-cases/agenda/list-agenda.use-case";
+import { PrismaAgendaRepository } from "@/core/infrastructure/database/repositories/prisma-agenda.repository";
+import { createAgendaSchema } from "@/core/infrastructure/validation/schemas/agenda.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "src/utils/authFetch";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const size = parseInt(searchParams.get("size") || "50");
-    const query = searchParams.get("query") || "";
-    const month = searchParams.get("month");
-    const year = searchParams.get("year");
-    const onlyPending = searchParams.get("onlyPending") === "true";
 
-    const skip = (page - 1) * size;
-
-    // Build the where clause
-    let where: any = {
-      OR: [
-        { titulo: { contains: query } },
-        { descripcion: { contains: query } },
-      ],
-    };
-
-    // Filter by month and year if provided
-    if (month && year) {
-      const startDate = new Date(parseInt(year), parseInt(month) - 1, 1);
-      const endDate = new Date(parseInt(year), parseInt(month), 0); // Last day of the month
-
-      where.fecha = {
-        gte: startDate,
-        lte: endDate,
-      };
-    }
-
-    // Filter only pending items if requested
-    if (onlyPending) {
-      where.hecho = false;
-    }
-
-    const [recordatorios, total] = await Promise.all([
-      prisma.recordatorioAgenda.findMany({
-        where,
-        skip,
-        take: size,
-        orderBy: { fecha: "asc" },
-      }),
-      prisma.recordatorioAgenda.count({ where }),
-    ]);
-
-    return NextResponse.json({
-      items: recordatorios,
-      total,
-      page,
-      size,
-      totalPages: Math.ceil(total / size),
-    });
-  } catch (error) {
-    console.error("Error al obtener recordatorios de agenda:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
+    const useCase = new ListAgendaUseCase(
+      new AgendaService(new PrismaAgendaRepository())
     );
+
+    const result = await useCase.execute({
+      page: searchParams.get("page"),
+      size: searchParams.get("size"),
+      query: searchParams.get("query"),
+      month: searchParams.get("month"),
+      year: searchParams.get("year"),
+      onlyPending: searchParams.get("onlyPending") === "true",
+    });
+
+    return NextResponse.json(result, { status: 200 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { titulo, descripcion, fecha, hecho } = body;
-
     const user = await getCurrentUser(request);
-    if (!user) {
+    if (!user)
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
-    }
-    if (!titulo || !fecha) {
-      return NextResponse.json(
-        { error: "El título y la fecha son campos requeridos" },
-        { status: 400 }
-      );
-    }
 
-    // Validate fecha is a valid date
-    const fechaDate = new Date(fecha);
-    if (isNaN(fechaDate.getTime())) {
-      return NextResponse.json(
-        { error: "La fecha proporcionada no es válida" },
-        { status: 400 }
-      );
-    }
+    const body = await request.json();
+    const dto = await validateRequest(body, createAgendaSchema);
 
-    // Create the recordatorio
-    const recordatorio = await prisma.recordatorioAgenda.create({
-      data: {
-        titulo,
-        descripcion,
-        fecha: fechaDate,
-        hecho,
-        userId: user.id,
-      },
-    });
-
-    return NextResponse.json(recordatorio, { status: 201 });
-  } catch (error) {
-    console.error("Error al crear recordatorio de agenda:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
+    const useCase = new CreateAgendaUseCase(
+      new AgendaService(new PrismaAgendaRepository())
     );
+
+    const created = await useCase.execute({ ...dto, userId: user.id });
+    return NextResponse.json(created, { status: 201 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }
