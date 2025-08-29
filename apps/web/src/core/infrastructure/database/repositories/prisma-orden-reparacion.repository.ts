@@ -115,7 +115,8 @@ export class PrismaOrdenReparacionRepository
     });
   }
 
-  async delete(id: number) {
-    await prisma.ordenReparacion.delete({ where: { id } });
+  async delete(tx: any, id: number) {
+    const db = tx?.tx ?? prisma;
+    await db.ordenReparacion.delete({ where: { id } });
   }
 }

@@ -1,3 +1,4 @@
+import { OrdenReparacionService } from "@/core/application/services/orden-reparacion.service";
 import { DeleteOrdenUseCase } from "@/core/application/use-cases/orden-reparacion/delete-orden.use-case";
 import { GetOrdenUseCase } from "@/core/application/use-cases/orden-reparacion/get-orden.use-case";
 import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
@@ -483,9 +484,11 @@ export async function DELETE(
     );
 
     await new DeleteOrdenUseCase(
-      new PrismaOrdenReparacionRepository(),
       new PrismaUnitOfWork(),
-      new PrismaInventoryAdapter()
+      new OrdenReparacionService(
+        new PrismaOrdenReparacionRepository(),
+        new PrismaInventoryAdapter()
+      )
     ).execute(dto.id);
 
     return NextResponse.json({

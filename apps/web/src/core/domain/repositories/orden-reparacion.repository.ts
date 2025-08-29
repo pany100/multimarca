@@ -27,5 +27,5 @@ export interface OrdenReparacionRepository {
   findMatchingIdsByFormattedDate(query: string): Promise<number[]>;
   create(tx: any, payload: CreateOrdenPersist["data"]): Promise<any>;
   findById(id: number): Promise<any | null>;
-  delete(id: number): Promise<void>;
+  delete(tx: any, id: number): Promise<void>;
 }
