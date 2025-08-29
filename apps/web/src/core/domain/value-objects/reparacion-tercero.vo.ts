@@ -1,3 +1,4 @@
+import { FileStoragePort } from "../ports/file-storage.port";
 import { Money } from "./money.vo";
 
 export interface ReparacionTerceroProps {
@@ -18,7 +19,11 @@ export class ReparacionTercero {
   ) {
     if (!nombre?.trim()) throw new Error("Nombre requerido");
   }
-  static from(p: ReparacionTerceroProps) {
+  static async from(p: ReparacionTerceroProps, files: FileStoragePort) {
+    let recibo = p.recibo ?? null;
+    if (recibo && typeof recibo === "string" && recibo.includes("/tmp/")) {
+      recibo = await files.moveTempTo(recibo, "recibos");
+    }
     return new ReparacionTercero(
       p.nombre.trim(),
       Number(p.proveedorId),

@@ -12,8 +12,20 @@ export type CreateOrdenPersist = {
   data: Prisma.OrdenReparacionCreateArgs;
 };
 
+export type RepuestoFromOrderInDb = {
+  stock: {
+    id: number;
+    name: string;
+  };
+  unidadesConsumidas: number;
+  precioCompra: number;
+  precioVenta: number;
+};
+
 export interface OrdenReparacionRepository {
   listPaged(params: ListOrdenesParams): Promise<PageResult<any>>;
   findMatchingIdsByFormattedDate(query: string): Promise<number[]>;
   create(tx: any, payload: CreateOrdenPersist["data"]): Promise<any>;
+  findById(id: number): Promise<any | null>;
+  delete(id: number): Promise<void>;
 }

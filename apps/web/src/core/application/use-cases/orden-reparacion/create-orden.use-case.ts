@@ -1,5 +1,6 @@
 // src/core/application/use-cases/orden-reparacion/create-orden.use-case.ts
 import type { CreateOrdenDto } from "@/core/application/dto/orden-reparacion.dto";
+import { hasAllRequiredFields } from "@/core/domain/policies/orden-reparacion.policy";
 import type { ExchangeRatePort } from "@/core/domain/ports/exchange-rate.port";
 import type { FileStoragePort } from "@/core/domain/ports/file-storage.port";
 import type { InventoryPort } from "@/core/domain/ports/inventory.port";
@@ -39,14 +40,7 @@ export class CreateOrdenUseCase {
     );
     // Validación de “terminada”
     if (estado.isTerminado()) {
-      const ok =
-        (input.mecanicos?.length ?? 0) > 0 &&
-        input.fechaEntradaReparacion &&
-        input.fechaSalidaReparacion &&
-        ((input.repuestosUsados?.length ?? 0) > 0 ||
-          (input.reparacionesDeTercero?.length ?? 0) > 0 ||
-          (input.trabajosRealizados?.length ?? 0) > 0);
-      if (!ok)
+      if (!hasAllRequiredFields(input))
         throw new Error(
           "Para finalizar, se requieren mecánicos, fechas y al menos un trabajo/repuesto/tercero."
         );
@@ -80,24 +74,20 @@ export class CreateOrdenUseCase {
           diasParaRecordatorio: t.diasParaRecordatorio ?? null,
         } as TrabajoRealizadoProps)
     );
-    const tercerosRaw = await Promise.all(
-      (input.reparacionesDeTercero ?? []).map(async (t) => {
-        let recibo = t.recibo ?? null;
-        if (recibo && typeof recibo === "string" && recibo.includes("/tmp/")) {
-          recibo = await this.files.moveTempTo(recibo, "recibos");
-        }
-        return { ...t, recibo };
-      })
-    );
-    const terceros = tercerosRaw.map(
-      (t): ReparacionTercero =>
-        ReparacionTercero.from({
-          nombre: t.nombre,
-          proveedorId: t.proveedor.id,
-          precioCompra: t.precioCompra,
-          precioVenta: t.precioVenta,
-          recibo: t.recibo,
-        } as ReparacionTerceroProps)
+
+    const terceros = await Promise.all(
+      (input.reparacionesDeTercero ?? []).map((t) =>
+        ReparacionTercero.from(
+          {
+            nombre: t.nombre,
+            proveedorId: t.proveedor.id,
+            precioCompra: t.precioCompra,
+            precioVenta: t.precioVenta,
+            recibo: t.recibo,
+          } as ReparacionTerceroProps,
+          this.files
+        )
+      )
     );
 
     // Validar stock suficiente

@@ -7,6 +7,7 @@ export class PrismaInventoryAdapter implements InventoryPort {
     deps?: { tx?: any }
   ) {
     const db =
+      deps?.tx?.tx ??
       deps?.tx ??
       (await import("@/core/infrastructure/database/prisma")).prisma;
     for (const it of items) {
@@ -26,6 +27,7 @@ export class PrismaInventoryAdapter implements InventoryPort {
     deps?: { tx?: any }
   ) {
     const db =
+      deps?.tx?.tx ??
       deps?.tx ??
       (await import("@/core/infrastructure/database/prisma")).prisma;
     for (const it of items) {
@@ -45,6 +47,22 @@ export class PrismaInventoryAdapter implements InventoryPort {
           },
         });
       }
+    }
+  }
+
+  async restoreStock(
+    items: Array<{ stockId: number; units: number }>,
+    deps?: { tx?: any }
+  ) {
+    const prisma = (await import("@/core/infrastructure/database/prisma"))
+      .prisma;
+    const db = deps?.tx?.tx ?? deps?.tx ?? prisma;
+
+    for (const it of items) {
+      await db.stock.update({
+        where: { id: it.stockId },
+        data: { units: { increment: it.units } },
+      });
     }
   }
 }

@@ -7,4 +7,8 @@ export interface InventoryPort {
     input: Array<{ stockId: number; units: number }>,
     deps?: { tx?: any }
   ): Promise<void>;
+  restoreStock(
+    input: Array<{ stockId: number; units: number }>,
+    deps?: { tx?: any }
+  ): Promise<void>;
 }

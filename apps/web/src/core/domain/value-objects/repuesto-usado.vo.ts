@@ -1,3 +1,4 @@
+import { RepuestoFromOrderInDb } from "../repositories/orden-reparacion.repository";
 import { Money } from "./money.vo";
 
 export interface RepuestoUsadoProps {
@@ -28,6 +29,16 @@ export class RepuestoUsado {
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
       p.stockName
+    );
+  }
+
+  static fromOrderDb(r: RepuestoFromOrderInDb) {
+    return new RepuestoUsado(
+      Number(r.stock.id),
+      Number(r.unidadesConsumidas),
+      Money.from(r.precioCompra),
+      Money.from(r.precioVenta),
+      r.stock.name
     );
   }
 }

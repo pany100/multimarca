@@ -1,4 +1,12 @@
+import { DeleteOrdenUseCase } from "@/core/application/use-cases/orden-reparacion/delete-orden.use-case";
+import { GetOrdenUseCase } from "@/core/application/use-cases/orden-reparacion/get-orden.use-case";
+import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
+import { PrismaOrdenReparacionRepository } from "@/core/infrastructure/database/repositories/prisma-orden-reparacion.repository";
+import { PrismaInventoryAdapter } from "@/core/infrastructure/external/prisma-inventory.adapter";
+import { getOrdenQuerySchema } from "@/core/infrastructure/validation/schemas/orden-reparacion.schema";
 import { getIO } from "@/lib/socketio";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import getDolarForDate from "@/utils/dolar";
 import { deleteFileFromS3, moveFileInS3 } from "@/utils/s3Helper";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
@@ -16,82 +24,18 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
-    const ordenReparacion = await prisma.ordenReparacion.findUnique({
-      where: { id },
-      include: {
-        auto: {
-          include: {
-            owner: true,
-          },
-        },
-        mecanicos: {
-          include: {
-            mecanico: true,
-          },
-        },
-        repuestosUsados: {
-          include: {
-            stock: {
-              include: {
-                proveedor: true,
-              },
-            },
-          },
-        },
-        reparacionesDeTercero: {
-          include: {
-            proveedor: true,
-          },
-        },
-        ingresos: {
-          include: {
-            dolar: true,
-          },
-        },
-        trabajosRealizados: true,
-        revisadoPor: true,
-        controlesEnReparacion: {
-          include: {
-            controlMecanico: {
-              include: {
-                parent: true,
-              },
-            },
-          },
-        },
-        pagos: true,
+    const dto = await validateRequest(
+      {
+        id: params.id,
       },
-    });
-
-    if (!ordenReparacion) {
-      return NextResponse.json(
-        { error: "Orden de reparación no encontrada" },
-        { status: 404 }
-      );
-    }
-    const { mecanicos, ...ordenReparacionWithoutMecanicos } = ordenReparacion;
-    const mecanicosWithoutMecanico = mecanicos.map(
-      (el: {
-        mecanico: { id: number; name: string };
-        detalle: string | null;
-      }) => ({
-        id: el.mecanico.id,
-        name: el.mecanico.name,
-        detalle: el.detalle,
-      })
+      getOrdenQuerySchema
     );
-
-    return NextResponse.json({
-      ...ordenReparacionWithoutMecanicos,
-      mecanicos: mecanicosWithoutMecanico,
-    });
-  } catch (error) {
-    console.error("Error al obtener orden de reparación:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+    const ordenReparacion = await new GetOrdenUseCase(
+      new PrismaOrdenReparacionRepository()
+    ).execute(dto.id);
+    return NextResponse.json(ordenReparacion);
+  } catch (e) {
+    return handleApiError(e);
   }
 }
 
@@ -531,52 +475,23 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
-
-    // Verificar si existe la orden de reparación
-    const ordenExistente = await prisma.ordenReparacion.findUnique({
-      where: { id },
-      include: {
-        repuestosUsados: {
-          include: {
-            stock: true,
-          },
-        },
+    const dto = await validateRequest(
+      {
+        id: params.id,
       },
-    });
+      getOrdenQuerySchema
+    );
 
-    if (!ordenExistente) {
-      return NextResponse.json(
-        { error: "Orden de reparación no encontrada" },
-        { status: 404 }
-      );
-    }
-
-    // Restaurar las unidades de stock de repuestos usados
-    for (const repuestoUsado of ordenExistente.repuestosUsados) {
-      await prisma.stock.update({
-        where: { id: repuestoUsado.stockId },
-        data: {
-          units: {
-            increment: repuestoUsado.unidadesConsumidas,
-          },
-        },
-      });
-    }
-
-    // Proceder con la eliminación de la orden
-    await prisma.ordenReparacion.delete({
-      where: { id },
-    });
+    await new DeleteOrdenUseCase(
+      new PrismaOrdenReparacionRepository(),
+      new PrismaUnitOfWork(),
+      new PrismaInventoryAdapter()
+    ).execute(dto.id);
 
     return NextResponse.json({
       mensaje: "Orden de reparación eliminada y stock restaurado",
     });
-  } catch (error) {
-    console.error("Error al eliminar orden de reparación:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+  } catch (e) {
+    return handleApiError(e);
   }
 }

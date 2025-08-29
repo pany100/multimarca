@@ -65,4 +65,57 @@ export class PrismaOrdenReparacionRepository
   async create(tx: any, payload: CreateOrdenPersist["data"]) {
     return tx.ordenReparacion.create(payload);
   }
+
+  async findById(id: number) {
+    return prisma.ordenReparacion.findUnique({
+      where: { id },
+      include: {
+        auto: {
+          include: {
+            owner: true,
+          },
+        },
+        mecanicos: {
+          include: {
+            mecanico: true,
+          },
+        },
+        repuestosUsados: {
+          include: {
+            stock: {
+              include: {
+                proveedor: true,
+              },
+            },
+          },
+        },
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
+          },
+        },
+        ingresos: {
+          include: {
+            dolar: true,
+          },
+        },
+        trabajosRealizados: true,
+        revisadoPor: true,
+        controlesEnReparacion: {
+          include: {
+            controlMecanico: {
+              include: {
+                parent: true,
+              },
+            },
+          },
+        },
+        pagos: true,
+      },
+    });
+  }
+
+  async delete(id: number) {
+    await prisma.ordenReparacion.delete({ where: { id } });
+  }
 }
