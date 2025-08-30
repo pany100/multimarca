@@ -1,3 +1,4 @@
+import { OrdenReparacionService } from "@/core/application/services/orden-reparacion.service";
 import { CreateOrdenUseCase } from "@/core/application/use-cases/orden-reparacion/create-orden.use-case";
 import { ListOrdenesUseCase } from "@/core/application/use-cases/orden-reparacion/list-ordenes.use-case";
 import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
@@ -44,12 +45,14 @@ export async function POST(request: Request) {
     const dto = await validateRequest(body, createOrdenSchema);
 
     const useCase = new CreateOrdenUseCase(
-      buildRepo(),
-      new DolarExchangeAdapter(),
-      new S3FileStorageAdapter(),
+      new OrdenReparacionService(
+        new PrismaOrdenReparacionRepository(),
+        new PrismaInventoryAdapter(),
+        new DolarExchangeAdapter(),
+        new S3FileStorageAdapter()
+      ),
       new SocketNotifier(),
-      new PrismaUnitOfWork(),
-      new PrismaInventoryAdapter()
+      new PrismaUnitOfWork()
     );
 
     const created = await useCase.execute(dto);
