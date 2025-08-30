@@ -1,14 +1,13 @@
+import { StockAction } from "../value-objects/stock-action.vo";
+
 export interface InventoryPort {
   ensureSufficient(
-    input: Array<{ stockId: number; units: number; name?: string }>,
+    stockActions: StockAction[],
     deps?: { tx?: any }
   ): Promise<void>;
   consumeAndNotify(
-    input: Array<{ stockId: number; units: number }>,
+    stockActions: StockAction[],
     deps?: { tx?: any }
   ): Promise<void>;
-  restoreStock(
-    input: Array<{ stockId: number; units: number }>,
-    deps?: { tx?: any }
-  ): Promise<void>;
+  restoreStock(stockActions: StockAction[], deps?: { tx?: any }): Promise<void>;
 }

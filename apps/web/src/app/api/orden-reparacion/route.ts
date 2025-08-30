@@ -1,4 +1,5 @@
 import { OrdenReparacionService } from "@/core/application/services/orden-reparacion.service";
+import { StockManagerService } from "@/core/application/services/stock-manager.service";
 import { CreateOrdenUseCase } from "@/core/application/use-cases/orden-reparacion/create-orden.use-case";
 import { ListOrdenesUseCase } from "@/core/application/use-cases/orden-reparacion/list-ordenes.use-case";
 import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
@@ -46,6 +47,7 @@ export async function POST(request: Request) {
 
     const useCase = new CreateOrdenUseCase(
       new OrdenReparacionService(
+        new StockManagerService(),
         new PrismaOrdenReparacionRepository(),
         new PrismaInventoryAdapter(),
         new DolarExchangeAdapter(),

@@ -17,15 +17,18 @@ import {
   RepuestoUsadoProps,
   RepuestoUsado as RepuestoUsadoVO,
 } from "@/core/domain/value-objects/repuesto-usado.vo";
+import { StockAction } from "@/core/domain/value-objects/stock-action.vo";
 import {
   TrabajoRealizado,
   TrabajoRealizadoProps,
 } from "@/core/domain/value-objects/trabajo-realizado.vo";
 import { EstadoOrdenReparacion, Prisma } from "@prisma/client";
 import { CreateOrdenDto } from "../dto/orden-reparacion.dto";
+import { StockManagerService } from "./stock-manager.service";
 
 export class OrdenReparacionService {
   constructor(
+    private readonly stockManager: StockManagerService,
     private readonly repo: OrdenReparacionRepository,
     private readonly inventory: InventoryPort,
     private readonly exchange: ExchangeRatePort,
@@ -38,6 +41,10 @@ export class OrdenReparacionService {
     const repuestos = (existing.repuestosUsados ?? []).map(
       (r: RepuestoFromOrderInDb): RepuestoUsado => RepuestoUsado.fromOrderDb(r)
     );
+
+    // Generar acciones de stock para liberar repuestos
+    const stockActions = this.stockManager.generateReleaseActions(repuestos);
+
     await this.inventory.restoreStock(
       repuestos.map((r: RepuestoUsado) => ({
         stockId: r.stockId,
@@ -46,9 +53,14 @@ export class OrdenReparacionService {
       { tx }
     );
     await this.repo.delete(tx, id);
+
+    return stockActions; // Retornar las acciones generadas para logging/auditoría
   }
 
-  async create({ tx }: any, input: CreateOrdenDto) {
+  async create(
+    { tx }: any,
+    input: CreateOrdenDto
+  ): Promise<{ orden: any; stockActions: StockAction[] }> {
     const estado = EstadoOrden.from(
       input.estado ?? EstadoOrdenReparacion.Presupuestado
     );
@@ -97,14 +109,11 @@ export class OrdenReparacionService {
       )
     );
 
+    // Generar acciones de stock para los repuestos
+    const stockActions = this.stockManager.generateTakeActions(repuestos);
+
     // Validar stock suficiente
-    await this.inventory.ensureSufficient(
-      repuestos.map((r) => ({
-        stockId: r.stockId,
-        units: r.unidadesConsumidas,
-        name: r.stockName,
-      }))
-    );
+    await this.inventory.ensureSufficient(stockActions);
 
     const fechaCreacion = input.fechaCreacion
       ? new Date(input.fechaCreacion)
@@ -178,13 +187,7 @@ export class OrdenReparacionService {
     });
 
     if (!estado.isPresupuestado()) {
-      await this.inventory.consumeAndNotify(
-        repuestos.map((r) => ({
-          stockId: r.stockId,
-          units: r.unidadesConsumidas,
-        })),
-        { tx }
-      );
+      await this.inventory.consumeAndNotify(stockActions, { tx });
     }
 
     if (estado.isTerminado()) {
@@ -203,6 +206,6 @@ export class OrdenReparacionService {
       });
     }
 
-    return orden;
+    return { orden, stockActions };
   }
 }

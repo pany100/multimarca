@@ -1,39 +1,49 @@
 import type { InventoryPort } from "@/core/domain/ports/inventory.port";
+import {
+  StockAction,
+  StockActionType,
+} from "@/core/domain/value-objects/stock-action.vo";
 import { TipoNotificacionInterna } from "@prisma/client";
 
 export class PrismaInventoryAdapter implements InventoryPort {
-  async ensureSufficient(
-    items: Array<{ stockId: number; units: number; name?: string }>,
-    deps?: { tx?: any }
-  ) {
+  async ensureSufficient(stockActions: StockAction[], deps?: { tx?: any }) {
     const db =
       deps?.tx?.tx ??
       deps?.tx ??
       (await import("@/core/infrastructure/database/prisma")).prisma;
-    for (const it of items) {
+
+    // Filtrar solo las acciones de tipo TAKE
+    const takeActions = stockActions.filter(
+      (action) => action.accion === StockActionType.TAKE
+    );
+
+    for (const action of takeActions) {
       const stock = await db.stock.findUnique({
-        where: { id: it.stockId },
+        where: { id: action.stockId },
         select: { units: true, name: true },
       });
-      if (!stock || (stock.units ?? 0) < it.units) {
-        const n = it.name ?? stock?.name ?? String(it.stockId);
-        throw new Error(`Stock insuficiente para ${n}`);
+      if (!stock || (stock.units ?? 0) < action.cantidad) {
+        const name = stock?.name ?? String(action.stockId);
+        throw new Error(`Stock insuficiente para ${name}`);
       }
     }
   }
 
-  async consumeAndNotify(
-    items: Array<{ stockId: number; units: number }>,
-    deps?: { tx?: any }
-  ) {
+  async consumeAndNotify(stockActions: StockAction[], deps?: { tx?: any }) {
     const db =
       deps?.tx?.tx ??
       deps?.tx ??
       (await import("@/core/infrastructure/database/prisma")).prisma;
-    for (const it of items) {
+
+    // Filtrar solo las acciones de tipo TAKE
+    const takeActions = stockActions.filter(
+      (action) => action.accion === StockActionType.TAKE
+    );
+
+    for (const action of takeActions) {
       const updated = await db.stock.update({
-        where: { id: it.stockId },
-        data: { units: { decrement: it.units } },
+        where: { id: action.stockId },
+        data: { units: { decrement: action.cantidad } },
       });
       if ((updated.units ?? 0) <= (updated.restockValue ?? 0)) {
         await db.notificacionInterna.create({
@@ -50,18 +60,20 @@ export class PrismaInventoryAdapter implements InventoryPort {
     }
   }
 
-  async restoreStock(
-    items: Array<{ stockId: number; units: number }>,
-    deps?: { tx?: any }
-  ) {
+  async restoreStock(stockActions: StockAction[], deps?: { tx?: any }) {
     const prisma = (await import("@/core/infrastructure/database/prisma"))
       .prisma;
     const db = deps?.tx?.tx ?? deps?.tx ?? prisma;
 
-    for (const it of items) {
+    // Filtrar solo las acciones de tipo RELEASE
+    const releaseActions = stockActions.filter(
+      (action) => action.accion === StockActionType.RELEASE
+    );
+
+    for (const action of releaseActions) {
       await db.stock.update({
-        where: { id: it.stockId },
-        data: { units: { increment: it.units } },
+        where: { id: action.stockId },
+        data: { units: { increment: action.cantidad } },
       });
     }
   }
