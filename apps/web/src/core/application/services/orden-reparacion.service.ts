@@ -6,24 +6,11 @@ import {
   RepuestoFromOrderInDb,
 } from "@/core/domain/repositories/orden-reparacion.repository";
 import { EstadoOrden } from "@/core/domain/value-objects/estado-orden.vo";
-import { MecanicoRef } from "@/core/domain/value-objects/mecanico-ref.vo";
-import { PriceAdjustments } from "@/core/domain/value-objects/price-adjustments.vo";
-import {
-  ReparacionTercero,
-  ReparacionTerceroProps,
-} from "@/core/domain/value-objects/reparacion-tercero.vo";
-import {
-  RepuestoUsado,
-  RepuestoUsadoProps,
-  RepuestoUsado as RepuestoUsadoVO,
-} from "@/core/domain/value-objects/repuesto-usado.vo";
+import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
 import { StockAction } from "@/core/domain/value-objects/stock-action.vo";
-import {
-  TrabajoRealizado,
-  TrabajoRealizadoProps,
-} from "@/core/domain/value-objects/trabajo-realizado.vo";
-import { EstadoOrdenReparacion, Prisma } from "@prisma/client";
+import { EstadoOrdenReparacion } from "@prisma/client";
 import { CreateOrdenDto } from "../dto/orden-reparacion.dto";
+import { OrdenReparacionDataFactory } from "../factories/orden-reparacion-data.factory";
 import { StockManagerService } from "./stock-manager.service";
 
 export class OrdenReparacionService {
@@ -65,51 +52,10 @@ export class OrdenReparacionService {
       input.estado ?? EstadoOrdenReparacion.Presupuestado
     );
 
-    // Ajustes de precio
-    const P = PriceAdjustments.normalize({
-      descuento: input.descuento,
-      incremento: input.incremento,
-      incrementoInterno: input.incrementoInterno,
-      porcentajeRecargo: input.porcentajeRecargo,
-    });
+    // Transformar datos usando factory
+    const { priceAdjustments, mecanicos, repuestos, trabajos, terceros } =
+      await OrdenReparacionDataFactory.transformInput(input, this.files);
 
-    // Mapear VOs
-    const mecanicos = (input.mecanicos ?? []).map(MecanicoRef.from);
-    const repuestos = (input.repuestosUsados ?? []).map(
-      (r): RepuestoUsadoVO =>
-        RepuestoUsadoVO.from({
-          stockId: r.stock.id,
-          unidadesConsumidas: r.unidadesConsumidas,
-          precioCompra: r.precioCompra,
-          precioVenta: r.precioVenta,
-          stockName: r.stock?.name,
-        } as RepuestoUsadoProps)
-    );
-    const trabajos = (input.trabajosRealizados ?? []).map(
-      (t): TrabajoRealizado =>
-        TrabajoRealizado.from({
-          descripcion: t.manoDeObra?.name ?? t.descripcion ?? "",
-          precioUnitario: t.precioUnitario,
-          diasParaRecordatorio: t.diasParaRecordatorio ?? null,
-        } as TrabajoRealizadoProps)
-    );
-
-    const terceros = await Promise.all(
-      (input.reparacionesDeTercero ?? []).map((t) =>
-        ReparacionTercero.from(
-          {
-            nombre: t.nombre,
-            proveedorId: t.proveedor.id,
-            precioCompra: t.precioCompra,
-            precioVenta: t.precioVenta,
-            recibo: t.recibo,
-          } as ReparacionTerceroProps,
-          this.files
-        )
-      )
-    );
-
-    // Generar acciones de stock para los repuestos
     const stockActions = this.stockManager.generateTakeActions(repuestos);
 
     // Validar stock suficiente
@@ -122,69 +68,20 @@ export class OrdenReparacionService {
 
     const controles = await tx.controlMecanico.findMany();
 
-    const orden = await this.repo.create(tx, {
-      data: {
-        autoId: Number(input.autoId),
-        fechaCreacion,
-        fechaEntradaReparacion: input.fechaEntradaReparacion ?? null,
-        fechaSalidaReparacion: input.fechaSalidaReparacion ?? null,
-        dolarId: dolar?.id ?? null,
-        kilometros: input.kilometros ?? null,
-        observacionesCliente: input.observacionesCliente,
-        observacionesOcultas: input.observacionesOcultas ?? null,
-        observacionesEntrada: input.observacionesEntrada ?? "[]",
-        observacionesSalida: input.observacionesSalida ?? "[]",
-        estado: estado.value,
-        pdfPath: input.pdfPath ?? null,
-        descuento: new Prisma.Decimal(P.descuento),
-        descripcionDescuento: input.descripcionDescuento ?? null,
-        incremento: new Prisma.Decimal(P.incremento),
-        descripcionIncremento: input.descripcionIncremento ?? null,
-        incrementoInterno: new Prisma.Decimal(P.incrementoInterno),
-        porcentajeRecargo: new Prisma.Decimal(P.porcentajeRecargo),
+    const createData = OrdenReparacionDataFactory.createData(
+      input,
+      estado,
+      priceAdjustments,
+      mecanicos,
+      repuestos,
+      trabajos,
+      terceros,
+      controles,
+      dolar,
+      fechaCreacion
+    );
 
-        mecanicos: { create: mecanicos.map((m) => ({ mecanicoId: m.id })) },
-        repuestosUsados: {
-          create: repuestos.map((r) => ({
-            precioCompra: r.precioCompra.asDecimal(),
-            precioVenta: r.precioVenta.asDecimal(),
-            unidadesConsumidas: r.unidadesConsumidas,
-            stock: { connect: { id: r.stockId } },
-          })),
-        },
-        reparacionesDeTercero: {
-          create: terceros.map((t) => ({
-            nombre: t.nombre,
-            precioCompra: t.precioCompra.asDecimal(),
-            precioVenta: t.precioVenta.asDecimal(),
-            proveedor: { connect: { id: t.proveedorId } },
-            recibo: t.recibo,
-          })),
-        },
-        trabajosRealizados: {
-          create: trabajos.map((t) => ({
-            descripcion: t.descripcion,
-            precioUnitario: t.precioUnitario.asDecimal(),
-            diasParaRecordatorio: t.diasParaRecordatorio,
-          })),
-        },
-        controlesEnReparacion: {
-          create: controles.map((c: any) => ({
-            controlMecanicoId: c.id,
-            valor: c.type === "checkbox" ? "false" : "",
-          })),
-        },
-      },
-      include: {
-        auto: { include: { owner: true } },
-        mecanicos: true,
-        repuestosUsados: true,
-        reparacionesDeTercero: true,
-        trabajosRealizados: true,
-        controlesEnReparacion: true,
-        pagos: true,
-      },
-    });
+    const orden = await this.repo.create(tx, createData);
 
     if (!estado.isPresupuestado()) {
       await this.inventory.consumeAndNotify(stockActions, { tx });
