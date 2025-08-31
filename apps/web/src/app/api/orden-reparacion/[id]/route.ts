@@ -496,8 +496,8 @@ export async function DELETE(
         new PrismaPagoMecanicoRepository(),
         notificationRepo,
         new PrismaInventoryAdapter(notificationRepo),
-        new DolarExchangeAdapter(),
-        new S3FileStorageAdapter()
+        new S3FileStorageAdapter(),
+        new DolarExchangeAdapter()
       )
     ).execute(dto.id);
 

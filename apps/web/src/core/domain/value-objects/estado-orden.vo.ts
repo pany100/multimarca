@@ -15,4 +15,7 @@ export class EstadoOrden {
   isTerminado() {
     return this.value === "Terminado";
   }
+  toPrisma() {
+    return this.value;
+  }
 }

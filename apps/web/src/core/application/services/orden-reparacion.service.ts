@@ -7,11 +7,9 @@ import {
   RepuestoFromOrderInDb,
 } from "@/core/domain/repositories/orden-reparacion.repository";
 import { PagoMecanicoRepository } from "@/core/domain/repositories/pago-mecanico.repository";
-import { EstadoOrden } from "@/core/domain/value-objects/estado-orden.vo";
+import { OrdenReparacionVO } from "@/core/domain/value-objects/orden-reparacion.vo";
 import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
 import { StockAction } from "@/core/domain/value-objects/stock-action.vo";
-import { EstadoOrdenReparacion } from "@prisma/client";
-import { CreateOrdenDto } from "../dto/orden-reparacion.dto";
 import { OrdenReparacionDataFactory } from "../factories/orden-reparacion-data.factory";
 import { StockManagerService } from "./stock-manager.service";
 
@@ -22,8 +20,8 @@ export class OrdenReparacionService {
     private readonly pagoMecanicoRepo: PagoMecanicoRepository,
     private readonly notificationRepo: NotificationRepository,
     private readonly inventory: InventoryPort,
-    private readonly exchange: ExchangeRatePort,
-    private readonly files: FileStoragePort
+    private readonly files: FileStoragePort,
+    private readonly exchange: ExchangeRatePort
   ) {}
 
   async delete({ tx }: any, id: number) {
@@ -50,48 +48,23 @@ export class OrdenReparacionService {
 
   async create(
     { tx }: any,
-    input: CreateOrdenDto
+    ordenReparacionVO: OrdenReparacionVO
   ): Promise<{ orden: any; stockActions: StockAction[] }> {
-    const estado = EstadoOrden.from(
-      input.estado ?? EstadoOrdenReparacion.Presupuestado
+    const stockActions = this.stockManager.generateTakeActions(
+      ordenReparacionVO.repuestosVO
     );
-
-    // Transformar datos usando factory
-    const { priceAdjustments, mecanicos, repuestos, trabajos, terceros } =
-      await OrdenReparacionDataFactory.transformInput(input, this.files);
-
-    const stockActions = this.stockManager.generateTakeActions(repuestos);
-
-    // Validar stock suficiente
     await this.inventory.ensureSufficient(stockActions);
 
-    const fechaCreacion = input.fechaCreacion
-      ? new Date(input.fechaCreacion)
-      : new Date();
-    const dolar = await this.exchange.getForDate(fechaCreacion);
-
-    const controles = await tx.controlMecanico.findMany();
-
-    const createData = OrdenReparacionDataFactory.createData(
-      input,
-      estado,
-      priceAdjustments,
-      mecanicos,
-      repuestos,
-      trabajos,
-      terceros,
-      controles,
-      dolar,
-      fechaCreacion
-    );
+    const createData =
+      OrdenReparacionDataFactory.createCreateDataToPersist(ordenReparacionVO);
 
     const orden = await this.repo.create(tx, createData);
 
-    if (!estado.isPresupuestado()) {
+    if (!ordenReparacionVO.estado.isPresupuestado()) {
       await this.inventory.consumeAndNotify(stockActions, { tx });
     }
 
-    if (estado.isTerminado()) {
+    if (ordenReparacionVO.estado.isTerminado()) {
       await this.pagoMecanicoRepo.create({ ordenReparacionId: orden.id });
       await this.notificationRepo.create({
         fecha: new Date(),

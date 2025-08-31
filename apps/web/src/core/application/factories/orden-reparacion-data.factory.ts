@@ -1,6 +1,7 @@
 import { FileStoragePort } from "@/core/domain/ports/file-storage.port";
 import { EstadoOrden } from "@/core/domain/value-objects/estado-orden.vo";
 import { MecanicoRef } from "@/core/domain/value-objects/mecanico-ref.vo";
+import { OrdenReparacionVO } from "@/core/domain/value-objects/orden-reparacion.vo";
 import { PriceAdjustments } from "@/core/domain/value-objects/price-adjustments.vo";
 import {
   ReparacionTercero,
@@ -14,7 +15,10 @@ import {
   TrabajoRealizado,
   TrabajoRealizadoProps,
 } from "@/core/domain/value-objects/trabajo-realizado.vo";
-import { Prisma } from "@prisma/client";
+import { PrismaControlMecanicoRepository } from "@/core/infrastructure/database/repositories/prisma-control-mecanico.repository";
+import { DolarExchangeAdapter } from "@/core/infrastructure/external/dolar-exchange.adapter";
+import { S3FileStorageAdapter } from "@/core/infrastructure/external/s3-file-storage.adapter";
+import { EstadoOrdenReparacion, Prisma } from "@prisma/client";
 import { CreateOrdenDto } from "../dto/orden-reparacion.dto";
 
 export interface OrdenReparacionCreateData {
@@ -28,6 +32,7 @@ export interface TransformedOrdenData {
   repuestos: RepuestoUsado[];
   trabajos: TrabajoRealizado[];
   terceros: ReparacionTercero[];
+  estado: EstadoOrden;
 }
 
 export class OrdenReparacionDataFactory {
@@ -81,57 +86,55 @@ export class OrdenReparacionDataFactory {
       )
     );
 
+    const estado = EstadoOrden.from(
+      input.estado ?? EstadoOrdenReparacion.Presupuestado
+    );
+
     return {
       priceAdjustments,
       mecanicos,
       repuestos,
       trabajos,
       terceros,
+      estado,
     };
   }
 
-  static createData(
-    input: CreateOrdenDto,
-    estado: EstadoOrden,
-    priceAdjustments: PriceAdjustments,
-    mecanicos: MecanicoRef[],
-    repuestos: RepuestoUsado[],
-    trabajos: TrabajoRealizado[],
-    terceros: ReparacionTercero[],
-    controles: any[],
-    dolar: { id: number } | null,
-    fechaCreacion: Date
+  static createCreateDataToPersist(
+    ordenReparacion: OrdenReparacionVO
   ): OrdenReparacionCreateData {
     return {
       data: {
-        autoId: Number(input.autoId),
-        fechaCreacion,
-        fechaEntradaReparacion: input.fechaEntradaReparacion ?? null,
-        fechaSalidaReparacion: input.fechaSalidaReparacion ?? null,
-        dolarId: dolar?.id ?? null,
-        kilometros: input.kilometros ?? null,
-        observacionesCliente: input.observacionesCliente,
-        observacionesOcultas: input.observacionesOcultas ?? null,
-        observacionesEntrada: input.observacionesEntrada ?? "[]",
-        observacionesSalida: input.observacionesSalida ?? "[]",
-        estado: estado.value,
-        pdfPath: input.pdfPath ?? null,
-        descuento: new Prisma.Decimal(priceAdjustments.descuento),
-        descripcionDescuento: input.descripcionDescuento ?? null,
-        incremento: new Prisma.Decimal(priceAdjustments.incremento),
-        descripcionIncremento: input.descripcionIncremento ?? null,
+        autoId: Number(ordenReparacion.autoId),
+        fechaCreacion: ordenReparacion.fechaCreacion,
+        fechaEntradaReparacion: ordenReparacion.fechaEntradaReparacion ?? null,
+        fechaSalidaReparacion: ordenReparacion.fechaSalidaReparacion ?? null,
+        dolarId: ordenReparacion.dolarId ?? null,
+        kilometros: ordenReparacion.kilometros ?? null,
+        observacionesCliente: ordenReparacion.observacionesCliente,
+        observacionesOcultas: ordenReparacion.observacionesOcultas ?? null,
+        observacionesEntrada: ordenReparacion.observacionesEntrada ?? "[]",
+        observacionesSalida: ordenReparacion.observacionesSalida ?? "[]",
+        estado: ordenReparacion.estado.toPrisma(),
+        pdfPath: ordenReparacion.pdfPath ?? null,
+        descuento: new Prisma.Decimal(ordenReparacion.descuento),
+        descripcionDescuento: ordenReparacion.descripcionDescuento ?? null,
+        incremento: new Prisma.Decimal(ordenReparacion.incremento),
+        descripcionIncremento: ordenReparacion.descripcionIncremento ?? null,
         incrementoInterno: new Prisma.Decimal(
-          priceAdjustments.incrementoInterno
+          ordenReparacion.incrementoInterno
         ),
         porcentajeRecargo: new Prisma.Decimal(
-          priceAdjustments.porcentajeRecargo
+          ordenReparacion.porcentajeRecargo
         ),
 
         mecanicos: {
-          create: mecanicos.map((m) => ({ mecanicoId: m.id })),
+          create: ordenReparacion.mecanicosVO.map((m) => ({
+            mecanicoId: m.id,
+          })),
         },
         repuestosUsados: {
-          create: repuestos.map((r) => ({
+          create: ordenReparacion.repuestosVO.map((r) => ({
             precioCompra: r.precioCompra.asDecimal(),
             precioVenta: r.precioVenta.asDecimal(),
             unidadesConsumidas: r.unidadesConsumidas,
@@ -139,7 +142,7 @@ export class OrdenReparacionDataFactory {
           })),
         },
         reparacionesDeTercero: {
-          create: terceros.map((t) => ({
+          create: ordenReparacion.tercerosVO.map((t) => ({
             nombre: t.nombre,
             precioCompra: t.precioCompra.asDecimal(),
             precioVenta: t.precioVenta.asDecimal(),
@@ -148,14 +151,14 @@ export class OrdenReparacionDataFactory {
           })),
         },
         trabajosRealizados: {
-          create: trabajos.map((t) => ({
+          create: ordenReparacion.trabajosVO.map((t) => ({
             descripcion: t.descripcion,
             precioUnitario: t.precioUnitario.asDecimal(),
             diasParaRecordatorio: t.diasParaRecordatorio,
           })),
         },
         controlesEnReparacion: {
-          create: controles.map((c: any) => ({
+          create: ordenReparacion.controlesEnReparacion.map((c: any) => ({
             controlMecanicoId: c.id,
             valor: c.type === "checkbox" ? "false" : "",
           })),
@@ -171,5 +174,54 @@ export class OrdenReparacionDataFactory {
         pagos: true,
       },
     };
+  }
+
+  static async transformInputToVO(
+    input: CreateOrdenDto
+  ): Promise<OrdenReparacionVO> {
+    // Transform to individual VOs first
+    const fileService = new S3FileStorageAdapter();
+    const exchange = new DolarExchangeAdapter();
+    const controlMecanico = new PrismaControlMecanicoRepository();
+    const {
+      priceAdjustments,
+      mecanicos,
+      repuestos,
+      trabajos,
+      terceros,
+      estado,
+    } = await this.transformInput(input, fileService);
+    const fechaCreacion = input.fechaCreacion
+      ? new Date(input.fechaCreacion)
+      : new Date();
+    const dolar = await exchange.getForDate(fechaCreacion);
+
+    const controles = await controlMecanico.findMany();
+    return OrdenReparacionVO.from({
+      priceAdjustmentsVO: priceAdjustments,
+      mecanicosVO: mecanicos,
+      repuestosVO: repuestos,
+      trabajosVO: trabajos,
+      tercerosVO: terceros,
+      autoId: input.autoId,
+      fechaEntradaReparacion: input.fechaEntradaReparacion,
+      fechaSalidaReparacion: input.fechaSalidaReparacion,
+      fechaCreacion: fechaCreacion,
+      kilometros: input.kilometros,
+      observacionesCliente: input.observacionesCliente,
+      observacionesEntrada: input.observacionesEntrada,
+      observacionesSalida: input.observacionesSalida,
+      observacionesOcultas: input.observacionesOcultas,
+      estado,
+      controlesEnReparacion: controles,
+      pdfPath: input.pdfPath,
+      descuento: input.descuento,
+      descripcionDescuento: input.descripcionDescuento,
+      incremento: input.incremento,
+      descripcionIncremento: input.descripcionIncremento,
+      incrementoInterno: input.incrementoInterno,
+      porcentajeRecargo: input.porcentajeRecargo,
+      dolarId: dolar?.id,
+    });
   }
 }

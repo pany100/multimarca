@@ -5,6 +5,7 @@ import type { NotifierPort } from "@/core/domain/ports/notifier.port";
 import type { UnitOfWork } from "@/core/domain/ports/uow.port";
 import { EstadoOrden } from "@/core/domain/value-objects/estado-orden.vo";
 import { EstadoOrdenReparacion } from "@prisma/client";
+import { OrdenReparacionDataFactory } from "../../factories/orden-reparacion-data.factory";
 import { OrdenReparacionService } from "../../services/orden-reparacion.service";
 
 export class CreateOrdenUseCase {
@@ -27,8 +28,11 @@ export class CreateOrdenUseCase {
         );
     }
 
+    const ordenReparacionVO =
+      await OrdenReparacionDataFactory.transformInputToVO(input);
+
     const creada = await this.uow.run(async (tx) => {
-      return await this.service.create(tx, input);
+      return await this.service.create(tx, ordenReparacionVO);
     });
 
     this.notifier.emit("newNotification");
