@@ -1,10 +1,12 @@
 import { ExchangeRatePort } from "@/core/domain/ports/exchange-rate.port";
 import { FileStoragePort } from "@/core/domain/ports/file-storage.port";
 import { InventoryPort } from "@/core/domain/ports/inventory.port";
+import { NotificationRepository } from "@/core/domain/repositories/notification.repository";
 import {
   OrdenReparacionRepository,
   RepuestoFromOrderInDb,
 } from "@/core/domain/repositories/orden-reparacion.repository";
+import { PagoMecanicoRepository } from "@/core/domain/repositories/pago-mecanico.repository";
 import { EstadoOrden } from "@/core/domain/value-objects/estado-orden.vo";
 import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
 import { StockAction } from "@/core/domain/value-objects/stock-action.vo";
@@ -17,6 +19,8 @@ export class OrdenReparacionService {
   constructor(
     private readonly stockManager: StockManagerService,
     private readonly repo: OrdenReparacionRepository,
+    private readonly pagoMecanicoRepo: PagoMecanicoRepository,
+    private readonly notificationRepo: NotificationRepository,
     private readonly inventory: InventoryPort,
     private readonly exchange: ExchangeRatePort,
     private readonly files: FileStoragePort
@@ -88,18 +92,14 @@ export class OrdenReparacionService {
     }
 
     if (estado.isTerminado()) {
-      await tx.pagoAMecanico.create({
-        data: { ordenReparacionId: orden.id },
-      });
-      await tx.notificacionInterna.create({
-        data: {
-          fecha: new Date(),
-          titulo: "Reparación Terminada",
-          texto: `La reparación del auto ${orden.autoId} se encuentra terminada. Pagar mano de obra.`,
-          leida: false,
-          ordenReparacionId: orden.id,
-          tipo: "REPARACION_TERMINADA",
-        },
+      await this.pagoMecanicoRepo.create({ ordenReparacionId: orden.id });
+      await this.notificationRepo.create({
+        fecha: new Date(),
+        titulo: "Reparación Terminada",
+        texto: `La reparación del auto ${orden.autoId} se encuentra terminada. Pagar mano de obra.`,
+        leida: false,
+        ordenReparacionId: orden.id,
+        tipo: "REPARACION_TERMINADA",
       });
     }
 

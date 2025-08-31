@@ -77,4 +77,12 @@ export class PrismaInventoryAdapter implements InventoryPort {
       });
     }
   }
+
+  async syncStockAndNotify(stockActions: StockAction[], deps?: { tx?: any }) {
+    const prisma = (await import("@/core/infrastructure/database/prisma"))
+      .prisma;
+    const db = deps?.tx?.tx ?? deps?.tx ?? prisma;
+    this.restoreStock(stockActions, { tx: db });
+    this.consumeAndNotify(stockActions, { tx: db });
+  }
 }

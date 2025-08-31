@@ -10,4 +10,8 @@ export interface InventoryPort {
     deps?: { tx?: any }
   ): Promise<void>;
   restoreStock(stockActions: StockAction[], deps?: { tx?: any }): Promise<void>;
+  syncStockAndNotify(
+    stockActions: StockAction[],
+    deps?: { tx?: any }
+  ): Promise<void>;
 }
