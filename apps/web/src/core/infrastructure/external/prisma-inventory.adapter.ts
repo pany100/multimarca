@@ -1,4 +1,5 @@
 import type { InventoryPort } from "@/core/domain/ports/inventory.port";
+import { NotificationRepository } from "@/core/domain/repositories/notification.repository";
 import {
   StockAction,
   StockActionType,
@@ -6,6 +7,7 @@ import {
 import { TipoNotificacionInterna } from "@prisma/client";
 
 export class PrismaInventoryAdapter implements InventoryPort {
+  constructor(private readonly notificationRepo: NotificationRepository) {}
   async ensureSufficient(stockActions: StockAction[], deps?: { tx?: any }) {
     const db =
       deps?.tx?.tx ??
@@ -46,15 +48,13 @@ export class PrismaInventoryAdapter implements InventoryPort {
         data: { units: { decrement: action.cantidad } },
       });
       if ((updated.units ?? 0) <= (updated.restockValue ?? 0)) {
-        await db.notificacionInterna.create({
-          data: {
-            fecha: new Date(),
-            titulo: `${updated.name} necesita reposición`,
-            texto: `El elemento ${updated.name} quedó con ${updated.units} unidades. Necesita reponer stock.`,
-            leida: false,
-            tipo: TipoNotificacionInterna.REPOSICION_STOCK,
-            stockId: updated.id,
-          },
+        await this.notificationRepo.create({
+          fecha: new Date(),
+          titulo: `${updated.name} necesita reposición`,
+          texto: `El elemento ${updated.name} quedó con ${updated.units} unidades. Necesita reponer stock.`,
+          leida: false,
+          tipo: TipoNotificacionInterna.REPOSICION_STOCK,
+          stockId: updated.id,
         });
       }
     }

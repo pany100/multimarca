@@ -487,15 +487,15 @@ export async function DELETE(
       },
       getOrdenQuerySchema
     );
-
+    const notificationRepo = new PrismaNotificationRepository();
     await new DeleteOrdenUseCase(
       new PrismaUnitOfWork(),
       new OrdenReparacionService(
         new StockManagerService(),
         new PrismaOrdenReparacionRepository(),
-        new PrismaNotificationRepository(),
         new PrismaPagoMecanicoRepository(),
-        new PrismaInventoryAdapter(),
+        notificationRepo,
+        new PrismaInventoryAdapter(notificationRepo),
         new DolarExchangeAdapter(),
         new S3FileStorageAdapter()
       )

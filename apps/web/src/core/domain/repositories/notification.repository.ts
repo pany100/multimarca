@@ -5,8 +5,9 @@ export type NotificationData = {
   titulo: string;
   texto: string;
   leida: boolean;
-  ordenReparacionId: number;
+  ordenReparacionId?: number;
   tipo: TipoNotificacionInterna;
+  stockId?: number;
 };
 
 export interface NotificationRepository {
