@@ -29,7 +29,7 @@ export class ReparacionTercero {
       Number(p.proveedorId),
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
-      p.recibo ?? null
+      recibo
     );
   }
 }

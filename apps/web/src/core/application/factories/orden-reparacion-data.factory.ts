@@ -131,6 +131,7 @@ export class OrdenReparacionDataFactory {
         mecanicos: {
           create: ordenReparacion.mecanicosVO.map((m) => ({
             mecanicoId: m.id,
+            detalle: m.detalle,
           })),
         },
         repuestosUsados: {

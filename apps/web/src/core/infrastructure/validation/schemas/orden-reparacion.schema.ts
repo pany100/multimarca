@@ -3,15 +3,15 @@ import { z } from "zod";
 export const repuestoSchema = z.object({
   stock: z.object({ id: z.coerce.number(), name: z.string().optional() }),
   unidadesConsumidas: z.coerce.number().int().positive(),
-  precioCompra: z.number().optional(),
-  precioVenta: z.number().optional(),
+  precioCompra: z.coerce.number().optional(),
+  precioVenta: z.coerce.number().optional(),
 });
 
 export const terceroSchema = z.object({
   nombre: z.string().min(1),
   proveedor: z.object({ id: z.coerce.number() }),
-  precioCompra: z.number().optional(),
-  precioVenta: z.number().optional(),
+  precioCompra: z.coerce.number().optional(),
+  precioVenta: z.coerce.number().optional(),
   recibo: z.string().nullable().optional(),
 });
 
@@ -27,7 +27,7 @@ export const createOrdenSchema = z.object({
   fechaEntradaReparacion: z.coerce.date().nullable().optional(),
   fechaSalidaReparacion: z.coerce.date().nullable().optional(),
   fechaCreacion: z.coerce.date().optional(),
-  kilometros: z.number().nullable().optional(),
+  kilometros: z.coerce.number().nullable().optional(),
   observacionesCliente: z.string(),
   observacionesEntrada: z.string().optional(),
   observacionesSalida: z.string().optional(),
@@ -35,17 +35,19 @@ export const createOrdenSchema = z.object({
   estado: z.string().optional(),
   pdfPath: z.string().nullable().optional(),
 
-  mecanicos: z.array(z.object({ id: z.coerce.number() })),
-  repuestosUsados: z.array(repuestoSchema),
-  reparacionesDeTercero: z.array(terceroSchema),
-  trabajosRealizados: z.array(trabajoSchema),
+  mecanicos: z
+    .array(z.object({ id: z.coerce.number(), detalle: z.string().optional() }))
+    .optional(),
+  repuestosUsados: z.array(repuestoSchema).optional(),
+  reparacionesDeTercero: z.array(terceroSchema).optional(),
+  trabajosRealizados: z.array(trabajoSchema).optional(),
 
-  descuento: z.number().optional(),
+  descuento: z.coerce.number().optional(),
   descripcionDescuento: z.string().nullable().optional(),
-  incremento: z.number().optional(),
+  incremento: z.coerce.number().optional(),
   descripcionIncremento: z.string().nullable().optional(),
-  incrementoInterno: z.number().optional(),
-  porcentajeRecargo: z.number().optional(),
+  incrementoInterno: z.coerce.number().optional(),
+  porcentajeRecargo: z.coerce.number().optional(),
 });
 
 export const listOrdenesQuerySchema = z.object({
