@@ -1,3 +1,4 @@
+import { S3FileStorageAdapter } from "@/core/infrastructure/external/s3-file-storage.adapter";
 import { EstadoOrden } from "./estado-orden.vo";
 import { MecanicoRef } from "./mecanico-ref.vo";
 import { PriceAdjustments } from "./price-adjustments.vo";
@@ -6,6 +7,7 @@ import { RepuestoUsado } from "./repuesto-usado.vo";
 import { TrabajoRealizado } from "./trabajo-realizado.vo";
 
 export type OrdenReparacionProps = {
+  id?: number;
   priceAdjustmentsVO: PriceAdjustments;
   mecanicosVO: MecanicoRef[];
   repuestosVO: RepuestoUsado[];
@@ -30,15 +32,20 @@ export type OrdenReparacionProps = {
   porcentajeRecargo?: number;
   dolarId?: number;
   controlesEnReparacion?: ControlesEnReparacionProps[];
+  revisadoPorId?: number;
+  detalleControles?: string;
+  recibos?: string[];
 };
 
 type ControlesEnReparacionProps = {
   id: number;
-  type: string;
+  type?: string;
+  valor?: string;
 };
 
 export class OrdenReparacionVO {
   constructor(
+    public readonly id: number | null,
     public readonly priceAdjustmentsVO: PriceAdjustments,
     public readonly mecanicosVO: MecanicoRef[],
     public readonly repuestosVO: RepuestoUsado[],
@@ -62,11 +69,36 @@ export class OrdenReparacionVO {
     public readonly incrementoInterno: number = 0,
     public readonly porcentajeRecargo: number = 0,
     public readonly dolarId: number | null = null,
-    public readonly controlesEnReparacion: ControlesEnReparacionProps[] = []
+    public readonly controlesEnReparacion: ControlesEnReparacionProps[] = [],
+    public readonly revisadoPorId: number | null = null,
+    public readonly detalleControles: string | null = null,
+    public readonly recibos: string[] = []
   ) {}
 
-  static from(props: OrdenReparacionProps): OrdenReparacionVO {
+  static async from(
+    props: OrdenReparacionProps,
+    pdfFile?: File | null
+  ): Promise<OrdenReparacionVO> {
+    const fileService = new S3FileStorageAdapter();
+    let pdfPath = props.pdfPath || null;
+    if (pdfFile) {
+      pdfPath = await fileService.uploadFileAndGetUrl(pdfFile, "scanner");
+    }
+    let recibosUrls: string[] = [];
+    const recibosToProcess = props.recibos || [];
+    if (recibosToProcess.length > 0) {
+      recibosUrls = await Promise.all(
+        recibosToProcess.map(async (recibo: string) => {
+          if (recibo && recibo.includes("/tmp/")) {
+            return await fileService.moveTempTo(recibo, "recibos");
+          }
+          return recibo;
+        })
+      );
+    }
+
     return new OrdenReparacionVO(
+      props.id || null,
       props.priceAdjustmentsVO,
       props.mecanicosVO,
       props.repuestosVO,
@@ -82,7 +114,7 @@ export class OrdenReparacionVO {
       props.observacionesSalida,
       props.observacionesOcultas,
       props.estado,
-      props.pdfPath,
+      pdfPath,
       props.descuento,
       props.descripcionDescuento,
       props.incremento,
@@ -90,7 +122,10 @@ export class OrdenReparacionVO {
       props.incrementoInterno,
       props.porcentajeRecargo,
       props.dolarId,
-      props.controlesEnReparacion
+      props.controlesEnReparacion,
+      props.revisadoPorId,
+      props.detalleControles,
+      recibosUrls
     );
   }
 }

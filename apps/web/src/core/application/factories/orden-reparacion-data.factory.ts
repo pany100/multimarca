@@ -19,11 +19,17 @@ import { PrismaControlMecanicoRepository } from "@/core/infrastructure/database/
 import { DolarExchangeAdapter } from "@/core/infrastructure/external/dolar-exchange.adapter";
 import { S3FileStorageAdapter } from "@/core/infrastructure/external/s3-file-storage.adapter";
 import { EstadoOrdenReparacion, Prisma } from "@prisma/client";
-import { CreateOrdenDto } from "../dto/orden-reparacion.dto";
+import { CreateOrdenDto, UpdateOrdenDto } from "../dto/orden-reparacion.dto";
 
 export interface OrdenReparacionCreateData {
   data: Prisma.OrdenReparacionUncheckedCreateInput;
   include: Prisma.OrdenReparacionInclude;
+}
+
+export interface OrdenReparacionUpdateData {
+  data: Prisma.OrdenReparacionUncheckedUpdateInput;
+  include: Prisma.OrdenReparacionInclude;
+  where: Prisma.OrdenReparacionWhereUniqueInput;
 }
 
 export interface TransformedOrdenData {
@@ -224,5 +230,159 @@ export class OrdenReparacionDataFactory {
       porcentajeRecargo: input.porcentajeRecargo,
       dolarId: dolar?.id,
     });
+  }
+
+  static async transformUpdateInputToVO(
+    input: UpdateOrdenDto,
+    scannerPdfFile: File | null
+  ): Promise<OrdenReparacionVO> {
+    const fileService = new S3FileStorageAdapter();
+    const exchange = new DolarExchangeAdapter();
+    const controlMecanico = new PrismaControlMecanicoRepository();
+    const {
+      priceAdjustments,
+      mecanicos,
+      repuestos,
+      trabajos,
+      terceros,
+      estado,
+    } = await this.transformInput(input, fileService);
+    const fechaCreacion = input.fechaCreacion
+      ? new Date(input.fechaCreacion)
+      : new Date();
+    const dolar = await exchange.getForDate(fechaCreacion);
+    return OrdenReparacionVO.from(
+      {
+        id: input.id,
+        priceAdjustmentsVO: priceAdjustments,
+        mecanicosVO: mecanicos,
+        repuestosVO: repuestos,
+        trabajosVO: trabajos,
+        tercerosVO: terceros,
+        autoId: input.autoId,
+        fechaEntradaReparacion: input.fechaEntradaReparacion,
+        fechaSalidaReparacion: input.fechaSalidaReparacion,
+        fechaCreacion: fechaCreacion,
+        kilometros: input.kilometros,
+        observacionesCliente: input.observacionesCliente,
+        observacionesEntrada: input.observacionesEntrada,
+        observacionesSalida: input.observacionesSalida,
+        observacionesOcultas: input.observacionesOcultas,
+        estado,
+        recibos: input.recibos,
+        revisadoPorId: input.revisadoPorId,
+        pdfPath: input.pdfPath,
+        descuento: input.descuento,
+        descripcionDescuento: input.descripcionDescuento,
+        incremento: input.incremento,
+        descripcionIncremento: input.descripcionIncremento,
+        incrementoInterno: input.incrementoInterno,
+        porcentajeRecargo: input.porcentajeRecargo,
+        dolarId: dolar?.id,
+        controlesEnReparacion: input.controlesEnReparacion,
+        detalleControles: input.detalleControles,
+      },
+      scannerPdfFile
+    );
+  }
+
+  static createUpdateDataToPersist(
+    ordenReparacion: OrdenReparacionVO
+  ): OrdenReparacionUpdateData {
+    return {
+      where: { id: Number(ordenReparacion.id) },
+      data: {
+        autoId: ordenReparacion.autoId,
+        fechaEntradaReparacion: ordenReparacion.fechaEntradaReparacion,
+        fechaSalidaReparacion: ordenReparacion.fechaSalidaReparacion,
+        fechaCreacion: ordenReparacion.fechaCreacion,
+        kilometros: ordenReparacion.kilometros,
+        observacionesCliente: ordenReparacion.observacionesCliente,
+        observacionesEntrada: ordenReparacion.observacionesEntrada,
+        observacionesOcultas: ordenReparacion.observacionesOcultas,
+        observacionesSalida: ordenReparacion.observacionesSalida,
+        estado: ordenReparacion.estado.toPrisma(),
+        recibos: ordenReparacion.recibos,
+        revisadoPorId: ordenReparacion.revisadoPorId,
+        dolarId: ordenReparacion.dolarId,
+        descuento: new Prisma.Decimal(ordenReparacion.descuento),
+        porcentajeRecargo: new Prisma.Decimal(
+          ordenReparacion.porcentajeRecargo
+        ),
+        mecanicos: {
+          deleteMany: {},
+          create: ordenReparacion.mecanicosVO.map((m) => ({
+            mecanicoId: m.id,
+            detalle: m.detalle,
+          })),
+        },
+        repuestosUsados: {
+          deleteMany: {},
+          create: ordenReparacion.repuestosVO.map((r) => ({
+            precioCompra: r.precioCompra.asDecimal(),
+            precioVenta: r.precioVenta.asDecimal(),
+            unidadesConsumidas: r.unidadesConsumidas,
+            stockId: r.stockId,
+          })),
+        },
+        reparacionesDeTercero: {
+          deleteMany: {},
+          create: ordenReparacion.tercerosVO.map((t) => ({
+            nombre: t.nombre,
+            precioCompra: t.precioCompra.asDecimal(),
+            precioVenta: t.precioVenta.asDecimal(),
+            proveedorId: t.proveedorId,
+            recibo: t.recibo,
+          })),
+        },
+        trabajosRealizados: {
+          deleteMany: {},
+          create: ordenReparacion.trabajosVO.map((t) => ({
+            descripcion: t.descripcion,
+            precioUnitario: t.precioUnitario.asDecimal(),
+            diasParaRecordatorio: t.diasParaRecordatorio,
+          })),
+        },
+        controlesEnReparacion: {
+          upsert: ordenReparacion.controlesEnReparacion.map((control: any) => ({
+            where: { id: control.id },
+            update: {
+              valor: control.valor,
+            },
+            create: {
+              controlMecanicoId: control.id,
+              valor: control.valor,
+            },
+          })),
+        },
+        detalleControles: ordenReparacion.detalleControles,
+        descripcionDescuento: ordenReparacion.descripcionDescuento,
+        pdfPath: ordenReparacion.pdfPath,
+        incremento: new Prisma.Decimal(ordenReparacion.incremento),
+        descripcionIncremento: ordenReparacion.descripcionIncremento,
+        incrementoInterno: new Prisma.Decimal(
+          ordenReparacion.incrementoInterno
+        ),
+      },
+      include: {
+        auto: {
+          include: {
+            owner: true,
+          },
+        },
+        revisadoPor: true,
+        mecanicos: true,
+        repuestosUsados: true,
+        reparacionesDeTercero: true,
+        trabajosRealizados: true,
+        controlesEnReparacion: true,
+        pagos: true,
+        ingresos: {
+          include: {
+            dolar: true,
+          },
+        },
+      },
+    };
   }
 }

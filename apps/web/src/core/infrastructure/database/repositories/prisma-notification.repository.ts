@@ -3,9 +3,21 @@ import {
   NotificationRepository,
 } from "@/core/domain/repositories/notification.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
+import { TipoNotificacionInterna } from "@prisma/client";
 
 export class PrismaNotificationRepository implements NotificationRepository {
   create(data: NotificationData): Promise<any> {
     return prisma.notificacionInterna.create({ data });
+  }
+  findByOrderIdAndType(
+    id: number,
+    tipo: TipoNotificacionInterna
+  ): Promise<any> {
+    return prisma.notificacionInterna.findFirst({
+      where: {
+        ordenReparacionId: id,
+        tipo,
+      },
+    });
   }
 }

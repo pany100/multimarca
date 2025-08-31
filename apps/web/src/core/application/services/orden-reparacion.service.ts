@@ -1,27 +1,28 @@
-import { ExchangeRatePort } from "@/core/domain/ports/exchange-rate.port";
 import { FileStoragePort } from "@/core/domain/ports/file-storage.port";
 import { InventoryPort } from "@/core/domain/ports/inventory.port";
-import { NotificationRepository } from "@/core/domain/repositories/notification.repository";
 import {
   OrdenReparacionRepository,
+  OrdenReparacionWithRelations,
   RepuestoFromOrderInDb,
 } from "@/core/domain/repositories/orden-reparacion.repository";
-import { PagoMecanicoRepository } from "@/core/domain/repositories/pago-mecanico.repository";
 import { OrdenReparacionVO } from "@/core/domain/value-objects/orden-reparacion.vo";
 import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
-import { StockAction } from "@/core/domain/value-objects/stock-action.vo";
+import { OrdenReparacion, Prisma } from "@prisma/client";
 import { OrdenReparacionDataFactory } from "../factories/orden-reparacion-data.factory";
 import { StockManagerService } from "./stock-manager.service";
+
+type OrdenReparacionWithReparaciones = Prisma.OrdenReparacionGetPayload<{
+  include: {
+    reparacionesDeTercero: { select: { recibo: true } };
+  };
+}>;
 
 export class OrdenReparacionService {
   constructor(
     private readonly stockManager: StockManagerService,
     private readonly repo: OrdenReparacionRepository,
-    private readonly pagoMecanicoRepo: PagoMecanicoRepository,
-    private readonly notificationRepo: NotificationRepository,
     private readonly inventory: InventoryPort,
-    private readonly files: FileStoragePort,
-    private readonly exchange: ExchangeRatePort
+    private readonly files: FileStoragePort
   ) {}
 
   async delete({ tx }: any, id: number) {
@@ -49,33 +50,81 @@ export class OrdenReparacionService {
   async create(
     { tx }: any,
     ordenReparacionVO: OrdenReparacionVO
-  ): Promise<{ orden: any; stockActions: StockAction[] }> {
+  ): Promise<OrdenReparacion> {
     const stockActions = this.stockManager.generateTakeActions(
       ordenReparacionVO.repuestosVO
     );
     await this.inventory.ensureSufficient(stockActions);
+    if (ordenReparacionVO.estado.isPresupuestado()) {
+      throw new Error("Estado no permitido");
+    }
 
     const createData =
       OrdenReparacionDataFactory.createCreateDataToPersist(ordenReparacionVO);
 
     const orden = await this.repo.create(tx, createData);
 
-    if (!ordenReparacionVO.estado.isPresupuestado()) {
-      await this.inventory.consumeAndNotify(stockActions, { tx });
+    await this.inventory.consumeAndNotify(stockActions, { tx });
+
+    return orden;
+  }
+
+  async update(
+    { tx }: any,
+    ordenReparacionVO: OrdenReparacionVO
+  ): Promise<OrdenReparacionWithRelations> {
+    if (!ordenReparacionVO.id) throw new Error("Id es requerido");
+    const existingOrder = await this.repo.findById(ordenReparacionVO.id);
+    if (!existingOrder) throw new Error("Orden de reparación no encontrada");
+
+    if (ordenReparacionVO.estado.isPresupuestado()) {
+      throw new Error("Estado no permitido");
+    }
+    const existingRepuestosVO = existingOrder.repuestosUsados.map(
+      (r: RepuestoFromOrderInDb): RepuestoUsado => RepuestoUsado.fromOrderDb(r)
+    );
+    const stockActions = this.stockManager.generateSyncActions(
+      existingRepuestosVO,
+      ordenReparacionVO.repuestosVO
+    );
+    await this.inventory.ensureSufficient(stockActions);
+    const filesToRemove = this.getFilesToDelete(
+      existingOrder,
+      ordenReparacionVO
+    );
+
+    const updateData =
+      OrdenReparacionDataFactory.createUpdateDataToPersist(ordenReparacionVO);
+
+    const updated = await this.repo.update(tx, updateData);
+    await this.inventory.syncStockAndNotify(stockActions, { tx });
+    for (const file of filesToRemove) {
+      await this.files.removeFile(file);
     }
 
-    if (ordenReparacionVO.estado.isTerminado()) {
-      await this.pagoMecanicoRepo.create({ ordenReparacionId: orden.id });
-      await this.notificationRepo.create({
-        fecha: new Date(),
-        titulo: "Reparación Terminada",
-        texto: `La reparación del auto ${orden.autoId} se encuentra terminada. Pagar mano de obra.`,
-        leida: false,
-        ordenReparacionId: orden.id,
-        tipo: "REPARACION_TERMINADA",
-      });
+    return updated;
+  }
+
+  getFilesToDelete(
+    existingOrder: OrdenReparacionWithReparaciones,
+    newOrder: OrdenReparacionVO
+  ): string[] {
+    const existingFiles = existingOrder.reparacionesDeTercero
+      .map((r) => r.recibo)
+      .filter((r) => r !== null);
+    if (existingOrder.pdfPath) {
+      existingFiles.push(existingOrder.pdfPath);
     }
 
-    return { orden, stockActions };
+    const newFiles = newOrder.tercerosVO
+      .map((r) => r.recibo)
+      .filter((r) => r !== null);
+    if (newOrder.pdfPath) {
+      newFiles.push(newOrder.pdfPath);
+    }
+    const filesToRemove = existingFiles.filter(
+      (file) => !newFiles.includes(file)
+    );
+    return filesToRemove;
   }
 }

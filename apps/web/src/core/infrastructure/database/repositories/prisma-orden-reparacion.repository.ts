@@ -2,6 +2,7 @@ import type {
   CreateOrdenPersist,
   ListOrdenesParams,
   OrdenReparacionRepository,
+  UpdateOrdenPersist,
 } from "@/core/domain/repositories/orden-reparacion.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
@@ -64,6 +65,10 @@ export class PrismaOrdenReparacionRepository
 
   async create(tx: any, payload: CreateOrdenPersist["data"]) {
     return tx.ordenReparacion.create(payload);
+  }
+
+  async update(tx: any, payload: UpdateOrdenPersist["data"]) {
+    return tx.ordenReparacion.update(payload);
   }
 
   async findById(id: number) {

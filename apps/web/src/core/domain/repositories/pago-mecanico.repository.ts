@@ -4,4 +4,5 @@ export type PagoMecanicoData = {
 
 export interface PagoMecanicoRepository {
   create(data: PagoMecanicoData): Promise<any>;
+  findByOrdenId(id: number): Promise<any>;
 }
