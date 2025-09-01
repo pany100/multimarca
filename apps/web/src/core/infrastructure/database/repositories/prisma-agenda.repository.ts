@@ -30,7 +30,7 @@ export class PrismaAgendaRepository implements AgendaRepository {
 
     if (onlyPending) where.hecho = false;
 
-    const skip = (page - 1) * size;
+    const skip = page * size;
     const [items, total] = await Promise.all([
       prisma.recordatorioAgenda.findMany({
         where,
