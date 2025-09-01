@@ -19,6 +19,10 @@ export class GetOrdenUseCase {
     return {
       ...ordenReparacionWithoutMecanicos,
       mecanicos: mecanicosWithoutMecanico,
+      recibos: order.recibosFiles.map(
+        (el: { finalPath: string }) => el.finalPath
+      ),
+      pdfPath: order.scannerFile?.finalPath,
     };
   }
 }

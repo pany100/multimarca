@@ -116,6 +116,8 @@ export class PrismaOrdenReparacionRepository
           },
         },
         pagos: true,
+        recibosFiles: true,
+        scannerFile: true,
       },
     });
   }
