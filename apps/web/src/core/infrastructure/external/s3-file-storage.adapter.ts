@@ -1,4 +1,5 @@
 import type { FileStoragePort } from "@/core/domain/ports/file-storage.port";
+import { uploadFileAndGetUrl } from "@/shared/utils/pdf-file.helper";
 import { deleteFileFromS3, moveFileInS3 } from "@/utils/s3Helper";
 
 export class S3FileStorageAdapter implements FileStoragePort {
@@ -7,7 +8,7 @@ export class S3FileStorageAdapter implements FileStoragePort {
   }
 
   uploadFileAndGetUrl(file: File, folder: string): Promise<string> {
-    return this.uploadFileAndGetUrl(file, folder);
+    return uploadFileAndGetUrl(file, folder);
   }
 
   removeFile(file: string): Promise<void> {

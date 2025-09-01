@@ -1,4 +1,3 @@
-import { S3FileStorageAdapter } from "@/core/infrastructure/external/s3-file-storage.adapter";
 import { EstadoOrden } from "./estado-orden.vo";
 import { MecanicoRef } from "./mecanico-ref.vo";
 import { PriceAdjustments } from "./price-adjustments.vo";
@@ -79,24 +78,6 @@ export class OrdenReparacionVO {
     props: OrdenReparacionProps,
     pdfFile?: File | null
   ): Promise<OrdenReparacionVO> {
-    const fileService = new S3FileStorageAdapter();
-    let pdfPath = props.pdfPath || null;
-    if (pdfFile) {
-      pdfPath = await fileService.uploadFileAndGetUrl(pdfFile, "scanner");
-    }
-    let recibosUrls: string[] = [];
-    const recibosToProcess = props.recibos || [];
-    if (recibosToProcess.length > 0) {
-      recibosUrls = await Promise.all(
-        recibosToProcess.map(async (recibo: string) => {
-          if (recibo && recibo.includes("/tmp/")) {
-            return await fileService.moveTempTo(recibo, "recibos");
-          }
-          return recibo;
-        })
-      );
-    }
-
     return new OrdenReparacionVO(
       props.id || null,
       props.priceAdjustmentsVO,
@@ -114,7 +95,7 @@ export class OrdenReparacionVO {
       props.observacionesSalida,
       props.observacionesOcultas,
       props.estado,
-      pdfPath,
+      props.pdfPath,
       props.descuento,
       props.descripcionDescuento,
       props.incremento,
@@ -125,7 +106,7 @@ export class OrdenReparacionVO {
       props.controlesEnReparacion,
       props.revisadoPorId,
       props.detalleControles,
-      recibosUrls
+      props.recibos
     );
   }
 }
