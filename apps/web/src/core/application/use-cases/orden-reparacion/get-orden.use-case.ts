@@ -22,7 +22,6 @@ export class GetOrdenUseCase {
         recibo: el.reciboFile?.finalPath || el.reciboFile?.tempPath || null,
       })
     );
-    console.log(reparacionesDeTercero);
     return {
       ...ordenReparacionWithoutMecanicos,
       mecanicos: mecanicosWithoutMecanico,

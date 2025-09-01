@@ -1,5 +1,5 @@
-import { FileStoragePort } from "@/core/domain/ports/file-storage.port";
 import { InventoryPort } from "@/core/domain/ports/inventory.port";
+import { CustomFileRepository } from "@/core/domain/repositories/custom-file.repository";
 import {
   OrdenReparacionRepository,
   OrdenReparacionWithRelations,
@@ -7,7 +7,7 @@ import {
 } from "@/core/domain/repositories/orden-reparacion.repository";
 import { OrdenReparacionVO } from "@/core/domain/value-objects/orden-reparacion.vo";
 import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
-import { OrdenReparacion, Prisma } from "@prisma/client";
+import { EstadoArchivo, OrdenReparacion, Prisma } from "@prisma/client";
 import { OrdenReparacionDBMapper } from "../mapper/orden-reparacion-db.mapper";
 import { StockManagerService } from "./stock-manager.service";
 
@@ -22,7 +22,7 @@ export class OrdenReparacionService {
     private readonly stockManager: StockManagerService,
     private readonly repo: OrdenReparacionRepository,
     private readonly inventory: InventoryPort,
-    private readonly files: FileStoragePort
+    private readonly customFileRepo: CustomFileRepository
   ) {}
 
   async delete({ tx }: any, id: number) {
@@ -86,22 +86,25 @@ export class OrdenReparacionService {
       ordenReparacionVO.repuestosVO
     );
     await this.inventory.ensureSufficient(stockActions);
-    const filesToRemove = this.getFilesToDelete(
-      existingOrder,
-      ordenReparacionVO
-    );
-    console.log("#####################");
-    console.log(ordenReparacionVO);
-    console.log("#####################");
+
+    const existingScannerFile = existingOrder.scannerFile;
+    const scannerFileId = existingScannerFile?.id;
     const updateData =
       OrdenReparacionDBMapper.transformToUpdateData(ordenReparacionVO);
-    console.log(JSON.stringify(updateData, null, 2));
-    console.log("#####################");
 
     const updated = await this.repo.update(tx, updateData);
     await this.inventory.syncStockAndNotify(stockActions, { tx });
-    for (const file of filesToRemove) {
-      await this.files.removeFile(file);
+    if (scannerFileId) {
+      await this.customFileRepo.update(
+        {
+          id: Number(scannerFileId),
+          status: EstadoArchivo.Borrado,
+          ordenReparacionId: null,
+        },
+        {
+          tx,
+        }
+      );
     }
 
     return updated;

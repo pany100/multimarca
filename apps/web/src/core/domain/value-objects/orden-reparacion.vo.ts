@@ -31,8 +31,8 @@ export type OrdenReparacionProps = {
   porcentajeRecargo?: number;
   dolarId?: number;
   controlesEnReparacion?: ControlesEnReparacionProps[];
-  revisadoPorId?: number;
-  detalleControles?: string;
+  revisadoPorId?: number | null;
+  detalleControles?: string | null;
   recibos?: string[];
 };
 
@@ -74,10 +74,7 @@ export class OrdenReparacionVO {
     public readonly recibos: string[] = []
   ) {}
 
-  static async from(
-    props: OrdenReparacionProps,
-    pdfFile?: File | null
-  ): Promise<OrdenReparacionVO> {
+  static async from(props: OrdenReparacionProps): Promise<OrdenReparacionVO> {
     return new OrdenReparacionVO(
       props.id || null,
       props.priceAdjustmentsVO,

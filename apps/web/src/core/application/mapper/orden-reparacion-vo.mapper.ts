@@ -53,7 +53,7 @@ export class OrdenReparacionVOMapper {
 
     const terceros = await Promise.all(
       (input.reparacionesDeTercero ?? []).map((t) =>
-        ReparacionTercero.fromHttpInput(t, fileService)
+        ReparacionTercero.fromHttpInput(t)
       )
     );
 
@@ -138,38 +138,40 @@ export class OrdenReparacionVOMapper {
       ? new Date(input.fechaCreacion)
       : new Date();
     const dolar = await exchange.getForDate(fechaCreacion);
-    return OrdenReparacionVO.from(
-      {
-        id: input.id,
-        priceAdjustmentsVO: priceAdjustments,
-        mecanicosVO: mecanicos,
-        repuestosVO: repuestos,
-        trabajosVO: trabajos,
-        tercerosVO: terceros,
-        autoId: input.autoId,
-        fechaEntradaReparacion: input.fechaEntradaReparacion,
-        fechaSalidaReparacion: input.fechaSalidaReparacion,
-        fechaCreacion: fechaCreacion,
-        kilometros: input.kilometros,
-        observacionesCliente: input.observacionesCliente,
-        observacionesEntrada: input.observacionesEntrada,
-        observacionesSalida: input.observacionesSalida,
-        observacionesOcultas: input.observacionesOcultas,
-        estado,
-        recibos: input.recibos,
-        revisadoPorId: input.revisadoPorId,
-        pdfPath: input.pdfPath,
-        descuento: input.descuento,
-        descripcionDescuento: input.descripcionDescuento,
-        incremento: input.incremento,
-        descripcionIncremento: input.descripcionIncremento,
-        incrementoInterno: input.incrementoInterno,
-        porcentajeRecargo: input.porcentajeRecargo,
-        dolarId: dolar?.id,
-        controlesEnReparacion: input.controlesEnReparacion,
-        detalleControles: input.detalleControles,
-      },
-      scannerPdfFile
-    );
+    let pdfPath = input.pdfPath;
+    if (scannerPdfFile) {
+      pdfPath = await fileService.uploadFileAndGetUrl(scannerPdfFile, "tmp");
+    }
+
+    return OrdenReparacionVO.from({
+      id: input.id,
+      priceAdjustmentsVO: priceAdjustments,
+      mecanicosVO: mecanicos,
+      repuestosVO: repuestos,
+      trabajosVO: trabajos,
+      tercerosVO: terceros,
+      autoId: input.autoId,
+      fechaEntradaReparacion: input.fechaEntradaReparacion,
+      fechaSalidaReparacion: input.fechaSalidaReparacion,
+      fechaCreacion: fechaCreacion,
+      kilometros: input.kilometros,
+      observacionesCliente: input.observacionesCliente,
+      observacionesEntrada: input.observacionesEntrada,
+      observacionesSalida: input.observacionesSalida,
+      observacionesOcultas: input.observacionesOcultas,
+      estado,
+      recibos: input.recibos,
+      revisadoPorId: input.revisadoPorId,
+      pdfPath,
+      descuento: input.descuento,
+      descripcionDescuento: input.descripcionDescuento,
+      incremento: input.incremento,
+      descripcionIncremento: input.descripcionIncremento,
+      incrementoInterno: input.incrementoInterno,
+      porcentajeRecargo: input.porcentajeRecargo,
+      dolarId: dolar?.id,
+      controlesEnReparacion: input.controlesEnReparacion,
+      detalleControles: input.detalleControles,
+    });
   }
 }

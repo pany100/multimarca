@@ -77,7 +77,7 @@ export const updateOrdenSchema = z.object({
   observacionesEntrada: z.string().optional(),
   observacionesSalida: z.string().optional(),
   observacionesOcultas: z.string().nullable().optional(),
-  revisadoPorId: z.coerce.number().optional(),
+  revisadoPorId: z.coerce.number().nullable().optional(),
   estado: z.string().optional(),
   pdfPath: z.string().nullable().optional(),
   mecanicos: z
@@ -88,7 +88,7 @@ export const updateOrdenSchema = z.object({
   trabajosRealizados: z.array(trabajoSchema).optional(),
   controlesEnReparacion: z.array(controlesSchema).optional(),
   recibos: z.array(z.string()).optional(),
-  detalleControles: z.string().optional(),
+  detalleControles: z.string().nullable().optional(),
   descuento: z.coerce.number().optional(),
   descripcionDescuento: z.string().nullable().optional(),
   incremento: z.coerce.number().optional(),

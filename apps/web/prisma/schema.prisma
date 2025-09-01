@@ -363,7 +363,7 @@ model CustomFile {
   ordenReparacionId    Int?              @unique
   ordenReparacion      OrdenReparacion?  @relation("ORepScanner",fields:     [ordenReparacionId],references: [id],onDelete:   SetNull)
 
-  reciboORepId         Int? @unique
+  reciboORepId         Int?
   reciboDeORep         OrdenReparacion?  @relation("ORepRecibos",fields:     [reciboORepId],references: [id],onDelete:   SetNull)
 
   reparacionDeTerceroId         Int? @unique

@@ -163,12 +163,26 @@ export class OrdenReparacionDBMapper {
         },
         detalleControles: ordenReparacion.detalleControles,
         descripcionDescuento: ordenReparacion.descripcionDescuento,
-        pdfPath: ordenReparacion.pdfPath,
         incremento: new Prisma.Decimal(ordenReparacion.incremento),
         descripcionIncremento: ordenReparacion.descripcionIncremento,
         incrementoInterno: new Prisma.Decimal(
           ordenReparacion.incrementoInterno
         ),
+        scannerFile: ordenReparacion.pdfPath?.includes("/tmp/")
+          ? {
+              create: {
+                tempPath: ordenReparacion.pdfPath,
+                status: EstadoArchivo.Pendiente,
+              },
+            }
+          : undefined,
+        recibosFiles: {
+          deleteMany: {},
+          create: ordenReparacion.recibos.map((r) => ({
+            tempPath: r,
+            status: EstadoArchivo.Pendiente,
+          })),
+        },
       },
       include: {
         auto: {

@@ -4,11 +4,11 @@ import { DeleteOrdenUseCase } from "@/core/application/use-cases/orden-reparacio
 import { GetOrdenUseCase } from "@/core/application/use-cases/orden-reparacion/get-orden.use-case";
 import { UpdateOrdenUseCase } from "@/core/application/use-cases/orden-reparacion/update-orden.use-case";
 import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
+import { PrismaCustomFileRepository } from "@/core/infrastructure/database/repositories/prisma-custom-file.repository";
 import { PrismaNotificationRepository } from "@/core/infrastructure/database/repositories/prisma-notification.repository";
 import { PrismaOrdenReparacionRepository } from "@/core/infrastructure/database/repositories/prisma-orden-reparacion.repository";
 import { PrismaPagoMecanicoRepository } from "@/core/infrastructure/database/repositories/prisma-pago-mecanico.repository";
 import { PrismaInventoryAdapter } from "@/core/infrastructure/external/prisma-inventory.adapter";
-import { S3FileStorageAdapter } from "@/core/infrastructure/external/s3-file-storage.adapter";
 import { SocketNotifier } from "@/core/infrastructure/external/socket-notifier";
 import {
   getOrdenQuerySchema,
@@ -67,7 +67,7 @@ export async function PUT(
         new StockManagerService(),
         new PrismaOrdenReparacionRepository(),
         new PrismaInventoryAdapter(notificationRepo),
-        new S3FileStorageAdapter()
+        new PrismaCustomFileRepository()
       ),
       notificationRepo,
       new PrismaPagoMecanicoRepository(),
@@ -98,7 +98,7 @@ export async function DELETE(
         new StockManagerService(),
         new PrismaOrdenReparacionRepository(),
         new PrismaInventoryAdapter(notificationRepo),
-        new S3FileStorageAdapter()
+        new PrismaCustomFileRepository()
       )
     ).execute(dto.id);
 
