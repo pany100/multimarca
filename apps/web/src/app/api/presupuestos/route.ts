@@ -1,6 +1,10 @@
+import { CreatePresupuestoUseCase } from "@/core/application/use-cases/presupuesto/create-presupuesto.use-case";
 import { ListPresupuestoUseCase } from "@/core/application/use-cases/presupuesto/list-presupuesto.use-case";
 import { PrismaPresupuestoRepository } from "@/core/infrastructure/database/repositories/prisma-presupuesto.repository";
-import { listPresupuestoQuerySchema } from "@/core/infrastructure/validation/schemas/presupuesto.schema";
+import {
+  createPresupuestoSchema,
+  listPresupuestoQuerySchema,
+} from "@/core/infrastructure/validation/schemas/presupuesto.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { EstadoPresupuesto as EstadoPresupuestoType } from "@prisma/client";
@@ -26,6 +30,20 @@ export async function GET(request: Request) {
       new PrismaPresupuestoRepository()
     ).execute(dto);
     return NextResponse.json(result, { status: 200 });
+  } catch (e) {
+    return handleApiError(e);
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const dto = await validateRequest(body, createPresupuestoSchema);
+    const useCase = new CreatePresupuestoUseCase(
+      new PrismaPresupuestoRepository()
+    );
+    const created = await useCase.execute(dto);
+    return NextResponse.json(created, { status: 201 });
   } catch (e) {
     return handleApiError(e);
   }

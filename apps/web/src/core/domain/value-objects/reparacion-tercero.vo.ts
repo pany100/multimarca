@@ -29,7 +29,7 @@ export class ReparacionTercero {
   ) {
     if (!nombre?.trim()) throw new Error("Nombre requerido");
   }
-  static async from(p: ReparacionTerceroProps, files: FileStoragePort) {
+  static from(p: ReparacionTerceroProps, files: FileStoragePort) {
     return new ReparacionTercero(
       p.nombre.trim(),
       Number(p.proveedorId),
@@ -39,7 +39,7 @@ export class ReparacionTercero {
     );
   }
 
-  static async fromHttpInput(p: ReparacionTerceroHTTPInput) {
+  static fromHttpInput(p: ReparacionTerceroHTTPInput) {
     return new ReparacionTercero(
       p.nombre.trim(),
       Number(p.proveedor.id),

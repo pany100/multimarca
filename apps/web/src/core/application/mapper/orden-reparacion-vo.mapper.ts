@@ -48,10 +48,8 @@ export class OrdenReparacionVOMapper {
       TrabajoRealizado.fromHttpInput
     );
 
-    const terceros = await Promise.all(
-      (input.reparacionesDeTercero ?? []).map((t) =>
-        ReparacionTercero.fromHttpInput(t)
-      )
+    const terceros = (input.reparacionesDeTercero ?? []).map((t) =>
+      ReparacionTercero.fromHttpInput(t)
     );
 
     const estado = EstadoOrden.from(

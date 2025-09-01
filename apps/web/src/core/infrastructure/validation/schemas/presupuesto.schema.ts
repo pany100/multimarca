@@ -10,3 +10,54 @@ export const listPresupuestoQuerySchema = z.object({
   from: z.string().nullable().optional(),
   to: z.string().nullable().optional(),
 });
+
+const repuestoSchema = z.object({
+  stock: z.object({ id: z.coerce.number(), name: z.string().optional() }),
+  unidadesConsumidas: z.coerce.number().int().positive(),
+  precioCompra: z.coerce.number().optional(),
+  precioVenta: z.coerce.number().optional(),
+});
+
+const terceroSchema = z.object({
+  nombre: z.string().min(1),
+  proveedor: z.object({ id: z.coerce.number() }),
+  precioCompra: z.coerce.number().optional(),
+  precioVenta: z.coerce.number().optional(),
+  recibo: z.string().nullable().optional(),
+});
+
+const trabajoSchema = z.object({
+  manoDeObra: z.object({ name: z.string().min(1) }).optional(),
+  descripcion: z.string().optional(),
+  precioUnitario: z.coerce.number(),
+  diasParaRecordatorio: z.coerce.number().int().nullable().optional(),
+});
+
+const tareasAdministrativasSchema = z.object({
+  usuarioId: z.coerce.number(),
+  descripcion: z.string().min(1),
+});
+
+export const createPresupuestoSchema = z.object({
+  autoId: z.coerce.number().positive(),
+  observacionesCliente: z
+    .string()
+    .min(1, "Las observaciones del cliente son obligatorias"),
+  detallesDeTrabajo: z.string().optional(),
+  informacionAuto: z.string().optional(),
+  informacionCliente: z.string().optional(),
+  repuestosUsados: z.array(repuestoSchema).optional(),
+  reparacionesDeTercero: z.array(terceroSchema).optional(),
+  trabajosRealizados: z.array(trabajoSchema).optional(),
+  tareasAdministrativas: z.array(tareasAdministrativasSchema).optional(),
+  descuento: z.coerce.number().optional(),
+  porcentajeRecargo: z.coerce.number().optional(),
+  descripcionDescuento: z.string().optional(),
+  incrementoInterno: z.coerce.number().optional(),
+  incremento: z.coerce.number().optional(),
+  descripcionIncremento: z.string().optional(),
+  estado: z.string().optional(),
+  fecha: z.coerce.date(),
+  fechaRespuesta: z.coerce.date().nullable().optional(),
+  fechaEnvio: z.coerce.date().nullable().optional(),
+});

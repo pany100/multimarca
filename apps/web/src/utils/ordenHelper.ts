@@ -9,10 +9,10 @@ function calcularPrecioFinal(
   porcentajeRecargo?: number | string
 ): number {
   const recargoNum = Number(porcentajeRecargo) || 0;
-  if (recargoNum === 0) {
-    return parseFloat(precio.toFixed(2));
-  }
   const precioNum = Number(precio);
+  if (recargoNum === 0) {
+    return parseFloat(precioNum.toFixed(2));
+  }
   const recargo = (precioNum * recargoNum) / 100;
   const total = roundToNearestThousandOrFiveHundred(precioNum + recargo);
 

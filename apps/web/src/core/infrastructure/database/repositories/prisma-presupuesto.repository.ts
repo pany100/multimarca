@@ -4,6 +4,7 @@ import {
 } from "@/core/domain/repositories/presupuesto.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
+import { Presupuesto, Prisma } from "@prisma/client";
 
 export class PrismaPresupuestoRepository implements PresupuestoRepository {
   async listPaged<T = any>({
@@ -91,5 +92,9 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
       page,
       size
     );
+  }
+
+  async create(data: Prisma.PresupuestoCreateArgs): Promise<Presupuesto> {
+    return prisma.presupuesto.create(data);
   }
 }

@@ -3,7 +3,6 @@ import useScrollToError from "@/hooks/useScrollToError";
 import useUsersAutocomplete from "@/hooks/useUsersAutocomplete";
 import { Grid } from "@mui/material";
 import { useFormContext } from "react-hook-form";
-import CustomInputDate from "../formV2/CustomInputDate";
 import CustomInputText from "../formV2/CustomInputText";
 import CustomSelect from "../formV2/CustomSelect";
 import TareasAdministrativas from "./TareasAdministrativas";
@@ -42,7 +41,11 @@ function PresupuestoInformacionGeneral() {
         md={6}
         ref={(el) => registerFieldRef("fechaRespuesta", el)}
       >
-        <CustomInputDate name="fechaRespuesta" label="Fecha de respuesta" />
+        <CustomInputText
+          name="fechaRespuesta"
+          label="Fecha de respuesta"
+          type="date"
+        />
       </Grid>
       <Grid
         item
