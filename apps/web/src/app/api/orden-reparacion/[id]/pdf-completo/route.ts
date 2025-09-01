@@ -50,6 +50,8 @@ export async function GET(
             dolar: true,
           },
         },
+        scannerFile: true,
+        recibosFiles: true,
       },
     });
 
@@ -72,22 +74,26 @@ export async function GET(
     let finalPdfBuffer = basePdfBuffer;
 
     // 2. Verificar si hay un PDF adicional (scanner)
-    if (ordenReparacion.pdfPath) {
-      // Obtener el PDF del scanner desde S3
-      const scannerPdfBuffer = await getFileFromS3(ordenReparacion.pdfPath);
+    if (ordenReparacion.scannerFile) {
+      const scannerPdfBuffer = await getFileFromS3(
+        ordenReparacion.scannerFile?.finalPath ||
+          ordenReparacion.scannerFile?.tempPath
+      );
       // Combinar el PDF base con el PDF del scanner
       finalPdfBuffer = await mergePdfs(finalPdfBuffer, scannerPdfBuffer);
     }
 
     // 3. Verificar si hay recibos para añadir
     if (
-      ordenReparacion.recibos &&
-      Array.isArray(ordenReparacion.recibos) &&
-      ordenReparacion.recibos.length > 0
+      ordenReparacion.recibosFiles &&
+      Array.isArray(ordenReparacion.recibosFiles) &&
+      ordenReparacion.recibosFiles.length > 0
     ) {
       // Generar un PDF con las imágenes de los recibos
       const recibosPdfBuffer = await generateRecibosPdf(
-        ordenReparacion.recibos as string[]
+        ordenReparacion.recibosFiles.map(
+          (r) => r.finalPath || r.tempPath
+        ) as string[]
       );
       // Combinar el PDF actual con el PDF de recibos
       finalPdfBuffer = await mergePdfs(finalPdfBuffer, recibosPdfBuffer);

@@ -104,7 +104,6 @@ export class OrdenReparacionService {
     },
     { tx }: any
   ) {
-    console.log(tx);
     const existingScannerFile = existingOrder.scannerFile;
     const existingRecibos = existingOrder.recibosFiles;
     const scannerFileId = existingScannerFile?.id;
