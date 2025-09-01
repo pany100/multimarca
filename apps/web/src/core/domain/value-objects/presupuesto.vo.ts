@@ -16,9 +16,9 @@ export type PresupuestoProps = {
   fechaRespuesta: Date | null;
   fechaEnvio: Date | null;
   observacionesCliente: string;
-  detallesDeTrabajo?: string;
-  informacionAuto?: string;
-  informacionCliente?: string;
+  detallesDeTrabajo: string | null;
+  informacionAuto: string | null;
+  informacionCliente: string | null;
   estado: string;
   dolarId?: number | null;
   descuento?: number;
@@ -42,9 +42,9 @@ export class PresupuestoVO {
     public readonly fechaRespuesta: Date | null = null,
     public readonly fechaEnvio: Date | null = null,
     public readonly observacionesCliente: string,
-    public readonly detallesDeTrabajo: string = "",
-    public readonly informacionAuto: string = "",
-    public readonly informacionCliente: string = "",
+    public readonly detallesDeTrabajo: string | null = null,
+    public readonly informacionAuto: string | null = null,
+    public readonly informacionCliente: string | null = null,
     public readonly estado: EstadoPresupuesto,
     public readonly dolarId: number | null = null,
     public readonly descuento: number = 0,
