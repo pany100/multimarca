@@ -1,13 +1,20 @@
 import { ChipProps } from "@mui/material";
 
+function roundToNearestThousandOrFiveHundred(value: number): number {
+  return Math.ceil(value / 500) * 500;
+}
+
 function calcularPrecioFinal(
   precio: number,
   porcentajeRecargo?: number | string
 ): number {
-  const precioNum = Number(precio);
   const recargoNum = Number(porcentajeRecargo) || 0;
+  if (recargoNum === 0) {
+    return parseFloat(precio.toFixed(2));
+  }
+  const precioNum = Number(precio);
   const recargo = (precioNum * recargoNum) / 100;
-  const total = precioNum + recargo;
+  const total = roundToNearestThousandOrFiveHundred(precioNum + recargo);
 
   return parseFloat(total.toFixed(2));
 }
