@@ -16,6 +16,7 @@ import {
 } from "@/core/infrastructure/validation/schemas/orden-reparacion.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
+import { parseMultipartRequest } from "@/shared/utils/multipart-request.helper";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -73,7 +74,7 @@ export async function PUT(
       new SocketNotifier()
     ).execute(dto, scannerPdfFile);
 
-    return NextResponse.json({});
+    return NextResponse.json(updated);
   } catch (e) {
     return handleApiError(e);
   }

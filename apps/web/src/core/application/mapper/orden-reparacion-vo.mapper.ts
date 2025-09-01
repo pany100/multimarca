@@ -126,7 +126,6 @@ export class OrdenReparacionVOMapper {
   ): Promise<OrdenReparacionVO> {
     const fileService = new S3FileStorageAdapter();
     const exchange = new DolarExchangeAdapter();
-    const controlMecanico = new PrismaControlMecanicoRepository();
     const {
       priceAdjustments,
       mecanicos,
