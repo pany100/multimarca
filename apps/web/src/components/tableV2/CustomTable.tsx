@@ -60,8 +60,16 @@ function CustomTable<T extends { id: string }>({
   const pendingFetch = useRef(false);
   const currentRequestId = useRef<number>(0);
 
-  const [fromDate, setFromDate] = useState<Date | null>(null);
-  const [toDate, setToDate] = useState<Date | null>(null);
+  const [fromDate, setFromDate] = useState<Date | null>(() => {
+    if (!searchByDate) return null;
+    const fromParam = searchParams.get("from");
+    return fromParam ? new Date(fromParam) : null;
+  });
+  const [toDate, setToDate] = useState<Date | null>(() => {
+    if (!searchByDate) return null;
+    const toParam = searchParams.get("to");
+    return toParam ? new Date(toParam) : null;
+  });
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [totalItems, setTotalItems] = useState(0);
