@@ -45,7 +45,7 @@ export class UpdateOrdenUseCase {
     }
   }
 
-  async execute(input: UpdateOrdenDto, scannerPdfFile: File | null) {
+  async execute(input: UpdateOrdenDto) {
     const estado = EstadoOrden.from(
       input.estado ?? EstadoOrdenReparacion.Aceptado
     );
@@ -58,10 +58,7 @@ export class UpdateOrdenUseCase {
         );
     }
     const ordenReparacionVO =
-      await OrdenReparacionVOMapper.transformUpdateInputToVO(
-        input,
-        scannerPdfFile
-      );
+      await OrdenReparacionVOMapper.transformUpdateInputToVO(input);
     const uow = new PrismaUnitOfWork();
     const updated = await uow.run(async (tx) => {
       const updatedOrder = await this.service.update(tx, ordenReparacionVO);

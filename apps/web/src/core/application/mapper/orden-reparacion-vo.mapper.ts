@@ -1,4 +1,3 @@
-import { FileStoragePort } from "@/core/domain/ports/file-storage.port";
 import { EstadoOrden } from "@/core/domain/value-objects/estado-orden.vo";
 import { MecanicoRef } from "@/core/domain/value-objects/mecanico-ref.vo";
 import { OrdenReparacionVO } from "@/core/domain/value-objects/orden-reparacion.vo";
@@ -8,7 +7,6 @@ import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
 import { TrabajoRealizado } from "@/core/domain/value-objects/trabajo-realizado.vo";
 import { PrismaControlMecanicoRepository } from "@/core/infrastructure/database/repositories/prisma-control-mecanico.repository";
 import { DolarExchangeAdapter } from "@/core/infrastructure/external/dolar-exchange.adapter";
-import { S3FileStorageAdapter } from "@/core/infrastructure/external/s3-file-storage.adapter";
 import { EstadoOrdenReparacion, Prisma } from "@prisma/client";
 import { CreateOrdenDto, UpdateOrdenDto } from "../dto/orden-reparacion.dto";
 
@@ -34,8 +32,7 @@ export interface TransformedOrdenData {
 
 export class OrdenReparacionVOMapper {
   private static async transformInput(
-    input: CreateOrdenDto,
-    fileService: FileStoragePort
+    input: CreateOrdenDto
   ): Promise<TransformedOrdenData> {
     // Ajustes de precio
     const priceAdjustments = PriceAdjustments.normalizeFromHttp(input);
@@ -75,7 +72,6 @@ export class OrdenReparacionVOMapper {
     input: CreateOrdenDto
   ): Promise<OrdenReparacionVO> {
     // Transform to individual VOs first
-    const fileService = new S3FileStorageAdapter();
     const exchange = new DolarExchangeAdapter();
     const controlMecanico = new PrismaControlMecanicoRepository();
     const {
@@ -85,7 +81,7 @@ export class OrdenReparacionVOMapper {
       trabajos,
       terceros,
       estado,
-    } = await this.transformInput(input, fileService);
+    } = await this.transformInput(input);
     const fechaCreacion = input.fechaCreacion
       ? new Date(input.fechaCreacion)
       : new Date();
@@ -121,10 +117,8 @@ export class OrdenReparacionVOMapper {
   }
 
   static async transformUpdateInputToVO(
-    input: UpdateOrdenDto,
-    scannerPdfFile: File | null
+    input: UpdateOrdenDto
   ): Promise<OrdenReparacionVO> {
-    const fileService = new S3FileStorageAdapter();
     const exchange = new DolarExchangeAdapter();
     const {
       priceAdjustments,
@@ -133,15 +127,11 @@ export class OrdenReparacionVOMapper {
       trabajos,
       terceros,
       estado,
-    } = await this.transformInput(input, fileService);
+    } = await this.transformInput(input);
     const fechaCreacion = input.fechaCreacion
       ? new Date(input.fechaCreacion)
       : new Date();
     const dolar = await exchange.getForDate(fechaCreacion);
-    let pdfPath = input.pdfPath;
-    if (scannerPdfFile) {
-      pdfPath = await fileService.uploadFileAndGetUrl(scannerPdfFile, "tmp");
-    }
 
     return OrdenReparacionVO.from({
       id: input.id,
@@ -162,7 +152,7 @@ export class OrdenReparacionVOMapper {
       estado,
       recibos: input.recibos,
       revisadoPorId: input.revisadoPorId,
-      pdfPath,
+      pdfPath: input.pdfPath,
       descuento: input.descuento,
       descripcionDescuento: input.descripcionDescuento,
       incremento: input.incremento,

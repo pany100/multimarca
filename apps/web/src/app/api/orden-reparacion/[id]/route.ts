@@ -9,6 +9,7 @@ import { PrismaNotificationRepository } from "@/core/infrastructure/database/rep
 import { PrismaOrdenReparacionRepository } from "@/core/infrastructure/database/repositories/prisma-orden-reparacion.repository";
 import { PrismaPagoMecanicoRepository } from "@/core/infrastructure/database/repositories/prisma-pago-mecanico.repository";
 import { PrismaInventoryAdapter } from "@/core/infrastructure/external/prisma-inventory.adapter";
+import { S3FileStorageAdapter } from "@/core/infrastructure/external/s3-file-storage.adapter";
 import { SocketNotifier } from "@/core/infrastructure/external/socket-notifier";
 import {
   getOrdenQuerySchema,
@@ -53,13 +54,17 @@ export async function PUT(
       },
       updateOrdenSchema
     );
-
     if (scannerPdfFile) {
       const fileName = scannerPdfFile.name;
       const fileExtension = fileName.split(".").pop()?.toLowerCase();
       if (!fileExtension || !["pdf"].includes(fileExtension)) {
-        throw new Error("El archivo de scannerdebe ser un PDF");
+        throw new Error("El archivo de scanner debe ser un PDF");
       }
+      const fileService = new S3FileStorageAdapter();
+      dto.pdfPath = await fileService.uploadFileAndGetUrl(
+        scannerPdfFile,
+        "tmp"
+      );
     }
     const notificationRepo = new PrismaNotificationRepository();
     const updated = await new UpdateOrdenUseCase(
@@ -72,7 +77,7 @@ export async function PUT(
       notificationRepo,
       new PrismaPagoMecanicoRepository(),
       new SocketNotifier()
-    ).execute(dto, scannerPdfFile);
+    ).execute(dto);
 
     return NextResponse.json(updated);
   } catch (e) {

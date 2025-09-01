@@ -78,6 +78,7 @@ export class OrdenReparacionService {
     if (ordenReparacionVO.estado.isPresupuestado()) {
       throw new Error("Estado no permitido");
     }
+
     const existingRepuestosVO = existingOrder.repuestosUsados.map(
       (r: RepuestoFromOrderInDb): RepuestoUsado => RepuestoUsado.fromOrderDb(r)
     );
@@ -108,28 +109,5 @@ export class OrdenReparacionService {
     }
 
     return updated;
-  }
-
-  getFilesToDelete(
-    existingOrder: OrdenReparacionWithReparaciones,
-    newOrder: OrdenReparacionVO
-  ): string[] {
-    const existingFiles = existingOrder.reparacionesDeTercero
-      .map((r) => r.recibo)
-      .filter((r) => r !== null);
-    if (existingOrder.pdfPath) {
-      existingFiles.push(existingOrder.pdfPath);
-    }
-
-    const newFiles = newOrder.tercerosVO
-      .map((r) => r.recibo)
-      .filter((r) => r !== null);
-    if (newOrder.pdfPath) {
-      newFiles.push(newOrder.pdfPath);
-    }
-    const filesToRemove = existingFiles.filter(
-      (file) => !newFiles.includes(file)
-    );
-    return filesToRemove;
   }
 }
