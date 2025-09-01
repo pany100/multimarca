@@ -38,6 +38,10 @@ const tareasAdministrativasSchema = z.object({
   descripcion: z.string().min(1),
 });
 
+export const getPresupuestoQuerySchema = z.object({
+  id: z.coerce.number().positive(),
+});
+
 export const createPresupuestoSchema = z.object({
   autoId: z.coerce.number().positive(),
   observacionesCliente: z

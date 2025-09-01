@@ -10,7 +10,39 @@ export type ListPresupuestosParams = Omit<
   size: number;
 };
 
+export type PresupuestoWithRelations = Prisma.PresupuestoGetPayload<{
+  include: {
+    auto: {
+      include: {
+        owner: true;
+      };
+    };
+    administrativo: true;
+    creador: true;
+    dolar: true;
+    reparacionesDeTercero: {
+      include: {
+        proveedor: true;
+        reciboFile: true;
+      };
+    };
+    repuestosUsados: {
+      include: {
+        stock: {
+          include: {
+            proveedor: true;
+          };
+        };
+      };
+    };
+    trabajosRealizados: true;
+    tareasAdministrativas: true;
+  };
+}>;
+
 export interface PresupuestoRepository {
   listPaged(params: ListPresupuestosParams): Promise<PageResult<any>>;
   create(data: Prisma.PresupuestoCreateArgs): Promise<Presupuesto>;
+  findById(id: number): Promise<PresupuestoWithRelations | null>;
+  delete(id: number): Promise<void>;
 }

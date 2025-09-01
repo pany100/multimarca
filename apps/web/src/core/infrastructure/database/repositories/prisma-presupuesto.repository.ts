@@ -1,6 +1,7 @@
 import {
   ListPresupuestosParams,
   PresupuestoRepository,
+  PresupuestoWithRelations,
 } from "@/core/domain/repositories/presupuesto.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
@@ -96,5 +97,48 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
 
   async create(data: Prisma.PresupuestoCreateArgs): Promise<Presupuesto> {
     return prisma.presupuesto.create(data);
+  }
+
+  async findById(id: number): Promise<PresupuestoWithRelations | null> {
+    return prisma.presupuesto.findUnique({
+      where: { id },
+      include: {
+        auto: {
+          include: {
+            owner: true,
+          },
+        },
+        administrativo: true,
+        creador: true,
+        dolar: true,
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
+            reciboFile: true,
+          },
+        },
+        repuestosUsados: {
+          include: {
+            stock: {
+              include: {
+                proveedor: true,
+              },
+            },
+          },
+        },
+        trabajosRealizados: true,
+        tareasAdministrativas: {
+          include: {
+            usuario: true,
+          },
+        },
+      },
+    });
+  }
+
+  async delete(id: number): Promise<void> {
+    await prisma.presupuesto.delete({
+      where: { id },
+    });
   }
 }

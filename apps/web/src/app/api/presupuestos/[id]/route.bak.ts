@@ -1,11 +1,4 @@
-import { PresupuestoService } from "@/core/application/services/presupuesto.service";
-import { DeletePresupuestoUseCase } from "@/core/application/use-cases/presupuesto/delete-presupuesto.use-case";
-import { GetPresupuestoUseCase } from "@/core/application/use-cases/presupuesto/get-presupuesto.use-case";
-import { PrismaPresupuestoRepository } from "@/core/infrastructure/database/repositories/prisma-presupuesto.repository";
-import { getPresupuestoQuerySchema } from "@/core/infrastructure/validation/schemas/presupuesto.schema";
 import prisma from "@/lib/prisma";
-import { handleApiError } from "@/shared/middleware/error-handler.middleware";
-import { validateRequest } from "@/shared/middleware/validation.middleware";
 import getDolarForDate from "@/utils/dolar";
 import { deleteFileFromS3, moveFileInS3 } from "@/utils/s3Helper";
 import { EstadoPresupuesto, Prisma } from "@prisma/client";
@@ -16,18 +9,51 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const dto = await validateRequest(
-      {
-        id: params.id,
+    const id = parseInt(params.id);
+    const presupuesto = await prisma.presupuesto.findUnique({
+      where: { id },
+      include: {
+        auto: {
+          include: {
+            owner: true,
+          },
+        },
+        dolar: true,
+        administrativo: true,
+        creador: true,
+        repuestosUsados: {
+          include: {
+            stock: true,
+          },
+        },
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
+          },
+        },
+        trabajosRealizados: true,
+        tareasAdministrativas: {
+          include: {
+            usuario: true,
+          },
+        },
       },
-      getPresupuestoQuerySchema
-    );
-    const presupuesto = await new GetPresupuestoUseCase(
-      new PrismaPresupuestoRepository()
-    ).execute(dto.id);
+    });
+
+    if (!presupuesto) {
+      return NextResponse.json(
+        { error: "Presupuesto no encontrado" },
+        { status: 404 }
+      );
+    }
+
     return NextResponse.json(presupuesto);
-  } catch (e) {
-    return handleApiError(e);
+  } catch (error) {
+    console.error("Error al obtener presupuesto:", error);
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
   }
 }
 
@@ -260,20 +286,43 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const dto = await validateRequest(
-      {
-        id: params.id,
+    const id = parseInt(params.id);
+
+    // Verificar si existe el presupuesto
+    const presupuestoExistente = await prisma.presupuesto.findUnique({
+      where: { id },
+      include: {
+        reparacionesDeTercero: true,
       },
-      getPresupuestoQuerySchema
-    );
-    await new DeletePresupuestoUseCase(
-      new PresupuestoService(new PrismaPresupuestoRepository())
-    ).execute(dto.id);
+    });
+
+    if (!presupuestoExistente) {
+      return NextResponse.json(
+        { error: "Presupuesto no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    // Eliminar los recibos de las reparaciones de tercero
+    for (const reparacion of presupuestoExistente.reparacionesDeTercero) {
+      if (reparacion.recibo) {
+        await deleteFileFromS3(reparacion.recibo);
+      }
+    }
+
+    // Proceder con la eliminación del presupuesto
+    await prisma.presupuesto.delete({
+      where: { id },
+    });
 
     return NextResponse.json({
       mensaje: "Presupuesto eliminado correctamente",
     });
-  } catch (e) {
-    return handleApiError(e);
+  } catch (error) {
+    console.error("Error al eliminar presupuesto:", error);
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
   }
 }
