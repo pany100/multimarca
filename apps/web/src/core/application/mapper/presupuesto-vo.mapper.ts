@@ -8,7 +8,10 @@ import { TareasAdministrativasVO } from "@/core/domain/value-objects/tareas-admi
 import { TrabajoRealizado } from "@/core/domain/value-objects/trabajo-realizado.vo";
 import { DolarExchangeAdapter } from "@/core/infrastructure/external/dolar-exchange.adapter";
 import { EstadoPresupuesto, Prisma } from "@prisma/client";
-import { CreatePresupuestoDto } from "../dto/presupuesto.dto";
+import {
+  CreatePresupuestoDto,
+  UpdatePresupuestoDto,
+} from "../dto/presupuesto.dto";
 
 export interface PresupuestoCreateData {
   data: Prisma.PresupuestoUncheckedCreateInput;
@@ -32,7 +35,7 @@ export interface TransformedPresupuestoData {
 
 export class PresupuestoVOMapper {
   static async transformInputToVO(
-    input: CreatePresupuestoDto
+    input: CreatePresupuestoDto | UpdatePresupuestoDto
   ): Promise<PresupuestoVO> {
     const priceAdjustments = PriceAdjustments.normalizeFromHttp(input);
 
@@ -54,8 +57,9 @@ export class PresupuestoVOMapper {
     const exchange = new DolarExchangeAdapter();
     const fecha = input.fecha ? new Date(input.fecha) : new Date();
     const dolar = await exchange.getForDate(fecha);
-
+    const id = (input as UpdatePresupuestoDto).id || null;
     return PresupuestoVO.from({
+      id,
       priceAdjustmentsVO: priceAdjustments,
       repuestosVO: repuestos,
       trabajosVO: trabajos,

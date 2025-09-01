@@ -141,4 +141,43 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
       where: { id },
     });
   }
+
+  async update(
+    data: Prisma.PresupuestoUpdateArgs
+  ): Promise<PresupuestoWithRelations> {
+    return prisma.presupuesto.update({
+      ...data,
+      include: {
+        auto: {
+          include: {
+            owner: true,
+          },
+        },
+        administrativo: true,
+        creador: true,
+        dolar: true,
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
+            reciboFile: true,
+          },
+        },
+        repuestosUsados: {
+          include: {
+            stock: {
+              include: {
+                proveedor: true,
+              },
+            },
+          },
+        },
+        trabajosRealizados: true,
+        tareasAdministrativas: {
+          include: {
+            usuario: true,
+          },
+        },
+      },
+    });
+  }
 }

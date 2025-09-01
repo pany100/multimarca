@@ -1,14 +1,14 @@
 import { PresupuestoService } from "@/core/application/services/presupuesto.service";
 import { DeletePresupuestoUseCase } from "@/core/application/use-cases/presupuesto/delete-presupuesto.use-case";
 import { GetPresupuestoUseCase } from "@/core/application/use-cases/presupuesto/get-presupuesto.use-case";
+import { UpdatePresupuestoUseCase } from "@/core/application/use-cases/presupuesto/update-presupuesto.use-case";
 import { PrismaPresupuestoRepository } from "@/core/infrastructure/database/repositories/prisma-presupuesto.repository";
-import { getPresupuestoQuerySchema } from "@/core/infrastructure/validation/schemas/presupuesto.schema";
-import prisma from "@/lib/prisma";
+import {
+  getPresupuestoQuerySchema,
+  updatePresupuestoSchema,
+} from "@/core/infrastructure/validation/schemas/presupuesto.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
-import getDolarForDate from "@/utils/dolar";
-import { deleteFileFromS3, moveFileInS3 } from "@/utils/s3Helper";
-import { EstadoPresupuesto, Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET(
@@ -38,220 +38,20 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const {
-      autoId,
-      observacionesCliente,
-      detallesDeTrabajo,
-      informacionAuto,
-      informacionCliente,
-      tareasAdministrativas = [],
-      repuestosUsados = [],
-      reparacionesDeTercero = [],
-      trabajosRealizados = [],
-      descuento = 0,
-      porcentajeRecargo = 0,
-      descripcionDescuento,
-      incrementoInterno = 0,
-      incremento = 0,
-      descripcionIncremento,
-      estado = EstadoPresupuesto.EnPreparacion,
-      fechaEnvio,
-      fechaRespuesta,
-    } = body;
-
-    // Verificar si existe el presupuesto
-    const presupuestoExistente = await prisma.presupuesto.findUnique({
-      where: { id },
-      include: {
-        repuestosUsados: true,
-        reparacionesDeTercero: true,
-        trabajosRealizados: true,
+    const dto = await validateRequest(
+      {
+        id,
+        ...body,
       },
-    });
-
-    if (!presupuestoExistente) {
-      return NextResponse.json(
-        { error: "Presupuesto no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    // Validar que los arrays sean arrays
-    if (
-      !Array.isArray(repuestosUsados) ||
-      !Array.isArray(reparacionesDeTercero) ||
-      !Array.isArray(trabajosRealizados) ||
-      !Array.isArray(tareasAdministrativas)
-    ) {
-      return NextResponse.json(
-        { error: "Los repuestos, reparaciones y trabajos deben ser arrays" },
-        { status: 400 }
-      );
-    }
-
-    // Procesar repuestos
-    const repuestosToPersist = repuestosUsados.map((repuesto: any) => ({
-      precioCompra: repuesto.precioCompra
-        ? new Prisma.Decimal(repuesto.precioCompra)
-        : new Prisma.Decimal(0),
-      precioVenta: repuesto.precioVenta
-        ? new Prisma.Decimal(repuesto.precioVenta)
-        : new Prisma.Decimal(0),
-      unidadesConsumidas: repuesto.unidadesConsumidas,
-      stock: { connect: { id: repuesto.stock.id } },
-    }));
-
-    // Obtener todas las reparaciones existentes para comparar
-    const reparacionesExistentes = await prisma.reparacionDeTercero.findMany({
-      where: {
-        presupuestoId: id,
-      },
-    });
-
-    const reparacionesEliminadas = reparacionesExistentes.filter(
-      (reparacionExistente) =>
-        !reparacionesDeTercero.some(
-          (reparacion: any) =>
-            reparacion.nombre === reparacionExistente.nombre &&
-            reparacion.proveedor.id === reparacionExistente.proveedorId
-        )
+      updatePresupuestoSchema
     );
+    const updated = await new UpdatePresupuestoUseCase(
+      new PresupuestoService(new PrismaPresupuestoRepository())
+    ).execute(dto);
 
-    // Procesar reparaciones de tercero
-    const reparacionesDeTerceroToPersist = await Promise.all(
-      reparacionesDeTercero.map(async (reparacion: any) => {
-        const reparacionExistente = await prisma.reparacionDeTercero.findFirst({
-          where: {
-            presupuestoId: id,
-            nombre: reparacion.nombre,
-            proveedorId: reparacion.proveedor.id,
-          },
-        });
-
-        let reciboUrl = reparacion.recibo;
-        if (reparacion.recibo && reparacion.recibo.includes("/tmp/")) {
-          reciboUrl = await moveFileInS3(reparacion.recibo, "recibos");
-        }
-
-        if (
-          reparacionExistente?.recibo &&
-          reparacionExistente.recibo !== reciboUrl
-        ) {
-          await deleteFileFromS3(reparacionExistente.recibo);
-        }
-
-        return {
-          nombre: reparacion.nombre,
-          precioCompra: reparacion.precioCompra
-            ? new Prisma.Decimal(reparacion.precioCompra)
-            : new Prisma.Decimal(0),
-          precioVenta: reparacion.precioVenta
-            ? new Prisma.Decimal(reparacion.precioVenta)
-            : new Prisma.Decimal(0),
-          proveedor: { connect: { id: reparacion.proveedor.id } },
-          recibo: reciboUrl,
-        };
-      })
-    );
-
-    // Procesar trabajos realizados
-    const trabajosRealizadosToPersist = trabajosRealizados.map(
-      (trabajo: any) => ({
-        descripcion: trabajo.manoDeObra.name,
-        precioUnitario: new Prisma.Decimal(trabajo.precioUnitario),
-        diasParaRecordatorio: trabajo.diasParaRecordatorio,
-      })
-    );
-
-    const tareasAdministrativasToPersist = tareasAdministrativas.map(
-      (tarea: any) => ({
-        usuarioId: tarea.usuarioId,
-        descripcion: tarea.descripcion,
-      })
-    );
-
-    // Obtener el dólar actual si no existe
-    const fechaActual = new Date();
-    const dolar = await getDolarForDate(fechaActual);
-
-    // Actualizar el presupuesto
-    const presupuestoActualizado = await prisma.presupuesto.update({
-      where: { id },
-      data: {
-        autoId: parseInt(autoId),
-        observacionesCliente,
-        detallesDeTrabajo,
-        informacionAuto,
-        informacionCliente,
-        estado,
-        dolarId: dolar?.id,
-        porcentajeRecargo: new Prisma.Decimal(porcentajeRecargo),
-        descuento: new Prisma.Decimal(descuento),
-        descripcionDescuento,
-        incrementoInterno: new Prisma.Decimal(incrementoInterno),
-        incremento: new Prisma.Decimal(incremento),
-        descripcionIncremento,
-        fechaEnvio,
-        fechaRespuesta,
-        repuestosUsados: {
-          deleteMany: {},
-          create: repuestosToPersist,
-        },
-        reparacionesDeTercero: {
-          deleteMany: {},
-          create: reparacionesDeTerceroToPersist,
-        },
-        trabajosRealizados: {
-          deleteMany: {},
-          create: trabajosRealizadosToPersist,
-        },
-        tareasAdministrativas: {
-          deleteMany: {},
-          create: tareasAdministrativasToPersist,
-        },
-      },
-      include: {
-        auto: {
-          include: {
-            owner: true,
-          },
-        },
-        dolar: true,
-        repuestosUsados: {
-          include: {
-            stock: true,
-          },
-        },
-        reparacionesDeTercero: {
-          include: {
-            proveedor: true,
-          },
-        },
-        trabajosRealizados: true,
-        tareasAdministrativas: {
-          include: {
-            usuario: true,
-          },
-        },
-      },
-    });
-
-    // Eliminar recibos de reparaciones eliminadas
-    await Promise.all(
-      reparacionesEliminadas.map(async (reparacion) => {
-        if (reparacion.recibo) {
-          await deleteFileFromS3(reparacion.recibo);
-        }
-      })
-    );
-
-    return NextResponse.json(presupuestoActualizado);
-  } catch (error) {
-    console.error("Error al actualizar presupuesto:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Error desconocido" },
-      { status: 500 }
-    );
+    return NextResponse.json(updated);
+  } catch (e) {
+    return handleApiError(e);
   }
 }
 

@@ -6,12 +6,12 @@ import { TareasAdministrativasVO } from "./tareas-administrativas.vo";
 import { TrabajoRealizado } from "./trabajo-realizado.vo";
 
 export type PresupuestoProps = {
-  id?: number;
+  id?: number | null;
   priceAdjustmentsVO: PriceAdjustments;
   repuestosVO: RepuestoUsado[];
   trabajosVO: TrabajoRealizado[];
   tercerosVO: ReparacionTercero[];
-  autoId: number;
+  autoId: number | null;
   fecha: Date;
   fechaRespuesta: Date | null;
   fechaEnvio: Date | null;
@@ -37,7 +37,7 @@ export class PresupuestoVO {
     public readonly repuestosVO: RepuestoUsado[],
     public readonly trabajosVO: TrabajoRealizado[],
     public readonly tercerosVO: ReparacionTercero[],
-    public readonly autoId: number,
+    public readonly autoId: number | null,
     public readonly fecha: Date = new Date(),
     public readonly fechaRespuesta: Date | null = null,
     public readonly fechaEnvio: Date | null = null,

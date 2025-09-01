@@ -45,4 +45,5 @@ export interface PresupuestoRepository {
   create(data: Prisma.PresupuestoCreateArgs): Promise<Presupuesto>;
   findById(id: number): Promise<PresupuestoWithRelations | null>;
   delete(id: number): Promise<void>;
+  update(data: Prisma.PresupuestoUpdateArgs): Promise<PresupuestoWithRelations>;
 }
