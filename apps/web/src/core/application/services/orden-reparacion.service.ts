@@ -7,7 +7,7 @@ import {
 } from "@/core/domain/repositories/orden-reparacion.repository";
 import { OrdenReparacionVO } from "@/core/domain/value-objects/orden-reparacion.vo";
 import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
-import { EstadoArchivo, OrdenReparacion, Prisma } from "@prisma/client";
+import { CustomFile, OrdenReparacion, Prisma } from "@prisma/client";
 import { OrdenReparacionDBMapper } from "../mapper/orden-reparacion-db.mapper";
 import { StockManagerService } from "./stock-manager.service";
 
@@ -88,26 +88,39 @@ export class OrdenReparacionService {
     );
     await this.inventory.ensureSufficient(stockActions);
 
-    const existingScannerFile = existingOrder.scannerFile;
-    const scannerFileId = existingScannerFile?.id;
     const updateData =
       OrdenReparacionDBMapper.transformToUpdateData(ordenReparacionVO);
 
     const updated = await this.repo.update(tx, updateData);
     await this.inventory.syncStockAndNotify(stockActions, { tx });
+    await this.updateFilesReferences(existingOrder, { tx });
+    return updated;
+  }
+
+  private async updateFilesReferences(
+    existingOrder: {
+      scannerFile: CustomFile | null;
+      recibosFiles: CustomFile[] | null;
+    },
+    { tx }: any
+  ) {
+    console.log(tx);
+    const existingScannerFile = existingOrder.scannerFile;
+    const existingRecibos = existingOrder.recibosFiles;
+    const scannerFileId = existingScannerFile?.id;
     if (scannerFileId) {
-      await this.customFileRepo.update(
-        {
-          id: Number(scannerFileId),
-          status: EstadoArchivo.Borrado,
-          ordenReparacionId: null,
-        },
-        {
-          tx,
-        }
+      await this.customFileRepo.markAsDeleted(Number(scannerFileId), {
+        tx,
+      });
+    }
+    if (existingRecibos && existingRecibos.length > 0) {
+      await Promise.all(
+        existingRecibos.map((r) =>
+          this.customFileRepo.markAsDeleted(Number(r.id), {
+            tx,
+          })
+        )
       );
     }
-
-    return updated;
   }
 }

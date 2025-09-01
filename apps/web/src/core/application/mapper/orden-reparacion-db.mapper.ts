@@ -177,7 +177,6 @@ export class OrdenReparacionDBMapper {
             }
           : undefined,
         recibosFiles: {
-          deleteMany: {},
           create: ordenReparacion.recibos.map((r) => ({
             tempPath: r,
             status: EstadoArchivo.Pendiente,

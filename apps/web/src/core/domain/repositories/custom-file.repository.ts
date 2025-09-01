@@ -12,5 +12,5 @@ export type CustomFileUpdateInput = {
 
 export interface CustomFileRepository {
   create(file: CustomFileInput): Promise<CustomFile>;
-  update(file: CustomFileUpdateInput, deps?: { tx?: any }): Promise<CustomFile>;
+  markAsDeleted(id: number, deps?: { tx?: any }): Promise<CustomFile>;
 }
