@@ -58,10 +58,8 @@ export class OrdenReparacionService {
     if (ordenReparacionVO.estado.isPresupuestado()) {
       throw new Error("Estado no permitido");
     }
-
     const createData =
       OrdenReparacionDBMapper.transformToCreateData(ordenReparacionVO);
-
     const orden = await this.repo.create(tx, createData);
 
     await this.inventory.consumeAndNotify(stockActions, { tx });
@@ -92,9 +90,13 @@ export class OrdenReparacionService {
       existingOrder,
       ordenReparacionVO
     );
-
+    console.log("#####################");
+    console.log(ordenReparacionVO);
+    console.log("#####################");
     const updateData =
       OrdenReparacionDBMapper.transformToUpdateData(ordenReparacionVO);
+    console.log(JSON.stringify(updateData, null, 2));
+    console.log("#####################");
 
     const updated = await this.repo.update(tx, updateData);
     await this.inventory.syncStockAndNotify(stockActions, { tx });

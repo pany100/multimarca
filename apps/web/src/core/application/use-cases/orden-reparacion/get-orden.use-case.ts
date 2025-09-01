@@ -16,13 +16,23 @@ export class GetOrdenUseCase {
         detalle: el.detalle,
       })
     );
+    const reparacionesDeTercero = order.reparacionesDeTercero.map(
+      (el: { reciboFile: { finalPath?: string; tempPath?: string } }) => ({
+        ...el,
+        recibo: el.reciboFile?.finalPath || el.reciboFile?.tempPath || null,
+      })
+    );
+    console.log(reparacionesDeTercero);
     return {
       ...ordenReparacionWithoutMecanicos,
       mecanicos: mecanicosWithoutMecanico,
+      reparacionesDeTercero,
       recibos: order.recibosFiles.map(
-        (el: { finalPath: string }) => el.finalPath
+        (el: { finalPath?: string; tempPath?: string }) =>
+          el.finalPath || el.tempPath || null
       ),
-      pdfPath: order.scannerFile?.finalPath,
+      pdfPath:
+        order.scannerFile?.finalPath || order.scannerFile?.tempPath || null,
     };
   }
 }

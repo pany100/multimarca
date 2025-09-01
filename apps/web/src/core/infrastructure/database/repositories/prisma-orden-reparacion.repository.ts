@@ -97,6 +97,7 @@ export class PrismaOrdenReparacionRepository
         reparacionesDeTercero: {
           include: {
             proveedor: true,
+            reciboFile: true,
           },
         },
         ingresos: {

@@ -1,5 +1,5 @@
 import { OrdenReparacionVO } from "@/core/domain/value-objects/orden-reparacion.vo";
-import { Prisma } from "@prisma/client";
+import { EstadoArchivo, Prisma } from "@prisma/client";
 
 export class OrdenReparacionDBMapper {
   static transformToCreateData(ordenReparacion: OrdenReparacionVO) {
@@ -48,7 +48,15 @@ export class OrdenReparacionDBMapper {
             precioCompra: t.precioCompra.asDecimal(),
             precioVenta: t.precioVenta.asDecimal(),
             proveedor: { connect: { id: t.proveedorId } },
-            recibo: t.recibo,
+            ...(t.recibo && {
+              reciboFile: {
+                create: {
+                  tempPath: t.recibo,
+                  finalPath: null,
+                  status: EstadoArchivo.Pendiente,
+                },
+              },
+            }),
           })),
         },
         trabajosRealizados: {
@@ -122,6 +130,15 @@ export class OrdenReparacionDBMapper {
             precioVenta: t.precioVenta.asDecimal(),
             proveedorId: t.proveedorId,
             recibo: t.recibo,
+            ...(t.recibo && {
+              reciboFile: {
+                create: {
+                  tempPath: t.recibo,
+                  finalPath: null,
+                  status: EstadoArchivo.Pendiente,
+                },
+              },
+            }),
           })),
         },
         trabajosRealizados: {
