@@ -7,7 +7,7 @@ import { EstadoOrden } from "@/core/domain/value-objects/estado-orden.vo";
 import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
 import { EstadoOrdenReparacion, TipoNotificacionInterna } from "@prisma/client";
 import { UpdateOrdenDto } from "../../dto/orden-reparacion.dto";
-import { OrdenReparacionDataFactory } from "../../factories/orden-reparacion-data.factory";
+import { OrdenReparacionVOMapper } from "../../mapper/orden-reparacion-vo.mapper";
 import { OrdenReparacionService } from "../../services/orden-reparacion.service";
 
 export class UpdateOrdenUseCase {
@@ -58,7 +58,7 @@ export class UpdateOrdenUseCase {
         );
     }
     const ordenReparacionVO =
-      await OrdenReparacionDataFactory.transformUpdateInputToVO(
+      await OrdenReparacionVOMapper.transformUpdateInputToVO(
         input,
         scannerPdfFile
       );

@@ -7,7 +7,7 @@ import { NotificationRepository } from "@/core/domain/repositories/notification.
 import { PagoMecanicoRepository } from "@/core/domain/repositories/pago-mecanico.repository";
 import { EstadoOrden } from "@/core/domain/value-objects/estado-orden.vo";
 import { EstadoOrdenReparacion, OrdenReparacion } from "@prisma/client";
-import { OrdenReparacionDataFactory } from "../../factories/orden-reparacion-data.factory";
+import { OrdenReparacionVOMapper } from "../../mapper/orden-reparacion-vo.mapper";
 import { OrdenReparacionService } from "../../services/orden-reparacion.service";
 
 export class CreateOrdenUseCase {
@@ -32,8 +32,9 @@ export class CreateOrdenUseCase {
         );
     }
 
-    const ordenReparacionVO =
-      await OrdenReparacionDataFactory.transformInputToVO(input);
+    const ordenReparacionVO = await OrdenReparacionVOMapper.transformInputToVO(
+      input
+    );
 
     const creada = await this.uow.run(async (tx) => {
       const ordenCreada: OrdenReparacion = await this.service.create(

@@ -6,6 +6,17 @@ export interface TrabajoRealizadoProps {
   diasParaRecordatorio?: number | null;
 }
 
+export interface TrabajosRealizadosHTTPInput {
+  precioUnitario: number;
+  manoDeObra?:
+    | {
+        name: string;
+      }
+    | undefined;
+  descripcion?: string | undefined;
+  diasParaRecordatorio?: number | null | undefined;
+}
+
 export class TrabajoRealizado {
   constructor(
     public readonly descripcion: string,
@@ -17,6 +28,14 @@ export class TrabajoRealizado {
   static from(p: TrabajoRealizadoProps) {
     return new TrabajoRealizado(
       p.descripcion.trim(),
+      Money.from(p.precioUnitario),
+      p.diasParaRecordatorio ?? null
+    );
+  }
+
+  static fromHttpInput(p: TrabajosRealizadosHTTPInput) {
+    return new TrabajoRealizado(
+      p.manoDeObra?.name ?? p.descripcion ?? "",
       Money.from(p.precioUnitario),
       p.diasParaRecordatorio ?? null
     );

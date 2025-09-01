@@ -9,6 +9,16 @@ export interface RepuestoUsadoProps {
   stockName?: string;
 }
 
+export interface RepuestoUsadoHTTPInput {
+  stock: {
+    id: number;
+    name?: string | undefined;
+  };
+  unidadesConsumidas: number;
+  precioCompra?: number | undefined;
+  precioVenta?: number | undefined;
+}
+
 export class RepuestoUsado {
   constructor(
     public readonly stockId: number,
@@ -29,6 +39,16 @@ export class RepuestoUsado {
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
       p.stockName
+    );
+  }
+
+  static fromHttpInput(p: RepuestoUsadoHTTPInput) {
+    return new RepuestoUsado(
+      Number(p.stock.id),
+      Number(p.unidadesConsumidas),
+      Money.from(p.precioCompra),
+      Money.from(p.precioVenta),
+      p.stock.name
     );
   }
 

@@ -8,7 +8,7 @@ import {
 import { OrdenReparacionVO } from "@/core/domain/value-objects/orden-reparacion.vo";
 import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
 import { OrdenReparacion, Prisma } from "@prisma/client";
-import { OrdenReparacionDataFactory } from "../factories/orden-reparacion-data.factory";
+import { OrdenReparacionDBMapper } from "../mapper/orden-reparacion-db.mapper";
 import { StockManagerService } from "./stock-manager.service";
 
 type OrdenReparacionWithReparaciones = Prisma.OrdenReparacionGetPayload<{
@@ -60,7 +60,7 @@ export class OrdenReparacionService {
     }
 
     const createData =
-      OrdenReparacionDataFactory.createCreateDataToPersist(ordenReparacionVO);
+      OrdenReparacionDBMapper.transformToCreateData(ordenReparacionVO);
 
     const orden = await this.repo.create(tx, createData);
 
@@ -94,7 +94,7 @@ export class OrdenReparacionService {
     );
 
     const updateData =
-      OrdenReparacionDataFactory.createUpdateDataToPersist(ordenReparacionVO);
+      OrdenReparacionDBMapper.transformToUpdateData(ordenReparacionVO);
 
     const updated = await this.repo.update(tx, updateData);
     await this.inventory.syncStockAndNotify(stockActions, { tx });

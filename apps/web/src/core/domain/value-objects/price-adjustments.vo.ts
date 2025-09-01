@@ -15,4 +15,14 @@ export class PriceAdjustments {
       num(input.porcentajeRecargo)
     );
   }
+
+  static normalizeFromHttp(input: Partial<PriceAdjustments>) {
+    const num = (n?: number) => (typeof n === "number" ? n : 0);
+    return new PriceAdjustments(
+      num(input.descuento),
+      num(input.incremento),
+      num(input.incrementoInterno),
+      num(input.porcentajeRecargo)
+    );
+  }
 }

@@ -9,6 +9,16 @@ export interface ReparacionTerceroProps {
   recibo?: string | null;
 }
 
+export interface ReparacionTerceroHTTPInput {
+  nombre: string;
+  proveedor: {
+    id: number;
+  };
+  precioCompra?: number | undefined;
+  precioVenta?: number | undefined;
+  recibo?: string | null | undefined;
+}
+
 export class ReparacionTercero {
   constructor(
     public readonly nombre: string,
@@ -27,6 +37,23 @@ export class ReparacionTercero {
     return new ReparacionTercero(
       p.nombre.trim(),
       Number(p.proveedorId),
+      Money.from(p.precioCompra),
+      Money.from(p.precioVenta),
+      recibo
+    );
+  }
+
+  static async fromHttpInput(
+    p: ReparacionTerceroHTTPInput,
+    files: FileStoragePort
+  ) {
+    let recibo = p.recibo ?? null;
+    if (recibo && typeof recibo === "string" && recibo.includes("/tmp/")) {
+      recibo = await files.moveTempTo(recibo, "recibos");
+    }
+    return new ReparacionTercero(
+      p.nombre.trim(),
+      Number(p.proveedor.id),
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
       recibo
