@@ -36,7 +36,12 @@ export const createOrdenSchema = z.object({
   pdfPath: z.string().nullable().optional(),
 
   mecanicos: z
-    .array(z.object({ id: z.coerce.number(), detalle: z.string().optional() }))
+    .array(
+      z.object({
+        id: z.coerce.number(),
+        detalle: z.string().nullable().optional(),
+      })
+    )
     .optional(),
   repuestosUsados: z.array(repuestoSchema).optional(),
   reparacionesDeTercero: z.array(terceroSchema).optional(),
@@ -81,7 +86,12 @@ export const updateOrdenSchema = z.object({
   estado: z.string().optional(),
   pdfPath: z.string().nullable().optional(),
   mecanicos: z
-    .array(z.object({ id: z.coerce.number(), detalle: z.string().optional() }))
+    .array(
+      z.object({
+        id: z.coerce.number(),
+        detalle: z.string().nullable().optional(),
+      })
+    )
     .optional(),
   repuestosUsados: z.array(repuestoSchema).optional(),
   reparacionesDeTercero: z.array(terceroSchema).optional(),
