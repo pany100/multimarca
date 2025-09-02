@@ -22,8 +22,8 @@ export type RepuestoFromOrderInDb = {
     name: string;
   };
   unidadesConsumidas: number;
-  precioCompra: number;
-  precioVenta: number;
+  precioCompra: number | Prisma.Decimal;
+  precioVenta: number | Prisma.Decimal;
 };
 
 export type OrdenReparacionWithRelations = Prisma.OrdenReparacionGetPayload<{

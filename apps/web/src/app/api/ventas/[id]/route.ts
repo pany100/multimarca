@@ -1,5 +1,12 @@
+import { NotificationService } from "@/core/application/services/notification.service";
+import { StockManagerService } from "@/core/application/services/stock-manager.service";
+import { VentaService } from "@/core/application/services/venta.service";
+import { DeleteVentaUseCase } from "@/core/application/use-cases/venta/delete-venta.use-case";
 import { GetVentaUseCase } from "@/core/application/use-cases/venta/get-venta.use-case";
+import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
+import { PrismaNotificationRepository } from "@/core/infrastructure/database/repositories/prisma-notification.repository";
 import { PrismaVentaRepository } from "@/core/infrastructure/database/repositories/prisma-venta.repository";
+import { PrismaInventoryAdapter } from "@/core/infrastructure/external/prisma-inventory.adapter";
 import { getVentaQuerySchema } from "@/core/infrastructure/validation/schemas/venta.schema";
 import prisma from "@/lib/prisma";
 import { getIO } from "@/lib/socketio";
@@ -286,79 +293,28 @@ export async function DELETE(
 ) {
   try {
     const id = parseInt(params.id);
+    const dto = await validateRequest(
+      {
+        id: params.id,
+      },
+      getVentaQuerySchema
+    );
+    const notificationRepo = new PrismaNotificationRepository();
+    const notificationService = new NotificationService(notificationRepo);
 
-    if (isNaN(id)) {
-      return NextResponse.json(
-        { error: "ID de venta inválido" },
-        { status: 400 }
-      );
-    }
-
-    const ventaEliminada = await prisma.$transaction(async (prisma) => {
-      // Obtener la venta con sus repuestos usados
-      const venta = await prisma.venta.findUnique({
-        where: { id },
-        include: {
-          repuestosUsados: {
-            include: {
-              stock: true,
-            },
-          },
-          reparacionesDeTercero: true,
-          trabajosRealizados: true,
-        },
-      });
-
-      if (!venta) {
-        throw new Error("Venta no encontrada");
-      }
-
-      // Restaurar el stock
-      for (const repuesto of venta.repuestosUsados) {
-        const stockActualizado = await prisma.stock.update({
-          where: { id: repuesto.stockId },
-          data: {
-            units: {
-              increment: repuesto.unidadesConsumidas,
-            },
-          },
-        });
-
-        if (
-          (stockActualizado.units ?? 0) <= (stockActualizado.restockValue ?? 0)
-        ) {
-          await prisma.notificacionInterna.create({
-            data: {
-              fecha: new Date(),
-              titulo: `${stockActualizado.name} necesita reposición`,
-              texto: `El elemento ${stockActualizado.name} quedó con ${stockActualizado.units} unidades. Necesita reponer stock.`,
-              leida: false,
-              tipo: TipoNotificacionInterna.REPOSICION_STOCK,
-              stockId: stockActualizado.id,
-            },
-          });
-          const io = getIO();
-          if (io) {
-            io.emit("newNotification");
-          }
-        }
-      }
-
-      // Eliminar la venta
-      return prisma.venta.delete({
-        where: { id },
-      });
-    });
+    await new DeleteVentaUseCase(
+      new PrismaUnitOfWork(),
+      new VentaService(
+        new PrismaVentaRepository(),
+        new PrismaInventoryAdapter(notificationService),
+        new StockManagerService()
+      )
+    ).execute(dto.id);
 
     return NextResponse.json({
-      message: "Venta eliminada correctamente",
-      venta: ventaEliminada,
+      mensaje: "Venta eliminada y stock restaurado",
     });
-  } catch (error) {
-    console.error("Error al eliminar venta:", error);
-    return NextResponse.json(
-      { error: `Error al eliminar la venta: ${error}` },
-      { status: 500 }
-    );
+  } catch (e) {
+    return handleApiError(e);
   }
 }

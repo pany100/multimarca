@@ -35,13 +35,7 @@ export class OrdenReparacionService {
     // Generar acciones de stock para liberar repuestos
     const stockActions = this.stockManager.generateReleaseActions(repuestos);
 
-    await this.inventory.restoreStock(
-      repuestos.map((r: RepuestoUsado) => ({
-        stockId: r.stockId,
-        units: r.unidadesConsumidas,
-      })),
-      { tx }
-    );
+    await this.inventory.restoreStock(stockActions, { tx });
     await this.repo.delete(tx, id);
 
     return stockActions; // Retornar las acciones generadas para logging/auditoría

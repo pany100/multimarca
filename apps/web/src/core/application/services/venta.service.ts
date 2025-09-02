@@ -1,5 +1,6 @@
 import { InventoryPort } from "@/core/domain/ports/inventory.port";
 import { VentaRepository } from "@/core/domain/repositories/venta.repository";
+import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
 import { VentaVO } from "@/core/domain/value-objects/venta.vo";
 import { EstadoVenta } from "@prisma/client";
 import { mapVentaVOToPrismaCreate } from "../mapper/venta-prisma.mapper";
@@ -25,5 +26,21 @@ export class VentaService {
       await this.inventory.consumeAndNotify(stockActions, { tx });
     }
     return venta;
+  }
+
+  async delete({ tx }: any, id: number) {
+    const existing = await this.repo.findById(id);
+    if (!existing) throw new Error("Venta no encontrada");
+    const repuestos = (existing.repuestosUsados ?? []).map(
+      (r): RepuestoUsado => RepuestoUsado.fromOrderDb(r)
+    );
+
+    // Generar acciones de stock para liberar repuestos
+    const stockActions = this.stockManager.generateReleaseActions(repuestos);
+
+    await this.inventory.restoreStock(stockActions, { tx });
+    await this.repo.delete(tx, id);
+
+    return stockActions;
   }
 }
