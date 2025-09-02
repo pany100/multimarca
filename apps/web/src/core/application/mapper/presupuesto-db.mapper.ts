@@ -7,7 +7,7 @@ export class PresupuestoDBMapper {
   ): Prisma.PresupuestoCreateArgs {
     return {
       data: {
-        autoId: Number(presupuesto.autoId),
+        autoId: presupuesto.autoId,
         fecha: presupuesto.fecha,
         observacionesCliente: presupuesto.observacionesCliente,
         detallesDeTrabajo: presupuesto.detallesDeTrabajo,

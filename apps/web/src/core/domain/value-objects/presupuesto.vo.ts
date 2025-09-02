@@ -11,7 +11,7 @@ export type PresupuestoProps = {
   repuestosVO: RepuestoUsado[];
   trabajosVO: TrabajoRealizado[];
   tercerosVO: ReparacionTercero[];
-  autoId: number | null;
+  autoId?: number | null;
   fecha: Date;
   fechaRespuesta: Date | null;
   fechaEnvio: Date | null;
@@ -63,7 +63,7 @@ export class PresupuestoVO {
       props.repuestosVO,
       props.trabajosVO,
       props.tercerosVO,
-      props.autoId,
+      props.autoId ?? null,
       props.fecha,
       props.fechaRespuesta,
       props.fechaEnvio,
