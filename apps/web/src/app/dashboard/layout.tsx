@@ -740,7 +740,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       {isLoading && (
         <LinearProgress
           sx={{
-            position: "absolute",
+            position: "fixed",
             top: 0,
             left: 0,
             right: 0,
