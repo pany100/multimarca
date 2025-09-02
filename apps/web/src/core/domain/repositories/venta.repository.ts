@@ -10,7 +10,7 @@ export type ListVentasParams = Omit<ListVentasQueryDto, "page" | "size"> & {
 export interface VentaRepository {
   create(
     tx: Prisma.TransactionClient,
-    input: Prisma.VentaCreateArgs
+    input: Prisma.VentaCreateInput
   ): Promise<Venta>;
   listPaged(args: ListVentasParams): Promise<PageResult<Venta>>;
 }

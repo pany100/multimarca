@@ -1,12 +1,19 @@
+import { StockManagerService } from "@/core/application/services/stock-manager.service";
+import { VentaService } from "@/core/application/services/venta.service";
+import { CreateVentaUseCase } from "@/core/application/use-cases/venta/create-venta.use-case";
 import { ListVentaUseCase } from "@/core/application/use-cases/venta/list-venta.use-case";
+import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
+import { PrismaNotificationRepository } from "@/core/infrastructure/database/repositories/prisma-notification.repository";
 import { PrismaVentaRepository } from "@/core/infrastructure/database/repositories/prisma-venta.repository";
-import { listVentasQuerySchema } from "@/core/infrastructure/validation/schemas/venta.schema";
-import prisma from "@/lib/prisma";
-import { getIO } from "@/lib/socketio";
+import { PrismaInventoryAdapter } from "@/core/infrastructure/external/prisma-inventory.adapter";
+import { SocketNotifier } from "@/core/infrastructure/external/socket-notifier";
+import {
+  createVentaDtoSchema,
+  listVentasQuerySchema,
+} from "@/core/infrastructure/validation/schemas/venta.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
-import { moveFileInS3 } from "@/utils/s3Helper";
-import { EstadoVenta, Prisma, TipoNotificacionInterna } from "@prisma/client";
+import { EstadoVenta } from "@prisma/client";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -33,170 +40,19 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const {
-      clienteId,
-      descripcionDescuento,
-      descripcionIncremento,
-      descuento,
-      fecha,
-      informacionCliente,
-      incremento,
-      porcentajeRecargo,
-      repuestosUsados = [],
-      reparacionesDeTercero = [],
-      trabajosRealizados = [],
-      estado,
-    } = body;
-
-    const isPresupuesto = estado === "Presupuestado";
-
-    if (!isPresupuesto) {
-      for (const repuesto of repuestosUsados) {
-        const stockActual = await prisma.stock.findUnique({
-          where: { id: repuesto.stock.id },
-          select: { units: true },
-        });
-
-        if (
-          !stockActual ||
-          (stockActual.units ?? 0) < repuesto.unidadesConsumidas
-        ) {
-          return NextResponse.json(
-            {
-              error: `Stock insuficiente para el repuesto ${repuesto.stock.name} con ID ${repuesto.stock.id}`,
-            },
-            { status: 400 }
-          );
-        }
-      }
-    }
-    if (!clienteId && !informacionCliente) {
-      return NextResponse.json(
-        { error: "Debe proporcionar un cliente o información del cliente" },
-        { status: 400 }
-      );
-    }
-
-    const repuestosToPersist = repuestosUsados.map((repuesto: any) => ({
-      precioCompra: repuesto.precioCompra
-        ? new Prisma.Decimal(repuesto.precioCompra)
-        : new Prisma.Decimal(0),
-      precioVenta: repuesto.precioVenta
-        ? new Prisma.Decimal(repuesto.precioVenta)
-        : new Prisma.Decimal(0),
-      unidadesConsumidas: repuesto.unidadesConsumidas,
-      stock: { connect: { id: repuesto.stock.id } },
-    }));
-
-    const reparacionesDeTerceroToPersist = await Promise.all(
-      reparacionesDeTercero.map(async (reparacion: any) => {
-        let reciboUrl = reparacion.recibo;
-        if (reparacion.recibo && reparacion.recibo.includes("/tmp/")) {
-          reciboUrl = await moveFileInS3(reparacion.recibo, "recibos");
-        }
-        return {
-          nombre: reparacion.nombre,
-          precioCompra: reparacion.precioCompra
-            ? new Prisma.Decimal(reparacion.precioCompra)
-            : new Prisma.Decimal(0),
-          precioVenta: reparacion.precioVenta
-            ? new Prisma.Decimal(reparacion.precioVenta)
-            : new Prisma.Decimal(0),
-          proveedor: { connect: { id: reparacion.proveedor.id } },
-          recibo: reciboUrl,
-        };
-      })
+    const dto = await validateRequest(body, createVentaDtoSchema);
+    const useCase = new CreateVentaUseCase(
+      new VentaService(
+        new PrismaVentaRepository(),
+        new PrismaInventoryAdapter(new PrismaNotificationRepository()),
+        new StockManagerService()
+      ),
+      new SocketNotifier(),
+      new PrismaUnitOfWork()
     );
-
-    const trabajosRealizadosToPersist = trabajosRealizados.map(
-      (trabajo: any) => ({
-        descripcion: trabajo.manoDeObra.name,
-        precioUnitario: new Prisma.Decimal(trabajo.precioUnitario),
-        diasParaRecordatorio: trabajo.diasParaRecordatorio,
-      })
-    );
-
-    const dolar = await prisma.dolar.findFirst({
-      where: {
-        fecha: {
-          lte: new Date(fecha),
-        },
-      },
-      orderBy: {
-        fecha: "desc",
-      },
-    });
-
-    const venta = await prisma.venta.create({
-      data: {
-        clienteId,
-        informacionCliente,
-        fecha,
-        dolarId: dolar?.id,
-        estado,
-        descuento: descuento ? new Prisma.Decimal(descuento) : 0,
-        descripcionDescuento,
-        incremento: incremento ? new Prisma.Decimal(incremento) : 0,
-        descripcionIncremento,
-        porcentajeRecargo,
-        repuestosUsados: {
-          create: repuestosToPersist,
-        },
-        reparacionesDeTercero: {
-          create: reparacionesDeTerceroToPersist,
-        },
-        trabajosRealizados: {
-          create: trabajosRealizadosToPersist,
-        },
-      },
-      include: {
-        cliente: true,
-        repuestosUsados: {
-          include: {
-            stock: true,
-          },
-        },
-        reparacionesDeTercero: true,
-        trabajosRealizados: true,
-      },
-    });
-
-    if (!isPresupuesto) {
-      for (const repuesto of repuestosUsados) {
-        const stockActualizado = await prisma.stock.update({
-          where: { id: repuesto.stock.id },
-          data: { units: { decrement: repuesto.unidadesConsumidas } },
-        });
-
-        if (
-          (stockActualizado.units ?? 0) <= (stockActualizado.restockValue ?? 0)
-        ) {
-          await prisma.notificacionInterna.create({
-            data: {
-              fecha: new Date(),
-              titulo: `${stockActualizado.name} necesita reposición`,
-              texto: `El elemento ${stockActualizado.name} quedó con ${stockActualizado.units} unidades. Necesita reponer stock.`,
-              leida: false,
-              tipo: TipoNotificacionInterna.REPOSICION_STOCK,
-              stockId: stockActualizado.id,
-            },
-          });
-          const io = getIO();
-          if (io) {
-            io.emit("newNotification");
-          }
-        }
-      }
-    }
-
-    return NextResponse.json(venta, {
-      status: 201,
-    });
-  } catch (error) {
-    console.error("Error al crear venta:", error);
-    return NextResponse.json(
-      { error: `Error al crear la venta: ${error}` },
-      { status: 500 }
-    );
+    const created = await useCase.execute(dto);
+    return NextResponse.json(created, { status: 201 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }

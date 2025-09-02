@@ -9,9 +9,9 @@ import { EstadoVenta, Prisma, Venta } from "@prisma/client";
 export class PrismaVentaRepository implements VentaRepository {
   create(
     tx: Prisma.TransactionClient,
-    data: Prisma.VentaCreateArgs
+    data: Prisma.VentaCreateInput
   ): Promise<Venta> {
-    return tx.venta.create(data);
+    return tx.venta.create({ data });
   }
 
   listPaged(args: ListVentasParams): Promise<PageResult<Venta>> {

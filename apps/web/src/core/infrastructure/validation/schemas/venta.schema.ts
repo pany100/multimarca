@@ -37,9 +37,10 @@ export const createVentaDtoSchema = z.object({
 
   descripcionDescuento: z.string().nullable().optional(),
   descripcionIncremento: z.string().nullable().optional(),
-  descuento: z.number().min(0).nullable().optional(),
-  incremento: z.number().min(0).nullable().optional(),
-  porcentajeRecargo: z.number().min(0).nullable().optional(),
+  descuento: z.coerce.number().optional(),
+  incremento: z.coerce.number().optional(),
+
+  porcentajeRecargo: z.coerce.number().optional(),
 
   estado: ventaEstadoEnum,
 
