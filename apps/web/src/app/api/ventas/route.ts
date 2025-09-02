@@ -1,3 +1,4 @@
+import { NotificationService } from "@/core/application/services/notification.service";
 import { StockManagerService } from "@/core/application/services/stock-manager.service";
 import { VentaService } from "@/core/application/services/venta.service";
 import { CreateVentaUseCase } from "@/core/application/use-cases/venta/create-venta.use-case";
@@ -44,7 +45,9 @@ export async function POST(request: Request) {
     const useCase = new CreateVentaUseCase(
       new VentaService(
         new PrismaVentaRepository(),
-        new PrismaInventoryAdapter(new PrismaNotificationRepository()),
+        new PrismaInventoryAdapter(
+          new NotificationService(new PrismaNotificationRepository())
+        ),
         new StockManagerService()
       ),
       new SocketNotifier(),

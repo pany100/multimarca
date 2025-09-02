@@ -1,3 +1,4 @@
+import { NotificationService } from "@/core/application/services/notification.service";
 import { OrdenReparacionService } from "@/core/application/services/orden-reparacion.service";
 import { StockManagerService } from "@/core/application/services/stock-manager.service";
 import { CreateOrdenUseCase } from "@/core/application/use-cases/orden-reparacion/create-orden.use-case";
@@ -8,7 +9,6 @@ import { PrismaNotificationRepository } from "@/core/infrastructure/database/rep
 import { PrismaOrdenReparacionRepository } from "@/core/infrastructure/database/repositories/prisma-orden-reparacion.repository";
 import { PrismaPagoMecanicoRepository } from "@/core/infrastructure/database/repositories/prisma-pago-mecanico.repository";
 import { PrismaInventoryAdapter } from "@/core/infrastructure/external/prisma-inventory.adapter";
-import { SocketNotifier } from "@/core/infrastructure/external/socket-notifier";
 import {
   createOrdenSchema,
   listOrdenesQuerySchema,
@@ -46,18 +46,19 @@ export async function POST(request: Request) {
     const body = await request.json();
     const dto = await validateRequest(body, createOrdenSchema);
 
-    const notificationRepo = new PrismaNotificationRepository();
+    const notificationService = new NotificationService(
+      new PrismaNotificationRepository()
+    );
     const useCase = new CreateOrdenUseCase(
       new OrdenReparacionService(
         new StockManagerService(),
         new PrismaOrdenReparacionRepository(),
-        new PrismaInventoryAdapter(notificationRepo),
+        new PrismaInventoryAdapter(notificationService),
         new PrismaCustomFileRepository()
       ),
-      new SocketNotifier(),
       new PrismaUnitOfWork(),
       new PrismaPagoMecanicoRepository(),
-      notificationRepo
+      notificationService
     );
 
     const created = await useCase.execute(dto);

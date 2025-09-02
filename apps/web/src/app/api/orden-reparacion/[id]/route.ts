@@ -1,3 +1,4 @@
+import { NotificationService } from "@/core/application/services/notification.service";
 import { OrdenReparacionService } from "@/core/application/services/orden-reparacion.service";
 import { StockManagerService } from "@/core/application/services/stock-manager.service";
 import { DeleteOrdenUseCase } from "@/core/application/use-cases/orden-reparacion/delete-orden.use-case";
@@ -10,7 +11,6 @@ import { PrismaOrdenReparacionRepository } from "@/core/infrastructure/database/
 import { PrismaPagoMecanicoRepository } from "@/core/infrastructure/database/repositories/prisma-pago-mecanico.repository";
 import { PrismaInventoryAdapter } from "@/core/infrastructure/external/prisma-inventory.adapter";
 import { S3FileStorageAdapter } from "@/core/infrastructure/external/s3-file-storage.adapter";
-import { SocketNotifier } from "@/core/infrastructure/external/socket-notifier";
 import {
   getOrdenQuerySchema,
   updateOrdenSchema,
@@ -67,16 +67,16 @@ export async function PUT(
       );
     }
     const notificationRepo = new PrismaNotificationRepository();
+    const notificationService = new NotificationService(notificationRepo);
     const updated = await new UpdateOrdenUseCase(
       new OrdenReparacionService(
         new StockManagerService(),
         new PrismaOrdenReparacionRepository(),
-        new PrismaInventoryAdapter(notificationRepo),
+        new PrismaInventoryAdapter(notificationService),
         new PrismaCustomFileRepository()
       ),
-      notificationRepo,
       new PrismaPagoMecanicoRepository(),
-      new SocketNotifier()
+      notificationService
     ).execute(dto);
 
     return NextResponse.json(updated);
@@ -97,12 +97,14 @@ export async function DELETE(
       getOrdenQuerySchema
     );
     const notificationRepo = new PrismaNotificationRepository();
+    const notificationService = new NotificationService(notificationRepo);
+
     await new DeleteOrdenUseCase(
       new PrismaUnitOfWork(),
       new OrdenReparacionService(
         new StockManagerService(),
         new PrismaOrdenReparacionRepository(),
-        new PrismaInventoryAdapter(notificationRepo),
+        new PrismaInventoryAdapter(notificationService),
         new PrismaCustomFileRepository()
       )
     ).execute(dto.id);

@@ -11,6 +11,6 @@ export type NotificationData = {
 };
 
 export interface NotificationRepository {
-  create(data: NotificationData): Promise<any>;
+  create(data: NotificationData, deps?: { tx?: any }): Promise<any>;
   findByOrderIdAndType(id: number, tipo: TipoNotificacionInterna): Promise<any>;
 }

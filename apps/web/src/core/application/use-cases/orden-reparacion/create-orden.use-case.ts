@@ -1,22 +1,20 @@
 // src/core/application/use-cases/orden-reparacion/create-orden.use-case.ts
 import type { CreateOrdenDto } from "@/core/application/dto/orden-reparacion.dto";
 import { hasAllRequiredFields } from "@/core/domain/policies/orden-reparacion.policy";
-import type { NotifierPort } from "@/core/domain/ports/notifier.port";
 import type { UnitOfWork } from "@/core/domain/ports/uow.port";
-import { NotificationRepository } from "@/core/domain/repositories/notification.repository";
 import { PagoMecanicoRepository } from "@/core/domain/repositories/pago-mecanico.repository";
 import { EstadoOrden } from "@/core/domain/value-objects/estado-orden.vo";
 import { EstadoOrdenReparacion, OrdenReparacion } from "@prisma/client";
 import { OrdenReparacionVOMapper } from "../../mapper/orden-reparacion-vo.mapper";
+import { NotificationService } from "../../services/notification.service";
 import { OrdenReparacionService } from "../../services/orden-reparacion.service";
 
 export class CreateOrdenUseCase {
   constructor(
     private readonly service: OrdenReparacionService,
-    private readonly notifier: NotifierPort,
     private readonly uow: UnitOfWork,
     private readonly pagoMecanicoRepo: PagoMecanicoRepository,
-    private readonly notificationRepo: NotificationRepository
+    private readonly notificationService: NotificationService
   ) {}
 
   async execute(input: CreateOrdenDto) {
@@ -45,16 +43,18 @@ export class CreateOrdenUseCase {
         await this.pagoMecanicoRepo.create({
           ordenReparacionId: ordenCreada.id,
         });
-        await this.notificationRepo.create({
-          fecha: new Date(),
-          titulo: "Reparación Terminada",
-          texto: `La reparación del auto ${ordenCreada.autoId} se encuentra terminada. Pagar mano de obra.`,
-          leida: false,
-          ordenReparacionId: ordenCreada.id,
-          tipo: "REPARACION_TERMINADA",
-        });
+        await this.notificationService.create(
+          {
+            fecha: new Date(),
+            titulo: "Reparación Terminada",
+            texto: `La reparación del auto ${ordenCreada.autoId} se encuentra terminada. Pagar mano de obra.`,
+            leida: false,
+            ordenReparacionId: ordenCreada.id,
+            tipo: "REPARACION_TERMINADA",
+          },
+          { tx }
+        );
       }
-      this.notifier.emit("newNotification");
       return ordenCreada;
     });
     return creada;

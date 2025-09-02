@@ -7,7 +7,7 @@ export class PrismaUnitOfWork implements UnitOfWork {
     fn: (deps: { tx: Prisma.TransactionClient }) => Promise<T>
   ): Promise<T> {
     return prisma.$transaction(async (tx) => fn({ tx }), {
-      timeout: 30000, // 30 seconds
+      timeout: 60000, // 60 seconds
     });
   }
 }

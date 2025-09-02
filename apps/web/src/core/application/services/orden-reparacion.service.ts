@@ -61,9 +61,7 @@ export class OrdenReparacionService {
     const createData =
       OrdenReparacionDBMapper.transformToCreateData(ordenReparacionVO);
     const orden = await this.repo.create(tx, createData);
-
     await this.inventory.consumeAndNotify(stockActions, { tx });
-
     return orden;
   }
 
