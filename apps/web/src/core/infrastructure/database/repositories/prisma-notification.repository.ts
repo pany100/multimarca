@@ -7,8 +7,8 @@ import { TipoNotificacionInterna } from "@prisma/client";
 
 export class PrismaNotificationRepository implements NotificationRepository {
   create(data: NotificationData, deps?: { tx?: any }): Promise<any> {
-    const client = deps?.tx || prisma;
-    return client.notificacionInterna.create({ data });
+    const db = deps?.tx?.tx ?? deps?.tx ?? prisma;
+    return db.notificacionInterna.create({ data });
   }
   findByOrderIdAndType(
     id: number,

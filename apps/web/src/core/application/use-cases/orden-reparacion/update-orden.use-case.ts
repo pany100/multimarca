@@ -24,9 +24,12 @@ export class UpdateOrdenUseCase {
       updatedOrder.id
     );
     if (!pagoMecanico) {
-      await this.pagoMecanicoRepo.create({
-        ordenReparacionId: updatedOrder.id,
-      });
+      await this.pagoMecanicoRepo.create(
+        {
+          ordenReparacionId: updatedOrder.id,
+        },
+        deps
+      );
     }
     const notification = await this.notificationService.findByOrderIdAndType(
       updatedOrder.id,
