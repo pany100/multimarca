@@ -1,10 +1,5 @@
-import { ListVentaUseCase } from "@/core/application/use-cases/venta/list-venta.use-case";
-import { PrismaVentaRepository } from "@/core/infrastructure/database/repositories/prisma-venta.repository";
-import { listVentasQuerySchema } from "@/core/infrastructure/validation/schemas/venta.schema";
 import prisma from "@/lib/prisma";
 import { getIO } from "@/lib/socketio";
-import { handleApiError } from "@/shared/middleware/error-handler.middleware";
-import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { moveFileInS3 } from "@/utils/s3Helper";
 import { EstadoVenta, Prisma, TipoNotificacionInterna } from "@prisma/client";
 import { NextResponse } from "next/server";
@@ -12,21 +7,57 @@ import { NextResponse } from "next/server";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const dto = await validateRequest(
-      {
-        page: searchParams.get("page") || "0",
-        size: searchParams.get("pageSize") || searchParams.get("size") || "10",
-        query: searchParams.get("query") || "",
-        estado: searchParams.get("estado") as EstadoVenta | null,
-      },
-      listVentasQuerySchema
+    const page = parseInt(searchParams.get("page") || "0");
+    const limit = parseInt(searchParams.get("limit") || "10");
+    const query = searchParams.get("query") || "";
+    const estado = searchParams.get("estado");
+
+    const where: Prisma.VentaWhereInput = {
+      OR: [
+        { cliente: { fullName: { contains: query } } },
+        { informacionCliente: { contains: query } },
+        { id: { equals: parseInt(query) || undefined } },
+      ],
+    };
+
+    // Add estado filter if provided
+    if (estado) {
+      where.estado = estado as EstadoVenta;
+    }
+
+    const [ventas, total] = await Promise.all([
+      prisma.venta.findMany({
+        where,
+        include: {
+          cliente: true,
+          repuestosUsados: {
+            include: {
+              stock: true,
+            },
+          },
+          reparacionesDeTercero: true,
+          trabajosRealizados: true,
+          ingresos: true,
+        },
+        skip: page * limit,
+        take: limit,
+        orderBy: { id: "desc" },
+      }),
+      prisma.venta.count({ where }),
+    ]);
+
+    return NextResponse.json({
+      items: ventas,
+      total,
+      page,
+      limit,
+    });
+  } catch (error) {
+    console.error("Error al obtener ventas:", error);
+    return NextResponse.json(
+      { error: "Error al obtener ventas" },
+      { status: 500 }
     );
-    const result = await new ListVentaUseCase(
-      new PrismaVentaRepository()
-    ).execute(dto);
-    return NextResponse.json(result, { status: 200 });
-  } catch (e) {
-    return handleApiError(e);
   }
 }
 

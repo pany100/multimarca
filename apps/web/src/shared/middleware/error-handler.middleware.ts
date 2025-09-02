@@ -2,8 +2,6 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
 export function handleApiError(err: unknown) {
-  console.error("API Error:", err);
-
   if (err instanceof ZodError) {
     return NextResponse.json(
       { error: "Validación fallida", details: err.flatten() },
