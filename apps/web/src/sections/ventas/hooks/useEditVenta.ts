@@ -25,7 +25,6 @@ function useEditVenta({ control, venta }: Props) {
         },
         body: JSON.stringify(data),
       });
-
       if (response.ok) {
         setSnackbar({
           open: true,

@@ -1,6 +1,7 @@
 import {
   ListVentasParams,
   VentaRepository,
+  VentaWithRelations,
 } from "@/core/domain/repositories/venta.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
@@ -58,6 +59,32 @@ export class PrismaVentaRepository implements VentaRepository {
   async findById(id: number) {
     return prisma.venta.findUnique({
       where: { id },
+      include: {
+        cliente: true,
+        repuestosUsados: {
+          include: {
+            stock: true,
+          },
+        },
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
+            reciboFile: true,
+          },
+        },
+        trabajosRealizados: true,
+        ingresos: true,
+      },
+    });
+  }
+
+  async update(
+    tx: any,
+    data: Prisma.VentaUpdateArgs
+  ): Promise<VentaWithRelations> {
+    const db = tx?.tx ?? prisma;
+    return db.venta.update({
+      ...data,
       include: {
         cliente: true,
         repuestosUsados: {

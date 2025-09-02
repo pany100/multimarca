@@ -3,7 +3,10 @@ import { VentaRepository } from "@/core/domain/repositories/venta.repository";
 import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
 import { VentaVO } from "@/core/domain/value-objects/venta.vo";
 import { EstadoVenta } from "@prisma/client";
-import { mapVentaVOToPrismaCreate } from "../mapper/venta-prisma.mapper";
+import {
+  mapVentaVOToPrismaCreate,
+  mapVentaVOToPrismaUpdate,
+} from "../mapper/venta-prisma.mapper";
 import { StockManagerService } from "./stock-manager.service";
 
 export class VentaService {
@@ -42,5 +45,40 @@ export class VentaService {
     await this.repo.delete(tx, id);
 
     return stockActions;
+  }
+
+  async update({ tx }: any, ventaVO: VentaVO) {
+    if (!ventaVO.id) {
+      throw new Error("ID de venta no proporcionado");
+    }
+    const existing = await this.repo.findById(ventaVO.id);
+    if (!existing) {
+      throw new Error("Venta no encontrada");
+    }
+
+    if (
+      ventaVO.estado === EstadoVenta.Presupuestado &&
+      existing.estado !== EstadoVenta.Presupuestado
+    ) {
+      throw new Error("No se puede convertir una venta a presupuesto");
+    }
+
+    const existingRepuestos = (existing.repuestosUsados ?? []).map(
+      (r): RepuestoUsado => RepuestoUsado.fromOrderDb(r)
+    );
+    const stockActions = this.stockManager.generateSyncActions(
+      existingRepuestos,
+      ventaVO.repuestosVO
+    );
+    if (ventaVO.estado !== EstadoVenta.Presupuestado) {
+      await this.inventory.ensureSufficient(stockActions);
+    }
+
+    const updateData = mapVentaVOToPrismaUpdate(ventaVO);
+    const venta = await this.repo.update(tx, updateData);
+    if (ventaVO.estado !== EstadoVenta.Presupuestado) {
+      await this.inventory.syncStockAndNotify(stockActions, { tx });
+    }
+    return venta;
   }
 }

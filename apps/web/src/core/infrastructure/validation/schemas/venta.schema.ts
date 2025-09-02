@@ -31,8 +31,8 @@ const trabajoSchema = z.object({
 });
 
 export const createVentaDtoSchema = z.object({
-  clienteId: z.number().int().positive().optional(),
-  informacionCliente: z.string().optional(),
+  clienteId: z.number().int().positive().nullable().optional(),
+  informacionCliente: z.string().nullable().optional(),
   fecha: z.coerce.date(),
 
   descripcionDescuento: z.string().nullable().optional(),
@@ -58,4 +58,9 @@ export const listVentasQuerySchema = z.object({
 
 export const getVentaQuerySchema = z.object({
   id: z.coerce.number().positive(),
+});
+
+export const updateVentaDtoSchema = z.object({
+  ...getVentaQuerySchema.shape,
+  ...createVentaDtoSchema.shape,
 });
