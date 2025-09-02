@@ -5,6 +5,9 @@ export class GetOrdenUseCase {
 
   async execute(id: number) {
     const order = await this.repo.findById(id);
+    if (!order) {
+      throw new Error("Orden no encontrada");
+    }
     const { mecanicos, ...ordenReparacionWithoutMecanicos } = order;
     const mecanicosWithoutMecanico = mecanicos.map(
       (el: {

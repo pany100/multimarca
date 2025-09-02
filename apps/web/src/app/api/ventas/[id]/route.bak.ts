@@ -1,10 +1,5 @@
-import { GetVentaUseCase } from "@/core/application/use-cases/venta/get-venta.use-case";
-import { PrismaVentaRepository } from "@/core/infrastructure/database/repositories/prisma-venta.repository";
-import { getVentaQuerySchema } from "@/core/infrastructure/validation/schemas/venta.schema";
 import prisma from "@/lib/prisma";
 import { getIO } from "@/lib/socketio";
-import { handleApiError } from "@/shared/middleware/error-handler.middleware";
-import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { moveFileInS3 } from "@/utils/s3Helper";
 import { Prisma, TipoNotificacionInterna } from "@prisma/client";
 import { NextResponse } from "next/server";
@@ -16,19 +11,46 @@ export async function GET(
   try {
     const id = parseInt(params.id);
 
-    const dto = await validateRequest(
-      {
-        id: parseInt(params.id),
-      },
-      getVentaQuerySchema
-    );
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: "ID de venta inválido" },
+        { status: 400 }
+      );
+    }
 
-    const venta = await new GetVentaUseCase(
-      new PrismaVentaRepository()
-    ).execute(dto);
-    return NextResponse.json(venta, { status: 200 });
-  } catch (e) {
-    return handleApiError(e);
+    const venta = await prisma.venta.findUnique({
+      where: { id },
+      include: {
+        cliente: true,
+        repuestosUsados: {
+          include: {
+            stock: true,
+          },
+        },
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
+          },
+        },
+        trabajosRealizados: true,
+        ingresos: true,
+      },
+    });
+
+    if (!venta) {
+      return NextResponse.json(
+        { error: "Venta no encontrada" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(venta);
+  } catch (error) {
+    console.error("Error al obtener la venta:", error);
+    return NextResponse.json(
+      { error: "Error al obtener la venta" },
+      { status: 500 }
+    );
   }
 }
 

@@ -7,10 +7,31 @@ export type ListVentasParams = Omit<ListVentasQueryDto, "page" | "size"> & {
   size: number;
 };
 
+export type VentaWithRelations = Prisma.VentaGetPayload<{
+  include: {
+    cliente: true;
+    repuestosUsados: {
+      include: {
+        stock: true;
+      };
+    };
+    reparacionesDeTercero: {
+      include: {
+        proveedor: true;
+        reciboFile: true;
+      };
+    };
+    trabajosRealizados: true;
+    ingresos: true;
+  };
+}>;
+
 export interface VentaRepository {
   create(
     tx: Prisma.TransactionClient,
     input: Prisma.VentaCreateInput
   ): Promise<Venta>;
   listPaged(args: ListVentasParams): Promise<PageResult<Venta>>;
+  findById(id: number): Promise<VentaWithRelations | null>;
+  delete(tx: any, id: number): Promise<void>;
 }

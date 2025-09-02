@@ -49,4 +49,31 @@ export class PrismaVentaRepository implements VentaRepository {
       size
     );
   }
+
+  async delete(tx: any, id: number) {
+    const db = tx?.tx ?? prisma;
+    await db.venta.delete({ where: { id } });
+  }
+
+  async findById(id: number) {
+    return prisma.venta.findUnique({
+      where: { id },
+      include: {
+        cliente: true,
+        repuestosUsados: {
+          include: {
+            stock: true,
+          },
+        },
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
+            reciboFile: true,
+          },
+        },
+        trabajosRealizados: true,
+        ingresos: true,
+      },
+    });
+  }
 }
