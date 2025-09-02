@@ -43,7 +43,7 @@ export const getPresupuestoQuerySchema = z.object({
 });
 
 export const createPresupuestoSchema = z.object({
-  autoId: z.coerce.number().nullable(),
+  autoId: z.coerce.number().nullable().optional(),
   observacionesCliente: z
     .string()
     .min(1, "Las observaciones del cliente son obligatorias"),
