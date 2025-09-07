@@ -1,7 +1,9 @@
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
-import { EstadoOrdenReparacion } from "@prisma/client";
+import { GetOrdenesClienteUseCase } from "@/core/application/use-cases/cliente/get-ordenes-cliente.use-case";
+import { PrismaOrdenReparacionRepository } from "@/core/infrastructure/database/repositories/prisma-orden-reparacion.repository";
+import { getOrdenesQuerySchema } from "@/core/infrastructure/validation/schemas/cliente.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
-import prisma from "src/lib/prisma";
 
 export async function GET(
   request: Request,
@@ -10,82 +12,19 @@ export async function GET(
   try {
     const clienteId = parseInt(params.id);
     const { searchParams } = new URL(request.url);
-    const soloConDeuda = searchParams.get("soloConDeuda") === "true";
-
-    const ordenesReparacion = await prisma.ordenReparacion.findMany({
-      where: {
-        auto: {
-          ownerId: clienteId,
-        },
-        estado: {
-          not: EstadoOrdenReparacion.Presupuestado,
-        },
+    const dto = await validateRequest(
+      {
+        id: clienteId,
+        soloConDeuda: searchParams.get("soloConDeuda") === "true",
       },
-      include: {
-        auto: {
-          include: {
-            owner: true,
-          },
-        },
-        mecanicos: true,
-        repuestosUsados: true,
-        reparacionesDeTercero: true,
-        trabajosRealizados: true,
-        ingresos: {
-          include: {
-            dolar: true,
-          },
-        },
-      },
-    });
-
-    const ordenesConDeuda = ordenesReparacion.map((orden) => {
-      const ordenParaCalculo = {
-        ...orden,
-        repuestosUsados: orden.repuestosUsados.map((r) => ({
-          precioVenta: Number(r.precioVenta),
-          unidadesConsumidas: r.unidadesConsumidas,
-        })),
-        reparacionesDeTercero: orden.reparacionesDeTercero.map((r) => ({
-          precioVenta: Number(r.precioVenta),
-        })),
-        trabajosRealizados: orden.trabajosRealizados.map((t) => ({
-          precioUnitario: Number(t.precioUnitario),
-        })),
-        descuento: Number(orden.descuento),
-        incremento: Number(orden.incremento),
-        incrementoInterno: Number(orden.incrementoInterno),
-        porcentajeRecargo: Number(orden.porcentajeRecargo),
-      };
-      const totalAPagar = calcularTotalOrdenReparacion(ordenParaCalculo);
-      const totalPagado = orden.ingresos.reduce((sum, ingreso) => {
-        if (ingreso.moneda === "Dolar") {
-          return sum + Number(ingreso.monto) * Number(ingreso.dolar?.blue);
-        }
-        return sum + Number(ingreso.monto);
-      }, 0);
-
-      return {
-        ...orden,
-        totalAPagar,
-        totalPagado,
-        deuda: totalAPagar - totalPagado,
-      };
-    });
-    if (soloConDeuda) {
-      return NextResponse.json(
-        ordenesConDeuda.filter(
-          (orden) => orden.deuda > 0 || orden.totalAPagar === 0
-        )
-      );
-    }
+      getOrdenesQuerySchema
+    );
+    const ordenesConDeuda = await new GetOrdenesClienteUseCase(
+      new PrismaOrdenReparacionRepository()
+    ).execute(dto);
 
     return NextResponse.json(ordenesConDeuda);
-  } catch (error) {
-    console.error("Error al obtener las órdenes de reparación:", error);
-    return NextResponse.json(
-      { error: "Error al obtener las órdenes de reparación" },
-      { status: 500 }
-    );
+  } catch (e) {
+    return handleApiError(e);
   }
 }

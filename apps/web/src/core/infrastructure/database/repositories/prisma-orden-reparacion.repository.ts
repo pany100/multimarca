@@ -6,6 +6,7 @@ import type {
 } from "@/core/domain/repositories/orden-reparacion.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
+import { EstadoOrdenReparacion } from "@prisma/client";
 
 export class PrismaOrdenReparacionRepository
   implements OrdenReparacionRepository
@@ -126,5 +127,38 @@ export class PrismaOrdenReparacionRepository
   async delete(tx: any, id: number) {
     const db = tx?.tx ?? prisma;
     await db.ordenReparacion.delete({ where: { id } });
+  }
+
+  async listForCliente(clienteId: number) {
+    return prisma.ordenReparacion.findMany({
+      where: {
+        auto: {
+          ownerId: clienteId,
+        },
+        estado: {
+          not: EstadoOrdenReparacion.Presupuestado,
+        },
+      },
+      include: {
+        auto: {
+          include: {
+            owner: true,
+          },
+        },
+        mecanicos: true,
+        repuestosUsados: {
+          include: {
+            stock: true,
+          },
+        },
+        reparacionesDeTercero: true,
+        trabajosRealizados: true,
+        ingresos: {
+          include: {
+            dolar: true,
+          },
+        },
+      },
+    });
   }
 }

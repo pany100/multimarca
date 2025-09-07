@@ -72,6 +72,30 @@ export type OrdenReparacionWithRelations = Prisma.OrdenReparacionGetPayload<{
   };
 }>;
 
+export type OrdenReparacionWithRelationsForClient =
+  Prisma.OrdenReparacionGetPayload<{
+    include: {
+      auto: {
+        include: {
+          owner: true;
+        };
+      };
+      mecanicos: true;
+      repuestosUsados: {
+        include: {
+          stock: true;
+        };
+      };
+      reparacionesDeTercero: true;
+      trabajosRealizados: true;
+      ingresos: {
+        include: {
+          dolar: true;
+        };
+      };
+    };
+  }>;
+
 export interface OrdenReparacionRepository {
   listPaged(params: ListOrdenesParams): Promise<PageResult<any>>;
   findMatchingIdsByFormattedDate(query: string): Promise<number[]>;
@@ -82,4 +106,7 @@ export interface OrdenReparacionRepository {
     tx: any,
     payload: UpdateOrdenPersist["data"]
   ): Promise<OrdenReparacionWithRelations>;
+  listForCliente(
+    clienteId: number
+  ): Promise<OrdenReparacionWithRelationsForClient[]>;
 }

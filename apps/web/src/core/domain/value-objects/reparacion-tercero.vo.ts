@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { FileStoragePort } from "../ports/file-storage.port";
 import { Money } from "./money.vo";
 
@@ -46,6 +47,20 @@ export class ReparacionTercero {
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
       p.recibo ?? null
+    );
+  }
+
+  static fromOrderDb(p: {
+    nombre: string;
+    precioCompra: Prisma.Decimal;
+    precioVenta: Prisma.Decimal;
+  }) {
+    return new ReparacionTercero(
+      p.nombre.trim(),
+      0,
+      Money.from(p.precioCompra),
+      Money.from(p.precioVenta),
+      null
     );
   }
 }

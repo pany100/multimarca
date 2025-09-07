@@ -101,7 +101,7 @@ function IngresosReparacionTable({
         }`,
       renderCell: (params: any) => (
         <Link
-          href={`/dashboard/ingresos-reparacion/${params.row.ordenReparacion.id}`}
+          href={`/dashboard/ordenes-reparacion/${params.row.ordenReparacion.id}/ver`}
           style={{ textDecoration: "underline" }}
         >
           {params.value}

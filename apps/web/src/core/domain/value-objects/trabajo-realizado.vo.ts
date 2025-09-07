@@ -1,3 +1,4 @@
+import { Decimal } from "@prisma/client/runtime/library";
 import { Money } from "./money.vo";
 
 export interface TrabajoRealizadoProps {
@@ -36,6 +37,18 @@ export class TrabajoRealizado {
   static fromHttpInput(p: TrabajosRealizadosHTTPInput) {
     return new TrabajoRealizado(
       p.manoDeObra?.name ?? p.descripcion ?? "",
+      Money.from(p.precioUnitario),
+      p.diasParaRecordatorio ?? null
+    );
+  }
+
+  static fromOrderDb(p: {
+    precioUnitario: Decimal;
+    descripcion: string;
+    diasParaRecordatorio: number | null;
+  }) {
+    return new TrabajoRealizado(
+      p.descripcion.trim(),
       Money.from(p.precioUnitario),
       p.diasParaRecordatorio ?? null
     );

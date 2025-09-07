@@ -12,4 +12,7 @@ export class Money {
   asDecimal() {
     return this.v;
   }
+  toNumber() {
+    return this.v.toNumber();
+  }
 }
