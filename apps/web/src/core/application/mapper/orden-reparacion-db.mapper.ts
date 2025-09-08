@@ -99,7 +99,6 @@ export class OrdenReparacionDBMapper {
         observacionesOcultas: ordenReparacion.observacionesOcultas,
         observacionesSalida: ordenReparacion.observacionesSalida,
         estado: ordenReparacion.estado.toPrisma(),
-        recibos: ordenReparacion.recibos,
         revisadoPorId: ordenReparacion.revisadoPorId,
         dolarId: ordenReparacion.dolarId,
         descuento: new Prisma.Decimal(ordenReparacion.descuento),
