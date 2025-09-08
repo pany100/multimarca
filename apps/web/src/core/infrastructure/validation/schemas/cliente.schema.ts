@@ -6,8 +6,7 @@ export const getOrdenesQuerySchema = z.object({
 });
 
 export const listDeudoresQuerySchema = z.object({
-  page: z.coerce.number().min(0).default(0),
-  size: z.coerce.number().min(1).max(200).default(10),
+  page: z.coerce.number().min(0).optional(),
+  size: z.coerce.number().min(1).max(200).optional(),
   query: z.string().nullable().optional(),
-  estado: z.string().nullable().optional(),
 });

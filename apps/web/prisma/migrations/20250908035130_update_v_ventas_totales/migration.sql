@@ -1,3 +1,6 @@
+DROP VIEW IF EXISTS v_ventas_totales;
+
+CREATE VIEW v_ventas_totales AS
 WITH
 -- Repuestos con recargo y redondeo
 ru AS (
@@ -23,7 +26,7 @@ rt AS (
 tr AS (
   SELECT
     t.ventaId,
-    SUM( CEIL( (t.precioUnitario) * (1 + v.porcentajeRecargo/100.0) / 500.0 ) * 500 ) AS total_trabajos
+    SUM( t.precioUnitario ) AS total_trabajos
   FROM TrabajoRealizado t
   JOIN Venta v ON v.id = t.ventaId
   WHERE t.ventaId IS NOT NULL

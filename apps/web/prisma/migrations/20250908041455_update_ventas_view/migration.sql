@@ -52,7 +52,6 @@ SELECT
   v.fecha                        AS fecha,
   v.clienteId                    AS cliente_id,
   COALESCE(c.fullName, v.informacionCliente) AS cliente_nombre,
-  c.phone						as cliente_phone,
 
   COALESCE(ru.total_repuestos,0) AS total_repuestos,
   COALESCE(rt.total_terceros,0)  AS total_terceros,

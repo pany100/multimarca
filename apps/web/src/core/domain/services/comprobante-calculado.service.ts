@@ -59,11 +59,7 @@ export class ComprobanteCalculado {
   get totalManoDeObra() {
     return this.trabajos.reduce(
       (acc, t) =>
-        acc +
-        this.calcularPrecioFinal(
-          t.precioUnitario.toNumber(),
-          this.ajustes.porcentajeRecargo
-        ),
+        acc + this.calcularPrecioFinal(t.precioUnitario.toNumber(), 0),
       0
     );
   }

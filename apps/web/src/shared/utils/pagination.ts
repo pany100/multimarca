@@ -91,3 +91,25 @@ export async function prismaPaged<T>(
   ]);
   return buildPageResult(items as T[], total as number, page, size);
 }
+
+/**
+ * Helper para consultas SQL raw con paginación:
+ *   sqlRawPaged(prisma, "SELECT * FROM users WHERE name LIKE '%john%'", "SELECT COUNT(*) as count FROM users WHERE name LIKE '%john%'", page, size)
+ */
+export async function sqlRawPaged<T>(
+  prisma: any,
+  query: string,
+  countQuery: string,
+  page: number,
+  size: number
+): Promise<PageResult<T>> {
+  const { skip } = getSkipTake(page, size);
+  // Agregar LIMIT y OFFSET a la query principal
+  const paginatedQuery = `${query} LIMIT ${size} OFFSET ${skip}`;
+  const [items, countResult] = await Promise.all([
+    prisma.$queryRawUnsafe(paginatedQuery) as Promise<T[]>,
+    prisma.$queryRawUnsafe(countQuery) as Promise<[{ count: bigint }]>,
+  ]);
+  const total = Number(countResult[0].count);
+  return buildPageResult(items, total, page, size);
+}
