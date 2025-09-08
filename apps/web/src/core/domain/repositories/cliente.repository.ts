@@ -21,6 +21,9 @@ export type ClienteWithRelations = Prisma.ClienteGetPayload<{
     ventas: {
       include: {
         ingresos: true;
+        repuestosUsados: true;
+        reparacionesDeTercero: true;
+        trabajosRealizados: true;
       };
     };
   };

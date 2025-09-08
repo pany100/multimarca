@@ -6,6 +6,7 @@ import {
   calcularTotalPagos,
   getStatusColor,
 } from "@/utils/ordenHelper";
+import { PriceCheck } from "@mui/icons-material";
 import BuildIcon from "@mui/icons-material/Build";
 import PersonIcon from "@mui/icons-material/Person";
 import {
@@ -80,15 +81,15 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
     {
       field: "fechaCreacion",
       headerName: "Fecha",
-      width: 150,
+      flex: 1,
       valueGetter: (fechaCreacion: string) =>
         new Date(fechaCreacion).toLocaleDateString(),
     },
-    { field: "observacionesCliente", headerName: "Observaciones", width: 300 },
+    { field: "observacionesCliente", headerName: "Observaciones", flex: 1.5 },
     {
       field: "estado",
       headerName: "Estado",
-      width: 150,
+      flex: 1,
       renderCell: (params) => (
         <Chip
           label={params.row.estado}
@@ -99,14 +100,14 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
     {
       field: "total",
       headerName: "Monto Total",
-      width: 150,
+      flex: 1,
       renderCell: (params: any) =>
         `$${calcularTotalOrdenReparacion(params.row)}`,
     },
     {
       field: "ingresos",
       headerName: "Deuda",
-      width: 250,
+      flex: 1,
       renderCell: (params: any) => {
         const total = calcularTotalOrdenReparacion(params.row);
         const aCuenta = calcularTotalPagos(params.row);
@@ -116,9 +117,46 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
     {
       field: "auto",
       headerName: "Auto",
-      width: 250,
+      flex: 2,
       valueGetter: (auto: any) => {
         return `${auto.brand} ${auto.model} (${auto.patent})`;
+      },
+    },
+  ];
+
+  const ventasColumns: GridColDef[] = [
+    {
+      field: "fecha",
+      headerName: "Fecha",
+      flex: 1,
+      valueGetter: (fecha: string) => new Date(fecha).toLocaleDateString(),
+    },
+    {
+      field: "estado",
+      headerName: "Estado",
+      flex: 1,
+      renderCell: (params) => (
+        <Chip
+          label={params.row.estado}
+          color={getStatusColor(params.row.estado)}
+        />
+      ),
+    },
+    {
+      field: "total",
+      headerName: "Monto Total",
+      flex: 1,
+      renderCell: (params: any) =>
+        `$${calcularTotalOrdenReparacion(params.row)}`,
+    },
+    {
+      field: "ingresos",
+      headerName: "Deuda",
+      flex: 1,
+      renderCell: (params: any) => {
+        const total = calcularTotalOrdenReparacion(params.row);
+        const aCuenta = calcularTotalPagos(params.row);
+        return `$${total - aCuenta}`;
       },
     },
   ];
@@ -129,6 +167,10 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
 
   const handleReparacionClick = (id: string) => {
     router.push(`/dashboard/ordenes-reparacion/${id}/ver`);
+  };
+
+  const handleVentaClick = (id: string) => {
+    router.push(`/dashboard/ventas/${id}/ver`);
   };
 
   return (
@@ -171,6 +213,21 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
           pageSizeOptions={[10, 20, 30]}
           autoHeight
           onRowClick={(params) => handleReparacionClick(params.row.id)}
+          sx={{ cursor: "pointer" }}
+        />
+        <Divider sx={{ my: 2 }} />
+        <Typography variant="h6" gutterBottom>
+          <PriceCheck sx={{ mr: 1, verticalAlign: "middle" }} />
+          Ventas
+        </Typography>
+        <DataGrid
+          rows={cliente.ventas}
+          columns={ventasColumns}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[10, 20, 30]}
+          autoHeight
+          onRowClick={(params) => handleVentaClick(params.row.id)}
           sx={{ cursor: "pointer" }}
         />
       </Paper>

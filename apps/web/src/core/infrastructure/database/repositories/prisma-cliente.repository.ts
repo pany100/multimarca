@@ -25,6 +25,9 @@ export class PrismaClienteRepository implements ClienteRepository {
         ventas: {
           include: {
             ingresos: true,
+            repuestosUsados: true,
+            reparacionesDeTercero: true,
+            trabajosRealizados: true,
           },
         },
       },
