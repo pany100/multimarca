@@ -18,6 +18,7 @@ export class DeudoresQueriesService {
         -- Deudas de ventas
         SELECT
           cliente_id,
+          null as patente,
           cliente_nombre,
           cliente_phone,
           pendiente
@@ -30,6 +31,7 @@ export class DeudoresQueriesService {
         -- Deudas de órdenes
         SELECT
           cliente_id,
+          auto_patent as patente,
           cliente_nombre,
           cliente_phone,
           pendiente
@@ -40,6 +42,7 @@ export class DeudoresQueriesService {
       )
       SELECT
         COALESCE(cliente_id, -1)       AS id,
+        patente,
         MAX(cliente_nombre)            AS cliente_nombre,
         MAX(cliente_phone)             AS cliente_phone,
         SUM(pendiente)                 AS deuda_total
@@ -54,10 +57,7 @@ export class DeudoresQueriesService {
       WITH deudas AS (
         -- Deudas de ventas
         SELECT
-          cliente_id,
-          cliente_nombre,
-          cliente_phone,
-          pendiente
+          *
         FROM v_ventas_totales
         WHERE pendiente > 0
           AND (LOWER(cliente_nombre) LIKE LOWER('%${query}%'))
@@ -66,10 +66,7 @@ export class DeudoresQueriesService {
 
         -- Deudas de órdenes
         SELECT
-          cliente_id,
-          cliente_nombre,
-          cliente_phone,
-          pendiente
+          *
         FROM v_orep_totales
         WHERE pendiente > 0
           AND (LOWER(cliente_nombre) LIKE LOWER('%${query}%')

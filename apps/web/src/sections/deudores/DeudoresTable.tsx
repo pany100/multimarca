@@ -24,6 +24,12 @@ function DeudoresTable({
       flex: 0.5,
     },
     {
+      field: "patente",
+      headerName: "Patente",
+      flex: 1,
+    },
+
+    {
       field: "cliente_nombre",
       headerName: "Cliente",
       flex: 1.5,
