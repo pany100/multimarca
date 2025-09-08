@@ -1,3 +1,4 @@
+import { prisma } from "@/core/infrastructure/database/prisma";
 import { sqlRawPaged } from "@/shared/utils/pagination";
 
 type DeudoresQueryParams = {
