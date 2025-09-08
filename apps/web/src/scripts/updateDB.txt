@@ -1,0 +1,7 @@
+mysql -uroot -pultra_super_secret_password -h127.0.0.1     
+drop database mtservice;
+
+create database mtservice;
+
+mysql -uroot -pultra_super_secret_password -h127.0.0.1 mtservice < ../Desktop/dump8sep.sql
+mysql:
