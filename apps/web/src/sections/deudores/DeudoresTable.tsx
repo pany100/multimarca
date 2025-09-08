@@ -4,8 +4,10 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { Box, Chip, Tooltip, Typography } from "@mui/material";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { MenuItem, Typography } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
+import { useRouter } from "next/navigation";
 
 function DeudoresTable({
   extraActions,
@@ -13,6 +15,8 @@ function DeudoresTable({
   setRefreshTrigger,
   ...rest
 }: InheritedTableProps) {
+  const router = useRouter();
+
   const columns: GridColDef[] = [
     {
       field: "id",
@@ -20,24 +24,18 @@ function DeudoresTable({
       flex: 0.5,
     },
     {
-      field: "fullName",
+      field: "cliente_nombre",
       headerName: "Cliente",
       flex: 1.5,
     },
     {
-      field: "dni",
-      headerName: "DNI",
-      flex: 1,
-      valueGetter: (dni) => dni || "-",
-    },
-    {
-      field: "phone",
+      field: "cliente_phone",
       headerName: "Teléfono",
       flex: 1,
       valueGetter: (phone) => phone || "-",
     },
     {
-      field: "totalDeuda",
+      field: "deuda_total",
       headerName: "Deuda Total",
       flex: 1,
       renderCell: (params) => {
@@ -45,102 +43,36 @@ function DeudoresTable({
           <Typography
             sx={{
               fontWeight: "bold",
-              color: params.row.totalDeuda > 50000 ? "error.main" : "inherit",
+              color: params.row.deuda_total > 50000 ? "error.main" : "inherit",
             }}
           >
-            {getFormattedPrice(params.row.totalDeuda)}
+            {getFormattedPrice(params.row.deuda_total)}
           </Typography>
-        );
-      },
-    },
-    {
-      field: "ventas",
-      headerName: "Ventas Pendientes",
-      flex: 1,
-      renderCell: (params) => {
-        const ventasPendientes = params.row.ventas || [];
-        if (ventasPendientes.length === 0) return "-";
-
-        return (
-          <Tooltip
-            title={
-              <Box>
-                {ventasPendientes.map((venta: any) => (
-                  <Box key={venta.id} sx={{ mb: 1 }}>
-                    <Typography variant="body2">
-                      ID: {venta.id} - Fecha:{" "}
-                      {new Date(venta.fecha).toLocaleDateString("es-AR")}
-                    </Typography>
-                    <Typography variant="body2">
-                      Total: {getFormattedPrice(venta.total)} - Pendiente:{" "}
-                      {getFormattedPrice(venta.pendiente)}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
-            }
-            arrow
-          >
-            <Chip
-              label={`${ventasPendientes.length} venta${
-                ventasPendientes.length !== 1 ? "s" : ""
-              }`}
-              color="primary"
-              variant="outlined"
-            />
-          </Tooltip>
-        );
-      },
-    },
-    {
-      field: "reparaciones",
-      headerName: "Reparaciones Pendientes",
-      flex: 1.5,
-      renderCell: (params) => {
-        const reparacionesPendientes = params.row.reparaciones || [];
-        if (reparacionesPendientes.length === 0) return "-";
-
-        return (
-          <Tooltip
-            title={
-              <Box>
-                {reparacionesPendientes.map((reparacion: any) => (
-                  <Box key={reparacion.id} sx={{ mb: 1 }}>
-                    <Typography variant="body2">
-                      ID: {reparacion.id} - Fecha:{" "}
-                      {new Date(reparacion.fecha).toLocaleDateString("es-AR")}
-                    </Typography>
-                    <Typography variant="body2">
-                      Auto: {reparacion.auto}
-                    </Typography>
-                    <Typography variant="body2">
-                      Total: {getFormattedPrice(reparacion.total)} - Pendiente:{" "}
-                      {getFormattedPrice(reparacion.pendiente)}
-                    </Typography>
-                  </Box>
-                ))}
-              </Box>
-            }
-            arrow
-          >
-            <Chip
-              label={`${reparacionesPendientes.length} reparación${
-                reparacionesPendientes.length !== 1 ? "es" : ""
-              }`}
-              color="secondary"
-              variant="outlined"
-            />
-          </Tooltip>
         );
       },
     },
   ];
 
+  const customActions = (params: any) => {
+    const defaultActions = extraActions ? extraActions(params) : [];
+    const customActions: React.ReactNode[] = [
+      <MenuItem
+        key="edit"
+        onClick={() => router.push(`/dashboard/clientes/${params.id}/ver`)}
+      >
+        <VisibilityIcon sx={{ mr: 1 }} />
+        Ver Cliente
+      </MenuItem>,
+      ,
+    ];
+    return customActions.concat(defaultActions);
+  };
+
   return (
     <CustomTable
       title="Deudores"
       apiEndpoint="/api/deudores"
-      extraActions={extraActions}
+      extraActions={customActions}
       ctaCb={ctaCb}
       columns={columns}
       {...rest}
