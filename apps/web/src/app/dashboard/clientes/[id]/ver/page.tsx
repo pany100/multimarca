@@ -4,6 +4,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   calcularTotalOrdenReparacion,
+  calcularTotalPagos,
   getStatusColor,
 } from "@/utils/ordenHelper";
 import BuildIcon from "@mui/icons-material/Build";
@@ -90,7 +91,10 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
       headerName: "Estado",
       width: 150,
       renderCell: (params) => (
-        <Chip label={params.row.estado} color={getStatusColor(params.row)} />
+        <Chip
+          label={params.row.estado}
+          color={getStatusColor(params.row.estado)}
+        />
       ),
     },
     {
@@ -101,11 +105,22 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
         `$${calcularTotalOrdenReparacion(params.row)}`,
     },
     {
+      field: "ingresos",
+      headerName: "Deuda",
+      width: 250,
+      renderCell: (params: any) => {
+        const total = calcularTotalOrdenReparacion(params.row);
+        const aCuenta = calcularTotalPagos(params.row);
+        return `$${total - aCuenta}`;
+      },
+    },
+    {
       field: "auto",
       headerName: "Auto",
       width: 250,
-      valueGetter: (params: any) =>
-        `${params.row.auto.brand} ${params.row.auto.model} (${params.row.auto.patent})`,
+      valueGetter: (auto: any) => {
+        return `${auto.brand} ${auto.model} (${auto.patent})`;
+      },
     },
   ];
 

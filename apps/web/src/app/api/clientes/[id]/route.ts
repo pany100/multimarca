@@ -120,6 +120,8 @@ export async function GET(
                 repuestosUsados: true,
                 reparacionesDeTercero: true,
                 trabajosRealizados: true,
+                auto: true,
+                ingresos: true,
               },
               orderBy: {
                 fechaCreacion: "desc",
