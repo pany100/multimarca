@@ -1,9 +1,3 @@
-import { ClienteService } from "@/core/application/services/cliente.service";
-import { GetClienteUseCase } from "@/core/application/use-cases/cliente/get-cliente.use-case";
-import { PrismaClienteRepository } from "@/core/infrastructure/database/repositories/prisma-cliente.repository";
-import { getClienteQuerySchema } from "@/core/infrastructure/validation/schemas/cliente.schema";
-import { handleApiError } from "@/shared/middleware/error-handler.middleware";
-import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 export async function PUT(
@@ -115,18 +109,42 @@ export async function GET(
 ) {
   try {
     const id = parseInt(params.id);
-    const dto = await validateRequest(
-      {
-        id,
+
+    const cliente = await prisma.cliente.findUnique({
+      where: { id },
+      include: {
+        cars: {
+          include: {
+            ordenesReparacion: {
+              include: {
+                repuestosUsados: true,
+                reparacionesDeTercero: true,
+                trabajosRealizados: true,
+                auto: true,
+                ingresos: true,
+              },
+              orderBy: {
+                fechaCreacion: "desc",
+              },
+            },
+          },
+        },
       },
-      getClienteQuerySchema
-    );
-    const cliente = await new GetClienteUseCase(
-      new ClienteService(new PrismaClienteRepository())
-    ).execute(dto);
+    });
+
+    if (!cliente) {
+      return NextResponse.json(
+        { error: "Cliente no encontrado" },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json(cliente);
   } catch (error) {
-    handleApiError(error);
+    console.error("Error al obtener el cliente:", error);
+    return NextResponse.json(
+      { error: "Error al obtener el cliente" },
+      { status: 500 }
+    );
   }
 }

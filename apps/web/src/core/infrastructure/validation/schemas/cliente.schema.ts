@@ -10,3 +10,7 @@ export const listDeudoresQuerySchema = z.object({
   size: z.coerce.number().min(1).max(200).optional(),
   query: z.string().nullable().optional(),
 });
+
+export const getClienteQuerySchema = z.object({
+  id: z.coerce.number().positive(),
+});
