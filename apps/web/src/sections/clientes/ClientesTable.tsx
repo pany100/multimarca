@@ -1,3 +1,6 @@
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import { MenuItem } from "@mui/material";
+import { useRouter } from "next/navigation";
 import CustomTable, {
   InheritedTableProps,
 } from "../../components/tableV2/CustomTable";
@@ -8,6 +11,8 @@ function ClientesTable({
   setRefreshTrigger,
   ...rest
 }: InheritedTableProps) {
+  const router = useRouter();
+
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "fullName", headerName: "Nombre completo", flex: 1.5 },
@@ -27,12 +32,27 @@ function ClientesTable({
     },
   ];
 
+  const customActions = (params: any) => {
+    const defaultActions = extraActions ? extraActions(params) : [];
+    const customActions: React.ReactNode[] = [
+      <MenuItem
+        key="edit"
+        onClick={() => router.push(`/dashboard/clientes/${params.id}/ver`)}
+      >
+        <VisibilityIcon sx={{ mr: 1 }} />
+        Ver Cliente
+      </MenuItem>,
+      ,
+    ];
+    return customActions.concat(defaultActions);
+  };
+
   return (
     <CustomTable
       columns={columns}
       title="Clientes"
       apiEndpoint="/api/clientes"
-      extraActions={extraActions}
+      extraActions={customActions}
       ctaCb={ctaCb}
       {...rest}
     />

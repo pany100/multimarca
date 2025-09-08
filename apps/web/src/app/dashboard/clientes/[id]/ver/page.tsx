@@ -1,7 +1,6 @@
 "use client";
 import { useFetch } from "@/contexts/FetchContext";
 import { useAuth } from "@/hooks/useAuth";
-import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   calcularTotalOrdenReparacion,
   calcularTotalPagos,
@@ -164,52 +163,16 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
           <BuildIcon sx={{ mr: 1, verticalAlign: "middle" }} />
           Reparaciones
         </Typography>
-        {reparaciones.length > 10 ? (
-          <DataGrid
-            rows={reparaciones}
-            columns={columns}
-            paginationModel={paginationModel}
-            onPaginationModelChange={setPaginationModel}
-            pageSizeOptions={[10, 20, 30]}
-            autoHeight
-            onRowClick={(params) => handleReparacionClick(params.row.id)}
-            sx={{ cursor: "pointer" }}
-          />
-        ) : (
-          <Box sx={{ mt: 2 }}>
-            {reparaciones.map((reparacion: any) => (
-              <Paper
-                key={reparacion.id}
-                sx={{ p: 2, mb: 2, cursor: "pointer" }}
-                onClick={() => handleReparacionClick(reparacion.id)}
-              >
-                <Typography>
-                  <strong>Fecha:</strong>{" "}
-                  {new Date(reparacion.fechaCreacion).toLocaleDateString()}
-                </Typography>
-                <Typography>
-                  <strong>Auto:</strong>{" "}
-                  {`${reparacion.car.brand} ${reparacion.car.model} (${reparacion.car.patent})`}
-                </Typography>
-                <Typography>
-                  <strong>Observaciones:</strong>{" "}
-                  {reparacion.observacionesCliente}
-                </Typography>
-                <Typography>
-                  <strong>Estado:</strong>{" "}
-                  <Chip
-                    label={reparacion.estado}
-                    color={getStatusColor(reparacion.estado)}
-                  />
-                </Typography>
-                <Typography>
-                  <strong>Monto Total:</strong>
-                  {getFormattedPrice(calcularTotalOrdenReparacion(reparacion))}
-                </Typography>
-              </Paper>
-            ))}
-          </Box>
-        )}
+        <DataGrid
+          rows={reparaciones}
+          columns={columns}
+          paginationModel={paginationModel}
+          onPaginationModelChange={setPaginationModel}
+          pageSizeOptions={[10, 20, 30]}
+          autoHeight
+          onRowClick={(params) => handleReparacionClick(params.row.id)}
+          sx={{ cursor: "pointer" }}
+        />
       </Paper>
     </Box>
   );
