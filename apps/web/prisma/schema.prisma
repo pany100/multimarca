@@ -19,14 +19,15 @@ model Usuario {
   activo                       Boolean                 @default(true)
   extracciones                 Extraccion[]
   ingresosManuales             IngresoManualDeDinero[]
-  rol                          Rol                     @relation(fields: [rolId], references: [id])
-  ordenesReparacion            OrdenReparacion[]     @relation("OrdenReparacionRevisadaPor")
   notificacionesInternas       NotificacionInterna[]
-  presupuestos                 Presupuesto[]         @relation("PresupuestoAdministrativo")
-  presupuestosCreados          Presupuesto[]         @relation("PresupuestoCreador")
+  ordenesReparacion            OrdenReparacion[]       @relation("OrdenReparacionRevisadaPor")
+  presupuestos                 Presupuesto[]           @relation("PresupuestoAdministrativo")
+  presupuestosCreados          Presupuesto[]           @relation("PresupuestoCreador")
   recordatoriosAgenda          RecordatorioAgenda[]
-  tareasAdministrativas        TareaAdministrativa[] @relation("UsuarioTareas")
+  tareasAdministrativas        TareaAdministrativa[]   @relation("UsuarioTareas")
   tareasDiarias                TareaDiaria[]
+  rol                          Rol                     @relation(fields: [rolId], references: [id])
+
   @@index([fullName])
   @@index([username])
   @@index([rolId], map: "Usuario_rolId_fkey")
@@ -102,10 +103,10 @@ model ControlMecanico {
   type                  String                @db.VarChar(10)
   ordenEnPdf            Int?
   pdfName               String?
-  parentId              Int?                  
+  parentId              Int?
+  controlesEnReparacion ControlEnReparacion[]
   parent                ControlMecanico?      @relation("Subcontroles", fields: [parentId], references: [id])
   subcontroles          ControlMecanico[]     @relation("Subcontroles")
-  controlesEnReparacion ControlEnReparacion[]
 
   @@index([name])
   @@index([parentId])
@@ -164,9 +165,9 @@ model Empleado {
 model OrdenReparacionMecanico {
   ordenReparacionId Int
   mecanicoId        Int
+  detalle           String?         @db.Text
   mecanico          Empleado        @relation(fields: [mecanicoId], references: [id], onDelete: Cascade)
   ordenReparacion   OrdenReparacion @relation(fields: [ordenReparacionId], references: [id], onDelete: Cascade)
-  detalle           String?         @db.Text
 
   @@id([ordenReparacionId, mecanicoId])
   @@index([mecanicoId], map: "OrdenReparacionMecanico_mecanicoId_fkey")
@@ -217,50 +218,54 @@ model OrdenDeCompraItem {
 }
 
 model Extraccion {
-  id             Int            @id @default(autoincrement())
-  monto          Decimal        @db.Decimal(10, 2)
-  fecha          DateTime       @default(now())
-  usuarioId      Int
-  motivo         String         @db.VarChar(150)
+  id              Int              @id @default(autoincrement())
+  monto           Decimal          @db.Decimal(10, 2)
+  fecha           DateTime         @default(now())
+  usuarioId       Int
+  motivo          String           @db.VarChar(150)
   tipoOperacionId Int?
+  moneda          Moneda           @default(Peso)
+  dolarId         Int?
+  chequeId        Int?
+  cheque          Cheque?          @relation(fields: [chequeId], references: [id])
+  dolar           Dolar?           @relation(fields: [dolarId], references: [id])
   tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
-  moneda         Moneda         @default(Peso)
-  dolarId        Int?
-  dolar          Dolar?         @relation(fields: [dolarId], references: [id])
-  usuario        Usuario        @relation(fields: [usuarioId], references: [id])
-  chequeId  Int?
-  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
+  usuario         Usuario          @relation(fields: [usuarioId], references: [id])
 
   @@index([usuarioId])
   @@index([fecha])
   @@index([dolarId], map: "Extraccion_dolarId_fkey")
+  @@index([chequeId], map: "Extraccion_chequeId_fkey")
+  @@index([tipoOperacionId], map: "Extraccion_tipoOperacionId_fkey")
 }
 
 model Gasto {
-  id          Int            @id @default(autoincrement())
-  nombre      String         @db.VarChar(150)
-  precio      Decimal        @db.Decimal(10, 2)
-  fecha       DateTime
-  categoriaId Int
-  mecanicoId  Int?
-  detalle     String?        @db.Text
-  proveedorId Int?
-  moneda      Moneda         @default(Peso)
-  dolarId     Int?
+  id              Int              @id @default(autoincrement())
+  nombre          String           @db.VarChar(150)
+  precio          Decimal          @db.Decimal(10, 2)
+  fecha           DateTime
+  categoriaId     Int
+  mecanicoId      Int?
+  detalle         String?          @db.Text
+  proveedorId     Int?
+  moneda          Moneda           @default(Peso)
+  dolarId         Int?
   tipoOperacionId Int?
+  chequeId        Int?
+  categoria       CategoriaGasto   @relation(fields: [categoriaId], references: [id])
+  cheque          Cheque?          @relation(fields: [chequeId], references: [id])
+  dolar           Dolar?           @relation(fields: [dolarId], references: [id])
+  mecanico        Empleado?        @relation(fields: [mecanicoId], references: [id])
+  proveedor       Proveedor?       @relation(fields: [proveedorId], references: [id])
   tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
-  categoria   CategoriaGasto @relation(fields: [categoriaId], references: [id])
-  dolar       Dolar?         @relation(fields: [dolarId], references: [id])
-  mecanico    Empleado?      @relation(fields: [mecanicoId], references: [id])
-  proveedor   Proveedor?     @relation(fields: [proveedorId], references: [id])
-  chequeId  Int?
-  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
 
   @@index([categoriaId])
   @@index([mecanicoId])
   @@index([proveedorId])
   @@index([fecha])
   @@index([dolarId], map: "Gasto_dolarId_fkey")
+  @@index([chequeId], map: "Gasto_chequeId_fkey")
+  @@index([tipoOperacionId], map: "Gasto_tipoOperacionId_fkey")
 }
 
 model CategoriaGasto {
@@ -273,24 +278,23 @@ model CategoriaGasto {
 }
 
 model Venta {
-  id        Int         @id @default(autoincrement())
-  fecha     DateTime    @default(now())
-  clienteId Int?
-  informacionCliente     String? @db.Text
-  dolarId   Int?
-  cliente   Cliente?    @relation(fields: [clienteId], references: [id])
-  dolar     Dolar?      @relation(fields: [dolarId], references: [id])
-  descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
-  descripcionDescuento   String?                   @db.VarChar(255)
-  incremento             Decimal                   @default(0.00) @db.Decimal(10, 2)
-  descripcionIncremento  String?                   @db.VarChar(255)
-  reparacionesDeTercero  ReparacionDeTercero[]     @relation("VentaReparacionTercero")
-  repuestosUsados        RepuestoUsado[]           @relation("VentaRepuestos")
-  trabajosRealizados     TrabajoRealizado[]        @relation("VentaTrabajosRealizados")
-  ingresos               IngresoPorVenta[]         @relation("VentaIngresos")
-  porcentajeRecargo      Decimal                   @default(0.00) @db.Decimal(10, 2)
-
-  estado                 EstadoVenta               @default(Presupuestado)
+  id                    Int                   @id @default(autoincrement())
+  fecha                 DateTime              @default(now())
+  clienteId             Int?
+  informacionCliente    String?               @db.Text
+  dolarId               Int?
+  descuento             Decimal               @default(0.00) @db.Decimal(10, 2)
+  descripcionDescuento  String?               @db.VarChar(255)
+  incremento            Decimal               @default(0.00) @db.Decimal(10, 2)
+  descripcionIncremento String?               @db.VarChar(255)
+  porcentajeRecargo     Decimal               @default(0.00) @db.Decimal(10, 2)
+  estado                EstadoVenta           @default(Presupuestado)
+  ingresos              IngresoPorVenta[]     @relation("VentaIngresos")
+  reparacionesDeTercero ReparacionDeTercero[] @relation("VentaReparacionTercero")
+  repuestosUsados       RepuestoUsado[]       @relation("VentaRepuestos")
+  trabajosRealizados    TrabajoRealizado[]    @relation("VentaTrabajosRealizados")
+  cliente               Cliente?              @relation(fields: [clienteId], references: [id])
+  dolar                 Dolar?                @relation(fields: [dolarId], references: [id])
 
   @@index([clienteId])
   @@index([fecha])
@@ -323,9 +327,7 @@ model OrdenReparacion {
   detallesDeTrabajo      String?                   @db.Text
   estado                 EstadoOrdenReparacion     @default(Presupuestado)
   pdfPath                String?                   @db.VarChar(255)
-  scannerFile  CustomFile?  @relation("ORepScanner")
-  recibos                Json?
-  recibosFiles           CustomFile[] @relation("ORepRecibos")
+  recibos                String?                   @db.LongText
   descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
   dolarId                Int?
   detalleControles       String?                   @db.Text
@@ -335,75 +337,79 @@ model OrdenReparacion {
   incremento             Decimal                   @default(0.00) @db.Decimal(10, 2)
   descripcionIncremento  String?                   @db.VarChar(255)
   revisadoPorId          Int?
-  revisadoPor            Usuario?                  @relation("OrdenReparacionRevisadaPor", fields: [revisadoPorId], references: [id])
   controlesEnReparacion  ControlEnReparacion[]     @relation("OrdenReparacionControlesEnReparacion")
+  scannerFile            CustomFile?               @relation("ORepScanner")
+  recibosFiles           CustomFile[]              @relation("ORepRecibos")
   ingresos               IngresoPorReparacion[]    @relation("OrdenReparacionIngresos")
   notificacionesInternas NotificacionInterna[]     @relation("OrdenReparacionNotificacionesInternas")
   auto                   Auto                      @relation("AutoOrdenReparacion", fields: [autoId], references: [id])
   dolar                  Dolar?                    @relation(fields: [dolarId], references: [id])
+  revisadoPor            Usuario?                  @relation("OrdenReparacionRevisadaPor", fields: [revisadoPorId], references: [id])
   mecanicos              OrdenReparacionMecanico[]
   pagos                  PagoAMecanico[]           @relation("OrdenReparacionPagos")
   reparacionesDeTercero  ReparacionDeTercero[]     @relation("OrdenReparacionReparacionTercero")
   repuestosUsados        RepuestoUsado[]           @relation("OrdenReparacionRepuestos")
   trabajosRealizados     TrabajoRealizado[]        @relation("OrdenReparacionTrabajosRealizados")
-  
+
   @@index([autoId])
   @@index([fechaCreacion])
   @@index([estado])
   @@index([dolarId], map: "OrdenReparacion_dolarId_fkey")
+  @@index([revisadoPorId], map: "OrdenReparacion_revisadoPorId_fkey")
 }
 
 model CustomFile {
-  id                     Int                       @id @default(autoincrement())
-  tempPath    String         @db.VarChar(255)
-  finalPath   String?         @db.VarChar(255)
-  status      EstadoArchivo  @default(Pendiente)
-  promotedAt  DateTime?
-  
-  ordenReparacionId    Int?              @unique
-  ordenReparacion      OrdenReparacion?  @relation("ORepScanner",fields:     [ordenReparacionId],references: [id],onDelete:   SetNull)
+  id                    Int                  @id @default(autoincrement())
+  tempPath              String               @db.VarChar(255)
+  finalPath             String?              @db.VarChar(255)
+  status                EstadoArchivo        @default(Pendiente)
+  promotedAt            DateTime?
+  ordenReparacionId     Int?                 @unique
+  reciboORepId          Int?
+  reparacionDeTerceroId Int?                 @unique
+  ordenReparacion       OrdenReparacion?     @relation("ORepScanner", fields: [ordenReparacionId], references: [id])
+  reciboDeORep          OrdenReparacion?     @relation("ORepRecibos", fields: [reciboORepId], references: [id])
+  reparacionDeTercero   ReparacionDeTercero? @relation("ReparacionDeTerceroRecibos", fields: [reparacionDeTerceroId], references: [id])
 
-  reciboORepId         Int?
-  reciboDeORep         OrdenReparacion?  @relation("ORepRecibos",fields:     [reciboORepId],references: [id],onDelete:   SetNull)
-
-  reparacionDeTerceroId         Int? @unique
-  reparacionDeTercero         ReparacionDeTercero?  @relation("ReparacionDeTerceroRecibos",fields:     [reparacionDeTerceroId],references: [id],onDelete:   SetNull)
   @@index([status])
+  @@index([reciboORepId], map: "CustomFile_reciboORepId_fkey")
 }
 
 model Presupuesto {
-  id                     Int                       @id @default(autoincrement())
-  autoId                 Int?
-  auto                   Auto?                     @relation("AutoPresupuesto", fields: [autoId], references: [id])
-  informacionAuto        String?                   @db.Text
-  informacionCliente     String?                   @db.Text
-  administrativoId       Int?
-  administrativo         Usuario?                  @relation("PresupuestoAdministrativo", fields: [administrativoId], references: [id])
-  creadorId              Int?
-  creador                Usuario?                 @relation("PresupuestoCreador", fields: [creadorId], references: [id])
-  fecha                  DateTime                  @default(now())
-  fechaEnvio             DateTime?
-  fechaRespuesta         DateTime?
-  observacionesCliente   String                    @db.Text
-  detallesDeTrabajo      String?                   @db.Text
-  descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
-  descripcionDescuento   String?                   @db.VarChar(255)
-  dolarId                Int?
-  dolar                  Dolar?                    @relation(fields: [dolarId], references: [id])
-  porcentajeRecargo      Decimal                   @default(0.00) @db.Decimal(10, 2)
-  incrementoInterno      Decimal                   @default(0.00) @db.Decimal(10, 2)
-  incremento             Decimal                   @default(0.00) @db.Decimal(10, 2)
-  descripcionIncremento  String?                   @db.VarChar(255)
-  reparacionesDeTercero  ReparacionDeTercero[]     @relation("PresupuestoReparacionTercero")
-  repuestosUsados        RepuestoUsado[]           @relation("PresupuestoRepuestos")
-  trabajosRealizados     TrabajoRealizado[]        @relation("PresupuestoTrabajosRealizados")
-  estado                 EstadoPresupuesto         @default(EnPreparacion)
-  tareasAdministrativas  TareaAdministrativa[]     @relation("PresupuestoTareas")
-  
+  id                    Int                   @id @default(autoincrement())
+  autoId                Int?
+  informacionAuto       String?               @db.Text
+  informacionCliente    String?               @db.Text
+  administrativoId      Int?
+  creadorId             Int?
+  fecha                 DateTime              @default(now())
+  fechaEnvio            DateTime?
+  fechaRespuesta        DateTime?
+  observacionesCliente  String                @db.Text
+  detallesDeTrabajo     String?               @db.Text
+  descuento             Decimal               @default(0.00) @db.Decimal(10, 2)
+  descripcionDescuento  String?               @db.VarChar(255)
+  dolarId               Int?
+  porcentajeRecargo     Decimal               @default(0.00) @db.Decimal(10, 2)
+  incrementoInterno     Decimal               @default(0.00) @db.Decimal(10, 2)
+  incremento            Decimal               @default(0.00) @db.Decimal(10, 2)
+  descripcionIncremento String?               @db.VarChar(255)
+  estado                EstadoPresupuesto     @default(EnPreparacion)
+  administrativo        Usuario?              @relation("PresupuestoAdministrativo", fields: [administrativoId], references: [id])
+  auto                  Auto?                 @relation("AutoPresupuesto", fields: [autoId], references: [id])
+  creador               Usuario?              @relation("PresupuestoCreador", fields: [creadorId], references: [id])
+  dolar                 Dolar?                @relation(fields: [dolarId], references: [id])
+  reparacionesDeTercero ReparacionDeTercero[] @relation("PresupuestoReparacionTercero")
+  repuestosUsados       RepuestoUsado[]       @relation("PresupuestoRepuestos")
+  tareasAdministrativas TareaAdministrativa[] @relation("PresupuestoTareas")
+  trabajosRealizados    TrabajoRealizado[]    @relation("PresupuestoTrabajosRealizados")
+
   @@index([autoId])
   @@index([fecha])
   @@index([estado])
   @@index([dolarId], map: "Presupuesto_dolarId_fkey")
+  @@index([administrativoId], map: "Presupuesto_administrativoId_fkey")
+  @@index([creadorId], map: "Presupuesto_creadorId_fkey")
 }
 
 model RepuestoUsado {
@@ -418,14 +424,15 @@ model RepuestoUsado {
   plantillaPresupuestoId Int?
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionRepuestos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoRepuestos", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
+  presupuesto            Presupuesto?          @relation("PresupuestoRepuestos", fields: [presupuestoId], references: [id], onDelete: Cascade)
   stock                  Stock                 @relation(fields: [stockId], references: [id])
   venta                  Venta?                @relation("VentaRepuestos", fields: [ventaId], references: [id], onDelete: Cascade)
-  presupuesto            Presupuesto?          @relation("PresupuestoRepuestos", fields: [presupuestoId], references: [id], onDelete: Cascade)
 
   @@index([ordenReparacionId])
   @@index([ventaId], map: "RepuestoUsado_ventaId_fkey")
   @@index([stockId])
   @@index([plantillaPresupuestoId], map: "RepuestoUsado_plantillaPresupuestoId_fkey")
+  @@index([presupuestoId], map: "RepuestoUsado_presupuestoId_fkey")
 }
 
 model ReparacionDeTercero {
@@ -439,19 +446,19 @@ model ReparacionDeTercero {
   presupuestoId          Int?
   plantillaPresupuestoId Int?
   recibo                 String?               @db.VarChar(255)
-  reciboFile             CustomFile? @relation("ReparacionDeTerceroRecibos")
+  reciboFile             CustomFile?           @relation("ReparacionDeTerceroRecibos")
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionReparacionTercero", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
-  venta                  Venta?                @relation("VentaReparacionTercero", fields: [ventaId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoReparacionTercero", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
-  proveedor              Proveedor             @relation(fields: [proveedorId], references: [id])
   presupuesto            Presupuesto?          @relation("PresupuestoReparacionTercero", fields: [presupuestoId], references: [id], onDelete: Cascade)
+  proveedor              Proveedor             @relation(fields: [proveedorId], references: [id])
+  venta                  Venta?                @relation("VentaReparacionTercero", fields: [ventaId], references: [id], onDelete: Cascade)
 
   @@index([nombre])
   @@index([proveedorId])
   @@index([ordenReparacionId], map: "ReparacionDeTercero_ordenReparacionId_fkey")
   @@index([ventaId], map: "ReparacionDeTercero_ventaId_fkey")
   @@index([plantillaPresupuestoId], map: "ReparacionDeTercero_plantillaPresupuestoId_fkey")
-  
+  @@index([presupuestoId], map: "ReparacionDeTercero_presupuestoId_fkey")
 }
 
 model TrabajoRealizado {
@@ -465,8 +472,8 @@ model TrabajoRealizado {
   plantillaPresupuestoId Int?
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionTrabajosRealizados", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoTrabajosRealizados", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
-  venta                  Venta?                @relation("VentaTrabajosRealizados", fields: [ventaId], references: [id], onDelete: Cascade)
   presupuesto            Presupuesto?          @relation("PresupuestoTrabajosRealizados", fields: [presupuestoId], references: [id], onDelete: Cascade)
+  venta                  Venta?                @relation("VentaTrabajosRealizados", fields: [ventaId], references: [id], onDelete: Cascade)
 
   @@index([ordenReparacionId])
   @@index([ventaId], map: "TrabajoRealizado_ventaId_fkey")
@@ -506,53 +513,56 @@ model PagoAMecanico {
 }
 
 model IngresoPorReparacion {
-  id                Int             @id @default(autoincrement())
-  fecha             DateTime        @default(now())
+  id                Int              @id @default(autoincrement())
+  fecha             DateTime         @default(now())
   clienteId         Int
-  monto             Decimal         @db.Decimal(10, 2)
-  descripcion       String          @db.Text
+  monto             Decimal          @db.Decimal(10, 2)
+  descripcion       String           @db.Text
   ordenReparacionId Int
-  reciboEnviado     Boolean         @default(false)
-  moneda            Moneda          @default(Peso)
+  reciboEnviado     Boolean          @default(false)
+  moneda            Moneda           @default(Peso)
   dolarId           Int?
-  cliente           Cliente         @relation(fields: [clienteId], references: [id])
-  dolar             Dolar?          @relation(fields: [dolarId], references: [id])
-  ordenReparacion   OrdenReparacion @relation("OrdenReparacionIngresos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
-  tipoOperacionId Int?
-  tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
-  chequeId  Int?
-  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
+  tipoOperacionId   Int?
+  chequeId          Int?
+  cheque            Cheque?          @relation(fields: [chequeId], references: [id])
+  cliente           Cliente          @relation(fields: [clienteId], references: [id])
+  dolar             Dolar?           @relation(fields: [dolarId], references: [id])
+  ordenReparacion   OrdenReparacion  @relation("OrdenReparacionIngresos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
+  tipoOperacion     TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
 
   @@index([fecha])
   @@index([clienteId])
   @@index([ordenReparacionId])
   @@index([dolarId], map: "IngresoPorReparacion_dolarId_fkey")
+  @@index([chequeId], map: "IngresoPorReparacion_chequeId_fkey")
+  @@index([tipoOperacionId], map: "IngresoPorReparacion_tipoOperacionId_fkey")
 }
 
-
 model IngresoPorVenta {
-  id                Int             @id @default(autoincrement())
-  fecha             DateTime        @default(now())
-  clienteId         Int?
-  informacionCliente String? @db.Text
-  monto             Decimal         @db.Decimal(10, 2)
-  descripcion       String          @db.Text
-  ventaId           Int
-  reciboEnviado     Boolean         @default(false)
-  moneda            Moneda          @default(Peso)
-  dolarId           Int?
-  cliente           Cliente?         @relation(fields: [clienteId], references: [id])
-  dolar             Dolar?          @relation(fields: [dolarId], references: [id])
-  venta             Venta @relation("VentaIngresos", fields: [ventaId], references: [id], onDelete: Cascade)
-  tipoOperacionId Int?
-  tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
-  chequeId  Int?
-  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
+  id                 Int              @id @default(autoincrement())
+  fecha              DateTime         @default(now())
+  clienteId          Int?
+  informacionCliente String?          @db.Text
+  monto              Decimal          @db.Decimal(10, 2)
+  descripcion        String           @db.Text
+  ventaId            Int
+  reciboEnviado      Boolean          @default(false)
+  moneda             Moneda           @default(Peso)
+  dolarId            Int?
+  tipoOperacionId    Int?
+  chequeId           Int?
+  cheque             Cheque?          @relation(fields: [chequeId], references: [id])
+  cliente            Cliente?         @relation(fields: [clienteId], references: [id])
+  dolar              Dolar?           @relation(fields: [dolarId], references: [id])
+  tipoOperacion      TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
+  venta              Venta            @relation("VentaIngresos", fields: [ventaId], references: [id], onDelete: Cascade)
 
   @@index([fecha])
   @@index([clienteId])
   @@index([ventaId])
   @@index([dolarId], map: "IngresoPorVenta_dolarId_fkey")
+  @@index([chequeId], map: "IngresoPorVenta_chequeId_fkey")
+  @@index([tipoOperacionId], map: "IngresoPorVenta_tipoOperacionId_fkey")
 }
 
 model Dolar {
@@ -566,9 +576,9 @@ model Dolar {
   ingresosPorReparacion IngresoPorReparacion[]
   ingresosPorVenta      IngresoPorVenta[]
   ordenReparacion       OrdenReparacion[]
-  venta                 Venta[]
-  presupuesto           Presupuesto[]
   perdidas              Perdidas[]
+  presupuesto           Presupuesto[]
+  venta                 Venta[]
 
   @@index([fecha])
 }
@@ -582,10 +592,11 @@ model NotificacionInterna {
   tipo              TipoNotificacionInterna
   stockId           Int?
   ordenReparacionId Int?
+  userId            Int?
   ordenReparacion   OrdenReparacion?        @relation("OrdenReparacionNotificacionesInternas", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   stock             Stock?                  @relation(fields: [stockId], references: [id])
-  userId            Int?
   user              Usuario?                @relation(fields: [userId], references: [id])
+
   @@index([fecha])
   @@index([leida])
   @@index([tipo])
@@ -625,56 +636,56 @@ model MensajeWhatsApp {
 }
 
 model IngresoManualDeDinero {
-  id             Int            @id @default(autoincrement())
-  monto          Decimal        @db.Decimal(10, 2)
-  fecha          DateTime
-  descripcion    String?        @db.Text
-  moneda         Moneda         @default(Peso)
-  dolarId        Int?
+  id              Int              @id @default(autoincrement())
+  monto           Decimal          @db.Decimal(10, 2)
+  fecha           DateTime
+  descripcion     String?          @db.Text
+  moneda          Moneda           @default(Peso)
+  dolarId         Int?
   tipoOperacionId Int?
+  usuarioId       Int
+  chequeId        Int?
+  cheque          Cheque?          @relation(fields: [chequeId], references: [id])
+  dolar           Dolar?           @relation(fields: [dolarId], references: [id])
   tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
-  usuarioId      Int
-  dolar          Dolar?         @relation(fields: [dolarId], references: [id])
-  usuario        Usuario        @relation(fields: [usuarioId], references: [id])
-  chequeId  Int?
-  cheque    Cheque?    @relation(fields: [chequeId], references: [id])
+  usuario         Usuario          @relation(fields: [usuarioId], references: [id])
 
   @@index([usuarioId])
   @@index([dolarId], map: "IngresoManualDeDinero_dolarId_fkey")
+  @@index([chequeId], map: "IngresoManualDeDinero_chequeId_fkey")
+  @@index([tipoOperacionId], map: "IngresoManualDeDinero_tipoOperacionId_fkey")
 }
 
 model Cheque {
-  id Int @id @default(autoincrement())
-  numero String @unique @db.VarChar(255)
-  fechaEmision DateTime @default(now())
-  fechaCobro  DateTime
-  banco String @db.VarChar(255)
-  importe Decimal @db.Decimal(10, 2)
-  owner String @db.VarChar(255)
-  picturePath String @db.VarChar(255)
-
-  rechazado           Boolean     @default(false)
-  fechaRechazo        DateTime?  
-  gastosAdministrativos Decimal? @db.Decimal(10, 2)
-  observaciones        String?     @db.Text
-
-  extraccion Extraccion[]
-  gasto Gasto[]
-  ingresoPorReparacion IngresoPorReparacion[]
+  id                    Int                     @id @default(autoincrement())
+  numero                String                  @unique @db.VarChar(255)
+  fechaEmision          DateTime                @default(now())
+  fechaCobro            DateTime
+  banco                 String                  @db.VarChar(255)
+  importe               Decimal                 @db.Decimal(10, 2)
+  owner                 String                  @db.VarChar(255)
+  picturePath           String                  @db.VarChar(255)
+  rechazado             Boolean                 @default(false)
+  fechaRechazo          DateTime?
+  gastosAdministrativos Decimal?                @db.Decimal(10, 2)
+  observaciones         String?                 @db.Text
+  extraccion            Extraccion[]
+  gasto                 Gasto[]
   ingresoManualDeDinero IngresoManualDeDinero[]
-  ingresoPorVenta IngresoPorVenta[]
+  ingresoPorReparacion  IngresoPorReparacion[]
+  ingresoPorVenta       IngresoPorVenta[]
 }
 
 model TipoDeOperacion {
-  id                    Int                     @id @default(autoincrement())
-  label                 String                  @unique @db.VarChar(100)
-  extracciones          Extraccion[]
-  gastos                Gasto[]
-  esIngreso             Boolean @default(true)
-  esGasto               Boolean @default(true)
-  ingresosPorReparacion IngresoPorReparacion[]
+  id                     Int                     @id @default(autoincrement())
+  label                  String                  @unique @db.VarChar(100)
+  esIngreso              Boolean                 @default(true)
+  esGasto                Boolean                 @default(true)
+  extracciones           Extraccion[]
+  gastos                 Gasto[]
   ingresosManualDeDinero IngresoManualDeDinero[]
-  ingresosPorVenta IngresoPorVenta[]
+  ingresosPorReparacion  IngresoPorReparacion[]
+  ingresosPorVenta       IngresoPorVenta[]
 
   @@index([label])
 }
@@ -688,26 +699,28 @@ model Feriado {
 }
 
 model Turno {
-  id        Int      @id @default(autoincrement())
-  hora      String
-  fecha     DateTime
-  problema  String   @db.Text
-  autoId    Int
-  auto      Auto     @relation(fields: [autoId], references: [id])
+  id       Int      @id @default(autoincrement())
+  hora     String
+  fecha    DateTime
+  problema String   @db.Text
+  autoId   Int
+  auto     Auto     @relation(fields: [autoId], references: [id])
 
   @@index([fecha])
   @@index([autoId])
 }
 
 model RecordatorioAgenda {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   userId      Int?
-  user        Usuario?  @relation(fields: [userId], references: [id])
-  titulo      String    @db.VarChar(255)
-  descripcion String?   @db.Text
+  titulo      String   @db.VarChar(255)
+  descripcion String?  @db.Text
   fecha       DateTime
-  hecho       Boolean   @default(false)  
+  hecho       Boolean  @default(false)
+  user        Usuario? @relation(fields: [userId], references: [id])
+
   @@index([fecha])
+  @@index([userId], map: "RecordatorioAgenda_userId_fkey")
 }
 
 model TareaAdministrativa {
@@ -723,47 +736,44 @@ model TareaAdministrativa {
 }
 
 model TareaDiaria {
-  id          Int       @id @default(autoincrement())
-  descripcion String    @db.Text
-  realizado   Boolean   @default(false)
-  fecha       DateTime  @default(now())
+  id          Int      @id @default(autoincrement())
+  descripcion String   @db.Text
+  realizado   Boolean  @default(false)
+  fecha       DateTime @default(now())
   usuarioId   Int?
-  usuario     Usuario?  @relation(fields: [usuarioId], references: [id])
+  usuario     Usuario? @relation(fields: [usuarioId], references: [id])
 
   @@index([fecha])
   @@index([usuarioId])
 }
 
-model Perdidas { 
-  id          Int       @id @default(autoincrement())
-  fecha       DateTime  @default(now())
-  monto       Decimal   @db.Decimal(10, 2)
-  descripcion String    @db.VarChar(255)
-  moneda      Moneda    @default(Peso)
-  dolar       Dolar?    @relation(fields: [dolarId], references: [id])
-  dolarId     Int?
+model Perdidas {
+  id             Int            @id @default(autoincrement())
+  fecha          DateTime       @default(now())
+  monto          Decimal        @db.Decimal(10, 2)
+  descripcion    String         @db.VarChar(255)
+  moneda         Moneda         @default(Peso)
+  dolarId        Int?
+  dolar          Dolar?         @relation(fields: [dolarId], references: [id])
   recuperaciones Recuperacion[]
+
+  @@index([dolarId], map: "Perdidas_dolarId_fkey")
 }
 
 model Recuperacion {
-  id          Int       @id @default(autoincrement())
-  fecha       DateTime  @default(now())
-  monto       Decimal   @db.Decimal(10, 2)
-  perdida     Perdidas  @relation(fields: [perdidaId], references: [id], onDelete: Cascade)
-  perdidaId   Int
-  detalle     String?   @db.VarChar(255)
+  id        Int      @id @default(autoincrement())
+  fecha     DateTime @default(now())
+  monto     Decimal  @db.Decimal(10, 2)
+  perdidaId Int
+  detalle   String?  @db.VarChar(255)
+  perdida   Perdidas @relation(fields: [perdidaId], references: [id], onDelete: Cascade)
+
+  @@index([perdidaId], map: "Recuperacion_perdidaId_fkey")
 }
 
 enum TipoEmpleado {
   Mecanico
   Administrativo
-}
-
-enum TipoOperacion {
-  EFECTIVO
-  TRANSFERENCIA
-  CHEQUE
-  DEBITO_AUTOMATICO_TARJETA_CREDITO
 }
 
 enum EstadoOrdenReparacion {

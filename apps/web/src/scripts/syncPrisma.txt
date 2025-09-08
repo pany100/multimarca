@@ -1,0 +1,13 @@
+1. Borrar migraciones y dejar solo una de init del tipo 20241204012911_init (cambiar el ultimo numero). Un migration.sql
+2. ⁠ npx prisma migrate diff --from-empty --to-schema-datamodel apps/web/prisma/schema.prisma --script > apps/web/prisma/migrations/20241204012917_init/migration.sql
+3.  npx prisma migrate resolve --applied "20241204012917_init" --schema apps/web/prisma/schema.prisma
+4. ⁠npx prisma db pull --schema apps/web/prisma/schema.prisma
+
+
+en prod:
+DELETE FROM _prisma_migrations;
+npx prisma migrate resolve --applied "20241204012917_init" --schema=apps/web/prisma/schema.prisma
+npx prisma migrate deploy --schema=apps/web/prisma/schema.prisma
+
+
+

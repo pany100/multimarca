@@ -1,0 +1,43 @@
+DROP VIEW IF EXISTS v_ventas_totales;
+
+CREATE VIEW v_ventas_totales AS
+SELECT
+  v.id AS venta_id, v.fecha, v.clienteId AS cliente_id, c.fullName AS cliente_nombre,
+  COALESCE(ru.total_repuestos,0)   AS total_repuestos,
+  COALESCE(rt.total_terceros,0)    AS total_terceros,
+  COALESCE(tr.total_trabajos,0)    AS total_trabajos,
+  COALESCE(ing.total_pagado_ars,0) AS total_pagado_ars,
+  (COALESCE(ru.total_repuestos,0)+COALESCE(rt.total_terceros,0)+COALESCE(tr.total_trabajos,0)+COALESCE(v.incremento,0)-COALESCE(v.descuento,0)) AS total_venta,
+  ((COALESCE(ru.total_repuestos,0)+COALESCE(rt.total_terceros,0)+COALESCE(tr.total_trabajos,0)+COALESCE(v.incremento,0)-COALESCE(v.descuento,0)) - COALESCE(ing.total_pagado_ars,0)) AS pendiente
+FROM Venta v
+LEFT JOIN Cliente c ON c.id = v.clienteId
+LEFT JOIN (
+  SELECT r.ventaId,
+         SUM(CEIL(r.precioVenta * r.unidadesConsumidas * (1 + v2.porcentajeRecargo/100.0)/500.0)*500) AS total_repuestos
+  FROM RepuestoUsado r JOIN Venta v2 ON v2.id=r.ventaId
+  WHERE r.ventaId IS NOT NULL
+  GROUP BY r.ventaId
+) ru ON ru.ventaId=v.id
+LEFT JOIN (
+  SELECT r.ventaId,
+         SUM(CEIL(r.precioVenta * (1 + v3.porcentajeRecargo/100.0)/500.0)*500) AS total_terceros
+  FROM ReparacionDeTercero r JOIN Venta v3 ON v3.id=r.ventaId
+  WHERE r.ventaId IS NOT NULL
+  GROUP BY r.ventaId
+) rt ON rt.ventaId=v.id
+LEFT JOIN (
+  SELECT t.ventaId,
+         SUM(CEIL(t.precioUnitario * (1 + v4.porcentajeRecargo/100.0)/500.0)*500) AS total_trabajos
+  FROM TrabajoRealizado t JOIN Venta v4 ON v4.id=t.ventaId
+  WHERE t.ventaId IS NOT NULL
+  GROUP BY t.ventaId
+) tr ON tr.ventaId=v.id
+LEFT JOIN (
+  SELECT i.ventaId,
+         SUM(CASE WHEN i.moneda='Peso' THEN i.monto
+                  WHEN i.moneda='Dolar' THEN i.monto * d.blue
+                  ELSE 0 END) AS total_pagado_ars
+  FROM IngresoPorVenta i LEFT JOIN Dolar d ON d.id=i.dolarId
+  GROUP BY i.ventaId
+) ing ON ing.ventaId=v.id
+WHERE v.estado <> 'Presupuestado';
