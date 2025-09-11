@@ -1,3 +1,9 @@
+import { EstadisticaService } from "@/core/application/services/estadistica.service";
+import { GetAutosUseCase } from "@/core/application/use-cases/estadisticas/get-autos.use-case";
+import { EstadisticasAutosQueriesService } from "@/core/infrastructure/database/queries/estadisticas-autos-queries.service";
+import { getAutosQuerySchema } from "@/core/infrastructure/validation/schemas/estadisticas.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 
@@ -12,57 +18,19 @@ interface MarcaAuto {
 
 export async function GET(request: NextRequest) {
   try {
-    const url = new URL(request.url);
-    const año = url.searchParams.get("año");
-    const mes = url.searchParams.get("mes");
-    // Removed the limite parameter as we want to return all brands
-
-    let sqlQuery = `
-      SELECT 
-        a.brand as marca, 
-        COUNT(DISTINCT orep.id) as cantidad
-      FROM Auto a
-      JOIN OrdenReparacion orep ON a.id = orep.autoId
-      WHERE orep.estado = 'Terminado'
-    `;
-
-    const queryParams: any[] = [];
-
-    if (año && mes) {
-      sqlQuery += ` AND orep.fechaCreacion >= ? AND orep.fechaCreacion < ?`;
-      queryParams.push(
-        `${año}-${mes}-01`,
-        mes === "12"
-          ? `${parseInt(año) + 1}-01-01`
-          : `${año}-${parseInt(mes) + 1}-01`
-      );
-    } else if (año) {
-      sqlQuery += ` AND YEAR(orep.fechaCreacion) = ?`;
-      queryParams.push(año);
-    }
-
-    sqlQuery += `
-      GROUP BY a.brand
-      ORDER BY cantidad DESC
-    `;
-    // Removed the LIMIT clause to return all brands
-
-    const marcasAtendidas = await prisma.$queryRawUnsafe<MarcaAuto[]>(
-      sqlQuery,
-      ...queryParams
+    const { searchParams } = new URL(request.url);
+    const dto = await validateRequest(
+      {
+        año: searchParams.get("año"),
+        mes: searchParams.get("mes"),
+      },
+      getAutosQuerySchema
     );
-
-    const marcasFormateadas = marcasAtendidas.map((marca) => ({
-      marca: marca.marca,
-      cantidad: Number(marca.cantidad),
-    }));
-
-    return NextResponse.json(marcasFormateadas);
-  } catch (error) {
-    console.error("Error al obtener estadísticas de autos:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+    const result = await new GetAutosUseCase(
+      new EstadisticaService(new EstadisticasAutosQueriesService())
+    ).execute(dto);
+    return NextResponse.json(result);
+  } catch (e) {
+    handleApiError(e);
   }
 }
