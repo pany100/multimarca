@@ -7,6 +7,10 @@ export class GetAutosUseCase {
 
   async execute(dto: GetAutosDto) {
     const dtoVO = EstadisticasVOMapper.getAutosToVo(dto);
-    return await this.estadisticaService.getAutos(dtoVO);
+    const result = await this.estadisticaService.getAutos(dtoVO);
+    return result.map((item) => ({
+      marca: item.marca,
+      cantidad: Number(item.cantidad),
+    }));
   }
 }

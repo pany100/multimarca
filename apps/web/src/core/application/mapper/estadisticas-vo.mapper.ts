@@ -1,6 +1,11 @@
 import { EstadisticasBalanceVO } from "@/core/domain/value-objects/estadisticas-balance.vo";
 import { EstadisticasBaseVO } from "@/core/domain/value-objects/estadisticas-base.vo";
-import { BalanceGeneralDto, GetAutosDto } from "../dto/estadisticas.dto";
+import { EstadisticasMonedaVO } from "@/core/domain/value-objects/estadisticas-moneda.vo";
+import {
+  BalanceGeneralDto,
+  GetAutosDto,
+  MecanicosDto,
+} from "../dto/estadisticas.dto";
 
 export class EstadisticasVOMapper {
   constructor() {}
@@ -14,5 +19,9 @@ export class EstadisticasVOMapper {
       new EstadisticasBaseVO(dto.año?.toString(), dto.mes?.toString()),
       dto.moneda || "ARS"
     );
+  }
+
+  static getMecanicosToVo(dto: MecanicosDto) {
+    return new EstadisticasMonedaVO(dto.moneda || "ARS");
   }
 }

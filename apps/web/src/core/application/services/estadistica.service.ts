@@ -1,20 +1,19 @@
 import { EstadisticasBalanceVO } from "@/core/domain/value-objects/estadisticas-balance.vo";
 import { EstadisticasBaseVO } from "@/core/domain/value-objects/estadisticas-base.vo";
+import { EstadisticasMonedaVO } from "@/core/domain/value-objects/estadisticas-moneda.vo";
 import { EstadisticasAutosQueriesService } from "@/core/infrastructure/database/queries/estadisticas-autos-queries.service";
 import { EstadisticasBalanceQueriesService } from "@/core/infrastructure/database/queries/estadisticas-balance-queries.service";
+import { EstadisticasMecanicosQueriesService } from "@/core/infrastructure/database/queries/estadisticas-mecanicos-query.service";
 
 export class EstadisticaService {
   constructor(
     private readonly estadisticasAutosQueriesService: EstadisticasAutosQueriesService,
-    private readonly estadisticasBalanceQueriesService: EstadisticasBalanceQueriesService
+    private readonly estadisticasBalanceQueriesService: EstadisticasBalanceQueriesService,
+    private readonly estadisticasMecanicosQueriesService: EstadisticasMecanicosQueriesService
   ) {}
 
   async getAutos(dto: EstadisticasBaseVO) {
-    const result = await this.estadisticasAutosQueriesService.getAutos(dto);
-    return result.map((item) => ({
-      marca: item.marca,
-      cantidad: Number(item.cantidad),
-    }));
+    return await this.estadisticasAutosQueriesService.getAutos(dto);
   }
 
   private async getBalanceUsd(dto: EstadisticasBalanceVO) {
@@ -63,27 +62,19 @@ export class EstadisticaService {
 
   async getBalance(dto: EstadisticasBalanceVO) {
     const moneda = dto.moneda ?? "ARS";
-    let ventas, reparaciones, ingresosManuales, gastos;
     if (moneda === "USD") {
-      [ventas, reparaciones, ingresosManuales, gastos] =
-        await this.getBalanceUsd(dto);
+      return await this.getBalanceUsd(dto);
     } else {
-      [ventas, reparaciones, ingresosManuales, gastos] =
-        await this.getBalanceArs(dto);
+      return await this.getBalanceArs(dto);
     }
-    console.log("ventas", ventas);
-    console.log("reparaciones", reparaciones);
-    console.log("ingresosManuales", ingresosManuales);
-    console.log("gastos", gastos);
+  }
 
-    const ingresos = ventas + reparaciones + ingresosManuales;
-    const balance = ingresos - gastos;
-
-    return {
-      ingresos: Number(ingresos.toFixed(2)),
-      gastos: Number(gastos.toFixed(2)),
-      balance: Number(balance.toFixed(2)),
-      moneda,
-    };
+  async getMecanicos(dto: EstadisticasMonedaVO) {
+    const moneda = dto.moneda ?? "ARS";
+    if (moneda === "USD") {
+      return await this.estadisticasMecanicosQueriesService.getMecanicosUsd();
+    } else {
+      return await this.estadisticasMecanicosQueriesService.getMecanicosArs();
+    }
   }
 }

@@ -23,6 +23,6 @@ export async function GET(request: Request) {
     ).execute(dto);
     return NextResponse.json(result, { status: 200 });
   } catch (e) {
-    handleApiError(e);
+    return handleApiError(e);
   }
 }

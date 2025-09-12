@@ -10,3 +10,7 @@ export const balanceGeneralQuerySchema = z.object({
   año: z.string().optional().nullable(),
   mes: z.string().optional().nullable(),
 });
+
+export const mecanicosQuerySchema = z.object({
+  moneda: z.string().optional().nullable(),
+});

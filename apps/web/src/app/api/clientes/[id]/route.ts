@@ -127,6 +127,6 @@ export async function GET(
 
     return NextResponse.json(cliente);
   } catch (error) {
-    handleApiError(error);
+    return handleApiError(error);
   }
 }

@@ -30,6 +30,6 @@ export async function GET(request: NextRequest) {
     ).execute(dto);
     return NextResponse.json(result);
   } catch (e) {
-    handleApiError(e);
+    return handleApiError(e);
   }
 }
