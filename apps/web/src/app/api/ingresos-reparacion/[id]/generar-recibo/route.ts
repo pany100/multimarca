@@ -1,6 +1,9 @@
-import generateReciboHtml from "@/utils/generateReciboHtml";
-import puppeteer from "puppeteer";
-import prisma from "src/lib/prisma";
+import { ReciboService } from "@/core/application/services/recibo.service";
+import { GenerateReciboUseCase } from "@/core/application/use-cases/ingreso-reparacion/generate-recibo.use-case";
+import { PuppeteerPdfGenerator } from "@/core/infrastructure/external/puppeteer-pdf-generator";
+import { generateReciboQuerySchema } from "@/core/infrastructure/validation/schemas/ingreso-reparacion.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 
 export async function GET(
   request: Request,
@@ -8,39 +11,14 @@ export async function GET(
 ) {
   try {
     const id = parseInt(params.id);
-    const ingresoPorReparacion = await prisma.ingresoPorReparacion.findUnique({
-      where: { id },
-      include: {
-        cliente: true,
-        ordenReparacion: {
-          include: {
-            auto: true,
-            repuestosUsados: true,
-            reparacionesDeTercero: true,
-            trabajosRealizados: true,
-            ingresos: {
-              include: {
-                dolar: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!ingresoPorReparacion) {
-      return new Response(
-        JSON.stringify({ error: "Ingreso por reparación no encontrado" }),
-        {
-          status: 404,
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-    }
-
-    const pdfBuffer = await generarPdfRecibo(ingresoPorReparacion);
+    const generateReciboDto = await validateRequest(
+      { id },
+      generateReciboQuerySchema
+    );
+    const generateReciboUseCase = new GenerateReciboUseCase(
+      new ReciboService(new PuppeteerPdfGenerator())
+    );
+    const pdfBuffer = await generateReciboUseCase.execute(generateReciboDto.id);
 
     // Convert Buffer to Uint8Array which is compatible with Response
     return new Response(new Uint8Array(pdfBuffer), {
@@ -50,39 +28,7 @@ export async function GET(
         "Content-Disposition": `attachment; filename="recibo_${id}.pdf"`,
       },
     });
-  } catch (error) {
-    console.error("Error al generar el recibo:", error);
-    return new Response(
-      JSON.stringify({ error: "Error al generar el recibo" }),
-      {
-        status: 500,
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
+  } catch (e) {
+    return handleApiError(e);
   }
-}
-
-async function generarPdfRecibo(ingresoPorReparacion: any): Promise<Buffer> {
-  const browser = await puppeteer.launch();
-  const page = await browser.newPage();
-
-  const html = generateReciboHtml(ingresoPorReparacion);
-  await page.setContent(html);
-
-  const pdfBuffer = await page.pdf({
-    format: "A4",
-    printBackground: true,
-    margin: {
-      top: "20px",
-      right: "20px",
-      bottom: "20px",
-      left: "20px",
-    },
-  });
-
-  await browser.close();
-
-  return pdfBuffer;
 }
