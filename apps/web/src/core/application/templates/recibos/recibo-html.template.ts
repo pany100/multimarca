@@ -153,9 +153,11 @@ export class ReciboHtmlTemplate {
     } (${ingresoPorReparacion.ordenReparacion.auto.patent})</strong></p>
         <p>Del total del monto: <strong>${getFormattedPrice(
           calculoVO.total
-        )}</strong> se paga <strong>$${Number(
+        )}</strong> se pagan <strong>$${Number(
       ingresoPorReparacion.monto
-    ).toLocaleString("es-AR")}</strong></p>
+    ).toLocaleString("es-AR")}${
+      ingresoPorReparacion.moneda === "Dolar" ? " Dólares" : " Pesos"
+    }</strong></p>
         <p>Recibido de: <strong>${
           ingresoPorReparacion.cliente.fullName
         }</strong></p>
@@ -163,7 +165,7 @@ export class ReciboHtmlTemplate {
         ${
           ingresoPorReparacion.ordenReparacion.ingresos.length > 1
             ? `<p>
-              Pagos anteriores: 
+              Otros pagos: 
               ${ingresoPorReparacion.ordenReparacion.ingresos
                 .filter(
                   (ingreso: any) => ingreso.id !== ingresoPorReparacion.id
@@ -173,7 +175,7 @@ export class ReciboHtmlTemplate {
                 * ${new Date(ingreso.fecha).toLocaleDateString(
                   "es-AR"
                 )}</strong>: ${getFormattedPrice(ingreso.monto)}${
-                    ingreso.moneda === "Dolar" ? " Dolares" : " Pesos"
+                    ingreso.moneda === "Dolar" ? " Dólares" : " Pesos"
                   }
               </p>`;
                 })
