@@ -11,6 +11,8 @@ export class ReciboService {
   ): Promise<Buffer> {
     const reciboTemplate = new ReciboHtmlTemplate();
     const html = reciboTemplate.generate(ingreso);
-    return this.pdf.generate(html);
+    return this.pdf.generate(html, {
+      format: "letter",
+    });
   }
 }

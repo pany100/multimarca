@@ -14,7 +14,7 @@ export class ReciboHtmlTemplate {
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <style>
         @page {
-          size: A4;
+          size: letter landscape;
           /* Change from the default size of A4 */
           margin: 0mm;
           /* Set margin on each page */
