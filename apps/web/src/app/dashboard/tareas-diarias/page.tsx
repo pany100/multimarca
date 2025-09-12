@@ -5,12 +5,15 @@ import useTareasDiarias from "@/sections/tareas-diarias/hooks/useTareasDiarias";
 import AddIcon from "@mui/icons-material/Add";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import ExpandLessIcon from "@mui/icons-material/ExpandLess";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Alert,
   Box,
   Button,
   Checkbox,
   CircularProgress,
+  Collapse,
   Dialog,
   DialogActions,
   DialogContent,
@@ -94,6 +97,35 @@ const TareasDiariasPage = () => {
   const fechasOrdenadas = Object.keys(tareasAgrupadas).sort(
     (a, b) => new Date(a).getTime() - new Date(b).getTime()
   );
+
+  // Verificar si todas las tareas de un día están completadas
+  const todasTareasCompletadas = (fecha: string): boolean => {
+    const tareasDelDia = tareasAgrupadas[fecha];
+    return tareasDelDia.every((tarea) => tarea.realizado);
+  };
+
+  // Inicializar días colapsados cuando cambian las tareas
+  useEffect(() => {
+    const nuevosColapsados = new Set<string>();
+    fechasOrdenadas.forEach((fecha) => {
+      if (todasTareasCompletadas(fecha)) {
+        nuevosColapsados.add(fecha);
+      }
+    });
+    setDiasColapsados(nuevosColapsados);
+  }, [tareas]);
+
+  const [diasColapsados, setDiasColapsados] = useState(new Set<string>());
+
+  const toggleColapso = (fecha: string) => {
+    const nuevosColapsados = new Set(diasColapsados);
+    if (nuevosColapsados.has(fecha)) {
+      nuevosColapsados.delete(fecha);
+    } else {
+      nuevosColapsados.add(fecha);
+    }
+    setDiasColapsados(nuevosColapsados);
+  };
 
   // Manejadores
   const handleCrearTarea = async () => {
@@ -189,61 +221,85 @@ const TareasDiariasPage = () => {
               color: "primary.contrastText",
               px: 2,
               py: 1,
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
             }}
           >
             <Typography variant="h6">{formatearFecha(fecha)}</Typography>
+            <IconButton
+              onClick={() => toggleColapso(fecha)}
+              sx={{ color: "primary.contrastText" }}
+              size="small"
+            >
+              {diasColapsados.has(fecha) ? (
+                <ExpandMoreIcon />
+              ) : (
+                <ExpandLessIcon />
+              )}
+            </IconButton>
           </Box>
-          <List>
-            {tareasAgrupadas[fecha].map((tarea, index) => (
-              <Box key={tarea.id}>
-                <ListItem
-                  secondaryAction={
-                    <Box sx={{ display: "flex", alignItems: "center" }}>
-                      <Checkbox
-                        edge="end"
-                        checked={tarea.realizado}
-                        onChange={(e) =>
-                          cambiarEstadoTarea(tarea.id, e.target.checked)
-                        }
-                        disabled={userData?.id !== tarea.usuarioId}
-                      />
-                      <IconButton
-                        edge="end"
-                        aria-label="edit"
-                        onClick={() => handleEditarTarea(tarea)}
-                        disabled={userData?.id !== tarea.usuarioId}
-                      >
-                        <EditIcon />
-                      </IconButton>
-                      <IconButton
-                        edge="end"
-                        aria-label="delete"
-                        onClick={() => {
-                          setTareaEliminar(tarea);
-                          setDialogoEliminarAbierto(true);
-                        }}
-                        disabled={userData?.id !== tarea.usuarioId}
-                      >
-                        <DeleteIcon />
-                      </IconButton>
-                    </Box>
-                  }
-                >
-                  <ListItemText
-                    primary={`${tarea.usuario?.fullName} - ${tarea.descripcion}`}
-                    sx={{
-                      textDecoration: tarea.realizado ? "line-through" : "none",
-                      color: tarea.realizado ? "text.disabled" : "text.primary",
-                      marginRight: "64px",
-                    }}
-                  />
-                </ListItem>
-                {index < tareasAgrupadas[fecha].length - 1 && (
-                  <Divider component="li" />
-                )}
-              </Box>
-            ))}
-          </List>
+          <Collapse
+            in={!diasColapsados.has(fecha)}
+            timeout="auto"
+            unmountOnExit
+          >
+            <List>
+              {tareasAgrupadas[fecha].map((tarea, index) => (
+                <Box key={tarea.id}>
+                  <ListItem
+                    secondaryAction={
+                      <Box sx={{ display: "flex", alignItems: "center" }}>
+                        <Checkbox
+                          edge="end"
+                          checked={tarea.realizado}
+                          onChange={(e) =>
+                            cambiarEstadoTarea(tarea.id, e.target.checked)
+                          }
+                          disabled={userData?.id !== tarea.usuarioId}
+                        />
+                        <IconButton
+                          edge="end"
+                          aria-label="edit"
+                          onClick={() => handleEditarTarea(tarea)}
+                          disabled={userData?.id !== tarea.usuarioId}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton
+                          edge="end"
+                          aria-label="delete"
+                          onClick={() => {
+                            setTareaEliminar(tarea);
+                            setDialogoEliminarAbierto(true);
+                          }}
+                          disabled={userData?.id !== tarea.usuarioId}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                    }
+                  >
+                    <ListItemText
+                      primary={`${tarea.usuario?.fullName} - ${tarea.descripcion}`}
+                      sx={{
+                        textDecoration: tarea.realizado
+                          ? "line-through"
+                          : "none",
+                        color: tarea.realizado
+                          ? "text.disabled"
+                          : "text.primary",
+                        marginRight: "64px",
+                      }}
+                    />
+                  </ListItem>
+                  {index < tareasAgrupadas[fecha].length - 1 && (
+                    <Divider component="li" />
+                  )}
+                </Box>
+              ))}
+            </List>
+          </Collapse>
         </Paper>
       ))}
 
