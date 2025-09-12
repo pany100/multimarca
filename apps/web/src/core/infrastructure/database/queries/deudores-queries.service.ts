@@ -25,6 +25,7 @@ export class DeudoresQueriesService {
         FROM v_ventas_totales
         WHERE pendiente > 0
           AND (LOWER(cliente_nombre) LIKE LOWER('%${query}%'))
+          AND estado = 'Entregado'
 
         UNION ALL
 
@@ -39,6 +40,7 @@ export class DeudoresQueriesService {
         WHERE pendiente > 0
           AND (LOWER(cliente_nombre) LIKE LOWER('%${query}%')
               OR LOWER(auto_patent) LIKE LOWER('%${query}%'))
+          AND estado = 'Terminado'
       )
       SELECT
         COALESCE(cliente_id, -1)       AS id,
@@ -57,20 +59,21 @@ export class DeudoresQueriesService {
       WITH deudas AS (
         -- Deudas de ventas
         SELECT
-          *
+          cliente_id
         FROM v_ventas_totales
         WHERE pendiente > 0
           AND (LOWER(cliente_nombre) LIKE LOWER('%${query}%'))
-
+          AND estado = 'Entregado'
         UNION ALL
 
         -- Deudas de órdenes
         SELECT
-          *
+          cliente_id
         FROM v_orep_totales
         WHERE pendiente > 0
           AND (LOWER(cliente_nombre) LIKE LOWER('%${query}%')
               OR LOWER(auto_patent) LIKE LOWER('%${query}%'))
+          AND estado = 'Terminado'
       )
       SELECT
         COUNT(*) as count 
