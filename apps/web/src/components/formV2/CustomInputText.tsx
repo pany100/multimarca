@@ -10,7 +10,7 @@ const CustomInputText = (props: TextFieldProps) => {
     <Controller
       name={props.name as string}
       control={control}
-      render={({ field: { value, ...field } }) => (
+      render={({ field: { value, onChange, ...field } }) => (
         <TextField
           {...field}
           label={props.label}
@@ -19,6 +19,15 @@ const CustomInputText = (props: TextFieldProps) => {
               ? new Date(value).toISOString().split("T")[0]
               : value ?? ""
           }
+          onChange={(e) => {
+            const newValue = e.target.value;
+            if (props.type === "date") {
+              // Convert empty string to null for date fields to avoid yup validation errors
+              onChange(newValue === "" ? null : newValue);
+            } else {
+              onChange(newValue);
+            }
+          }}
           type={props.type}
           fullWidth
           error={!!errors[props.name as string]}

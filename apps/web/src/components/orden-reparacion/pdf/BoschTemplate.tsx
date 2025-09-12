@@ -238,12 +238,10 @@ const BoschTemplate = React.forwardRef<HTMLDivElement>((_, ref) => {
         </CarInfo>
         <Section>
           <SectionText>
-            Servicios solicitados (inspección / mantenimiento / reparación) /
-            Cliente solicita turno por:
+            Servicios solicitados (inspección / mantenimiento / reparación)
           </SectionText>
         </Section>
-        <LightLine />
-        <WhiteLine />
+        <CarInfoLine>Cliente solicita turno por:</CarInfoLine>
         <LightLine />
         <WhiteLine />
         <LightLine />

@@ -7,6 +7,14 @@ const schema = yup.object().shape({
   fechaSalidaReparacion: yup
     .date()
     .nullable()
+    .when("estado", {
+      is: "Terminado",
+      then: (schema) =>
+        schema.required(
+          "La fecha de salida es requerida cuando el estado es Terminado"
+        ),
+      otherwise: (schema) => schema.nullable(),
+    })
     .min(
       yup.ref("fechaEntradaReparacion"),
       "La fecha de salida debe ser posterior a la fecha de entrada"
