@@ -92,7 +92,10 @@ const EstadisticasMecanicosPage = () => {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
+    // Crear la fecha en hora local para evitar problemas de zona horaria
+    const [year, month, day] = dateString.split("-");
+    const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+
     return date.toLocaleDateString("es-AR", {
       day: "2-digit",
       month: "2-digit",

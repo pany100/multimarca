@@ -6,7 +6,7 @@ export class EstadisticasMecanicosQueriesService {
       SELECT 
         orm.mecanicoId,
         e.name AS mecanicoNombre,
-        YEARWEEK(orep.fechaSalidaReparacion, 6) AS semana,
+        YEARWEEK(orep.fechaSalidaReparacion, 1) AS semana,
         DATE_FORMAT(MIN(orep.fechaSalidaReparacion), '%Y-%m-%d') AS semanaInicio,
         DATE_FORMAT(MAX(orep.fechaSalidaReparacion), '%Y-%m-%d') AS semanaFin,
         SUM(
@@ -34,7 +34,7 @@ export class EstadisticasMecanicosQueriesService {
       SELECT 
         orm.mecanicoId,
         e.name AS mecanicoNombre,
-        YEARWEEK(orep.fechaSalidaReparacion, 6) AS semana,
+        YEARWEEK(orep.fechaSalidaReparacion, 1) AS semana,
         DATE_FORMAT(MIN(orep.fechaSalidaReparacion), '%Y-%m-%d') AS semanaInicio,
         DATE_FORMAT(MAX(orep.fechaSalidaReparacion), '%Y-%m-%d') AS semanaFin,
         SUM(

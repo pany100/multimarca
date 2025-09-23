@@ -80,8 +80,8 @@ export class OrdenReparacionVOMapper {
       terceros,
       estado,
     } = await this.transformInput(input);
-    const fechaCreacion = input.fechaCreacion
-      ? new Date(input.fechaCreacion)
+    const fechaCreacion = input.fechaSalidaReparacion
+      ? new Date(input.fechaSalidaReparacion)
       : new Date();
     const dolar = await exchange.getForDate(fechaCreacion);
 
@@ -126,8 +126,8 @@ export class OrdenReparacionVOMapper {
       terceros,
       estado,
     } = await this.transformInput(input);
-    const fechaCreacion = input.fechaCreacion
-      ? new Date(input.fechaCreacion)
+    const fechaCreacion = input.fechaSalidaReparacion
+      ? new Date(input.fechaSalidaReparacion)
       : new Date();
     const dolar = await exchange.getForDate(fechaCreacion);
 

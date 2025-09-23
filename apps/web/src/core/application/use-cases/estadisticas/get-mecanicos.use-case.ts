@@ -34,13 +34,13 @@ export class GetMecanicosUseCase {
     for (let i = n - 1; i >= 0; i--) {
       const date = subWeeks(hoy, i);
       const weekStart = format(
-        startOfWeek(date, { weekStartsOn: 0 }),
+        startOfWeek(date, { weekStartsOn: 1 }),
         "yyyy-MM-dd"
-      ); // sábado
+      );
       const weekEnd = format(
-        endOfWeek(date, { weekStartsOn: 0 }),
+        endOfWeek(date, { weekStartsOn: 1 }),
         "yyyy-MM-dd"
-      ); // viernes
+      );
       semanas.push({ weekStart, weekEnd });
     }
 
@@ -49,20 +49,19 @@ export class GetMecanicosUseCase {
 
   private groupByWeek(rows: Row[]) {
     const semanas = this.getUltimasSemanas(10);
-
     const mecanicosMap = new Map<number, ResultadoMecanico>();
 
     for (const row of rows) {
       // Calcular la semana de la fila
       const date = parseISO(row.semanaInicio);
       const weekStart = format(
-        startOfWeek(date, { weekStartsOn: 0 }),
+        startOfWeek(date, { weekStartsOn: 1 }),
         "yyyy-MM-dd"
-      ); // sábado
+      );
       const weekEnd = format(
-        endOfWeek(date, { weekStartsOn: 0 }),
+        endOfWeek(date, { weekStartsOn: 1 }),
         "yyyy-MM-dd"
-      ); // viernes
+      );
 
       if (!mecanicosMap.has(row.mecanicoId)) {
         mecanicosMap.set(row.mecanicoId, {
