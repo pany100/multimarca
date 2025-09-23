@@ -19,7 +19,7 @@ export async function GET(request: Request) {
         size: searchParams.get("pageSize") || searchParams.get("size") || "10",
         query: searchParams.get("query") || "",
         estado: searchParams.get("estado") as EstadoPresupuestoType | null,
-        sortBy: searchParams.get("sortBy") || "fecha",
+        sortBy: searchParams.get("sortBy") || "id",
         sortOrder: searchParams.get("sortOrder") || "desc",
         from: searchParams.get("from"),
         to: searchParams.get("to"),
