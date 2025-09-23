@@ -1,6 +1,7 @@
 import { EstadisticasAutosQueriesService } from "@/core/infrastructure/database/queries/estadisticas-autos-queries.service";
 import { EstadisticasBalanceQueriesService } from "@/core/infrastructure/database/queries/estadisticas-balance-queries.service";
 import { EstadisticasMecanicosQueriesService } from "@/core/infrastructure/database/queries/estadisticas-mecanicos-query.service";
+import { EstadisticasTransaccionesQueriesService } from "@/core/infrastructure/database/queries/estadisticas-transacciones-queries.service";
 import { EstadisticaService } from "../services/estadistica.service";
 
 export class EstadisticaServiceFactory {
@@ -10,7 +11,8 @@ export class EstadisticaServiceFactory {
     return new EstadisticaService(
       new EstadisticasAutosQueriesService(),
       new EstadisticasBalanceQueriesService(),
-      new EstadisticasMecanicosQueriesService()
+      new EstadisticasMecanicosQueriesService(),
+      new EstadisticasTransaccionesQueriesService()
     );
   }
 }

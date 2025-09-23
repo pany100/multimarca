@@ -4,12 +4,14 @@ import { EstadisticasMonedaVO } from "@/core/domain/value-objects/estadisticas-m
 import { EstadisticasAutosQueriesService } from "@/core/infrastructure/database/queries/estadisticas-autos-queries.service";
 import { EstadisticasBalanceQueriesService } from "@/core/infrastructure/database/queries/estadisticas-balance-queries.service";
 import { EstadisticasMecanicosQueriesService } from "@/core/infrastructure/database/queries/estadisticas-mecanicos-query.service";
+import { EstadisticasTransaccionesQueriesService } from "@/core/infrastructure/database/queries/estadisticas-transacciones-queries.service";
 
 export class EstadisticaService {
   constructor(
     private readonly estadisticasAutosQueriesService: EstadisticasAutosQueriesService,
     private readonly estadisticasBalanceQueriesService: EstadisticasBalanceQueriesService,
-    private readonly estadisticasMecanicosQueriesService: EstadisticasMecanicosQueriesService
+    private readonly estadisticasMecanicosQueriesService: EstadisticasMecanicosQueriesService,
+    private readonly estadisticasTransaccionesQueriesService: EstadisticasTransaccionesQueriesService
   ) {}
 
   async getAutos(dto: EstadisticasBaseVO) {
@@ -76,5 +78,13 @@ export class EstadisticaService {
     } else {
       return await this.estadisticasMecanicosQueriesService.getMecanicosArs();
     }
+  }
+
+  async getTransacciones(dto: EstadisticasBaseVO) {
+    const { fechaInicio, fechaFin } = dto.toObjectWithStrings();
+    return await this.estadisticasTransaccionesQueriesService.getTransacciones(
+      fechaInicio,
+      fechaFin
+    );
   }
 }

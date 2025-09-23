@@ -4,6 +4,7 @@ import { EstadisticasMonedaVO } from "@/core/domain/value-objects/estadisticas-m
 import {
   BalanceGeneralDto,
   GetAutosDto,
+  GetByFechaDto,
   MecanicosDto,
 } from "../dto/estadisticas.dto";
 
@@ -11,6 +12,10 @@ export class EstadisticasVOMapper {
   constructor() {}
 
   static getAutosToVo(dto: GetAutosDto) {
+    return new EstadisticasBaseVO(dto.año?.toString(), dto.mes?.toString());
+  }
+
+  static getByFechaToVo(dto: GetByFechaDto) {
     return new EstadisticasBaseVO(dto.año?.toString(), dto.mes?.toString());
   }
 
