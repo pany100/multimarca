@@ -23,7 +23,7 @@ import { useSearchParams } from "next/navigation";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
 export interface CustomTableProps {
-  title: string;
+  title?: string;
   columns: GridColDef[];
   apiEndpoint: string;
   extraActions?: (item: any) => React.ReactNode[];
@@ -389,16 +389,18 @@ function CustomTable<T extends { id: string }>({
           mb: 4,
         }}
       >
-        <Typography
-          variant="h5"
-          sx={{
-            fontWeight: 600,
-            color: "text.primary",
-            mb: 1,
-          }}
-        >
-          {title}
-        </Typography>
+        {title && (
+          <Typography
+            variant="h5"
+            sx={{
+              fontWeight: 600,
+              color: "text.primary",
+              mb: 1,
+            }}
+          >
+            {title}
+          </Typography>
+        )}
         <Box
           sx={{
             display: "flex",
@@ -494,7 +496,7 @@ function CustomTable<T extends { id: string }>({
                 boxShadow: 1,
               }}
             >
-              AGREGAR {title.toUpperCase()}
+              AGREGAR {title?.toUpperCase() || "Elemento"}
             </Button>
           )}
         </Box>

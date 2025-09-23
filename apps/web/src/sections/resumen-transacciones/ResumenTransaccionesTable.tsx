@@ -87,7 +87,7 @@ function ResumenTransaccionesTable({
       headerName: "Operación",
       flex: 1,
       renderCell: (params: any) => {
-        const label = params.row.tipoOperacion?.label || "N/A";
+        const label = params.row.tipoOperacion || "N/A";
         // Determine color based on operation type
         let color = "default";
 
@@ -210,7 +210,7 @@ function ResumenTransaccionesTable({
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mb: 2, mt: 2 }}>
         <FormControl variant="outlined" size="small" sx={{ minWidth: 200 }}>
           <InputLabel id="tipo-operacion-label">Tipo de Operación</InputLabel>
           <Select
@@ -231,7 +231,6 @@ function ResumenTransaccionesTable({
       </Box>
 
       <CustomTable
-        title="Resumen de Transacciones"
         apiEndpoint={getApiEndpoint()}
         columns={columns}
         ctaCb={ctaCb}
