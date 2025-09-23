@@ -392,8 +392,9 @@ export default function generateClientOrderHtml(repair: any): string {
             ? `
             <div class="TypographyBody1" style="margin-top: 20px;">
               Otros ${
-                repair.descripcionIncremento &&
-                `- ${repair.descripcionIncremento}`
+                repair.descripcionIncremento
+                  ? `- ${repair.descripcionIncremento}`
+                  : ""
               }
             </div>
             <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
