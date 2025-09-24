@@ -1,4 +1,5 @@
 import { ResumenTransaccionesVO } from "@/core/domain/value-objects/resumen-transacciones.vo";
+import { prisma } from "@/core/infrastructure/database/prisma";
 import { sqlRawPaged } from "@/shared/utils/pagination";
 
 export class ResumenTransaccionesQueriesService {
@@ -134,7 +135,6 @@ export class ResumenTransaccionesQueriesService {
             )
       ORDER BY fecha DESC
     `;
-    console.log(transaccionesQuery);
     const countQuery = `
   WITH transacciones AS (
     -- misma estructura simplificada solo para contar
