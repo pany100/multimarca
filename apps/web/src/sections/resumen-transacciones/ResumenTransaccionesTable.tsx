@@ -205,19 +205,6 @@ function ResumenTransaccionesTable({
   const handleTipoOperacionChange = (event: any) => {
     const value = event.target.value;
     setSelectedTipoOperacion(value === "all" ? null : value);
-
-    // Update URL with the selected filter
-    const url = new URL(window.location.href);
-    if (value === "all") {
-      url.searchParams.delete("tipoOperacionId");
-    } else {
-      url.searchParams.set("tipoOperacionId", value);
-    }
-
-    // Reset to first page when changing filters
-    url.searchParams.set("page", "0");
-
-    router.push(`?${url.searchParams.toString()}`);
   };
 
   return (
