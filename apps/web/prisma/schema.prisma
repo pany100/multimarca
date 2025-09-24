@@ -231,6 +231,7 @@ model Extraccion {
   dolar           Dolar?           @relation(fields: [dolarId], references: [id])
   tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
   usuario         Usuario          @relation(fields: [usuarioId], references: [id])
+  revisado        Boolean          @default(false)
 
   @@index([usuarioId])
   @@index([fecha])
@@ -258,6 +259,7 @@ model Gasto {
   mecanico        Empleado?        @relation(fields: [mecanicoId], references: [id])
   proveedor       Proveedor?       @relation(fields: [proveedorId], references: [id])
   tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
+  revisado        Boolean          @default(false)
 
   @@index([categoriaId])
   @@index([mecanicoId])
@@ -529,6 +531,7 @@ model IngresoPorReparacion {
   dolar             Dolar?           @relation(fields: [dolarId], references: [id])
   ordenReparacion   OrdenReparacion  @relation("OrdenReparacionIngresos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   tipoOperacion     TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
+  revisado          Boolean          @default(false)
 
   @@index([fecha])
   @@index([clienteId])
@@ -556,6 +559,7 @@ model IngresoPorVenta {
   dolar              Dolar?           @relation(fields: [dolarId], references: [id])
   tipoOperacion      TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
   venta              Venta            @relation("VentaIngresos", fields: [ventaId], references: [id], onDelete: Cascade)
+  revisado           Boolean          @default(false)
 
   @@index([fecha])
   @@index([clienteId])
@@ -649,6 +653,7 @@ model IngresoManualDeDinero {
   dolar           Dolar?           @relation(fields: [dolarId], references: [id])
   tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
   usuario         Usuario          @relation(fields: [usuarioId], references: [id])
+  revisado        Boolean          @default(false)
 
   @@index([usuarioId])
   @@index([dolarId], map: "IngresoManualDeDinero_dolarId_fkey")

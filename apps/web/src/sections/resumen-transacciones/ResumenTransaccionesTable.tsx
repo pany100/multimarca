@@ -130,6 +130,18 @@ function ResumenTransaccionesTable({
       flex: 1.5,
     },
     {
+      field: "revisado",
+      headerName: "Revisado",
+      flex: 1,
+      renderCell: (params: any) => (
+        <Chip
+          label={params.row.revisado ? "Sí" : "No"}
+          color={params.row.revisado ? "success" : "error"}
+          size="small"
+        />
+      ),
+    },
+    {
       field: "Ver",
       headerName: "Ver",
       flex: 0.5,

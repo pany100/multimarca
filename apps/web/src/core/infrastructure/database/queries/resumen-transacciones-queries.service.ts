@@ -17,7 +17,8 @@ export class ResumenTransaccionesQueriesService {
           i.tipoOperacionId,
           t.label AS tipoOperacion,
           u.fullName AS detalleEntidad,
-          i.moneda
+          i.moneda,
+          i.revisado
         FROM IngresoManualDeDinero i
         INNER JOIN Usuario u ON u.id = i.usuarioId
         LEFT JOIN TipoDeOperacion t ON t.id = i.tipoOperacionId
@@ -36,7 +37,8 @@ export class ResumenTransaccionesQueriesService {
           i.tipoOperacionId,
           t.label AS tipoOperacion,
           COALESCE(c.fullName, i.informacionCliente) AS detalleEntidad,
-          i.moneda
+          i.moneda,
+          i.revisado
         FROM IngresoPorVenta i
         LEFT JOIN Cliente c ON c.id = i.clienteId
         LEFT JOIN TipoDeOperacion t ON t.id = i.tipoOperacionId
@@ -55,7 +57,8 @@ export class ResumenTransaccionesQueriesService {
           i.tipoOperacionId,
           t.label AS tipoOperacion,
           c.fullName AS detalleEntidad,
-          i.moneda
+          i.moneda,
+          i.revisado
         FROM IngresoPorReparacion i
         INNER JOIN Cliente c ON c.id = i.clienteId
         LEFT JOIN TipoDeOperacion t ON t.id = i.tipoOperacionId
@@ -74,7 +77,8 @@ export class ResumenTransaccionesQueriesService {
           g.tipoOperacionId,
           t.label AS tipoOperacion,
           COALESCE(p.name, c.nombre) AS detalleEntidad,
-          g.moneda
+          g.moneda,
+          g.revisado
         FROM Gasto g
         LEFT JOIN Proveedor p ON p.id = g.proveedorId
         LEFT JOIN CategoriaGasto c ON c.id = g.categoriaId
@@ -94,7 +98,8 @@ export class ResumenTransaccionesQueriesService {
           e.tipoOperacionId,
           t.label AS tipoOperacion,
           u.fullName AS detalleEntidad,
-          e.moneda
+          e.moneda,
+          e.revisado
         FROM Extraccion e
         INNER JOIN Usuario u ON u.id = e.usuarioId
         LEFT JOIN TipoDeOperacion t ON t.id = e.tipoOperacionId
