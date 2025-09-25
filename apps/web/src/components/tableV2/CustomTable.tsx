@@ -37,7 +37,7 @@ export interface CustomTableProps {
 export type InheritedTableProps = {
   extraActions?: (item: any) => React.ReactNode[];
   ctaCb?: () => void;
-  setRefreshTrigger?: React.Dispatch<React.SetStateAction<number>>;
+  setRefreshTrigger: React.Dispatch<React.SetStateAction<number>>;
 } & Omit<
   CustomTableProps,
   "extraActions" | "ctaCb" | "title" | "columns" | "apiEndpoint"

@@ -26,16 +26,12 @@ interface TipoOperacion {
   esGasto: boolean;
 }
 
-interface ResumenTransaccionesTableProps {
-  setRefreshTrigger: React.Dispatch<React.SetStateAction<number>>;
-}
-
 function ResumenTransaccionesTable({
   extraActions,
   ctaCb,
   setRefreshTrigger,
   ...rest
-}: InheritedTableProps & ResumenTransaccionesTableProps) {
+}: InheritedTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { authFetch } = useFetch();
@@ -235,7 +231,6 @@ function ResumenTransaccionesTable({
     }
   ) => {
     try {
-      console.log(row.tipo);
       const response = await authFetch(
         `${getTipoEndpoint(row.tipo)}/${row.id}`,
         {

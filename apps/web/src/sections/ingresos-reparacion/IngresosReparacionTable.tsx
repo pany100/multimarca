@@ -4,10 +4,11 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 import useRecibo from "@/hooks/useRecibo";
+import authFetch from "@/utils/authFetch";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import SendIcon from "@mui/icons-material/Send";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { Alert, Chip, MenuItem, Snackbar } from "@mui/material";
+import { Alert, Checkbox, Chip, MenuItem, Snackbar } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -112,9 +113,31 @@ function IngresosReparacionTable({
       field: "reciboEnviado",
       headerName: "Recibo Enviado",
       flex: 1,
-      valueGetter: (value: any) => (value ? "Sí" : "No"),
+      renderCell: (params: any) => (
+        <Checkbox
+          checked={params.row.revisado}
+          onChange={(event) => handleRevisadoChange(event, params.row.id)}
+        />
+      ),
     },
   ];
+
+  const handleRevisadoChange = async (event: any, ingresoId: string) => {
+    try {
+      const response = await authFetch(
+        `/api/ingresos-reparacion/${ingresoId}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ revisado: event.target.checked }),
+        }
+      );
+      if (response.ok) {
+        setRefreshTrigger((prev) => prev + 1);
+      }
+    } catch (error) {
+      console.error("Error al actualizar el estado revisado:", error);
+    }
+  };
 
   const handleExtraAction = async (ingresoId: string) => {
     try {
