@@ -1,3 +1,9 @@
+import { TransaccionService } from "@/core/application/services/transaccion.service";
+import { UpdateRevisadoUseCase } from "@/core/application/use-cases/transacciones/update-revisado.use-case";
+import { PrismaExtraccionRepository } from "@/core/infrastructure/database/repositories/prisma-extraccion.repository";
+import { updateRevisadoYEnviadoSchema } from "@/core/infrastructure/validation/schemas/resumen-transaccion.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import {
   chequeQueryData,
   getChequeIdAndValidate,
@@ -51,6 +57,33 @@ export async function GET(
       { error: "Error al obtener la extracción" },
       { status: 500 }
     );
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+    const body = await request.json();
+    const { revisado, reciboEnviado } = body;
+    const dto = await validateRequest(
+      {
+        id,
+        revisado,
+        reciboEnviado,
+      },
+      updateRevisadoYEnviadoSchema
+    );
+
+    const transaccionActualizada = await new UpdateRevisadoUseCase(
+      new TransaccionService(new PrismaExtraccionRepository())
+    ).execute(dto);
+
+    return NextResponse.json(transaccionActualizada);
+  } catch (error) {
+    return handleApiError(error);
   }
 }
 

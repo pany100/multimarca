@@ -1,3 +1,9 @@
+import { TransaccionService } from "@/core/application/services/transaccion.service";
+import { UpdateRevisadoUseCase } from "@/core/application/use-cases/transacciones/update-revisado.use-case";
+import { PrismaIngresoVentaRepository } from "@/core/infrastructure/database/repositories/prisma-ingreso-venta.repository";
+import { updateRevisadoYEnviadoSchema } from "@/core/infrastructure/validation/schemas/resumen-transaccion.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import {
   chequeQueryData,
   getChequeIdAndValidate,
@@ -102,6 +108,33 @@ export async function PUT(
       { error: "Error al actualizar el ingreso por venta" },
       { status: 500 }
     );
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+    const body = await request.json();
+    const { revisado, reciboEnviado } = body;
+    const dto = await validateRequest(
+      {
+        id,
+        revisado,
+        reciboEnviado,
+      },
+      updateRevisadoYEnviadoSchema
+    );
+
+    const transaccionActualizada = await new UpdateRevisadoUseCase(
+      new TransaccionService(new PrismaIngresoVentaRepository())
+    ).execute(dto);
+
+    return NextResponse.json(transaccionActualizada);
+  } catch (error) {
+    return handleApiError(error);
   }
 }
 

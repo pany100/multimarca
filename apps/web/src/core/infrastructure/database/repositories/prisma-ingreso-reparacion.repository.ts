@@ -1,3 +1,5 @@
+import { UpdateRevisadoYEnviadoDto } from "@/core/application/dto/resumen.dto";
+import { TransaccionRepository } from "@/core/domain/repositories/transaccion.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { Prisma } from "@prisma/client";
 
@@ -25,7 +27,9 @@ export type IngresoPorReparacionWithRelations =
     };
   }>;
 
-export class PrismaIngresoReparacionRepository {
+export class PrismaIngresoReparacionRepository
+  implements TransaccionRepository
+{
   async findById(
     id: number
   ): Promise<IngresoPorReparacionWithRelations | null> {
@@ -50,6 +54,16 @@ export class PrismaIngresoReparacionRepository {
             },
           },
         },
+      },
+    });
+  }
+
+  async update(dto: UpdateRevisadoYEnviadoDto) {
+    return prisma.ingresoPorReparacion.update({
+      where: { id: dto.id },
+      data: {
+        revisado: dto.revisado || false,
+        reciboEnviado: dto.reciboEnviado || false,
       },
     });
   }

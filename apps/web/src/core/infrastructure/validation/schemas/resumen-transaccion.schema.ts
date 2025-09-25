@@ -11,3 +11,9 @@ export const resumenSchema = z.object({
     userId: z.number(),
   }),
 });
+
+export const updateRevisadoYEnviadoSchema = z.object({
+  id: z.coerce.number().min(1),
+  revisado: z.boolean().optional(),
+  reciboEnviado: z.boolean().optional(),
+});
