@@ -72,4 +72,55 @@ export class PrismaGastoRepository
       },
     });
   }
+
+  async getGastoMecanicosUltimaSemanaCompartida(from: Date, to: Date) {
+    return await prisma.ordenReparacion.findMany({
+      where: {
+        estado: "Terminado",
+        fechaSalidaReparacion: {
+          gte: from,
+          lte: to,
+        },
+        // Only repairs with more than one mechanic
+        mecanicos: {
+          some: {}, // At least one mechanic exists
+        },
+      },
+      select: {
+        id: true,
+        fechaSalidaReparacion: true,
+        auto: {
+          select: {
+            brand: true,
+            model: true,
+            patent: true,
+          },
+        },
+        mecanicos: {
+          select: {
+            mecanico: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        trabajosRealizados: {
+          select: {
+            precioUnitario: true,
+          },
+        },
+        pagos: {
+          select: {
+            fechaPago: true,
+            monto: true,
+          },
+          where: {
+            AND: [{ fechaPago: { not: null } }, { monto: { not: null } }],
+          },
+        },
+      },
+    });
+  }
 }

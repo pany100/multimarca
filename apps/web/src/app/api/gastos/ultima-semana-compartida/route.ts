@@ -1,63 +1,36 @@
+import { GastoService } from "@/core/application/services/gasto.service";
+import { UltimaSemanaCompartidaUseCase } from "@/core/application/use-cases/gasto/ultima-semana-compartida.use-case";
+import { PrismaGastoRepository } from "@/core/infrastructure/database/repositories/prisma-gasto.repository";
+import { PrismaUsuarioRepository } from "@/core/infrastructure/database/repositories/prisma-usuario.repository";
+import { getUltimaSemanaSchema } from "@/core/infrastructure/validation/schemas/gasto.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
-import {
-  checkUserPermission,
-  getReparacionesMultiplesMecanicos,
-  getWeekDateRange,
-} from "src/utils/gastosUtils";
 
 export async function GET(request: Request) {
   try {
-    const checkPermissionError = await checkUserPermission(request);
-    if (checkPermissionError) {
-      return checkPermissionError;
+    const { searchParams } = new URL(request.url);
+
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
-
-    const { startDate, endDate } = getWeekDateRange(request);
-
-    // Get all repairs with multiple mechanics assigned
-    const reparaciones = await getReparacionesMultiplesMecanicos(
-      startDate,
-      endDate
+    const token = authHeader.split(" ")[1];
+    const decodedToken = JSON.parse(atob(token.split(".")[1]));
+    const dto = await validateRequest(
+      {
+        from: searchParams.get("start"),
+        to: searchParams.get("end"),
+        decodedToken,
+      },
+      getUltimaSemanaSchema
     );
-
-    // Process and format the repairs data
-    const result = reparaciones.map((reparacion) => {
-      // Calculate total manoDeObra for this repair order
-      const manoDeObraTotal = reparacion.trabajosRealizados.reduce(
-        (total, trabajo) => total + Number(trabajo.precioUnitario),
-        0
-      );
-
-      // Check if the repair order has been paid
-      const pagado = reparacion.pagos.some(
-        (pago) => pago.fechaPago !== null && pago.monto !== null
-      );
-
-      // Calculate total manoDeObra for paid repair orders
-      const manoDeObraPagada = pagado ? manoDeObraTotal : 0;
-
-      // Format mechanics list
-      const mechanics = reparacion.mecanicos.map((rm) => ({
-        id: rm.mecanico.id,
-        name: rm.mecanico.name,
-      }));
-
-      return {
-        id: reparacion.id,
-        fecha: reparacion.fechaSalidaReparacion,
-        auto: `${reparacion.auto.brand} ${reparacion.auto.model} (${reparacion.auto.patent})`,
-        mechanics,
-        manoDeObraTotal,
-        manoDeObraPagada,
-      };
-    });
-
-    return NextResponse.json(result);
+    const gastos = await new UltimaSemanaCompartidaUseCase(
+      new PrismaUsuarioRepository(),
+      new GastoService(new PrismaGastoRepository())
+    ).execute(dto);
+    return NextResponse.json(gastos);
   } catch (error) {
-    console.error("Error al obtener datos de reparaciones compartidas:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

@@ -12,4 +12,12 @@ export class GastoService {
       dateRangeVO.to
     );
   }
+
+  async getGastoMecanicosUltimaSemanaCompartida(dto: GastoDto) {
+    const dateRangeVO = new DateRangeVO(dto.from, dto.to).toMandatoryDate();
+    return await this.gastoRepository.getGastoMecanicosUltimaSemanaCompartida(
+      dateRangeVO.from,
+      dateRangeVO.to
+    );
+  }
 }
