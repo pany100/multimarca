@@ -8,6 +8,7 @@ import { getFormattedPrice } from "@/utils/fieldHelper";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Box,
+  Checkbox,
   Chip,
   FormControl,
   InputLabel,
@@ -25,16 +26,19 @@ interface TipoOperacion {
   esGasto: boolean;
 }
 
+interface ResumenTransaccionesTableProps {
+  setRefreshTrigger: React.Dispatch<React.SetStateAction<number>>;
+}
+
 function ResumenTransaccionesTable({
   extraActions,
   ctaCb,
   setRefreshTrigger,
   ...rest
-}: InheritedTableProps) {
+}: InheritedTableProps & ResumenTransaccionesTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { authFetch } = useFetch();
-
   const [tiposOperacion, setTiposOperacion] = useState<TipoOperacion[]>([]);
   const [selectedTipoOperacion, setSelectedTipoOperacion] = useState<
     string | null
@@ -134,10 +138,9 @@ function ResumenTransaccionesTable({
       headerName: "Revisado",
       flex: 1,
       renderCell: (params: any) => (
-        <Chip
-          label={params.row.revisado ? "Sí" : "No"}
-          color={params.row.revisado ? "success" : "error"}
-          size="small"
+        <Checkbox
+          checked={params.row.revisado}
+          onChange={(event) => handleRevisadoChange(event, params.row)}
         />
       ),
     },
@@ -205,6 +208,49 @@ function ResumenTransaccionesTable({
   const handleTipoOperacionChange = (event: any) => {
     const value = event.target.value;
     setSelectedTipoOperacion(value === "all" ? null : value);
+  };
+
+  const getTipoEndpoint = (tipo: string) => {
+    switch (tipo) {
+      case "Gasto":
+        return `/api/gastos`;
+      case "Extraccion":
+        return `/api/extracciones`;
+      case "IngresoPorVenta":
+        return `/api/ingresos-ventas`;
+      case "IngresoPorReparacion":
+        return `/api/ingresos-reparacion`;
+      case "IngresoManualDeDinero":
+        return `/api/ingresos-manuales`;
+      default:
+        return "";
+    }
+  };
+
+  const handleRevisadoChange = async (
+    event: any,
+    row: {
+      id: number;
+      tipo: string;
+    }
+  ) => {
+    try {
+      console.log(row.tipo);
+      const response = await authFetch(
+        `${getTipoEndpoint(row.tipo)}/${row.id}`,
+        {
+          method: "PATCH",
+          body: JSON.stringify({ revisado: event.target.checked }),
+        }
+      );
+      if (response.ok) {
+        setRefreshTrigger((prev) => prev + 1);
+      } else {
+        console.error("Error al actualizar revisado:", response.status);
+      }
+    } catch (error) {
+      console.error("Error al actualizar revisado:", error);
+    }
   };
 
   return (
