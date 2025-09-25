@@ -1,95 +1,36 @@
+import { GastoService } from "@/core/application/services/gasto.service";
+import { UltimaSemanaUseCase } from "@/core/application/use-cases/gasto/ultima-semana.use-case";
+import { PrismaGastoRepository } from "@/core/infrastructure/database/repositories/prisma-gasto.repository";
+import { PrismaUsuarioRepository } from "@/core/infrastructure/database/repositories/prisma-usuario.repository";
+import { getUltimaSemanaSchema } from "@/core/infrastructure/validation/schemas/gasto.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
-import prisma from "src/lib/prisma";
-import {
-  checkUserPermission,
-  getReparacionesTerminadasForMecanico,
-  getWeekDateRange,
-} from "src/utils/gastosUtils";
 
 export async function GET(request: Request) {
   try {
-    const checkPermissionError = await checkUserPermission(request);
-    if (checkPermissionError) {
-      return checkPermissionError;
+    const { searchParams } = new URL(request.url);
+
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
-
-    const { startDate, endDate } = getWeekDateRange(request);
-
-    const mecanicos = await prisma.empleado.findMany({
-      where: {
-        tipo: "Mecanico",
+    const token = authHeader.split(" ")[1];
+    const decodedToken = JSON.parse(atob(token.split(".")[1]));
+    const dto = await validateRequest(
+      {
+        from: searchParams.get("start"),
+        to: searchParams.get("end"),
+        decodedToken,
       },
-      select: {
-        id: true,
-        name: true,
-      },
-    });
-
-    // For each mechanic, get their repair orders from the specified date range
-    const result = await Promise.all(
-      mecanicos.map(async (mecanico) => {
-        const ordenesReparacion = await getReparacionesTerminadasForMecanico(
-          startDate,
-          endDate,
-          mecanico.id
-        );
-        const ordenesReparacionUnicoMecanico = ordenesReparacion.filter(
-          (reparacion) => reparacion.mecanicos.length === 1
-        );
-
-        // Calculate manoDeObra for each repair order and total for the mechanic
-        const reparaciones = await Promise.all(
-          ordenesReparacionUnicoMecanico.map(async (orden) => {
-            // Calculate total manoDeObra for this repair order
-            const manoDeObra = orden.trabajosRealizados.reduce(
-              (total, trabajo) => total + Number(trabajo.precioUnitario),
-              0
-            );
-
-            // Check if the repair order has been paid
-            const pagado = orden.pagos.some(
-              (pago) => pago.fechaPago !== null && pago.monto !== null
-            );
-
-            return {
-              idOrep: orden.id,
-              fecha: orden.fechaSalidaReparacion,
-              auto: orden.auto.patent,
-              manoDeObra,
-              pagado,
-            };
-          })
-        );
-
-        // Calculate total manoDeObra for all repair orders
-        const manoDeObraTotal = reparaciones.reduce(
-          (total, reparacion) => total + reparacion.manoDeObra,
-          0
-        );
-
-        // Calculate total manoDeObra for paid repair orders
-        const manoDeObraPagada = reparaciones.reduce(
-          (total, reparacion) =>
-            total + (reparacion.pagado ? reparacion.manoDeObra : 0),
-          0
-        );
-
-        return {
-          mecanicoId: mecanico.id,
-          mecanicoNombre: mecanico.name,
-          reparaciones,
-          manoDeObraTotal,
-          manoDeObraPagada,
-        };
-      })
+      getUltimaSemanaSchema
     );
-
-    return NextResponse.json(result);
+    const gastos = await new UltimaSemanaUseCase(
+      new PrismaUsuarioRepository(),
+      new GastoService(new PrismaGastoRepository())
+    ).execute(dto);
+    return NextResponse.json(gastos);
   } catch (error) {
-    console.error("Error al obtener datos de mecánicos:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

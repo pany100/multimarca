@@ -22,4 +22,10 @@ export class DateRangeVO {
 
     return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${milliseconds}`;
   }
+
+  toMandatoryDate() {
+    const from = this.from ?? "1900-01-01 00:00:00.000";
+    const to = this.to ?? new Date().toISOString();
+    return { from: new Date(from), to: new Date(to) };
+  }
 }
