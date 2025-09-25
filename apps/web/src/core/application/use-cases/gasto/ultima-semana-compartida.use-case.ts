@@ -17,10 +17,12 @@ export class UltimaSemanaCompartidaUseCase {
     // Process and format the repairs data
     const result = reparacionesMultiplesMecanicos.map((reparacion) => {
       // Calculate total manoDeObra for this repair order
-      const manoDeObraTotal = reparacion.trabajosRealizados.reduce(
-        (total: number, trabajo: any) => total + Number(trabajo.precioUnitario),
-        0
-      );
+      const manoDeObraTotal =
+        reparacion.trabajosRealizados.reduce(
+          (total: number, trabajo: any) =>
+            total + Number(trabajo.precioUnitario),
+          0
+        ) - reparacion.descuento;
 
       // Check if the repair order has been paid
       const pagado = reparacion.pagos.length > 0;

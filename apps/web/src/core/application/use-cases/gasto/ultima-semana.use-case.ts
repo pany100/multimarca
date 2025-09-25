@@ -43,7 +43,8 @@ export class UltimaSemanaUseCase {
 
       // Calcular totales
       const manoDeObraTotal = reparaciones.reduce(
-        (total: number, reparacion: any) => total + reparacion.manoDeObra,
+        (total: number, reparacion: any) =>
+          total + reparacion.manoDeObra - reparacion.descuento,
         0
       );
 
