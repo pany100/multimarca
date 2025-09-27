@@ -17,7 +17,7 @@ function RepuestosUsadosInnerForm() {
           searchOptions={searchStockObject}
           initialOptions={initialStock}
           selectOption={selectOption}
-          initialValue={currentItem?.id}
+          initialValue={currentItem?.stock?.id}
         />
       </Grid>
       <Grid item xs={12}>

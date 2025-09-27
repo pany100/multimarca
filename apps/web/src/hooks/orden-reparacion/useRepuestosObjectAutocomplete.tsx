@@ -2,7 +2,8 @@ import { useFormDataWithModalContext } from "@/contexts/FormDataWithModalContext
 import { ObjectAutocomplete } from "@/sections/commons/NonFormObjectAutocomplete";
 
 function useRepuestosObjectAutocomplete() {
-  const { newItem, setNewItem } = useFormDataWithModalContext();
+  const { newItem, setNewItem, currentItem, setCurrentItem } =
+    useFormDataWithModalContext();
   const selectOption = (
     option: ObjectAutocomplete | null,
     initialRender?: boolean
@@ -21,6 +22,8 @@ function useRepuestosObjectAutocomplete() {
           label: option.object.label,
           proveedor: option.object.proveedor,
           precioCompra: option.object.buyPrice,
+          unidadesConsumidas: 1,
+          precioUnitario: precioVentaCalculado.toFixed(2),
           precioVenta: precioVentaCalculado.toFixed(2),
         });
       } else {
