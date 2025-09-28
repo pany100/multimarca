@@ -34,16 +34,6 @@ function RepuestosUsadosInnerForm() {
       </Grid>
       <Grid item xs={12}>
         <ORepTextField
-          label="Precio Venta"
-          type="number"
-          defaultValue={newItem?.precioVenta || currentItem?.precioVenta || ""}
-          onChange={(e) =>
-            setNewItem({ ...newItem, precioVenta: Number(e.target.value) })
-          }
-        />
-      </Grid>
-      <Grid item xs={12}>
-        <ORepTextField
           label="Unidades Consumidas"
           type="number"
           defaultValue={
@@ -54,6 +44,16 @@ function RepuestosUsadosInnerForm() {
               ...newItem,
               unidadesConsumidas: Number(e.target.value),
             })
+          }
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <ORepTextField
+          label="Precio Venta"
+          type="number"
+          defaultValue={newItem?.precioVenta || currentItem?.precioVenta || ""}
+          onChange={(e) =>
+            setNewItem({ ...newItem, precioVenta: Number(e.target.value) })
           }
         />
       </Grid>
