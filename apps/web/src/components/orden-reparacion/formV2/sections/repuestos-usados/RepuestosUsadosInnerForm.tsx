@@ -24,37 +24,91 @@ function RepuestosUsadosInnerForm() {
         <ORepTextField
           label="Precio Compra"
           type="number"
-          defaultValue={
-            newItem?.precioCompra || currentItem?.precioCompra || ""
+          value={newItem?.precioCompra}
+          onChange={(e) => {
+            const value = e.target.value;
+            setNewItem({
+              ...newItem,
+              precioCompra: value === "" ? "" : Number(value),
+            });
+          }}
+        />
+      </Grid>
+      <Grid item xs={12}>
+        <ORepTextField
+          label="Precio Unitario"
+          type="number"
+          value={
+            newItem?.precioUnitario ||
+            newItem?.precioVenta / newItem?.unidadesConsumidas ||
+            ""
           }
-          onChange={(e) =>
-            setNewItem({ ...newItem, precioCompra: Number(e.target.value) })
-          }
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === "") {
+              setNewItem({
+                ...newItem,
+                precioUnitario: 0,
+                precioVenta: 0,
+              });
+            } else {
+              const unitPrice = Number(value);
+              setNewItem({
+                ...newItem,
+                precioUnitario: unitPrice,
+                precioVenta: unitPrice * (newItem?.unidadesConsumidas || 1),
+              });
+            }
+          }}
         />
       </Grid>
       <Grid item xs={12}>
         <ORepTextField
           label="Unidades Consumidas"
           type="number"
-          defaultValue={
-            newItem?.unidadesConsumidas || currentItem?.unidadesConsumidas || ""
-          }
-          onChange={(e) =>
-            setNewItem({
-              ...newItem,
-              unidadesConsumidas: Number(e.target.value),
-            })
-          }
+          value={newItem?.unidadesConsumidas}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === "") {
+              setNewItem({
+                ...newItem,
+                unidadesConsumidas: "",
+              });
+            } else {
+              const units = Number(value);
+              setNewItem({
+                ...newItem,
+                unidadesConsumidas: units,
+                precioVenta: (newItem?.precioUnitario || 0) * units,
+              });
+            }
+          }}
         />
       </Grid>
       <Grid item xs={12}>
         <ORepTextField
           label="Precio Venta"
           type="number"
-          defaultValue={newItem?.precioVenta || currentItem?.precioVenta || ""}
-          onChange={(e) =>
-            setNewItem({ ...newItem, precioVenta: Number(e.target.value) })
-          }
+          value={newItem?.precioVenta}
+          onChange={(e) => {
+            const value = e.target.value;
+            if (value === "") {
+              setNewItem({
+                ...newItem,
+                precioVenta: 0,
+                precioUnitario: 0,
+              });
+            } else {
+              const salePrice = Number(value);
+              setNewItem({
+                ...newItem,
+                precioVenta: salePrice,
+                precioUnitario: (
+                  salePrice / (newItem?.unidadesConsumidas || 1)
+                ).toFixed(2),
+              });
+            }
+          }}
         />
       </Grid>
     </Grid>
