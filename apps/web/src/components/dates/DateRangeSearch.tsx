@@ -1,11 +1,4 @@
-import {
-  FormControl,
-  Grid,
-  InputLabel,
-  MenuItem,
-  Select,
-  TextField,
-} from "@mui/material";
+import { FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material";
 import { Dispatch, SetStateAction } from "react";
 
 type Props = {
@@ -28,6 +21,10 @@ function DateRangeSearch({ setMes, setAnio }: Props) {
     { valor: "11", nombre: "Noviembre" },
     { valor: "12", nombre: "Diciembre" },
   ];
+  const currentYear = new Date().getFullYear();
+  const years = Array.from({ length: currentYear - 2023 + 1 }, (_, i) =>
+    (2023 + i).toString()
+  );
   return (
     <>
       <Grid item xs={12} sm={6} md={3}>
@@ -49,13 +46,22 @@ function DateRangeSearch({ setMes, setAnio }: Props) {
         </FormControl>
       </Grid>
       <Grid item xs={12} sm={6} md={3}>
-        <TextField
-          label="Año"
-          type="number"
-          onChange={(e) => setAnio(e.target.value)}
-          fullWidth
-          size="small"
-        />
+        <FormControl fullWidth size="small">
+          <InputLabel>Año</InputLabel>
+          <Select
+            label="Año"
+            onChange={(e) => setAnio(e.target.value as string)}
+          >
+            <MenuItem value="">
+              <em>Todos los años</em>
+            </MenuItem>
+            {years.map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
       </Grid>
     </>
   );

@@ -2,7 +2,8 @@ import { useMemo } from "react";
 
 /**
  * Hook to transform a month (1-12) and optional year into a date range.
- * - If year is omitted, it uses the current year.
+ * - If month is omitted but year is provided, returns the full year range (Jan 1 - Dec 31 of that year)
+ * - If year is omitted, it uses the current year (when month is provided)
  * - `from` is set to the first day of the month at 00:00:00.000
  * - `to` is set to the last day of the month at 23:59:59.999
  */
@@ -12,7 +13,18 @@ function useFechaToRange(
 ): { from: Date | undefined; to: Date | undefined } {
   const range = useMemo(() => {
     if (mes === undefined || mes === null || mes === "") {
-      // When month is not provided, return undefineds to avoid errors in consumers
+      // When month is not provided:
+      // - If a year is provided, return the full year's range
+      // - Otherwise, return undefineds to avoid errors in consumers
+      if (anio !== undefined && anio !== null && anio !== "") {
+        const yearNumber = typeof anio === "string" ? parseInt(anio, 10) : anio;
+        if (Number.isNaN(yearNumber)) {
+          throw new Error("useFechaToRange: 'anio' inválido");
+        }
+        const from = new Date(yearNumber, 0, 1, 0, 0, 0, 0); // Jan 1
+        const to = new Date(yearNumber, 11, 31, 23, 59, 59, 999); // Dec 31
+        return { from, to };
+      }
       return { from: undefined, to: undefined };
     }
 
