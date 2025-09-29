@@ -37,10 +37,10 @@ export class UltimaSemanaUseCase {
           fecha: orden.fechaSalidaReparacion,
           auto: orden.auto.patent,
           manoDeObra,
+          descuento: orden.descuento,
           pagado,
         };
       });
-
       // Calcular totales
       const manoDeObraTotal = reparaciones.reduce(
         (total: number, reparacion: any) =>

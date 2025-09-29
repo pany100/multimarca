@@ -53,6 +53,7 @@ export class PrismaGastoRepository
                     precioUnitario: true,
                   },
                 },
+                descuento: true,
                 pagos: {
                   select: {
                     fechaPago: true,
@@ -89,6 +90,7 @@ export class PrismaGastoRepository
       select: {
         id: true,
         fechaSalidaReparacion: true,
+        descuento: true,
         auto: {
           select: {
             brand: true,
