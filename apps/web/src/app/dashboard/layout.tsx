@@ -13,6 +13,7 @@ import DateRangeIcon from "@mui/icons-material/DateRange";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
+import HandymanIcon from "@mui/icons-material/Handyman";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import LockIcon from "@mui/icons-material/Lock";
 import MenuIcon from "@mui/icons-material/Menu";
@@ -382,6 +383,18 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Mecánicos",
             icono: <BuildIcon />,
             ruta: "/dashboard/estadisticasMecanicos",
+          },
+          {
+            permiso: "Estadisticas",
+            texto: "Deudores",
+            icono: <AttachMoneyIcon />,
+            ruta: "/dashboard/estadisticasDeudores",
+          },
+          {
+            permiso: "Estadisticas",
+            texto: "Mano de obra",
+            icono: <HandymanIcon />,
+            ruta: "/dashboard/estadisticasManoDeObra",
           },
           {
             permiso: "Estadisticas",

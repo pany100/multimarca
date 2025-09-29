@@ -5,6 +5,8 @@ type DeudoresQueryParams = {
   page: number;
   size: number;
   query: string;
+  from?: Date;
+  to?: Date;
 };
 
 export class DeudoresQueriesService {
@@ -12,6 +14,8 @@ export class DeudoresQueriesService {
     page,
     size,
     query = "",
+    from,
+    to,
   }: DeudoresQueryParams): Promise<any> {
     const deudaQuery = `
       WITH deudas AS (
@@ -26,7 +30,8 @@ export class DeudoresQueriesService {
         WHERE pendiente > 0
           AND (LOWER(cliente_nombre) LIKE LOWER('%${query}%'))
           AND estado = 'Entregado'
-
+          ${from ? `AND fecha >= '${from.toISOString()}'` : ""}
+          ${to ? `AND fecha <= '${to.toISOString()}'` : ""}
         UNION ALL
 
         -- Deudas de órdenes
@@ -41,6 +46,8 @@ export class DeudoresQueriesService {
           AND (LOWER(cliente_nombre) LIKE LOWER('%${query}%')
               OR LOWER(auto_patent) LIKE LOWER('%${query}%'))
           AND estado = 'Terminado'
+          ${from ? `AND fecha >= '${from.toISOString()}'` : ""}
+          ${to ? `AND fecha <= '${to.toISOString()}'` : ""}
       )
       SELECT
         COALESCE(cliente_id, -1)       AS id,
@@ -64,6 +71,8 @@ export class DeudoresQueriesService {
         WHERE pendiente > 0
           AND (LOWER(cliente_nombre) LIKE LOWER('%${query}%'))
           AND estado = 'Entregado'
+          ${from ? `AND fecha >= '${from.toISOString()}'` : ""}
+          ${to ? `AND fecha <= '${to.toISOString()}'` : ""}
         UNION ALL
 
         -- Deudas de órdenes
@@ -74,6 +83,8 @@ export class DeudoresQueriesService {
           AND (LOWER(cliente_nombre) LIKE LOWER('%${query}%')
               OR LOWER(auto_patent) LIKE LOWER('%${query}%'))
           AND estado = 'Terminado'
+          ${from ? `AND fecha >= '${from.toISOString()}'` : ""}
+          ${to ? `AND fecha <= '${to.toISOString()}'` : ""}
       )
       SELECT
         COUNT(*) as count 

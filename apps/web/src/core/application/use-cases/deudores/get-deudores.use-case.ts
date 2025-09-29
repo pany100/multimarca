@@ -12,6 +12,8 @@ export class GetDeudoresUseCase {
       page,
       size,
       query: dto.query || "",
+      from: dto.from,
+      to: dto.to,
     });
   }
 }
