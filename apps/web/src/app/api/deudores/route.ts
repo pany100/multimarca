@@ -15,6 +15,12 @@ export async function GET(request: Request) {
         page: searchParams.get("page"),
         size: searchParams.get("size"),
         query: searchParams.get("query"),
+        from: searchParams.get("from")
+          ? new Date(searchParams.get("from") as string)
+          : undefined,
+        to: searchParams.get("to")
+          ? new Date(searchParams.get("to") as string)
+          : undefined,
       },
       listDeudoresQuerySchema
     );

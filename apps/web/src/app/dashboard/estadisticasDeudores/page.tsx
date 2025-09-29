@@ -1,20 +1,36 @@
 "use client";
 
 import DateRangeSearch from "@/components/dates/DateRangeSearch";
+import BarGraphic from "@/components/estadisticas/BarGraphic";
 import useFechaToRange from "@/hooks/dates/useFechaToRange";
 import useDeudores from "@/hooks/deudores/useDeudores";
-import { Box, Button, Grid, Paper, Typography, useTheme } from "@mui/material";
-import { useEffect, useState } from "react";
+import { Box, Grid, Paper, Typography, useTheme } from "@mui/material";
+import { useEffect, useMemo, useState } from "react";
 
 function EstadisticasDeudoresPage() {
   const [mes, setMes] = useState("");
   const [anio, setAnio] = useState("");
   const theme = useTheme();
   const { from, to } = useFechaToRange(mes, anio);
-  const { deudores, searchDeudores } = useDeudores();
+  const { deudores, searchDeudores, loading } = useDeudores();
+
   useEffect(() => {
     searchDeudores(from, to);
   }, [from, to, searchDeudores]);
+
+  const items = useMemo(
+    () =>
+      Array.isArray(deudores)
+        ? deudores.map((d) => ({
+            label: d.cliente_nombre || "Cliente",
+            value: d.deuda_total || 0,
+          }))
+        : [],
+    [deudores]
+  );
+
+  const hayDatos = items.length > 0;
+
   return (
     <Box sx={{ p: 3 }}>
       <Box
@@ -41,12 +57,33 @@ function EstadisticasDeudoresPage() {
         >
           <Grid container spacing={2} alignItems="center">
             <DateRangeSearch setMes={setMes} setAnio={setAnio} />
-            <Grid item xs={12} sm={6} md={3}>
-              <Button variant="contained" onClick={() => {}} fullWidth>
-                Actualizar
-              </Button>
-            </Grid>
           </Grid>
+        </Paper>
+
+        <Paper elevation={0} sx={{ borderRadius: 2, p: 2 }}>
+          {hayDatos || loading ? (
+            <BarGraphic
+              data={items}
+              title="Deuda total por cliente"
+              currency="ARS"
+              height={420}
+              maxWidth={1100}
+              loading={loading}
+              // color="rgba(75, 192, 192, 0.7)"
+              // borderColor="rgba(75, 192, 192, 1)"
+            />
+          ) : (
+            <Box
+              display="flex"
+              justifyContent="center"
+              alignItems="center"
+              height="200px"
+            >
+              <Typography color="text.secondary">
+                Sin datos disponibles
+              </Typography>
+            </Box>
+          )}
         </Paper>
       </Box>
     </Box>
