@@ -1,69 +1,73 @@
-import { FormControl, Grid, InputLabel, MenuItem, Select } from "@mui/material";
+import { Stack } from "@mui/material";
+import {
+  DateValidationError,
+  PickerChangeHandlerContext,
+} from "@mui/x-date-pickers";
+import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import { PickerValue } from "@mui/x-date-pickers/internals";
+import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { Dispatch, SetStateAction } from "react";
 
 type Props = {
-  setMes: Dispatch<SetStateAction<string>>;
-  setAnio: Dispatch<SetStateAction<string>>;
+  setFrom: Dispatch<SetStateAction<Date | null>>;
+  setTo: Dispatch<SetStateAction<Date | null>>;
 };
 
-function DateRangeSearch({ setMes, setAnio }: Props) {
-  const meses = [
-    { valor: "1", nombre: "Enero" },
-    { valor: "2", nombre: "Febrero" },
-    { valor: "3", nombre: "Marzo" },
-    { valor: "4", nombre: "Abril" },
-    { valor: "5", nombre: "Mayo" },
-    { valor: "6", nombre: "Junio" },
-    { valor: "7", nombre: "Julio" },
-    { valor: "8", nombre: "Agosto" },
-    { valor: "9", nombre: "Septiembre" },
-    { valor: "10", nombre: "Octubre" },
-    { valor: "11", nombre: "Noviembre" },
-    { valor: "12", nombre: "Diciembre" },
-  ];
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: currentYear - 2023 + 1 }, (_, i) =>
-    (2023 + i).toString()
-  );
+function DateRangeSearch({ setFrom, setTo }: Props) {
+  const handleDateChange = (
+    value: PickerValue,
+    context: PickerChangeHandlerContext<DateValidationError>,
+    setDate: Dispatch<SetStateAction<Date | null>>
+  ) => {
+    if (context.validationError) {
+      return; // No actualizar si hay error de validación
+    }
+    // Convertir el valor a Date si es necesario
+    const dateValue =
+      value instanceof Date ? value : value && new Date(value.toString());
+    setDate(dateValue);
+  };
+
   return (
-    <>
-      <Grid item xs={12} sm={6} md={3}>
-        <FormControl fullWidth size="small">
-          <InputLabel>Mes</InputLabel>
-          <Select
-            label="Mes"
-            onChange={(e) => setMes(e.target.value as string)}
-          >
-            <MenuItem value="">
-              <em>Todos los meses</em>
-            </MenuItem>
-            {meses.map((mes) => (
-              <MenuItem key={mes.valor} value={mes.valor}>
-                {mes.nombre}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Grid>
-      <Grid item xs={12} sm={6} md={3}>
-        <FormControl fullWidth size="small">
-          <InputLabel>Año</InputLabel>
-          <Select
-            label="Año"
-            onChange={(e) => setAnio(e.target.value as string)}
-          >
-            <MenuItem value="">
-              <em>Todos los años</em>
-            </MenuItem>
-            {years.map((year) => (
-              <MenuItem key={year} value={year}>
-                {year}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-      </Grid>
-    </>
+    <LocalizationProvider dateAdapter={AdapterDateFns}>
+      <Stack direction="row" spacing={1} alignItems="center">
+        <DatePicker
+          label="Desde"
+          onChange={(value, context) =>
+            handleDateChange(value, context, setFrom)
+          }
+          format="dd-MM-yyyy"
+          slotProps={{
+            textField: {
+              size: "small",
+              sx: {
+                width: 200,
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "background.paper",
+                },
+              },
+            },
+          }}
+        />
+        <DatePicker
+          label="Hasta"
+          onChange={(value, context) => handleDateChange(value, context, setTo)}
+          format="dd-MM-yyyy"
+          slotProps={{
+            textField: {
+              size: "small",
+              sx: {
+                width: 200,
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "background.paper",
+                },
+              },
+            },
+          }}
+        />
+      </Stack>
+    </LocalizationProvider>
   );
 }
 

@@ -7,7 +7,7 @@ import { useMemo } from "react";
  * - `from` is set to the first day of the month at 00:00:00.000
  * - `to` is set to the last day of the month at 23:59:59.999
  */
-function useFechaToRange(
+function useMonthYearToRange(
   mes: number | string | undefined | null,
   anio?: number | string | undefined | null
 ): { from: Date | undefined; to: Date | undefined } {
@@ -19,7 +19,7 @@ function useFechaToRange(
       if (anio !== undefined && anio !== null && anio !== "") {
         const yearNumber = typeof anio === "string" ? parseInt(anio, 10) : anio;
         if (Number.isNaN(yearNumber)) {
-          throw new Error("useFechaToRange: 'anio' inválido");
+          throw new Error("useMonthYearToRange: 'anio' inválido");
         }
         const from = new Date(yearNumber, 0, 1, 0, 0, 0, 0); // Jan 1
         const to = new Date(yearNumber, 11, 31, 23, 59, 59, 999); // Dec 31
@@ -30,7 +30,7 @@ function useFechaToRange(
 
     const monthNumber = typeof mes === "string" ? parseInt(mes, 10) : mes;
     if (Number.isNaN(monthNumber) || monthNumber < 1 || monthNumber > 12) {
-      throw new Error("useFechaToRange: 'mes' debe estar entre 1 y 12");
+      throw new Error("useMonthYearToRange: 'mes' debe estar entre 1 y 12");
     }
 
     const currentYear = new Date().getFullYear();
@@ -42,7 +42,7 @@ function useFechaToRange(
         : anio;
 
     if (Number.isNaN(yearNumber)) {
-      throw new Error("useFechaToRange: 'anio' inválido");
+      throw new Error("useMonthYearToRange: 'anio' inválido");
     }
 
     const monthIndex = monthNumber - 1; // JS Date uses 0-11 for months
@@ -57,4 +57,4 @@ function useFechaToRange(
   return range;
 }
 
-export default useFechaToRange;
+export default useMonthYearToRange;

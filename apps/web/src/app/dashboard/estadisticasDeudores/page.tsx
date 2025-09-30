@@ -1,8 +1,8 @@
 "use client";
 
-import DateRangeSearch from "@/components/dates/DateRangeSearch";
+import MonthYearRangeSearch from "@/components/dates/MonthYearRangeSearch";
 import BarGraphic from "@/components/estadisticas/BarGraphic";
-import useFechaToRange from "@/hooks/dates/useFechaToRange";
+import useMonthYearToRange from "@/hooks/dates/useMonthYearToRange";
 import useDeudores from "@/hooks/deudores/useDeudores";
 import { Box, Grid, Paper, Typography, useTheme } from "@mui/material";
 import { useEffect, useMemo, useState } from "react";
@@ -11,7 +11,7 @@ function EstadisticasDeudoresPage() {
   const [mes, setMes] = useState("");
   const [anio, setAnio] = useState("");
   const theme = useTheme();
-  const { from, to } = useFechaToRange(mes, anio);
+  const { from, to } = useMonthYearToRange(mes, anio);
   const { deudores, searchDeudores, loading } = useDeudores();
 
   useEffect(() => {
@@ -56,7 +56,7 @@ function EstadisticasDeudoresPage() {
           }}
         >
           <Grid container spacing={2} alignItems="center">
-            <DateRangeSearch setMes={setMes} setAnio={setAnio} />
+            <MonthYearRangeSearch setMes={setMes} setAnio={setAnio} />
           </Grid>
         </Paper>
 
