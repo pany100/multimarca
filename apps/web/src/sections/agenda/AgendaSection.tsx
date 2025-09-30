@@ -55,9 +55,10 @@ interface RecordatorioAgenda {
 
 type props = {
   general?: boolean;
+  title: string;
 };
 
-export default function AgendaSection({ general = true }: props) {
+export default function AgendaSection({ general = true, title }: props) {
   const theme = useTheme();
   const { authFetch } = useFetch();
 
@@ -416,7 +417,7 @@ export default function AgendaSection({ general = true }: props) {
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
       <Box sx={{ p: 3, width: "100%" }}>
         <Typography variant="h4" gutterBottom>
-          Agenda General
+          {title}
         </Typography>
         {/* Navegación del mes */}
         <Paper

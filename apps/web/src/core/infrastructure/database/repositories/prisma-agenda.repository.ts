@@ -15,6 +15,7 @@ export class PrismaAgendaRepository implements AgendaRepository {
     year,
     onlyPending,
     general,
+    userId,
   }: ListAgendaParams) {
     const where: any = {
       OR: [
@@ -35,6 +36,7 @@ export class PrismaAgendaRepository implements AgendaRepository {
       where.general = true;
     } else {
       where.general = false;
+      where.userId = userId;
     }
 
     const skip = page * size;

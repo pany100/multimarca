@@ -11,6 +11,9 @@ import { getCurrentUser } from "src/utils/authFetch";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
+    const user = await getCurrentUser(request);
+    if (!user)
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
     const useCase = new ListAgendaUseCase(
       new AgendaService(new PrismaAgendaRepository())
@@ -24,6 +27,7 @@ export async function GET(request: Request) {
       year: searchParams.get("year"),
       onlyPending: searchParams.get("onlyPending") === "true",
       general: searchParams.get("general") === "true",
+      userId: user.id,
     });
 
     return NextResponse.json(result, { status: 200 });
