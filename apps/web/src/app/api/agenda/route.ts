@@ -23,6 +23,7 @@ export async function GET(request: Request) {
       month: searchParams.get("month"),
       year: searchParams.get("year"),
       onlyPending: searchParams.get("onlyPending") === "true",
+      general: searchParams.get("general") === "true",
     });
 
     return NextResponse.json(result, { status: 200 });
@@ -33,6 +34,8 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+
     const user = await getCurrentUser(request);
     if (!user)
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -44,7 +47,11 @@ export async function POST(request: Request) {
       new AgendaService(new PrismaAgendaRepository())
     );
 
-    const created = await useCase.execute({ ...dto, userId: user.id });
+    const created = await useCase.execute({
+      ...dto,
+      userId: user.id,
+      general: searchParams.get("general") === "true",
+    });
     return NextResponse.json(created, { status: 201 });
   } catch (e) {
     return handleApiError(e);

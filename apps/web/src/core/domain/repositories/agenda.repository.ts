@@ -5,7 +5,7 @@ export type ListAgendaParams = {
   month?: number; // 1..12
   year?: number; // yyyy
   onlyPending?: boolean;
-  userId?: number;
+  general: boolean;
 };
 
 export type CreateAgendaInput = {
@@ -14,6 +14,7 @@ export type CreateAgendaInput = {
   fecha: Date;
   hecho?: boolean;
   userId: number;
+  general: boolean;
 };
 
 export interface AgendaRepository {

@@ -14,7 +14,7 @@ export class PrismaAgendaRepository implements AgendaRepository {
     month,
     year,
     onlyPending,
-    userId,
+    general,
   }: ListAgendaParams) {
     const where: any = {
       OR: [
@@ -31,7 +31,11 @@ export class PrismaAgendaRepository implements AgendaRepository {
 
     if (onlyPending) where.hecho = false;
 
-    if (userId) where.userId = userId;
+    if (general) {
+      where.general = true;
+    } else {
+      where.general = false;
+    }
 
     const skip = page * size;
     const [items, total] = await Promise.all([

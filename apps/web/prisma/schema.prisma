@@ -723,6 +723,7 @@ model RecordatorioAgenda {
   fecha       DateTime
   hecho       Boolean  @default(false)
   user        Usuario? @relation(fields: [userId], references: [id])
+  general     Boolean  @default(true)
 
   @@index([fecha])
   @@index([userId], map: "RecordatorioAgenda_userId_fkey")

@@ -11,7 +11,7 @@ export class ListAgendaUseCase {
     month?: number | string | null;
     year?: number | string | null;
     onlyPending?: boolean;
-    userId?: number;
+    general: boolean;
   }) {
     const { page, size } = normalizePageSize(params.page, params.size);
     const query = params.query ?? "";
@@ -25,7 +25,7 @@ export class ListAgendaUseCase {
       month,
       year,
       onlyPending,
-      userId: params.userId,
+      general: params.general,
     });
   }
 }

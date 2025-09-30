@@ -9,6 +9,7 @@ export class CreateAgendaUseCase {
     fecha: string | Date;
     hecho?: boolean;
     userId: number;
+    general: boolean;
   }) {
     const fechaDate = new Date(input.fecha);
     if (Number.isNaN(fechaDate.getTime())) {
@@ -21,6 +22,7 @@ export class CreateAgendaUseCase {
       fecha: fechaDate,
       hecho: Boolean(input.hecho),
       userId: input.userId,
+      general: input.general,
     });
   }
 }
