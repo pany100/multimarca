@@ -69,8 +69,6 @@ function EstadisticasDeudoresPage() {
               height={420}
               maxWidth={1100}
               loading={loading}
-              // color="rgba(75, 192, 192, 0.7)"
-              // borderColor="rgba(75, 192, 192, 1)"
             />
           ) : (
             <Box

@@ -1,5 +1,6 @@
 import {
   balanceGeneralQuerySchema,
+  dateRangeSchema,
   getAutosQuerySchema,
   getByFechaQuerySchema,
   mecanicosQuerySchema,
@@ -10,3 +11,4 @@ export type GetAutosDto = z.infer<typeof getAutosQuerySchema>;
 export type BalanceGeneralDto = z.infer<typeof balanceGeneralQuerySchema>;
 export type MecanicosDto = z.infer<typeof mecanicosQuerySchema>;
 export type GetByFechaDto = z.infer<typeof getByFechaQuerySchema>;
+export type DateRangeDto = z.infer<typeof dateRangeSchema>;
