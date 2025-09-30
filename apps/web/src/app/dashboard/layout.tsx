@@ -316,9 +316,15 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "Agenda",
-            texto: "Agenda",
+            texto: "Agenda General",
             icono: <DateRangeIcon />,
             ruta: "/dashboard/agenda",
+          },
+          {
+            permiso: "Agenda",
+            texto: "Agenda Individual",
+            icono: <DateRangeIcon />,
+            ruta: "/dashboard/agenda-individual",
           },
           {
             permiso: "Agenda",

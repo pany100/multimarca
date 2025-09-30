@@ -412,7 +412,7 @@ export default function AgendaPage() {
     <LocalizationProvider dateAdapter={AdapterDateFns} adapterLocale={es}>
       <Box sx={{ p: 3, width: "100%" }}>
         <Typography variant="h4" gutterBottom>
-          Agenda
+          Agenda General
         </Typography>
         {/* Navegación del mes */}
         <Paper

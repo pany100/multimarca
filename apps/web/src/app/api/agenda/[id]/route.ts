@@ -7,6 +7,7 @@ import { updateAgendaSchema } from "@/core/infrastructure/validation/schemas/age
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { parseIdParam } from "@/shared/utils/params";
+import { getCurrentUser } from "@/utils/authFetch";
 import { NextResponse } from "next/server";
 
 function buildService() {
@@ -15,11 +16,16 @@ function buildService() {
 
 export async function GET(
   _req: Request,
+  request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
+    const user = await getCurrentUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
     const id = parseIdParam(params.id);
-    const data = await new GetAgendaUseCase(buildService()).execute(id);
+    const data = await new GetAgendaUseCase(buildService()).execute(id, user);
     return NextResponse.json(data, { status: 200 });
   } catch (e) {
     return handleApiError(e);
@@ -31,12 +37,20 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
+    const user = await getCurrentUser(request);
+    if (!user) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
     const id = parseIdParam(params.id);
     const body = await request.json();
     const dto = await validateRequest(body, updateAgendaSchema);
 
     // si querés exigir título en update, dejalo en schema .min(1) sin .optional()
-    const data = await new UpdateAgendaUseCase(buildService()).execute(id, dto);
+    const data = await new UpdateAgendaUseCase(buildService()).execute(
+      id,
+      dto,
+      user
+    );
     return NextResponse.json(data, { status: 200 });
   } catch (e) {
     return handleApiError(e);
@@ -48,8 +62,13 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
+    const user = await getCurrentUser(_req);
+    if (!user) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+
     const id = parseIdParam(params.id);
-    await new DeleteAgendaUseCase(buildService()).execute(id);
+    await new DeleteAgendaUseCase(buildService()).execute(id, user);
     return NextResponse.json(
       { message: "Recordatorio eliminado correctamente" },
       { status: 200 }

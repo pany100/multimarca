@@ -5,6 +5,7 @@ export type ListAgendaParams = {
   month?: number; // 1..12
   year?: number; // yyyy
   onlyPending?: boolean;
+  userId?: number;
 };
 
 export type CreateAgendaInput = {

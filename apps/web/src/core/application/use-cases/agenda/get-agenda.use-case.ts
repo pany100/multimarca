@@ -2,9 +2,23 @@ import { AgendaService } from "@/core/application/services/agenda.service";
 
 export class GetAgendaUseCase {
   constructor(private readonly service: AgendaService) {}
-  async execute(id: number) {
+  async execute(
+    id: number,
+    user?: {
+      id: number;
+      rol: {
+        id: number;
+      };
+    }
+  ) {
     const item = await this.service.findById(id);
     if (!item) throw new Error("Recordatorio no encontrado");
+    if (user) {
+      if (item.userId !== user.id && user.rol.id !== 1) {
+        throw new Error("No autorizado");
+      }
+    }
+
     return item;
   }
 }
