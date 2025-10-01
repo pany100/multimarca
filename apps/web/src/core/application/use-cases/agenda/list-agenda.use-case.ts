@@ -12,7 +12,7 @@ export class ListAgendaUseCase {
     year?: number | string | null;
     onlyPending?: boolean;
     general: boolean;
-    userId: string;
+    userId: number;
   }) {
     const { page, size } = normalizePageSize(params.page, params.size);
     const query = params.query ?? "";
