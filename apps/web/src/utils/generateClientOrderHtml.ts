@@ -356,17 +356,15 @@ export default function generateClientOrderHtml(repair: any): string {
             (el: {
               stock: { id: number; name: string };
               precioVenta: number;
+              unidadesConsumidas: number;
             }) => `
                 <div class="TypographyBody1">
-                  ${el.stock.name}
+                  ${el.stock.name} - ${el.unidadesConsumidas} unidades
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(
-                    calcularPrecioFinal(
-                      el.precioVenta,
-                      repair.porcentajeRecargo
-                    )
-                  ).toLocaleString("es-AR")}
+                  $${Number(calcularPrecioFinal(el.precioVenta)).toLocaleString(
+                    "es-AR"
+                  )}
                 </div>
             `
           )
@@ -409,8 +407,9 @@ export default function generateClientOrderHtml(repair: any): string {
               <div class="TypographyBody1" style="margin-top: 20px;">
                 Descuento
                 ${
-                  repair.descripcionDescuento &&
-                  `${repair.descripcionDescuento}`
+                  repair.descripcionDescuento
+                    ? ` - ${repair.descripcionDescuento}`
+                    : ""
                 }
               </div>
               <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">

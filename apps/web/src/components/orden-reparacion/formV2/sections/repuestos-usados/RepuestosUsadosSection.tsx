@@ -27,14 +27,14 @@ function RepuestosUsadosSection() {
     <ModalProvider>
       <FormDataArrayWithModal
         fieldName="repuestosUsados"
-        columns={getRepuestosUsadosTableColumns(porcentajeRecargo)}
+        columns={getRepuestosUsadosTableColumns()}
         form={RepuestosUsadosInnerForm}
         validateForm={validateRepuestosUsados}
         extraContent={
           <ResumenCostosFooter
             descripcion="Total Repuestos"
             total={getFormattedPrice(
-              calcularTotalRepuestos({ repuestosUsados, porcentajeRecargo })
+              calcularTotalRepuestos({ repuestosUsados })
             )}
           />
         }

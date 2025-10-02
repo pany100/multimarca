@@ -1,10 +1,7 @@
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { calcularPrecioFinal } from "@/utils/ordenHelper";
 import { GridColDef } from "@mui/x-data-grid";
 
-export const getRepuestosUsadosTableColumns = (
-  porcentajeRecargo?: number | string
-): GridColDef[] => [
+export const getRepuestosUsadosTableColumns = (): GridColDef[] => [
   {
     field: "stock",
     headerName: "Repuesto",
@@ -19,7 +16,7 @@ export const getRepuestosUsadosTableColumns = (
   },
   {
     field: "label",
-    headerName: "Label",
+    headerName: "Rótulo",
     flex: 1,
     valueFormatter: (value: { name: string }) => value?.name,
   },
@@ -30,25 +27,14 @@ export const getRepuestosUsadosTableColumns = (
     valueGetter: (value) => getFormattedPrice(value),
   },
   {
-    field: "precioVenta",
-    headerName: "Precio Venta",
-    flex: 1,
-    valueFormatter: (value) => getFormattedPrice(value),
-  },
-  {
     field: "unidadesConsumidas",
     headerName: "Unidades Consumidas",
     flex: 1,
   },
   {
-    field: "precioConRecargo",
-    headerName: `Precio con recargo (${porcentajeRecargo || 0}%)`,
+    field: "precioVenta",
+    headerName: "Precio Final",
     flex: 1,
-    renderCell: (params: any) => {
-      const precioVenta = params.row.precioVenta;
-      return getFormattedPrice(
-        calcularPrecioFinal(precioVenta, porcentajeRecargo)
-      );
-    },
+    valueFormatter: (value) => getFormattedPrice(value),
   },
 ];

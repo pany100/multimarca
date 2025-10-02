@@ -293,17 +293,15 @@ export default function generateBudgetHtml(repair: any): string {
             (el: {
               stock: { id: number; name: string };
               precioVenta: number;
+              unidadesConsumidas: number;
             }) => `
                 <div class="TypographyBody1">
-                  ${el.stock.name}
+                  ${el.stock.name} - ${el.unidadesConsumidas} unidades
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(
-                    calcularPrecioFinal(
-                      el.precioVenta,
-                      repair.porcentajeRecargo
-                    )
-                  ).toLocaleString("es-AR")}
+                  $${Number(calcularPrecioFinal(el.precioVenta)).toLocaleString(
+                    "es-AR"
+                  )}
                 </div>
             `
           )

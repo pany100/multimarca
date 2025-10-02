@@ -24,7 +24,6 @@ function calcularTotalRepuestos(ordenReparacion: {
     precioVenta: number;
     unidadesConsumidas: number;
   }[];
-  porcentajeRecargo?: number;
 }): string {
   if (!ordenReparacion.repuestosUsados) {
     return "0";
@@ -33,10 +32,7 @@ function calcularTotalRepuestos(ordenReparacion: {
     .reduce(
       (total, repuesto) =>
         total +
-        calcularPrecioFinal(
-          parseFloat(repuesto.precioVenta.toString()),
-          ordenReparacion.porcentajeRecargo
-        ),
+        calcularPrecioFinal(parseFloat(repuesto.precioVenta.toString())),
       0
     )
     .toFixed(2);
