@@ -20,7 +20,7 @@ export class UpdateAgendaUseCase {
   ) {
     const existing = await this.service.findById(id);
     if (!existing) throw new Error("Recordatorio no encontrado");
-    if (existing.userId !== user.id && user.rol.id !== 1) {
+    if (!existing.general && existing.userId !== user.id && user.rol.id !== 1) {
       throw new Error("No tienes permiso");
     }
     // reglas de negocio adicionales acá si hiciera falta
