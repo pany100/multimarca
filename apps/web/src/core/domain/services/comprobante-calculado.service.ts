@@ -34,12 +34,7 @@ export class ComprobanteCalculado {
 
   get totalRepuestos() {
     return this.repuestos.reduce(
-      (acc, r) =>
-        acc +
-        this.calcularPrecioFinal(
-          r.precioVenta.toNumber(),
-          this.ajustes.porcentajeRecargo
-        ),
+      (acc, r) => acc + this.calcularPrecioFinal(r.precioVenta.toNumber(), 0),
       0
     );
   }

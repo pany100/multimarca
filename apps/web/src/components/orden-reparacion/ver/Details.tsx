@@ -223,11 +223,7 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
                   <TableCell sx={{ fontWeight: 500 }}>Rótulo</TableCell>
                   <TableCell sx={{ fontWeight: 500 }}>Cantidad</TableCell>
                   <TableCell align="right" sx={{ fontWeight: 500 }}>
-                    Precio
-                  </TableCell>
-                  <TableCell align="right" sx={{ fontWeight: 500 }}>
-                    Precio Con recargo ({ordenReparacion.porcentajeRecargo || 0}
-                    %)
+                    Precio Total
                   </TableCell>
                 </TableRow>
               </TableHead>
@@ -259,14 +255,6 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
                       <TableCell>{repuesto.unidadesConsumidas || 0}</TableCell>
                       <TableCell align="right">
                         {getFormattedPrice(repuesto.precioVenta)}
-                      </TableCell>
-                      <TableCell align="right">
-                        {getFormattedPrice(
-                          calcularPrecioFinal(
-                            repuesto.precioVenta,
-                            ordenReparacion.porcentajeRecargo
-                          )
-                        )}
                       </TableCell>
                     </TableRow>
                   )
