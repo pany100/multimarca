@@ -23,9 +23,12 @@ export class UltimaSemanaUseCase {
       // Procesar cada reparación
       const reparaciones = reparacionesUnicoMecanico.map((orden: any) => {
         // Calcular mano de obra total
-        const manoDeObra = orden.trabajosRealizados.reduce(
-          (total: number, trabajo: any) =>
-            total + Number(trabajo.precioUnitario),
+        const manoDeObra = Math.max(
+          orden.trabajosRealizados.reduce(
+            (total: number, trabajo: any) =>
+              total + Number(trabajo.precioUnitario),
+            0
+          ) - orden.descuento,
           0
         );
 
@@ -43,8 +46,7 @@ export class UltimaSemanaUseCase {
       });
       // Calcular totales
       const manoDeObraTotal = reparaciones.reduce(
-        (total: number, reparacion: any) =>
-          total + reparacion.manoDeObra - reparacion.descuento,
+        (total: number, reparacion: any) => total + reparacion.manoDeObra,
         0
       );
 

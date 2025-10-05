@@ -89,8 +89,11 @@ export async function GET(
     const reparaciones = await Promise.all(
       filteredOrdenes.map(async (orden) => {
         // Calculate total manoDeObra for this repair order
-        const manoDeObra = orden.trabajosRealizados.reduce(
-          (total, trabajo) => total + Number(trabajo.precioUnitario),
+        const manoDeObra = Math.max(
+          orden.trabajosRealizados.reduce(
+            (total, trabajo) => total + Number(trabajo.precioUnitario),
+            0
+          ) - Number(orden.descuento),
           0
         );
 
