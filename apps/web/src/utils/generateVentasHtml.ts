@@ -1,95 +1,97 @@
 import {
+  calcularManoDeObra,
   calcularPrecioFinal,
   calcularTotalOrdenReparacion,
 } from "./ordenHelper";
 
 export default function generateClientOrderHtml(venta: any): string {
   return `
-  <!DOCTYPE html>
-
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <style>
-      @media print {
-        @page {
-          margin: 10mm;
-          margin-bottom: 13mm;
+    <!DOCTYPE html>
+  
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        @media print {
+          @page {
+            margin: 10mm;
+            margin-bottom: 13mm;
+          }
+          .pagebreak {
+            clear: both;
+            page-break-after: always;
+          }
         }
-        .pagebreak {
-          clear: both;
-          page-break-after: always;
+        .PDFPage {
+          height: 1130px;
+          width: 800px;
         }
-      }
-      .PDFPage {
-        height: 1130px;
-        width: 800px;
-      }
-      .PDFHeader {
-        display: grid;
-        grid-gap: 20px;
-        grid-template-columns: 170px auto;
-        margin-bottom: 10px;
-        
-        .TypographyH5 {
+        .PDFHeader {
+          display: grid;
+          grid-gap: 20px;
+          grid-template-columns: 170px auto;
+          margin-bottom: 10px;
+          
+          .TypographyH5 {
+            margin: 0;
+            font-family: Inter, sans-serif;
+            font-size: 24px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: black;
+            line-height: 32.016px;
+            letter-spacing: 0;
+          }
+        }
+        .TypographyBody2 {
+          margin: 0;
+          font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+          font-size: 14px;
+          font-weight: 400;
+          color: black;
+          line-height:  20.02px;
+          letter-spacing: 0.15px;
+        }
+        .TypographyBody1 {
           margin: 0;
           font-family: Inter, sans-serif;
-          font-size: 24px;
-          font-weight: 600;
-          text-transform: uppercase;
-          color: black;
-          line-height: 32.016px;
-          letter-spacing: 0;
+          font-weight: 400;
+          font-size: 1rem;
+          line-height: 1.1;
+          letter-spacing: 0.00938em;
+          color: #000;
         }
-      }
-      .TypographyBody2 {
-        margin: 0;
-        font-family: "Roboto", "Helvetica", "Arial", sans-serif;
-        font-size: 14px;
-        font-weight: 400;
-        color: black;
-        line-height:  20.02px;
-        letter-spacing: 0.15px;
-      }
-      .TypographyBody1 {
-        margin: 0;
-        font-family: Inter, sans-serif;
-        font-weight: 400;
-        font-size: 1rem;
-        line-height: 1.1;
-        letter-spacing: 0.00938em;
-        color: #000;
-      }
-      .Typography {
-        margin: 0;
-         font-family: Inter, sans-serif;
-        font-size: 16px;
-        font-weight: 400;
-        color: black;
-        line-height: 24px;
-        letter-spacing: 0.15px;
-      }
-      .divider {
-        border-bottom-width: 1px;
-        border-color: #000;
-        flex-shrink: 0;
-        border-width: 1px;
-        border-style: solid;
-        margin-bottom: 5px;
-        margin-top: 5px;
-      }
-      .TypographyH6 {
-        margin: 0;
-        font-family: Inter, sans-serif;
-        font-weight: 500;
-        font-size: 1.25rem;
-        line-height: 1.6;
-        letter-spacing: 0.0075em;
-        color: #000;
-      }
-    </style>
-  </head>
-  <html>
+        .Typography {
+          margin: 0;
+           font-family: Inter, sans-serif;
+          font-size: 16px;
+          font-weight: 400;
+          color: black;
+          line-height: 24px;
+          letter-spacing: 0.15px;
+        }
+        .divider {
+          border-bottom-width: 1px;
+          border-color: #000;
+          flex-shrink: 0;
+          border-width: 1px;
+          border-style: solid;
+          margin-bottom: 5px;
+          margin-top: 5px;
+        }
+        .TypographyH6 {
+          margin: 0;
+          font-family: Inter, sans-serif;
+          font-weight: 500;
+          font-size: 1.25rem;
+          line-height: 1.6;
+          letter-spacing: 0.0075em;
+          color: #000;
+        }
+      </style>
+    </head>
+    <html>
+    
     <body>
       <div class="PDFPage">
         <div class="PDFHeader">
@@ -151,22 +153,15 @@ export default function generateClientOrderHtml(venta: any): string {
             display: grid;
             grid-template-columns: 1fr 1fr;
           '>
-            <h4 style='
-              margin: 0;
-              margin-bottom: 5px;
-              font-family: Inter, sans-serif;
-              font-weight: 400;
-              font-size: 1.5rem;
-              line-height: 1.334;
-              letter-spacing: 0em;
-              color: #000;
-            '>
-              ${venta.estado === "Presupuestado" ? "Presupuesto #" : "Venta #"}
-              ${venta.id}
-            </h4>
           </div>
           <div style="display: grid;">
-            <div class="TypographyBody1" style="margin-bottom: 3px;">
+            <div class="TypographyBody1">
+                Venta Nro: ${venta.id}
+            </div>
+            <div class="TypographyBody1">
+              Cliente: ${venta.cliente?.fullName || venta.informacionCliente}
+            </div>
+            <div class="TypographyBody1">
               Fecha:
               ${
                 venta.fecha
@@ -174,206 +169,168 @@ export default function generateClientOrderHtml(venta: any): string {
                   : "-"
               }
             </div>
-            <div class="TypographyBody1" style="margin-bottom: 3px;">
-              Cliente: ${venta.cliente?.fullName || venta.informacionCliente}
-            </div>
           </div>
         </div>
-        <hr class="divider" style="margin-top: 10px; margin-bottom: 10px;"/>
-        <div>
-          <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
-            Repuestos Usados
-          </div>
-          ${
-            venta.repuestosUsados.length > 0
-              ? `
-            <div style='
-              display: grid;
-              grid-template-columns: 1fr 1fr 1fr;
-              margin-top: 10px;
-              width: 100%;
-          '>
-            <div class="TypographyBody1" style="font-weight: bold; margin-bottom: 4px;">
-              Repuesto
-            </div>
-            <div class="TypographyBody1" style="text-align: right;font-weight: bold; margin-bottom: 4px;">
-              Cantidad
-            </div>
-            <div class="TypographyBody1" style="text-align: right;font-weight: bold; margin-bottom: 4px;">
-              Importe
-            </div>
-            ${venta.repuestosUsados
-              .map(
-                (el: {
-                  stock: { id: number; name: string };
-                  precioVenta: number;
-                  unidadesConsumidas: number;
-                }) => `
-                    <div class="TypographyBody1" style="margin-bottom: 4px;">
-                      ${el.stock.name}
-                    </div>
-                    <div class="TypographyBody1" style="text-align: right;margin-bottom: 4px;">
-                      ${el.unidadesConsumidas}
-                    </div>
-                    <div class="TypographyBody1" style="text-align: right;margin-bottom: 4px;">
-                      $${Number(
-                        calcularPrecioFinal(
-                          el.precioVenta,
-                          venta.porcentajeRecargo
-                        )
-                      ).toLocaleString("es-AR")}
-                    </div>
-                `
-              )
-              .join("")}
-          </div>`
-              : `<div>No hay repuestos usados registrados</div>`
-          }
-        </div>
-        <hr class="divider" style="margin-top: 10px; margin-bottom: 10px;"/>
-        <div>
-          <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
-            Reparaciones de Terceros
-          </div>
-          ${
-            venta.reparacionesDeTercero.length > 0
-              ? `
-            <div style='
-              display: grid;
-              grid-template-columns: 1fr 1fr;
-              margin-top: 10px;
-              width: 100%;
-            '>
-              <div class="TypographyBody1" style="font-weight: bold; margin-bottom: 4px;">
-                Nombre
-              </div>
-              <div class="TypographyBody1" style="text-align: right;font-weight: bold; margin-bottom: 4px;">
-                Importe
-              </div>
-              ${venta.reparacionesDeTercero
-                .map(
-                  (el: {
-                    nombre: string;
-                    proveedor: { name: string };
-                    precioVenta: number;
-                  }) => `
-                      <div class="TypographyBody1" style="margin-bottom: 4px;">
-                        ${el.nombre}
-                      </div>
-                      <div class="TypographyBody1" style="text-align: right;margin-bottom: 4px;">
-                        $${Number(
-                          calcularPrecioFinal(
-                            el.precioVenta,
-                            venta.porcentajeRecargo
-                          )
-                        ).toLocaleString("es-AR")}
-                      </div>
-                  `
-                )
-                .join("")}
-            </div>`
-              : `<div>No hay reparaciones de tercero registradas</div>`
-          }
-        </div>
-        <hr class="divider" style="margin-top: 10px; margin-bottom: 10px;"/>
-        <div>
-          <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
-            Trabajos Realizados
-          </div>
-          ${
-            venta.trabajosRealizados.length > 0
-              ? `
-          <div style='
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            margin-top: 10px;
-            width: 100%;
-          '>
-            <div class="TypographyBody1" style="font-weight: bold; margin-bottom: 4px;">
-              Descripción
-            </div>
-            <div class="TypographyBody1" style="text-align: right;font-weight: bold; margin-bottom: 4px;">
-              Importe
-            </div>
-            ${venta.trabajosRealizados
-              .map(
-                (el: { descripcion: string; precioUnitario: number }) => `
-                    <div class="TypographyBody1" style="margin-bottom: 4px;">
-                      ${el.descripcion}
-                    </div>
-                    <div class="TypographyBody1" style="text-align: right;margin-bottom: 4px;">
-                      $${Number(el.precioUnitario).toLocaleString("es-AR")}
-                    </div>
-                `
-              )
-              .join("")}
-          </div>`
-              : `<div>No hay trabajos realizados registrados</div>`
-          }
-        </div>
-        ${
-          venta.descuento > 0 || venta.incremento > 0
-            ? `
-          <hr class="divider" style="margin-top: 10px; margin-bottom: 10px;"/>
-          <div>
-            <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
-              Información Adicional
-            </div>
-        ${
-          venta.descuento > 0
-            ? `
-          <div style='
-            display: grid;
-            grid-template-columns: 80% 20%;
-          '>
-            <div class="TypographyBody1" style="margin-top: 20px;">
-              Descuento:
-              ${venta.descripcionDescuento && `${venta.descripcionDescuento}`}
-            </div>
-            <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
-              ${"- "}$${Number(venta.descuento).toLocaleString("es-AR")}
-            </div>
-          </div>
-          `
-            : ""
-        }
-        ${
-          venta.incremento > 0
-            ? `
-          <div style='
-            display: grid;
-            grid-template-columns: 80% 20%;
-          '>
-            <div class="TypographyBody1" style="margin-top: 20px;">
-              Incremento:
-              ${venta.descripcionIncremento && `${venta.descripcionIncremento}`}
-            </div>
-            <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
-              ${"+ "}$${Number(venta.incremento).toLocaleString("es-AR")}
-            </div>
-          </div>
-          `
-            : ""
-        }
-        </div>`
-            : ``
-        }
-        <hr class="divider" style="margin-top: 10px; margin-bottom: 30px;"/>
+        <hr class="divider" />
+  
         <div style='
+          display: grid;
+          grid-template-columns: 80% 20%;
+          margin-top: 5px;
+          margin-right: 15px;
+        '>
+          <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
+            Repuestos utilizados
+          </div>
+          <div class="TypographyBody1" style="text-align: right;font-weight: bold;">
+            Importe
+          </div>
+          ${venta.reparacionesDeTercero
+            .map(
+              (el: { nombre: string; precioVenta: number }) => `
+                  <div class="TypographyBody1">
+                    ${el.nombre}
+                  </div>
+                  <div class="TypographyBody1" style="text-align: right;">
+                    $${Number(
+                      calcularPrecioFinal(
+                        el.precioVenta,
+                        venta.porcentajeRecargo
+                      )
+                    ).toLocaleString("es-AR")}
+                  </div>
+                `
+            )
+            .join("")}
+          ${venta.repuestosUsados
+            .map(
+              (el: {
+                stock: { id: number; name: string };
+                precioVenta: number;
+                unidadesConsumidas: number;
+              }) => `
+                  <div class="TypographyBody1">
+                    ${el.stock.name} - ${el.unidadesConsumidas} unidades
+                  </div>
+                  <div class="TypographyBody1" style="text-align: right;">
+                    $${Number(
+                      calcularPrecioFinal(el.precioVenta)
+                    ).toLocaleString("es-AR")}
+                  </div>
+              `
+            )
+            .join("")}
+          </div>
+          <hr class="divider" style="border-color: rgba(0, 0, 0, 0.12);"/>
+          <div style='
             display: grid;
             grid-template-columns: 80% 20%;
+            margin-right: 15px;
           '>
-          <h2 style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
-            Total:
-          </h2>
-          <h2 style="text-align: right; margin-top: 1px; margin-bottom: 4px;">
+          <div class="TypographyBody1" style="font-weight: bold;">
+            Mano de Obra
+          </div>
+          <div class="TypographyBody1" style="text-align: right;">
+            $${(
+              calcularManoDeObra(venta.trabajosRealizados) +
+              Number(venta.incrementoInterno || 0)
+            ).toLocaleString("es-AR")}
+          </div>
+          ${
+            venta.incremento > 0
+              ? `
+              <div class="TypographyBody1" style="margin-top: 20px;">
+                Otros ${
+                  venta.descripcionIncremento
+                    ? `- ${venta.descripcionIncremento}`
+                    : ""
+                }
+              </div>
+              <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
+                $${Number(venta.incremento).toLocaleString("es-AR")}
+              </div>
+          `
+              : ""
+          }
+          ${
+            venta.descuento > 0
+              ? `
+                <div class="TypographyBody1" style="margin-top: 20px;">
+                  Descuento
+                  ${
+                    venta.descripcionDescuento
+                      ? ` - ${venta.descripcionDescuento}`
+                      : ""
+                  }
+                </div>
+                <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
+                  ${"- "}$${Number(venta.descuento).toLocaleString("es-AR")}
+                </div>
+            `
+              : ""
+          }
+          <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; margin-bottom: 20px;">
+            Importe Total:
+          </div>
+          <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; text-align: right;">        
             $${Number(calcularTotalOrdenReparacion(venta)).toLocaleString(
               "es-AR"
             )}
-          </h2>
+          </div>
         </div>
+               ${
+                 venta.ingresos && venta.ingresos.length > 0
+                   ? `
+          <div class="TypographyBody1" style="display: flex;
+            justify-content: space-between; margin-bottom: 20px; margin-right: 15px;">
+            <div style="font-weight: bold;">
+              Monto abonado: ${new Intl.NumberFormat("es-AR", {
+                style: "currency",
+                currency: "ARS",
+              }).format(
+                venta.ingresos.reduce((sum: number, ingreso: any) => {
+                  if (ingreso.moneda === "Dolar") {
+                    return (
+                      sum + Number(ingreso.monto) * Number(ingreso.dolar.blue)
+                    );
+                  }
+                  return sum + Number(ingreso.monto);
+                }, 0)
+              )}
+            </div>
+            ${(() => {
+              const faltaPagar =
+                Number(calcularTotalOrdenReparacion(venta)) -
+                (venta.ingresos
+                  ? venta.ingresos.reduce((sum: number, ingreso: any) => {
+                      if (ingreso.moneda === "Dolar") {
+                        return (
+                          sum +
+                          Number(ingreso.monto) * Number(ingreso.dolar.blue)
+                        );
+                      }
+                      return sum + Number(ingreso.monto);
+                    }, 0)
+                  : 0);
+
+              return faltaPagar > 0
+                ? `
+                <div style="font-weight: bold;">
+                  Falta pagar: ${new Intl.NumberFormat("es-AR", {
+                    style: "currency",
+                    currency: "ARS",
+                  }).format(faltaPagar)}
+                </div>
+              `
+                : "";
+            })()}
+          </div>
+              `
+                   : ""
+               }
       </div>
     </body>
-  </html>
-  `;
+    
+    </html>
+    `;
 }
