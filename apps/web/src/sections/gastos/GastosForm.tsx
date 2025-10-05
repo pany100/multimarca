@@ -37,7 +37,7 @@ export const schema = yup.object({
     then: (schema) => schema.required("El proveedor es requerido"),
     otherwise: (schema) => schema.nullable(),
   }),
-  tipoOperacionId: yup.number().required("El tipo de extracción es requerido"),
+  tipoOperacionId: yup.number().required("El tipo de operación es requerido"),
   ...getSchemaPropsForCheque("tipoOperacionId"),
 });
 
@@ -50,7 +50,7 @@ const GastosForm = () => {
   const { categorias } = useCategoriasGasto();
   const { searchProveedores, initialProveedor } = useProveedorAutocomplete();
   const { searchMecanicos, initialMecanico } = useMecanicoAutocomplete();
-
+  console.log(tiposOperacion);
   return (
     <>
       <Typography variant="h5" sx={{ mb: 2 }}>

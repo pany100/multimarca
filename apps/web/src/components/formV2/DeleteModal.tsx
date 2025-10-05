@@ -44,13 +44,18 @@ const DeleteModal = ({
       });
 
       if (!response.ok) {
-        throw new Error("Error al eliminar el elemento");
+        const errorMessage = await response.json();
+        setFeedback({
+          message: `Error al eliminar el elemento: ${errorMessage.error}`,
+          type: "error",
+        });
+      } else {
+        setFeedback({
+          type: "success",
+          message: "Elemento eliminado correctamente",
+        });
+        onSuccess();
       }
-      setFeedback({
-        type: "success",
-        message: "Elemento eliminado correctamente",
-      });
-      onSuccess();
       onClose();
     } catch (error) {
       setFeedback({

@@ -1,3 +1,7 @@
+import { DeleteTipoDeOperacionUseCase } from "@/core/application/use-cases/tipos-de-operacion/delete-tipo-de-operacion.use-case";
+import { TransaccionesQueriesService } from "@/core/infrastructure/database/queries/transacciones-queries.service";
+import { PrismaTipoDeOperacionRepository } from "@/core/infrastructure/database/repositories/prisma-tipo-de-operacion.repository";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -57,19 +61,15 @@ export async function DELETE(
   try {
     const id = parseInt(params.id);
 
-    await prisma.tipoDeOperacion.delete({
-      where: { id },
-    });
-
+    await new DeleteTipoDeOperacionUseCase(
+      new PrismaTipoDeOperacionRepository(),
+      new TransaccionesQueriesService()
+    ).execute(id);
     return NextResponse.json(
       { message: "Tipo de operación eliminado con éxito" },
       { status: 200 }
     );
-  } catch (error) {
-    console.error("Error deleting tipo de operación:", error);
-    return NextResponse.json(
-      { error: "Error al eliminar tipo de operación" },
-      { status: 500 }
-    );
+  } catch (e) {
+    return handleApiError(e);
   }
 }
