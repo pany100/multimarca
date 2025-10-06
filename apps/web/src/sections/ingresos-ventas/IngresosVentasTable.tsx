@@ -68,6 +68,9 @@ function IngresosVentasTable({
       flex: 1.5,
       renderCell: (params: any) => {
         const value = params.value;
+        if (value === null) {
+          return "No especificado";
+        }
         if (value.label === "Cheque" && params.row.chequeId) {
           const cheque = params.row.cheque;
           return (
