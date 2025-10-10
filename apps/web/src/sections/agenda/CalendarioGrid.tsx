@@ -4,7 +4,6 @@ import { useCalendarContext } from "./contexts/CalendarContext";
 
 function CalendarioGrid() {
   const { calendarGrid } = useCalendarContext();
-
   return (
     <>
       {calendarGrid.map((week, weekIndex) =>

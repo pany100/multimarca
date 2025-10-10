@@ -40,7 +40,7 @@ function useCalendar({ currentMonth }: Props) {
     // Colocar el día en la posición correcta de la semana
     currentWeek[weekdayIndex] = day;
   });
-
+  calendarGrid.push([...currentWeek]);
   return { calendarGrid };
 }
 
