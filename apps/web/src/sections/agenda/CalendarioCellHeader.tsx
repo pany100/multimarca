@@ -15,8 +15,8 @@ function CalendarioCellHeader({ day }: Props) {
   const { setIsModalOpen, setDay } = useAgendaUIContext();
 
   const handleCreateRecordatorio = (day: Date) => {
-    setDay(day);
     setCurrentRecordatorio(null);
+    setDay(day);
     setIsModalOpen(true);
   };
 

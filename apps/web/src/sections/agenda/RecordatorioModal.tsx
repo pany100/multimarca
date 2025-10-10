@@ -15,19 +15,13 @@ import { useCalendarContext } from "./contexts/CalendarContext";
 import useRecordatoriosHandlers from "./hooks/useRecordatoriosHandlers";
 
 function RecordatorioModal() {
-  const { isModalOpen, setIsModalOpen, loading } = useAgendaUIContext();
+  const { isModalOpen, setIsModalOpen, loading, day } = useAgendaUIContext();
   const { handleCreate, handleUpdate } = useRecordatoriosHandlers();
   const { currentRecordatorio } = useCalendarContext();
   const methods = useForm<UpdateAgendaSchema>({
     resolver: zodResolver(updateAgendaSchema),
   });
-  const {
-    handleSubmit,
-    formState: { errors },
-    watch,
-    reset,
-  } = methods;
-
+  const { handleSubmit, reset } = methods;
   useEffect(() => {
     if (currentRecordatorio) {
       reset({
@@ -40,11 +34,11 @@ function RecordatorioModal() {
       reset({
         titulo: "",
         descripcion: "",
-        fecha: new Date(),
+        fecha: day || new Date(),
         hecho: false,
       });
     }
-  }, [currentRecordatorio, reset]);
+  }, [currentRecordatorio, day, reset]);
 
   const onSubmit = (data: UpdateAgendaSchema) => {
     if (currentRecordatorio) {
