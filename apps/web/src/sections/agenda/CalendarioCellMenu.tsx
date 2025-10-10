@@ -3,12 +3,13 @@
 import { Delete as DeleteIcon, Edit as EditIcon } from "@mui/icons-material";
 import { Menu, MenuItem } from "@mui/material";
 import { useAgendaUIContext } from "./contexts/AgendaUIContext";
+import { useCalendarContext } from "./contexts/CalendarContext";
 import { useMenuUIContext } from "./contexts/MenuUIContext";
 
 function CalendarioCellMenu() {
   const { menuAnchorEl, setMenuAnchorEl } = useMenuUIContext();
-  const { currentRecordatorio, setIsModalOpen, setIsDeleteModalOpen } =
-    useAgendaUIContext();
+  const { setIsModalOpen, setIsDeleteModalOpen } = useAgendaUIContext();
+  const { currentRecordatorio } = useCalendarContext();
 
   // Handle menu close
   const handleMenuClose = () => {

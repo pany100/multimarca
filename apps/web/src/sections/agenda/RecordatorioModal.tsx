@@ -6,24 +6,15 @@ import {
   createAgendaSchema,
   CreateAgendaSchema,
 } from "../../core/infrastructure/validation/schemas/agenda.schema";
-import { RecordatorioAgenda } from "./hooks/useRecordatorios";
+import { useAgendaUIContext } from "./contexts/AgendaUIContext";
+import { useCalendarContext } from "./contexts/CalendarContext";
 
-type Props = {
-  isModalOpened: boolean;
-  setIsModalOpened: (value: boolean) => void;
-  currentEntity?: RecordatorioAgenda;
-  onSubmit: (data: CreateAgendaSchema) => void;
-};
-
-function RecordatorioModal({
-  isModalOpened,
-  setIsModalOpened,
-  currentEntity,
-  onSubmit,
-}: Props) {
+function RecordatorioModal() {
+  const { isModalOpen, setIsModalOpen } = useAgendaUIContext();
+  const { currentRecordatorio } = useCalendarContext();
   const methods = useForm<CreateAgendaSchema>({
     resolver: zodResolver(createAgendaSchema),
-    defaultValues: currentEntity,
+    defaultValues: currentRecordatorio || {},
   });
   const {
     handleSubmit,
@@ -31,8 +22,12 @@ function RecordatorioModal({
     formState: { errors },
   } = methods;
 
+  const onSubmit = (data: CreateAgendaSchema) => {
+    console.log(data);
+  };
+
   return (
-    <FormModal open={isModalOpened} onClose={() => setIsModalOpened(false)}>
+    <FormModal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Typography variant="h5" sx={{ mb: 2 }}>
@@ -43,3 +38,5 @@ function RecordatorioModal({
     </FormModal>
   );
 }
+
+export default RecordatorioModal;

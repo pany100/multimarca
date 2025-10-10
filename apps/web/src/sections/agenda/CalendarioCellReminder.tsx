@@ -6,7 +6,6 @@ import {
   RadioButtonUnchecked as RadioButtonUncheckedIcon,
 } from "@mui/icons-material";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
-import { useAgendaUIContext } from "./contexts/AgendaUIContext";
 import { useCalendarContext } from "./contexts/CalendarContext";
 import { useMenuUIContext } from "./contexts/MenuUIContext";
 import { RecordatorioAgenda } from "./hooks/useRecordatorios";
@@ -16,8 +15,8 @@ type Props = {
 };
 
 function CalendarioCellReminder({ day }: Props) {
-  const { getRecordatoriosForDay, updateRecordatorio } = useCalendarContext();
-  const { setCurrentRecordatorio } = useAgendaUIContext();
+  const { getRecordatoriosForDay, updateRecordatorio, setCurrentRecordatorio } =
+    useCalendarContext();
   const dayRecordatorios = getRecordatoriosForDay(day);
   const { setMenuAnchorEl } = useMenuUIContext();
 

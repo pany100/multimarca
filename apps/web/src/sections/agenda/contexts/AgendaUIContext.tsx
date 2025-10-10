@@ -1,15 +1,10 @@
 import React from "react";
-import { RecordatorioAgenda } from "../hooks/useRecordatorios";
 
 type AgendaUIContextType = {
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isDeleteModalOpen: boolean;
   setIsDeleteModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
-  currentRecordatorio: RecordatorioAgenda | null;
-  setCurrentRecordatorio: React.Dispatch<
-    React.SetStateAction<RecordatorioAgenda | null>
-  >;
   day: Date | null;
   setDay: React.Dispatch<Date | null>;
 };
@@ -23,8 +18,7 @@ export const AgendaUIProvider = ({
 }) => {
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
-  const [currentRecordatorio, setCurrentRecordatorio] =
-    React.useState<RecordatorioAgenda | null>(null);
+
   const [day, setDay] = React.useState<Date | null>(null);
 
   return (
@@ -34,8 +28,6 @@ export const AgendaUIProvider = ({
         setIsModalOpen,
         isDeleteModalOpen,
         setIsDeleteModalOpen,
-        currentRecordatorio,
-        setCurrentRecordatorio,
         day,
         setDay,
       }}

@@ -19,6 +19,10 @@ type CalendarContextType = {
   feriados: { id: number; fecha: string; descripcion: string }[];
   getFeriadoDescripcion: (day: Date) => string;
   isFeriado: (day: Date) => boolean;
+  currentRecordatorio: RecordatorioAgenda | null;
+  setCurrentRecordatorio: React.Dispatch<
+    React.SetStateAction<RecordatorioAgenda | null>
+  >;
 };
 
 const CalendarContext = React.createContext<CalendarContextType | null>(null);
@@ -34,6 +38,8 @@ export const CalendarProvider = ({
 }: CalendarProviderProps) => {
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const { calendarGrid } = useCalendar({ currentMonth });
+  const [currentRecordatorio, setCurrentRecordatorio] =
+    React.useState<RecordatorioAgenda | null>(null);
   const {
     recordatorios,
     createRecordatorio,
@@ -59,6 +65,8 @@ export const CalendarProvider = ({
         feriados,
         getFeriadoDescripcion,
         isFeriado,
+        currentRecordatorio,
+        setCurrentRecordatorio,
       }}
     >
       {children}

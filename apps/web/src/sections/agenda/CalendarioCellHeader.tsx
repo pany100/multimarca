@@ -9,11 +9,10 @@ type Props = {
 };
 
 function CalendarioCellHeader({ day }: Props) {
-  const { isFeriado } = useCalendarContext();
+  const { isFeriado, setCurrentRecordatorio } = useCalendarContext();
   const isToday = isSameDay(day, new Date());
   const esFeriado = isFeriado(day);
-  const { setIsModalOpen, setCurrentRecordatorio, setDay } =
-    useAgendaUIContext();
+  const { setIsModalOpen, setDay } = useAgendaUIContext();
 
   const handleCreateRecordatorio = (day: Date) => {
     setDay(day);
