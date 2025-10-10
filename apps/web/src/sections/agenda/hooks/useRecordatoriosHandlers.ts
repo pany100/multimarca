@@ -3,9 +3,8 @@ import { useAgendaUIContext } from "../contexts/AgendaUIContext";
 import { useCalendarContext } from "../contexts/CalendarContext";
 
 function useRecordatoriosHandlers() {
-  const { snackbar, setSnackbar } = useSnackbarContext();
-  const { isDeleteModalOpen, setIsDeleteModalOpen, loading, setLoading } =
-    useAgendaUIContext();
+  const { setSnackbar } = useSnackbarContext();
+  const { setIsDeleteModalOpen, setLoading } = useAgendaUIContext();
   const { currentRecordatorio, deleteRecordatorio } = useCalendarContext();
   const handleDelete = async () => {
     if (!currentRecordatorio) {
