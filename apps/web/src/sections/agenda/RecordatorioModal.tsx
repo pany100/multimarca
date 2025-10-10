@@ -31,9 +31,11 @@ function RecordatorioModal() {
       reset({
         titulo: currentRecordatorio.titulo,
         descripcion: currentRecordatorio.descripcion || "",
-        fecha: new Date(currentRecordatorio.fecha),
+        fecha: currentRecordatorio.fecha,
         hecho: currentRecordatorio.hecho,
         recurrence: currentRecordatorio.recurrence,
+        fechaFinRecurrencia:
+          currentRecordatorio.fechaFinRecurrencia || undefined,
       });
     } else {
       reset({
@@ -51,18 +53,20 @@ function RecordatorioModal() {
       handleUpdate({
         id: currentRecordatorio.id,
         titulo: data.titulo || "",
-        fecha: data.fecha ? data.fecha.toISOString() : new Date().toISOString(),
+        fecha: data.fecha || new Date(),
         descripcion: data.descripcion || null,
         hecho: data.hecho || false,
         recurrence: data.recurrence || "no",
+        fechaFinRecurrencia: data.fechaFinRecurrencia || undefined,
       });
     } else {
       handleCreate({
         titulo: data.titulo || "",
-        fecha: data.fecha ? data.fecha.toISOString() : new Date().toISOString(),
+        fecha: data.fecha || new Date(),
         descripcion: data.descripcion || null,
         hecho: data.hecho || false,
         recurrence: data.recurrence || "no",
+        fechaFinRecurrencia: data.fechaFinRecurrencia || undefined,
       });
     }
     setIsModalOpen(false);
