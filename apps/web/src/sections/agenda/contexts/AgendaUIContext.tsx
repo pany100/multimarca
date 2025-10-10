@@ -1,6 +1,8 @@
 import React from "react";
 
 type AgendaUIContextType = {
+  loading: boolean;
+  setLoading: React.Dispatch<React.SetStateAction<boolean>>;
   isModalOpen: boolean;
   setIsModalOpen: React.Dispatch<React.SetStateAction<boolean>>;
   isDeleteModalOpen: boolean;
@@ -16,6 +18,7 @@ export const AgendaUIProvider = ({
 }: {
   children: React.ReactNode;
 }) => {
+  const [loading, setLoading] = React.useState(false);
   const [isModalOpen, setIsModalOpen] = React.useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = React.useState(false);
 
@@ -24,6 +27,8 @@ export const AgendaUIProvider = ({
   return (
     <AgendaUIContext.Provider
       value={{
+        loading,
+        setLoading,
         isModalOpen,
         setIsModalOpen,
         isDeleteModalOpen,

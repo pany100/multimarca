@@ -7,11 +7,13 @@ import {
   Typography,
 } from "@mui/material";
 import { useAgendaUIContext } from "./contexts/AgendaUIContext";
-import { useCalendarContext } from "./contexts/CalendarContext";
+import useRecordatoriosHandlers from "./hooks/useRecordatoriosHandlers";
 
 function DeleteRecordatorioModal() {
-  const { isDeleteModalOpen, setIsDeleteModalOpen } = useAgendaUIContext();
-  const { currentRecordatorio, deleteRecordatorio } = useCalendarContext();
+  const { isDeleteModalOpen, setIsDeleteModalOpen, loading } =
+    useAgendaUIContext();
+  const { handleDelete } = useRecordatoriosHandlers();
+
   return (
     <Dialog
       open={isDeleteModalOpen}
@@ -30,9 +32,8 @@ function DeleteRecordatorioModal() {
         <Button
           color="error"
           variant="contained"
-          onClick={async () =>
-            currentRecordatorio && deleteRecordatorio(currentRecordatorio.id)
-          }
+          onClick={handleDelete}
+          disabled={loading}
         >
           Eliminar
         </Button>

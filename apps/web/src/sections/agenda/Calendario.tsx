@@ -1,3 +1,5 @@
+import FormSnackbar from "@/components/orden-reparacion/formV2/commons/FormSnackbar";
+import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { Grid } from "@mui/material";
 import CalendarioCellMenu from "./CalendarioCellMenu";
 import CalendarioGrid from "./CalendarioGrid";
@@ -9,20 +11,23 @@ import { MenuUIProvider } from "./contexts/MenuUIContext";
 function Calendario() {
   return (
     <MenuUIProvider>
-      <Grid
-        container
-        spacing={1}
-        sx={{
-          width: "100%",
-          mx: "auto",
-        }}
-      >
-        <CalendarioHeader />
-        <CalendarioGrid />
-        <CalendarioCellMenu />
-        <RecordatorioModal />
-        <DeleteRecordatorioModal />
-      </Grid>
+      <SnackbarProvider>
+        <Grid
+          container
+          spacing={1}
+          sx={{
+            width: "100%",
+            mx: "auto",
+          }}
+        >
+          <CalendarioHeader />
+          <CalendarioGrid />
+          <CalendarioCellMenu />
+          <RecordatorioModal />
+          <DeleteRecordatorioModal />
+        </Grid>
+        <FormSnackbar />
+      </SnackbarProvider>
     </MenuUIProvider>
   );
 }
