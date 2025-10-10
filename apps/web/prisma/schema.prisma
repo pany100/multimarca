@@ -182,7 +182,7 @@ model Stock {
   restockValue           Int?
   markup                 Float?
   proveedorId            Int
-  label                  String                @db.VarChar(250)
+  label                  String?                @db.VarChar(250)
   notificacionesInternas NotificacionInterna[]
   ordenDeCompraItems     OrdenDeCompraItem[]
   repuestosUsados        RepuestoUsado[]
@@ -725,6 +725,7 @@ model RecordatorioAgenda {
   user        Usuario? @relation(fields: [userId], references: [id])
   general     Boolean  @default(true)
   recurrence  String   @default("no")
+  fechaFinRecurrencia       DateTime?
 
   @@index([fecha])
   @@index([userId], map: "RecordatorioAgenda_userId_fkey")
