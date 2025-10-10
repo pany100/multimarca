@@ -34,8 +34,7 @@ function RecordatorioModal() {
         fecha: currentRecordatorio.fecha,
         hecho: currentRecordatorio.hecho,
         recurrence: currentRecordatorio.recurrence,
-        fechaFinRecurrencia:
-          currentRecordatorio.fechaFinRecurrencia || undefined,
+        fechaFinRecurrencia: currentRecordatorio.fechaFinRecurrencia || null,
       });
     } else {
       reset({
@@ -44,6 +43,7 @@ function RecordatorioModal() {
         fecha: day || new Date(),
         hecho: false,
         recurrence: "no",
+        fechaFinRecurrencia: null,
       });
     }
   }, [currentRecordatorio, day, reset]);
@@ -57,7 +57,7 @@ function RecordatorioModal() {
         descripcion: data.descripcion || null,
         hecho: data.hecho || false,
         recurrence: data.recurrence || "no",
-        fechaFinRecurrencia: data.fechaFinRecurrencia || undefined,
+        fechaFinRecurrencia: data.fechaFinRecurrencia || null,
       });
     } else {
       handleCreate({
@@ -66,7 +66,7 @@ function RecordatorioModal() {
         descripcion: data.descripcion || null,
         hecho: data.hecho || false,
         recurrence: data.recurrence || "no",
-        fechaFinRecurrencia: data.fechaFinRecurrencia || undefined,
+        fechaFinRecurrencia: data.fechaFinRecurrencia || null,
       });
     }
     setIsModalOpen(false);

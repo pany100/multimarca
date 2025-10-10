@@ -15,7 +15,7 @@ export const createAgendaSchema = z.object({
   ),
   hecho: z.boolean().optional(),
   recurrence: z.string().optional(),
-  fechaFinRecurrencia: z.coerce.date().optional(),
+  fechaFinRecurrencia: z.coerce.date().optional().nullable(),
 });
 export type CreateAgendaSchema = z.infer<typeof createAgendaSchema>;
 
@@ -25,6 +25,6 @@ export const updateAgendaSchema = z.object({
   fecha: z.coerce.date().optional(),
   hecho: z.boolean().optional(),
   recurrence: z.string().optional(),
-  fechaFinRecurrencia: z.coerce.date().optional(),
+  fechaFinRecurrencia: z.coerce.date().optional().nullable(),
 });
 export type UpdateAgendaSchema = z.infer<typeof updateAgendaSchema>;
