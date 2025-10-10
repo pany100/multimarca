@@ -9,14 +9,16 @@ import { Box, IconButton, Tooltip, Typography } from "@mui/material";
 import { useCalendarContext } from "./contexts/CalendarContext";
 import { useMenuUIContext } from "./contexts/MenuUIContext";
 import { RecordatorioAgenda } from "./hooks/useRecordatorios";
+import useRecordatoriosHandlers from "./hooks/useRecordatoriosHandlers";
 
 type Props = {
   day: Date;
 };
 
 function CalendarioCellReminder({ day }: Props) {
-  const { getRecordatoriosForDay, updateRecordatorio, setCurrentRecordatorio } =
+  const { getRecordatoriosForDay, setCurrentRecordatorio } =
     useCalendarContext();
+  const { toggleHecho } = useRecordatoriosHandlers();
   const dayRecordatorios = getRecordatoriosForDay(day);
   const { setMenuAnchorEl } = useMenuUIContext();
 
@@ -26,13 +28,6 @@ function CalendarioCellReminder({ day }: Props) {
   ) => {
     setMenuAnchorEl(event.currentTarget);
     setCurrentRecordatorio(recordatorio);
-  };
-
-  const handleToggleHecho = async (recordatorio: RecordatorioAgenda) => {
-    await updateRecordatorio({
-      ...recordatorio,
-      hecho: !recordatorio.hecho,
-    });
   };
 
   return (
@@ -71,7 +66,7 @@ function CalendarioCellReminder({ day }: Props) {
           >
             <IconButton
               size="small"
-              onClick={() => handleToggleHecho(recordatorio)}
+              onClick={() => toggleHecho(recordatorio)}
               sx={{ mr: 0.1, mt: 0 }}
             >
               {recordatorio.hecho ? (
