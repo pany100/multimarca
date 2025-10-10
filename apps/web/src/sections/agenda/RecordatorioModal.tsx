@@ -97,11 +97,17 @@ function RecordatorioModal() {
             <Grid item xs={6}>
               <CustomInputBoolean name="hecho" label="Hecho" />
             </Grid>
-            <Grid item xs={12}>
+            <Grid item xs={6}>
               <CustomSelect
                 options={agendaEventRecurrence}
                 name="recurrence"
                 label="Recurrencia"
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomInputDate
+                name="fechaFinRecurrencia"
+                label="Fecha Fin Recurrencia"
               />
             </Grid>
             <Grid item xs={12}>
