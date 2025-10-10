@@ -41,6 +41,15 @@ function useFixedSelectData() {
     { value: "Si", label: "Si" },
     { value: "No", label: "No" },
   ];
+
+  const agendaEventRecurrence = [
+    { value: "No", label: "No se repite" },
+    { value: "Diario", label: "Diaria" },
+    { value: "Semanal", label: "Semanal" },
+    { value: "Mensual", label: "Mensual" },
+    { value: "Anual", label: "Anual" },
+  ];
+
   return {
     tipoOperacion,
     currency,
@@ -48,6 +57,7 @@ function useFixedSelectData() {
     ventaEstadoOptions,
     siNo,
     presupuestoEstadoOptions,
+    agendaEventRecurrence,
   };
 }
 

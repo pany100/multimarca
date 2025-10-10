@@ -14,6 +14,7 @@ export const createAgendaSchema = z.object({
     { message: "Fecha inválida" }
   ),
   hecho: z.boolean().optional(),
+  recurrence: z.string().optional(),
 });
 export type CreateAgendaSchema = z.infer<typeof createAgendaSchema>;
 
@@ -22,5 +23,6 @@ export const updateAgendaSchema = z.object({
   descripcion: z.string().nullable().optional(),
   fecha: z.coerce.date().optional(),
   hecho: z.boolean().optional(),
+  recurrence: z.string().optional(),
 });
 export type UpdateAgendaSchema = z.infer<typeof updateAgendaSchema>;

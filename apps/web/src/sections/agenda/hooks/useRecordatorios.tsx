@@ -13,6 +13,7 @@ export interface RecordatorioAgenda {
   descripcion: string | null;
   fecha: string;
   hecho: boolean;
+  recurrence?: string;
 }
 
 function useRecordatorios({ currentMonth, general }: Props) {

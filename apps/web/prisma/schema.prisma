@@ -724,6 +724,7 @@ model RecordatorioAgenda {
   hecho       Boolean  @default(false)
   user        Usuario? @relation(fields: [userId], references: [id])
   general     Boolean  @default(true)
+  recurrence  String   @default("no")
 
   @@index([fecha])
   @@index([userId], map: "RecordatorioAgenda_userId_fkey")
@@ -833,3 +834,12 @@ enum EstadoArchivo {
   Error
   Borrado
 }
+
+enum Recurrence {
+  No
+  Diario
+  Semanal
+  Mensual
+  Anual
+}
+

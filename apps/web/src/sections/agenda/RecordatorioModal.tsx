@@ -1,7 +1,9 @@
 import CustomInputBoolean from "@/components/formV2/CustomInputBoolean";
 import CustomInputDate from "@/components/formV2/CustomInputDate";
 import CustomInputText from "@/components/formV2/CustomInputText";
+import CustomSelect from "@/components/formV2/CustomSelect";
 import FormModal from "@/components/formV2/FormModal";
+import useFixedSelectData from "@/hooks/useFixedSelectData";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, CircularProgress, Grid, Typography } from "@mui/material";
 import { useEffect } from "react";
@@ -17,6 +19,8 @@ import useRecordatoriosHandlers from "./hooks/useRecordatoriosHandlers";
 function RecordatorioModal() {
   const { isModalOpen, setIsModalOpen, loading, day } = useAgendaUIContext();
   const { handleCreate, handleUpdate } = useRecordatoriosHandlers();
+  const { agendaEventRecurrence } = useFixedSelectData();
+
   const { currentRecordatorio } = useCalendarContext();
   const methods = useForm<UpdateAgendaSchema>({
     resolver: zodResolver(updateAgendaSchema),
@@ -29,6 +33,7 @@ function RecordatorioModal() {
         descripcion: currentRecordatorio.descripcion || "",
         fecha: new Date(currentRecordatorio.fecha),
         hecho: currentRecordatorio.hecho,
+        recurrence: currentRecordatorio.recurrence,
       });
     } else {
       reset({
@@ -36,6 +41,7 @@ function RecordatorioModal() {
         descripcion: "",
         fecha: day || new Date(),
         hecho: false,
+        recurrence: "no",
       });
     }
   }, [currentRecordatorio, day, reset]);
@@ -48,6 +54,7 @@ function RecordatorioModal() {
         fecha: data.fecha ? data.fecha.toISOString() : new Date().toISOString(),
         descripcion: data.descripcion || null,
         hecho: data.hecho || false,
+        recurrence: data.recurrence || "no",
       });
     } else {
       handleCreate({
@@ -55,6 +62,7 @@ function RecordatorioModal() {
         fecha: data.fecha ? data.fecha.toISOString() : new Date().toISOString(),
         descripcion: data.descripcion || null,
         hecho: data.hecho || false,
+        recurrence: data.recurrence || "no",
       });
     }
     setIsModalOpen(false);
@@ -84,6 +92,13 @@ function RecordatorioModal() {
             </Grid>
             <Grid item xs={6}>
               <CustomInputBoolean name="hecho" label="Hecho" />
+            </Grid>
+            <Grid item xs={12}>
+              <CustomSelect
+                options={agendaEventRecurrence}
+                name="recurrence"
+                label="Recurrencia"
+              />
             </Grid>
             <Grid item xs={12}>
               <Box
