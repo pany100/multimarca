@@ -16,6 +16,8 @@ export type CreateAgendaInput = {
   hecho?: boolean;
   userId: number;
   general: boolean;
+  recurrence?: string;
+  fechaFinRecurrencia?: Date | null;
 };
 
 export interface AgendaRepository {

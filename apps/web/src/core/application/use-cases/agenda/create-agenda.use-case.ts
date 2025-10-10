@@ -10,6 +10,8 @@ export class CreateAgendaUseCase {
     hecho?: boolean;
     userId: number;
     general: boolean;
+    recurrence?: string;
+    fechaFinRecurrencia?: Date | null;
   }) {
     const fechaDate = new Date(input.fecha);
     if (Number.isNaN(fechaDate.getTime())) {
@@ -23,6 +25,8 @@ export class CreateAgendaUseCase {
       hecho: Boolean(input.hecho),
       userId: input.userId,
       general: input.general,
+      recurrence: input.recurrence ?? "no",
+      fechaFinRecurrencia: input.fechaFinRecurrencia ?? null,
     });
   }
 }
