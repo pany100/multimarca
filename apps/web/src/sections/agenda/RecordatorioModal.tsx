@@ -7,17 +7,19 @@ import { Box, Button, CircularProgress, Grid, Typography } from "@mui/material";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import {
-  createAgendaSchema,
-  CreateAgendaSchema,
+  updateAgendaSchema,
+  UpdateAgendaSchema,
 } from "../../core/infrastructure/validation/schemas/agenda.schema";
 import { useAgendaUIContext } from "./contexts/AgendaUIContext";
 import { useCalendarContext } from "./contexts/CalendarContext";
+import useRecordatoriosHandlers from "./hooks/useRecordatoriosHandlers";
 
 function RecordatorioModal() {
   const { isModalOpen, setIsModalOpen, loading } = useAgendaUIContext();
+  const { handleCreate, handleUpdate } = useRecordatoriosHandlers();
   const { currentRecordatorio } = useCalendarContext();
-  const methods = useForm<CreateAgendaSchema>({
-    resolver: zodResolver(createAgendaSchema),
+  const methods = useForm<UpdateAgendaSchema>({
+    resolver: zodResolver(updateAgendaSchema),
   });
   const {
     handleSubmit,
@@ -44,8 +46,24 @@ function RecordatorioModal() {
     }
   }, [currentRecordatorio, reset]);
 
-  const onSubmit = (data: CreateAgendaSchema) => {
-    console.log(data);
+  const onSubmit = (data: UpdateAgendaSchema) => {
+    if (currentRecordatorio) {
+      handleUpdate({
+        id: currentRecordatorio.id,
+        titulo: data.titulo || "",
+        fecha: data.fecha ? data.fecha.toISOString() : new Date().toISOString(),
+        descripcion: data.descripcion || null,
+        hecho: data.hecho || false,
+      });
+    } else {
+      handleCreate({
+        titulo: data.titulo || "",
+        fecha: data.fecha ? data.fecha.toISOString() : new Date().toISOString(),
+        descripcion: data.descripcion || null,
+        hecho: data.hecho || false,
+      });
+    }
+    setIsModalOpen(false);
   };
 
   return (

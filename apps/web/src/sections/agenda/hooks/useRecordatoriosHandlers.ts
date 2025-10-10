@@ -5,9 +5,14 @@ import { RecordatorioAgenda } from "./useRecordatorios";
 
 function useRecordatoriosHandlers() {
   const { setSnackbar } = useSnackbarContext();
-  const { setIsDeleteModalOpen, setLoading } = useAgendaUIContext();
-  const { currentRecordatorio, deleteRecordatorio, updateRecordatorio } =
-    useCalendarContext();
+  const { setIsDeleteModalOpen, setLoading, setIsModalOpen } =
+    useAgendaUIContext();
+  const {
+    currentRecordatorio,
+    deleteRecordatorio,
+    updateRecordatorio,
+    createRecordatorio,
+  } = useCalendarContext();
   const handleDelete = async () => {
     if (!currentRecordatorio) {
       setSnackbar({
@@ -60,7 +65,49 @@ function useRecordatoriosHandlers() {
       });
     }
   };
-  return { handleDelete, toggleHecho };
+
+  const handleCreate = async (recordatorio: Omit<RecordatorioAgenda, "id">) => {
+    try {
+      setLoading(true);
+      await createRecordatorio(recordatorio);
+      setLoading(false);
+      setSnackbar({
+        open: true,
+        message: "Recordatorio creado correctamente",
+        severity: "success",
+      });
+    } catch (error) {
+      setLoading(false);
+      setSnackbar({
+        open: true,
+        message: "Error al crear recordatorio",
+        severity: "error",
+      });
+    }
+    setIsModalOpen(false);
+  };
+
+  const handleUpdate = async (recordatorio: RecordatorioAgenda) => {
+    try {
+      setLoading(true);
+      await updateRecordatorio(recordatorio);
+      setLoading(false);
+      setSnackbar({
+        open: true,
+        message: "Recordatorio actualizado correctamente",
+        severity: "success",
+      });
+    } catch (error) {
+      setLoading(false);
+      setSnackbar({
+        open: true,
+        message: "Error al actualizar recordatorio",
+        severity: "error",
+      });
+    }
+    setIsModalOpen(false);
+  };
+  return { handleDelete, toggleHecho, handleCreate, handleUpdate };
 }
 
 export default useRecordatoriosHandlers;
