@@ -1,3 +1,4 @@
+import CalendarioCell from "./CalendarioCell";
 import CalendarioEmptyCell from "./CalendarioEmptyCell";
 import { useCalendarContext } from "./contexts/CalendarContext";
 
@@ -13,6 +14,9 @@ function CalendarioGrid() {
               <CalendarioEmptyCell key={`empty-${weekIndex}-${dayIndex}`} />
             );
           }
+          return (
+            <CalendarioCell key={`cell-${weekIndex}-${dayIndex}`} day={day} />
+          );
         })
       )}
     </>
