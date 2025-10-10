@@ -1,6 +1,7 @@
 import { Grid } from "@mui/material";
 import CalendarioGrid from "./CalendarioGrid";
 import CalendarioHeader from "./CalendarioHeader";
+import DeleteRecordatorioModal from "./DeleteRecordatorioModal";
 import RecordatorioModal from "./RecordatorioModal";
 
 function Calendario() {
@@ -16,6 +17,7 @@ function Calendario() {
       <CalendarioHeader />
       <CalendarioGrid />
       <RecordatorioModal />
+      <DeleteRecordatorioModal />
     </Grid>
   );
 }

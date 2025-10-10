@@ -40,3 +40,5 @@ function DeleteRecordatorioModal() {
     </Dialog>
   );
 }
+
+export default DeleteRecordatorioModal;
