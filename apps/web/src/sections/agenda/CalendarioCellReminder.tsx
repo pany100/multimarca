@@ -15,6 +15,26 @@ type Props = {
   day: Date;
 };
 
+const getBackgroundColor = (recordatorio: RecordatorioAgenda) => {
+  if (recordatorio.hecho) {
+    return "rgba(76, 175, 80, 0.1)"; // Verde para completados
+  }
+
+  switch (recordatorio.recurrence) {
+    case "Diario":
+      return "rgba(255, 193, 7, 0.1)"; // Amarillo para diario
+    case "Semanal":
+      return "rgba(156, 39, 176, 0.1)"; // Púrpura para semanal
+    case "Mensual":
+      return "rgba(255, 87, 34, 0.1)"; // Naranja para mensual
+    case "Anual":
+      return "rgba(244, 67, 54, 0.1)"; // Rojo para anual
+    case "No":
+    default:
+      return "rgba(33, 150, 243, 0.1)"; // Azul para sin recurrencia
+  }
+};
+
 function CalendarioCellReminder({ day }: Props) {
   const { getRecordatoriosForDay, setCurrentRecordatorio } =
     useCalendarContext();
@@ -46,9 +66,7 @@ function CalendarioCellReminder({ day }: Props) {
           key={recordatorio.id}
           sx={{
             p: 0.5,
-            bgcolor: recordatorio.hecho
-              ? "rgba(76, 175, 80, 0.1)"
-              : "rgba(33, 150, 243, 0.1)",
+            bgcolor: getBackgroundColor(recordatorio),
             borderRadius: 1,
             display: "flex",
             flexWrap: "wrap",
