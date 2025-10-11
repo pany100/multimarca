@@ -8,16 +8,16 @@ export class ListAgendaUseCase {
     page?: number | string | null;
     size?: number | string | null;
     query?: string | null;
-    month?: number | string | null;
-    year?: number | string | null;
+    month: number;
+    year: number;
     onlyPending?: boolean;
     general: boolean;
     userId: number;
   }) {
     const { page, size } = normalizePageSize(params.page, params.size);
     const query = params.query ?? "";
-    const month = params.month ? Number(params.month) : undefined;
-    const year = params.year ? Number(params.year) : undefined;
+    const month = Number(params.month);
+    const year = Number(params.year);
     const onlyPending = !!params.onlyPending;
     return this.service.list({
       page,

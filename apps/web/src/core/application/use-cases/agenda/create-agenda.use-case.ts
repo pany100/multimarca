@@ -1,4 +1,5 @@
 import { AgendaService } from "@/core/application/services/agenda.service";
+import { Recurrence } from "@prisma/client";
 
 export class CreateAgendaUseCase {
   constructor(private readonly service: AgendaService) {}
@@ -25,7 +26,11 @@ export class CreateAgendaUseCase {
       hecho: Boolean(input.hecho),
       userId: input.userId,
       general: input.general,
-      recurrence: input.recurrence ?? "no",
+      recurrence:
+        input.recurrence &&
+        Object.values(Recurrence).includes(input.recurrence as Recurrence)
+          ? (input.recurrence as Recurrence)
+          : Recurrence.No,
       fechaFinRecurrencia: input.fechaFinRecurrencia ?? null,
     });
   }

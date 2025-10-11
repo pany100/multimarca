@@ -1,5 +1,18 @@
 import { z } from "zod";
 
+export const listAgendaSchema = z.object({
+  page: z.number().optional(),
+  size: z.number().optional(),
+  query: z.string().optional(),
+  month: z.number(),
+  year: z.number(),
+  onlyPending: z.boolean().optional(),
+  general: z.boolean(),
+  userId: z.number(),
+});
+
+export type ListAgendaSchema = z.infer<typeof listAgendaSchema>;
+
 export const createAgendaSchema = z.object({
   titulo: z.string().min(1, "El título es requerido"),
   descripcion: z.string().nullable().optional(),

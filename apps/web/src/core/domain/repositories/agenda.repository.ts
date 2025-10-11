@@ -1,9 +1,11 @@
+import { Recurrence } from "@prisma/client";
+
 export type ListAgendaParams = {
   page: number;
   size: number;
   query?: string;
-  month?: number; // 1..12
-  year?: number; // yyyy
+  month: number;
+  year: number;
   onlyPending?: boolean;
   general: boolean;
   userId: number;
@@ -16,7 +18,7 @@ export type CreateAgendaInput = {
   hecho?: boolean;
   userId: number;
   general: boolean;
-  recurrence?: string;
+  recurrence?: Recurrence;
   fechaFinRecurrencia?: Date | null;
 };
 

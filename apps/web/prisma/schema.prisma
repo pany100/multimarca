@@ -724,7 +724,7 @@ model RecordatorioAgenda {
   hecho       Boolean  @default(false)
   user        Usuario? @relation(fields: [userId], references: [id])
   general     Boolean  @default(true)
-  recurrence  String   @default("no")
+  recurrence  Recurrence   @default(No)
   fechaFinRecurrencia       DateTime?
 
   @@index([fecha])
