@@ -23,6 +23,7 @@ type CalendarContextType = {
   setCurrentRecordatorio: React.Dispatch<
     React.SetStateAction<RecordatorioAgenda | null>
   >;
+  forceRefreshRecordatorios: () => void;
 };
 
 const CalendarContext = React.createContext<CalendarContextType | null>(null);
@@ -46,6 +47,7 @@ export const CalendarProvider = ({
     updateRecordatorio,
     deleteRecordatorio,
     getRecordatoriosForDay,
+    forceRefreshRecordatorios,
   } = useRecordatorios({ currentMonth, general });
 
   const { feriados, getFeriadoDescripcion, isFeriado } = useFeriados({
@@ -67,6 +69,7 @@ export const CalendarProvider = ({
         isFeriado,
         currentRecordatorio,
         setCurrentRecordatorio,
+        forceRefreshRecordatorios,
       }}
     >
       {children}

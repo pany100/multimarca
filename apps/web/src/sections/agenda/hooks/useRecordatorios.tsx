@@ -20,6 +20,11 @@ export interface RecordatorioAgenda {
 function useRecordatorios({ currentMonth, general }: Props) {
   const { authFetch } = useFetch();
   const [recordatorios, setRecordatorios] = useState<RecordatorioAgenda[]>([]);
+  const [refreshRecordatorios, setRefreshRecordatorios] = useState(false);
+
+  const forceRefreshRecordatorios = () => {
+    setRefreshRecordatorios((prev) => !prev);
+  };
 
   useEffect(() => {
     const fetchRecordatorios = async () => {
@@ -43,7 +48,7 @@ function useRecordatorios({ currentMonth, general }: Props) {
     };
 
     fetchRecordatorios();
-  }, [currentMonth, general, authFetch]);
+  }, [currentMonth, general, authFetch, refreshRecordatorios]);
 
   const createRecordatorio = async (
     recordatorioData: Omit<RecordatorioAgenda, "id">
@@ -112,6 +117,7 @@ function useRecordatorios({ currentMonth, general }: Props) {
     updateRecordatorio,
     deleteRecordatorio,
     getRecordatoriosForDay,
+    forceRefreshRecordatorios,
   };
 }
 

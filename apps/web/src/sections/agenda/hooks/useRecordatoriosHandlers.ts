@@ -12,6 +12,7 @@ function useRecordatoriosHandlers() {
     deleteRecordatorio,
     updateRecordatorio,
     createRecordatorio,
+    forceRefreshRecordatorios,
   } = useCalendarContext();
   const handleDelete = async () => {
     if (!currentRecordatorio) {
@@ -32,6 +33,7 @@ function useRecordatoriosHandlers() {
         message: "Recordatorio eliminado correctamente",
         severity: "success",
       });
+      forceRefreshRecordatorios();
     } catch (error) {
       setLoading(false);
       setSnackbar({
@@ -76,6 +78,7 @@ function useRecordatoriosHandlers() {
         message: "Recordatorio creado correctamente",
         severity: "success",
       });
+      forceRefreshRecordatorios();
     } catch (error) {
       setLoading(false);
       setSnackbar({
