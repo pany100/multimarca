@@ -77,7 +77,7 @@ export class PrismaAgendaRepository implements AgendaRepository {
             AND: [
               {
                 OR: [
-                  { fechaFinRecurrencia: { gte: startDate } },
+                  { fechaFinRecurrencia: { gt: startDate } },
                   { fechaFinRecurrencia: null },
                 ],
               },

@@ -39,6 +39,12 @@ export const updateAgendaSchema = z.object({
   hecho: z.boolean().optional(),
   recurrence: z.string().optional(),
   fechaFinRecurrencia: z.coerce.date().optional().nullable(),
-  updatingRecurrentEvent: z.boolean(),
+  typeOfUpdate: z.enum(["this", "this_and_following", "all"]),
 });
 export type UpdateAgendaSchema = z.infer<typeof updateAgendaSchema>;
+
+export const deleteAgendaSchema = z.object({
+  id: z.number(),
+  typeOfDelete: z.enum(["this", "this_and_following", "all"]),
+});
+export type DeleteAgendaSchema = z.infer<typeof deleteAgendaSchema>;

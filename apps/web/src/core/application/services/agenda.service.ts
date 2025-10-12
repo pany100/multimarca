@@ -5,6 +5,8 @@ import type {
   ListAgendaParams,
 } from "@/core/domain/repositories/agenda.repository";
 
+export type TypeOfOperation = "this" | "this_and_following" | "all";
+
 export class AgendaService {
   constructor(
     private readonly repo: AgendaRepository,
@@ -25,13 +27,12 @@ export class AgendaService {
 
   update(
     id: number,
-    data: Partial<CreateAgendaInput> & {
-      updatingRecurrentEvent: boolean;
-    }
+    data: Partial<CreateAgendaInput>,
+    typeOfUpdate: TypeOfOperation
   ) {
-    if (data.updatingRecurrentEvent) {
+    if (typeOfUpdate === "all") {
       return this.repo.update(id, data);
-    } else {
+    } else if (typeOfUpdate === "this") {
       return this.uow.run(async (tx) => {
         const newEventData = data as CreateAgendaInput;
         const nuevoRecordatorio = await this.repo.create(newEventData);
@@ -41,17 +42,37 @@ export class AgendaService {
         });
         return nuevoRecordatorio;
       });
+    } else {
+      // this_and_following
+      const newEventData = data as CreateAgendaInput;
+
+      return this.uow.run(async (tx) => {
+        await this.repo.update(id, {
+          fechaFinRecurrencia: newEventData.fecha,
+        });
+        await this.repo.createException({
+          recordatorioId: id,
+          fecha: newEventData.fecha,
+        });
+      });
     }
   }
 
-  async delete(id: number, deletingCurrentEvent: boolean) {
+  async delete(id: number, typeOfDelete: TypeOfOperation) {
     const recordatorio = await this.findById(id);
-    if (deletingCurrentEvent) {
+    if (typeOfDelete === "all") {
       return this.repo.delete(id);
-    } else {
+    } else if (typeOfDelete === "this") {
       return this.repo.createException({
         recordatorioId: id,
         fecha: recordatorio.fecha,
+      });
+    } else {
+      // this_and_following
+      return this.uow.run(async (tx) => {
+        await this.repo.update(id, {
+          fechaFinRecurrencia: recordatorio.fecha,
+        });
       });
     }
   }
