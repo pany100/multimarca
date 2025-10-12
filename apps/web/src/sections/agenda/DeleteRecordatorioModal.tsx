@@ -40,17 +40,18 @@ function DeleteRecordatorioModal() {
         <Typography>
           ¿Está seguro que desea eliminar este recordatorio?
         </Typography>
+        {currentRecordatorio &&
+          currentRecordatorio.recurrence !== Recurrence.No && (
+            <CustomRadioButton
+              options={typeOfOperation}
+              value={typeOfDelete}
+              onChange={(value) => setTypeOfDelete(value as TypeOfOperation)}
+              label="Qué elemento recurrente desea eliminar?"
+            />
+          )}
       </DialogContent>
-      {currentRecordatorio &&
-        currentRecordatorio.recurrence !== Recurrence.No && (
-          <CustomRadioButton
-            options={typeOfOperation}
-            value={typeOfDelete}
-            onChange={(value) => setTypeOfDelete(value as TypeOfOperation)}
-            label="Qué elemento recurrente desea eliminar?"
-          />
-        )}
-      <DialogActions>
+
+      <DialogActions sx={{ p: 2 }}>
         <Button
           onClick={() => {
             setIsDeleteModalOpen(false);
