@@ -1,3 +1,6 @@
+import CustomRadioButton from "@/components/formV2/CustomRadioButton";
+import { TypeOfOperation } from "@/core/application/services/agenda.service";
+import useFixedSelectData from "@/hooks/useFixedSelectData";
 import {
   Button,
   Dialog,
@@ -6,18 +9,29 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
+import { Recurrence } from "@prisma/client";
+import { useState } from "react";
 import { useAgendaUIContext } from "./contexts/AgendaUIContext";
+import { useCalendarContext } from "./contexts/CalendarContext";
 import useRecordatoriosHandlers from "./hooks/useRecordatoriosHandlers";
 
 function DeleteRecordatorioModal() {
   const { isDeleteModalOpen, setIsDeleteModalOpen, loading } =
     useAgendaUIContext();
+  const { typeOfOperation } = useFixedSelectData();
+
+  const [typeOfDelete, setTypeOfDelete] = useState<TypeOfOperation>("this");
+  const { currentRecordatorio } = useCalendarContext();
+
   const { handleDelete } = useRecordatoriosHandlers();
 
   return (
     <Dialog
       open={isDeleteModalOpen}
-      onClose={() => setIsDeleteModalOpen(false)}
+      onClose={() => {
+        setIsDeleteModalOpen(false);
+        setTypeOfDelete("this");
+      }}
       maxWidth="xs"
       fullWidth
     >
@@ -27,12 +41,31 @@ function DeleteRecordatorioModal() {
           ¿Está seguro que desea eliminar este recordatorio?
         </Typography>
       </DialogContent>
+      {currentRecordatorio &&
+        currentRecordatorio.recurrence !== Recurrence.No && (
+          <CustomRadioButton
+            options={typeOfOperation}
+            value={typeOfDelete}
+            onChange={(value) => setTypeOfDelete(value as TypeOfOperation)}
+            label="Qué elemento recurrente desea eliminar?"
+          />
+        )}
       <DialogActions>
-        <Button onClick={() => setIsDeleteModalOpen(false)}>Cancelar</Button>
+        <Button
+          onClick={() => {
+            setIsDeleteModalOpen(false);
+            setTypeOfDelete("this");
+          }}
+        >
+          Cancelar
+        </Button>
         <Button
           color="error"
           variant="contained"
-          onClick={handleDelete}
+          onClick={() => {
+            handleDelete(typeOfDelete);
+            setTypeOfDelete("this");
+          }}
           disabled={loading}
         >
           Eliminar

@@ -7,13 +7,18 @@ import {
   RadioGroup,
   RadioGroupProps,
 } from "@mui/material";
-import { Controller, useFormContext } from "react-hook-form";
 
-type CustomRadioButtonProps = Omit<RadioGroupProps, "name"> & {
-  name: string;
+type CustomRadioButtonProps = Omit<
+  RadioGroupProps,
+  "name" | "value" | "onChange"
+> & {
+  name?: string;
   label?: string;
   options: { value: string | number; label: string }[];
   helperText?: string;
+  value?: string | number;
+  onChange?: (value: string | number) => void;
+  error?: boolean;
 };
 
 const CustomRadioButton = ({
@@ -21,48 +26,47 @@ const CustomRadioButton = ({
   label,
   options = [],
   helperText,
+  value,
+  onChange,
+  error = false,
   ...props
 }: CustomRadioButtonProps) => {
-  const {
-    control,
-    formState: { errors },
-  } = useFormContext();
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = event.target.value;
+    // Try to convert to number if the original option value was a number
+    const option = options.find((opt) => opt.value.toString() === newValue);
+    if (option && onChange) {
+      onChange(option.value);
+    }
+  };
 
   return (
-    <Controller
-      name={name}
-      control={control}
-      render={({ field: { value, onChange, ...field } }) => (
-        <FormControl
-          fullWidth
-          error={!!errors[name]}
-          component="fieldset"
-          variant="standard"
-        >
-          {label && <FormLabel component="legend">{label}</FormLabel>}
-          <RadioGroup
-            {...field}
-            value={value ?? ""}
-            onChange={onChange}
-            {...props}
-          >
-            {options.map((option) => (
-              <FormControlLabel
-                key={option.value}
-                value={option.value}
-                control={<Radio />}
-                label={option.label}
-              />
-            ))}
-          </RadioGroup>
-          {(helperText || errors[name]?.message) && (
-            <FormHelperText error={!!errors[name]}>
-              {(errors[name]?.message as string) || helperText}
-            </FormHelperText>
-          )}
-        </FormControl>
+    <FormControl
+      fullWidth
+      error={error}
+      component="fieldset"
+      variant="standard"
+    >
+      {label && <FormLabel component="legend">{label}</FormLabel>}
+      <RadioGroup
+        name={name}
+        value={value?.toString() ?? ""}
+        onChange={handleChange}
+        {...props}
+      >
+        {options.map((option) => (
+          <FormControlLabel
+            key={option.value}
+            value={option.value.toString()}
+            control={<Radio />}
+            label={option.label}
+          />
+        ))}
+      </RadioGroup>
+      {helperText && (
+        <FormHelperText error={error}>{helperText}</FormHelperText>
       )}
-    />
+    </FormControl>
   );
 };
 

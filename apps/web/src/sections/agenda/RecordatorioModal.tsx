@@ -4,11 +4,12 @@ import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomRadioButton from "@/components/formV2/CustomRadioButton";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import FormModal from "@/components/formV2/FormModal";
+import { TypeOfOperation } from "@/core/application/services/agenda.service";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, CircularProgress, Grid, Typography } from "@mui/material";
 import { Recurrence } from "@prisma/client";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import {
   updateAgendaSchema,
@@ -22,6 +23,7 @@ function RecordatorioModal() {
   const { isModalOpen, setIsModalOpen, loading, day } = useAgendaUIContext();
   const { handleCreate, handleUpdate } = useRecordatoriosHandlers();
   const { agendaEventRecurrence, typeOfOperation } = useFixedSelectData();
+  const [typeOfUpdate, setTypeOfUpdate] = useState<TypeOfOperation>("this");
 
   const { currentRecordatorio } = useCalendarContext();
   const methods = useForm<UpdateAgendaSchema>({
@@ -37,7 +39,6 @@ function RecordatorioModal() {
         hecho: currentRecordatorio.hecho,
         recurrence: currentRecordatorio.recurrence,
         fechaFinRecurrencia: currentRecordatorio.fechaFinRecurrencia || null,
-        typeOfUpdate: "this",
       });
     } else {
       reset({
@@ -47,7 +48,6 @@ function RecordatorioModal() {
         hecho: false,
         recurrence: Recurrence.No,
         fechaFinRecurrencia: null,
-        typeOfUpdate: "this",
       });
     }
   }, [currentRecordatorio, day, reset]);
@@ -64,7 +64,7 @@ function RecordatorioModal() {
           recurrence: data.recurrence || "no",
           fechaFinRecurrencia: data.fechaFinRecurrencia || null,
         },
-        data.typeOfUpdate
+        typeOfUpdate
       );
     } else {
       handleCreate({
@@ -77,10 +77,17 @@ function RecordatorioModal() {
       });
     }
     setIsModalOpen(false);
+    setTypeOfUpdate("this");
   };
 
   return (
-    <FormModal open={isModalOpen} onClose={() => setIsModalOpen(false)}>
+    <FormModal
+      open={isModalOpen}
+      onClose={() => {
+        setTypeOfUpdate("this");
+        setIsModalOpen(false);
+      }}
+    >
       <FormProvider {...methods}>
         <form onSubmit={handleSubmit(onSubmit)}>
           <Typography variant="h5" sx={{ mb: 2 }}>
@@ -122,7 +129,10 @@ function RecordatorioModal() {
                 <Grid item xs={12}>
                   <CustomRadioButton
                     options={typeOfOperation}
-                    name="typeOfUpdate"
+                    value={typeOfUpdate}
+                    onChange={(value) =>
+                      setTypeOfUpdate(value as TypeOfOperation)
+                    }
                     label="Edición de elemento recurrente"
                   />
                 </Grid>
@@ -138,7 +148,10 @@ function RecordatorioModal() {
               >
                 <Button
                   variant="outlined"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={() => {
+                    setTypeOfUpdate("this");
+                    setIsModalOpen(false);
+                  }}
                   type="button"
                   disabled={loading}
                 >
