@@ -32,13 +32,32 @@ function RecordatorioModal() {
   const { handleSubmit, reset } = methods;
   useEffect(() => {
     if (currentRecordatorio) {
+      const fechaUTC = new Date(currentRecordatorio.fecha);
+      const fechaLocal = new Date(
+        fechaUTC.getUTCFullYear(),
+        fechaUTC.getUTCMonth(),
+        fechaUTC.getUTCDate()
+      );
+
+      let fechaFinRecurrenciaLocal = null;
+      if (currentRecordatorio.fechaFinRecurrencia) {
+        const fechaFinRecurrenciaUTC = new Date(
+          currentRecordatorio.fechaFinRecurrencia
+        );
+        fechaFinRecurrenciaLocal = new Date(
+          fechaFinRecurrenciaUTC.getUTCFullYear(),
+          fechaFinRecurrenciaUTC.getUTCMonth(),
+          fechaFinRecurrenciaUTC.getUTCDate()
+        );
+      }
+
       reset({
         titulo: currentRecordatorio.titulo,
         descripcion: currentRecordatorio.descripcion || "",
-        fecha: currentRecordatorio.fecha,
+        fecha: fechaLocal,
         hecho: currentRecordatorio.hecho,
         recurrence: currentRecordatorio.recurrence,
-        fechaFinRecurrencia: currentRecordatorio.fechaFinRecurrencia || null,
+        fechaFinRecurrencia: fechaFinRecurrenciaLocal || null,
       });
     } else {
       reset({

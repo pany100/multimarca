@@ -50,13 +50,19 @@ function useRecordatoriosHandlers() {
   const toggleHecho = async (recordatorio: RecordatorioAgenda) => {
     try {
       setLoading(true);
+      const fechaUTC = new Date(recordatorio.fecha);
+      const fechaLocal = new Date(
+        fechaUTC.getUTCFullYear(),
+        fechaUTC.getUTCMonth(),
+        fechaUTC.getUTCDate()
+      );
       await updateRecordatorio(
         {
           id: recordatorio.id,
           hecho: !recordatorio.hecho,
           titulo: recordatorio.titulo,
           descripcion: recordatorio.descripcion,
-          fecha: recordatorio.fecha,
+          fecha: fechaLocal,
           recurrence: Recurrence.No,
           fechaFinRecurrencia: null,
         },

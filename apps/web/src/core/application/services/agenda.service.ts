@@ -47,7 +47,14 @@ export class AgendaService {
     } else if (typeOfUpdate === "this") {
       return this.uow.run(async (tx) => {
         const newEventData = data as CreateAgendaInput;
-        const nuevoRecordatorio = await this.repo.create(newEventData, { tx });
+        const { id, ...rest } = recordatorio;
+        const nuevoRecordatorio = await this.repo.create(
+          {
+            ...rest,
+            ...newEventData,
+          },
+          { tx }
+        );
         await this.repo.createException(
           {
             recordatorioId: id,
