@@ -1,5 +1,6 @@
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { TypeOfOperation } from "@/core/application/services/agenda.service";
+import { Recurrence } from "@prisma/client";
 import { useAgendaUIContext } from "../contexts/AgendaUIContext";
 import { useCalendarContext } from "../contexts/CalendarContext";
 import { RecordatorioAgenda } from "./useRecordatorios";
@@ -49,13 +50,25 @@ function useRecordatoriosHandlers() {
   const toggleHecho = async (recordatorio: RecordatorioAgenda) => {
     try {
       setLoading(true);
-      await updateRecordatorio(recordatorio, "this");
+      await updateRecordatorio(
+        {
+          id: recordatorio.id,
+          hecho: !recordatorio.hecho,
+          titulo: recordatorio.titulo,
+          descripcion: recordatorio.descripcion,
+          fecha: recordatorio.fecha,
+          recurrence: Recurrence.No,
+          fechaFinRecurrencia: null,
+        },
+        "this"
+      );
       setLoading(false);
       setSnackbar({
         open: true,
         message: "Recordatorio actualizado correctamente",
         severity: "success",
       });
+      forceRefreshRecordatorios();
     } catch (error) {
       setLoading(false);
       setSnackbar({
