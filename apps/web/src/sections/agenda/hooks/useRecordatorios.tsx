@@ -1,6 +1,7 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { TypeOfOperation } from "@/core/application/services/agenda.service";
 import { isSameDay } from "date-fns";
+import { toZonedTime } from "date-fns-tz";
 import { useEffect, useState } from "react";
 
 type Props = {
@@ -115,8 +116,9 @@ function useRecordatorios({ currentMonth, general }: Props) {
 
   const getRecordatoriosForDay = (day: Date) => {
     return recordatorios.filter((recordatorio) => {
-      const recordatorioDate = new Date(recordatorio.fecha);
-      return isSameDay(recordatorioDate, day);
+      const recordatorioDate = toZonedTime(new Date(recordatorio.fecha), "UTC");
+      const dayUTC = toZonedTime(day, "UTC");
+      return isSameDay(recordatorioDate, dayUTC);
     });
   };
 

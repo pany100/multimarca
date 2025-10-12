@@ -93,7 +93,7 @@ export class AgendaService {
     } else {
       // this_and_following
       await this.repo.update(id, {
-        fechaFinRecurrencia: refDate,
+        fechaFinRecurrencia: new Date(refDate.getTime() - 24 * 60 * 60 * 1000),
       });
     }
   }
