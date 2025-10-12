@@ -1,4 +1,7 @@
-import { AgendaService } from "@/core/application/services/agenda.service";
+import {
+  AgendaService,
+  TypeOfOperation,
+} from "@/core/application/services/agenda.service";
 import { DeleteAgendaUseCase } from "@/core/application/use-cases/agenda/delete-agenda.use-case";
 import { GetAgendaUseCase } from "@/core/application/use-cases/agenda/get-agenda.use-case";
 import { UpdateAgendaUseCase } from "@/core/application/use-cases/agenda/update-agenda.use-case";
@@ -60,12 +63,12 @@ export async function PUT(
       updateAgendaSchema
     );
 
-    // si querés exigir título en update, dejalo en schema .min(1) sin .optional()
+    const { typeOfUpdate, ...dtoWithoutTypeOfUpdate } = dto;
     const data = await new UpdateAgendaUseCase(buildService()).execute(
       id,
-      dto,
+      dtoWithoutTypeOfUpdate,
       user,
-      dto.typeOfUpdate
+      typeOfUpdate as TypeOfOperation
     );
     return NextResponse.json(data, { status: 200 });
   } catch (e) {

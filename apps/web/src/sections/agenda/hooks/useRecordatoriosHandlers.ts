@@ -101,6 +101,7 @@ function useRecordatoriosHandlers() {
         message: "Recordatorio actualizado correctamente",
         severity: "success",
       });
+      forceRefreshRecordatorios();
     } catch (error) {
       setLoading(false);
       setSnackbar({

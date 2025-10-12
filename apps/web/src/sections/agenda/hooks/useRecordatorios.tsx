@@ -86,9 +86,7 @@ function useRecordatorios({ currentMonth, general }: Props) {
     );
     const data = await response.json();
 
-    if (response.ok) {
-      setRecordatorios(recordatorios.map((r) => (r.id === data.id ? data : r)));
-    } else {
+    if (!response.ok) {
       throw new Error(data.error || "Error al actualizar recordatorio");
     }
   };
@@ -105,10 +103,7 @@ function useRecordatorios({ currentMonth, general }: Props) {
         }
       );
 
-      if (response.ok) {
-        // Actualizar la lista de recordatorios
-        setRecordatorios(recordatorios.filter((r) => r.id !== id));
-      } else {
+      if (!response.ok) {
         const data = await response.json();
         throw new Error(data.error || "Error al eliminar recordatorio");
       }
