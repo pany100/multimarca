@@ -21,16 +21,28 @@ export class CreateAgendaUseCase {
 
     const fechaToPersist = new Date(
       Date.UTC(
-        fechaDate.getFullYear(),
-        fechaDate.getMonth(),
-        fechaDate.getDate(),
+        fechaDate.getUTCFullYear(),
+        fechaDate.getUTCMonth(),
+        fechaDate.getUTCDate(),
         0,
         0,
         0,
         0
       )
     );
-    console.log(fechaToPersist);
+    const fechaFinRecurrenciaDate = input.fechaFinRecurrencia
+      ? new Date(
+          Date.UTC(
+            input.fechaFinRecurrencia.getUTCFullYear(),
+            input.fechaFinRecurrencia.getUTCMonth(),
+            input.fechaFinRecurrencia.getUTCDate(),
+            0,
+            0,
+            0,
+            0
+          )
+        )
+      : null;
 
     return this.service.create({
       titulo: input.titulo,
@@ -44,7 +56,7 @@ export class CreateAgendaUseCase {
         Object.values(Recurrence).includes(input.recurrence as Recurrence)
           ? (input.recurrence as Recurrence)
           : Recurrence.No,
-      fechaFinRecurrencia: input.fechaFinRecurrencia ?? null,
+      fechaFinRecurrencia: fechaFinRecurrenciaDate,
     });
   }
 }

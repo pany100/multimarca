@@ -30,13 +30,13 @@ export class PrismaAgendaRepository implements AgendaRepository {
       [Recurrence.Mensual]: RRule.MONTHLY,
       [Recurrence.Anual]: RRule.YEARLY,
     } as const;
-
     const rule = new RRule({
       freq: freqMap[evento.recurrence],
       dtstart: new Date(evento.fecha),
       until: evento.fechaFinRecurrencia || end,
+      tzid: "UTC",
     });
-    const ocurrencias = rule.between(start, end);
+    const ocurrencias = rule.between(start, end, true);
     return ocurrencias.map((f) => ({
       ...evento,
       fecha: f,
@@ -61,9 +61,8 @@ export class PrismaAgendaRepository implements AgendaRepository {
       ],
     };
 
-    const startDate = new Date(year, month - 1, 1, 0, 0, 0, 0);
-    const endDate = new Date(year, month, 0, 23, 59, 59, 999);
-
+    const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
+    const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
     where.AND = [
       {
         OR: [
