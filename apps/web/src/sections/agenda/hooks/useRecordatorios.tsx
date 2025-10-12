@@ -1,4 +1,5 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { TypeOfOperation } from "@/core/application/services/agenda.service";
 import { isSameDay } from "date-fns";
 import { useEffect, useState } from "react";
 
@@ -69,14 +70,20 @@ function useRecordatorios({ currentMonth, general }: Props) {
     }
   };
 
-  const updateRecordatorio = async (recordatorioData: RecordatorioAgenda) => {
-    const response = await authFetch(`/api/agenda/${recordatorioData.id}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(recordatorioData),
-    });
+  const updateRecordatorio = async (
+    recordatorioData: RecordatorioAgenda,
+    typeOfUpdate: TypeOfOperation
+  ) => {
+    const response = await authFetch(
+      `/api/agenda/${recordatorioData.id}?typeOfUpdate=${typeOfUpdate}`,
+      {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(recordatorioData),
+      }
+    );
     const data = await response.json();
 
     if (response.ok) {
@@ -86,11 +93,17 @@ function useRecordatorios({ currentMonth, general }: Props) {
     }
   };
 
-  const deleteRecordatorio = async (id: number) => {
+  const deleteRecordatorio = async (
+    id: number,
+    typeOfDelete: TypeOfOperation
+  ) => {
     try {
-      const response = await authFetch(`/api/agenda/${id}`, {
-        method: "DELETE",
-      });
+      const response = await authFetch(
+        `/api/agenda/${id}?typeOfDelete=${typeOfDelete}`,
+        {
+          method: "DELETE",
+        }
+      );
 
       if (response.ok) {
         // Actualizar la lista de recordatorios

@@ -29,9 +29,16 @@ export type CreateAgendaExceptionInput = {
 
 export interface AgendaRepository {
   list(params: ListAgendaParams): Promise<{ items: any[]; total: number }>;
-  create(input: CreateAgendaInput): Promise<any>;
+  create(input: CreateAgendaInput, deps?: { tx?: any }): Promise<any>;
   findById(id: number): Promise<any | null>;
-  update(id: number, data: Partial<CreateAgendaInput>): Promise<any>;
+  update(
+    id: number,
+    data: Partial<CreateAgendaInput>,
+    deps?: { tx?: any }
+  ): Promise<any>;
   delete(id: number): Promise<void>;
-  createException(params: CreateAgendaExceptionInput): Promise<any>;
+  createException(
+    params: CreateAgendaExceptionInput,
+    deps?: { tx?: any }
+  ): Promise<any>;
 }

@@ -35,11 +35,14 @@ export class AgendaService {
     } else if (typeOfUpdate === "this") {
       return this.uow.run(async (tx) => {
         const newEventData = data as CreateAgendaInput;
-        const nuevoRecordatorio = await this.repo.create(newEventData);
-        await this.repo.createException({
-          recordatorioId: id,
-          fecha: newEventData.fecha,
-        });
+        const nuevoRecordatorio = await this.repo.create(newEventData, { tx });
+        await this.repo.createException(
+          {
+            recordatorioId: id,
+            fecha: newEventData.fecha,
+          },
+          { tx }
+        );
         return nuevoRecordatorio;
       });
     } else {
@@ -47,13 +50,20 @@ export class AgendaService {
       const newEventData = data as CreateAgendaInput;
 
       return this.uow.run(async (tx) => {
-        await this.repo.update(id, {
-          fechaFinRecurrencia: newEventData.fecha,
-        });
-        await this.repo.createException({
-          recordatorioId: id,
-          fecha: newEventData.fecha,
-        });
+        await this.repo.update(
+          id,
+          {
+            fechaFinRecurrencia: newEventData.fecha,
+          },
+          { tx }
+        );
+        await this.repo.createException(
+          {
+            recordatorioId: id,
+            fecha: newEventData.fecha,
+          },
+          { tx }
+        );
       });
     }
   }
@@ -69,10 +79,8 @@ export class AgendaService {
       });
     } else {
       // this_and_following
-      return this.uow.run(async (tx) => {
-        await this.repo.update(id, {
-          fechaFinRecurrencia: recordatorio.fecha,
-        });
+      await this.repo.update(id, {
+        fechaFinRecurrencia: recordatorio.fecha,
       });
     }
   }

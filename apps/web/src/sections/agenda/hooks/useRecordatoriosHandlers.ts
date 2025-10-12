@@ -1,4 +1,5 @@
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
+import { TypeOfOperation } from "@/core/application/services/agenda.service";
 import { useAgendaUIContext } from "../contexts/AgendaUIContext";
 import { useCalendarContext } from "../contexts/CalendarContext";
 import { RecordatorioAgenda } from "./useRecordatorios";
@@ -14,7 +15,7 @@ function useRecordatoriosHandlers() {
     createRecordatorio,
     forceRefreshRecordatorios,
   } = useCalendarContext();
-  const handleDelete = async () => {
+  const handleDelete = async (typeOfDelete: TypeOfOperation) => {
     if (!currentRecordatorio) {
       setSnackbar({
         open: true,
@@ -26,7 +27,7 @@ function useRecordatoriosHandlers() {
     }
     try {
       setLoading(true);
-      await deleteRecordatorio(currentRecordatorio?.id);
+      await deleteRecordatorio(currentRecordatorio?.id, typeOfDelete);
       setLoading(false);
       setSnackbar({
         open: true,
@@ -48,10 +49,7 @@ function useRecordatoriosHandlers() {
   const toggleHecho = async (recordatorio: RecordatorioAgenda) => {
     try {
       setLoading(true);
-      await updateRecordatorio({
-        ...recordatorio,
-        hecho: !recordatorio.hecho,
-      });
+      await updateRecordatorio(recordatorio, "this");
       setLoading(false);
       setSnackbar({
         open: true,
@@ -90,10 +88,13 @@ function useRecordatoriosHandlers() {
     setIsModalOpen(false);
   };
 
-  const handleUpdate = async (recordatorio: RecordatorioAgenda) => {
+  const handleUpdate = async (
+    recordatorio: RecordatorioAgenda,
+    typeOfUpdate: TypeOfOperation
+  ) => {
     try {
       setLoading(true);
-      await updateRecordatorio(recordatorio);
+      await updateRecordatorio(recordatorio, typeOfUpdate);
       setLoading(false);
       setSnackbar({
         open: true,

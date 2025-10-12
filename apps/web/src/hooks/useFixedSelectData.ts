@@ -50,6 +50,12 @@ function useFixedSelectData() {
     { value: "Anual", label: "Anual" },
   ];
 
+  const typeOfOperation = [
+    { value: "this", label: "Este" },
+    { value: "all", label: "Todos" },
+    { value: "this_and_following", label: "Este y los siguientes" },
+  ];
+
   return {
     tipoOperacion,
     currency,
@@ -58,6 +64,7 @@ function useFixedSelectData() {
     siNo,
     presupuestoEstadoOptions,
     agendaEventRecurrence,
+    typeOfOperation,
   };
 }
 

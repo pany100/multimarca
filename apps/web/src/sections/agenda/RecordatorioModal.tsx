@@ -1,6 +1,7 @@
 import CustomInputBoolean from "@/components/formV2/CustomInputBoolean";
 import CustomInputDate from "@/components/formV2/CustomInputDate";
 import CustomInputText from "@/components/formV2/CustomInputText";
+import CustomRadioButton from "@/components/formV2/CustomRadioButton";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import FormModal from "@/components/formV2/FormModal";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
@@ -19,7 +20,7 @@ import useRecordatoriosHandlers from "./hooks/useRecordatoriosHandlers";
 function RecordatorioModal() {
   const { isModalOpen, setIsModalOpen, loading, day } = useAgendaUIContext();
   const { handleCreate, handleUpdate } = useRecordatoriosHandlers();
-  const { agendaEventRecurrence } = useFixedSelectData();
+  const { agendaEventRecurrence, typeOfOperation } = useFixedSelectData();
 
   const { currentRecordatorio } = useCalendarContext();
   const methods = useForm<UpdateAgendaSchema>({
@@ -50,15 +51,18 @@ function RecordatorioModal() {
 
   const onSubmit = (data: UpdateAgendaSchema) => {
     if (currentRecordatorio) {
-      handleUpdate({
-        id: currentRecordatorio.id,
-        titulo: data.titulo || "",
-        fecha: data.fecha || new Date(),
-        descripcion: data.descripcion || null,
-        hecho: data.hecho || false,
-        recurrence: data.recurrence || "no",
-        fechaFinRecurrencia: data.fechaFinRecurrencia || null,
-      });
+      handleUpdate(
+        {
+          id: currentRecordatorio.id,
+          titulo: data.titulo || "",
+          fecha: data.fecha || new Date(),
+          descripcion: data.descripcion || null,
+          hecho: data.hecho || false,
+          recurrence: data.recurrence || "no",
+          fechaFinRecurrencia: data.fechaFinRecurrencia || null,
+        },
+        "this"
+      );
     } else {
       handleCreate({
         titulo: data.titulo || "",
@@ -108,6 +112,14 @@ function RecordatorioModal() {
               <CustomInputDate
                 name="fechaFinRecurrencia"
                 label="Fecha Fin Recurrencia"
+              />
+            </Grid>
+            <Grid item xs={6}>
+              <CustomRadioButton
+                options={typeOfOperation}
+                name="typeOfOperation"
+                label="Tipo de Operación"
+                helperText="Selecciona cómo quieres actualizar el evento recurrente"
               />
             </Grid>
             <Grid item xs={12}>

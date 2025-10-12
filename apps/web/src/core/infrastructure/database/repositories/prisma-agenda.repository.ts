@@ -106,7 +106,7 @@ export class PrismaAgendaRepository implements AgendaRepository {
         orderBy: { fecha: "asc" },
       }),
       prisma.recordatorioAgenda.count({ where }),
-      this.fingExceptionsByDate(startDate, endDate),
+      this.findExceptionsByDate(startDate, endDate),
     ]);
 
     // Expandimos los recurrentes
@@ -126,27 +126,37 @@ export class PrismaAgendaRepository implements AgendaRepository {
     return buildPageResult(expanded, expanded.length, page, size);
   }
 
-  async create(input: CreateAgendaInput) {
-    return prisma.recordatorioAgenda.create({ data: input });
+  async create(input: CreateAgendaInput, deps?: { tx?: any }) {
+    const db = deps?.tx?.tx ?? deps?.tx ?? prisma;
+    return db.recordatorioAgenda.create({ data: input });
   }
 
   async findById(id: number) {
     return prisma.recordatorioAgenda.findUnique({ where: { id } });
   }
 
-  async update(id: number, data: Partial<CreateAgendaInput>) {
-    return prisma.recordatorioAgenda.update({ where: { id }, data });
+  async update(
+    id: number,
+    data: Partial<CreateAgendaInput>,
+    deps?: { tx?: any }
+  ) {
+    const db = deps?.tx?.tx ?? deps?.tx ?? prisma;
+    return db.recordatorioAgenda.update({ where: { id }, data });
   }
 
   async delete(id: number) {
     await prisma.recordatorioAgenda.delete({ where: { id } });
   }
 
-  async createException(params: CreateAgendaExceptionInput) {
-    return prisma.recordatorioRecurrenteExcepciones.create({ data: params });
+  async createException(
+    params: CreateAgendaExceptionInput,
+    deps?: { tx?: any }
+  ) {
+    const db = deps?.tx?.tx ?? deps?.tx ?? prisma;
+    return db.recordatorioRecurrenteExcepciones.create({ data: params });
   }
 
-  async fingExceptionsByDate(startDate: Date, endDate: Date) {
+  async findExceptionsByDate(startDate: Date, endDate: Date) {
     return prisma.recordatorioRecurrenteExcepciones.findMany({
       where: { fecha: { gte: startDate, lte: endDate } },
     });
