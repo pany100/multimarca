@@ -67,12 +67,19 @@ export async function DELETE(
 ) {
   try {
     const user = await getCurrentUser(_req);
+    const { searchParams } = new URL(_req.url);
+
     if (!user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
     const id = parseIdParam(params.id);
-    await new DeleteAgendaUseCase(buildService()).execute(id, user);
+
+    await new DeleteAgendaUseCase(buildService()).execute(
+      id,
+      user,
+      searchParams.get("deletingCurrentEvent") === "true"
+    );
     return NextResponse.json(
       { message: "Recordatorio eliminado correctamente" },
       { status: 200 }

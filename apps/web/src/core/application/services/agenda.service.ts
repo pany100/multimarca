@@ -44,7 +44,15 @@ export class AgendaService {
     }
   }
 
-  delete(id: number) {
-    return this.repo.delete(id);
+  async delete(id: number, deletingCurrentEvent: boolean) {
+    const recordatorio = await this.findById(id);
+    if (deletingCurrentEvent) {
+      return this.repo.delete(id);
+    } else {
+      return this.repo.createException({
+        recordatorioId: id,
+        fecha: recordatorio.fecha,
+      });
+    }
   }
 }

@@ -98,7 +98,7 @@ export class PrismaAgendaRepository implements AgendaRepository {
     }
 
     const skip = page * size;
-    const [items, total] = await Promise.all([
+    const [items, total, exceptions] = await Promise.all([
       prisma.recordatorioAgenda.findMany({
         where,
         skip,
@@ -106,12 +106,20 @@ export class PrismaAgendaRepository implements AgendaRepository {
         orderBy: { fecha: "asc" },
       }),
       prisma.recordatorioAgenda.count({ where }),
+      this.fingExceptionsByDate(startDate, endDate),
     ]);
 
     // Expandimos los recurrentes
-    const expanded = items.flatMap((evento) =>
-      this.expandirRecurrencia(evento, startDate, endDate)
-    );
+    const expanded = items
+      .flatMap((evento) => this.expandirRecurrencia(evento, startDate, endDate))
+      .filter(
+        (occ) =>
+          !exceptions.some(
+            (ex) =>
+              ex.recordatorioId === occ.id &&
+              ex.fecha.toDateString() === occ.fecha.toDateString()
+          )
+      );
 
     expanded.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
 
@@ -136,5 +144,11 @@ export class PrismaAgendaRepository implements AgendaRepository {
 
   async createException(params: CreateAgendaExceptionInput) {
     return prisma.recordatorioRecurrenteExcepciones.create({ data: params });
+  }
+
+  async fingExceptionsByDate(startDate: Date, endDate: Date) {
+    return prisma.recordatorioRecurrenteExcepciones.findMany({
+      where: { fecha: { gte: startDate, lte: endDate } },
+    });
   }
 }

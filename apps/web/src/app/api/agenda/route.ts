@@ -1,6 +1,7 @@
 import { AgendaService } from "@/core/application/services/agenda.service";
 import { CreateAgendaUseCase } from "@/core/application/use-cases/agenda/create-agenda.use-case";
 import { ListAgendaUseCase } from "@/core/application/use-cases/agenda/list-agenda.use-case";
+import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
 import { PrismaAgendaRepository } from "@/core/infrastructure/database/repositories/prisma-agenda.repository";
 import {
   createAgendaSchema,
@@ -19,7 +20,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
 
     const useCase = new ListAgendaUseCase(
-      new AgendaService(new PrismaAgendaRepository())
+      new AgendaService(new PrismaAgendaRepository(), new PrismaUnitOfWork())
     );
 
     const dto = await validateRequest(
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
     const dto = await validateRequest(body, createAgendaSchema);
 
     const useCase = new CreateAgendaUseCase(
-      new AgendaService(new PrismaAgendaRepository())
+      new AgendaService(new PrismaAgendaRepository(), new PrismaUnitOfWork())
     );
 
     const created = await useCase.execute({

@@ -4,14 +4,15 @@ export class DeleteAgendaUseCase {
   constructor(private readonly service: AgendaService) {}
   async execute(
     id: number,
-    user: { id: number; rol: { id: number; name: string } }
+    user: { id: number; rol: { id: number; name: string } },
+    deletingCurrentEvent: boolean
   ) {
     const existing = await this.service.findById(id);
     if (!existing) throw new Error("Recordatorio no encontrado");
     if (!existing.general && existing.userId !== user.id && user.rol.id !== 1) {
       throw new Error("No tienes permiso");
     }
-    await this.service.delete(id);
+    await this.service.delete(id, deletingCurrentEvent);
     return { ok: true };
   }
 }
