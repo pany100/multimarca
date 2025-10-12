@@ -76,6 +76,8 @@ export class AgendaService {
           },
           { tx }
         );
+        const nuevoRecordatorio = await this.repo.create(newEventData, { tx });
+        return nuevoRecordatorio;
       });
     }
   }
