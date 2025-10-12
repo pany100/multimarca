@@ -27,6 +27,19 @@ export class UpdateAgendaUseCase {
     if (!existing.general && existing.userId !== user.id && user.rol.id !== 1) {
       throw new Error("No tienes permiso");
     }
+    if (data.fecha) {
+      data.fecha = new Date(
+        Date.UTC(
+          data.fecha.getFullYear(),
+          data.fecha.getMonth(),
+          data.fecha.getDate(),
+          0,
+          0,
+          0,
+          0
+        )
+      );
+    }
     // reglas de negocio adicionales acá si hiciera falta
     return this.service.update(id, data, typeOfUpdate);
   }

@@ -7,7 +7,7 @@ import { RecordatorioAgenda } from "./useRecordatorios";
 
 function useRecordatoriosHandlers() {
   const { setSnackbar } = useSnackbarContext();
-  const { setIsDeleteModalOpen, setLoading, setIsModalOpen } =
+  const { setIsDeleteModalOpen, setLoading, setIsModalOpen, day } =
     useAgendaUIContext();
   const {
     currentRecordatorio,
@@ -17,7 +17,7 @@ function useRecordatoriosHandlers() {
     forceRefreshRecordatorios,
   } = useCalendarContext();
   const handleDelete = async (typeOfDelete: TypeOfOperation) => {
-    if (!currentRecordatorio) {
+    if (!currentRecordatorio || !day) {
       setSnackbar({
         open: true,
         message: "No se seleccionó ningún recordatorio",
@@ -28,7 +28,7 @@ function useRecordatoriosHandlers() {
     }
     try {
       setLoading(true);
-      await deleteRecordatorio(currentRecordatorio?.id, typeOfDelete);
+      await deleteRecordatorio(currentRecordatorio?.id, typeOfDelete, day);
       setLoading(false);
       setSnackbar({
         open: true,

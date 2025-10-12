@@ -93,6 +93,7 @@ export async function DELETE(
       {
         id,
         typeOfDelete: searchParams.get("typeOfDelete"),
+        refDate: searchParams.get("refDate"),
       },
       deleteAgendaSchema
     );
@@ -100,7 +101,8 @@ export async function DELETE(
     await new DeleteAgendaUseCase(buildService()).execute(
       id,
       user,
-      dto.typeOfDelete
+      dto.typeOfDelete,
+      dto.refDate
     );
     return NextResponse.json(
       { message: "Recordatorio eliminado correctamente" },

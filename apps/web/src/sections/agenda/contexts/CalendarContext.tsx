@@ -20,7 +20,8 @@ type CalendarContextType = {
   ) => Promise<void>;
   deleteRecordatorio: (
     id: number,
-    typeOfDelete: TypeOfOperation
+    typeOfDelete: TypeOfOperation,
+    refDate: Date
   ) => Promise<void>;
   getRecordatoriosForDay: (day: Date) => RecordatorioAgenda[];
   feriados: { id: number; fecha: string; descripcion: string }[];

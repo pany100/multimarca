@@ -82,19 +82,18 @@ export class AgendaService {
     }
   }
 
-  async delete(id: number, typeOfDelete: TypeOfOperation) {
-    const recordatorio = await this.findById(id);
+  async delete(id: number, typeOfDelete: TypeOfOperation, refDate: Date) {
     if (typeOfDelete === "all") {
       return this.repo.delete(id);
     } else if (typeOfDelete === "this") {
       return this.repo.createException({
         recordatorioId: id,
-        fecha: recordatorio.fecha,
+        fecha: refDate,
       });
     } else {
       // this_and_following
       await this.repo.update(id, {
-        fechaFinRecurrencia: recordatorio.fecha,
+        fechaFinRecurrencia: refDate,
       });
     }
   }

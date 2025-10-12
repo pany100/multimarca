@@ -93,11 +93,12 @@ function useRecordatorios({ currentMonth, general }: Props) {
 
   const deleteRecordatorio = async (
     id: number,
-    typeOfDelete: TypeOfOperation
+    typeOfDelete: TypeOfOperation,
+    refDate: Date
   ) => {
     try {
       const response = await authFetch(
-        `/api/agenda/${id}?typeOfDelete=${typeOfDelete}`,
+        `/api/agenda/${id}?typeOfDelete=${typeOfDelete}&refDate=${refDate}`,
         {
           method: "DELETE",
         }
