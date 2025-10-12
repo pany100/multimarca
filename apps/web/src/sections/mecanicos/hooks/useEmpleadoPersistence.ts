@@ -22,8 +22,25 @@ function useEmpleadoPersistence() {
     }
   };
 
+  const updateEmpleado = async (data: { id: number }) => {
+    try {
+      const response = await authFetch(`/api/mecanicos/${data.id}`, {
+        method: "PUT",
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorMessage = await response.json();
+        throw new Error(errorMessage.error);
+      }
+    } catch (error) {
+      throw error;
+    }
+  };
+
   return {
     createEmpleado,
+    updateEmpleado,
   };
 }
 
