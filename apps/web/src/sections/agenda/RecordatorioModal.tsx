@@ -7,6 +7,7 @@ import FormModal from "@/components/formV2/FormModal";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Box, Button, CircularProgress, Grid, Typography } from "@mui/material";
+import { Recurrence } from "@prisma/client";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import {
@@ -36,6 +37,7 @@ function RecordatorioModal() {
         hecho: currentRecordatorio.hecho,
         recurrence: currentRecordatorio.recurrence,
         fechaFinRecurrencia: currentRecordatorio.fechaFinRecurrencia || null,
+        typeOfUpdate: "this",
       });
     } else {
       reset({
@@ -43,8 +45,9 @@ function RecordatorioModal() {
         descripcion: "",
         fecha: day || new Date(),
         hecho: false,
-        recurrence: "no",
+        recurrence: Recurrence.No,
         fechaFinRecurrencia: null,
+        typeOfUpdate: "this",
       });
     }
   }, [currentRecordatorio, day, reset]);
@@ -61,7 +64,7 @@ function RecordatorioModal() {
           recurrence: data.recurrence || "no",
           fechaFinRecurrencia: data.fechaFinRecurrencia || null,
         },
-        "this"
+        data.typeOfUpdate
       );
     } else {
       handleCreate({
@@ -114,14 +117,16 @@ function RecordatorioModal() {
                 label="Fecha Fin Recurrencia"
               />
             </Grid>
-            <Grid item xs={6}>
-              <CustomRadioButton
-                options={typeOfOperation}
-                name="typeOfOperation"
-                label="Tipo de Operación"
-                helperText="Selecciona cómo quieres actualizar el evento recurrente"
-              />
-            </Grid>
+            {currentRecordatorio &&
+              currentRecordatorio.recurrence !== Recurrence.No && (
+                <Grid item xs={12}>
+                  <CustomRadioButton
+                    options={typeOfOperation}
+                    name="typeOfUpdate"
+                    label="Edición de elemento recurrente"
+                  />
+                </Grid>
+              )}
             <Grid item xs={12}>
               <Box
                 sx={{
