@@ -39,5 +39,6 @@ export const updateAgendaSchema = z.object({
   hecho: z.boolean().optional(),
   recurrence: z.string().optional(),
   fechaFinRecurrencia: z.coerce.date().optional().nullable(),
+  updatingRecurrentEvent: z.boolean(),
 });
 export type UpdateAgendaSchema = z.infer<typeof updateAgendaSchema>;

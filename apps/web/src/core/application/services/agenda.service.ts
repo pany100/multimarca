@@ -1,3 +1,4 @@
+import { UnitOfWork } from "@/core/domain/ports/uow.port";
 import type {
   AgendaRepository,
   CreateAgendaInput,
@@ -5,7 +6,10 @@ import type {
 } from "@/core/domain/repositories/agenda.repository";
 
 export class AgendaService {
-  constructor(private readonly repo: AgendaRepository) {}
+  constructor(
+    private readonly repo: AgendaRepository,
+    private readonly uow: UnitOfWork
+  ) {}
 
   list(params: ListAgendaParams) {
     return this.repo.list(params);
@@ -19,8 +23,25 @@ export class AgendaService {
     return this.repo.findById(id);
   }
 
-  update(id: number, data: Partial<CreateAgendaInput>) {
-    return this.repo.update(id, data);
+  update(
+    id: number,
+    data: Partial<CreateAgendaInput> & {
+      updatingRecurrentEvent: boolean;
+    }
+  ) {
+    if (data.updatingRecurrentEvent) {
+      return this.repo.update(id, data);
+    } else {
+      return this.uow.run(async (tx) => {
+        const newEventData = data as CreateAgendaInput;
+        const nuevoRecordatorio = await this.repo.create(newEventData);
+        await this.repo.createException({
+          recordatorioId: id,
+          fecha: newEventData.fecha,
+        });
+        return nuevoRecordatorio;
+      });
+    }
   }
 
   delete(id: number) {

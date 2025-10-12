@@ -22,10 +22,16 @@ export type CreateAgendaInput = {
   fechaFinRecurrencia?: Date | null;
 };
 
+export type CreateAgendaExceptionInput = {
+  fecha: Date;
+  recordatorioId: number;
+};
+
 export interface AgendaRepository {
   list(params: ListAgendaParams): Promise<{ items: any[]; total: number }>;
   create(input: CreateAgendaInput): Promise<any>;
   findById(id: number): Promise<any | null>;
   update(id: number, data: Partial<CreateAgendaInput>): Promise<any>;
   delete(id: number): Promise<void>;
+  createException(params: CreateAgendaExceptionInput): Promise<any>;
 }

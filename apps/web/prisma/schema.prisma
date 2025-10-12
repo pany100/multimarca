@@ -726,9 +726,17 @@ model RecordatorioAgenda {
   general     Boolean  @default(true)
   recurrence  Recurrence   @default(No)
   fechaFinRecurrencia       DateTime?
+  excepciones RecordatorioRecurrenteExcepciones[]
 
   @@index([fecha])
   @@index([userId], map: "RecordatorioAgenda_userId_fkey")
+}
+
+model RecordatorioRecurrenteExcepciones {
+  id          Int      @id @default(autoincrement())
+  recordatorioId Int
+  recordatorio RecordatorioAgenda @relation(fields: [recordatorioId], references: [id], onDelete: Cascade)
+  fecha       DateTime
 }
 
 model TareaAdministrativa {

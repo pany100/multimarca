@@ -2,6 +2,7 @@ import { AgendaService } from "@/core/application/services/agenda.service";
 import { DeleteAgendaUseCase } from "@/core/application/use-cases/agenda/delete-agenda.use-case";
 import { GetAgendaUseCase } from "@/core/application/use-cases/agenda/get-agenda.use-case";
 import { UpdateAgendaUseCase } from "@/core/application/use-cases/agenda/update-agenda.use-case";
+import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
 import { PrismaAgendaRepository } from "@/core/infrastructure/database/repositories/prisma-agenda.repository";
 import { updateAgendaSchema } from "@/core/infrastructure/validation/schemas/agenda.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
@@ -11,7 +12,10 @@ import { getCurrentUser } from "@/utils/authFetch";
 import { NextResponse } from "next/server";
 
 function buildService() {
-  return new AgendaService(new PrismaAgendaRepository());
+  return new AgendaService(
+    new PrismaAgendaRepository(),
+    new PrismaUnitOfWork()
+  );
 }
 
 export async function GET(

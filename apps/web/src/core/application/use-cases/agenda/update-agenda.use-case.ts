@@ -9,6 +9,7 @@ export class UpdateAgendaUseCase {
       descripcion?: string | null;
       fecha?: Date;
       hecho?: boolean;
+      updatingRecurrentEvent: boolean;
     },
     user: {
       id: number;

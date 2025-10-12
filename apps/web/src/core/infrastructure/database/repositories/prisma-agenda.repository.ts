@@ -1,5 +1,6 @@
 import type {
   AgendaRepository,
+  CreateAgendaExceptionInput,
   CreateAgendaInput,
   ListAgendaParams,
 } from "@/core/domain/repositories/agenda.repository";
@@ -131,5 +132,9 @@ export class PrismaAgendaRepository implements AgendaRepository {
 
   async delete(id: number) {
     await prisma.recordatorioAgenda.delete({ where: { id } });
+  }
+
+  async createException(params: CreateAgendaExceptionInput) {
+    return prisma.recordatorioRecurrenteExcepciones.create({ data: params });
   }
 }
