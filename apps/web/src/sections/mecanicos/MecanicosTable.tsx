@@ -1,6 +1,6 @@
 import UploadImageModal from "@/components/UploadImageModal";
 import { useFetch } from "@/contexts/FetchContext";
-import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Alert, MenuItem, Snackbar } from "@mui/material";
 import { GridRenderCellParams } from "@mui/x-data-grid";
@@ -107,9 +107,12 @@ function MecanicosTable({
   const customActions = (params: any) => {
     const defaultActions = extraActions ? extraActions(params) : [];
     const customActions: React.ReactNode[] = [
-      <MenuItem key="dni" onClick={() => handleExtraAction(params.id)}>
-        <CameraAltIcon sx={{ mr: 1 }} />
-        Agregar Foto DNI
+      <MenuItem
+        key="edit"
+        onClick={() => router.push(`/dashboard/mecanicos/${params.id}/editar`)}
+      >
+        <EditIcon sx={{ mr: 1 }} />
+        Editar
       </MenuItem>,
       <MenuItem
         key="edit"
@@ -127,7 +130,7 @@ function MecanicosTable({
         title="Colaboradores"
         columns={columns}
         apiEndpoint="/api/mecanicos"
-        ctaCb={ctaCb}
+        ctaCb={() => router.push("/dashboard/mecanicos/nuevo")}
         extraActions={customActions}
         {...rest}
       />
