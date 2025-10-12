@@ -4,6 +4,7 @@ import type {
   CreateAgendaInput,
   ListAgendaParams,
 } from "@/core/domain/repositories/agenda.repository";
+import { Recurrence } from "@prisma/client";
 
 export type TypeOfOperation = "this" | "this_and_following" | "all";
 
@@ -25,13 +26,24 @@ export class AgendaService {
     return this.repo.findById(id);
   }
 
-  update(
+  async update(
     id: number,
     data: Partial<CreateAgendaInput>,
     typeOfUpdate: TypeOfOperation
   ) {
+    const recordatorio = await this.findById(id);
     if (typeOfUpdate === "all") {
-      return this.repo.update(id, data);
+      if (recordatorio.recurrence === Recurrence.No) {
+        return this.repo.update(id, data);
+      } else {
+        return this.repo.update(id, {
+          titulo: data.titulo,
+          descripcion: data.descripcion,
+          hecho: data.hecho,
+          fechaFinRecurrencia: data.fechaFinRecurrencia,
+          recurrence: data.recurrence,
+        });
+      }
     } else if (typeOfUpdate === "this") {
       return this.uow.run(async (tx) => {
         const newEventData = data as CreateAgendaInput;
