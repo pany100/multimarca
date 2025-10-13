@@ -39,4 +39,16 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
       },
     });
   }
+
+  findById(id: number): Promise<Empleado | null> {
+    return prisma.empleado.findUnique({
+      where: { id },
+    });
+  }
+
+  async delete(id: number): Promise<Empleado | null> {
+    return prisma.empleado.delete({
+      where: { id },
+    });
+  }
 }

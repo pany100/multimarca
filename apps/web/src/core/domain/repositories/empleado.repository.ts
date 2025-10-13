@@ -6,4 +6,6 @@ import { EmpleadoVO } from "../value-objects/empleado-vo";
 export interface EmpleadoRepository {
   listPaged(dto: ListMecanicosQueryData): Promise<PageResult<Empleado>>;
   create(dto: EmpleadoVO): Promise<Empleado>;
+  findById(id: number): Promise<Empleado | null>;
+  delete(id: number): Promise<Empleado | null>;
 }

@@ -40,6 +40,11 @@ export const editMecanicoSchema = baseMecanicoSchema.extend({
   id: z.number().int().positive("El ID debe ser un número positivo"),
 });
 
+export const getMecanicoSchema = z.object({
+  id: z.number().int().positive("El ID debe ser un número positivo"),
+});
+
 // Tipos TypeScript derivados de los schemas
 export type CreateMecanicoData = z.infer<typeof createMecanicoSchema>;
 export type EditMecanicoData = z.infer<typeof editMecanicoSchema>;
+export type GetMecanicoData = z.infer<typeof getMecanicoSchema>;

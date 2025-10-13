@@ -20,7 +20,7 @@ type Props = {
     postal_code: string | null;
     start_date: string | null;
     birthday: string | null;
-    tipo: string | null;
+    tipo: "Mecanico" | "Administrativo" | null;
   };
 };
 
@@ -38,6 +38,7 @@ function EditEmpleadoForm({ empleado }: Props) {
       postal_code: empleado.postal_code,
       start_date: empleado.start_date ? new Date(empleado.start_date) : null,
       birthday: empleado.birthday ? new Date(empleado.birthday) : null,
+      tipo: empleado.tipo,
       dniImagePath: empleado.dniImagePath,
     },
   });

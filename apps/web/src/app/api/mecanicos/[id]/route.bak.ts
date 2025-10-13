@@ -1,10 +1,3 @@
-import { EmpleadoService } from "@/core/application/services/empleados.service";
-import { DeleteEmpleadoUseCase } from "@/core/application/use-cases/mecanicos/delete-empleado.use-case";
-import { GetEmpleadoUseCase } from "@/core/application/use-cases/mecanicos/get-empleado.use-case";
-import { PrismaEmpleadoRepository } from "@/core/infrastructure/database/repositories/prisma-empleado.repository";
-import { getMecanicoSchema } from "@/core/infrastructure/validation/schemas/mecanico.schema";
-import { handleApiError } from "@/shared/middleware/error-handler.middleware";
-import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -14,13 +7,31 @@ export async function GET(
 ) {
   try {
     const id = parseInt(params.id);
-    const dto = await validateRequest({ id }, getMecanicoSchema);
-    const empleado = await new GetEmpleadoUseCase(
-      new EmpleadoService(new PrismaEmpleadoRepository())
-    ).execute(dto.id);
-    return NextResponse.json(empleado);
+
+    const empleado = await prisma.empleado.findUnique({
+      where: { id },
+    });
+
+    if (!empleado) {
+      return NextResponse.json(
+        { error: "Empleado no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    // Convertir BigInt a string para serialización
+    const empleadoSerializable = {
+      ...empleado,
+      dni: empleado.dni ? empleado.dni.toString() : null,
+    };
+
+    return NextResponse.json(empleadoSerializable);
   } catch (error) {
-    return handleApiError(error);
+    console.error("Error al obtener empleado:", error);
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
   }
 }
 
@@ -85,21 +96,26 @@ export async function DELETE(
 ) {
   try {
     const id = parseInt(params.id);
-    const dto = await validateRequest({ id }, getMecanicoSchema);
-    const empleado = await new DeleteEmpleadoUseCase(
-      new EmpleadoService(new PrismaEmpleadoRepository())
-    ).execute(dto.id);
 
-    if (!empleado) {
+    const mecanicoEliminado = await prisma.empleado.delete({
+      where: { id },
+    });
+
+    if (!mecanicoEliminado) {
       return NextResponse.json(
         { error: "Mecánico no encontrado" },
         { status: 404 }
       );
     }
+
     return NextResponse.json({
       message: "Mecánico eliminado con éxito",
     });
   } catch (error) {
-    return handleApiError(error);
+    console.error("Error al eliminar mecánico:", error);
+    return NextResponse.json(
+      { error: "Error al eliminar el mecánico" },
+      { status: 500 }
+    );
   }
 }
