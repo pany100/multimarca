@@ -26,8 +26,8 @@ const baseMecanicoSchema = z.object({
   address: z.string().nullable().optional(),
   state: z.string().nullable().optional(),
   postal_code: z.string().nullable().optional(),
-  start_date: z.date().nullable().optional(),
-  birthday: z.date().nullable().optional(),
+  start_date: z.coerce.date().nullable().optional(),
+  birthday: z.coerce.date().nullable().optional(),
   tipo: z.enum(["Mecanico", "Administrativo"]).nullable().optional(),
   dniImagePath: z.string().nullable().optional(),
 });
