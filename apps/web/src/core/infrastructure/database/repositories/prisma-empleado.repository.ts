@@ -51,4 +51,27 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
       where: { id },
     });
   }
+
+  update(empleado: EmpleadoVO): Promise<Empleado> {
+    if (!empleado.id) {
+      throw new Error("El ID del empleado es requerido");
+    }
+    return prisma.empleado.update({
+      where: { id: empleado.id },
+      data: {
+        name: empleado.name,
+        start_date: empleado.startDate,
+        dni: empleado.dni,
+        address: empleado.address,
+        city: empleado.city,
+        state: empleado.state,
+        postal_code: empleado.postalCode,
+        email: empleado.email,
+        phone: empleado.phone,
+        tipo: empleado.tipo,
+        birthday: empleado.birthday,
+        dniImagePath: empleado.dniImagePath,
+      },
+    });
+  }
 }

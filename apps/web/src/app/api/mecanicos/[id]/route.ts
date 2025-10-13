@@ -1,12 +1,15 @@
 import { EmpleadoService } from "@/core/application/services/empleados.service";
 import { DeleteEmpleadoUseCase } from "@/core/application/use-cases/mecanicos/delete-empleado.use-case";
+import { EditEmpleadoUseCase } from "@/core/application/use-cases/mecanicos/edit-empleado.use-case";
 import { GetEmpleadoUseCase } from "@/core/application/use-cases/mecanicos/get-empleado.use-case";
 import { PrismaEmpleadoRepository } from "@/core/infrastructure/database/repositories/prisma-empleado.repository";
-import { getMecanicoSchema } from "@/core/infrastructure/validation/schemas/mecanico.schema";
+import {
+  editMecanicoSchema,
+  getMecanicoSchema,
+} from "@/core/infrastructure/validation/schemas/mecanico.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
-import prisma from "src/lib/prisma";
 
 export async function GET(
   request: Request,
@@ -31,51 +34,19 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const {
-      name,
-      start_date,
-      dni,
-      address,
-      city,
-      state,
-      postal_code,
-      email,
-      phone,
-      birthday,
-      tipo,
-    } = body;
-
-    if (!name || typeof name !== "string") {
-      return NextResponse.json(
-        { error: "Nombre de mecánico inválido o faltante" },
-        { status: 400 }
-      );
-    }
-
-    const mecanicoActualizado = await prisma.empleado.update({
-      where: { id },
-      data: {
-        name: name.toUpperCase(),
-        start_date: start_date ? new Date(start_date) : null,
-        dni: dni ? dni.toString() : null,
-        address,
-        city,
-        state,
-        postal_code,
-        email,
-        phone,
-        tipo,
-        birthday: birthday ? new Date(birthday) : null,
+    const dto = await validateRequest(
+      {
+        id,
+        ...body,
       },
-    });
-
-    return NextResponse.json(mecanicoActualizado);
-  } catch (error) {
-    console.error("Error al actualizar mecánico:", error);
-    return NextResponse.json(
-      { error: "Error al actualizar el mecánico" },
-      { status: 500 }
+      editMecanicoSchema
     );
+    const empleado = await new EditEmpleadoUseCase(
+      new EmpleadoService(new PrismaEmpleadoRepository())
+    ).execute(dto);
+    return NextResponse.json(empleado);
+  } catch (error) {
+    return handleApiError(error);
   }
 }
 

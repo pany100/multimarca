@@ -8,4 +8,5 @@ export interface EmpleadoRepository {
   create(dto: EmpleadoVO): Promise<Empleado>;
   findById(id: number): Promise<Empleado | null>;
   delete(id: number): Promise<Empleado | null>;
+  update(dto: EmpleadoVO): Promise<Empleado>;
 }

@@ -1,6 +1,7 @@
 import { EmpleadoRepository } from "@/core/domain/repositories/empleado.repository";
 import {
   CreateMecanicoData,
+  EditMecanicoData,
   ListMecanicosQueryData,
 } from "@/core/infrastructure/validation/schemas/mecanico.schema";
 import { PageResult } from "@/shared/utils/pagination";
@@ -32,7 +33,7 @@ export class EmpleadoService {
   }
 
   async create(dto: CreateMecanicoData): Promise<Empleado> {
-    const empleadoVO = EmpleadoVOMapper.transformDtoToVo(dto);
+    const empleadoVO = EmpleadoVOMapper.transformCreateDtoToVo(dto);
     const empleado = await this.repo.create(empleadoVO);
     const empleadoSerializable = this.transformToSerializable(empleado);
     return empleadoSerializable;
@@ -49,5 +50,12 @@ export class EmpleadoService {
 
   async delete(id: number): Promise<Empleado | null> {
     return this.repo.delete(id);
+  }
+
+  async update(dto: EditMecanicoData): Promise<Empleado> {
+    const empleadoVO = EmpleadoVOMapper.transformEditDtoToVo(dto);
+    const empleado = await this.repo.update(empleadoVO);
+    const empleadoSerializable = this.transformToSerializable(empleado);
+    return empleadoSerializable;
   }
 }
