@@ -1,30 +1,52 @@
-import { EmpleadoService } from "@/core/application/services/empleados.service";
-import { ListEmpleadosUseCase } from "@/core/application/use-cases/mecanicos/list-empleados.use-case";
-import { PrismaEmpleadoRepository } from "@/core/infrastructure/database/repositories/prisma-empleado.repository";
-import { listMecanicosQuerySchema } from "@/core/infrastructure/validation/schemas/mecanico.schema";
-import { handleApiError } from "@/shared/middleware/error-handler.middleware";
-import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const dto = await validateRequest(
-      {
-        page: parseInt(searchParams.get("page") || "0"),
-        size: parseInt(searchParams.get("size") || "10"),
-        query: searchParams.get("query") || "",
-        soloMecanicos: searchParams.get("mecanicos") === "true",
-      },
-      listMecanicosQuerySchema
+    const page = parseInt(searchParams.get("page") || "0");
+    const size = parseInt(searchParams.get("size") || "10");
+    const query = searchParams.get("query") || "";
+    const soloMecanicos = searchParams.get("mecanicos") === "true";
+
+    const skip = page * size;
+
+    const [mecanicos, total] = await Promise.all([
+      prisma.empleado.findMany({
+        where: {
+          name: { contains: query },
+          tipo: soloMecanicos ? "Mecanico" : undefined,
+        },
+        skip,
+        take: size,
+        orderBy: { name: "asc" },
+      }),
+      prisma.empleado.count({
+        where: {
+          name: { contains: query },
+          tipo: soloMecanicos ? "Mecanico" : undefined,
+        },
+      }),
+    ]);
+    // Convertir BigInt a string para serialización
+    const mecanicosSerializables = mecanicos.map((mecanico) => ({
+      ...mecanico,
+      dni: mecanico.dni ? mecanico.dni.toString() : null,
+    }));
+
+    return NextResponse.json({
+      items: mecanicosSerializables,
+      total,
+      page,
+      size,
+      totalPages: Math.ceil(total / size),
+    });
+  } catch (error) {
+    console.error("Error al obtener mecánicos:", error);
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
     );
-    const mecanicos = await new ListEmpleadosUseCase(
-      new EmpleadoService(new PrismaEmpleadoRepository())
-    ).execute(dto);
-    return NextResponse.json(mecanicos);
-  } catch (e) {
-    return handleApiError(e);
   }
 }
 
