@@ -1,7 +1,11 @@
 import { EmpleadoRepository } from "@/core/domain/repositories/empleado.repository";
-import { ListMecanicosQueryData } from "@/core/infrastructure/validation/schemas/mecanico.schema";
+import {
+  CreateMecanicoData,
+  ListMecanicosQueryData,
+} from "@/core/infrastructure/validation/schemas/mecanico.schema";
 import { PageResult } from "@/shared/utils/pagination";
 import { Empleado } from "@prisma/client";
+import { EmpleadoVOMapper } from "../mapper/empleado-vo.mapper";
 
 export class EmpleadoService {
   constructor(private readonly repo: EmpleadoRepository) {}
@@ -19,5 +23,15 @@ export class EmpleadoService {
       size: result.size,
       totalPages: result.totalPages,
     };
+  }
+
+  async create(dto: CreateMecanicoData): Promise<Empleado> {
+    const empleadoVO = EmpleadoVOMapper.transformDtoToVo(dto);
+    const empleado = await this.repo.create(empleadoVO);
+    const empleadoSerializable = {
+      ...empleado,
+      dni: empleado.dni ? empleado.dni.toString() : null,
+    };
+    return empleadoSerializable;
   }
 }

@@ -1,11 +1,14 @@
 import { EmpleadoService } from "@/core/application/services/empleados.service";
+import { CreateEmpleadosUseCase } from "@/core/application/use-cases/mecanicos/create-empleados.use-case";
 import { ListEmpleadosUseCase } from "@/core/application/use-cases/mecanicos/list-empleados.use-case";
 import { PrismaEmpleadoRepository } from "@/core/infrastructure/database/repositories/prisma-empleado.repository";
-import { listMecanicosQuerySchema } from "@/core/infrastructure/validation/schemas/mecanico.schema";
+import {
+  createMecanicoSchema,
+  listMecanicosQuerySchema,
+} from "@/core/infrastructure/validation/schemas/mecanico.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
-import prisma from "src/lib/prisma";
 
 export async function GET(request: Request) {
   try {
@@ -31,52 +34,12 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const {
-      name,
-      start_date,
-      dni,
-      address,
-      city,
-      state,
-      postal_code,
-      email,
-      phone,
-      tipo,
-      birthday,
-    } = body;
-
-    if (!name || typeof name !== "string") {
-      return NextResponse.json(
-        { error: "Nombre de mecánico inválido o faltante" },
-        { status: 400 }
-      );
-    }
-
-    const nuevoMecanico = await prisma.empleado.create({
-      data: {
-        name: name.toUpperCase(),
-        start_date: start_date ? new Date(start_date) : null,
-        dni: dni ? dni.toString() : null,
-        address,
-        city,
-        state,
-        postal_code,
-        email,
-        phone,
-        tipo,
-        birthday: birthday ? new Date(birthday) : null,
-      },
-    });
-    const mecanicoSerializable = {
-      ...nuevoMecanico,
-      dni: nuevoMecanico.dni ? nuevoMecanico.dni.toString() : null,
-    };
-    return NextResponse.json(mecanicoSerializable, { status: 201 });
-  } catch (error) {
-    console.error("Error al crear mecánico:", error);
-    return NextResponse.json(
-      { error: "No se pudo crear el mecánico" },
-      { status: 500 }
-    );
+    const dto = await validateRequest(body, createMecanicoSchema);
+    const result = await new CreateEmpleadosUseCase(
+      new EmpleadoService(new PrismaEmpleadoRepository())
+    ).execute(dto);
+    return NextResponse.json(result);
+  } catch (e) {
+    return handleApiError(e);
   }
 }

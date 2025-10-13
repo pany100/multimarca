@@ -1,4 +1,5 @@
 import { EmpleadoRepository } from "@/core/domain/repositories/empleado.repository";
+import { EmpleadoVO } from "@/core/domain/value-objects/empleado-vo";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { ListMecanicosQueryData } from "@/core/infrastructure/validation/schemas/mecanico.schema";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
@@ -18,5 +19,24 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
       dto.page,
       dto.size
     );
+  }
+
+  create(empleado: EmpleadoVO): Promise<Empleado> {
+    return prisma.empleado.create({
+      data: {
+        name: empleado.name,
+        start_date: empleado.startDate,
+        dni: empleado.dni,
+        address: empleado.address,
+        city: empleado.city,
+        state: empleado.state,
+        postal_code: empleado.postalCode,
+        email: empleado.email,
+        phone: empleado.phone,
+        tipo: empleado.tipo,
+        birthday: empleado.birthday,
+        dniImagePath: empleado.dniImagePath,
+      },
+    });
   }
 }
