@@ -1,3 +1,4 @@
+import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -23,6 +24,7 @@ export const schema = yup.object({
   start_date: yup.date().nullable(),
   birthday: yup.date().nullable(),
   tipo: yup.string().oneOf(["Mecanico", "Administrativo"]).nullable(),
+  dniImagePath: yup.string().nullable(),
 });
 
 function NewMecanicoForm() {
@@ -32,12 +34,19 @@ function NewMecanicoForm() {
 
   const { createEmpleado } = useEmpleadoPersistence();
   const router = useRouter();
+  const { setSnackbar } = useSnackbarContext();
 
   const onSubmit = async (data: any) => {
     try {
       await createEmpleado(data);
       router.push("/dashboard/mecanicos");
-    } catch (error) {}
+    } catch (error) {
+      setSnackbar({
+        message: "Error al crear el mecanico: " + error,
+        severity: "error",
+        open: true,
+      });
+    }
   };
 
   return (

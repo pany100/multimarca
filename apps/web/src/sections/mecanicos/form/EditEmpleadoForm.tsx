@@ -1,3 +1,4 @@
+import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
@@ -37,18 +38,29 @@ function EditEmpleadoForm({ empleado }: Props) {
       postal_code: empleado.postal_code,
       start_date: empleado.start_date ? new Date(empleado.start_date) : null,
       birthday: empleado.birthday ? new Date(empleado.birthday) : null,
-      tipo: empleado.tipo as "Mecanico" | "Administrativo" | null,
+      dniImagePath: empleado.dniImagePath,
     },
   });
 
   const { updateEmpleado } = useEmpleadoPersistence();
+  const { setSnackbar } = useSnackbarContext();
+
   const router = useRouter();
 
   const onSubmit = async (data: any) => {
     try {
-      await updateEmpleado(data);
+      await updateEmpleado({
+        ...data,
+        id: empleado.id,
+      });
       router.push("/dashboard/mecanicos");
-    } catch (error) {}
+    } catch (error) {
+      setSnackbar({
+        message: "Error al actualizar el mecanico: " + error,
+        severity: "error",
+        open: true,
+      });
+    }
   };
 
   return (

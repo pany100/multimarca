@@ -28,11 +28,6 @@ function MecanicosTable({
     severity: "success" as "success" | "error",
   });
 
-  const handleExtraAction = (empleado: string) => {
-    setSelectedEmpleado(empleado);
-    setModalOpen(true);
-  };
-
   const handleSaveDNIImage = async (file: File | null) => {
     if (file && selectedEmpleado) {
       try {
