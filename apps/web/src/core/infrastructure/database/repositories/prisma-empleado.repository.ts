@@ -2,7 +2,10 @@ import { EmpleadoRepository } from "@/core/domain/repositories/empleado.reposito
 import { OrdenReparacionWithRelations } from "@/core/domain/repositories/orden-reparacion.repository";
 import { EmpleadoVO } from "@/core/domain/value-objects/empleado-vo";
 import { prisma } from "@/core/infrastructure/database/prisma";
-import { ListMecanicosQueryData } from "@/core/infrastructure/validation/schemas/mecanico.schema";
+import {
+  ListMecanicosQueryData,
+  UpdateMecanicoDocsData,
+} from "@/core/infrastructure/validation/schemas/mecanico.schema";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
 import { Empleado } from "@prisma/client";
 
@@ -139,6 +142,20 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
       },
       orderBy: {
         fechaSalidaReparacion: "desc",
+      },
+    });
+  }
+
+  updateDocs(dto: UpdateMecanicoDocsData): Promise<Empleado> {
+    if (!dto.id) {
+      throw new Error("El ID del empleado es requerido");
+    }
+    return prisma.empleado.update({
+      where: { id: dto.id },
+      data: {
+        licenciaConducirPath: dto.licenciaConducirPath,
+        inscripcionMonotributoPath: dto.inscripcionMonotributoPath,
+        curriculumPath: dto.curriculumPath,
       },
     });
   }

@@ -6,6 +6,7 @@ import {
   EditMecanicoData,
   GetMecanicoReparacionesData,
   ListMecanicosQueryData,
+  UpdateMecanicoDocsData,
 } from "@/core/infrastructure/validation/schemas/mecanico.schema";
 import { PageResult } from "@/shared/utils/pagination";
 import { Empleado } from "@prisma/client";
@@ -85,5 +86,11 @@ export class EmpleadoService {
       };
     });
     return reparacionesSerializables;
+  }
+
+  async updateDocs(dto: UpdateMecanicoDocsData): Promise<Empleado> {
+    const empleado = await this.repo.updateDocs(dto);
+    const empleadoSerializable = this.transformToSerializable(empleado);
+    return empleadoSerializable;
   }
 }

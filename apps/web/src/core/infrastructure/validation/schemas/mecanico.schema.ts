@@ -59,3 +59,12 @@ export const getMecanicoReparacionesSchema = z.object({
 export type GetMecanicoReparacionesData = z.infer<
   typeof getMecanicoReparacionesSchema
 >;
+
+export const updateMecanicoDocsSchema = z.object({
+  id: z.number().int().positive("El ID debe ser un número positivo"),
+  licenciaConducirPath: z.string().nullable().optional(),
+  inscripcionMonotributoPath: z.string().nullable().optional(),
+  curriculumPath: z.string().nullable().optional(),
+});
+
+export type UpdateMecanicoDocsData = z.infer<typeof updateMecanicoDocsSchema>;

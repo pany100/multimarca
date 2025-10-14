@@ -1,4 +1,7 @@
-import { ListMecanicosQueryData } from "@/core/infrastructure/validation/schemas/mecanico.schema";
+import {
+  ListMecanicosQueryData,
+  UpdateMecanicoDocsData,
+} from "@/core/infrastructure/validation/schemas/mecanico.schema";
 import { PageResult } from "@/shared/utils/pagination";
 import { Empleado } from "@prisma/client";
 import { EmpleadoVO } from "../value-objects/empleado-vo";
@@ -15,4 +18,5 @@ export interface EmpleadoRepository {
     from: Date,
     to: Date
   ): Promise<OrdenReparacionWithRelations[]>;
+  updateDocs(dto: UpdateMecanicoDocsData): Promise<Empleado>;
 }

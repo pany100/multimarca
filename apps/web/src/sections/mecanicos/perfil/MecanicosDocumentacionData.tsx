@@ -1,10 +1,19 @@
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Button, Grid, Typography } from "@mui/material";
+import { useRouter } from "next/navigation";
 import { useEmpleadosContext } from "../context/EmpleadosContext";
 import MecanicosImagenData from "./MecanicosImagenData";
 
 function MecanicosDocumentacionData() {
   const { empleado } = useEmpleadosContext();
+  const router = useRouter();
 
+  const handleUpdate = () => {
+    if (empleado?.id) {
+      router.push(
+        `/dashboard/mecanicos/${empleado.id}/actualizar-documentacion`
+      );
+    }
+  };
   const documentos = [
     {
       label: "Licencia de Conducir",
@@ -60,6 +69,18 @@ function MecanicosDocumentacionData() {
               </Box>
             </Grid>
           ))}
+          <Grid item xs={12}>
+            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
+              <Button
+                variant="outlined"
+                color="primary"
+                onClick={handleUpdate}
+                disabled={!empleado?.id}
+              >
+                Actualizar Documentación
+              </Button>
+            </Box>
+          </Grid>
         </Grid>
       </Box>
     </>
