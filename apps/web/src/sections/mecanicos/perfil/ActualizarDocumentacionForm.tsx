@@ -1,4 +1,4 @@
-import CustomImageInput from "@/components/formV2/CustomImageInput";
+import CustomFileInput from "@/components/formV2/CustomFileInput";
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { yupResolver } from "@hookform/resolvers/yup";
 import {
@@ -103,7 +103,7 @@ function ActualizarDocumentacionForm() {
                     mb: 2,
                   }}
                 >
-                  <CustomImageInput
+                  <CustomFileInput
                     name="licenciaConducirPath"
                     label="Licencia de Conducir"
                   />
@@ -121,7 +121,7 @@ function ActualizarDocumentacionForm() {
                     mb: 2,
                   }}
                 >
-                  <CustomImageInput
+                  <CustomFileInput
                     name="inscripcionMonotributoPath"
                     label="Inscripción Monotributo"
                   />
@@ -139,7 +139,7 @@ function ActualizarDocumentacionForm() {
                     mb: 2,
                   }}
                 >
-                  <CustomImageInput name="curriculumPath" label="Curriculum" />
+                  <CustomFileInput name="curriculumPath" label="Curriculum" />
                 </Grid>
               </Grid>
             </Paper>

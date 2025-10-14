@@ -1,7 +1,7 @@
 import { Box, Button, Grid, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEmpleadosContext } from "../context/EmpleadosContext";
-import MecanicosImagenData from "./MecanicosImagenData";
+import MecanicosFileData from "./MecanicosFileData";
 
 function MecanicosDocumentacionData() {
   const { empleado } = useEmpleadosContext();
@@ -71,7 +71,7 @@ function MecanicosDocumentacionData() {
                     justifyContent: "center",
                   }}
                 >
-                  <MecanicosImagenData
+                  <MecanicosFileData
                     filePath={documento.filePath || null}
                     alt={documento.label}
                     maxWidth={200}
