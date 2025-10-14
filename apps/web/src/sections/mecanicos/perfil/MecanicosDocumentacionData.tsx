@@ -51,21 +51,33 @@ function MecanicosDocumentacionData() {
                   borderColor: "divider",
                   borderRadius: 1,
                   bgcolor: "background.paper",
+                  height: 350, // Fixed height for all cards
+                  justifyContent: "space-between", // Distribute space evenly
                 }}
               >
                 <Typography
                   variant="subtitle2"
                   fontWeight="bold"
                   textAlign="center"
+                  sx={{ minHeight: 40, display: "flex", alignItems: "center" }} // Fixed height for title
                 >
                   {documento.label}
                 </Typography>
-                <MecanicosImagenData
-                  filePath={documento.filePath || null}
-                  alt={documento.label}
-                  maxWidth={200}
-                  maxHeight={200}
-                />
+                <Box
+                  sx={{
+                    flex: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <MecanicosImagenData
+                    filePath={documento.filePath || null}
+                    alt={documento.label}
+                    maxWidth={200}
+                    maxHeight={200}
+                  />
+                </Box>
               </Box>
             </Grid>
           ))}

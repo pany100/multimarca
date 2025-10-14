@@ -22,13 +22,7 @@ const schema = yup.object({
   curriculumPath: yup.string().nullable(),
 });
 
-interface ActualizarDocumentacionFormProps {
-  empleadoId: string;
-}
-
-function ActualizarDocumentacionForm({
-  empleadoId,
-}: ActualizarDocumentacionFormProps) {
+function ActualizarDocumentacionForm() {
   const methods = useForm({
     resolver: yupResolver(schema),
   });
@@ -39,13 +33,16 @@ function ActualizarDocumentacionForm({
   const { setSnackbar } = useSnackbarContext();
 
   const handleCancel = () => {
-    router.push(`/dashboard/mecanicos/${empleadoId}/ver`);
+    router.push(`/dashboard/mecanicos/${empleado?.id}/ver`);
   };
 
   const onSubmit = async (data: any) => {
     try {
-      await updateEmpleadoDocs(data);
-      router.push("/dashboard/mecanicos");
+      await updateEmpleadoDocs({
+        ...data,
+        id: empleado?.id,
+      });
+      router.push(`/dashboard/mecanicos/${empleado?.id}/ver`);
     } catch (error) {
       setSnackbar({
         message: "Error al actualizar el mecanico: " + error,

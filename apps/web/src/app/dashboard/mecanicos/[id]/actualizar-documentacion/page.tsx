@@ -23,7 +23,7 @@ export default function ActualizarDocumentacionPage({
       </AppBar>
       <SnackbarProvider>
         <EmpleadosProvider id={params.id}>
-          <ActualizarDocumentacionForm empleadoId={params.id} />
+          <ActualizarDocumentacionForm />
           <FormSnackbar />
         </EmpleadosProvider>
       </SnackbarProvider>
