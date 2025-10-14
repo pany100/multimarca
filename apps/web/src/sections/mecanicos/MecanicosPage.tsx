@@ -8,11 +8,12 @@ import {
 } from "@mui/material";
 import { useEmpleadosContext } from "./context/EmpleadosContext";
 import MecanicosActivity from "./perfil/MecanicosActivity";
+import MecanicosDocumentacionData from "./perfil/MecanicosDocumentacionData";
 import MecanicosPerfilHeader from "./perfil/MecanicosPerfilHeader";
 import MecanicosPersonalData from "./perfil/MecanicosPersonalData";
 
 function MecanicosPage() {
-  const { loading } = useEmpleadosContext();
+  const { loading, empleado } = useEmpleadosContext();
   if (loading) {
     return (
       <Box
@@ -55,7 +56,8 @@ function MecanicosPage() {
       </Grid>
 
       <MecanicosPersonalData />
-      <MecanicosActivity />
+      {empleado?.tipo === "Mecanico" && <MecanicosActivity />}
+      <MecanicosDocumentacionData />
     </Container>
   );
 }
