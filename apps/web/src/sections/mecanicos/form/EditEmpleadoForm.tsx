@@ -42,7 +42,7 @@ function EditEmpleadoForm({ empleado }: Props) {
         ...data,
         id: empleado.id,
       });
-      router.push("/dashboard/mecanicos");
+      router.push(`/dashboard/mecanicos/${empleado.id}/ver`);
     } catch (error) {
       setSnackbar({
         message: "Error al actualizar el mecanico: " + error,

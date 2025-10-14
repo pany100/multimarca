@@ -14,6 +14,7 @@ export class EmpleadoVO {
     public readonly phone: string | null,
     public readonly tipo: TipoEmpleado | undefined,
     public readonly birthday: Date | null,
-    public readonly dniImagePath: string | null
+    public readonly dniImagePath: string | null,
+    public readonly contactoEmergencia: string | null
   ) {}
 }

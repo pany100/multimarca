@@ -71,6 +71,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         tipo: empleado.tipo,
         birthday: empleado.birthday,
         dniImagePath: empleado.dniImagePath,
+        contactoEmergencia: empleado.contactoEmergencia,
       },
     });
   }
