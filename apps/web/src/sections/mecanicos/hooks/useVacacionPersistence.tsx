@@ -75,10 +75,28 @@ const useVacacionPersistence = () => {
     }
   };
 
+  const fetchVacacion = async (id: number) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/ausencias-acordadas/${id}`);
+      if (response.ok) {
+        const data = await response.json();
+        return data;
+      } else {
+        throw new Error("Error al obtener las vacaciones");
+      }
+    } catch (error) {
+      console.error("Error al obtener las vacaciones:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     createVacacion,
     deleteVacacion,
     updateVacacion,
+    fetchVacacion,
     loading,
   };
 };

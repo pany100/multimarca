@@ -43,9 +43,7 @@ function MecanicosVacacionesData() {
 
   const handleEdit = (vacacion: AusenciaProgramada) => {
     if (empleado?.id) {
-      router.push(
-        `/dashboard/mecanicos/${empleado.id}/vacaciones/${vacacion.id}/editar`
-      );
+      router.push(`/dashboard/vacaciones/${vacacion.id}/editar`);
     }
   };
 

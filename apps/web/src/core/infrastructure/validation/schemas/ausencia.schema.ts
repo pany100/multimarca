@@ -7,7 +7,7 @@ const baseSchema = z.object({
   estado: z.enum(["Pendiente", "Aprobada", "Rechazada", "Cancelada"]),
   observaciones: z.string().optional(),
   esGoceSueldo: z.boolean().optional(),
-  fechaCreacion: z.date().optional(),
+  fechaCreacion: z.coerce.date().optional(),
   fechaAprobacion: z.coerce.date().optional(),
   tipo: z.enum(["Vacaciones", "Licencia"]),
 });
