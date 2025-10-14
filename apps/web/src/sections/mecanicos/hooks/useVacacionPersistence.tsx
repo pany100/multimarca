@@ -27,8 +27,58 @@ const useVacacionPersistence = () => {
     }
   };
 
+  const deleteVacacion = async (id: number) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/ausencias-acordadas/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "Error al eliminar las vacaciones"
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateVacacion = async (id: number, data: any) => {
+    setLoading(true);
+    try {
+      const response = await fetch(`/api/ausencias-acordadas/${id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(
+          errorData.message || "Error al actualizar las vacaciones"
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      throw error;
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return {
     createVacacion,
+    deleteVacacion,
+    updateVacacion,
     loading,
   };
 };

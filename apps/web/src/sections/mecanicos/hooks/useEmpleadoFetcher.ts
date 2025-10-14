@@ -9,6 +9,8 @@ function useEmpleadoFetcher(id: string) {
   const [loading, setLoading] = useState(true);
   const [loadingReparaciones, setLoadingReparaciones] = useState(false);
 
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
   useEffect(() => {
     const fetchEmpleado = async () => {
       setLoading(true);
@@ -28,7 +30,7 @@ function useEmpleadoFetcher(id: string) {
     };
 
     fetchEmpleado();
-  }, [id]);
+  }, [id, refreshTrigger]);
 
   const fetchReparaciones = async (start: Date, end: Date) => {
     setLoadingReparaciones(true);
@@ -55,6 +57,8 @@ function useEmpleadoFetcher(id: string) {
     loading,
     loadingReparaciones,
     fetchReparaciones,
+    refreshTrigger,
+    setRefreshTrigger,
   };
 }
 

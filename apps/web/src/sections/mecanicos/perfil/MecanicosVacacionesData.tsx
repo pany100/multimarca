@@ -1,13 +1,32 @@
+import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { getFormattedDate } from "@/utils/fieldHelper";
-import { Box, Button, CardContent, Grid, Typography } from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
+import EditIcon from "@mui/icons-material/Edit";
+import {
+  Box,
+  Button,
+  CardContent,
+  Grid,
+  IconButton,
+  Typography,
+} from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { AusenciaProgramada } from "@prisma/client";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useEmpleadosContext } from "../context/EmpleadosContext";
+import useVacacionPersistence from "../hooks/useVacacionPersistence";
+import DeleteVacacionModal from "./DeleteVacacionModal";
 
 function MecanicosVacacionesData() {
-  const { empleado, loading } = useEmpleadosContext();
+  const { empleado, loading, setRefreshTrigger } = useEmpleadosContext();
   const router = useRouter();
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [selectedVacacion, setSelectedVacacion] =
+    useState<AusenciaProgramada | null>(null);
+  const [deleteLoading, setDeleteLoading] = useState(false);
+  const { deleteVacacion } = useVacacionPersistence();
+  const { setSnackbar } = useSnackbarContext();
 
   // Filter ausenciasProgramadas for vacations with esGoceSueldo = true and tipo = "Vacaciones"
   const vacaciones =
@@ -20,6 +39,50 @@ function MecanicosVacacionesData() {
     if (empleado?.id) {
       router.push(`/dashboard/mecanicos/${empleado.id}/agregar-vacaciones`);
     }
+  };
+
+  const handleEdit = (vacacion: AusenciaProgramada) => {
+    if (empleado?.id) {
+      router.push(
+        `/dashboard/mecanicos/${empleado.id}/vacaciones/${vacacion.id}/editar`
+      );
+    }
+  };
+
+  const handleDeleteClick = (vacacion: AusenciaProgramada) => {
+    setSelectedVacacion(vacacion);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!selectedVacacion) return;
+
+    setDeleteLoading(true);
+    try {
+      await deleteVacacion(selectedVacacion.id);
+
+      setDeleteModalOpen(false);
+      setSelectedVacacion(null);
+      setRefreshTrigger((prev) => prev + 1);
+      setSnackbar({
+        message: "Vacación eliminada exitosamente",
+        severity: "success",
+        open: true,
+      });
+    } catch (error) {
+      setSnackbar({
+        message: "Error al eliminar la vacación",
+        severity: "error",
+        open: true,
+      });
+    } finally {
+      setDeleteLoading(false);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setSelectedVacacion(null);
   };
 
   // Define columns for DataGrid
@@ -82,6 +145,34 @@ function MecanicosVacacionesData() {
         return getFormattedDate(value as string);
       },
     },
+    {
+      field: "actions",
+      headerName: "Acciones",
+      flex: 0.8,
+      align: "center",
+      headerAlign: "center",
+      sortable: false,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+          <IconButton
+            size="small"
+            color="primary"
+            onClick={() => handleEdit(params.row)}
+            title="Editar vacación"
+          >
+            <EditIcon fontSize="small" />
+          </IconButton>
+          <IconButton
+            size="small"
+            color="error"
+            onClick={() => handleDeleteClick(params.row)}
+            title="Eliminar vacación"
+          >
+            <DeleteIcon fontSize="small" />
+          </IconButton>
+        </Box>
+      ),
+    },
   ];
 
   const renderTableContent = () => {
@@ -119,6 +210,14 @@ function MecanicosVacacionesData() {
           "& .MuiDataGrid-cell": {
             fontSize: "0.875rem",
             padding: "8px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          },
+          "& .MuiDataGrid-columnHeader": {
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
           },
           backgroundColor: "background.paper",
           borderRadius: 1,
@@ -154,6 +253,14 @@ function MecanicosVacacionesData() {
           </Grid>
         </Grid>
       </CardContent>
+
+      <DeleteVacacionModal
+        open={deleteModalOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        vacacion={selectedVacacion}
+        loading={deleteLoading}
+      />
     </>
   );
 }

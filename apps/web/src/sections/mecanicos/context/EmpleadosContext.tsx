@@ -1,7 +1,7 @@
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import useWeek from "@/sections/gastos/hooks/useWeek";
 import { AusenciaProgramada, Empleado } from "@prisma/client";
-import React, { useEffect, useState } from "react";
+import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import useEmpleadoFetcher from "../hooks/useEmpleadoFetcher";
 
 interface ReparacionData {
@@ -31,6 +31,7 @@ interface EmpleadoContextType {
   setDateRange: (dateRange: { from: Date | null; to: Date | null }) => void;
   reparaciones: ReparacionData[] | null;
   loadingReparaciones: boolean;
+  setRefreshTrigger: Dispatch<SetStateAction<number>>;
 }
 
 const EmpleadosContext = React.createContext<EmpleadoContextType | null>(null);
@@ -42,8 +43,13 @@ type Props = {
 
 export const EmpleadosProvider = ({ id, children }: Props) => {
   const { startDate, endDate } = useWeek();
-  const { empleado, loading, fetchReparaciones, loadingReparaciones } =
-    useEmpleadoFetcher(id);
+  const {
+    empleado,
+    loading,
+    fetchReparaciones,
+    loadingReparaciones,
+    setRefreshTrigger,
+  } = useEmpleadoFetcher(id);
   const [reparaciones, setReparaciones] = useState<any | null>(null);
 
   const { setSnackbar } = useSnackbarContext();
@@ -84,6 +90,7 @@ export const EmpleadosProvider = ({ id, children }: Props) => {
         setDateRange,
         reparaciones,
         loadingReparaciones,
+        setRefreshTrigger,
       }}
     >
       {children}
