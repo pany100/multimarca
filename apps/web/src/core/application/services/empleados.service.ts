@@ -1,7 +1,9 @@
 import { EmpleadoRepository } from "@/core/domain/repositories/empleado.repository";
+import { DateRangeVO } from "@/core/domain/value-objects/date-range.vo";
 import {
   CreateMecanicoData,
   EditMecanicoData,
+  GetMecanicoReparacionesData,
   ListMecanicosQueryData,
 } from "@/core/infrastructure/validation/schemas/mecanico.schema";
 import { PageResult } from "@/shared/utils/pagination";
@@ -57,5 +59,14 @@ export class EmpleadoService {
     const empleado = await this.repo.update(empleadoVO);
     const empleadoSerializable = this.transformToSerializable(empleado);
     return empleadoSerializable;
+  }
+
+  async getReparacionesEmpleado(dto: GetMecanicoReparacionesData) {
+    const dateRangeVO = new DateRangeVO(dto.from, dto.to).toMandatoryDate();
+    return this.repo.getReparacionesEmpleado(
+      dto.id,
+      dateRangeVO.from,
+      dateRangeVO.to
+    );
   }
 }

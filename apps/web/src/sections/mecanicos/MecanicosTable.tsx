@@ -1,6 +1,5 @@
 import UploadImageModal from "@/components/UploadImageModal";
 import { useFetch } from "@/contexts/FetchContext";
-import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Alert, MenuItem, Snackbar } from "@mui/material";
 import { GridRenderCellParams } from "@mui/x-data-grid";
@@ -104,17 +103,10 @@ function MecanicosTable({
     const customActions: React.ReactNode[] = [
       <MenuItem
         key="edit"
-        onClick={() => router.push(`/dashboard/mecanicos/${params.id}/editar`)}
-      >
-        <EditIcon sx={{ mr: 1 }} />
-        Editar
-      </MenuItem>,
-      <MenuItem
-        key="edit"
         onClick={() => router.push(`/dashboard/mecanicos/${params.id}/ver`)}
       >
         <VisibilityIcon sx={{ mr: 1 }} />
-        Ver
+        Administración General
       </MenuItem>,
     ];
     return customActions.concat(defaultActions);

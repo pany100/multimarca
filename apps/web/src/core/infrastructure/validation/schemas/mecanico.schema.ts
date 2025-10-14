@@ -48,3 +48,13 @@ export const getMecanicoSchema = z.object({
 export type CreateMecanicoData = z.infer<typeof createMecanicoSchema>;
 export type EditMecanicoData = z.infer<typeof editMecanicoSchema>;
 export type GetMecanicoData = z.infer<typeof getMecanicoSchema>;
+
+export const getMecanicoReparacionesSchema = z.object({
+  id: z.number().int().positive("El ID debe ser un número positivo"),
+  from: z.string().nullable().optional(),
+  to: z.string().nullable().optional(),
+});
+
+export type GetMecanicoReparacionesData = z.infer<
+  typeof getMecanicoReparacionesSchema
+>;

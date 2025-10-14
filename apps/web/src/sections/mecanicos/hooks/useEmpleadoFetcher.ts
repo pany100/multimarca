@@ -1,13 +1,16 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { Empleado } from "@prisma/client";
 import { useEffect, useState } from "react";
 
 function useEmpleadoFetcher(id: string) {
   const { authFetch } = useFetch();
 
-  const [empleado, setEmpleado] = useState(null);
+  const [empleado, setEmpleado] = useState<Empleado | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchEmpleado = async () => {
+      setLoading(true);
       try {
         const response = await authFetch(`/api/mecanicos/${id}`);
         if (response.ok) {
@@ -18,6 +21,8 @@ function useEmpleadoFetcher(id: string) {
         }
       } catch (error) {
         console.error("Error al obtener el empleado:", error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -26,6 +31,7 @@ function useEmpleadoFetcher(id: string) {
 
   return {
     empleado,
+    loading,
   };
 }
 

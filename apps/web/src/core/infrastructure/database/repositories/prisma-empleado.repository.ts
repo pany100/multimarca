@@ -74,4 +74,43 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
       },
     });
   }
+
+  getReparacionesEmpleado(id: number, from: Date, to: Date): Promise<any> {
+    return prisma.ordenReparacion.findMany({
+      where: {
+        mecanicos: {
+          some: {
+            mecanicoId: id,
+          },
+        },
+        fechaSalidaReparacion: {
+          gte: from,
+          lte: to,
+        },
+      },
+      include: {
+        mecanicos: {
+          include: {
+            mecanico: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        trabajosRealizados: true,
+        pagos: true,
+        auto: {
+          select: {
+            id: true,
+            patent: true,
+          },
+        },
+      },
+      orderBy: {
+        fechaSalidaReparacion: "desc",
+      },
+    });
+  }
 }

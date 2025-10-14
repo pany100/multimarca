@@ -9,4 +9,5 @@ export interface EmpleadoRepository {
   findById(id: number): Promise<Empleado | null>;
   delete(id: number): Promise<Empleado | null>;
   update(dto: EmpleadoVO): Promise<Empleado>;
+  getReparacionesEmpleado(id: number, from: Date, to: Date): Promise<any>;
 }

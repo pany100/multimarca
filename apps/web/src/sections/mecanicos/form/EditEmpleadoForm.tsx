@@ -1,5 +1,6 @@
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { Empleado } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import useEmpleadoPersistence from "../hooks/useEmpleadoPersistence";
@@ -7,21 +8,7 @@ import MecanicosForm from "../MecanicosForm";
 import { schema } from "./NewMecanicoForm";
 
 type Props = {
-  empleado: {
-    id: number;
-    name: string;
-    dni: string | null;
-    email: string | null;
-    dniImagePath: string | null;
-    phone: string | null;
-    city: string | null;
-    address: string | null;
-    state: string | null;
-    postal_code: string | null;
-    start_date: string | null;
-    birthday: string | null;
-    tipo: "Mecanico" | "Administrativo" | null;
-  };
+  empleado: Empleado;
 };
 
 function EditEmpleadoForm({ empleado }: Props) {
@@ -68,7 +55,7 @@ function EditEmpleadoForm({ empleado }: Props) {
     <MecanicosForm
       methods={methods}
       onSubmit={onSubmit}
-      onCancel={() => router.push("/dashboard/mecanicos")}
+      onCancel={() => router.push(`/dashboard/mecanicos/${empleado.id}/ver`)}
     />
   );
 }
