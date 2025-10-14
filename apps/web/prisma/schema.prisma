@@ -158,6 +158,7 @@ model Empleado {
   inscripcionMonotributoPath String?                   @db.VarChar(1000)
   notasAdministrativas String?                   @db.Text
   curriculumPath String?                   @db.VarChar(1000)
+  ausenciasAcordadas        AusenciaProgramada[]
 
   gastosRealizados  Gasto[]
   ordenesReparacion OrdenReparacionMecanico[]
@@ -166,6 +167,21 @@ model Empleado {
   @@index([dni])
   @@index([dni], map: "Mecanico_dni_idx")
   @@index([name], map: "Mecanico_name_idx")
+}
+
+model AusenciaProgramada {
+  id               Int         @id @default(autoincrement())
+  empleadoId       Int
+  empleado         Empleado    @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
+  fechaDesde       DateTime
+  fechaHasta       DateTime
+  estado           EstadoAusencia @default(Pendiente)
+  observaciones    String?       @db.Text
+  esGoceSueldo     Boolean       @default(true)
+  fechaCreacion    DateTime      @default(now())
+  fechaAprobacion  DateTime?
+
+  @@index([empleadoId])
 }
 
 model OrdenReparacionMecanico {
@@ -858,3 +874,9 @@ enum Recurrence {
   Anual
 }
 
+enum EstadoAusencia {
+  Pendiente
+  Aprobada
+  Rechazada
+  Cancelada
+}
