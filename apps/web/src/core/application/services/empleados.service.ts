@@ -1,4 +1,5 @@
 import { EmpleadoRepository } from "@/core/domain/repositories/empleado.repository";
+import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 import { DateRangeVO } from "@/core/domain/value-objects/date-range.vo";
 import {
   CreateMecanicoData,
@@ -63,10 +64,26 @@ export class EmpleadoService {
 
   async getReparacionesEmpleado(dto: GetMecanicoReparacionesData) {
     const dateRangeVO = new DateRangeVO(dto.from, dto.to).toMandatoryDate();
-    return this.repo.getReparacionesEmpleado(
+    const reparaciones = await this.repo.getReparacionesEmpleado(
       dto.id,
       dateRangeVO.from,
       dateRangeVO.to
     );
+    const reparacionesSerializables = reparaciones.map((reparacion) => {
+      const calculoVO = ComprobanteCalculadoFactory.fromOrden(reparacion);
+      return {
+        id: reparacion.id,
+        estado: reparacion.estado,
+        fechaSalidaReparacion: reparacion.fechaSalidaReparacion,
+        kilometros: reparacion.kilometros,
+        auto: {
+          id: reparacion.auto.id,
+          patent: reparacion.auto.patent,
+        },
+        totalAPagar: calculoVO.total,
+        totalManoDeObra: calculoVO.totalManoDeObra,
+      };
+    });
+    return reparacionesSerializables;
   }
 }

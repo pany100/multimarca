@@ -77,9 +77,7 @@ function UltimaSemana({
     const fetchData = async (start: Date, end: Date) => {
       setLoading(true);
       try {
-        // Construct the URL with query parameters
-        const estado = enProgreso ? "enProgreso" : "terminado";
-        const url = `/api/mecanicos/${mecanicoId}/reparaciones?start=${start.toISOString()}&end=${end.toISOString()}&reparaciones=${estado}&compartidas=${compartidas}`;
+        const url = `/api/mecanicos/${mecanicoId}/reparaciones?from=${start.toISOString()}&to=${end.toISOString()}`;
 
         const response = await authFetch(url);
 

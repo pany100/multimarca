@@ -1,4 +1,5 @@
 import { EmpleadoRepository } from "@/core/domain/repositories/empleado.repository";
+import { OrdenReparacionWithRelations } from "@/core/domain/repositories/orden-reparacion.repository";
 import { EmpleadoVO } from "@/core/domain/value-objects/empleado-vo";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { ListMecanicosQueryData } from "@/core/infrastructure/validation/schemas/mecanico.schema";
@@ -76,7 +77,11 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
     });
   }
 
-  getReparacionesEmpleado(id: number, from: Date, to: Date): Promise<any> {
+  getReparacionesEmpleado(
+    id: number,
+    from: Date,
+    to: Date
+  ): Promise<OrdenReparacionWithRelations[]> {
     return prisma.ordenReparacion.findMany({
       where: {
         mecanicos: {
@@ -90,24 +95,47 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         },
       },
       include: {
+        auto: {
+          include: {
+            owner: true,
+          },
+        },
         mecanicos: {
           include: {
-            mecanico: {
-              select: {
-                id: true,
-                name: true,
+            mecanico: true,
+          },
+        },
+        repuestosUsados: {
+          include: {
+            stock: {
+              include: {
+                proveedor: true,
               },
             },
           },
         },
-        trabajosRealizados: true,
-        pagos: true,
-        auto: {
-          select: {
-            id: true,
-            patent: true,
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
           },
         },
+        ingresos: {
+          include: {
+            dolar: true,
+          },
+        },
+        trabajosRealizados: true,
+        revisadoPor: true,
+        controlesEnReparacion: {
+          include: {
+            controlMecanico: {
+              include: {
+                parent: true,
+              },
+            },
+          },
+        },
+        pagos: true,
       },
       orderBy: {
         fechaSalidaReparacion: "desc",

@@ -7,6 +7,7 @@ function useEmpleadoFetcher(id: string) {
 
   const [empleado, setEmpleado] = useState<Empleado | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadingReparaciones, setLoadingReparaciones] = useState(false);
 
   useEffect(() => {
     const fetchEmpleado = async () => {
@@ -17,7 +18,7 @@ function useEmpleadoFetcher(id: string) {
           const data = await response.json();
           setEmpleado(data);
         } else {
-          console.error("Error al obtener el empleado");
+          throw new Error("Error al obtener el empleado");
         }
       } catch (error) {
         console.error("Error al obtener el empleado:", error);
@@ -29,9 +30,31 @@ function useEmpleadoFetcher(id: string) {
     fetchEmpleado();
   }, [id]);
 
+  const fetchReparaciones = async (start: Date, end: Date) => {
+    setLoadingReparaciones(true);
+    try {
+      // Construct the URL with query parameters
+      const url = `/api/mecanicos/${id}/reparaciones?from=${start.toISOString()}&to=${end.toISOString()}`;
+
+      const response = await authFetch(url);
+
+      if (!response.ok) {
+        throw new Error("Error al obtener los datos");
+      }
+
+      return response.json();
+    } catch (err) {
+      throw err;
+    } finally {
+      setLoadingReparaciones(false);
+    }
+  };
+
   return {
     empleado,
     loading,
+    loadingReparaciones,
+    fetchReparaciones,
   };
 }
 

@@ -7,12 +7,12 @@ import { EmpleadosProvider } from "@/sections/mecanicos/context/EmpleadosContext
 
 const VerEmpleadoPage = ({ params }: { params: { id: string } }) => {
   return (
-    <EmpleadosProvider id={params.id}>
-      <SnackbarProvider>
+    <SnackbarProvider>
+      <EmpleadosProvider id={params.id}>
         <MecanicosPage />
         <FormSnackbar />
-      </SnackbarProvider>
-    </EmpleadosProvider>
+      </EmpleadosProvider>
+    </SnackbarProvider>
   );
 };
 

@@ -2,6 +2,7 @@ import { ListMecanicosQueryData } from "@/core/infrastructure/validation/schemas
 import { PageResult } from "@/shared/utils/pagination";
 import { Empleado } from "@prisma/client";
 import { EmpleadoVO } from "../value-objects/empleado-vo";
+import { OrdenReparacionWithRelations } from "./orden-reparacion.repository";
 
 export interface EmpleadoRepository {
   listPaged(dto: ListMecanicosQueryData): Promise<PageResult<Empleado>>;
@@ -9,5 +10,9 @@ export interface EmpleadoRepository {
   findById(id: number): Promise<Empleado | null>;
   delete(id: number): Promise<Empleado | null>;
   update(dto: EmpleadoVO): Promise<Empleado>;
-  getReparacionesEmpleado(id: number, from: Date, to: Date): Promise<any>;
+  getReparacionesEmpleado(
+    id: number,
+    from: Date,
+    to: Date
+  ): Promise<OrdenReparacionWithRelations[]>;
 }
