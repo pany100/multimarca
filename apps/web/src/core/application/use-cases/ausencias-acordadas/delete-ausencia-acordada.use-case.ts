@@ -7,6 +7,10 @@ export class DeleteAusenciaAcordadaUseCase {
   ) {}
 
   async execute(id: number): Promise<AusenciaProgramada | null> {
-    return this.ausenciaProgramadaRepository.delete(id);
+    const deleted = await this.ausenciaProgramadaRepository.delete(id);
+    if (!deleted) {
+      throw new Error("Ausencia acordada no encontrada");
+    }
+    return deleted;
   }
 }

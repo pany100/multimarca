@@ -158,7 +158,7 @@ model Empleado {
   inscripcionMonotributoPath String?                   @db.VarChar(1000)
   notasAdministrativas String?                   @db.Text
   curriculumPath String?                   @db.VarChar(1000)
-  ausenciasAcordadas        AusenciaProgramada[]
+  ausenciasProgramadas        AusenciaProgramada[]
 
   gastosRealizados  Gasto[]
   ordenesReparacion OrdenReparacionMecanico[]
@@ -180,6 +180,7 @@ model AusenciaProgramada {
   esGoceSueldo     Boolean       @default(true)
   fechaCreacion    DateTime      @default(now())
   fechaAprobacion  DateTime?
+  tipo             TipoAusencia @default(Vacaciones)
 
   @@index([empleadoId])
 }
@@ -880,3 +881,9 @@ enum EstadoAusencia {
   Rechazada
   Cancelada
 }
+
+enum TipoAusencia {
+  Vacaciones
+  Licencia
+}
+  

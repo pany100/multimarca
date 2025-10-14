@@ -11,6 +11,7 @@ import MecanicosActivity from "./perfil/MecanicosActivity";
 import MecanicosDocumentacionData from "./perfil/MecanicosDocumentacionData";
 import MecanicosPerfilHeader from "./perfil/MecanicosPerfilHeader";
 import MecanicosPersonalData from "./perfil/MecanicosPersonalData";
+import MecanicosVacacionesData from "./perfil/MecanicosVacacionesData";
 
 function MecanicosPage() {
   const { loading, empleado } = useEmpleadosContext();
@@ -58,6 +59,7 @@ function MecanicosPage() {
       <MecanicosPersonalData />
       {empleado?.tipo === "Mecanico" && <MecanicosActivity />}
       <MecanicosDocumentacionData />
+      <MecanicosVacacionesData />
     </Container>
   );
 }

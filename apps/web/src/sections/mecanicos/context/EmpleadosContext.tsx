@@ -1,6 +1,6 @@
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import useWeek from "@/sections/gastos/hooks/useWeek";
-import { Empleado } from "@prisma/client";
+import { AusenciaProgramada, Empleado } from "@prisma/client";
 import React, { useEffect, useState } from "react";
 import useEmpleadoFetcher from "../hooks/useEmpleadoFetcher";
 
@@ -16,8 +16,13 @@ interface ReparacionData {
   totalAPagar: string;
   totalManoDeObra: string;
 }
+
+type EmpleadoWithAusencias = Empleado & {
+  ausenciasProgramadas?: AusenciaProgramada[];
+};
+
 interface EmpleadoContextType {
-  empleado: Empleado | null;
+  empleado: EmpleadoWithAusencias | null;
   loading: boolean;
   dateRange: {
     from: Date | null;

@@ -37,6 +37,13 @@ function useFixedSelectData() {
     { value: "Descartado", label: "Descartado" },
   ];
 
+  const vacacionEstadoOptions = [
+    { value: "Pendiente", label: "Pendiente" },
+    { value: "Aprobada", label: "Aprobada" },
+    { value: "Rechazada", label: "Rechazada" },
+    { value: "Cancelada", label: "Cancelada" },
+  ];
+
   const siNo = [
     { value: "Si", label: "Si" },
     { value: "No", label: "No" },
@@ -63,6 +70,7 @@ function useFixedSelectData() {
     ventaEstadoOptions,
     siNo,
     presupuestoEstadoOptions,
+    vacacionEstadoOptions,
     agendaEventRecurrence,
     typeOfOperation,
   };

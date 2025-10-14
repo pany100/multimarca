@@ -47,6 +47,9 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
   findById(id: number): Promise<Empleado | null> {
     return prisma.empleado.findUnique({
       where: { id },
+      include: {
+        ausenciasProgramadas: true,
+      },
     });
   }
 
