@@ -2,7 +2,8 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 
-const allowedExtensions = ["jpg", "jpeg", "png"];
+const allowedExtensions = ["jpg", "jpeg", "png", "pdf"];
+const maxFileSize = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,6 +13,13 @@ export async function POST(request: NextRequest) {
     if (!file) {
       return NextResponse.json(
         { mensaje: "No se proporcionó ningún archivo" },
+        { status: 400 }
+      );
+    }
+
+    if (file.size > maxFileSize) {
+      return NextResponse.json(
+        { mensaje: "El archivo es demasiado grande. Máximo 10MB." },
         { status: 400 }
       );
     }
@@ -29,13 +37,17 @@ export async function POST(request: NextRequest) {
     const secureFileName = `${uuidv4()}.${fileExtension}`;
     const s3ObjectKey = `tmp/${secureFileName}`;
 
+    let contentType = file.type;
+    if (fileExtension === "pdf" && !contentType) {
+      contentType = "application/pdf";
+    }
+
     const uploadParams = {
       Bucket: process.env.AWS_S3_BUCKET_NAME,
       Key: s3ObjectKey,
       Body: Buffer.from(await file.arrayBuffer()),
-      ContentType: file.type,
+      ContentType: contentType,
     };
-
     const s3Client = new S3Client({
       region: process.env.AWS_DEFAULT_REGION,
       credentials: {

@@ -84,7 +84,7 @@ function RecibosSection() {
             formData.append("file", file);
 
             // Upload the file to temporary storage
-            const response = await fetch("/api/upload-tmp-image", {
+            const response = await fetch("/api/upload-tmp-file", {
               method: "POST",
               body: formData,
             });

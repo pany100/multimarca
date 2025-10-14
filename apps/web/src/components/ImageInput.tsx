@@ -30,7 +30,7 @@ function ImageInput({ image, label, setImage }: Props) {
     formData.append("file", file);
 
     try {
-      const response = await fetch("/api/upload-tmp-image", {
+      const response = await fetch("/api/upload-tmp-file", {
         method: "POST",
         body: formData,
       });

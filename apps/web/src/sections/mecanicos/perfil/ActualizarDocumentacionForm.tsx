@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { useEmpleadosContext } from "../context/EmpleadosContext";
@@ -23,12 +24,28 @@ const schema = yup.object({
 });
 
 function ActualizarDocumentacionForm() {
+  const { empleado, loading } = useEmpleadosContext();
   const methods = useForm({
     resolver: yupResolver(schema),
+    defaultValues: {
+      licenciaConducirPath: empleado?.licenciaConducirPath || null,
+      inscripcionMonotributoPath: empleado?.inscripcionMonotributoPath || null,
+      curriculumPath: empleado?.curriculumPath || null,
+    },
   });
 
+  useEffect(() => {
+    if (empleado) {
+      methods.reset({
+        licenciaConducirPath: empleado?.licenciaConducirPath || null,
+        inscripcionMonotributoPath:
+          empleado?.inscripcionMonotributoPath || null,
+        curriculumPath: empleado?.curriculumPath || null,
+      });
+    }
+  }, [empleado]);
+
   const router = useRouter();
-  const { empleado, loading } = useEmpleadosContext();
   const { updateEmpleadoDocs } = useEmpleadoPersistence();
   const { setSnackbar } = useSnackbarContext();
 
