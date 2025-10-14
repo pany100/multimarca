@@ -27,6 +27,7 @@ function EditEmpleadoForm({ empleado }: Props) {
       birthday: empleado.birthday ? new Date(empleado.birthday) : null,
       tipo: empleado.tipo,
       dniImagePath: empleado.dniImagePath,
+      contactoEmergencia: empleado.contactoEmergencia,
     },
   });
 

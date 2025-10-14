@@ -153,6 +153,13 @@ model Empleado {
   birthday          DateTime?
   tipo              TipoEmpleado              @default(Mecanico)
   dniImagePath      String?                   @db.VarChar(1000)
+  contactoEmergencia String?                   @db.VarChar(150)
+  licenciaConducirPath String?                   @db.VarChar(1000)
+  inscripcionMonotributoPath String?                   @db.VarChar(1000)
+  recategorizacionesMonotributoPath String?                   @db.VarChar(1000)
+  notasAdministrativas String?                   @db.Text
+  curriculumPath String?                   @db.VarChar(1000)
+
   gastosRealizados  Gasto[]
   ordenesReparacion OrdenReparacionMecanico[]
 

@@ -31,6 +31,12 @@ function PersonalDataSection() {
             type="date"
           />
         </Grid>
+        <Grid item xs={12} sm={6}>
+          <CustomInputText
+            name="contactoEmergencia"
+            label="Contacto de emergencia"
+          />
+        </Grid>
       </Grid>
     </>
   );

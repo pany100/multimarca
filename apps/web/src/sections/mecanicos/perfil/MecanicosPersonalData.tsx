@@ -34,19 +34,19 @@ function MecanicosPersonalData() {
             <Typography variant="body2" color="text.secondary">
               Email
             </Typography>
-            <Typography>{empleado?.email}</Typography>
+            <Typography>{empleado?.email || "No especificado"}</Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">
               CUIT/CUIL
             </Typography>
-            <Typography>{empleado?.dni}</Typography>
+            <Typography>{empleado?.dni || "No especificado"}</Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">
               Tipo de contrato
             </Typography>
-            <Typography>{empleado?.tipo}</Typography>
+            <Typography>{empleado?.tipo || "No especificado"}</Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">
@@ -55,38 +55,48 @@ function MecanicosPersonalData() {
             <Typography>
               {empleado?.birthday
                 ? getFormattedDate(empleado?.birthday.toString())
-                : ""}
+                : "No especificado"}
             </Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">
               Teléfono
             </Typography>
-            <Typography>{empleado?.phone}</Typography>
+            <Typography>{empleado?.phone || "No especificado"}</Typography>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Typography variant="body2" color="text.secondary">
+              Contacto de emergencia
+            </Typography>
+            <Typography>
+              {empleado?.contactoEmergencia || "No especificado"}
+            </Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">
               Dirección
             </Typography>
-            <Typography>{empleado?.address}</Typography>
+            <Typography>{empleado?.address || "No especificado"}</Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">
               Ciudad
             </Typography>
-            <Typography>{empleado?.city}</Typography>
+            <Typography>{empleado?.city || "No especificado"}</Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">
               Provincia
             </Typography>
-            <Typography>{empleado?.state}</Typography>
+            <Typography>{empleado?.state || "No especificado"}</Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">
               Código Postal
             </Typography>
-            <Typography>{empleado?.postal_code}</Typography>
+            <Typography>
+              {empleado?.postal_code || "No especificado"}
+            </Typography>
           </Grid>
           <Grid item xs={12}>
             <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
