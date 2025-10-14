@@ -74,8 +74,8 @@ function MecanicosDocumentacionData() {
                   <MecanicosFileData
                     filePath={documento.filePath || null}
                     alt={documento.label}
-                    maxWidth={200}
-                    maxHeight={200}
+                    maxWidth={280}
+                    maxHeight={280}
                   />
                 </Box>
               </Box>

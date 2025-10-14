@@ -34,8 +34,8 @@ function MecanicosFileData({
           sx={{
             borderRadius: 1,
             overflow: "hidden",
-            border: "1px solid",
-            borderColor: "divider",
+            width: "100%",
+            height: "100%",
             maxWidth,
             maxHeight,
             display: "flex",
@@ -67,11 +67,13 @@ function MecanicosFileData({
         <Paper
           elevation={2}
           sx={{
-            p: 1.5,
+            p: 1,
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             gap: 1,
+            width: "100%",
+            height: "100%",
             maxWidth,
             maxHeight,
             borderRadius: 2,
@@ -82,8 +84,8 @@ function MecanicosFileData({
           <Box
             sx={{
               width: "100%",
-              height: Math.min(maxHeight - 60, 120),
-              border: "1px solid #ddd",
+              flex: 1,
+              minHeight: Math.min(maxHeight - 50, 200),
               borderRadius: 1,
               overflow: "hidden",
             }}
@@ -100,7 +102,7 @@ function MecanicosFileData({
             variant="outlined"
             size="small"
             onClick={() => window.open(filePath, "_blank")}
-            sx={{ fontSize: "0.75rem", py: 0.5 }}
+            sx={{ fontSize: "0.7rem", py: 0.3, px: 1 }}
           >
             Abrir PDF
           </Button>
