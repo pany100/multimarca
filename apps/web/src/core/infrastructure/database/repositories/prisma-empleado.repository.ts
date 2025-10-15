@@ -49,6 +49,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
       where: { id },
       include: {
         ausenciasProgramadas: true,
+        inasistencias: true,
       },
     });
   }

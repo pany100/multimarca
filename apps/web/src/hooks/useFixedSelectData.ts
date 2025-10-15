@@ -13,6 +13,13 @@ function useFixedSelectData() {
     { value: "Dolar", label: "Dolar" },
   ];
 
+  const tipoInasistenciaOptions = [
+    { value: "Medica", label: "Médica" },
+    { value: "Personal", label: "Personal" },
+    { value: "SinAviso", label: "Sin Aviso" },
+    { value: "Otro", label: "Otro" },
+  ];
+
   const orepEstadoOptions = [
     { value: "EnProgreso", label: "En Proceso" },
     { value: "Aceptado", label: "Aceptado" },
@@ -73,6 +80,7 @@ function useFixedSelectData() {
     vacacionEstadoOptions,
     agendaEventRecurrence,
     typeOfOperation,
+    tipoInasistenciaOptions,
   };
 }
 
