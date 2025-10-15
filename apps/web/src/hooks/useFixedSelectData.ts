@@ -26,6 +26,13 @@ function useFixedSelectData() {
     { value: "Pendiente", label: "Pendiente" },
   ];
 
+  const tipoPremioOptions = [
+    { value: "Reconocimiento", label: "Reconocimiento" },
+    { value: "Economico", label: "Económico" },
+    { value: "Productividad", label: "Productividad" },
+    { value: "Especial", label: "Especial" },
+  ];
+
   const orepEstadoOptions = [
     { value: "EnProgreso", label: "En Proceso" },
     { value: "Aceptado", label: "Aceptado" },
@@ -88,6 +95,7 @@ function useFixedSelectData() {
     typeOfOperation,
     tipoInasistenciaOptions,
     estadoLlegadaOptions,
+    tipoPremioOptions,
   };
 }
 
