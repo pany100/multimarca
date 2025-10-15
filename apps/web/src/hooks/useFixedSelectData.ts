@@ -33,6 +33,13 @@ function useFixedSelectData() {
     { value: "Especial", label: "Especial" },
   ];
 
+  const tipoApercibimientoOptions = [
+    { value: "Verbal", label: "Verbal" },
+    { value: "Leve", label: "Leve" },
+    { value: "Grave", label: "Grave" },
+    { value: "MuyGrave", label: "Muy Grave" },
+  ];
+
   const orepEstadoOptions = [
     { value: "EnProgreso", label: "En Proceso" },
     { value: "Aceptado", label: "Aceptado" },
@@ -96,6 +103,7 @@ function useFixedSelectData() {
     tipoInasistenciaOptions,
     estadoLlegadaOptions,
     tipoPremioOptions,
+    tipoApercibimientoOptions,
   };
 }
 

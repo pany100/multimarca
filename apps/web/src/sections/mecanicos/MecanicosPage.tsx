@@ -13,6 +13,7 @@ import MecanicosInasistenciasData from "./perfil/MecanicosInasistenciasData";
 import MecanicosLlegadasTardeData from "./perfil/MecanicosLlegadasTardeData";
 import MecanicosHorasExtrasData from "./perfil/MecanicosHorasExtrasData";
 import MecanicosPremiosData from "./perfil/MecanicosPremiosData";
+import MecanicosApercibimientosData from "./perfil/MecanicosApercibimientosData";
 import MecanicosLicenciasData from "./perfil/MecanicosLicenciasData";
 import MecanicosPerfilHeader from "./perfil/MecanicosPerfilHeader";
 import MecanicosPersonalData from "./perfil/MecanicosPersonalData";
@@ -70,6 +71,7 @@ function MecanicosPage() {
       <MecanicosLlegadasTardeData />
       <MecanicosHorasExtrasData />
       <MecanicosPremiosData />
+      <MecanicosApercibimientosData />
     </Container>
   );
 }
