@@ -51,6 +51,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         ausenciasProgramadas: true,
         inasistencias: true,
         llegadasTarde: true,
+        horasExtra: true,
       },
     });
   }
