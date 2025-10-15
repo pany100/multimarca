@@ -156,18 +156,40 @@ model Empleado {
   contactoEmergencia String?                   @db.VarChar(150)
   licenciaConducirPath String?                   @db.VarChar(1000)
   inscripcionMonotributoPath String?                   @db.VarChar(1000)
+  recategorizacionMonotributoPath String?                   @db.VarChar(1000)
   notasAdministrativas String?                   @db.Text
   curriculumPath String?                   @db.VarChar(1000)
   ausenciasProgramadas        AusenciaProgramada[]
 
   gastosRealizados  Gasto[]
   ordenesReparacion OrdenReparacionMecanico[]
+  inasistencias     Inasistencia[]
 
   @@index([name])
   @@index([dni])
   @@index([dni], map: "Mecanico_dni_idx")
   @@index([name], map: "Mecanico_name_idx")
 }
+
+model Inasistencia {
+  id              Int        @id @default(autoincrement())
+  empleadoId      Int
+  empleado        Empleado   @relation(fields: [empleadoId], references: [id])
+  fecha           DateTime
+  motivo          String?     @db.VarChar(255)
+  tipo            TipoInasistencia @default(Medica)
+  certificadoMedicoPath String? @db.VarChar(1000)
+
+  @@index([empleadoId])
+}
+
+enum TipoInasistencia {
+  Medica
+  Personal
+  SinAviso
+  Otro
+}
+
 
 model AusenciaProgramada {
   id               Int         @id @default(autoincrement())

@@ -20,6 +20,10 @@ function MecanicosDocumentacionData() {
       filePath: empleado?.licenciaConducirPath,
     },
     {
+      label: "Recategorización Monotributo",
+      filePath: empleado?.recategorizacionMonotributoPath,
+    },
+    {
       label: "Inscripción Monotributo",
       filePath: empleado?.inscripcionMonotributoPath,
     },

@@ -19,6 +19,7 @@ import useEmpleadoPersistence from "../hooks/useEmpleadoPersistence";
 
 const schema = yup.object({
   licenciaConducirPath: yup.string().nullable(),
+  recategorizacionMonotributoPath: yup.string().nullable(),
   inscripcionMonotributoPath: yup.string().nullable(),
   curriculumPath: yup.string().nullable(),
 });
@@ -29,6 +30,8 @@ function ActualizarDocumentacionForm() {
     resolver: yupResolver(schema),
     defaultValues: {
       licenciaConducirPath: empleado?.licenciaConducirPath || null,
+      recategorizacionMonotributoPath:
+        empleado?.recategorizacionMonotributoPath || null,
       inscripcionMonotributoPath: empleado?.inscripcionMonotributoPath || null,
       curriculumPath: empleado?.curriculumPath || null,
     },
@@ -38,6 +41,8 @@ function ActualizarDocumentacionForm() {
     if (empleado) {
       methods.reset({
         licenciaConducirPath: empleado?.licenciaConducirPath || null,
+        recategorizacionMonotributoPath:
+          empleado?.recategorizacionMonotributoPath || null,
         inscripcionMonotributoPath:
           empleado?.inscripcionMonotributoPath || null,
         curriculumPath: empleado?.curriculumPath || null,
@@ -124,6 +129,24 @@ function ActualizarDocumentacionForm() {
                   <CustomFileInput
                     name="inscripcionMonotributoPath"
                     label="Inscripción Monotributo"
+                  />
+                </Grid>
+
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  sx={{
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 1,
+                    p: 2,
+                    mb: 2,
+                  }}
+                >
+                  <CustomFileInput
+                    name="recategorizacionMonotributoPath"
+                    label="Recategorización Monotributo"
                   />
                 </Grid>
 

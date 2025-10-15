@@ -157,6 +157,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
       where: { id: dto.id },
       data: {
         licenciaConducirPath: dto.licenciaConducirPath,
+        recategorizacionMonotributoPath: dto.recategorizacionMonotributoPath,
         inscripcionMonotributoPath: dto.inscripcionMonotributoPath,
         curriculumPath: dto.curriculumPath,
       },
