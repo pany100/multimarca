@@ -9,6 +9,7 @@ import {
 import { useEmpleadosContext } from "./context/EmpleadosContext";
 import MecanicosActivity from "./perfil/MecanicosActivity";
 import MecanicosDocumentacionData from "./perfil/MecanicosDocumentacionData";
+import MecanicosLicenciasData from "./perfil/MecanicosLicenciasData";
 import MecanicosPerfilHeader from "./perfil/MecanicosPerfilHeader";
 import MecanicosPersonalData from "./perfil/MecanicosPersonalData";
 import MecanicosVacacionesData from "./perfil/MecanicosVacacionesData";
@@ -60,6 +61,7 @@ function MecanicosPage() {
       {empleado?.tipo === "Mecanico" && <MecanicosActivity />}
       <MecanicosDocumentacionData />
       <MecanicosVacacionesData />
+      <MecanicosLicenciasData />
     </Container>
   );
 }

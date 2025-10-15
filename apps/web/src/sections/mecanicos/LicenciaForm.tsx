@@ -12,9 +12,9 @@ interface Props {
   onCancel: () => void;
 }
 
-function VacacionForm({ methods, onSubmit, onCancel }: Props) {
+function LicenciaForm({ methods, onSubmit, onCancel }: Props) {
   const { handleSubmit } = methods;
-  const { vacacionEstadoOptions } = useFixedSelectData();
+  const { vacacionEstadoOptions, siNo } = useFixedSelectData();
 
   return (
     <FormProvider {...methods}>
@@ -24,7 +24,7 @@ function VacacionForm({ methods, onSubmit, onCancel }: Props) {
           <Container maxWidth="md" sx={{ mt: 4, mb: 8 }}>
             <Paper sx={{ p: 4, borderRadius: 3 }}>
               <Typography variant="h6" gutterBottom sx={{ mb: 2 }}>
-                Datos de las Vacaciones
+                Datos de la Licencia
               </Typography>
 
               <Grid container spacing={3}>
@@ -43,6 +43,15 @@ function VacacionForm({ methods, onSubmit, onCancel }: Props) {
                     name="fechaHasta"
                     label="Fecha Hasta"
                     type="date"
+                  />
+                </Grid>
+
+                {/* Goce de Sueldo */}
+                <Grid item xs={12} sm={6}>
+                  <CustomSelect
+                    options={siNo}
+                    name="esGoceSueldo"
+                    label="Goce de Sueldo"
                   />
                 </Grid>
 
@@ -93,7 +102,7 @@ function VacacionForm({ methods, onSubmit, onCancel }: Props) {
             Cancelar
           </Button>
           <Button variant="contained" type="submit">
-            Guardar Vacaciones
+            Guardar Licencia
           </Button>
         </Box>
       </form>
@@ -101,4 +110,4 @@ function VacacionForm({ methods, onSubmit, onCancel }: Props) {
   );
 }
 
-export default VacacionForm;
+export default LicenciaForm;
