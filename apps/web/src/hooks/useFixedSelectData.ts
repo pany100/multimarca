@@ -20,6 +20,12 @@ function useFixedSelectData() {
     { value: "Otro", label: "Otro" },
   ];
 
+  const estadoLlegadaOptions = [
+    { value: "Justificada", label: "Justificada" },
+    { value: "Injustificada", label: "Injustificada" },
+    { value: "Pendiente", label: "Pendiente" },
+  ];
+
   const orepEstadoOptions = [
     { value: "EnProgreso", label: "En Proceso" },
     { value: "Aceptado", label: "Aceptado" },
@@ -81,6 +87,7 @@ function useFixedSelectData() {
     agendaEventRecurrence,
     typeOfOperation,
     tipoInasistenciaOptions,
+    estadoLlegadaOptions,
   };
 }
 
