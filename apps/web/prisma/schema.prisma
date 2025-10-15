@@ -164,6 +164,10 @@ model Empleado {
   gastosRealizados  Gasto[]
   ordenesReparacion OrdenReparacionMecanico[]
   inasistencias     Inasistencia[]
+  llegadasTarde     LlegadaTarde[]
+  horasExtra        HoraExtra[]
+  apercibimientos   Apercibimiento[]
+  premios           Premio[]
 
   @@index([name])
   @@index([dni])
@@ -171,14 +175,65 @@ model Empleado {
   @@index([name], map: "Mecanico_name_idx")
 }
 
+model Premio {
+  id               Int         @id @default(autoincrement())
+  empleadoId       Int
+  empleado         Empleado    @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
+  fecha            DateTime    @default(now())
+  tipo             TipoPremio  @default(Reconocimiento)
+  descripcion      String?      @db.Text
+  monto            Decimal?     @db.Decimal(10,2)
+  fechaCreacion    DateTime     @default(now())
+
+  @@index([empleadoId])
+}
+
+enum TipoPremio {
+  Reconocimiento
+  Economico
+  Productividad
+  Especial
+}
+
+model HoraExtra {
+  id              Int         @id @default(autoincrement())
+  empleadoId      Int
+  empleado        Empleado    @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
+  fecha           DateTime
+  horasTotales    Decimal      @db.Decimal(5,2)
+  motivo          String?      @db.VarChar(255)
+  fechaCreacion    DateTime      @default(now())
+  @@index([empleadoId])
+}
+
+model Apercibimiento {
+  id               Int          @id @default(autoincrement())
+  empleadoId       Int
+  empleado         Empleado     @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
+  fecha            DateTime     @default(now())
+  tipo             TipoApercibimiento @default(Leve)
+  motivo           String        @db.VarChar(255)
+  fechaCreacion    DateTime      @default(now())
+
+  @@index([empleadoId])
+}
+
+enum TipoApercibimiento {
+  Verbal
+  Leve
+  Grave
+  MuyGrave
+}
+
 model Inasistencia {
   id              Int        @id @default(autoincrement())
   empleadoId      Int
-  empleado        Empleado   @relation(fields: [empleadoId], references: [id])
+  empleado        Empleado   @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
   fecha           DateTime
   motivo          String?     @db.VarChar(255)
   tipo            TipoInasistencia @default(Medica)
   certificadoMedicoPath String? @db.VarChar(1000)
+  fechaCreacion    DateTime      @default(now())
 
   @@index([empleadoId])
 }
@@ -190,6 +245,25 @@ enum TipoInasistencia {
   Otro
 }
 
+model LlegadaTarde {
+  id               Int        @id @default(autoincrement())
+  empleadoId       Int
+  empleado         Empleado   @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
+  fecha            DateTime
+  minutosRetraso   Int
+  motivo           String?      @db.VarChar(255)
+  estado           EstadoLlegada @default(Justificada)
+  certificadoPath  String?      @db.VarChar(1000)
+  fechaCreacion    DateTime      @default(now())
+
+  @@index([empleadoId])
+}
+
+enum EstadoLlegada {
+  Justificada
+  Injustificada
+  Pendiente
+}
 
 model AusenciaProgramada {
   id               Int         @id @default(autoincrement())
