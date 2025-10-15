@@ -73,7 +73,6 @@ function LlegadaTardeForm({
                   <CustomFileInput
                     name="certificadoPath"
                     label="Certificado (opcional)"
-                    acceptedTypes="pdfs"
                   />
                 </Grid>
               </Grid>
