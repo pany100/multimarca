@@ -5,6 +5,7 @@ import CrearTareaDialog from "@/sections/tareas-diarias/components/CrearTareaDia
 import EditarTareaDialog from "@/sections/tareas-diarias/components/EditarTareaDialog";
 import EliminarTareaDialog from "@/sections/tareas-diarias/components/EliminarTareaDialog";
 import FechaSection from "@/sections/tareas-diarias/components/FechaSection";
+import SearchInput from "@/sections/tareas-diarias/components/SearchInput";
 import { useTareasDialogs } from "@/sections/tareas-diarias/hooks/useTareasDialogs";
 import useTareasDiarias from "@/sections/tareas-diarias/hooks/useTareasDiarias";
 import {
@@ -26,6 +27,8 @@ const TareasDiariasPage = () => {
   const [fechaActual, setFechaActual] = useState<string>(
     format(new Date(), "yyyy-MM-dd")
   );
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [isSearching, setIsSearching] = useState<boolean>(false);
   const { userData } = useAuth();
   const {
     tareas,
@@ -60,8 +63,25 @@ const TareasDiariasPage = () => {
   });
 
   useEffect(() => {
-    obtenerTareasDiarias(fechaActual, true);
-  }, [fechaActual, obtenerTareasDiarias]);
+    if (isSearching) {
+      // Cuando está buscando, no usar fecha específica para mostrar todas las fechas
+      obtenerTareasDiarias(undefined, true, searchQuery);
+    } else {
+      // Búsqueda normal por fecha
+      obtenerTareasDiarias(fechaActual, true);
+    }
+  }, [fechaActual, searchQuery, isSearching, obtenerTareasDiarias]);
+
+  // Handlers de búsqueda
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setIsSearching(query.trim().length > 0);
+  };
+
+  const handleClearSearch = () => {
+    setSearchQuery("");
+    setIsSearching(false);
+  };
 
   const tareasAgrupadas = agruparTareasPorFecha(tareas);
   const fechasOrdenadas = ordenarFechas(Object.keys(tareasAgrupadas));
@@ -86,6 +106,13 @@ const TareasDiariasPage = () => {
           Nueva Tarea
         </Button>
       </Box>
+
+      {/* Buscador */}
+      <SearchInput
+        onSearch={handleSearch}
+        onClear={handleClearSearch}
+        placeholder="Buscar tareas por descripción..."
+      />
 
       {/* Estado de carga */}
       {loading && (
@@ -112,6 +139,7 @@ const TareasDiariasPage = () => {
           fecha={fecha}
           tareas={tareasAgrupadas[fecha]}
           currentUserId={userData?.id}
+          isSearchMode={isSearching}
           onCambiarEstado={cambiarEstadoTarea}
           onEditarTarea={handleEditarTarea}
           onEliminarTarea={handleEliminarTarea}

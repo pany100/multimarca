@@ -6,7 +6,13 @@ import type {
 import { prisma } from "@/core/infrastructure/database/prisma";
 
 export class PrismaTareaDiariaRepository implements TareaDiariaRepository {
-  async list({ fecha, incluirAnteriores, user }: ListTareasParams) {
+  async list({
+    fecha,
+    incluirAnteriores,
+    search,
+    nombre,
+    user,
+  }: ListTareasParams) {
     let where: any = {};
 
     if (user.rol?.name === "Administrador") {
@@ -15,7 +21,8 @@ export class PrismaTareaDiariaRepository implements TareaDiariaRepository {
       where.usuarioId = user.id;
     }
 
-    const fechaDate = new Date(fecha);
+    // Si no se proporciona fecha, usar la fecha actual
+    const fechaDate = fecha ? new Date(fecha) : new Date();
     const fechaLimite = new Date(fechaDate);
     fechaLimite.setDate(fechaLimite.getDate() - 365);
 
@@ -29,6 +36,48 @@ export class PrismaTareaDiariaRepository implements TareaDiariaRepository {
       };
     } else {
       where.fecha = { gte: fechaDate };
+    }
+
+    // Filtros de búsqueda
+    const searchFilters: any[] = [];
+
+    // Búsqueda por texto en descripción Y nombre de usuario
+    if (search && search.trim()) {
+      searchFilters.push({
+        OR: [
+          {
+            descripcion: {
+              contains: search.trim(),
+            },
+          },
+          {
+            usuario: {
+              fullName: {
+                contains: search.trim(),
+              },
+            },
+          },
+        ],
+      });
+    }
+
+    // Búsqueda específica por nombre de usuario (si se proporciona por separado)
+    if (nombre && nombre.trim()) {
+      searchFilters.push({
+        usuario: {
+          fullName: {
+            contains: nombre.trim(),
+          },
+        },
+      });
+    }
+
+    // Combinar filtros de búsqueda con AND si hay múltiples
+    if (searchFilters.length > 0) {
+      where = {
+        ...where,
+        AND: searchFilters,
+      };
     }
 
     return prisma.tareaDiaria.findMany({

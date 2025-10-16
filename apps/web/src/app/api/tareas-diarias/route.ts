@@ -24,6 +24,8 @@ export async function GET(request: Request) {
       {
         fecha: searchParams.get("fecha"),
         incluirAnteriores: searchParams.get("incluirAnteriores") === "true",
+        search: searchParams.get("search") || undefined,
+        nombre: searchParams.get("nombre") || undefined,
       },
       listTareasQuerySchema
     );
@@ -36,6 +38,8 @@ export async function GET(request: Request) {
     const data = await new ListTareasUseCase(buildService()).execute({
       fecha: dto.fecha,
       incluirAnteriores: dto.incluirAnteriores,
+      search: dto.search,
+      nombre: dto.nombre,
       user,
     });
 

@@ -1,8 +1,10 @@
 import { z } from "zod";
 
 export const listTareasQuerySchema = z.object({
-  fecha: z.coerce.date({ invalid_type_error: "La fecha es obligatoria" }),
+  fecha: z.coerce.date({ invalid_type_error: "Fecha inválida" }).optional(),
   incluirAnteriores: z.boolean(),
+  search: z.string().optional(), // Búsqueda por texto en descripción
+  nombre: z.string().optional(), // Búsqueda por nombre de usuario
 });
 
 // POST body

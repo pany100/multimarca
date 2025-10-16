@@ -17,6 +17,7 @@ interface FechaSectionProps {
   fecha: string;
   tareas: TareaDiaria[];
   currentUserId?: number;
+  isSearchMode?: boolean; // Indica si está en modo búsqueda
   onCambiarEstado: (id: number, realizado: boolean) => void;
   onEditarTarea: (tarea: TareaDiaria) => void;
   onEliminarTarea: (tarea: TareaDiaria) => void;
@@ -26,17 +27,24 @@ const FechaSection = ({
   fecha,
   tareas,
   currentUserId,
+  isSearchMode = false,
   onCambiarEstado,
   onEditarTarea,
   onEliminarTarea,
 }: FechaSectionProps) => {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // Auto-colapsar cuando todas las tareas están completadas
+  // Auto-colapsar cuando todas las tareas están completadas (solo si no está en modo búsqueda)
   useEffect(() => {
-    const todasCompletadas = todasTareasCompletadas(tareas);
-    setIsCollapsed(todasCompletadas);
-  }, [tareas]);
+    if (isSearchMode) {
+      // En modo búsqueda, mantener todas las fechas abiertas
+      setIsCollapsed(false);
+    } else {
+      // En modo normal, colapsar si todas las tareas están completadas
+      const todasCompletadas = todasTareasCompletadas(tareas);
+      setIsCollapsed(todasCompletadas);
+    }
+  }, [tareas, isSearchMode]);
 
   const toggleCollapse = () => {
     setIsCollapsed(!isCollapsed);
