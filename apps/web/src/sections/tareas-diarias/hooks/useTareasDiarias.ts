@@ -1,5 +1,5 @@
 import { useFetch } from "@/contexts/FetchContext";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 
 interface TareaDiaria {
   id: number;
@@ -16,10 +16,16 @@ interface TareaDiaria {
 
 interface UseTareasDiariasProps {
   onSuccess?: () => void;
+  userData?: {
+    id: number;
+    fullName: string;
+    username: string;
+  };
 }
 
 export default function useTareasDiarias({
   onSuccess,
+  userData,
 }: UseTareasDiariasProps = {}) {
   const { authFetch } = useFetch();
   const [tareas, setTareas] = useState<TareaDiaria[]>([]);
@@ -40,7 +46,7 @@ export default function useTareasDiarias({
    * @param fecha - Fecha en formato YYYY-MM-DD
    * @param incluirAnteriores - Si es true, incluye tareas pendientes de fechas anteriores
    */
-  const obtenerTareasDiarias = async (
+  const obtenerTareasDiarias = useCallback(async (
     fecha: string,
     incluirAnteriores: boolean = true
   ) => {
@@ -76,7 +82,7 @@ export default function useTareasDiarias({
     } finally {
       setLoading(false);
     }
-  };
+  }, [authFetch]);
 
   /**
    * Crea una nueva tarea diaria
@@ -96,7 +102,12 @@ export default function useTareasDiarias({
 
       if (response.ok) {
         const nuevaTarea = await response.json();
-        setTareas((prevTareas) => [...prevTareas, nuevaTarea]);
+        // Agregar información del usuario si no viene del backend
+        const tareaConUsuario = {
+          ...nuevaTarea,
+          usuario: nuevaTarea.usuario || userData,
+        };
+        setTareas((prevTareas) => [...prevTareas, tareaConUsuario]);
         setSnackbar({
           open: true,
           message: "Tarea creada con éxito",

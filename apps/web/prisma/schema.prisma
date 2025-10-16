@@ -342,13 +342,13 @@ model Extraccion {
   fecha           DateTime         @default(now())
   usuarioId       Int
   motivo          String           @db.VarChar(150)
-  tipoOperacionId Int?
+  tipoOperacionId Int
   moneda          Moneda           @default(Peso)
   dolarId         Int?
   chequeId        Int?
   cheque          Cheque?          @relation(fields: [chequeId], references: [id])
   dolar           Dolar?           @relation(fields: [dolarId], references: [id])
-  tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
+  tipoOperacion   TipoDeOperacion  @relation(fields: [tipoOperacionId], references: [id])
   usuario         Usuario          @relation(fields: [usuarioId], references: [id])
   revisado        Boolean          @default(false)
 
@@ -370,14 +370,14 @@ model Gasto {
   proveedorId     Int?
   moneda          Moneda           @default(Peso)
   dolarId         Int?
-  tipoOperacionId Int?
+  tipoOperacionId Int
   chequeId        Int?
   categoria       CategoriaGasto   @relation(fields: [categoriaId], references: [id])
   cheque          Cheque?          @relation(fields: [chequeId], references: [id])
   dolar           Dolar?           @relation(fields: [dolarId], references: [id])
   mecanico        Empleado?        @relation(fields: [mecanicoId], references: [id])
   proveedor       Proveedor?       @relation(fields: [proveedorId], references: [id])
-  tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
+  tipoOperacion   TipoDeOperacion  @relation(fields: [tipoOperacionId], references: [id])
   revisado        Boolean          @default(false)
 
   @@index([categoriaId])
@@ -643,13 +643,13 @@ model IngresoPorReparacion {
   reciboEnviado     Boolean          @default(false)
   moneda            Moneda           @default(Peso)
   dolarId           Int?
-  tipoOperacionId   Int?
+  tipoOperacionId   Int
   chequeId          Int?
   cheque            Cheque?          @relation(fields: [chequeId], references: [id])
   cliente           Cliente          @relation(fields: [clienteId], references: [id])
   dolar             Dolar?           @relation(fields: [dolarId], references: [id])
   ordenReparacion   OrdenReparacion  @relation("OrdenReparacionIngresos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
-  tipoOperacion     TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
+  tipoOperacion     TipoDeOperacion  @relation(fields: [tipoOperacionId], references: [id])
   revisado          Boolean          @default(false)
 
   @@index([fecha])
@@ -671,12 +671,12 @@ model IngresoPorVenta {
   reciboEnviado      Boolean          @default(false)
   moneda             Moneda           @default(Peso)
   dolarId            Int?
-  tipoOperacionId    Int?
+  tipoOperacionId    Int
   chequeId           Int?
   cheque             Cheque?          @relation(fields: [chequeId], references: [id])
   cliente            Cliente?         @relation(fields: [clienteId], references: [id])
   dolar              Dolar?           @relation(fields: [dolarId], references: [id])
-  tipoOperacion      TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
+  tipoOperacion      TipoDeOperacion  @relation(fields: [tipoOperacionId], references: [id])
   venta              Venta            @relation("VentaIngresos", fields: [ventaId], references: [id], onDelete: Cascade)
   revisado           Boolean          @default(false)
 
@@ -765,12 +765,12 @@ model IngresoManualDeDinero {
   descripcion     String?          @db.Text
   moneda          Moneda           @default(Peso)
   dolarId         Int?
-  tipoOperacionId Int?
+  tipoOperacionId Int
   usuarioId       Int
   chequeId        Int?
   cheque          Cheque?          @relation(fields: [chequeId], references: [id])
   dolar           Dolar?           @relation(fields: [dolarId], references: [id])
-  tipoOperacion   TipoDeOperacion? @relation(fields: [tipoOperacionId], references: [id])
+  tipoOperacion   TipoDeOperacion  @relation(fields: [tipoOperacionId], references: [id])
   usuario         Usuario          @relation(fields: [usuarioId], references: [id])
   revisado        Boolean          @default(false)
 

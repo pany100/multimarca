@@ -1,63 +1,32 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
+import CrearTareaDialog from "@/sections/tareas-diarias/components/CrearTareaDialog";
+import EditarTareaDialog from "@/sections/tareas-diarias/components/EditarTareaDialog";
+import EliminarTareaDialog from "@/sections/tareas-diarias/components/EliminarTareaDialog";
+import FechaSection from "@/sections/tareas-diarias/components/FechaSection";
 import useTareasDiarias from "@/sections/tareas-diarias/hooks/useTareasDiarias";
+import { useTareasDialogs } from "@/sections/tareas-diarias/hooks/useTareasDialogs";
+import { TareaDiaria } from "@/sections/tareas-diarias/types/TareaDiaria";
+import {
+  agruparTareasPorFecha,
+  ordenarFechas,
+} from "@/sections/tareas-diarias/utils/tareas.utils";
 import AddIcon from "@mui/icons-material/Add";
-import DeleteIcon from "@mui/icons-material/Delete";
-import EditIcon from "@mui/icons-material/Edit";
-import ExpandLessIcon from "@mui/icons-material/ExpandLess";
-import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import {
   Alert,
   Box,
   Button,
-  Checkbox,
   CircularProgress,
-  Collapse,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogTitle,
-  Divider,
-  IconButton,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  TextField,
   Typography,
 } from "@mui/material";
-import { format, parseISO } from "date-fns";
-import { es } from "date-fns/locale";
+import { format } from "date-fns";
 import { useEffect, useState } from "react";
-
-interface TareaDiaria {
-  id: number;
-  descripcion: string;
-  realizado: boolean;
-  fecha: string;
-  usuarioId: number;
-  usuario?: {
-    id: number;
-    fullName: string;
-    username: string;
-  };
-}
-
-interface TareasAgrupadasPorFecha {
-  [fecha: string]: TareaDiaria[];
-}
 
 const TareasDiariasPage = () => {
   const [fechaActual, setFechaActual] = useState<string>(
     format(new Date(), "yyyy-MM-dd")
   );
-  const [dialogoCrearAbierto, setDialogoCrearAbierto] = useState(false);
-  const [nuevaTareaDescripcion, setNuevaTareaDescripcion] = useState("");
-  const [dialogoEditarAbierto, setDialogoEditarAbierto] = useState(false);
-  const [tareaEditando, setTareaEditando] = useState<TareaDiaria | null>(null);
-  const [dialogoEliminarAbierto, setDialogoEliminarAbierto] = useState(false);
-  const [tareaEliminar, setTareaEliminar] = useState<TareaDiaria | null>(null);
   const { userData } = useAuth();
   console.log(userData);
   const {
@@ -69,109 +38,36 @@ const TareasDiariasPage = () => {
     actualizarTareaDiaria,
     cambiarEstadoTarea,
     eliminarTareaDiaria,
-  } = useTareasDiarias({
-    onSuccess: () => obtenerTareasDiarias(fechaActual, true),
+  } = useTareasDiarias({ userData });
+
+  const {
+    dialogoCrearAbierto,
+    dialogoEditarAbierto,
+    tareaEditando,
+    dialogoEliminarAbierto,
+    tareaEliminar,
+    handleCrearTarea,
+    abrirDialogoCrear,
+    cerrarDialogoCrear,
+    handleEditarTarea,
+    handleGuardarEdicion,
+    cerrarDialogoEditar,
+    handleEliminarTarea,
+    handleConfirmarEliminar,
+    cerrarDialogoEliminar,
+  } = useTareasDialogs({
+    crearTareaDiaria,
+    actualizarTareaDiaria,
+    eliminarTareaDiaria,
   });
 
   useEffect(() => {
     obtenerTareasDiarias(fechaActual, true);
-  }, [fechaActual]);
-
-  // Agrupar tareas por fecha
-  const agruparTareasPorFecha = (
-    tareas: TareaDiaria[]
-  ): TareasAgrupadasPorFecha => {
-    return tareas.reduce((agrupadas: TareasAgrupadasPorFecha, tarea) => {
-      const fechaFormateada = format(parseISO(tarea.fecha), "yyyy-MM-dd");
-
-      if (!agrupadas[fechaFormateada]) {
-        agrupadas[fechaFormateada] = [];
-      }
-
-      agrupadas[fechaFormateada].push(tarea);
-      return agrupadas;
-    }, {});
-  };
+  }, [fechaActual, obtenerTareasDiarias]);
 
   const tareasAgrupadas = agruparTareasPorFecha(tareas);
-  const fechasOrdenadas = Object.keys(tareasAgrupadas).sort(
-    (a, b) => new Date(a).getTime() - new Date(b).getTime()
-  );
+  const fechasOrdenadas = ordenarFechas(Object.keys(tareasAgrupadas));
 
-  // Verificar si todas las tareas de un día están completadas
-  const todasTareasCompletadas = (fecha: string): boolean => {
-    const tareasDelDia = tareasAgrupadas[fecha];
-    return tareasDelDia.every((tarea) => tarea.realizado);
-  };
-
-  // Inicializar días colapsados cuando cambian las tareas
-  useEffect(() => {
-    const nuevosColapsados = new Set<string>();
-    fechasOrdenadas.forEach((fecha) => {
-      if (todasTareasCompletadas(fecha)) {
-        nuevosColapsados.add(fecha);
-      }
-    });
-    setDiasColapsados(nuevosColapsados);
-  }, [tareas]);
-
-  const [diasColapsados, setDiasColapsados] = useState(new Set<string>());
-
-  const toggleColapso = (fecha: string) => {
-    const nuevosColapsados = new Set(diasColapsados);
-    if (nuevosColapsados.has(fecha)) {
-      nuevosColapsados.delete(fecha);
-    } else {
-      nuevosColapsados.add(fecha);
-    }
-    setDiasColapsados(nuevosColapsados);
-  };
-
-  // Manejadores
-  const handleCrearTarea = async () => {
-    if (nuevaTareaDescripcion.trim()) {
-      await crearTareaDiaria(nuevaTareaDescripcion);
-      setNuevaTareaDescripcion("");
-      setDialogoCrearAbierto(false);
-    }
-  };
-
-  const handleEditarTarea = (tarea: TareaDiaria) => {
-    setTareaEditando(tarea);
-    setDialogoEditarAbierto(true);
-  };
-
-  const handleGuardarEdicion = async () => {
-    if (tareaEditando && tareaEditando.descripcion.trim()) {
-      await actualizarTareaDiaria(tareaEditando.id, {
-        descripcion: tareaEditando.descripcion,
-      });
-      setDialogoEditarAbierto(false);
-      setTareaEditando(null);
-    }
-  };
-
-  const handleConfirmarEliminar = async () => {
-    if (tareaEliminar) {
-      await eliminarTareaDiaria(tareaEliminar.id);
-      setDialogoEliminarAbierto(false);
-      setTareaEliminar(null);
-    }
-  };
-
-  const formatearFecha = (fechaStr: string): string => {
-    // Si es la fecha actual, mostrar "Hoy"
-    const hoy = format(new Date(), "yyyy-MM-dd");
-
-    if (fechaStr === hoy) {
-      return "Hoy";
-    }
-
-    // Formatear la fecha en estilo español
-    return format(parseISO(fechaStr), "EEEE, d 'de' MMMM 'de' yyyy", {
-      locale: es,
-    });
-  };
 
   return (
     <Box sx={{ p: 3 }}>
@@ -188,7 +84,7 @@ const TareasDiariasPage = () => {
           variant="contained"
           color="primary"
           startIcon={<AddIcon />}
-          onClick={() => setDialogoCrearAbierto(true)}
+          onClick={abrirDialogoCrear}
         >
           Nueva Tarea
         </Button>
@@ -214,206 +110,37 @@ const TareasDiariasPage = () => {
       )}
 
       {fechasOrdenadas.map((fecha) => (
-        <Paper elevation={2} sx={{ mb: 3, overflow: "hidden" }} key={fecha}>
-          <Box
-            sx={{
-              bgcolor: "primary.main",
-              color: "primary.contrastText",
-              px: 2,
-              py: 1,
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <Typography variant="h6">{formatearFecha(fecha)}</Typography>
-            <IconButton
-              onClick={() => toggleColapso(fecha)}
-              sx={{ color: "primary.contrastText" }}
-              size="small"
-            >
-              {diasColapsados.has(fecha) ? (
-                <ExpandMoreIcon />
-              ) : (
-                <ExpandLessIcon />
-              )}
-            </IconButton>
-          </Box>
-          <Collapse
-            in={!diasColapsados.has(fecha)}
-            timeout="auto"
-            unmountOnExit
-          >
-            <List>
-              {tareasAgrupadas[fecha].map((tarea, index) => (
-                <Box key={tarea.id}>
-                  <ListItem
-                    secondaryAction={
-                      <Box sx={{ display: "flex", alignItems: "center" }}>
-                        <Checkbox
-                          edge="end"
-                          checked={tarea.realizado}
-                          onChange={(e) =>
-                            cambiarEstadoTarea(tarea.id, e.target.checked)
-                          }
-                          disabled={userData?.id !== tarea.usuarioId}
-                        />
-                        <IconButton
-                          edge="end"
-                          aria-label="edit"
-                          onClick={() => handleEditarTarea(tarea)}
-                          disabled={userData?.id !== tarea.usuarioId}
-                        >
-                          <EditIcon />
-                        </IconButton>
-                        <IconButton
-                          edge="end"
-                          aria-label="delete"
-                          onClick={() => {
-                            setTareaEliminar(tarea);
-                            setDialogoEliminarAbierto(true);
-                          }}
-                          disabled={userData?.id !== tarea.usuarioId}
-                        >
-                          <DeleteIcon />
-                        </IconButton>
-                      </Box>
-                    }
-                  >
-                    <ListItemText
-                      primary={`${tarea.usuario?.fullName} - ${tarea.descripcion}`}
-                      sx={{
-                        textDecoration: tarea.realizado
-                          ? "line-through"
-                          : "none",
-                        color: tarea.realizado
-                          ? "text.disabled"
-                          : "text.primary",
-                        marginRight: "64px",
-                      }}
-                    />
-                  </ListItem>
-                  {index < tareasAgrupadas[fecha].length - 1 && (
-                    <Divider component="li" />
-                  )}
-                </Box>
-              ))}
-            </List>
-          </Collapse>
-        </Paper>
+        <FechaSection
+          key={fecha}
+          fecha={fecha}
+          tareas={tareasAgrupadas[fecha]}
+          currentUserId={userData?.id}
+          onCambiarEstado={cambiarEstadoTarea}
+          onEditarTarea={handleEditarTarea}
+          onEliminarTarea={handleEliminarTarea}
+        />
       ))}
 
-      {/* Diálogo para crear nueva tarea */}
-      <Dialog
+      {/* Diálogos */}
+      <CrearTareaDialog
         open={dialogoCrearAbierto}
-        onClose={() => setDialogoCrearAbierto(false)}
-        PaperProps={{
-          sx: {
-            width: "100%",
-            minWidth: "500px",
-            maxWidth: "800px",
-          },
-        }}
-      >
-        <DialogTitle>Nueva Tarea</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Descripción"
-            type="text"
-            fullWidth
-            value={nuevaTareaDescripcion}
-            onChange={(e) => setNuevaTareaDescripcion(e.target.value)}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogoCrearAbierto(false)}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleCrearTarea}
-            variant="contained"
-            color="primary"
-          >
-            Guardar
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onClose={cerrarDialogoCrear}
+        onCrear={handleCrearTarea}
+      />
 
-      {/* Diálogo para editar tarea */}
-      <Dialog
+      <EditarTareaDialog
         open={dialogoEditarAbierto}
-        onClose={() => setDialogoEditarAbierto(false)}
-        PaperProps={{
-          sx: {
-            width: "100%",
-            minWidth: "500px",
-            maxWidth: "800px",
-          },
-        }}
-      >
-        <DialogTitle>Editar Tarea</DialogTitle>
-        <DialogContent>
-          <TextField
-            autoFocus
-            margin="dense"
-            label="Descripción"
-            type="text"
-            fullWidth
-            value={tareaEditando?.descripcion || ""}
-            onChange={(e) =>
-              tareaEditando &&
-              setTareaEditando({
-                ...tareaEditando,
-                descripcion: e.target.value,
-              })
-            }
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogoEditarAbierto(false)}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleGuardarEdicion}
-            variant="contained"
-            color="primary"
-          >
-            Guardar
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onClose={cerrarDialogoEditar}
+        tarea={tareaEditando}
+        onEditar={handleGuardarEdicion}
+      />
 
-      {/* Diálogo para confirmar eliminación */}
-      <Dialog
+      <EliminarTareaDialog
         open={dialogoEliminarAbierto}
-        onClose={() => setDialogoEliminarAbierto(false)}
-      >
-        <DialogTitle>Eliminar Tarea</DialogTitle>
-        <DialogContent>
-          <Typography>
-            ¿Estás seguro de que deseas eliminar esta tarea?
-          </Typography>
-          {tareaEliminar && (
-            <Typography sx={{ mt: 1, fontStyle: "italic" }}>
-              &quot;{tareaEliminar.descripcion}&quot;
-            </Typography>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setDialogoEliminarAbierto(false)}>
-            Cancelar
-          </Button>
-          <Button
-            onClick={handleConfirmarEliminar}
-            variant="contained"
-            color="error"
-          >
-            Eliminar
-          </Button>
-        </DialogActions>
-      </Dialog>
+        onClose={cerrarDialogoEliminar}
+        tarea={tareaEliminar}
+        onEliminar={handleConfirmarEliminar}
+      />
     </Box>
   );
 };
