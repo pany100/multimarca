@@ -19,8 +19,8 @@ interface UseTareasDiariasProps {
   userData?: {
     id: number;
     fullName: string;
-    username: string;
-  };
+    username?: string;
+  } | null;
 }
 
 export default function useTareasDiarias({
@@ -105,7 +105,11 @@ export default function useTareasDiarias({
         // Agregar información del usuario si no viene del backend
         const tareaConUsuario = {
           ...nuevaTarea,
-          usuario: nuevaTarea.usuario || userData,
+          usuario: nuevaTarea.usuario || (userData ? {
+            id: userData.id,
+            fullName: userData.fullName,
+            username: userData.username || userData.fullName, // Fallback si no hay username
+          } : undefined),
         };
         setTareas((prevTareas) => [...prevTareas, tareaConUsuario]);
         setSnackbar({
