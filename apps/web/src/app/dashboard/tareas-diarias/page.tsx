@@ -5,9 +5,8 @@ import CrearTareaDialog from "@/sections/tareas-diarias/components/CrearTareaDia
 import EditarTareaDialog from "@/sections/tareas-diarias/components/EditarTareaDialog";
 import EliminarTareaDialog from "@/sections/tareas-diarias/components/EliminarTareaDialog";
 import FechaSection from "@/sections/tareas-diarias/components/FechaSection";
-import useTareasDiarias from "@/sections/tareas-diarias/hooks/useTareasDiarias";
 import { useTareasDialogs } from "@/sections/tareas-diarias/hooks/useTareasDialogs";
-import { TareaDiaria } from "@/sections/tareas-diarias/types/TareaDiaria";
+import useTareasDiarias from "@/sections/tareas-diarias/hooks/useTareasDiarias";
 import {
   agruparTareasPorFecha,
   ordenarFechas,
@@ -28,7 +27,6 @@ const TareasDiariasPage = () => {
     format(new Date(), "yyyy-MM-dd")
   );
   const { userData } = useAuth();
-  console.log(userData);
   const {
     tareas,
     loading,
@@ -67,7 +65,6 @@ const TareasDiariasPage = () => {
 
   const tareasAgrupadas = agruparTareasPorFecha(tareas);
   const fechasOrdenadas = ordenarFechas(Object.keys(tareasAgrupadas));
-
 
   return (
     <Box sx={{ p: 3 }}>
