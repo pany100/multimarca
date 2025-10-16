@@ -2,6 +2,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
+  Button,
   IconButton,
   InputAdornment,
   TextField,
@@ -21,9 +22,8 @@ const SearchInput = ({
 }: SearchInputProps) => {
   const [searchValue, setSearchValue] = useState("");
 
-  const handleSearch = (value: string) => {
-    setSearchValue(value);
-    onSearch(value);
+  const handleSearchClick = () => {
+    onSearch(searchValue.trim());
   };
 
   const handleClear = () => {
@@ -33,44 +33,54 @@ const SearchInput = ({
 
   const handleKeyPress = (event: React.KeyboardEvent) => {
     if (event.key === 'Enter') {
-      onSearch(searchValue);
+      handleSearchClick();
     }
   };
 
   return (
     <Box sx={{ mb: 3 }}>
-      <TextField
-        fullWidth
-        variant="outlined"
-        placeholder={placeholder}
-        value={searchValue}
-        onChange={(e) => handleSearch(e.target.value)}
-        onKeyPress={handleKeyPress}
-        InputProps={{
-          startAdornment: (
-            <InputAdornment position="start">
-              <SearchIcon color="action" />
-            </InputAdornment>
-          ),
-          endAdornment: searchValue && (
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="limpiar búsqueda"
-                onClick={handleClear}
-                edge="end"
-                size="small"
-              >
-                <ClearIcon />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-        sx={{
-          '& .MuiOutlinedInput-root': {
-            backgroundColor: 'background.paper',
-          },
-        }}
-      />
+      <Box sx={{ display: 'flex', gap: 1 }}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder={placeholder}
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
+          onKeyPress={handleKeyPress}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <SearchIcon color="action" />
+              </InputAdornment>
+            ),
+            endAdornment: searchValue && (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="limpiar búsqueda"
+                  onClick={handleClear}
+                  edge="end"
+                  size="small"
+                >
+                  <ClearIcon />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+          sx={{
+            '& .MuiOutlinedInput-root': {
+              backgroundColor: 'background.paper',
+            },
+          }}
+        />
+        <Button
+          variant="contained"
+          onClick={handleSearchClick}
+          startIcon={<SearchIcon />}
+          sx={{ minWidth: 'auto', px: 2 }}
+        >
+          Buscar
+        </Button>
+      </Box>
     </Box>
   );
 };
