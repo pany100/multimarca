@@ -5,7 +5,7 @@ import CrearTareaDialog from "@/sections/tareas-diarias/components/CrearTareaDia
 import EditarTareaDialog from "@/sections/tareas-diarias/components/EditarTareaDialog";
 import EliminarTareaDialog from "@/sections/tareas-diarias/components/EliminarTareaDialog";
 import FechaSection from "@/sections/tareas-diarias/components/FechaSection";
-import SearchInput from "@/sections/tareas-diarias/components/SearchInput";
+import TareasFilters from "@/sections/tareas-diarias/components/TareasFilters";
 import { useTareasDialogs } from "@/sections/tareas-diarias/hooks/useTareasDialogs";
 import useTareasDiarias from "@/sections/tareas-diarias/hooks/useTareasDiarias";
 import {
@@ -20,15 +20,10 @@ import {
   CircularProgress,
   Typography,
 } from "@mui/material";
-import { format } from "date-fns";
 import { useEffect, useState } from "react";
 
 const TareasDiariasPage = () => {
-  const [fechaActual, setFechaActual] = useState<string>(
-    format(new Date(), "yyyy-MM-dd")
-  );
-  const [searchQuery, setSearchQuery] = useState<string>("");
-  const [isSearching, setIsSearching] = useState<boolean>(false);
+  const [isSearchActive, setIsSearchActive] = useState<boolean>(false);
   const { userData } = useAuth();
   const {
     tareas,
@@ -62,25 +57,36 @@ const TareasDiariasPage = () => {
     eliminarTareaDiaria,
   });
 
+  // Cargar tareas inicialmente sin filtros
   useEffect(() => {
-    if (isSearching) {
-      // Cuando está buscando, no usar fecha específica para mostrar todas las fechas
-      obtenerTareasDiarias(undefined, true, searchQuery);
-    } else {
-      // Búsqueda normal por fecha
-      obtenerTareasDiarias(fechaActual, true);
-    }
-  }, [fechaActual, searchQuery, isSearching, obtenerTareasDiarias]);
+    obtenerTareasDiarias();
+  }, [obtenerTareasDiarias]);
 
-  // Handlers de búsqueda
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
-    setIsSearching(query.trim().length > 0);
+  // Handler para búsqueda desde el componente de filtros
+  const handleSearch = (
+    searchQuery: string,
+    fromDate: Date | null,
+    toDate: Date | null,
+    hasActiveFilters: boolean
+  ) => {
+    const fromStr = fromDate ? fromDate.toISOString().split("T")[0] : null;
+    const toStr = toDate ? toDate.toISOString().split("T")[0] : null;
+    const searchText = searchQuery.trim() || undefined;
+
+    setIsSearchActive(hasActiveFilters);
+    obtenerTareasDiarias(fromStr, toStr, searchText);
   };
 
-  const handleClearSearch = () => {
-    setSearchQuery("");
-    setIsSearching(false);
+  // Handler para limpiar solo texto (botón X en el input)
+  const handleClearSearchText = () => {
+    // Solo ejecuta una nueva búsqueda si hay otros filtros activos
+    // Si no hay otros filtros, no hace nada (mantiene el botón Resetear visible)
+  };
+
+  // Handler para resetear todos los filtros (botón Resetear)
+  const handleResetFilters = () => {
+    setIsSearchActive(false);
+    obtenerTareasDiarias();
   };
 
   const tareasAgrupadas = agruparTareasPorFecha(tareas);
@@ -107,11 +113,11 @@ const TareasDiariasPage = () => {
         </Button>
       </Box>
 
-      {/* Buscador */}
-      <SearchInput
-        onSearch={handleSearch}
-        onClear={handleClearSearch}
-        placeholder="Buscar tareas por descripción..."
+      {/* Filtros */}
+      <TareasFilters 
+        onSearch={handleSearch} 
+        onClear={handleClearSearchText}
+        onReset={handleResetFilters}
       />
 
       {/* Estado de carga */}
@@ -139,7 +145,7 @@ const TareasDiariasPage = () => {
           fecha={fecha}
           tareas={tareasAgrupadas[fecha]}
           currentUserId={userData?.id}
-          isSearchMode={isSearching}
+          isSearchMode={isSearchActive}
           onCambiarEstado={cambiarEstadoTarea}
           onEditarTarea={handleEditarTarea}
           onEliminarTarea={handleEliminarTarea}

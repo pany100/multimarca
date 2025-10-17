@@ -4,22 +4,28 @@ export class ListTareasUseCase {
   constructor(private readonly service: TareaDiariaService) {}
 
   async execute(input: {
-    fecha?: string | Date;
-    incluirAnteriores: boolean;
+    from?: string | null;
+    to?: string | null;
     search?: string;
     nombre?: string;
     user: { id: number; rol?: { name?: string } };
   }) {
-    let fecha: Date | undefined;
+    let from: Date | undefined;
+    let to: Date | undefined;
     
-    if (input.fecha) {
-      fecha = new Date(input.fecha);
-      if (Number.isNaN(fecha.getTime())) throw new Error("Fecha inválida");
+    if (input.from) {
+      from = new Date(input.from);
+      if (Number.isNaN(from.getTime())) throw new Error("Fecha desde inválida");
+    }
+
+    if (input.to) {
+      to = new Date(input.to);
+      if (Number.isNaN(to.getTime())) throw new Error("Fecha hasta inválida");
     }
 
     return this.service.list({
-      fecha,
-      incluirAnteriores: !!input.incluirAnteriores,
+      from,
+      to,
       search: input.search,
       nombre: input.nombre,
       user: input.user,

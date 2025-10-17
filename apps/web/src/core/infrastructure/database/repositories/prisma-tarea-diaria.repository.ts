@@ -7,8 +7,8 @@ import { prisma } from "@/core/infrastructure/database/prisma";
 
 export class PrismaTareaDiariaRepository implements TareaDiariaRepository {
   async list({
-    fecha,
-    incluirAnteriores,
+    from,
+    to,
     search,
     nombre,
     user,
@@ -21,21 +21,20 @@ export class PrismaTareaDiariaRepository implements TareaDiariaRepository {
       where.usuarioId = user.id;
     }
 
-    // Si no se proporciona fecha, usar la fecha actual
-    const fechaDate = fecha ? new Date(fecha) : new Date();
-    const fechaLimite = new Date(fechaDate);
-    fechaLimite.setDate(fechaLimite.getDate() - 365);
-
-    if (incluirAnteriores) {
-      where = {
-        ...where,
-        OR: [
-          { fecha: { gte: fechaDate } },
-          { fecha: { lt: fechaDate, gte: fechaLimite } },
-        ],
-      };
-    } else {
-      where.fecha = { gte: fechaDate };
+    // Filtro por rango de fechas
+    if (from || to) {
+      const dateFilter: any = {};
+      if (from) {
+        dateFilter.gte = from;
+      }
+      if (to) {
+        // Agregar 1 día y restar 1ms para incluir todo el día "to"
+        const toDate = new Date(to);
+        toDate.setDate(toDate.getDate() + 1);
+        toDate.setMilliseconds(toDate.getMilliseconds() - 1);
+        dateFilter.lte = toDate;
+      }
+      where.fecha = dateFilter;
     }
 
     // Filtros de búsqueda

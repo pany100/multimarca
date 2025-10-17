@@ -1,6 +1,6 @@
 export type ListTareasParams = {
-  fecha?: Date; // día base (opcional, por defecto hoy)
-  incluirAnteriores?: boolean; // incluye pendientes hasta 365 días atrás
+  from?: Date; // fecha desde para filtrar rango
+  to?: Date; // fecha hasta para filtrar rango
   search?: string; // búsqueda por texto en descripción
   nombre?: string; // búsqueda por nombre de usuario
   user: { id: number; rol?: { name?: string } }; // filtra por usuario si no es admin

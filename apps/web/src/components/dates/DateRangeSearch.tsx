@@ -12,9 +12,11 @@ import { Dispatch, SetStateAction } from "react";
 type Props = {
   setFrom: Dispatch<SetStateAction<Date | null>>;
   setTo: Dispatch<SetStateAction<Date | null>>;
+  fromValue?: Date | null;
+  toValue?: Date | null;
 };
 
-function DateRangeSearch({ setFrom, setTo }: Props) {
+function DateRangeSearch({ setFrom, setTo, fromValue, toValue }: Props) {
   const handleDateChange = (
     value: PickerValue,
     context: PickerChangeHandlerContext<DateValidationError>,
@@ -23,9 +25,14 @@ function DateRangeSearch({ setFrom, setTo }: Props) {
     if (context.validationError) {
       return; // No actualizar si hay error de validación
     }
+    // Si el valor es null o undefined, establecer como null
+    if (!value) {
+      setDate(null);
+      return;
+    }
     // Convertir el valor a Date si es necesario
     const dateValue =
-      value instanceof Date ? value : value && new Date(value.toString());
+      value instanceof Date ? value : new Date(value.toString());
     setDate(dateValue);
   };
 
@@ -34,6 +41,7 @@ function DateRangeSearch({ setFrom, setTo }: Props) {
       <Stack direction="row" spacing={1} alignItems="center">
         <DatePicker
           label="Desde"
+          value={fromValue}
           onChange={(value, context) =>
             handleDateChange(value, context, setFrom)
           }
@@ -48,10 +56,14 @@ function DateRangeSearch({ setFrom, setTo }: Props) {
                 },
               },
             },
+            actionBar: {
+              actions: ['clear'],
+            },
           }}
         />
         <DatePicker
           label="Hasta"
+          value={toValue}
           onChange={(value, context) => handleDateChange(value, context, setTo)}
           format="dd-MM-yyyy"
           slotProps={{
@@ -63,6 +75,9 @@ function DateRangeSearch({ setFrom, setTo }: Props) {
                   backgroundColor: "background.paper",
                 },
               },
+            },
+            actionBar: {
+              actions: ['clear'],
             },
           }}
         />

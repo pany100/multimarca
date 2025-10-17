@@ -42,15 +42,15 @@ export default function useTareasDiarias({
   });
 
   /**
-   * Obtiene las tareas diarias para una fecha específica
-   * @param fecha - Fecha en formato YYYY-MM-DD (opcional)
-   * @param incluirAnteriores - Si es true, incluye tareas pendientes de fechas anteriores
+   * Obtiene las tareas diarias filtradas por rango de fechas
+   * @param from - Fecha desde (opcional)
+   * @param to - Fecha hasta (opcional)
    * @param search - Texto de búsqueda (opcional)
    * @param nombre - Nombre de usuario para filtrar (opcional)
    */
   const obtenerTareasDiarias = useCallback(async (
-    fecha?: string,
-    incluirAnteriores: boolean = true,
+    from?: string | null,
+    to?: string | null,
     search?: string,
     nombre?: string
   ) => {
@@ -58,8 +58,8 @@ export default function useTareasDiarias({
     setError(null);
     try {
       const params = new URLSearchParams();
-      if (fecha) params.append('fecha', fecha);
-      params.append('incluirAnteriores', incluirAnteriores.toString());
+      if (from) params.append('from', from);
+      if (to) params.append('to', to);
       if (search) params.append('search', search);
       if (nombre) params.append('nombre', nombre);
 

@@ -22,8 +22,8 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const dto = await validateRequest(
       {
-        fecha: searchParams.get("fecha"),
-        incluirAnteriores: searchParams.get("incluirAnteriores") === "true",
+        from: searchParams.get("from"),
+        to: searchParams.get("to"),
         search: searchParams.get("search") || undefined,
         nombre: searchParams.get("nombre") || undefined,
       },
@@ -36,8 +36,8 @@ export async function GET(request: Request) {
     }
 
     const data = await new ListTareasUseCase(buildService()).execute({
-      fecha: dto.fecha,
-      incluirAnteriores: dto.incluirAnteriores,
+      from: dto.from,
+      to: dto.to,
       search: dto.search,
       nombre: dto.nombre,
       user,
