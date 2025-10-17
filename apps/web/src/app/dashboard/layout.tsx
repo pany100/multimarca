@@ -118,7 +118,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   }, [authFetch]);
 
   useEffect(() => {
-    obtenerTareasDiarias(new Date().toISOString().split("T")[0], true);
+    obtenerTareasDiarias();
   }, [authFetch]);
 
   useEffect(() => {
@@ -379,7 +379,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             ruta: "/dashboard/estadisticas",
           },
           {
-            permiso: "Estadisticas",
+            permiso: "EstadisticasBalance",
             texto: "Balances",
             icono: <QueryStatsIcon />,
             ruta: "/dashboard/balance",
