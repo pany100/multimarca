@@ -66,7 +66,7 @@ const ExtraccionesForm = () => {
         <Grid item xs={12} md={6}>
           <CustomInputText
             name="gastosBancarios"
-            label="Gastos Bancarios"
+            label="Gastos Bancarios (en pesos)"
             type="number"
           />
         </Grid>
