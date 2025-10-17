@@ -24,6 +24,12 @@ export const schema = yup.object({
   usuarioId: yup.number().required("El usuario es requerido"),
   motivo: yup.string().required("El motivo es requerido"),
   tipoOperacionId: yup.number().required("El tipo de extracción es requerido"),
+  cotizacionDolar: yup.number().when("moneda", {
+    is: "Dolar",
+    then: (schema) => schema.required("La cotización es requerida"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  gastosBancarios: yup.number().default(0),
   ...getSchemaPropsForCheque("tipoOperacionId"),
 });
 
@@ -49,6 +55,20 @@ const ExtraccionesForm = () => {
         </Grid>
         <Grid item xs={12} md={6}>
           <CustomSelect options={currency} name="moneda" label="Moneda" />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomInputText
+            name="cotizacionDolar"
+            label="Cotización Dolar"
+            type="number"
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomInputText
+            name="gastosBancarios"
+            label="Gastos Bancarios"
+            type="number"
+          />
         </Grid>
         <Grid item xs={12} md={6}>
           <CustomSelect options={admins} name="usuarioId" label="Usuario" />

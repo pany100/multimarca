@@ -176,6 +176,14 @@ const VerIngresoVentaPage = ({ params }: { params: { id: string } }) => {
         </Grid>
         <Grid item xs={12} md={6}>
           <Typography variant="subtitle1" fontWeight="bold">
+            Gastos Bancarios
+          </Typography>
+          <Typography variant="body1">
+            {getFormattedPrice(ingreso.gastosBancarios)}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle1" fontWeight="bold">
             Cliente
           </Typography>
           <Typography variant="body1">
@@ -304,6 +312,21 @@ const VerIngresoVentaPage = ({ params }: { params: { id: string } }) => {
           />
         </Grid>
       </Grid>
+
+      {/* Dolar Info if applicable */}
+      {ingreso.moneda === "Dolar" && (
+        <>
+          <Divider sx={{ my: 2 }} />
+          <Typography variant="h6" gutterBottom>
+            Cotización del Dólar
+          </Typography>
+          <Grid item xs={12} md={6}>
+            <Typography variant="body1">
+              {getFormattedPrice(ingreso.cotizacionDolar)}
+            </Typography>
+          </Grid>
+        </>
+      )}
 
       {selectedIngreso && (
         <RecibosModal

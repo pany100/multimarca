@@ -54,7 +54,7 @@ export default function ExtraccionVerPage({
     };
 
     fetchExtraccion();
-  }, [params.id]);
+  }, [params.id, authFetch]);
 
   if (loading) {
     return (
@@ -160,6 +160,14 @@ export default function ExtraccionVerPage({
         </Grid>
         <Grid item xs={12} md={6}>
           <Typography variant="subtitle1" fontWeight="bold">
+            Gastos Bancarios
+          </Typography>
+          <Typography variant="body1">
+            {getFormattedPrice(extraccion.gastosBancarios)}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle1" fontWeight="bold">
             Usuario
           </Typography>
           <Typography variant="body1">
@@ -208,29 +216,16 @@ export default function ExtraccionVerPage({
       </Grid>
 
       {/* Dolar Info if applicable */}
-      {extraccion.moneda === "Dolar" && extraccion.dolar && (
+      {extraccion.moneda === "Dolar" && (
         <>
           <Divider sx={{ my: 2 }} />
           <Typography variant="h6" gutterBottom>
-            Información del Dólar
+            Cotización del Dólar
           </Typography>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle1" fontWeight="bold">
-                Cotización del Dólar
-              </Typography>
-              <Typography variant="body1">
-                {getFormattedPrice(extraccion.dolar.valor)}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle1" fontWeight="bold">
-                Fecha de Cotización
-              </Typography>
-              <Typography variant="body1">
-                {getFormattedDate(extraccion.dolar.fecha)}
-              </Typography>
-            </Grid>
+          <Grid item xs={12} md={6}>
+            <Typography variant="body1">
+              {getFormattedPrice(extraccion.cotizacionDolar)}
+            </Typography>
           </Grid>
         </>
       )}

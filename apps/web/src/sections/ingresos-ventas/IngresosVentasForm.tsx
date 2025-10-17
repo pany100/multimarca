@@ -24,6 +24,12 @@ export const schema = yup.object({
   informacionCliente: yup.string().nullable(),
   ventaId: yup.number().required("La venta es requerida"),
   tipoOperacionId: yup.number().required("El tipo de operación es requerido"),
+  cotizacionDolar: yup.number().when("moneda", {
+    is: "Dolar",
+    then: (schema) => schema.required("La cotización es requerida"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
+  gastosBancarios: yup.number().default(0),
   ...getSchemaPropsForCheque("tipoOperacionId"),
 });
 
@@ -49,6 +55,20 @@ const IngresosVentasForm = () => {
         </Grid>
         <Grid item xs={12} md={6}>
           <CustomSelect name="moneda" label="Moneda" options={currency} />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomInputText
+            name="cotizacionDolar"
+            label="Cotización Dolar"
+            type="number"
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomInputText
+            name="gastosBancarios"
+            label="Gastos Bancarios"
+            type="number"
+          />
         </Grid>
         <Grid item xs={12} md={6}>
           <CustomSelect

@@ -198,6 +198,14 @@ const GastoDetallePage = ({ params }: { params: { id: string } }) => {
                 </Box>
                 <Box>
                   <Typography variant="caption" color="text.secondary">
+                    Gastos Bancarios
+                  </Typography>
+                  <Typography variant="body1" fontWeight="medium">
+                    {getFormattedPrice(gasto.gastosBancarios)}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary">
                     Tipo de Operación
                   </Typography>
                   <Typography variant="body1" fontWeight="medium">
@@ -276,6 +284,21 @@ const GastoDetallePage = ({ params }: { params: { id: string } }) => {
                   </Grid>
                 </Grid>
               </Box>
+            </>
+          )}
+
+          {/* Dolar Info if applicable */}
+          {gasto.moneda === "Dolar" && (
+            <>
+              <Divider sx={{ my: 2 }} />
+              <Typography variant="h6" gutterBottom>
+                Cotización del Dólar
+              </Typography>
+              <Grid item xs={12} md={6}>
+                <Typography variant="body1">
+                  {getFormattedPrice(gasto.cotizacionDolar)}
+                </Typography>
+              </Grid>
             </>
           )}
         </CardContent>

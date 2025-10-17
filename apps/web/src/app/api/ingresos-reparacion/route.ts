@@ -76,6 +76,8 @@ export async function POST(request: Request) {
       tipoOperacionId,
       descripcion,
       ordenReparacionId,
+      cotizacionDolar,
+      gastosBancarios,
     } = body;
 
     if (!validateChequeRequest(body, tipoOperacionId)) {
@@ -140,6 +142,8 @@ export async function POST(request: Request) {
         dolarId: dolar?.id,
         tipoOperacionId,
         chequeId: chequeIdToPass,
+        cotizacionDolar,
+        gastosBancarios,
       },
       include: {
         cliente: true,

@@ -28,6 +28,8 @@ export async function PUT(
       tipoOperacionId,
       descripcion,
       ordenReparacionId,
+      cotizacionDolar,
+      gastosBancarios,
     } = body;
 
     if (!validateChequeRequest(body, tipoOperacionId)) {
@@ -90,6 +92,8 @@ export async function PUT(
         dolarId: dolar?.id,
         tipoOperacionId,
         chequeId: chequeIdToPass,
+        cotizacionDolar,
+        gastosBancarios,
       },
       include: {
         cliente: true,
