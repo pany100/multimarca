@@ -62,8 +62,16 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { monto, descripcion, moneda, fecha, usuarioId, tipoOperacionId } =
-      body;
+    const {
+      monto,
+      descripcion,
+      moneda,
+      fecha,
+      usuarioId,
+      tipoOperacionId,
+      cotizacionDolar,
+      gastosBancarios,
+    } = body;
 
     if (!validateChequeRequest(body, tipoOperacionId)) {
       return NextResponse.json(
@@ -139,6 +147,8 @@ export async function POST(request: Request) {
         usuarioId,
         tipoOperacionId,
         chequeId: chequeIdToPass,
+        cotizacionDolar,
+        gastosBancarios,
       },
       include: {
         dolar: true,

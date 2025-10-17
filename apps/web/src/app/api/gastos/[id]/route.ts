@@ -30,6 +30,8 @@ export async function PUT(
       mecanicoId,
       proveedorId,
       detalle,
+      cotizacionDolar,
+      gastosBancarios,
     } = body;
 
     if (!validateChequeRequest(body, tipoOperacionId)) {
@@ -88,6 +90,8 @@ export async function PUT(
         detalle,
         dolarId: dolar?.id,
         chequeId: chequeIdToPass,
+        cotizacionDolar,
+        gastosBancarios,
       },
       include: {
         categoria: true,

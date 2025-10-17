@@ -351,6 +351,8 @@ model Extraccion {
   tipoOperacion   TipoDeOperacion  @relation(fields: [tipoOperacionId], references: [id])
   usuario         Usuario          @relation(fields: [usuarioId], references: [id])
   revisado        Boolean          @default(false)
+  gastosBancarios Decimal          @default(0) @db.Decimal(10, 2)
+  cotizacionDolar Decimal?         @db.Decimal(10, 2)
 
   @@index([usuarioId])
   @@index([fecha])
@@ -379,6 +381,8 @@ model Gasto {
   proveedor       Proveedor?       @relation(fields: [proveedorId], references: [id])
   tipoOperacion   TipoDeOperacion  @relation(fields: [tipoOperacionId], references: [id])
   revisado        Boolean          @default(false)
+  gastosBancarios Decimal          @default(0) @db.Decimal(10, 2)
+  cotizacionDolar Decimal?         @db.Decimal(10, 2)
 
   @@index([categoriaId])
   @@index([mecanicoId])
@@ -651,6 +655,8 @@ model IngresoPorReparacion {
   ordenReparacion   OrdenReparacion  @relation("OrdenReparacionIngresos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   tipoOperacion     TipoDeOperacion  @relation(fields: [tipoOperacionId], references: [id])
   revisado          Boolean          @default(false)
+  gastosBancarios   Decimal          @default(0) @db.Decimal(10, 2)
+  cotizacionDolar   Decimal?         @db.Decimal(10, 2)
 
   @@index([fecha])
   @@index([clienteId])
@@ -679,6 +685,8 @@ model IngresoPorVenta {
   tipoOperacion      TipoDeOperacion  @relation(fields: [tipoOperacionId], references: [id])
   venta              Venta            @relation("VentaIngresos", fields: [ventaId], references: [id], onDelete: Cascade)
   revisado           Boolean          @default(false)
+  gastosBancarios    Decimal          @default(0) @db.Decimal(10, 2)
+  cotizacionDolar    Decimal?         @db.Decimal(10, 2)
 
   @@index([fecha])
   @@index([clienteId])
@@ -773,6 +781,8 @@ model IngresoManualDeDinero {
   tipoOperacion   TipoDeOperacion  @relation(fields: [tipoOperacionId], references: [id])
   usuario         Usuario          @relation(fields: [usuarioId], references: [id])
   revisado        Boolean          @default(false)
+  gastosBancarios Decimal          @default(0) @db.Decimal(10, 2)
+  cotizacionDolar Decimal?         @db.Decimal(10, 2)
 
   @@index([usuarioId])
   @@index([dolarId], map: "IngresoManualDeDinero_dolarId_fkey")
