@@ -161,6 +161,14 @@ export default function IngresoManualVerPage({
         </Grid>
         <Grid item xs={12} md={6}>
           <Typography variant="subtitle1" fontWeight="bold">
+            Gastos Bancarios
+          </Typography>
+          <Typography variant="body1">
+            {getFormattedPrice(ingreso.gastosBancarios)}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle1" fontWeight="bold">
             Usuario
           </Typography>
           <Typography variant="body1">
@@ -208,29 +216,16 @@ export default function IngresoManualVerPage({
       </Grid>
 
       {/* Dolar Info if applicable */}
-      {ingreso.moneda === "Dolar" && ingreso.dolar && (
+      {ingreso.moneda === "Dolar" && (
         <>
           <Divider sx={{ my: 2 }} />
           <Typography variant="h6" gutterBottom>
-            Información del Dólar
+            Cotización del Dólar
           </Typography>
-          <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle1" fontWeight="bold">
-                Cotización del Dólar
-              </Typography>
-              <Typography variant="body1">
-                {getFormattedPrice(ingreso.dolar.valor)}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Typography variant="subtitle1" fontWeight="bold">
-                Fecha de Cotización
-              </Typography>
-              <Typography variant="body1">
-                {getFormattedDate(ingreso.dolar.fecha)}
-              </Typography>
-            </Grid>
+          <Grid item xs={12} md={6}>
+            <Typography variant="body1">
+              {getFormattedPrice(ingreso.cotizacionDolar)}
+            </Typography>
           </Grid>
         </>
       )}

@@ -85,8 +85,16 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { monto, descripcion, usuarioId, moneda, fecha, tipoOperacionId } =
-      body;
+    const {
+      monto,
+      descripcion,
+      usuarioId,
+      moneda,
+      fecha,
+      tipoOperacionId,
+      cotizacionDolar,
+      gastosBancarios,
+    } = body;
 
     if (!validateChequeRequest(body, tipoOperacionId)) {
       return NextResponse.json(
@@ -146,6 +154,8 @@ export async function PUT(
         usuarioId,
         dolarId: dolar?.id,
         tipoOperacionId,
+        cotizacionDolar,
+        gastosBancarios,
         chequeId: chequeIdToPass,
       },
       include: {
