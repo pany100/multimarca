@@ -40,7 +40,7 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { fecha, monto, descripcion, moneda, dolarId, cancelado } = body;
+    const { fecha, monto, descripcion, moneda, dolarId, cancelado, cotizacionDolar } = body;
 
     // Validate the perdida exists
     const existePerdida = await prisma.perdidas.findUnique({
@@ -93,6 +93,7 @@ export async function PUT(
         descripcion: descripcion.trim(),
         moneda: moneda || undefined,
         dolarId: dolar?.id || undefined,
+        cotizacionDolar,
       },
       include: {
         dolar: true,

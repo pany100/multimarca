@@ -68,7 +68,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { fecha, monto, descripcion, moneda, cancelado } = body;
+    const { fecha, monto, descripcion, moneda, cancelado, cotizacionDolar } = body;
 
     // Validate required fields
     if (!monto || typeof monto !== "number" || monto <= 0) {
@@ -108,6 +108,7 @@ export async function POST(request: Request) {
         descripcion: descripcion.trim(),
         moneda: moneda || undefined,
         dolarId: dolar?.id || undefined,
+        cotizacionDolar,
       },
       include: {
         dolar: true,

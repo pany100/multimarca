@@ -39,9 +39,9 @@ function PerdidaTable({
         if (moneda === "Dolar") {
           let formattedMonto = `U$D ${Number(monto).toFixed(2)}`;
 
-          // If there's dolar info, show the equivalent in pesos
-          if (dolar) {
-            const pesosEquivalent = Number(monto) * Number(dolar.blue);
+          // If there's cotizacion info, show the equivalent in pesos
+          if (params.row.cotizacionDolar) {
+            const pesosEquivalent = Number(monto) * Number(params.row.cotizacionDolar);
             formattedMonto += ` (${getFormattedPrice(pesosEquivalent)})`;
           }
 
@@ -91,9 +91,9 @@ function PerdidaTable({
         if (moneda === "Dolar") {
           formattedPendiente = `U$D ${pendiente.toFixed(2)}`;
 
-          // If there's dolar info, show the equivalent in pesos
-          if (params.row.dolar) {
-            const pesosEquivalent = pendiente * Number(params.row.dolar.blue);
+          // If there's cotizacion info, show the equivalent in pesos
+          if (params.row.cotizacionDolar) {
+            const pesosEquivalent = pendiente * Number(params.row.cotizacionDolar);
             formattedPendiente += ` (${getFormattedPrice(pesosEquivalent)})`;
           }
         } else {

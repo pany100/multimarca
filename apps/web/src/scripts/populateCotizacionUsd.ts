@@ -62,12 +62,23 @@ async function populateCotizacionUsd() {
       `✅ IngresoManualDeDinero: ${ingresoManualResult} registros actualizados`
     );
 
+    // 6. Actualizar Perdidas
+    console.log("📊 Actualizando Perdidas...");
+    const perdidasResult = await prisma.$executeRaw`
+      UPDATE \`Perdidas\` 
+      JOIN \`Dolar\` ON \`Perdidas\`.\`dolarId\` = \`Dolar\`.\`id\`
+      SET \`Perdidas\`.\`cotizacionDolar\` = \`Dolar\`.\`blue\`
+      WHERE \`Perdidas\`.\`cotizacionDolar\` IS NULL
+    `;
+    console.log(`✅ Perdidas: ${perdidasResult} registros actualizados`);
+
     const totalUpdated =
       Number(extraccionResult) +
       Number(gastoResult) +
       Number(ingresoReparacionResult) +
       Number(ingresoVentaResult) +
-      Number(ingresoManualResult);
+      Number(ingresoManualResult) +
+      Number(perdidasResult);
 
     console.log(`\n🎉 Proceso completado exitosamente!`);
     console.log(`📈 Total de registros actualizados: ${totalUpdated}`);
@@ -77,6 +88,7 @@ async function populateCotizacionUsd() {
     console.log(`- IngresoPorReparacion: ${ingresoReparacionResult}`);
     console.log(`- IngresoPorVenta: ${ingresoVentaResult}`);
     console.log(`- IngresoManualDeDinero: ${ingresoManualResult}`);
+    console.log(`- Perdidas: ${perdidasResult}`);
   } catch (error) {
     console.error("❌ Error durante la población de cotizacionDolar:", error);
     throw error;

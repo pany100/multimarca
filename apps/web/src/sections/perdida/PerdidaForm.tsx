@@ -18,6 +18,11 @@ export const schema = yup.object({
     .string()
     .oneOf(["Peso", "Dolar"])
     .required("La moneda es requerida"),
+  cotizacionDolar: yup.number().when("moneda", {
+    is: "Dolar",
+    then: (schema) => schema.required("La cotización es requerida"),
+    otherwise: (schema) => schema.notRequired(),
+  }),
   cancelado: yup.boolean().default(false),
 });
 
@@ -32,14 +37,21 @@ const PerdidaForm = () => {
       </Typography>
 
       <Grid container spacing={2}>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <CustomInputText name="fecha" label="Fecha" type="date" />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <CustomInputText name="monto" label="Monto" type="number" />
         </Grid>
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} md={6}>
           <CustomSelect options={currency} name="moneda" label="Moneda" />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomInputText
+            name="cotizacionDolar"
+            label="Cotización Dolar"
+            type="number"
+          />
         </Grid>
         <Grid item xs={12}>
           <CustomInputText

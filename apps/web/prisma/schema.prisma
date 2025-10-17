@@ -898,6 +898,7 @@ model Perdidas {
   monto          Decimal        @db.Decimal(10, 2)
   descripcion    String         @db.VarChar(255)
   moneda         Moneda         @default(Peso)
+  cotizacionDolar Decimal?       @db.Decimal(10, 2)
   dolarId        Int?
   dolar          Dolar?         @relation(fields: [dolarId], references: [id])
   recuperaciones Recuperacion[]
