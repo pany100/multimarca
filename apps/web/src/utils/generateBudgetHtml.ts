@@ -1,10 +1,7 @@
-import {
-  calcularManoDeObra,
-  calcularPrecioFinal,
-  calcularTotalOrdenReparacion,
-} from "./ordenHelper";
+import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 
 export default function generateBudgetHtml(repair: any): string {
+  const calculoVO = ComprobanteCalculadoFactory.fromOrden(repair);
   return `
   <!DOCTYPE html>
 
@@ -279,10 +276,7 @@ export default function generateBudgetHtml(repair: any): string {
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
                   $${Number(
-                    calcularPrecioFinal(
-                      el.precioVenta,
-                      repair.porcentajeRecargo
-                    )
+                    calculoVO.getPrecioFinalForReparaciones(el.precioVenta)
                   ).toLocaleString("es-AR")}
                 </div>
               `
@@ -299,9 +293,9 @@ export default function generateBudgetHtml(repair: any): string {
                   ${el.stock.name} - ${el.unidadesConsumidas} unidades
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(calcularPrecioFinal(el.precioVenta)).toLocaleString(
-                    "es-AR"
-                  )}
+                  $${Number(
+                    calculoVO.getPrecioFinalForRepuestos(el.precioVenta)
+                  ).toLocaleString("es-AR")}
                 </div>
             `
           )
@@ -317,10 +311,7 @@ export default function generateBudgetHtml(repair: any): string {
           Mano de Obra
         </div>
         <div class="TypographyBody1" style="text-align: right;">
-          $${(
-            calcularManoDeObra(repair.trabajosRealizados) +
-            Number(repair.incrementoInterno || 0)
-          ).toLocaleString("es-AR")}
+          $${calculoVO.manoDeObraForRecibos.toLocaleString("es-AR")}
         </div>
         ${
           repair.incremento > 0
@@ -355,9 +346,7 @@ export default function generateBudgetHtml(repair: any): string {
           Importe Total:
         </div>
         <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; text-align: right;">        
-          $${Number(calcularTotalOrdenReparacion(repair)).toLocaleString(
-            "es-AR"
-          )}
+          $${Number(calculoVO.total).toLocaleString("es-AR")}
         </div>
       </div>
       <div class="TypographyBody1" style="margin-top: 5px;">

@@ -1,11 +1,8 @@
+import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 import { EstadoOrdenReparacion } from "@prisma/client";
-import {
-  calcularManoDeObra,
-  calcularPrecioFinal,
-  calcularTotalOrdenReparacion,
-} from "./ordenHelper";
 
 export default function generateClientOrderHtml(repair: any): string {
+  const calculoVO = ComprobanteCalculadoFactory.fromOrden(repair);
   return `
   <!DOCTYPE html>
 
@@ -342,10 +339,7 @@ export default function generateClientOrderHtml(repair: any): string {
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
                   $${Number(
-                    calcularPrecioFinal(
-                      el.precioVenta,
-                      repair.porcentajeRecargo
-                    )
+                    calculoVO.getPrecioFinalForRepuestos(el.precioVenta)
                   ).toLocaleString("es-AR")}
                 </div>
               `
@@ -362,9 +356,9 @@ export default function generateClientOrderHtml(repair: any): string {
                   ${el.stock.name} - ${el.unidadesConsumidas} unidades
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(calcularPrecioFinal(el.precioVenta)).toLocaleString(
-                    "es-AR"
-                  )}
+                  $${Number(
+                    calculoVO.getPrecioFinalForRepuestos(el.precioVenta)
+                  ).toLocaleString("es-AR")}
                 </div>
             `
           )
@@ -380,10 +374,7 @@ export default function generateClientOrderHtml(repair: any): string {
           Mano de Obra
         </div>
         <div class="TypographyBody1" style="text-align: right;">
-          $${(
-            calcularManoDeObra(repair.trabajosRealizados) +
-            Number(repair.incrementoInterno || 0)
-          ).toLocaleString("es-AR")}
+          $${calculoVO.manoDeObraForRecibos.toLocaleString("es-AR")}
         </div>
         ${
           repair.incremento > 0
@@ -422,9 +413,7 @@ export default function generateClientOrderHtml(repair: any): string {
           Importe Total:
         </div>
         <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; text-align: right;">        
-          $${Number(calcularTotalOrdenReparacion(repair)).toLocaleString(
-            "es-AR"
-          )}
+          $${Number(calculoVO.total).toLocaleString("es-AR")}
         </div>
       </div>
              ${
@@ -448,26 +437,13 @@ export default function generateClientOrderHtml(repair: any): string {
             )}
           </div>
           ${(() => {
-            const faltaPagar =
-              Number(calcularTotalOrdenReparacion(repair)) -
-              (repair.ingresos
-                ? repair.ingresos.reduce((sum: number, ingreso: any) => {
-                    if (ingreso.moneda === "Dolar") {
-                      return (
-                        sum + Number(ingreso.monto) * Number(ingreso.dolar.blue)
-                      );
-                    }
-                    return sum + Number(ingreso.monto);
-                  }, 0)
-                : 0);
-
-            return faltaPagar > 0
+            return calculoVO.deuda > 0
               ? `
               <div style="font-weight: bold;">
                 Falta pagar: ${new Intl.NumberFormat("es-AR", {
                   style: "currency",
                   currency: "ARS",
-                }).format(faltaPagar)}
+                }).format(calculoVO.deuda)}
               </div>
             `
               : "";

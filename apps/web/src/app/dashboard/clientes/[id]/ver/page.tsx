@@ -1,11 +1,8 @@
 "use client";
 import { useFetch } from "@/contexts/FetchContext";
 import { useAuth } from "@/hooks/useAuth";
-import {
-  calcularTotalOrdenReparacion,
-  calcularTotalPagos,
-  getStatusColor,
-} from "@/utils/ordenHelper";
+import { getFormattedPrice } from "@/utils/fieldHelper";
+import { getStatusColor } from "@/utils/ordenHelper";
 import { PriceCheck } from "@mui/icons-material";
 import BuildIcon from "@mui/icons-material/Build";
 import PersonIcon from "@mui/icons-material/Person";
@@ -98,21 +95,17 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
       ),
     },
     {
-      field: "total",
+      field: "totalAPagar",
       headerName: "Monto Total",
       flex: 1,
-      renderCell: (params: any) =>
-        `$${calcularTotalOrdenReparacion(params.row)}`,
+      renderCell: (params) => `${getFormattedPrice(params.row.totalAPagar)}`,
     },
     {
-      field: "ingresos",
+      field: "deuda",
       headerName: "Deuda",
       flex: 1,
-      renderCell: (params: any) => {
-        const total = calcularTotalOrdenReparacion(params.row);
-        const aCuenta = calcularTotalPagos(params.row);
-        return `$${total - aCuenta}`;
-      },
+      renderCell: (params) =>
+        `${getFormattedPrice(params.row.deuda < 0 ? 0 : params.row.deuda)}`,
     },
     {
       field: "auto",
@@ -143,26 +136,22 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
       ),
     },
     {
-      field: "total",
+      field: "totalAPagar",
       headerName: "Monto Total",
       flex: 1,
-      renderCell: (params: any) =>
-        `$${calcularTotalOrdenReparacion(params.row)}`,
+      renderCell: (params) => `${getFormattedPrice(params.row.totalAPagar)}`,
     },
     {
-      field: "ingresos",
+      field: "deuda",
       headerName: "Deuda",
       flex: 1,
-      renderCell: (params: any) => {
-        const total = calcularTotalOrdenReparacion(params.row);
-        const aCuenta = calcularTotalPagos(params.row);
-        return `$${total - aCuenta}`;
-      },
+      renderCell: (params) =>
+        `${getFormattedPrice(params.row.deuda < 0 ? 0 : params.row.deuda)}`,
     },
   ];
 
   const reparaciones = cliente.cars.flatMap((car: any) =>
-    car.ordenesReparacion.map((orden: any) => ({ ...orden, car }))
+    car.ordenesReparacion.map((orden: any) => ({ ...orden, auto: car }))
   );
 
   const handleReparacionClick = (id: string) => {

@@ -1,10 +1,10 @@
+import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 import { getFormattedPrice } from "./fieldHelper";
-import {
-  calcularTotalOrdenReparacion,
-  calcularTotalPagos,
-} from "./ordenHelper";
 
 export default function generateReciboHtml(ingresoPorReparacion: any): string {
+  const calculoVO = ComprobanteCalculadoFactory.fromOrden(
+    ingresoPorReparacion.ordenReparacion
+  );
   return `
   <!DOCTYPE html>
 
@@ -151,7 +151,7 @@ export default function generateReciboHtml(ingresoPorReparacion: any): string {
     ingresoPorReparacion.ordenReparacion.auto.model
   } (${ingresoPorReparacion.ordenReparacion.auto.patent})</strong></p>
       <p>Del total del monto: <strong>${getFormattedPrice(
-        calcularTotalOrdenReparacion(ingresoPorReparacion.ordenReparacion)
+        calculoVO.total
       )}</strong> se paga <strong>$${Number(
     ingresoPorReparacion.monto
   ).toLocaleString("es-AR")}</strong></p>
@@ -179,17 +179,10 @@ export default function generateReciboHtml(ingresoPorReparacion: any): string {
           : ""
       }
       <p>Total abonado hasta el momento (en pesos): <strong>${getFormattedPrice(
-        Math.min(
-          calcularTotalPagos(ingresoPorReparacion.ordenReparacion),
-          calcularTotalOrdenReparacion(ingresoPorReparacion.ordenReparacion)
-        )
+        Math.min(calculoVO.totalPagado, calculoVO.total)
       )}</strong></p>
       <p>Resta pagar (en pesos): <strong>${getFormattedPrice(
-        Math.max(
-          0,
-          calcularTotalOrdenReparacion(ingresoPorReparacion.ordenReparacion) -
-            calcularTotalPagos(ingresoPorReparacion.ordenReparacion)
-        )
+        Math.max(0, calculoVO.deuda)
       )}</strong></p>
       <div style="margin-top: 50px; border-top: 1px solid #000; padding-top: 10px; text-align: center;">
         <p>Gracias por su pago</p>

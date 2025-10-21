@@ -6,11 +6,18 @@ export type ClienteWithRelations = Prisma.ClienteGetPayload<{
       include: {
         ordenesReparacion: {
           include: {
-            repuestosUsados: true;
             reparacionesDeTercero: true;
+            repuestosUsados: {
+              include: {
+                stock: true;
+              };
+            };
             trabajosRealizados: true;
-            auto: true;
-            ingresos: true;
+            ingresos: {
+              include: {
+                dolar: true;
+              };
+            };
           };
           orderBy: {
             fechaCreacion: "desc";
@@ -20,10 +27,18 @@ export type ClienteWithRelations = Prisma.ClienteGetPayload<{
     };
     ventas: {
       include: {
-        ingresos: true;
-        repuestosUsados: true;
         reparacionesDeTercero: true;
+        repuestosUsados: {
+          include: {
+            stock: true;
+          };
+        };
         trabajosRealizados: true;
+        ingresos: {
+          include: {
+            dolar: true;
+          };
+        };
       };
     };
   };

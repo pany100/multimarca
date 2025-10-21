@@ -10,11 +10,18 @@ export class PrismaClienteRepository implements ClienteRepository {
           include: {
             ordenesReparacion: {
               include: {
-                repuestosUsados: true,
                 reparacionesDeTercero: true,
+                repuestosUsados: {
+                  include: {
+                    stock: true,
+                  },
+                },
                 trabajosRealizados: true,
-                auto: true,
-                ingresos: true,
+                ingresos: {
+                  include: {
+                    dolar: true,
+                  },
+                },
               },
               orderBy: {
                 fechaCreacion: "desc",
@@ -24,10 +31,18 @@ export class PrismaClienteRepository implements ClienteRepository {
         },
         ventas: {
           include: {
-            ingresos: true,
-            repuestosUsados: true,
             reparacionesDeTercero: true,
+            repuestosUsados: {
+              include: {
+                stock: true,
+              },
+            },
             trabajosRealizados: true,
+            ingresos: {
+              include: {
+                dolar: true,
+              },
+            },
           },
         },
       },

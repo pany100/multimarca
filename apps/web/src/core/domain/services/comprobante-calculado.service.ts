@@ -32,6 +32,18 @@ export class ComprobanteCalculado {
     return parseFloat(total.toFixed(2));
   }
 
+  public getPrecioFinalForReparaciones(precio: number) {
+    return this.calcularPrecioFinal(precio, this.ajustes.porcentajeRecargo);
+  }
+
+  public getPrecioFinalForRepuestos(precio: number) {
+    return this.calcularPrecioFinal(precio, 0);
+  }
+
+  get manoDeObraForRecibos() {
+    return this.totalManoDeObra + this.ajustes.incrementoInterno;
+  }
+
   get totalRepuestos() {
     return this.repuestos.reduce(
       (acc, r) => acc + this.calcularPrecioFinal(r.precioVenta.toNumber(), 0),

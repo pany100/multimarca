@@ -2,10 +2,7 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { useAuth } from "@/hooks/useAuth";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import {
-  calcularTotalOrdenReparacion,
-  getStatusColor,
-} from "@/utils/ordenHelper";
+import { getStatusColor } from "@/utils/ordenHelper";
 import BuildIcon from "@mui/icons-material/Build";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import PersonIcon from "@mui/icons-material/Person";
@@ -202,9 +199,7 @@ const VerAutoPage = ({ params }: { params: { id: string } }) => {
                       color={getStatusColor(orden.estado)}
                     />
                   </TableCell>
-                  <TableCell>
-                    {getFormattedPrice(calcularTotalOrdenReparacion(orden))}
-                  </TableCell>
+                  <TableCell>{getFormattedPrice(orden.totalAPagar)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

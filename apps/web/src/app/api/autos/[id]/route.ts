@@ -1,3 +1,4 @@
+import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -106,11 +107,27 @@ export async function GET(
           },
           include: {
             reparacionesDeTercero: true,
-            repuestosUsados: true,
+            repuestosUsados: {
+              include: {
+                stock: true,
+              },
+            },
             trabajosRealizados: true,
+            ingresos: {
+              include: {
+                dolar: true,
+              },
+            },
           },
         },
       },
+    });
+    const ordenesReparacion = auto?.ordenesReparacion.map((orden) => {
+      const comprobante = ComprobanteCalculadoFactory.fromOrden(orden);
+      return {
+        ...orden,
+        totalAPagar: comprobante.total,
+      };
     });
 
     if (!auto) {
@@ -120,7 +137,10 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(auto);
+    return NextResponse.json({
+      ...auto,
+      ordenesReparacion,
+    });
   } catch (error) {
     console.error("Error al obtener el auto:", error);
     return NextResponse.json(

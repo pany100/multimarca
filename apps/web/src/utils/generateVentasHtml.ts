@@ -1,10 +1,7 @@
-import {
-  calcularManoDeObra,
-  calcularPrecioFinal,
-  calcularTotalOrdenReparacion,
-} from "./ordenHelper";
+import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 
 export default function generateClientOrderHtml(venta: any): string {
+  const calculoVO = ComprobanteCalculadoFactory.fromOrden(venta);
   return `
     <!DOCTYPE html>
   
@@ -193,10 +190,7 @@ export default function generateClientOrderHtml(venta: any): string {
                   </div>
                   <div class="TypographyBody1" style="text-align: right;">
                     $${Number(
-                      calcularPrecioFinal(
-                        el.precioVenta,
-                        venta.porcentajeRecargo
-                      )
+                      calculoVO.getPrecioFinalForRepuestos(el.precioVenta)
                     ).toLocaleString("es-AR")}
                   </div>
                 `
@@ -214,7 +208,7 @@ export default function generateClientOrderHtml(venta: any): string {
                   </div>
                   <div class="TypographyBody1" style="text-align: right;">
                     $${Number(
-                      calcularPrecioFinal(el.precioVenta)
+                      calculoVO.getPrecioFinalForRepuestos(el.precioVenta)
                     ).toLocaleString("es-AR")}
                   </div>
               `
@@ -231,10 +225,7 @@ export default function generateClientOrderHtml(venta: any): string {
             Mano de Obra
           </div>
           <div class="TypographyBody1" style="text-align: right;">
-            $${(
-              calcularManoDeObra(venta.trabajosRealizados) +
-              Number(venta.incrementoInterno || 0)
-            ).toLocaleString("es-AR")}
+            $${calculoVO.manoDeObraForRecibos.toLocaleString("es-AR")}
           </div>
           ${
             venta.incremento > 0
@@ -273,9 +264,7 @@ export default function generateClientOrderHtml(venta: any): string {
             Importe Total:
           </div>
           <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; text-align: right;">        
-            $${Number(calcularTotalOrdenReparacion(venta)).toLocaleString(
-              "es-AR"
-            )}
+            $${Number(calculoVO.total).toLocaleString("es-AR")}
           </div>
         </div>
                ${
@@ -299,27 +288,13 @@ export default function generateClientOrderHtml(venta: any): string {
               )}
             </div>
             ${(() => {
-              const faltaPagar =
-                Number(calcularTotalOrdenReparacion(venta)) -
-                (venta.ingresos
-                  ? venta.ingresos.reduce((sum: number, ingreso: any) => {
-                      if (ingreso.moneda === "Dolar") {
-                        return (
-                          sum +
-                          Number(ingreso.monto) * Number(ingreso.dolar.blue)
-                        );
-                      }
-                      return sum + Number(ingreso.monto);
-                    }, 0)
-                  : 0);
-
-              return faltaPagar > 0
+              return calculoVO.deuda > 0
                 ? `
                 <div style="font-weight: bold;">
                   Falta pagar: ${new Intl.NumberFormat("es-AR", {
                     style: "currency",
                     currency: "ARS",
-                  }).format(faltaPagar)}
+                  }).format(calculoVO.deuda)}
                 </div>
               `
                 : "";
