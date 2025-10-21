@@ -1,4 +1,5 @@
 import { VentaRepository } from "@/core/domain/repositories/venta.repository";
+import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 import { normalizePageSize } from "@/shared/utils/pagination";
 import { ListVentasQueryDto } from "../../dto/venta.dto";
 
@@ -9,11 +10,23 @@ export class ListVentaUseCase {
     const { page, size } = normalizePageSize(params.page, params.size, {
       defaultSize: 10,
     });
-    return this.repo.listPaged({
+    const result = await this.repo.listPaged({
       ...params,
       query: params.query ?? "",
       page,
       size,
     });
+    const items = result.items.map((venta) => {
+      const comprobante = ComprobanteCalculadoFactory.fromVenta(venta);
+      return {
+        ...venta,
+        precioTotal: comprobante.total,
+        totalPagado: comprobante.totalPagado,
+      };
+    });
+    return {
+      ...result,
+      items,
+    };
   }
 }

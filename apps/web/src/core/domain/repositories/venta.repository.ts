@@ -35,7 +35,7 @@ export interface VentaRepository {
     tx: Prisma.TransactionClient,
     input: Prisma.VentaCreateInput
   ): Promise<Venta>;
-  listPaged(args: ListVentasParams): Promise<PageResult<Venta>>;
+  listPaged(args: ListVentasParams): Promise<PageResult<VentaWithRelations>>;
   findById(id: number): Promise<VentaWithRelations | null>;
   delete(tx: any, id: number): Promise<void>;
   update(tx: any, data: Prisma.VentaUpdateArgs): Promise<VentaWithRelations>;

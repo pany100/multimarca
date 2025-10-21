@@ -15,7 +15,7 @@ export class PrismaVentaRepository implements VentaRepository {
     return tx.venta.create({ data });
   }
 
-  listPaged(args: ListVentasParams): Promise<PageResult<Venta>> {
+  listPaged(args: ListVentasParams): Promise<PageResult<VentaWithRelations>> {
     const { page, size, query, estado } = args;
     const where: Prisma.VentaWhereInput = {
       OR: [
@@ -29,7 +29,7 @@ export class PrismaVentaRepository implements VentaRepository {
     if (estado) {
       where.estado = estado as EstadoVenta;
     }
-    return prismaPaged<Venta>(
+    return prismaPaged<VentaWithRelations>(
       prisma.venta,
       {
         where,
@@ -40,7 +40,12 @@ export class PrismaVentaRepository implements VentaRepository {
               stock: true,
             },
           },
-          reparacionesDeTercero: true,
+          reparacionesDeTercero: {
+            include: {
+              proveedor: true,
+              reciboFile: true,
+            },
+          },
           trabajosRealizados: true,
           ingresos: true,
         },

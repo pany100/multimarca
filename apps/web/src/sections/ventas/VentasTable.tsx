@@ -4,7 +4,6 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs } from "@mui/material";
@@ -162,28 +161,13 @@ function VentasTable({
       field: "precioTotal",
       headerName: "Precio Total",
       flex: 1,
-      renderCell: (params: any) =>
-        getFormattedPrice(
-          calcularTotalOrdenReparacion({
-            repuestosUsados: params.row.repuestosUsados,
-            reparacionesDeTercero: params.row.reparacionesDeTercero,
-            trabajosRealizados: params.row.trabajosRealizados,
-            descuento: params.row.descuento,
-            incremento: params.row.incremento,
-            porcentajeRecargo: params.row.porcentajeRecargo,
-          })
-        ),
+      renderCell: (params: any) => getFormattedPrice(params.row.precioTotal),
     },
     {
       field: "pagos",
       headerName: "Pagos",
       flex: 1.5,
       renderCell: (params: any) => {
-        const totalPagos = params.row.ingresos.reduce(
-          (total: number, ingreso: any) => total + ingreso.monto,
-          0
-        );
-
         return (
           <Box sx={{ display: "flex", flexDirection: "column", width: "100%" }}>
             {params.row.ingresos.length > 0 ? (
@@ -234,18 +218,8 @@ function VentasTable({
   ];
 
   const getRowClassName = (params: GridRowParams) => {
-    const totalIngresos = params.row.ingresos.reduce(
-      (total: number, ingreso: any) => total + ingreso.monto,
-      0
-    );
-    const total = calcularTotalOrdenReparacion({
-      repuestosUsados: params.row.repuestosUsados,
-      reparacionesDeTercero: params.row.reparacionesDeTercero,
-      trabajosRealizados: params.row.trabajosRealizados,
-      descuento: params.row.descuento,
-      incremento: params.row.incremento,
-      porcentajeRecargo: params.row.porcentajeRecargo,
-    });
+    const totalIngresos = params.row.totalPagado;
+    const total = params.row.precioTotal;
     if (totalIngresos < total) {
       return "low-stock-row";
     } else if (totalIngresos > total) {
