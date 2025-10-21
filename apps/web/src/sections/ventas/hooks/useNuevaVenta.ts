@@ -1,10 +1,8 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
-import {
-  calcularManoDeObra,
-  calcularTotalOrdenReparacion,
-} from "@/utils/ordenHelper";
+import usePrecios from "@/hooks/precios/usePrecios";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useWatch } from "react-hook-form";
 
 type Props = {
@@ -15,6 +13,19 @@ function useNuevaVenta({ control }: Props) {
   const { authFetch } = useFetch();
   const router = useRouter();
   const { snackbar, setSnackbar } = useSnackbarContext();
+  const { calculatePrecios } = usePrecios();
+
+  // State for calculated prices
+  const [precios, setPrecios] = useState({
+    totalAPagar: 0,
+    totalManoDeObra: 0,
+    totalRepuestos: 0,
+    totalTerceros: 0,
+    totalPagado: 0,
+    deuda: 0,
+  });
+
+  // Watch form values
   const repuestosUsados = useWatch({ control, name: "repuestosUsados" });
   const reparacionesTerceros = useWatch({
     control,
@@ -25,15 +36,95 @@ function useNuevaVenta({ control }: Props) {
   const incremento = useWatch({ control, name: "incremento" }) || 0;
   const porcentajeRecargo =
     useWatch({ control, name: "porcentajeRecargo" }) || 0;
-  const manoDeObra = calcularManoDeObra(trabajosRealizados ?? []);
-  const totalOrdenReparacion = calcularTotalOrdenReparacion({
-    repuestosUsados: repuestosUsados ?? [],
-    reparacionesDeTercero: reparacionesTerceros ?? [],
-    trabajosRealizados: trabajosRealizados ?? [],
+
+  // Use refs to track previous values and prevent unnecessary calculations
+  const timeoutRef = useRef<NodeJS.Timeout>();
+  const previousDataRef = useRef<string>("");
+
+  // Calculate prices with debouncing
+  useEffect(() => {
+    // Create a more detailed string representation for comparison
+    const currentData = JSON.stringify({
+      repuestosUsados: (repuestosUsados ?? []).map((r: any) => ({
+        id: r.id || r.stockId,
+        cantidad: r.unidadesConsumidas,
+        precio: r.precioVenta,
+      })),
+      reparacionesDeTercero: (reparacionesTerceros ?? []).map((r: any) => ({
+        id: r.id || r.nombre,
+        precio: r.precioVenta,
+      })),
+      trabajosRealizados: (trabajosRealizados ?? []).map((t: any) => ({
+        id: t.id || t.descripcion,
+        precio: t.precioUnitario,
+      })),
+      descuento,
+      incremento,
+      porcentajeRecargo,
+      // Add array lengths to ensure deletion detection
+      lengths: {
+        repuestos: (repuestosUsados ?? []).length,
+        terceros: (reparacionesTerceros ?? []).length,
+        trabajos: (trabajosRealizados ?? []).length,
+      },
+    });
+
+    // Only proceed if data actually changed
+    if (currentData === previousDataRef.current) {
+      return;
+    }
+
+    // Clear previous timeout
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+
+    // Set new timeout for debounced calculation
+    timeoutRef.current = setTimeout(async () => {
+      try {
+        // Always calculate prices, even with empty arrays (to reset totals)
+        const preciosCalculados = await calculatePrecios({
+          repuestosUsados: repuestosUsados ?? [],
+          reparacionesDeTercero: reparacionesTerceros ?? [],
+          trabajosRealizados: trabajosRealizados ?? [],
+          descuento,
+          incremento,
+          incrementoInterno: 0, // Ventas no usan incremento interno
+          porcentajeRecargo,
+        });
+        setPrecios(preciosCalculados);
+
+        // Update previous data reference
+        previousDataRef.current = currentData;
+      } catch (error) {
+        console.error("Error calculating prices:", error);
+        // Reset prices on error
+        setPrecios({
+          totalAPagar: 0,
+          totalManoDeObra: 0,
+          totalRepuestos: 0,
+          totalTerceros: 0,
+          totalPagado: 0,
+          deuda: 0,
+        });
+      }
+    }, 300); // 300ms debounce
+
+    // Cleanup function
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, [
+    repuestosUsados,
+    reparacionesTerceros,
+    trabajosRealizados,
     descuento,
-    incremento: incremento || 0,
-    porcentajeRecargo: porcentajeRecargo || 0,
-  });
+    incremento,
+    porcentajeRecargo,
+    calculatePrecios,
+  ]);
 
   const onSubmit = async (data: any) => {
     try {
@@ -76,8 +167,9 @@ function useNuevaVenta({ control }: Props) {
     onSubmit,
     snackbar,
     setSnackbar,
-    manoDeObra,
-    totalOrdenReparacion,
+    manoDeObra: precios.totalManoDeObra,
+    totalOrdenReparacion: precios.totalAPagar,
+    precios,
   };
 }
 

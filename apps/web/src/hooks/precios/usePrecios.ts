@@ -7,7 +7,7 @@ function usePrecios() {
   const calculatePrecios = async (entidad: PrecioDto) => {
     try {
       const response = await authFetch("/api/precios", {
-        method: "GET",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
