@@ -15,4 +15,19 @@ export const precioSchema = z.object({
   trabajosRealizados: z.array(trabajoSchema).optional(),
 });
 
+export const precioFinalReparacionesSchema = z.object({
+  reparacionesTerceros: z.array(terceroSchema),
+  porcentajeRecargo: z.coerce.number().optional(),
+});
+
+export const precioFinalRepuestosSchema = z.object({
+  repuestosUsados: z.array(repuestoSchema),
+});
+
 export type PrecioDto = z.infer<typeof precioSchema>;
+export type PrecioFinalReparacionesDto = z.infer<
+  typeof precioFinalReparacionesSchema
+>;
+export type PrecioFinalRepuestosDto = z.infer<
+  typeof precioFinalRepuestosSchema
+>;
