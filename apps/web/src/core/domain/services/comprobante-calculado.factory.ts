@@ -61,7 +61,13 @@ export class ComprobanteCalculadoFactory {
     const terceros = (orden.reparacionesDeTercero ?? []).map((t) =>
       ReparacionTercero.fromOrderDb(t)
     );
-    const pagos = (orden.ingresos ?? []).map((p) => Pago.fromOrderDb(p));
+    const pagos = (orden.ingresos ?? []).map((p) =>
+      Pago.fromOrderDb({
+        monto: p.monto,
+        moneda: p.moneda,
+        cotizacionDolar: p.cotizacionDolar?.toNumber() ?? 0,
+      })
+    );
     return new ComprobanteCalculado(
       repuestos,
       terceros,
@@ -92,15 +98,13 @@ export class ComprobanteCalculadoFactory {
     );
 
     // Transform venta ingresos to match the expected Pago structure
-    const pagos = (venta.ingresos ?? []).map((ingreso) => {
-      // Create a compatible structure for Pago.fromOrderDb
-      const ingresoCompatible = {
-        ...ingreso,
-        clienteId: ingreso.clienteId || 0, // Provide default value for required field
-        ordenReparacionId: 0, // Provide default value since it's not used in venta context
-      };
-      return Pago.fromOrderDb(ingresoCompatible);
-    });
+    const pagos = (venta.ingresos ?? []).map((ingreso) =>
+      Pago.fromOrderDb({
+        monto: ingreso.monto,
+        moneda: ingreso.moneda,
+        cotizacionDolar: ingreso.cotizacionDolar?.toNumber() ?? 0,
+      })
+    );
 
     return new ComprobanteCalculado(
       repuestos,

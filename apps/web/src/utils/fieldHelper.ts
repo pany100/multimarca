@@ -7,6 +7,13 @@ function getFormattedPrice(price: number | string) {
   })}`;
 }
 
+function getFormattedPriceDolar(price: number | string) {
+  return `US$${parseFloat(price.toString()).toLocaleString("en-AR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  })}`;
+}
+
 function getFormattedDate(date: string) {
   const dateParts = date.split("T")[0].split("-");
   const year = dateParts[0];
@@ -100,6 +107,7 @@ export {
   getFormattedChequeType,
   getFormattedDate,
   getFormattedPrice,
+  getFormattedPriceDolar,
   getOperacionChequeLabel,
   getSortedCheckControls,
   getSortedGroupControls,

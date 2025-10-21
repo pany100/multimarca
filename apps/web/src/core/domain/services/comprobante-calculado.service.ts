@@ -81,8 +81,8 @@ export class ComprobanteCalculado {
 
   get totalPagado() {
     return this.pagos.reduce((acc, p) => {
-      if (p.isInDolars && p.dolar) {
-        return acc + p.monto.toNumber() * p.dolar.blue;
+      if (p.isInDolars && p.cotizacionDolar) {
+        return acc + p.monto.toNumber() * p.cotizacionDolar;
       }
       return acc + p.monto.toNumber();
     }, 0);

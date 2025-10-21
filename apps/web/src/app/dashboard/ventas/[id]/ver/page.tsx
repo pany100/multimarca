@@ -3,7 +3,11 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { useGeneratePdf } from "@/hooks/orden-reparacion/useGeneratePdf";
 import { useAuth } from "@/hooks/useAuth";
-import { getFormattedDate, getFormattedPrice } from "@/utils/fieldHelper";
+import {
+  getFormattedDate,
+  getFormattedPrice,
+  getFormattedPriceDolar,
+} from "@/utils/fieldHelper";
 import PrintIcon from "@mui/icons-material/Print";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import {
@@ -392,6 +396,7 @@ const PrecioInfo = ({ venta }: { venta: any }) => {
 const PagosInfo = ({ venta }: { venta: any }) => {
   const total = venta.total;
   const totalPagos = venta.totalPagos;
+  console.log(venta);
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
@@ -419,14 +424,16 @@ const PagosInfo = ({ venta }: { venta: any }) => {
                 {getFormattedDate(ingreso.fecha)}
               </Box>
               <Box component="td" sx={{ p: 1, textAlign: "right" }}>
-                {getFormattedPrice(ingreso.monto)}
+                {ingreso.moneda === "Dolar"
+                  ? getFormattedPriceDolar(ingreso.monto)
+                  : getFormattedPrice(ingreso.monto)}
               </Box>
             </Box>
           ))}
         </Box>
         <Box component="tr" sx={{ borderTop: 1, borderColor: "divider" }}>
           <Box component="td" sx={{ p: 1, fontWeight: "bold" }}>
-            Total Pagos:
+            Total Pagos (en pesos):
           </Box>
           <Box
             component="td"
