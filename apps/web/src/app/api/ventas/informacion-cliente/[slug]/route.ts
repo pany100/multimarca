@@ -18,8 +18,17 @@ export async function GET(
         },
       },
       include: {
-        repuestosUsados: true,
-        reparacionesDeTercero: true,
+        repuestosUsados: {
+          include: {
+            stock: true,
+          },
+        },
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
+            reciboFile: true,
+          },
+        },
         trabajosRealizados: true,
         ingresos: {
           include: {
@@ -33,31 +42,7 @@ export async function GET(
     });
 
     const ventasConDeuda = ventas.map((venta) => {
-      const ventaParaCalculo = {
-        ...venta,
-        repuestosUsados: venta.repuestosUsados.map((r) => ({
-          stock: { id: 0, name: "" },
-          unidadesConsumidas: r.unidadesConsumidas,
-          precioVenta: Number(r.precioVenta),
-          precioCompra: 0,
-        })),
-        reparacionesDeTercero: venta.reparacionesDeTercero.map((r) => ({
-          nombre: "",
-          proveedor: { id: 0 },
-          precioVenta: Number(r.precioVenta),
-          precioCompra: 0,
-        })),
-        trabajosRealizados: venta.trabajosRealizados.map((t) => ({
-          precioUnitario: Number(t.precioUnitario),
-          descripcion: "",
-        })),
-        descuento: Number(venta.descuento),
-        incremento: Number(venta.incremento),
-        porcentajeRecargo: Number(venta.porcentajeRecargo),
-        incrementoInterno: 0,
-      };
-      const calculoVO =
-        ComprobanteCalculadoFactory.fromPrecioDto(ventaParaCalculo);
+      const calculoVO = ComprobanteCalculadoFactory.fromVenta(venta);
       return {
         ...venta,
         totalAPagar: calculoVO.total,
