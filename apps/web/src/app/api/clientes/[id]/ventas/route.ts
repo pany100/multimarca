@@ -1,4 +1,4 @@
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
+import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
@@ -35,34 +35,35 @@ export async function GET(
 
     const ventasConDeuda = ventas.map((venta) => {
       const ventaParaCalculo = {
-        ...venta,
         repuestosUsados: venta.repuestosUsados.map((r) => ({
-          precioVenta: Number(r.precioVenta),
+          stock: { id: 0, name: "" },
           unidadesConsumidas: r.unidadesConsumidas,
+          precioVenta: Number(r.precioVenta),
+          precioCompra: 0,
         })),
         reparacionesDeTercero: venta.reparacionesDeTercero.map((r) => ({
+          nombre: "",
+          proveedor: { id: 0 },
           precioVenta: Number(r.precioVenta),
+          precioCompra: 0,
         })),
         trabajosRealizados: venta.trabajosRealizados.map((t) => ({
           precioUnitario: Number(t.precioUnitario),
+          descripcion: "",
         })),
         descuento: Number(venta.descuento),
         incremento: Number(venta.incremento),
         porcentajeRecargo: Number(venta.porcentajeRecargo),
+        incrementoInterno: 0,
       };
-      const totalAPagar = calcularTotalOrdenReparacion(ventaParaCalculo);
-      const totalPagado = venta.ingresos.reduce((sum, ingreso) => {
-        if (ingreso.moneda === "Dolar") {
-          return sum + Number(ingreso.monto) * Number(ingreso.dolar?.blue);
-        }
-        return sum + Number(ingreso.monto);
-      }, 0);
+      const calculoVO =
+        ComprobanteCalculadoFactory.fromPrecioDto(ventaParaCalculo);
 
       return {
         ...venta,
-        totalAPagar,
-        totalPagado,
-        deuda: totalAPagar - totalPagado,
+        totalAPagar: calculoVO.total,
+        totalPagado: calculoVO.totalPagado,
+        deuda: calculoVO.deuda,
       };
     });
     if (soloConDeuda) {
