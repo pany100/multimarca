@@ -1,7 +1,3 @@
-import {
-  calcularManoDeObra,
-  calcularTotalOrdenReparacion,
-} from "@/utils/ordenHelper";
 import { Typography } from "@mui/material";
 import Divider from "@mui/material/Divider";
 import { styled } from "@mui/material/styles";
@@ -104,9 +100,7 @@ function WorkDescription({ repair }: Props) {
           sx={{ color: "common.black", textAlign: "right", lineHeight: 1.1 }}
         >
           $
-          {calcularManoDeObra(repair.trabajosRealizados).toLocaleString(
-            "es-AR"
-          )}
+          {repair.totalManoDeObra.toLocaleString("es-AR")}
         </Typography>
 
         {repair.descuento > 0 && (
@@ -140,8 +134,7 @@ function WorkDescription({ repair }: Props) {
             textAlign: "right",
           }}
         >
-          $
-          {Number(calcularTotalOrdenReparacion(repair)).toLocaleString("es-AR")}
+          ${Number(repair.total).toLocaleString("es-AR")}
         </Typography>
       </Box>
     </>

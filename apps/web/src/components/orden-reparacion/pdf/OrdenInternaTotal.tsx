@@ -1,8 +1,4 @@
 import {
-  calcularTotalOrdenReparacion,
-  calcularTotalPagos,
-} from "@/utils/ordenHelper";
-import {
   Box,
   Checkbox,
   FormControlLabel,
@@ -12,9 +8,9 @@ import {
 } from "@mui/material";
 
 function OrdenInternaTotal({ repair }: { repair: any }) {
-  const total = calcularTotalOrdenReparacion(repair);
-  const aCuenta = calcularTotalPagos(repair);
-  const deuda = total - aCuenta;
+  const total = repair.total;
+  const aCuenta = repair.totalPagado;
+  const deuda = repair.deuda;
   const paymentMethods = [
     "Efectivo",
     "Transferencia",

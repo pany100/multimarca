@@ -1,7 +1,6 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { useGeneratePdf } from "@/hooks/orden-reparacion/useGeneratePdf";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import {
   Alert,
   Box,
@@ -147,7 +146,7 @@ function PresupuestoHeader({ presupuesto }: { presupuesto: any }) {
   const createWhatsAppLink = () => {
     if (!presupuesto.auto?.owner?.phone) return "";
 
-    const total = calcularTotalOrdenReparacion(presupuesto);
+    const total = presupuesto.total;
     const message = `Hola ${
       presupuesto.auto.owner.fullName
     }, le enviamos el presupuesto para su vehículo ${presupuesto.auto.brand} ${
@@ -249,7 +248,7 @@ function PresupuestoHeader({ presupuesto }: { presupuesto: any }) {
                 order: { xs: 1, md: 0 },
               }}
             >
-              {getFormattedPrice(calcularTotalOrdenReparacion(presupuesto))}
+              {getFormattedPrice(presupuesto.total)}
             </Typography>
 
             <Button

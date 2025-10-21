@@ -1,4 +1,5 @@
 import { OrdenReparacionRepository } from "@/core/domain/repositories/orden-reparacion.repository";
+import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 
 export class GetOrdenUseCase {
   constructor(private readonly repo: OrdenReparacionRepository) {}
@@ -25,6 +26,7 @@ export class GetOrdenUseCase {
         recibo: el.reciboFile?.finalPath || el.reciboFile?.tempPath || null,
       })
     );
+    const comprobanteCalculado = ComprobanteCalculadoFactory.fromOrden(order);
     return {
       ...ordenReparacionWithoutMecanicos,
       mecanicos: mecanicosWithoutMecanico,
@@ -35,6 +37,10 @@ export class GetOrdenUseCase {
       ),
       pdfPath:
         order.scannerFile?.finalPath || order.scannerFile?.tempPath || null,
+      total: comprobanteCalculado.total,
+      totalPagado: comprobanteCalculado.totalPagado,
+      totalManoDeObra: comprobanteCalculado.totalManoDeObra,
+      deuda: comprobanteCalculado.deuda,
     };
   }
 }
