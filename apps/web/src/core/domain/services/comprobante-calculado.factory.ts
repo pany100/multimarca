@@ -21,6 +21,16 @@ export type OrdenForCalculo = {
   ingresos: OrdenReparacionWithRelationsForClient["ingresos"];
 };
 
+export type PresupuestoForCalculo = {
+  descuento: Decimal;
+  incremento: Decimal;
+  incrementoInterno: Decimal;
+  porcentajeRecargo: Decimal;
+  repuestosUsados: any[];
+  reparacionesDeTercero: any[];
+  trabajosRealizados: any[];
+};
+
 export type VentaForCalculo = {
   descuento: Decimal;
   incremento: Decimal;
@@ -131,6 +141,59 @@ export class ComprobanteCalculadoFactory {
     );
 
     const terceros = (dto.reparacionesDeTercero ?? []).map((t) =>
+      ReparacionTercero.fromOrderDb({
+        nombre: t.nombre,
+        precioCompra: new Decimal(t.precioCompra || 0),
+        precioVenta: new Decimal(t.precioVenta || 0),
+      })
+    );
+
+    // No payments for price calculation
+    const pagos: Pago[] = [];
+
+    return new ComprobanteCalculado(
+      repuestos,
+      terceros,
+      trabajos,
+      pagos,
+      priceAdjustments
+    );
+  }
+
+  static fromPresupuesto(presupuesto: PresupuestoForCalculo) {
+    const priceAdjustments = PriceAdjustments.normalizeFromDB({
+      descuento: presupuesto.descuento
+        ? new Decimal(presupuesto.descuento)
+        : new Decimal(0),
+      incremento: presupuesto.incremento
+        ? new Decimal(presupuesto.incremento)
+        : new Decimal(0),
+      incrementoInterno: presupuesto.incrementoInterno
+        ? new Decimal(presupuesto.incrementoInterno)
+        : new Decimal(0),
+      porcentajeRecargo: presupuesto.porcentajeRecargo
+        ? new Decimal(presupuesto.porcentajeRecargo)
+        : new Decimal(0),
+    });
+
+    const repuestos = (presupuesto.repuestosUsados ?? []).map((r) =>
+      RepuestoUsado.fromOrderDb({
+        stock: { id: r.stock.id, name: r.stock.name || "" },
+        unidadesConsumidas: r.unidadesConsumidas,
+        precioCompra: r.precioCompra || 0,
+        precioVenta: r.precioVenta || 0,
+      })
+    );
+
+    const trabajos = (presupuesto.trabajosRealizados ?? []).map((t) =>
+      TrabajoRealizado.fromOrderDb({
+        precioUnitario: new Decimal(t.precioUnitario),
+        descripcion: t.descripcion || t.manoDeObra?.name || "",
+        diasParaRecordatorio: t.diasParaRecordatorio || null,
+      })
+    );
+
+    const terceros = (presupuesto.reparacionesDeTercero ?? []).map((t) =>
       ReparacionTercero.fromOrderDb({
         nombre: t.nombre,
         precioCompra: new Decimal(t.precioCompra || 0),

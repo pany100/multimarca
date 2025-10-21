@@ -2,7 +2,6 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
@@ -135,22 +134,13 @@ const OrdenesReparacionTable = ({
       field: "totalAPagar",
       headerName: "Total a Pagar",
       flex: 1,
-      renderCell: (params: any) =>
-        getFormattedPrice(calcularTotalOrdenReparacion(params.row)),
+      renderCell: (params: any) => getFormattedPrice(params.row.totalAPagar),
     },
     {
       field: "totalPagado",
       headerName: "Total Pagado",
       flex: 1,
-      renderCell: (params: any) =>
-        getFormattedPrice(
-          params.row.ingresos.reduce((sum: number, ingreso: any) => {
-            if (ingreso.moneda === "Dolar") {
-              return sum + Number(ingreso.monto) * Number(ingreso.dolar.blue);
-            }
-            return sum + Number(ingreso.monto);
-          }, 0)
-        ),
+      renderCell: (params: any) => getFormattedPrice(params.row.totalPagado),
     },
   ];
 

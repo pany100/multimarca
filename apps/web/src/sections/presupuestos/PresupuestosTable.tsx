@@ -4,7 +4,6 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { calcularTotalOrdenReparacion } from "@/utils/ordenHelper";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
@@ -227,8 +226,7 @@ function PresupuestosTable({
       field: "totalAPagar",
       headerName: "Total a Pagar",
       flex: 1,
-      renderCell: (params: any) =>
-        getFormattedPrice(calcularTotalOrdenReparacion(params.row)),
+      renderCell: (params: any) => getFormattedPrice(params.row.totalAPagar),
     },
   ];
 

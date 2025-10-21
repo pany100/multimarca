@@ -45,10 +45,23 @@ export class PrismaOrdenReparacionRepository
           auto: { include: { owner: true } },
           mecanicos: true,
           controlesEnReparacion: { include: { controlMecanico: true } },
-          repuestosUsados: true,
-          reparacionesDeTercero: true,
+          repuestosUsados: {
+            include: {
+              stock: true,
+            },
+          },
+          reparacionesDeTercero: {
+            include: {
+              proveedor: true,
+              reciboFile: true,
+            },
+          },
           trabajosRealizados: true,
-          ingresos: { include: { dolar: true } },
+          ingresos: {
+            include: {
+              dolar: true,
+            },
+          },
         },
       },
       page,
