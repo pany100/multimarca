@@ -1,4 +1,5 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { TotalManoDeObraDto } from "@/core/application/services/get-total-mano-de-obra.service";
 import {
   PrecioDto,
   PrecioFinalReparacionesDto,
@@ -127,12 +128,36 @@ function usePrecios() {
     }
   };
 
+  const calculateTotalManoDeObra = async (entidad: TotalManoDeObraDto) => {
+    try {
+      const response = await authFetch("/api/precios/total-mano-de-obra", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(entidad),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Error calculating total for mano de obra: ${response.statusText}`
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error in calculateTotalManoDeObra:", error);
+      throw error;
+    }
+  };
+
   return {
     calculatePrecios,
     calculatePreciosFinalReparaciones,
     calculatePreciosFinalRepuestos,
     calculateTotalReparaciones,
     calculateTotalRepuestos,
+    calculateTotalManoDeObra,
   };
 }
 
