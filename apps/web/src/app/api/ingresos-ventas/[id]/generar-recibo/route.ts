@@ -15,8 +15,17 @@ export async function GET(
         venta: {
           include: {
             cliente: true,
-            repuestosUsados: true,
-            reparacionesDeTercero: true,
+            repuestosUsados: {
+              include: {
+                stock: true,
+              },
+            },
+            reparacionesDeTercero: {
+              include: {
+                proveedor: true,
+                reciboFile: true,
+              },
+            },
             trabajosRealizados: true,
             ingresos: {
               include: {

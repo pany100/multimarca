@@ -1,7 +1,7 @@
 import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 
 export default function generateClientOrderHtml(venta: any): string {
-  const calculoVO = ComprobanteCalculadoFactory.fromOrden(venta);
+  const calculoVO = ComprobanteCalculadoFactory.fromVenta(venta);
   return `
     <!DOCTYPE html>
   

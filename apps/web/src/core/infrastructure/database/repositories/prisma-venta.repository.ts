@@ -73,7 +73,11 @@ export class PrismaVentaRepository implements VentaRepository {
           },
         },
         trabajosRealizados: true,
-        ingresos: true,
+        ingresos: {
+          include: {
+            dolar: true,
+          },
+        },
       },
     });
   }

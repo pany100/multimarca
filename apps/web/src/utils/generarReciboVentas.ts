@@ -2,8 +2,8 @@ import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-
 import { getFormattedPrice } from "./fieldHelper";
 
 export default function generateReciboVentas(ingresoPorVenta: any): string {
-  const calculoVO = ComprobanteCalculadoFactory.fromOrden(
-    ingresoPorVenta.ordenVenta
+  const calculoVO = ComprobanteCalculadoFactory.fromVenta(
+    ingresoPorVenta.venta
   );
   return `
 <!DOCTYPE html>

@@ -22,7 +22,11 @@ export type VentaWithRelations = Prisma.VentaGetPayload<{
       };
     };
     trabajosRealizados: true;
-    ingresos: true;
+    ingresos: {
+      include: {
+        dolar: true;
+      };
+    };
   };
 }>;
 

@@ -16,7 +16,18 @@ export async function POST(
         cliente: true,
         ordenReparacion: {
           include: {
-            auto: true,
+            repuestosUsados: {
+              include: {
+                stock: true,
+              },
+            },
+            reparacionesDeTercero: {
+              include: {
+                proveedor: true,
+                reciboFile: true,
+              },
+            },
+            trabajosRealizados: true,
             ingresos: {
               include: {
                 dolar: true,

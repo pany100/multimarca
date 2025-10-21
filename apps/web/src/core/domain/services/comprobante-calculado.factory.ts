@@ -21,6 +21,16 @@ export type OrdenForCalculo = {
   ingresos: OrdenReparacionWithRelationsForClient["ingresos"];
 };
 
+export type VentaForCalculo = {
+  descuento: Decimal;
+  incremento: Decimal;
+  porcentajeRecargo: Decimal;
+  repuestosUsados: any[];
+  reparacionesDeTercero: any[];
+  trabajosRealizados: any[];
+  ingresos: any[];
+};
+
 export class ComprobanteCalculadoFactory {
   static fromOrden(orden: OrdenForCalculo) {
     const priceAdjustments = PriceAdjustments.normalizeFromDB({
@@ -42,6 +52,46 @@ export class ComprobanteCalculadoFactory {
       ReparacionTercero.fromOrderDb(t)
     );
     const pagos = (orden.ingresos ?? []).map((p) => Pago.fromOrderDb(p));
+    return new ComprobanteCalculado(
+      repuestos,
+      terceros,
+      trabajos,
+      pagos,
+      priceAdjustments
+    );
+  }
+
+  static fromVenta(venta: VentaForCalculo) {
+    const priceAdjustments = PriceAdjustments.normalizeFromDB({
+      descuento: venta.descuento,
+      incremento: venta.incremento,
+      incrementoInterno: new Decimal(0),
+      porcentajeRecargo: venta.porcentajeRecargo,
+    });
+
+    const repuestos = (venta.repuestosUsados ?? []).map(
+      RepuestoUsado.fromOrderDb
+    );
+
+    const trabajos = (venta.trabajosRealizados ?? []).map(
+      TrabajoRealizado.fromOrderDb
+    );
+
+    const terceros = (venta.reparacionesDeTercero ?? []).map((t) =>
+      ReparacionTercero.fromOrderDb(t)
+    );
+
+    // Transform venta ingresos to match the expected Pago structure
+    const pagos = (venta.ingresos ?? []).map((ingreso) => {
+      // Create a compatible structure for Pago.fromOrderDb
+      const ingresoCompatible = {
+        ...ingreso,
+        clienteId: ingreso.clienteId || 0, // Provide default value for required field
+        ordenReparacionId: 0, // Provide default value since it's not used in venta context
+      };
+      return Pago.fromOrderDb(ingresoCompatible);
+    });
+
     return new ComprobanteCalculado(
       repuestos,
       terceros,
