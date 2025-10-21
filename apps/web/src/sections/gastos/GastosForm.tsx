@@ -44,6 +44,7 @@ export const schema = yup.object({
     otherwise: (schema) => schema.notRequired(),
   }),
   gastosBancarios: yup.number().default(0),
+  gastosArba: yup.number().default(0),
   ...getSchemaPropsForCheque("tipoOperacionId"),
 });
 
@@ -87,6 +88,13 @@ const GastosForm = () => {
           <CustomInputText
             name="gastosBancarios"
             label="Gastos Bancarios (en pesos)"
+            type="number"
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomInputText
+            name="gastosArba"
+            label="Gastos ARBA (en pesos)"
             type="number"
           />
         </Grid>

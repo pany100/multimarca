@@ -169,6 +169,14 @@ export default function IngresoManualVerPage({
         </Grid>
         <Grid item xs={12} md={6}>
           <Typography variant="subtitle1" fontWeight="bold">
+            Gastos ARBA
+          </Typography>
+          <Typography variant="body1">
+            {getFormattedPrice(ingreso.gastosArba)}
+          </Typography>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Typography variant="subtitle1" fontWeight="bold">
             Usuario
           </Typography>
           <Typography variant="body1">

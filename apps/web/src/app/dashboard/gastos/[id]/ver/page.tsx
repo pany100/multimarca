@@ -206,6 +206,14 @@ const GastoDetallePage = ({ params }: { params: { id: string } }) => {
                 </Box>
                 <Box>
                   <Typography variant="caption" color="text.secondary">
+                    Gastos ARBA
+                  </Typography>
+                  <Typography variant="body1" fontWeight="medium">
+                    {getFormattedPrice(gasto.gastosArba)}
+                  </Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption" color="text.secondary">
                     Tipo de Operación
                   </Typography>
                   <Typography variant="body1" fontWeight="medium">

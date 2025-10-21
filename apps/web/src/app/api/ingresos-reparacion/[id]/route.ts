@@ -30,6 +30,7 @@ export async function PUT(
       ordenReparacionId,
       cotizacionDolar,
       gastosBancarios,
+      gastosArba,
     } = body;
 
     if (!validateChequeRequest(body, tipoOperacionId)) {
@@ -94,6 +95,7 @@ export async function PUT(
         chequeId: chequeIdToPass,
         cotizacionDolar,
         gastosBancarios,
+        gastosArba,
       },
       include: {
         cliente: true,

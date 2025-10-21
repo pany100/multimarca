@@ -71,6 +71,7 @@ export async function POST(request: Request) {
       tipoOperacionId,
       cotizacionDolar,
       gastosBancarios,
+      gastosArba,
     } = body;
 
     if (!validateChequeRequest(body, tipoOperacionId)) {
@@ -149,6 +150,7 @@ export async function POST(request: Request) {
         chequeId: chequeIdToPass,
         cotizacionDolar,
         gastosBancarios,
+        gastosArba,
       },
       include: {
         dolar: true,

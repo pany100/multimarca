@@ -104,6 +104,7 @@ export async function PUT(
       fecha,
       cotizacionDolar,
       gastosBancarios,
+      gastosArba,
     } = body;
     if (!validateChequeRequest(body, tipoOperacionId)) {
       return NextResponse.json(
@@ -167,6 +168,7 @@ export async function PUT(
         chequeId: chequeIdToPass,
         cotizacionDolar,
         gastosBancarios,
+        gastosArba,
       },
       include: {
         usuario: {

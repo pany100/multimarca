@@ -352,6 +352,7 @@ model Extraccion {
   usuario         Usuario          @relation(fields: [usuarioId], references: [id])
   revisado        Boolean          @default(false)
   gastosBancarios Decimal          @default(0) @db.Decimal(10, 2)
+  gastosArba      Decimal          @default(0) @db.Decimal(10, 2)
   cotizacionDolar Decimal?         @db.Decimal(10, 2)
 
   @@index([usuarioId])
@@ -382,6 +383,7 @@ model Gasto {
   tipoOperacion   TipoDeOperacion  @relation(fields: [tipoOperacionId], references: [id])
   revisado        Boolean          @default(false)
   gastosBancarios Decimal          @default(0) @db.Decimal(10, 2)
+  gastosArba      Decimal          @default(0) @db.Decimal(10, 2)
   cotizacionDolar Decimal?         @db.Decimal(10, 2)
 
   @@index([categoriaId])
@@ -656,6 +658,7 @@ model IngresoPorReparacion {
   tipoOperacion     TipoDeOperacion  @relation(fields: [tipoOperacionId], references: [id])
   revisado          Boolean          @default(false)
   gastosBancarios   Decimal          @default(0) @db.Decimal(10, 2)
+  gastosArba        Decimal          @default(0) @db.Decimal(10, 2)
   cotizacionDolar   Decimal?         @db.Decimal(10, 2)
 
   @@index([fecha])
@@ -686,6 +689,7 @@ model IngresoPorVenta {
   venta              Venta            @relation("VentaIngresos", fields: [ventaId], references: [id], onDelete: Cascade)
   revisado           Boolean          @default(false)
   gastosBancarios    Decimal          @default(0) @db.Decimal(10, 2)
+  gastosArba      Decimal          @default(0) @db.Decimal(10, 2)
   cotizacionDolar    Decimal?         @db.Decimal(10, 2)
 
   @@index([fecha])
@@ -782,6 +786,7 @@ model IngresoManualDeDinero {
   usuario         Usuario          @relation(fields: [usuarioId], references: [id])
   revisado        Boolean          @default(false)
   gastosBancarios Decimal          @default(0) @db.Decimal(10, 2)
+  gastosArba      Decimal          @default(0) @db.Decimal(10, 2)
   cotizacionDolar Decimal?         @db.Decimal(10, 2)
 
   @@index([usuarioId])
