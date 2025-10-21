@@ -2,10 +2,9 @@ import { ModalProvider } from "@/contexts/ModalContext";
 import useReparacionTercerosFormValidator from "@/hooks/orden-reparacion/useReparacionTercerosFormValidator";
 import usePrecios from "@/hooks/precios/usePrecios";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { calcularTotalReparacionesTerceros } from "@/utils/ordenHelper";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import { Typography } from "@mui/material";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import FormDataArrayWithModal from "../../commons/FormDataArray/FormDataWithModal";
 import ResumenCostosFooter from "../resumen-costos/ResumenCostosFooter";
@@ -15,7 +14,8 @@ import { getReparacionTercerosTableColumns } from "./ReparacionTercerosTableColu
 function ReparacionTercerosSection() {
   const { validator } = useReparacionTercerosFormValidator();
   const { control, setValue } = useFormContext();
-  const { calculatePreciosFinalReparaciones } = usePrecios();
+  const { calculatePreciosFinalReparaciones, calculateTotalReparaciones } =
+    usePrecios();
 
   const reparacionesDeTercero = useWatch({
     name: "reparacionesDeTercero",
@@ -25,6 +25,9 @@ function ReparacionTercerosSection() {
     name: "porcentajeRecargo",
     control,
   });
+
+  // State for calculated total
+  const [totalReparaciones, setTotalReparaciones] = useState<number>(0);
 
   // Use refs to track previous values and prevent unnecessary calculations
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -63,33 +66,48 @@ function ReparacionTercerosSection() {
     timeoutRef.current = setTimeout(async () => {
       try {
         if (reparacionesDeTercero && reparacionesDeTercero.length > 0) {
-          const result = await calculatePreciosFinalReparaciones({
-            reparacionesTerceros: reparacionesDeTercero,
-            porcentajeRecargo: porcentajeRecargo || 0,
-          });
+          // Calculate both individual prices and total in parallel
+          const [finalPricesResult, totalResult] = await Promise.all([
+            calculatePreciosFinalReparaciones({
+              reparacionesTerceros: reparacionesDeTercero,
+              porcentajeRecargo: porcentajeRecargo || 0,
+            }),
+            calculateTotalReparaciones({
+              reparacionesTerceros: reparacionesDeTercero,
+              porcentajeRecargo: porcentajeRecargo || 0,
+            }),
+          ]);
 
           // Update the form with calculated prices
-          const updatedReparaciones = result.reparacionesTerceros.map(
-            (reparacion: any, index: number) => ({
-              ...reparacionesDeTercero[index],
-              precioConRecargo: reparacion.precioConRecargo,
-            })
-          );
+          const updatedReparaciones =
+            finalPricesResult.reparacionesTerceros.map(
+              (reparacion: any, index: number) => ({
+                ...reparacionesDeTercero[index],
+                precioConRecargo: reparacion.precioConRecargo,
+              })
+            );
 
           // Set flag to prevent loop
           isUpdatingRef.current = true;
           setValue("reparacionesDeTercero", updatedReparaciones, {
             shouldValidate: false,
           });
+
+          // Update total state
+          setTotalReparaciones(totalResult.totalTerceros);
+        } else {
+          // Reset total when no reparaciones
+          setTotalReparaciones(0);
         }
 
         // Update previous data reference
         previousDataRef.current = currentData;
       } catch (error) {
         console.error(
-          "Error calculating final prices for reparaciones:",
+          "Error calculating prices and total for reparaciones:",
           error
         );
+        setTotalReparaciones(0);
       }
     }, 300); // 300ms debounce
 
@@ -103,6 +121,7 @@ function ReparacionTercerosSection() {
     reparacionesDeTercero,
     porcentajeRecargo,
     calculatePreciosFinalReparaciones,
+    calculateTotalReparaciones,
     setValue,
   ]);
 
@@ -116,12 +135,7 @@ function ReparacionTercerosSection() {
         extraContent={
           <ResumenCostosFooter
             descripcion="Total Reparaciones de Terceros"
-            total={getFormattedPrice(
-              calcularTotalReparacionesTerceros({
-                reparacionesDeTercero,
-                porcentajeRecargo,
-              })
-            )}
+            total={getFormattedPrice(totalReparaciones)}
           />
         }
       >

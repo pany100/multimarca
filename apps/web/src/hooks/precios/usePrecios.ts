@@ -79,10 +79,60 @@ function usePrecios() {
     }
   };
 
+  const calculateTotalReparaciones = async (
+    entidad: PrecioFinalReparacionesDto
+  ) => {
+    try {
+      const response = await authFetch("/api/precios/total-reparaciones", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(entidad),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Error calculating total for reparaciones: ${response.statusText}`
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error in calculateTotalReparaciones:", error);
+      throw error;
+    }
+  };
+
+  const calculateTotalRepuestos = async (entidad: PrecioFinalRepuestosDto) => {
+    try {
+      const response = await authFetch("/api/precios/total-repuestos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(entidad),
+      });
+
+      if (!response.ok) {
+        throw new Error(
+          `Error calculating total for repuestos: ${response.statusText}`
+        );
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error in calculateTotalRepuestos:", error);
+      throw error;
+    }
+  };
+
   return {
     calculatePrecios,
     calculatePreciosFinalReparaciones,
     calculatePreciosFinalRepuestos,
+    calculateTotalReparaciones,
+    calculateTotalRepuestos,
   };
 }
 
