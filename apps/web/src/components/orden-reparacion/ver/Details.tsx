@@ -1,6 +1,5 @@
 "use client";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { calcularPrecioFinal } from "@/utils/ordenHelper";
 import BuildIcon from "@mui/icons-material/Build";
 import CommentIcon from "@mui/icons-material/Comment";
 import EngineeringIcon from "@mui/icons-material/Engineering";
@@ -302,6 +301,7 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
                       precioCompra: string | number;
                       precioVenta: string | number;
                       recibo: string;
+                      precioConRecargo: string | number;
                     },
                     index: number
                   ) => (
@@ -319,12 +319,7 @@ function Details({ ordenReparacion }: { ordenReparacion: any }) {
                         {getFormattedPrice(reparacion.precioVenta)}
                       </TableCell>
                       <TableCell>
-                        {getFormattedPrice(
-                          calcularPrecioFinal(
-                            Number(reparacion.precioVenta),
-                            ordenReparacion.porcentajeRecargo
-                          )
-                        )}
+                        {getFormattedPrice(reparacion.precioConRecargo)}
                       </TableCell>
                       <TableCell align="center">
                         {reparacion.recibo && (

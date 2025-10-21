@@ -20,13 +20,20 @@ export class GetOrdenUseCase {
         detalle: el.detalle,
       })
     );
+    const comprobanteCalculado = ComprobanteCalculadoFactory.fromOrden(order);
     const reparacionesDeTercero = order.reparacionesDeTercero.map(
-      (el: { reciboFile: { finalPath?: string; tempPath?: string } }) => ({
+      (el: {
+        reciboFile: { finalPath?: string; tempPath?: string };
+        precioVenta: number;
+      }) => ({
         ...el,
         recibo: el.reciboFile?.finalPath || el.reciboFile?.tempPath || null,
+        precioConRecargo: comprobanteCalculado.getPrecioFinalForReparaciones(
+          el.precioVenta
+        ),
       })
     );
-    const comprobanteCalculado = ComprobanteCalculadoFactory.fromOrden(order);
+
     return {
       ...ordenReparacionWithoutMecanicos,
       mecanicos: mecanicosWithoutMecanico,

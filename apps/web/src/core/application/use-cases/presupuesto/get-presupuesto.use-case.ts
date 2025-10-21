@@ -10,15 +10,17 @@ export class GetPresupuestoUseCase {
     if (!presupuesto) {
       throw new Error("Presupuesto not found");
     }
-
-    const reparacionesDeTercero = presupuesto.reparacionesDeTercero.map(
-      (el) => ({
-        ...el,
-        recibo: el.reciboFile?.finalPath || el.reciboFile?.tempPath || null,
-      })
-    );
     const comprobanteCalculado =
       ComprobanteCalculadoFactory.fromPresupuesto(presupuesto);
+    const reparacionesDeTercero = presupuesto.reparacionesDeTercero.map(
+      (el: any) => ({
+        ...el,
+        recibo: el.reciboFile?.finalPath || el.reciboFile?.tempPath || null,
+        precioConRecargo: comprobanteCalculado.getPrecioFinalForReparaciones(
+          el.precioVenta
+        ),
+      })
+    );
 
     return {
       ...presupuesto,
