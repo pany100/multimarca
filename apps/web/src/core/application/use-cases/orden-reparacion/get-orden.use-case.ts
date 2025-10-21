@@ -40,6 +40,8 @@ export class GetOrdenUseCase {
       total: comprobanteCalculado.total,
       totalPagado: comprobanteCalculado.totalPagado,
       totalManoDeObra: comprobanteCalculado.totalManoDeObra,
+      totalRepuestos: comprobanteCalculado.totalRepuestos,
+      totalReparacionesDeTerceros: comprobanteCalculado.totalTerceros,
       deuda: comprobanteCalculado.deuda,
     };
   }

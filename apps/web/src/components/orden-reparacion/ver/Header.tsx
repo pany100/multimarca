@@ -1,9 +1,6 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import {
-  calcularTotalOrdenReparacion,
-  getStatusColor,
-} from "@/utils/ordenHelper";
+import { getStatusColor } from "@/utils/ordenHelper";
 import {
   Alert,
   Box,
@@ -214,7 +211,7 @@ function Header({ ordenReparacion }: { ordenReparacion: any }) {
                 order: { xs: 1, md: 0 },
               }}
             >
-              {getFormattedPrice(calcularTotalOrdenReparacion(ordenReparacion))}
+              {getFormattedPrice(ordenReparacion.total)}
             </Typography>
 
             <Button

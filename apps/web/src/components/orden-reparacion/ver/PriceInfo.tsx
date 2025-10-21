@@ -1,11 +1,5 @@
 "use client";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import {
-  calcularManoDeObra,
-  calcularTotalOrdenReparacion,
-  calcularTotalReparacionesTerceros,
-  calcularTotalRepuestos,
-} from "@/utils/ordenHelper";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import {
   Box,
@@ -66,7 +60,7 @@ function PriceInfo({ ordenReparacion }: { ordenReparacion: any }) {
                   recargo)
                 </TableCell>
                 <TableCell align="right">
-                  {getFormattedPrice(calcularTotalRepuestos(ordenReparacion))}
+                  {getFormattedPrice(ordenReparacion.totalRepuestos)}
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -76,7 +70,7 @@ function PriceInfo({ ordenReparacion }: { ordenReparacion: any }) {
                 </TableCell>
                 <TableCell align="right">
                   {getFormattedPrice(
-                    calcularTotalReparacionesTerceros(ordenReparacion)
+                    ordenReparacion.totalReparacionesDeTerceros
                   )}
                 </TableCell>
               </TableRow>
@@ -85,9 +79,7 @@ function PriceInfo({ ordenReparacion }: { ordenReparacion: any }) {
                   Mano de Obra
                 </TableCell>
                 <TableCell align="right">
-                  {getFormattedPrice(
-                    calcularManoDeObra(ordenReparacion.trabajosRealizados)
-                  )}
+                  {getFormattedPrice(ordenReparacion.totalManoDeObra)}
                 </TableCell>
               </TableRow>
               <TableRow>
@@ -135,9 +127,7 @@ function PriceInfo({ ordenReparacion }: { ordenReparacion: any }) {
                   Total
                 </TableCell>
                 <TableCell align="right">
-                  {getFormattedPrice(
-                    calcularTotalOrdenReparacion(ordenReparacion)
-                  )}
+                  {getFormattedPrice(ordenReparacion.total)}
                 </TableCell>
               </TableRow>
             </TableBody>

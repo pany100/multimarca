@@ -24,6 +24,9 @@ export class GetPresupuestoUseCase {
       ...presupuesto,
       reparacionesDeTercero,
       total: comprobanteCalculado.total,
+      totalManoDeObra: comprobanteCalculado.totalManoDeObra,
+      totalRepuestos: comprobanteCalculado.totalRepuestos,
+      totalReparacionesDeTerceros: comprobanteCalculado.totalTerceros,
     };
   }
 }
