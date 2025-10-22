@@ -301,7 +301,7 @@ model Stock {
   restockValue           Int?
   markup                 Float?
   proveedorId            Int
-  label                  String?                @db.VarChar(250)
+  label                  String                 @unique @db.VarChar(250)
   notificacionesInternas NotificacionInterna[]
   ordenDeCompraItems     OrdenDeCompraItem[]
   repuestosUsados        RepuestoUsado[]
