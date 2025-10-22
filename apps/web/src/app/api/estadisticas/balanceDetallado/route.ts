@@ -122,13 +122,13 @@ export async function GET(request: NextRequest) {
             CASE 
               WHEN ? = 'USD' THEN 
                 CASE 
-                  WHEN i.moneda = 'Dolar' THEN i.monto
-                  ELSE i.monto / COALESCE(i.cotizacionDolar, 1)
+                  WHEN i.moneda = 'Dolar' THEN i.monto - i.gastosBancarios
+                  ELSE (i.monto  - i.gastosBancarios) / COALESCE(i.cotizacionDolar, 1)
                 END
               ELSE 
                 CASE 
-                  WHEN i.moneda = 'Dolar' THEN i.monto * COALESCE(i.cotizacionDolar, 1)
-                  ELSE i.monto
+                  WHEN i.moneda = 'Dolar' THEN (i.monto - i.gastosBancarios) * COALESCE(i.cotizacionDolar, 1)
+                  ELSE i.monto - i.gastosBancarios
                 END
             END
           )) as totalIngresos
@@ -148,13 +148,13 @@ export async function GET(request: NextRequest) {
           CASE 
             WHEN ? = 'USD' THEN 
               CASE
-                WHEN g.moneda = 'Dolar' THEN g.precio
-                ELSE g.precio / COALESCE(g.cotizacionDolar, 1)
+                WHEN g.moneda = 'Dolar' THEN (g.precio + g.gastosBancarios)
+                ELSE (g.precio + g.gastosBancarios) / COALESCE(g.cotizacionDolar, 1)
               END
           ELSE 
             CASE
-              WHEN g.moneda = 'Dolar' THEN g.precio * COALESCE(g.cotizacionDolar, 1)
-              ELSE g.precio
+              WHEN g.moneda = 'Dolar' THEN (g.precio + g.gastosBancarios) * COALESCE(g.cotizacionDolar, 1)
+              ELSE (g.precio + g.gastosBancarios)
             END
           END
         )) as totalGastos

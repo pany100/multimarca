@@ -34,13 +34,13 @@ export async function GET(request: NextRequest) {
         CASE 
           WHEN ? = 'USD' THEN 
             CASE
-              WHEN g.moneda = 'Dolar' THEN g.precio
-              ELSE g.precio / COALESCE(g.cotizacionDolar, 1)
+              WHEN g.moneda = 'Dolar' THEN g.precio + g.gastosBancarios
+              ELSE (g.precio + g.gastosBancarios) / COALESCE(g.cotizacionDolar, 1)
             END
         ELSE 
           CASE
-            WHEN g.moneda = 'Dolar' THEN g.precio * COALESCE(g.cotizacionDolar, 1)
-              ELSE g.precio
+            WHEN g.moneda = 'Dolar' THEN (g.precio + g.gastosBancarios) * COALESCE(g.cotizacionDolar, 1)
+              ELSE (g.precio + g.gastosBancarios)
             END
         END
       ), 2) as totalGastos

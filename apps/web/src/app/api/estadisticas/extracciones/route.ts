@@ -34,13 +34,13 @@ export async function GET(request: NextRequest) {
         ROUND(SUM(CASE 
           WHEN ? = 'USD' THEN 
             CASE
-              WHEN e.moneda = 'Dolar' THEN e.monto
-              ELSE e.monto / COALESCE(e.cotizacionDolar, 1)
+              WHEN e.moneda = 'Dolar' THEN  e.monto + e.gastosBancarios
+              ELSE (e.monto + e.gastosBancarios) / COALESCE(e.cotizacionDolar, 1)
             END
           ELSE 
             CASE
-              WHEN e.moneda = 'Dolar' THEN e.monto * COALESCE(e.cotizacionDolar, 1)
-              ELSE e.monto
+              WHEN e.moneda = 'Dolar' THEN (e.monto + e.gastosBancarios) * COALESCE(e.cotizacionDolar, 1)
+              ELSE (e.monto + e.gastosBancarios)
             END
         END)) as totalExtracciones
       FROM Usuario u
