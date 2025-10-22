@@ -35,18 +35,17 @@ export async function GET(request: NextRequest) {
           WHEN ? = 'USD' THEN 
             CASE
               WHEN g.moneda = 'Dolar' THEN g.precio
-              ELSE g.precio / COALESCE(d.blue, 1)
+              ELSE g.precio / COALESCE(g.cotizacionDolar, 1)
             END
         ELSE 
           CASE
-            WHEN g.moneda = 'Dolar' THEN g.precio * COALESCE(d.blue, 1)
+            WHEN g.moneda = 'Dolar' THEN g.precio * COALESCE(g.cotizacionDolar, 1)
               ELSE g.precio
             END
         END
       ), 2) as totalGastos
     FROM CategoriaGasto cg
     JOIN Gasto g ON cg.id = g.categoriaId
-    LEFT JOIN Dolar d ON d.id = g.dolarId
     WHERE 1=1
     `;
 

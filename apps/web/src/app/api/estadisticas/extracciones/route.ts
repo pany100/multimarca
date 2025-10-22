@@ -35,17 +35,16 @@ export async function GET(request: NextRequest) {
           WHEN ? = 'USD' THEN 
             CASE
               WHEN e.moneda = 'Dolar' THEN e.monto
-              ELSE e.monto / COALESCE(d.blue, 1)
+              ELSE e.monto / COALESCE(e.cotizacionDolar, 1)
             END
           ELSE 
             CASE
-              WHEN e.moneda = 'Dolar' THEN e.monto * COALESCE(d.blue, 1)
+              WHEN e.moneda = 'Dolar' THEN e.monto * COALESCE(e.cotizacionDolar, 1)
               ELSE e.monto
             END
         END)) as totalExtracciones
       FROM Usuario u
       LEFT JOIN Extraccion e ON u.id = e.usuarioId
-      LEFT JOIN Dolar d ON d.id = e.dolarId
       WHERE 1=1
     `;
 

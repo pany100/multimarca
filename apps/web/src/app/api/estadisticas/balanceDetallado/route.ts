@@ -123,17 +123,16 @@ export async function GET(request: NextRequest) {
               WHEN ? = 'USD' THEN 
                 CASE 
                   WHEN i.moneda = 'Dolar' THEN i.monto
-                  ELSE i.monto / COALESCE(d.blue, 1)
+                  ELSE i.monto / COALESCE(i.cotizacionDolar, 1)
                 END
               ELSE 
                 CASE 
-                  WHEN i.moneda = 'Dolar' THEN i.monto * COALESCE(d.blue, 1)
+                  WHEN i.moneda = 'Dolar' THEN i.monto * COALESCE(i.cotizacionDolar, 1)
                   ELSE i.monto
                 END
             END
           )) as totalIngresos
         FROM IngresoManualDeDinero i
-        LEFT JOIN Dolar d ON d.id = i.dolarId
         WHERE i.fecha >= ? AND i.fecha <= ?
       `;
 
@@ -150,17 +149,16 @@ export async function GET(request: NextRequest) {
             WHEN ? = 'USD' THEN 
               CASE
                 WHEN g.moneda = 'Dolar' THEN g.precio
-                ELSE g.precio / COALESCE(d.blue, 1)
+                ELSE g.precio / COALESCE(g.cotizacionDolar, 1)
               END
           ELSE 
             CASE
-              WHEN g.moneda = 'Dolar' THEN g.precio * COALESCE(d.blue, 1)
-                ELSE g.precio
-              END
+              WHEN g.moneda = 'Dolar' THEN g.precio * COALESCE(g.cotizacionDolar, 1)
+              ELSE g.precio
+            END
           END
         )) as totalGastos
         FROM Gasto g
-        LEFT JOIN Dolar d ON d.id = g.dolarId
         WHERE g.fecha >= ? AND g.fecha <= ?
       `;
 

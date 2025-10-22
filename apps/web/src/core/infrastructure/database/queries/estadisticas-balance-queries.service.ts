@@ -79,12 +79,11 @@ export class EstadisticasBalanceQueriesService {
     const rows = await prisma.$queryRaw<{ total: number }[]>`
       SELECT SUM(
         CASE
-          WHEN i.moneda = 'Dolar' THEN i.monto * COALESCE(d.blue,1)
+          WHEN i.moneda = 'Dolar' THEN i.monto * COALESCE(i.cotizacionDolar,1)
           ELSE i.monto
         END
       ) AS total
       FROM IngresoManualDeDinero i
-      LEFT JOIN Dolar d ON d.id = i.dolarId
       WHERE 1=1
       ${
         fechaInicio && fechaFin
@@ -103,11 +102,10 @@ export class EstadisticasBalanceQueriesService {
       SELECT SUM(
         CASE
           WHEN i.moneda = 'Dolar' THEN i.monto
-          ELSE i.monto / COALESCE(d.blue,1)
+          ELSE i.monto / COALESCE(i.cotizacionDolar,1)
         END
       ) AS total
       FROM IngresoManualDeDinero i
-      LEFT JOIN Dolar d ON d.id = i.dolarId
       WHERE 1=1
       ${
         fechaInicio && fechaFin
@@ -125,12 +123,11 @@ export class EstadisticasBalanceQueriesService {
     const rows = await prisma.$queryRaw<{ total: number }[]>`
       SELECT SUM(
       CASE
-        WHEN g.moneda = 'Dolar' THEN g.precio * COALESCE(d.blue,1)
+        WHEN g.moneda = 'Dolar' THEN g.precio * COALESCE(g.cotizacionDolar,1)
         ELSE g.precio
       END
       ) AS total
       FROM Gasto g
-      LEFT JOIN Dolar d ON d.id = g.dolarId
       WHERE 1=1
       ${
         fechaInicio && fechaFin
@@ -149,11 +146,10 @@ export class EstadisticasBalanceQueriesService {
       SELECT SUM(
         CASE
           WHEN g.moneda = 'Dolar' THEN g.precio
-          ELSE g.precio / COALESCE(d.blue,1)
+          ELSE g.precio / COALESCE(g.cotizacionDolar,1)
         END
       ) AS total
       FROM Gasto g
-      LEFT JOIN Dolar d ON d.id = g.dolarId
       WHERE 1=1
       ${
         fechaInicio && fechaFin
