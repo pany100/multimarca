@@ -8,6 +8,7 @@ import {
   getFormattedPrice,
   getFormattedPriceDolar,
 } from "@/utils/fieldHelper";
+import EditIcon from "@mui/icons-material/Edit";
 import PrintIcon from "@mui/icons-material/Print";
 import ReceiptIcon from "@mui/icons-material/Receipt";
 import {
@@ -77,19 +78,32 @@ const VentaHeader = ({ venta }: { venta: any }) => {
           </Typography>
         )}
       </Box>
-      <Tooltip title="Imprimir venta">
-        <Button
-          variant="outlined"
-          color="primary"
-          startIcon={
-            printLoading ? <CircularProgress size={20} /> : <PrintIcon />
-          }
-          onClick={handlePrintVenta}
-          disabled={printLoading}
-        >
-          Imprimir
-        </Button>
-      </Tooltip>
+      <Box sx={{ display: "flex", gap: 1 }}>
+        <Tooltip title="Editar venta">
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<EditIcon />}
+            component={Link}
+            href={`/dashboard/ventas/${venta.id}/editar`}
+          >
+            Editar
+          </Button>
+        </Tooltip>
+        <Tooltip title="Imprimir venta">
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={
+              printLoading ? <CircularProgress size={20} /> : <PrintIcon />
+            }
+            onClick={handlePrintVenta}
+            disabled={printLoading}
+          >
+            Imprimir
+          </Button>
+        </Tooltip>
+      </Box>
     </Box>
   );
 };
