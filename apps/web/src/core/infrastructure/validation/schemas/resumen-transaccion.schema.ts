@@ -17,3 +17,8 @@ export const updateRevisadoYEnviadoSchema = z.object({
   revisado: z.boolean().optional(),
   reciboEnviado: z.boolean().optional(),
 });
+
+export const updateProveedorRevisadoSchema = z.object({
+  id: z.coerce.number().min(1),
+  revisado: z.boolean(),
+});

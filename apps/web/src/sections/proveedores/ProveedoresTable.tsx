@@ -1,5 +1,6 @@
+import { useFetch } from "@/contexts/FetchContext";
 import VisibilityIcon from "@mui/icons-material/Visibility";
-import { MenuItem } from "@mui/material";
+import { Checkbox, MenuItem } from "@mui/material";
 import { useRouter } from "next/navigation";
 import CustomTable, {
   InheritedTableProps,
@@ -12,6 +13,28 @@ function ProveedoresTable({
   ...rest
 }: InheritedTableProps) {
   const router = useRouter();
+  const { authFetch } = useFetch();
+
+  const handleRevisadoChange = async (
+    event: any,
+    row: {
+      id: number;
+    }
+  ) => {
+    try {
+      const response = await authFetch(`/api/proveedores/${row.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ revisado: event.target.checked }),
+      });
+      if (response.ok) {
+        setRefreshTrigger && setRefreshTrigger((prev) => prev + 1);
+      } else {
+        console.error("Error al actualizar revisado:", response.status);
+      }
+    } catch (error) {
+      console.error("Error al actualizar revisado:", error);
+    }
+  };
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.5 },
@@ -20,6 +43,17 @@ function ProveedoresTable({
     { field: "email", headerName: "Email", flex: 2 },
     { field: "phone", headerName: "Teléfono", flex: 1 },
     { field: "mobile", headerName: "Móvil", flex: 1 },
+    {
+      field: "revisado",
+      headerName: "Revisado",
+      flex: 0.5,
+      renderCell: (params: any) => (
+        <Checkbox
+          checked={params.row.revisado || false}
+          onChange={(event) => handleRevisadoChange(event, params.row)}
+        />
+      ),
+    },
   ];
 
   const customActions = (params: any) => {

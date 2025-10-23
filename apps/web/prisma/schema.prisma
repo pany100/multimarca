@@ -134,6 +134,7 @@ model Proveedor {
   ordenesDeCompra       OrdenDeCompra[]
   reparacionesDeTercero ReparacionDeTercero[]
   stocks                Stock[]
+  revisado        Boolean          @default(false)
 
   @@index([name])
   @@index([cuit])

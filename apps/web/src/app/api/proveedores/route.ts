@@ -41,6 +41,7 @@ export async function GET(request: Request) {
               precioTotal: true,
             },
           },
+          revisado: true,
         },
       }),
       prisma.proveedor.count({

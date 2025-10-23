@@ -1,3 +1,9 @@
+import { TransaccionService } from "@/core/application/services/transaccion.service";
+import { UpdateRevisadoUseCase } from "@/core/application/use-cases/transacciones/update-revisado.use-case";
+import { PrismaProveedorRepository } from "@/core/infrastructure/database/repositories/prisma-proveedor.repository";
+import { updateProveedorRevisadoSchema } from "@/core/infrastructure/validation/schemas/resumen-transaccion.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { Moneda } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
@@ -147,6 +153,32 @@ export async function GET(
       { error: "Error interno del servidor" },
       { status: 500 }
     );
+  }
+}
+
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id);
+    const body = await request.json();
+    const { revisado } = body;
+    const dto = await validateRequest(
+      {
+        id,
+        revisado,
+      },
+      updateProveedorRevisadoSchema
+    );
+
+    const proveedorActualizado = await new UpdateRevisadoUseCase(
+      new TransaccionService(new PrismaProveedorRepository())
+    ).execute(dto);
+
+    return NextResponse.json(proveedorActualizado);
+  } catch (error) {
+    return handleApiError(error);
   }
 }
 
