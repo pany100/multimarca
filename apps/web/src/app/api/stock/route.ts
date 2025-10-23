@@ -13,6 +13,7 @@ export async function GET(request: Request) {
 
     let whereClause: any = {
       OR: [
+        { id: { equals: parseInt(query) || undefined } },
         { name: { contains: query } },
         { brand: { contains: query } },
         { label: { contains: query } },

@@ -21,6 +21,7 @@ export async function GET(request: Request) {
       prisma.extraccion.findMany({
         where: {
           OR: [
+            { id: { equals: parseInt(query) || undefined } },
             { motivo: { contains: query } },
             { usuario: { fullName: { contains: query } } },
           ],
@@ -67,7 +68,17 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { monto, usuarioId, motivo, moneda, fecha, tipoOperacionId, cotizacionDolar, gastosBancarios, gastosArba } = body;
+    const {
+      monto,
+      usuarioId,
+      motivo,
+      moneda,
+      fecha,
+      tipoOperacionId,
+      cotizacionDolar,
+      gastosBancarios,
+      gastosArba,
+    } = body;
 
     if (!validateChequeRequest(body, tipoOperacionId)) {
       return NextResponse.json(

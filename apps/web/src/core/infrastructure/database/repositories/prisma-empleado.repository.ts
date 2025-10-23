@@ -15,7 +15,10 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
       prisma.empleado,
       {
         where: {
-          name: { contains: dto.query },
+          OR: [
+            { name: { contains: dto.query } },
+            { id: { equals: parseInt(dto.query || "") || undefined } },
+          ],
           tipo: dto.soloMecanicos ? "Mecanico" : undefined,
         },
         orderBy: { id: "desc" },

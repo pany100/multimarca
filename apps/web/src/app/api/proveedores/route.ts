@@ -13,7 +13,10 @@ export async function GET(request: Request) {
     const [proveedores, total] = await Promise.all([
       prisma.proveedor.findMany({
         where: {
-          name: { contains: query },
+          OR: [
+            { id: { equals: parseInt(query) || undefined } },
+            { name: { contains: query } },
+          ],
         },
         skip,
         take: size,

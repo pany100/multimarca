@@ -14,6 +14,7 @@ export async function GET(request: Request) {
       prisma.cliente.findMany({
         where: {
           OR: [
+            { id: { equals: parseInt(query) || undefined } },
             { fullName: { contains: query } },
             { email: { contains: query } },
             { dni: { contains: query } },

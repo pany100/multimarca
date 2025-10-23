@@ -21,6 +21,7 @@ export async function GET(request: Request) {
       prisma.ingresoPorVenta.findMany({
         where: {
           OR: [
+            { id: { equals: parseInt(query) || undefined } },
             { cliente: { fullName: { contains: query } } },
             { informacionCliente: { contains: query } },
           ],

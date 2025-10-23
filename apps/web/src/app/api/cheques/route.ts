@@ -13,6 +13,7 @@ export async function GET(request: Request) {
 
     const whereClause: any = {
       OR: [
+        { id: { equals: parseInt(query) || undefined } },
         { numero: { contains: query } },
         { banco: { contains: query } },
         { owner: { contains: query } },

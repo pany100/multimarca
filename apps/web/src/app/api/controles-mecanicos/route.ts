@@ -14,7 +14,10 @@ export async function GET(request: Request) {
     const [controles, total] = await Promise.all([
       prisma.controlMecanico.findMany({
         where: {
-          name: { contains: query },
+          OR: [
+            { id: { equals: parseInt(query) || undefined } },
+            { name: { contains: query } },
+          ],
         },
         skip,
         take: size,

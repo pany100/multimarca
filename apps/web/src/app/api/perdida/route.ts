@@ -14,7 +14,10 @@ export async function GET(request: Request) {
 
     // Build the where clause
     const where: any = {
-      descripcion: { contains: query },
+      OR: [
+        { id: { equals: parseInt(query) || undefined } },
+        { descripcion: { contains: query } },
+      ],
     };
 
     // Add date filter if provided
@@ -68,7 +71,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { fecha, monto, descripcion, moneda, cancelado, cotizacionDolar } = body;
+    const { fecha, monto, descripcion, moneda, cancelado, cotizacionDolar } =
+      body;
 
     // Validate required fields
     if (!monto || typeof monto !== "number" || monto <= 0) {

@@ -20,7 +20,10 @@ export async function GET(request: Request) {
     const [ingresos, total] = await Promise.all([
       prisma.ingresoManualDeDinero.findMany({
         where: {
-          descripcion: { contains: query },
+          OR: [
+            { id: { equals: parseInt(query) || undefined } },
+            { descripcion: { contains: query } },
+          ],
         },
         skip,
         take: size,

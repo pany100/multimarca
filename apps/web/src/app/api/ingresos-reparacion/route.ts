@@ -21,6 +21,7 @@ export async function GET(request: Request) {
       prisma.ingresoPorReparacion.findMany({
         where: {
           OR: [
+            { id: { equals: parseInt(query) || undefined } },
             { cliente: { fullName: { contains: query } } },
             { ordenReparacion: { auto: { patent: { contains: query } } } },
           ],

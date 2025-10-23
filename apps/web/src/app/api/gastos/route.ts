@@ -41,6 +41,7 @@ export async function GET(request: Request) {
 
     const whereClause: any = {
       OR: [
+        { id: { equals: parseInt(query) || undefined } },
         { nombre: { contains: query } },
         { categoria: { nombre: { contains: query } } },
         { mecanico: { name: { contains: query } } },

@@ -13,6 +13,7 @@ export async function GET(request: Request) {
       prisma.auto.findMany({
         where: {
           OR: [
+            { id: { equals: parseInt(query) || undefined } },
             { patent: { contains: query } },
             { brand: { contains: query } },
             { model: { contains: query } },
