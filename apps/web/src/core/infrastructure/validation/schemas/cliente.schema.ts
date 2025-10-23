@@ -13,6 +13,14 @@ export const listDeudoresQuerySchema = z.object({
   query: z.string().nullable().optional(),
 });
 
+export const listAcreedoresQuerySchema = z.object({
+  page: z.coerce.number().min(0).optional(),
+  size: z.coerce.number().min(1).max(200).optional(),
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
+  query: z.string().nullable().optional(),
+});
+
 export const getClienteQuerySchema = z.object({
   id: z.coerce.number().positive(),
 });

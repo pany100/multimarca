@@ -482,6 +482,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "Ingresos",
+            texto: "Acreedores",
+            icono: <MonetizationOnIcon />,
+            ruta: "/dashboard/acreedores",
+          },
+          {
+            permiso: "Ingresos",
             texto: "Resumen Transacciones",
             icono: <CompareArrowsIcon />,
             ruta: "/dashboard/resumen-transacciones",
