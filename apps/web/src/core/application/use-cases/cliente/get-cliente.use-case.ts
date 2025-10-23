@@ -17,7 +17,7 @@ export class GetClienteUseCase {
         return {
           ...orden,
           totalAPagar: comprobante.total,
-          deuda: comprobante.deuda,
+          totalPagado: comprobante.totalPagado,
         };
       }),
     }));
@@ -31,7 +31,7 @@ export class GetClienteUseCase {
       return {
         ...venta,
         totalAPagar: comprobante.total,
-        deuda: comprobante.deuda,
+        totalPagado: comprobante.totalPagado,
       };
     });
 

@@ -101,11 +101,10 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
       renderCell: (params) => `${getFormattedPrice(params.row.totalAPagar)}`,
     },
     {
-      field: "deuda",
-      headerName: "Deuda",
+      field: "totalPagado",
+      headerName: "Total Pagado",
       flex: 1,
-      renderCell: (params) =>
-        `${getFormattedPrice(params.row.deuda < 0 ? 0 : params.row.deuda)}`,
+      renderCell: (params) => `${getFormattedPrice(params.row.totalPagado)}`,
     },
     {
       field: "auto",
@@ -142,11 +141,10 @@ const VerClientePage = ({ params }: { params: { id: string } }) => {
       renderCell: (params) => `${getFormattedPrice(params.row.totalAPagar)}`,
     },
     {
-      field: "deuda",
-      headerName: "Deuda",
+      field: "totalPagado",
+      headerName: "Total Pagado",
       flex: 1,
-      renderCell: (params) =>
-        `${getFormattedPrice(params.row.deuda < 0 ? 0 : params.row.deuda)}`,
+      renderCell: (params) => `${getFormattedPrice(params.row.totalPagado)}`,
     },
   ];
 
