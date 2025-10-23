@@ -37,6 +37,13 @@ function StockTable({
       valueGetter: (buyPrice: any) => getFormattedPrice(buyPrice),
     },
     {
+      field: "sellPrice",
+      headerName: "Precio de venta sugerido",
+      flex: 0.8,
+      renderCell: (params: any) =>
+        getFormattedPrice(params.row.buyPrice * (1 + params.row.markup / 100)),
+    },
+    {
       field: "units",
       headerName: "Unidades",
       width: 100,
