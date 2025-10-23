@@ -339,7 +339,7 @@ export default function generateClientOrderHtml(repair: any): string {
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
                   $${Number(
-                    calculoVO.getPrecioFinalForRepuestos(el.precioVenta)
+                    calculoVO.getPrecioFinalForReparaciones(el.precioVenta)
                   ).toLocaleString("es-AR")}
                 </div>
               `
