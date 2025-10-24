@@ -26,6 +26,10 @@ type Venta = {
     stock: {
       id: number;
       name: string;
+      label: string;
+      proveedor: {
+        name: string;
+      };
     };
     precioCompra: number;
     precioVenta: number;
@@ -78,6 +82,8 @@ function EditarVentaForm({ venta }: { venta: Venta }) {
         precioVenta: Number(repuesto.precioVenta),
         unidadesConsumidas: repuesto.unidadesConsumidas,
         id: Math.floor(Math.random() * 1000000),
+        proveedor: repuesto.stock.proveedor.name,
+        label: repuesto.stock.label,
       })),
       reparacionesDeTercero: venta.reparacionesDeTercero.map((reparacion) => ({
         nombre: reparacion.nombre,

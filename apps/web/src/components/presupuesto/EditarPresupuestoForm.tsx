@@ -37,6 +37,8 @@ function EditarPresupuestoForm({ presupuesto }: { presupuesto: any }) {
         precioVenta: Number(repuesto.precioVenta),
         unidadesConsumidas: repuesto.unidadesConsumidas,
         id: Math.floor(Math.random() * 1000000),
+        proveedor: repuesto.stock.proveedor.name,
+        label: repuesto.stock.label,
       })),
       reparacionesDeTercero: presupuesto.reparacionesDeTercero.map(
         (reparacion: any) => ({
