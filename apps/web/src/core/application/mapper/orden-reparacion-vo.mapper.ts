@@ -80,10 +80,10 @@ export class OrdenReparacionVOMapper {
       terceros,
       estado,
     } = await this.transformInput(input);
-    const fechaCreacion = input.fechaSalidaReparacion
+    const fechaSalidaReparacion = input.fechaSalidaReparacion
       ? new Date(input.fechaSalidaReparacion)
       : new Date();
-    const dolar = await exchange.getForDate(fechaCreacion);
+    const dolar = await exchange.getForDate(fechaSalidaReparacion);
 
     const controles = await controlMecanico.findMany();
     return OrdenReparacionVO.from({
@@ -95,7 +95,7 @@ export class OrdenReparacionVOMapper {
       autoId: input.autoId,
       fechaEntradaReparacion: input.fechaEntradaReparacion,
       fechaSalidaReparacion: input.fechaSalidaReparacion,
-      fechaCreacion: fechaCreacion,
+      fechaCreacion: input.fechaCreacion,
       kilometros: input.kilometros,
       observacionesCliente: input.observacionesCliente,
       observacionesEntrada: input.observacionesEntrada,
@@ -126,10 +126,10 @@ export class OrdenReparacionVOMapper {
       terceros,
       estado,
     } = await this.transformInput(input);
-    const fechaCreacion = input.fechaSalidaReparacion
+    const fechaSalida = input.fechaSalidaReparacion
       ? new Date(input.fechaSalidaReparacion)
       : new Date();
-    const dolar = await exchange.getForDate(fechaCreacion);
+    const dolar = await exchange.getForDate(fechaSalida);
 
     return OrdenReparacionVO.from({
       id: input.id,
@@ -141,7 +141,7 @@ export class OrdenReparacionVOMapper {
       autoId: input.autoId,
       fechaEntradaReparacion: input.fechaEntradaReparacion,
       fechaSalidaReparacion: input.fechaSalidaReparacion,
-      fechaCreacion: fechaCreacion,
+      fechaCreacion: input.fechaCreacion,
       kilometros: input.kilometros,
       observacionesCliente: input.observacionesCliente,
       observacionesEntrada: input.observacionesEntrada,
