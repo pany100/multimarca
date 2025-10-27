@@ -25,7 +25,7 @@ const estadoColors = {
   [EstadoOrdenReparacion.EnProgreso]: "#4169E1",
   [EstadoOrdenReparacion.Terminado]: "#32CD32",
   [EstadoOrdenReparacion.SeRetira]: "#FF0000",
-  [EstadoOrdenReparacion.Incobrable]: "#FF0000",
+  [EstadoOrdenReparacion.Incobrable]: "#8A2BE2",
 };
 
 const estados = [
