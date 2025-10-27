@@ -45,6 +45,7 @@ function useFixedSelectData() {
     { value: "Aceptado", label: "Aceptado" },
     { value: "Terminado", label: "Terminado" },
     { value: "SeRetira", label: "Se Retira" },
+    { value: "Incobrable", label: "Incobrable" },
   ];
 
   const ventaEstadoOptions = [

@@ -16,6 +16,7 @@ const estadosDisplay: Record<EstadoOrdenReparacion, string> = {
   [EstadoOrdenReparacion.EnProgreso]: "En Proceso",
   [EstadoOrdenReparacion.Terminado]: "Terminado",
   [EstadoOrdenReparacion.SeRetira]: "Se Retira",
+  [EstadoOrdenReparacion.Incobrable]: "Incobrable",
 };
 
 const estadoColors = {
@@ -24,6 +25,7 @@ const estadoColors = {
   [EstadoOrdenReparacion.EnProgreso]: "#4169E1",
   [EstadoOrdenReparacion.Terminado]: "#32CD32",
   [EstadoOrdenReparacion.SeRetira]: "#FF0000",
+  [EstadoOrdenReparacion.Incobrable]: "#FF0000",
 };
 
 const estados = [
@@ -32,6 +34,7 @@ const estados = [
   EstadoOrdenReparacion.EnProgreso,
   EstadoOrdenReparacion.SeRetira,
   EstadoOrdenReparacion.Terminado,
+  EstadoOrdenReparacion.Incobrable,
 ];
 
 interface OrdenesReparacionTableProps {
@@ -230,6 +233,16 @@ const OrdenesReparacionTable = ({
           <CustomTable
             title="Orden de reparación"
             apiEndpoint="/api/orden-reparacion?estado=Terminado"
+            extraActions={customActions}
+            ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
+            columns={columns}
+            {...rest}
+          />
+        )}
+        {estadoActual === EstadoOrdenReparacion.Incobrable && (
+          <CustomTable
+            title="Orden de reparación"
+            apiEndpoint="/api/orden-reparacion?estado=Incobrable"
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
             columns={columns}

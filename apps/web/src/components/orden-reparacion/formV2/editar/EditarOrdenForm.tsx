@@ -41,7 +41,8 @@ type OrdenReparacion = {
     | "EnProgreso"
     | "Aceptado"
     | "Terminado"
-    | "SeRetira";
+    | "SeRetira"
+    | "Incobrable";
   pdfPath: string | null;
   manoDeObra: number;
   auto: {

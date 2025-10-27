@@ -18,7 +18,14 @@ const schema = yup.object().shape({
   observacionesOcultas: yup.string().nullable(),
   estado: yup
     .string()
-    .oneOf(["Presupuestado", "EnProgreso", "Aceptado", "Terminado", "SeRetira"])
+    .oneOf([
+      "Presupuestado",
+      "EnProgreso",
+      "Aceptado",
+      "Terminado",
+      "SeRetira",
+      "Incobrable",
+    ])
     .required("Debe seleccionar un estado"),
   mecanicos: yup.array().of(
     yup.object().shape({

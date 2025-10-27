@@ -34,6 +34,7 @@ const schema = yup.object().shape({
       "ADefinir",
       "Terminado",
       "SeRetira",
+      "Incobrable",
     ])
     .required("Debe seleccionar un estado"),
   mecanicos: yup.array().of(
