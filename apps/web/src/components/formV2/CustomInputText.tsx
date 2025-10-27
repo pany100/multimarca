@@ -35,7 +35,10 @@ const CustomInputText = (props: TextFieldProps) => {
           InputLabelProps={{
             ...props.InputLabelProps,
             shrink: props.type === "date" ? true : undefined,
+            autoCorrect: props.type === "text" ? "on" : undefined,
+            autoCapitalize: props.type === "text" ? "on" : undefined,
           }}
+          spellCheck={props.type === "text" ? true : undefined}
           {...props}
         />
       )}

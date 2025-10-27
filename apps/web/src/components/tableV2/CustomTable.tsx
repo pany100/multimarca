@@ -1,10 +1,13 @@
 import { useFetch } from "@/contexts/FetchContext";
 import AddIcon from "@mui/icons-material/Add";
+import ClearIcon from "@mui/icons-material/Clear";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
   Button,
   IconButton,
+  InputAdornment,
   Menu,
   Stack,
   TextField,
@@ -70,8 +73,19 @@ function CustomTable<T extends { id: string }>({
     const toParam = searchParams.get("to");
     return toParam ? new Date(toParam) : null;
   });
+  const [fromDateInput, setFromDateInput] = useState<Date | null>(() => {
+    if (!searchByDate) return null;
+    const fromParam = searchParams.get("from");
+    return fromParam ? new Date(fromParam) : null;
+  });
+  const [toDateInput, setToDateInput] = useState<Date | null>(() => {
+    if (!searchByDate) return null;
+    const toParam = searchParams.get("to");
+    return toParam ? new Date(toParam) : null;
+  });
   const [items, setItems] = useState<T[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [totalItems, setTotalItems] = useState(0);
   const [loading, setLoading] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -108,7 +122,20 @@ function CustomTable<T extends { id: string }>({
       // Initialize search term from URL
       if (query !== null) {
         setSearchTerm(query);
+        setSearchInput(query);
         stateChanged = true;
+      }
+
+      // Initialize date inputs from URL
+      if (searchByDate) {
+        const fromParam = searchParams.get("from");
+        const toParam = searchParams.get("to");
+        if (fromParam) {
+          setFromDateInput(new Date(fromParam));
+        }
+        if (toParam) {
+          setToDateInput(new Date(toParam));
+        }
       }
 
       isInitialMount.current = false;
@@ -121,7 +148,7 @@ function CustomTable<T extends { id: string }>({
       // Set pendingFetch to true to trigger a fetch after initialization
       pendingFetch.current = true;
     }
-  }, [searchParams]);
+  }, [searchParams, searchByDate]);
 
   // Listen for popstate events (browser back/forward navigation)
   useEffect(() => {
@@ -156,9 +183,18 @@ function CustomTable<T extends { id: string }>({
         updatedSearchTerm = "";
       }
 
+      // Update date inputs from URL
+      if (searchByDate) {
+        const fromParam = url.searchParams.get("from");
+        const toParam = url.searchParams.get("to");
+        setFromDateInput(fromParam ? new Date(fromParam) : null);
+        setToDateInput(toParam ? new Date(toParam) : null);
+      }
+
       // Update state in a batch
       setPaginationModel(updatedPagination);
       setSearchTerm(updatedSearchTerm);
+      setSearchInput(updatedSearchTerm);
 
       // Don't update URL when handling popstate
       isUrlUpdateNeeded.current = false;
@@ -171,7 +207,7 @@ function CustomTable<T extends { id: string }>({
     return () => {
       window.removeEventListener("popstate", handlePopState);
     };
-  }, [paginationModel, searchTerm]);
+  }, [paginationModel, searchTerm, searchByDate]);
 
   // Update URL when pagination or search changes
   const updateUrl = useCallback(
@@ -320,7 +356,7 @@ function CustomTable<T extends { id: string }>({
     return () => clearTimeout(timeoutId);
   }, [fetchItems, refreshTrigger]);
 
-  const handleFromDateChange = (
+  const handleFromDateInputChange = (
     value: PickerValue,
     context: PickerChangeHandlerContext<DateValidationError>
   ) => {
@@ -330,15 +366,10 @@ function CustomTable<T extends { id: string }>({
     // Convertir el valor a Date si es necesario
     const dateValue =
       value instanceof Date ? value : value && new Date(value.toString());
-    setFromDate(dateValue);
-    setPaginationModel({ ...paginationModel, page: 0 }); // Reset to first page on date change
-    // Trigger fetch immediately
-    setTimeout(() => {
-      fetchItems();
-    }, 0);
+    setFromDateInput(dateValue);
   };
 
-  const handleToDateChange = (
+  const handleToDateInputChange = (
     value: PickerValue,
     context: PickerChangeHandlerContext<DateValidationError>
   ) => {
@@ -348,19 +379,50 @@ function CustomTable<T extends { id: string }>({
     // Convertir el valor a Date si es necesario
     const dateValue =
       value instanceof Date ? value : value && new Date(value.toString());
-    setToDate(dateValue);
-    setPaginationModel({ ...paginationModel, page: 0 }); // Reset to first page on date change
-    // Trigger fetch immediately
-    setTimeout(() => {
-      fetchItems();
-    }, 0);
+    setToDateInput(dateValue);
   };
 
-  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newSearchTerm = e.target.value;
-    setSearchTerm(newSearchTerm);
+  const handleSearchInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchInput(e.target.value);
+  };
+
+  const handleSearchSubmit = () => {
+    setSearchTerm(searchInput);
+    if (searchByDate) {
+      setFromDate(fromDateInput);
+      setToDate(toDateInput);
+    }
     setPaginationModel({ ...paginationModel, page: 0 }); // Reset to first page on new search
     pendingFetch.current = true;
+
+    // Force fetch immediately after state changes
+    setTimeout(() => {
+      fetchItems();
+    }, 0);
+  };
+
+  const handleSearchKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Enter") {
+      handleSearchSubmit();
+    }
+  };
+
+  const handleClearFilters = () => {
+    setSearchInput("");
+    setSearchTerm("");
+    if (searchByDate) {
+      setFromDateInput(null);
+      setToDateInput(null);
+      setFromDate(null);
+      setToDate(null);
+    }
+    setPaginationModel({ ...paginationModel, page: 0 });
+    pendingFetch.current = true;
+
+    // Force fetch immediately after clearing
+    setTimeout(() => {
+      fetchItems();
+    }, 0);
   };
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, item: T) => {
@@ -419,8 +481,9 @@ function CustomTable<T extends { id: string }>({
               placeholder="Buscar..."
               variant="outlined"
               size="small"
-              value={searchTerm}
-              onChange={handleSearchChange}
+              value={searchInput}
+              onChange={handleSearchInputChange}
+              onKeyPress={handleSearchKeyPress}
               sx={{
                 width: 300,
                 "& .MuiOutlinedInput-root": {
@@ -436,48 +499,112 @@ function CustomTable<T extends { id: string }>({
                     🔍
                   </Box>
                 ),
+                endAdornment: searchInput && (
+                  <InputAdornment position="end">
+                    <IconButton
+                      size="small"
+                      onClick={() => setSearchInput("")}
+                      sx={{ p: 0.5 }}
+                    >
+                      <ClearIcon fontSize="small" />
+                    </IconButton>
+                  </InputAdornment>
+                ),
               }}
             />
             {searchByDate && (
               <LocalizationProvider dateAdapter={AdapterDateFns}>
                 <Stack direction="row" spacing={1} alignItems="center">
-                  <DatePicker
-                    label="Desde"
-                    value={fromDate}
-                    onChange={handleFromDateChange}
-                    format="dd-MM-yyyy"
-                    slotProps={{
-                      textField: {
-                        size: "small",
-                        sx: {
-                          width: 150,
-                          "& .MuiOutlinedInput-root": {
-                            backgroundColor: "background.paper",
+                  <Box sx={{ position: "relative", display: "inline-block" }}>
+                    <DatePicker
+                      label="Desde"
+                      value={fromDateInput}
+                      onChange={handleFromDateInputChange}
+                      format="dd-MM-yyyy"
+                      slotProps={{
+                        textField: {
+                          size: "small",
+                          sx: {
+                            width: 200,
+                            "& .MuiOutlinedInput-root": {
+                              backgroundColor: "background.paper",
+                            },
                           },
                         },
-                      },
-                    }}
-                  />
-                  <DatePicker
-                    label="Hasta"
-                    value={toDate}
-                    onChange={handleToDateChange}
-                    format="dd-MM-yyyy"
-                    slotProps={{
-                      textField: {
-                        size: "small",
-                        sx: {
-                          width: 150,
-                          "& .MuiOutlinedInput-root": {
-                            backgroundColor: "background.paper",
+                      }}
+                    />
+                    {fromDateInput && (
+                      <IconButton
+                        size="small"
+                        onClick={() => setFromDateInput(null)}
+                        sx={{
+                          position: "absolute",
+                          right: 35,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          p: 0.5,
+                          zIndex: 1,
+                        }}
+                      >
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
+                  <Box sx={{ position: "relative", display: "inline-block" }}>
+                    <DatePicker
+                      label="Hasta"
+                      value={toDateInput}
+                      onChange={handleToDateInputChange}
+                      format="dd-MM-yyyy"
+                      slotProps={{
+                        textField: {
+                          size: "small",
+                          sx: {
+                            width: 200,
+                            "& .MuiOutlinedInput-root": {
+                              backgroundColor: "background.paper",
+                            },
                           },
                         },
-                      },
-                    }}
-                  />
+                      }}
+                    />
+                    {toDateInput && (
+                      <IconButton
+                        size="small"
+                        onClick={() => setToDateInput(null)}
+                        sx={{
+                          position: "absolute",
+                          right: 35,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          p: 0.5,
+                          zIndex: 1,
+                        }}
+                      >
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </Box>
                 </Stack>
               </LocalizationProvider>
             )}
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleSearchSubmit}
+              startIcon={<SearchIcon />}
+              sx={{
+                minWidth: "auto",
+                px: 2,
+                height: "40px", // Match the height of small TextField
+                backgroundColor: (theme) => theme.palette.primary.main,
+                "&:hover": {
+                  backgroundColor: (theme) => theme.palette.primary.dark,
+                },
+              }}
+            >
+              Buscar
+            </Button>
           </Stack>
           {ctaCb && (
             <Button
