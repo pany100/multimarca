@@ -472,7 +472,7 @@ function CustomTable<T extends { id: string }>({
           }}
         >
           <Stack
-            direction="row"
+            direction={{ lg: "column", xl: "row" }}
             spacing={2}
             alignItems="center"
             sx={{ flexWrap: "wrap" }}
@@ -514,78 +514,72 @@ function CustomTable<T extends { id: string }>({
             />
             {searchByDate && (
               <LocalizationProvider dateAdapter={AdapterDateFns}>
-                <Stack direction="row" spacing={1} alignItems="center">
-                  <Box sx={{ position: "relative", display: "inline-block" }}>
-                    <DatePicker
-                      label="Desde"
-                      value={fromDateInput}
-                      onChange={handleFromDateInputChange}
-                      format="dd-MM-yyyy"
-                      slotProps={{
-                        textField: {
-                          size: "small",
-                          sx: {
-                            width: 200,
-                            "& .MuiOutlinedInput-root": {
-                              backgroundColor: "background.paper",
-                            },
-                          },
+                <DatePicker
+                  label="Desde"
+                  value={fromDateInput}
+                  onChange={handleFromDateInputChange}
+                  format="dd-MM-yyyy"
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      sx: {
+                        width: 300,
+                        "& .MuiOutlinedInput-root": {
+                          backgroundColor: "background.paper",
                         },
-                      }}
-                    />
-                    {fromDateInput && (
-                      <IconButton
-                        size="small"
-                        onClick={() => setFromDateInput(null)}
-                        sx={{
-                          position: "absolute",
-                          right: 35,
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          p: 0.5,
-                          zIndex: 1,
-                        }}
-                      >
-                        <ClearIcon fontSize="small" />
-                      </IconButton>
-                    )}
-                  </Box>
-                  <Box sx={{ position: "relative", display: "inline-block" }}>
-                    <DatePicker
-                      label="Hasta"
-                      value={toDateInput}
-                      onChange={handleToDateInputChange}
-                      format="dd-MM-yyyy"
-                      slotProps={{
-                        textField: {
-                          size: "small",
-                          sx: {
-                            width: 200,
-                            "& .MuiOutlinedInput-root": {
-                              backgroundColor: "background.paper",
-                            },
-                          },
+                      },
+                    },
+                  }}
+                />
+                {fromDateInput && (
+                  <IconButton
+                    size="small"
+                    onClick={() => setFromDateInput(null)}
+                    sx={{
+                      position: "absolute",
+                      right: 35,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      p: 0.5,
+                      zIndex: 1,
+                    }}
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                )}
+                <DatePicker
+                  label="Hasta"
+                  value={toDateInput}
+                  onChange={handleToDateInputChange}
+                  format="dd-MM-yyyy"
+                  slotProps={{
+                    textField: {
+                      size: "small",
+                      sx: {
+                        width: 300,
+                        "& .MuiOutlinedInput-root": {
+                          backgroundColor: "background.paper",
                         },
-                      }}
-                    />
-                    {toDateInput && (
-                      <IconButton
-                        size="small"
-                        onClick={() => setToDateInput(null)}
-                        sx={{
-                          position: "absolute",
-                          right: 35,
-                          top: "50%",
-                          transform: "translateY(-50%)",
-                          p: 0.5,
-                          zIndex: 1,
-                        }}
-                      >
-                        <ClearIcon fontSize="small" />
-                      </IconButton>
-                    )}
-                  </Box>
-                </Stack>
+                      },
+                    },
+                  }}
+                />
+                {toDateInput && (
+                  <IconButton
+                    size="small"
+                    onClick={() => setToDateInput(null)}
+                    sx={{
+                      position: "absolute",
+                      right: 35,
+                      top: "50%",
+                      transform: "translateY(-50%)",
+                      p: 0.5,
+                      zIndex: 1,
+                    }}
+                  >
+                    <ClearIcon fontSize="small" />
+                  </IconButton>
+                )}
               </LocalizationProvider>
             )}
             <Button
