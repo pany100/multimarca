@@ -1,6 +1,7 @@
 "use client";
 
 import Balance from "@/components/estadisticas/Balance";
+import ComparacionStock from "@/components/estadisticas/ComparacionStock";
 import Extracciones from "@/components/estadisticas/Extracciones";
 import GastoEmpleados from "@/components/estadisticas/GastoEmpleados";
 import Gastos from "@/components/estadisticas/Gastos";
@@ -49,6 +50,13 @@ const EstadisticasPage = () => {
             sx={{ width: "100%", display: "flex", flexDirection: "column" }}
           >
             <Reparaciones />
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6} sx={{ display: "flex" }}>
+          <Card
+            sx={{ width: "100%", display: "flex", flexDirection: "column" }}
+          >
+            <ComparacionStock />
           </Card>
         </Grid>
         <Grid item xs={12} md={12} sx={{ display: "flex" }}>
