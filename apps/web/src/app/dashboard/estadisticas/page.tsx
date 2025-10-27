@@ -24,7 +24,9 @@ const EstadisticasPage = () => {
       <Grid container spacing={2} sx={{ height: "100%" }}>
         {permisos.includes("EstadisticasBalance") && (
           <Grid item xs={12} md={6} sx={{ display: "flex" }}>
-            <Card>
+            <Card
+              sx={{ width: "100%", display: "flex", flexDirection: "column" }}
+            >
               <Balance />
             </Card>
           </Grid>
