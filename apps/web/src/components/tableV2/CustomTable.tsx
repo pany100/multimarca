@@ -599,6 +599,19 @@ function CustomTable<T extends { id: string }>({
             >
               Buscar
             </Button>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={handleClearFilters}
+              startIcon={<ClearIcon />}
+              sx={{
+                minWidth: "auto",
+                px: 2,
+                height: "40px", // Match the height of small TextField
+              }}
+            >
+              Limpiar
+            </Button>
           </Stack>
           {ctaCb && (
             <Button
