@@ -1,5 +1,22 @@
+import { CreateRecuperacionUseCase } from "@/core/application/use-cases/recuperacion/create-recuperacion.use-case";
+import { ListRecuperacionesUseCase } from "@/core/application/use-cases/recuperacion/list-recuperaciones.use-case";
+import { PrismaPerdidaRepository } from "@/core/infrastructure/database/repositories/prisma-perdida.repository";
+import { PrismaRecuperacionRepository } from "@/core/infrastructure/database/repositories/prisma-recuperacion.repository";
+import {
+  createRecuperacionSchema,
+  listRecuperacionesQuerySchema,
+} from "@/core/infrastructure/validation/schemas/recuperacion.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
-import prisma from "src/lib/prisma";
+
+function buildRecuperacionRepo() {
+  return new PrismaRecuperacionRepository();
+}
+
+function buildPerdidaRepo() {
+  return new PrismaPerdidaRepository();
+}
 
 // GET all recuperaciones for a specific perdida
 export async function GET(
@@ -7,32 +24,20 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const perdidaId = parseInt(params.id);
-
-    // Validate the perdida exists
-    const existePerdida = await prisma.perdidas.findUnique({
-      where: { id: perdidaId },
-    });
-
-    if (!existePerdida) {
-      return NextResponse.json(
-        { error: "Registro de pérdida no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    const recuperaciones = await prisma.recuperacion.findMany({
-      where: { perdidaId },
-      orderBy: { fecha: "desc" },
-    });
-
-    return NextResponse.json(recuperaciones);
-  } catch (error) {
-    console.error("Error al obtener las recuperaciones:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
+    const dto = await validateRequest(
+      { perdidaId: params.id },
+      listRecuperacionesQuerySchema
     );
+
+    const useCase = new ListRecuperacionesUseCase(
+      buildRecuperacionRepo(),
+      buildPerdidaRepo()
+    );
+    const result = await useCase.execute(dto.perdidaId);
+    
+    return NextResponse.json(result, { status: 200 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }
 
@@ -42,46 +47,20 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const perdidaId = parseInt(params.id);
     const body = await request.json();
-    const { fecha, monto, detalle } = body;
-
-    // Validate the perdida exists
-    const existePerdida = await prisma.perdidas.findUnique({
-      where: { id: perdidaId },
-    });
-
-    if (!existePerdida) {
-      return NextResponse.json(
-        { error: "Registro de pérdida no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    // Validate required fields
-    if (!monto || typeof monto !== "number" || monto <= 0) {
-      return NextResponse.json(
-        { error: "El monto debe ser un número mayor que cero" },
-        { status: 400 }
-      );
-    }
-
-    // Create the recuperacion
-    const nuevaRecuperacion = await prisma.recuperacion.create({
-      data: {
-        fecha: fecha ? new Date(fecha) : new Date(),
-        monto,
-        detalle: detalle || null,
-        perdidaId,
-      },
-    });
-
-    return NextResponse.json(nuevaRecuperacion, { status: 201 });
-  } catch (error) {
-    console.error("Error al crear la recuperación:", error);
-    return NextResponse.json(
-      { error: "Error al crear la recuperación" },
-      { status: 500 }
+    const dto = await validateRequest(
+      { ...body, perdidaId: params.id },
+      createRecuperacionSchema
     );
+
+    const useCase = new CreateRecuperacionUseCase(
+      buildRecuperacionRepo(),
+      buildPerdidaRepo()
+    );
+    const result = await useCase.execute(dto);
+    
+    return NextResponse.json(result, { status: 201 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }
