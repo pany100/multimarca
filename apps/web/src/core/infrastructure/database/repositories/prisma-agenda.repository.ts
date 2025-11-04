@@ -160,4 +160,10 @@ export class PrismaAgendaRepository implements AgendaRepository {
       where: { fecha: { gte: startDate, lte: endDate } },
     });
   }
+
+  async findExceptionsByRecordatorioId(recordatorioId: number) {
+    return prisma.recordatorioRecurrenteExcepciones.findMany({
+      where: { recordatorioId },
+    });
+  }
 }

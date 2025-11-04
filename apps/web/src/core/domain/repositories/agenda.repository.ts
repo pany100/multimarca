@@ -41,4 +41,5 @@ export interface AgendaRepository {
     params: CreateAgendaExceptionInput,
     deps?: { tx?: any }
   ): Promise<any>;
+  findExceptionsByRecordatorioId(recordatorioId: number): Promise<any[]>;
 }

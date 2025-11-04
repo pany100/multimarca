@@ -69,6 +69,9 @@ export class AgendaService {
       const newEventData = data as CreateAgendaInput;
 
       return this.uow.run(async (tx) => {
+        const excepcionesExistentes =
+          await this.repo.findExceptionsByRecordatorioId(id);
+
         await this.repo.update(
           id,
           {
@@ -84,6 +87,21 @@ export class AgendaService {
           { tx }
         );
         const nuevoRecordatorio = await this.repo.create(newEventData, { tx });
+
+        const excepcionesADuplicar = excepcionesExistentes.filter(
+          (excepcion) => excepcion.fecha >= newEventData.fecha
+        );
+
+        for (const excepcion of excepcionesADuplicar) {
+          await this.repo.createException(
+            {
+              recordatorioId: nuevoRecordatorio.id,
+              fecha: excepcion.fecha,
+            },
+            { tx }
+          );
+        }
+
         return nuevoRecordatorio;
       });
     }
