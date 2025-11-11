@@ -11,7 +11,7 @@ function useTrabajosObjectAutocomplete() {
     return data.items.map(
       (trabajo: { name: string; id: number; sellPrice: number }) => ({
         value: trabajo.id,
-        label: trabajo.name,
+        label: `${trabajo.name} - id:${trabajo.id}`,
         object: {
           id: trabajo.id,
           name: trabajo.name,
@@ -26,7 +26,7 @@ function useTrabajosObjectAutocomplete() {
     const data = await response.json();
     return {
       object: data,
-      label: data.name,
+      label: `${data.name} - id:${data.id}`,
       value: data.id,
     };
   };

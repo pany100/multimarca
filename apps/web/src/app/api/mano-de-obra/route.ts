@@ -15,7 +15,7 @@ export async function GET(request: Request) {
       whereClause = {
         OR: [
           { name: { contains: query } },
-          { id: isNaN(parseInt(query)) ? undefined : parseInt(query) },
+          { id: { equals: parseInt(query || "") || undefined } },
         ],
       };
     }

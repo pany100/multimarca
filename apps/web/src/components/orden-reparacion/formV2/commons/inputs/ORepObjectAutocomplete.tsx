@@ -71,7 +71,7 @@ function ORepObjectAutocomplete({
           selectOption(newValue);
         }}
         onInputChange={(_, newInputValue) => {
-          if (newInputValue.length >= 2) {
+          if (newInputValue.length >= 0) {
             fetchOptions(newInputValue);
           } else {
             setOptions([]);
