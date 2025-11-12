@@ -15,10 +15,10 @@ const ManoDeObraForm = () => {
       </Typography>
 
       <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
-          <CustomInputText name="name" label="Nombre del Trabajo" />
+        <Grid item xs={12}>
+          <CustomInputText multiline name="name" label="Nombre del Trabajo" />
         </Grid>
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12}>
           <CustomInputText
             name="sellPrice"
             label="Precio de Venta"
