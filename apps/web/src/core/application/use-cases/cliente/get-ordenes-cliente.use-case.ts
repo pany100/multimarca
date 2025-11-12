@@ -11,7 +11,7 @@ export class GetOrdenesClienteUseCase {
     if (dto.soloConDeuda) {
       return ordenes.filter((orden) => {
         const calculoVO = ComprobanteCalculadoFactory.fromOrden(orden);
-        return calculoVO.deuda >= 0;
+        return calculoVO.deuda > 0;
       });
     }
     return ordenes;

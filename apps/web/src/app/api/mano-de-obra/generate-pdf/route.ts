@@ -68,7 +68,6 @@ export async function POST(request: NextRequest) {
           <table>
             <thead>
               <tr>
-                <th>ID</th>
                 <th>Nombre</th>
                 <th>Precio</th>
               </tr>
@@ -78,7 +77,6 @@ export async function POST(request: NextRequest) {
                 .map(
                   (item: any) => `
                 <tr>
-                  <td>${item.id}</td>
                   <td>${item.name}</td>
                   <td>${getFormattedPrice(item.sellPrice)}</td>
                 </tr>
