@@ -1,4 +1,5 @@
 import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
+import { getFormattedPrice } from "./fieldHelper";
 
 export default function generateClientOrderHtml(venta: any): string {
   const calculoVO = ComprobanteCalculadoFactory.fromVenta(venta);
@@ -272,33 +273,12 @@ export default function generateClientOrderHtml(venta: any): string {
                    ? `
           <div class="TypographyBody1" style="display: flex;
             justify-content: space-between; margin-bottom: 20px; margin-right: 15px;">
-            <div style="font-weight: bold;">
-              Monto abonado: ${new Intl.NumberFormat("es-AR", {
-                style: "currency",
-                currency: "ARS",
-              }).format(
-                venta.ingresos.reduce((sum: number, ingreso: any) => {
-                  if (ingreso.moneda === "Dolar") {
-                    return (
-                      sum + Number(ingreso.monto) * Number(ingreso.dolar.blue)
-                    );
-                  }
-                  return sum + Number(ingreso.monto);
-                }, 0)
-              )}
-            </div>
-            ${(() => {
-              return calculoVO.deuda > 0
-                ? `
-                <div style="font-weight: bold;">
-                  Falta pagar: ${new Intl.NumberFormat("es-AR", {
-                    style: "currency",
-                    currency: "ARS",
-                  }).format(calculoVO.deuda)}
-                </div>
-              `
-                : "";
-            })()}
+            <p>Total abonado hasta el momento (en pesos): <strong>${getFormattedPrice(
+              Math.min(calculoVO.totalPagado, calculoVO.total)
+            )}</strong></p>
+            <p>Resta pagar (en pesos): <strong>${getFormattedPrice(
+              Math.max(0, calculoVO.deuda)
+            )}</strong></p>
           </div>
               `
                    : ""

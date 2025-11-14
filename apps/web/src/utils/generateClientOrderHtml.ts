@@ -1,5 +1,6 @@
 import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 import { EstadoOrdenReparacion } from "@prisma/client";
+import { getFormattedPrice } from "./fieldHelper";
 
 export default function generateClientOrderHtml(repair: any): string {
   const calculoVO = ComprobanteCalculadoFactory.fromOrden(repair);
@@ -422,19 +423,12 @@ export default function generateClientOrderHtml(repair: any): string {
         <div class="TypographyBody1" style="display: flex;
           justify-content: space-between; margin-bottom: 20px; margin-right: 15px;">
           <div style="font-weight: bold;">
-            Monto abonado: ${new Intl.NumberFormat("es-AR", {
-              style: "currency",
-              currency: "ARS",
-            }).format(
-              repair.ingresos.reduce((sum: number, ingreso: any) => {
-                if (ingreso.moneda === "Dolar") {
-                  return (
-                    sum + Number(ingreso.monto) * Number(ingreso.dolar.blue)
-                  );
-                }
-                return sum + Number(ingreso.monto);
-              }, 0)
-            )}
+            <p>Total abonado hasta el momento (en pesos): <strong>${getFormattedPrice(
+              Math.min(calculoVO.totalPagado, calculoVO.total)
+            )}</strong></p>
+            <p>Resta pagar (en pesos): <strong>${getFormattedPrice(
+              Math.max(0, calculoVO.deuda)
+            )}</strong></p>
           </div>
           ${(() => {
             return calculoVO.deuda > 0
