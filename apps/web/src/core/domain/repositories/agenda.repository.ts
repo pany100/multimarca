@@ -1,9 +1,6 @@
 import { Recurrence } from "@prisma/client";
 
 export type ListAgendaParams = {
-  page: number;
-  size: number;
-  query?: string;
   month: number;
   year: number;
   onlyPending?: boolean;

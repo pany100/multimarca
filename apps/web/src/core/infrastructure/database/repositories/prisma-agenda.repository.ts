@@ -5,7 +5,6 @@ import type {
   ListAgendaParams,
 } from "@/core/domain/repositories/agenda.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
-import { buildPageResult } from "@/shared/utils/pagination";
 import { Recurrence } from "@prisma/client";
 import { RRule } from "rrule";
 
@@ -44,22 +43,8 @@ export class PrismaAgendaRepository implements AgendaRepository {
     }));
   }
 
-  async list({
-    page,
-    size,
-    query = "",
-    month,
-    year,
-    onlyPending,
-    general,
-    userId,
-  }: ListAgendaParams) {
-    const where: any = {
-      OR: [
-        { titulo: { contains: query } },
-        { descripcion: { contains: query } },
-      ],
-    };
+  async list({ month, year, onlyPending, general, userId }: ListAgendaParams) {
+    const where: any = {};
 
     const startDate = new Date(Date.UTC(year, month - 1, 1, 0, 0, 0, 0));
     const endDate = new Date(Date.UTC(year, month, 0, 23, 59, 59, 999));
@@ -95,18 +80,16 @@ export class PrismaAgendaRepository implements AgendaRepository {
       where.general = false;
       where.userId = userId;
     }
-
-    const skip = page * size;
+    console.log("Where", where);
     const [items, total, exceptions] = await Promise.all([
       prisma.recordatorioAgenda.findMany({
         where,
-        skip,
-        take: size,
         orderBy: { fecha: "asc" },
       }),
       prisma.recordatorioAgenda.count({ where }),
       this.findExceptionsByDate(startDate, endDate),
     ]);
+    console.log(items);
 
     // Expandimos los recurrentes
     const expanded = items
@@ -121,8 +104,7 @@ export class PrismaAgendaRepository implements AgendaRepository {
       );
 
     expanded.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
-
-    return buildPageResult(expanded, expanded.length, page, size);
+    return { items: expanded, total };
   }
 
   async create(input: CreateAgendaInput, deps?: { tx?: any }) {

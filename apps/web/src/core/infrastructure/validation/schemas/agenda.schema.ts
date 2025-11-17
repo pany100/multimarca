@@ -1,9 +1,6 @@
 import { z } from "zod";
 
 export const listAgendaSchema = z.object({
-  page: z.number().optional().nullable(),
-  size: z.number().optional().nullable(),
-  query: z.string().optional().nullable(),
   month: z.coerce.number(),
   year: z.coerce.number(),
   onlyPending: z.boolean().optional(),

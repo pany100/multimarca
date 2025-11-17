@@ -25,9 +25,6 @@ export async function GET(request: Request) {
 
     const dto = await validateRequest(
       {
-        page: searchParams.get("page"),
-        size: searchParams.get("size"),
-        query: searchParams.get("query"),
         month: searchParams.get("month"),
         year: searchParams.get("year"),
         onlyPending: searchParams.get("onlyPending") === "true",
@@ -38,9 +35,6 @@ export async function GET(request: Request) {
     );
 
     const result = await useCase.execute({
-      page: dto.page,
-      size: dto.size,
-      query: dto.query,
       month: dto.month,
       year: dto.year,
       onlyPending: dto.onlyPending,
