@@ -89,22 +89,28 @@ export class PrismaAgendaRepository implements AgendaRepository {
       prisma.recordatorioAgenda.count({ where }),
       this.findExceptionsByDate(startDate, endDate),
     ]);
-    console.log(items);
+    console.log("Items from DB:", items.length, items);
 
     // Expandimos los recurrentes
-    const expanded = items
-      .flatMap((evento) => this.expandirRecurrencia(evento, startDate, endDate))
-      .filter(
-        (occ) =>
-          !exceptions.some(
-            (ex) =>
-              ex.recordatorioId === occ.id &&
-              ex.fecha.toDateString() === occ.fecha.toDateString()
-          )
-      );
+    const expanded = items.flatMap((evento) =>
+      this.expandirRecurrencia(evento, startDate, endDate)
+    );
 
-    expanded.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
-    return { items: expanded, total };
+    console.log("After expansion:", expanded.length, expanded);
+
+    const filtered = expanded.filter(
+      (occ) =>
+        !exceptions.some(
+          (ex) =>
+            ex.recordatorioId === occ.id &&
+            ex.fecha.toDateString() === occ.fecha.toDateString()
+        )
+    );
+
+    console.log("After filtering exceptions:", filtered.length, filtered);
+
+    filtered.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
+    return { items: filtered, total };
   }
 
   async create(input: CreateAgendaInput, deps?: { tx?: any }) {

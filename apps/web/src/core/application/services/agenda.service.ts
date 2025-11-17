@@ -45,6 +45,9 @@ export class AgendaService {
         });
       }
     } else if (typeOfUpdate === "this") {
+      if (recordatorio.recurrence === Recurrence.No) {
+        return this.repo.update(id, data);
+      }
       return this.uow.run(async (tx) => {
         const newEventData = data as CreateAgendaInput;
         const { id, ...rest } = recordatorio;
