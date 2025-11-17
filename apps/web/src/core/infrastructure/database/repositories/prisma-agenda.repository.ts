@@ -80,7 +80,6 @@ export class PrismaAgendaRepository implements AgendaRepository {
       where.general = false;
       where.userId = userId;
     }
-    console.log("Where", where);
     const [items, total, exceptions] = await Promise.all([
       prisma.recordatorioAgenda.findMany({
         where,
@@ -89,14 +88,11 @@ export class PrismaAgendaRepository implements AgendaRepository {
       prisma.recordatorioAgenda.count({ where }),
       this.findExceptionsByDate(startDate, endDate),
     ]);
-    console.log("Items from DB:", items.length, items);
 
     // Expandimos los recurrentes
     const expanded = items.flatMap((evento) =>
       this.expandirRecurrencia(evento, startDate, endDate)
     );
-
-    console.log("After expansion:", expanded.length, expanded);
 
     const filtered = expanded.filter(
       (occ) =>
