@@ -27,6 +27,17 @@ export type CreateAgendaExceptionInput = {
 export interface AgendaRepository {
   list(params: ListAgendaParams): Promise<{ items: any[]; total: number }>;
   create(input: CreateAgendaInput, deps?: { tx?: any }): Promise<any>;
+  listByDay({
+    year,
+    month,
+    day,
+    onlyPending,
+  }: {
+    year: number;
+    month: number;
+    day: number;
+    onlyPending?: boolean;
+  }): Promise<any[]>;
   findById(id: number): Promise<any | null>;
   update(
     id: number,

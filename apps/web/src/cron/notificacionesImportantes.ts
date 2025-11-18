@@ -151,31 +151,30 @@ async function enviarNotificacionesAgenda() {
   try {
     // Get current date in Argentina's timezone
     const today = dayjs().tz("America/Argentina/Buenos_Aires");
-    const startOfDay = today.startOf("day").toDate();
-    const endOfDay = today.endOf("day").toDate();
+    const year = today.year();
+    const month = today.month() + 1; // dayjs months are 0-indexed
+    const day = today.date();
 
-    console.log("Fecha en Argentina:", today.format("YYYY-MM-DD"));
     console.log(
-      "Buscando eventos de agenda entre:",
-      startOfDay.toLocaleString("es-AR", {
-        timeZone: "America/Argentina/Buenos_Aires",
-      }),
-      "y",
-      endOfDay.toLocaleString("es-AR", {
-        timeZone: "America/Argentina/Buenos_Aires",
-      })
+      `Fecha en Argentina: ${today.format(
+        "YYYY-MM-DD"
+      )} (Año: ${year}, Mes: ${month}, Día: ${day})`
     );
 
-    // Obtener eventos de agenda del día
-    const eventosHoy = await prisma.recordatorioAgenda.findMany({
-      where: {
-        fecha: {
-          gte: startOfDay,
-          lte: endOfDay,
-        },
-        hecho: false,
-      },
+    // Usar el repositorio para obtener eventos del día (incluyendo recurrentes)
+    const { PrismaAgendaRepository } = await import(
+      "@/core/infrastructure/database/repositories/prisma-agenda.repository"
+    );
+    const agendaRepo = new PrismaAgendaRepository();
+    const eventosHoy = await agendaRepo.listByDay({
+      year,
+      month,
+      day,
+      onlyPending: true,
     });
+
+    console.log(`Eventos encontrados: ${eventosHoy.length}`);
+    console.log(eventosHoy);
 
     if (eventosHoy.length > 0) {
       console.log(`Eventos de agenda encontrados: ${eventosHoy.length}`);
@@ -242,8 +241,8 @@ async function procesarNotificacionesImportantes() {
 }
 
 export function initNotificacionesImportantesCron() {
-  // Programar el cronjob para que se ejecute todos los días a las 7:00 AM
-  cron.schedule("0 7 * * *", () => {
+  // Programar el cronjob para que se ejecute cada 30 segundos
+  cron.schedule("*/30 * * * * *", () => {
     console.log("Ejecutando cronjob de notificaciones importantes");
     procesarNotificacionesImportantes();
   });

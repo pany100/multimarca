@@ -148,4 +148,77 @@ export class PrismaAgendaRepository implements AgendaRepository {
       where: { recordatorioId },
     });
   }
+
+  async listByDay({
+    year,
+    month,
+    day,
+    onlyPending,
+  }: {
+    year: number;
+    month: number;
+    day: number;
+    onlyPending?: boolean;
+  }) {
+    const where: any = {};
+
+    // Crear rango para un solo día en UTC
+    const startDate = new Date(Date.UTC(year, month - 1, day, 0, 0, 0, 0));
+    const endDate = new Date(Date.UTC(year, month - 1, day, 23, 59, 59, 999));
+
+    // Buscar eventos que:
+    // 1. Sean del día específico y no recurrentes
+    // 2. Sean recurrentes y estén activos (sin fecha fin o con fecha fin posterior al día)
+    where.AND = [
+      {
+        OR: [
+          {
+            AND: [
+              { fecha: { gte: startDate, lte: endDate } },
+              { recurrence: Recurrence.No },
+            ],
+          },
+          {
+            AND: [
+              {
+                OR: [
+                  { fechaFinRecurrencia: { gt: startDate } },
+                  { fechaFinRecurrencia: null },
+                ],
+              },
+              { recurrence: { not: Recurrence.No } },
+            ],
+          },
+        ],
+      },
+    ];
+
+    if (onlyPending) where.hecho = false;
+
+    const [items, exceptions] = await Promise.all([
+      prisma.recordatorioAgenda.findMany({
+        where,
+        orderBy: { fecha: "asc" },
+      }),
+      this.findExceptionsByDate(startDate, endDate),
+    ]);
+
+    // Expandir los eventos recurrentes para el día específico
+    const expanded = items.flatMap((evento) =>
+      this.expandirRecurrencia(evento, startDate, endDate)
+    );
+
+    // Filtrar excepciones
+    const filtered = expanded.filter(
+      (occ) =>
+        !exceptions.some(
+          (ex) =>
+            ex.recordatorioId === occ.id &&
+            ex.fecha.toDateString() === occ.fecha.toDateString()
+        )
+    );
+
+    filtered.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
+    return filtered;
+  }
 }
