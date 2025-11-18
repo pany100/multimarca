@@ -4,7 +4,7 @@ import type {
   CreateAgendaInput,
   ListAgendaParams,
 } from "@/core/domain/repositories/agenda.repository";
-import { Recurrence } from "@prisma/client";
+import { RecordatorioAgenda, Recurrence } from "@prisma/client";
 
 export type TypeOfOperation = "this" | "this_and_following" | "all";
 
@@ -110,17 +110,24 @@ export class AgendaService {
     }
   }
 
-  async delete(id: number, typeOfDelete: TypeOfOperation, refDate: Date) {
+  async delete(
+    recordatorio: RecordatorioAgenda,
+    typeOfDelete: TypeOfOperation,
+    refDate: Date
+  ) {
     if (typeOfDelete === "all") {
-      return this.repo.delete(id);
+      return this.repo.delete(recordatorio.id);
     } else if (typeOfDelete === "this") {
+      if (recordatorio.recurrence === Recurrence.No) {
+        return this.repo.delete(recordatorio.id);
+      }
       return this.repo.createException({
-        recordatorioId: id,
+        recordatorioId: recordatorio.id,
         fecha: refDate,
       });
     } else {
       // this_and_following
-      await this.repo.update(id, {
+      await this.repo.update(recordatorio.id, {
         fechaFinRecurrencia: new Date(refDate.getTime() - 24 * 60 * 60 * 1000),
       });
     }

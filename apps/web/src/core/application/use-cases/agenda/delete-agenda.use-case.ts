@@ -16,7 +16,7 @@ export class DeleteAgendaUseCase {
     if (!existing.general && existing.userId !== user.id && user.rol.id !== 1) {
       throw new Error("No tienes permiso");
     }
-    await this.service.delete(id, typeOfDelete, refDate);
+    await this.service.delete(existing, typeOfDelete, refDate);
     return { ok: true };
   }
 }

@@ -103,8 +103,6 @@ export class PrismaAgendaRepository implements AgendaRepository {
         )
     );
 
-    console.log("After filtering exceptions:", filtered.length, filtered);
-
     filtered.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
     return { items: filtered, total };
   }
