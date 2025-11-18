@@ -150,6 +150,7 @@ async function enviarRecordatoriosMantenimiento() {
 async function enviarNotificacionesAgenda() {
   try {
     // Get current date in Argentina's timezone
+    // TESTING: Simulating tomorrow's date
     const today = dayjs().tz("America/Argentina/Buenos_Aires");
     const year = today.year();
     const month = today.month() + 1; // dayjs months are 0-indexed
@@ -241,8 +242,8 @@ async function procesarNotificacionesImportantes() {
 }
 
 export function initNotificacionesImportantesCron() {
-  // Programar el cronjob para que se ejecute cada 30 segundos
-  cron.schedule("*/30 * * * * *", () => {
+  // Programar el cronjob para que se ejecute a las 7am todos los días
+  cron.schedule("0 7 * * *", () => {
     console.log("Ejecutando cronjob de notificaciones importantes");
     procesarNotificacionesImportantes();
   });
