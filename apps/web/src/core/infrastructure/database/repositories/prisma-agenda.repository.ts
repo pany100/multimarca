@@ -18,6 +18,7 @@ type Evento = {
   fecha: Date;
   hecho: boolean;
   id: number;
+  isOccurrence?: boolean;
 };
 
 export class PrismaAgendaRepository implements AgendaRepository {
@@ -98,6 +99,7 @@ export class PrismaAgendaRepository implements AgendaRepository {
     console.log("Exceptions:", exceptions);
     const filtered = expanded.filter(
       (occ) =>
+        !occ.isOccurrence ||
         !exceptions.some(
           (ex) =>
             ex.recordatorioId === occ.id &&
@@ -211,9 +213,11 @@ export class PrismaAgendaRepository implements AgendaRepository {
       this.expandirRecurrencia(evento, startDate, endDate)
     );
 
-    // Filtrar excepciones
+    // Filtrar excepciones (solo para ocurrencias autogeneradas)
     const filtered = expanded.filter(
       (occ) =>
+        // Solo aplicar excepciones a ocurrencias autogeneradas
+        !occ.isOccurrence ||
         !exceptions.some(
           (ex) =>
             ex.recordatorioId === occ.id &&
