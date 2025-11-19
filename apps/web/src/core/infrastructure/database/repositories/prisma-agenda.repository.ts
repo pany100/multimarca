@@ -93,7 +93,7 @@ export class PrismaAgendaRepository implements AgendaRepository {
     const expanded = items.flatMap((evento) =>
       this.expandirRecurrencia(evento, startDate, endDate)
     );
-
+    console.log("Expanded events:", expanded);
     const filtered = expanded.filter(
       (occ) =>
         !exceptions.some(
@@ -102,7 +102,7 @@ export class PrismaAgendaRepository implements AgendaRepository {
             ex.fecha.toDateString() === occ.fecha.toDateString()
         )
     );
-
+    console.log("Filtered events:", filtered);
     filtered.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
     return { items: filtered, total };
   }
