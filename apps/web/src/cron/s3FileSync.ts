@@ -27,13 +27,41 @@ async function limpiarArchivosHuerfanos() {
     for (const archivo of archivosHuerfanos) {
       try {
         console.log(`Procesando archivo huérfano ID ${archivo.id}`);
-        // Si tiene finalPath, eliminar del S3
-        if (archivo.finalPath) {
-          await fileStorage.removeFile(archivo.finalPath);
-          console.log(`Archivo eliminado de S3: ${archivo.finalPath}`);
+
+        // Verificar que el archivo no esté siendo usado por otro registro válido
+        // Buscar tanto en finalPath como en tempPath
+        const pathToCheck = archivo.finalPath || archivo.tempPath;
+
+        if (pathToCheck) {
+          // Buscar si existe otro CustomFile con el mismo path que SÍ tenga referencias
+          const archivoValido = await prisma.customFile.findFirst({
+            where: {
+              id: { not: archivo.id }, // Excluir el archivo actual
+              OR: [{ finalPath: pathToCheck }, { tempPath: pathToCheck }],
+              AND: {
+                OR: [
+                  { ordenReparacionId: { not: null } },
+                  { reciboORepId: { not: null } },
+                  { reparacionDeTerceroId: { not: null } },
+                ],
+              },
+            },
+          });
+          console.log("######");
+          console.log("Archivo valido", archivoValido);
+          console.log("######");
+          if (archivoValido) {
+            console.log(
+              `Archivo ${pathToCheck} está siendo usado por otro registro (ID ${archivoValido.id}), NO se eliminará de S3`
+            );
+          } else {
+            // Solo eliminar de S3 si no hay otro registro válido usando este archivo
+            await fileStorage.removeFile(pathToCheck);
+            console.log(`Archivo eliminado de S3: ${pathToCheck}`);
+          }
         }
 
-        // Eliminar el registro de la base de datos
+        // Eliminar el registro de la base de datos (siempre, ya que es huérfano)
         await prisma.customFile.delete({
           where: { id: archivo.id },
         });
