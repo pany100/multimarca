@@ -22,6 +22,17 @@ type Evento = {
 };
 
 export class PrismaAgendaRepository implements AgendaRepository {
+  /**
+   * Compara dos fechas solo por año, mes y día, ignorando la hora
+   */
+  private isSameDay(date1: Date, date2: Date): boolean {
+    return (
+      date1.getUTCFullYear() === date2.getUTCFullYear() &&
+      date1.getUTCMonth() === date2.getUTCMonth() &&
+      date1.getUTCDate() === date2.getUTCDate()
+    );
+  }
+
   private expandirRecurrencia(evento: Evento, start: Date, end: Date) {
     if (evento.recurrence === Recurrence.No) return [evento];
     const freqMap = {
@@ -99,8 +110,7 @@ export class PrismaAgendaRepository implements AgendaRepository {
         !occ.isOccurrence ||
         !exceptions.some(
           (ex) =>
-            ex.recordatorioId === occ.id &&
-            ex.fecha.toDateString() === occ.fecha.toDateString()
+            ex.recordatorioId === occ.id && this.isSameDay(ex.fecha, occ.fecha)
         )
     );
     filtered.sort((a, b) => a.fecha.getTime() - b.fecha.getTime());
@@ -215,8 +225,7 @@ export class PrismaAgendaRepository implements AgendaRepository {
         !occ.isOccurrence ||
         !exceptions.some(
           (ex) =>
-            ex.recordatorioId === occ.id &&
-            ex.fecha.toDateString() === occ.fecha.toDateString()
+            ex.recordatorioId === occ.id && this.isSameDay(ex.fecha, occ.fecha)
         )
     );
 
