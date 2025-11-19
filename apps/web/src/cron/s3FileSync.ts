@@ -26,6 +26,7 @@ async function limpiarArchivosHuerfanos() {
 
     for (const archivo of archivosHuerfanos) {
       try {
+        console.log(`Procesando archivo huérfano ID ${archivo.id}`);
         // Si tiene finalPath, eliminar del S3
         if (archivo.finalPath) {
           await fileStorage.removeFile(archivo.finalPath);
