@@ -1,5 +1,6 @@
 import { sendWhatsAppMessage } from "@/services/whatsappService";
 import { PrismaClient } from "@prisma/client";
+import dayjs from "dayjs";
 import cron from "node-cron";
 
 const prisma = new PrismaClient();
@@ -10,8 +11,9 @@ async function enviarRecordatoriosTrabajos() {
       `[${new Date().toISOString()}] Iniciando cronjob de recordatorios de trabajos`
     );
 
-    const hoy = new Date();
-    const fechaHoy = hoy.toISOString().split("T")[0]; // Formato YYYY-MM-DD
+    const today = dayjs().tz("America/Argentina/Buenos_Aires");
+    const fechaHoy = today.format("YYYY-MM-DD");
+    console.log(`Buscando recordatorios para el día ${fechaHoy}`);
 
     const trabajosParaRecordar: {
       fullName: string;
