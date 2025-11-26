@@ -1,4 +1,5 @@
 import { UsuarioRepository } from "@/core/domain/repositories/usuario.repository";
+import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 import { GastoDto } from "../../dto/gasto.dto";
 import { GastoService } from "../../services/gasto.service";
 
@@ -16,14 +17,10 @@ export class UltimaSemanaCompartidaUseCase {
 
     // Process and format the repairs data
     const result = reparacionesMultiplesMecanicos.map((reparacion) => {
-      // Calculate total manoDeObra for this repair order
+      const calculoVO = ComprobanteCalculadoFactory.fromOrden(reparacion);
       const manoDeObraTotal = Math.max(
-        0,
-        reparacion.trabajosRealizados.reduce(
-          (total: number, trabajo: any) =>
-            total + Number(trabajo.precioUnitario),
-          0
-        ) - reparacion.descuento
+        calculoVO.totalManoDeObra - reparacion.descuento,
+        0
       );
 
       // Check if the repair order has been paid

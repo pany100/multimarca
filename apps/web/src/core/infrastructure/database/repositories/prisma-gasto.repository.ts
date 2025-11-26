@@ -48,9 +48,11 @@ export class PrismaGastoRepository
                     mecanicoId: true,
                   },
                 },
-                trabajosRealizados: {
-                  select: {
-                    precioUnitario: true,
+                trabajosRealizados: true,
+                reparacionesDeTercero: true,
+                repuestosUsados: {
+                  include: {
+                    stock: true,
                   },
                 },
                 descuento: true,
@@ -108,9 +110,11 @@ export class PrismaGastoRepository
             },
           },
         },
-        trabajosRealizados: {
-          select: {
-            precioUnitario: true,
+        trabajosRealizados: true,
+        reparacionesDeTercero: true,
+        repuestosUsados: {
+          include: {
+            stock: true,
           },
         },
         pagos: {
