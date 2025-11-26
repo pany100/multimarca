@@ -24,11 +24,7 @@ export class UltimaSemanaUseCase {
       // Procesar cada reparación
       const reparaciones = reparacionesUnicoMecanico.map((orden: any) => {
         const calculoVO = ComprobanteCalculadoFactory.fromOrden(orden);
-
-        const manoDeObra = Math.max(
-          calculoVO.totalManoDeObra - orden.descuento,
-          0
-        );
+        const manoDeObra = calculoVO.manoDeObraAPagar;
 
         // Verificar si está pagado (si tiene al menos un pago válido)
         const pagado = orden.pagos.length > 0;

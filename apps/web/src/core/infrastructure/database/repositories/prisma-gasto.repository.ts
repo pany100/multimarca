@@ -56,6 +56,9 @@ export class PrismaGastoRepository
                   },
                 },
                 descuento: true,
+                incrementoInterno: true,
+                incremento: true,
+                porcentajeRecargo: true,
                 pagos: {
                   select: {
                     fechaPago: true,
@@ -93,6 +96,9 @@ export class PrismaGastoRepository
         id: true,
         fechaSalidaReparacion: true,
         descuento: true,
+        incrementoInterno: true,
+        incremento: true,
+        porcentajeRecargo: true,
         auto: {
           select: {
             brand: true,

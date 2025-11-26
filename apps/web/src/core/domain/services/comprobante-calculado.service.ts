@@ -91,4 +91,35 @@ export class ComprobanteCalculado {
   get deuda() {
     return this.total - this.totalPagado;
   }
+
+  get totalSinDescuentos() {
+    return this.ajustes.applyToWithoutDiscount(this.totalBase);
+  }
+
+  get descuento() {
+    return this.ajustes.descuento;
+  }
+
+  get descuentoManoDeObraAPagar() {
+    if (this.ajustes.descuento === 0) {
+      return 0;
+    }
+
+    // Si el total sin descuentos es 0, retornar 0 para evitar división por cero
+    if (this.totalSinDescuentos === 0) {
+      return 0;
+    }
+
+    // Calcular el porcentaje de descuento
+    const porcentajeDescuento =
+      (this.ajustes.descuento / this.totalSinDescuentos) * 100;
+    // Aplicar ese porcentaje a la mano de obra
+    const descuentoManoDeObra =
+      (this.totalManoDeObra * porcentajeDescuento) / 100;
+    return this.roundToNearestThousandOrFiveHundred(descuentoManoDeObra);
+  }
+
+  get manoDeObraAPagar() {
+    return Math.max(this.totalManoDeObra - this.descuentoManoDeObraAPagar, 0);
+  }
 }

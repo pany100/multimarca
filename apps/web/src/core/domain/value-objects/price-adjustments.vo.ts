@@ -45,4 +45,8 @@ export class PriceAdjustments {
   applyTo(precio: number) {
     return precio + this.incrementoInterno - this.descuento + this.incremento;
   }
+
+  applyToWithoutDiscount(precio: number) {
+    return precio + this.incrementoInterno + this.incremento;
+  }
 }
