@@ -72,7 +72,11 @@ export class PrismaVentaRepository implements VentaRepository {
         cliente: true,
         repuestosUsados: {
           include: {
-            stock: true,
+            stock: {
+              include: {
+                proveedor: true,
+              },
+            },
           },
         },
         reparacionesDeTercero: {
