@@ -1,5 +1,6 @@
 import { sendWhatsAppMessage } from "@/services/whatsappService";
-import { PrismaClient } from "@prisma/client";
+import { getUsersToNotify } from "@/utils/notificationUtils";
+import { PrismaClient, TipoNotificacionInterna } from "@prisma/client";
 import dayjs from "dayjs";
 import cron from "node-cron";
 
@@ -58,6 +59,20 @@ async function enviarRecordatoriosTrabajos() {
           year: "numeric",
         }),
       ]);
+      const users = await getUsersToNotify();
+      // Crear notificación interna para los recordatorios
+      for (const user of users) {
+        await prisma.notificacionInterna.create({
+          data: {
+            fecha: new Date(),
+            titulo: `Recordatorios de mano de obra`,
+            texto: `El cliente ${trabajo.fullName} tiene un recordatorio de mano de obra para hoy: ${trabajo.descripcion} para el auto ${trabajo.patent}`,
+            leida: false,
+            tipo: TipoNotificacionInterna.RECORDATORIOS_MANO_DE_OBRA,
+            userId: user.id,
+          },
+        });
+      }
     }
 
     console.log(
