@@ -286,7 +286,7 @@ model OrdenReparacionMecanico {
   ordenReparacionId Int
   mecanicoId        Int
   detalle           String?         @db.Text
-  mecanico          Empleado        @relation(fields: [mecanicoId], references: [id], onDelete: Cascade)
+  mecanico          Empleado        @relation(fields: [mecanicoId], references: [id], onDelete: Restrict)
   ordenReparacion   OrdenReparacion @relation(fields: [ordenReparacionId], references: [id], onDelete: Cascade)
 
   @@id([ordenReparacionId, mecanicoId])
