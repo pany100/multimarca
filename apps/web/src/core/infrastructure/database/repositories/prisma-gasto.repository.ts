@@ -19,6 +19,7 @@ export class PrismaGastoRepository
     return prisma.empleado.findMany({
       where: {
         tipo: "Mecanico",
+        fechaBaja: null,
       },
       select: {
         id: true,
@@ -44,6 +45,13 @@ export class PrismaGastoRepository
                   },
                 },
                 mecanicos: {
+                  where: {
+                    mecanico: {
+                      is: {
+                        fechaBaja: null,
+                      },
+                    },
+                  },
                   select: {
                     mecanicoId: true,
                   },
@@ -107,6 +115,13 @@ export class PrismaGastoRepository
           },
         },
         mecanicos: {
+          where: {
+            mecanico: {
+              is: {
+                fechaBaja: null,
+              },
+            },
+          },
           select: {
             mecanico: {
               select: {
