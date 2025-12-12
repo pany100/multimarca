@@ -20,6 +20,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
             { id: { equals: parseInt(dto.query || "") || undefined } },
           ],
           tipo: dto.soloMecanicos ? "Mecanico" : undefined,
+          fechaBaja: null,
         },
         orderBy: { id: "desc" },
       },
@@ -62,8 +63,9 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
   }
 
   async delete(id: number): Promise<Empleado | null> {
-    return prisma.empleado.delete({
+    return prisma.empleado.update({
       where: { id },
+      data: { fechaBaja: new Date() },
     });
   }
 

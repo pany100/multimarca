@@ -160,6 +160,7 @@ model Empleado {
   recategorizacionMonotributoPath String?                   @db.VarChar(1000)
   notasAdministrativas String?                   @db.Text
   curriculumPath String?                   @db.VarChar(1000)
+  fechaBaja                   DateTime?
   ausenciasProgramadas        AusenciaProgramada[]
 
   gastosRealizados  Gasto[]
