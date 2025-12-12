@@ -7,7 +7,7 @@ import prisma from "src/lib/prisma";
 export async function getUsersToNotify() {
   const users = await prisma.usuario.findMany({
     where: {
-      rolId: 4,
+      OR: [{ rolId: 4 }, { rolId: 5 }],
     },
     include: {
       rol: true,
