@@ -3,6 +3,16 @@ import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
 export function handleApiError(err: unknown) {
+  if (err === null || err === undefined) {
+    logger.error("Null or undefined error caught", {
+      error: "Error object was null or undefined",
+    });
+    return NextResponse.json(
+      { error: "Error interno del servidor" },
+      { status: 500 }
+    );
+  }
+
   if (err instanceof ZodError) {
     logger.warn("Validación fallida", {
       errors: err.flatten(),
