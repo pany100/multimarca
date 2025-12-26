@@ -1,6 +1,6 @@
+import logger from "@/lib/logger";
 import { PrismaClient } from "@prisma/client";
 import cron from "node-cron";
-import logger from "../lib/logger.js";
 
 const prisma = new PrismaClient();
 

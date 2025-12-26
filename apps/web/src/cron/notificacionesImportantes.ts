@@ -1,10 +1,10 @@
+import logger from "@/lib/logger";
 import { getUsersToNotify } from "@/utils/notificationUtils";
 import { PrismaClient, TipoNotificacionInterna } from "@prisma/client";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import cron from "node-cron";
-import logger from "../lib/logger.js";
 
 // Configurar dayjs para usar timezone
 dayjs.extend(utc);

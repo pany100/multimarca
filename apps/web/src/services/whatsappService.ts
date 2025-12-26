@@ -1,6 +1,6 @@
+import logger from "@/lib/logger";
 import { PrismaClient } from "@prisma/client";
 import axios from "axios";
-import logger from "../lib/logger.js";
 const prisma = new PrismaClient();
 
 async function sendWhatsappTextMessage(numeroDestino: string, body: string) {

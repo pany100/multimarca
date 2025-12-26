@@ -1,7 +1,7 @@
 import { S3FileStorageAdapter } from "@/core/infrastructure/external/s3-file-storage.adapter";
+import logger from "@/lib/logger";
 import { EstadoArchivo, PrismaClient } from "@prisma/client";
 import cron from "node-cron";
-import logger from "../lib/logger.js";
 
 const prisma = new PrismaClient();
 const fileStorage = new S3FileStorageAdapter();

@@ -1,10 +1,10 @@
+import logger from "@/lib/logger";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { PrismaClient } from "@prisma/client";
 import { exec } from "child_process";
 import fs from "fs";
 import cron from "node-cron";
 import path from "path";
-import logger from "../lib/logger.js";
 
 const prisma = new PrismaClient();
 
