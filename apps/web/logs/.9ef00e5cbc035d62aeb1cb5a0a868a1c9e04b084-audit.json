@@ -1,0 +1,15 @@
+{
+    "keep": {
+        "days": true,
+        "amount": 30
+    },
+    "auditLog": "/Users/luispaniagua/multimarca/apps/web/logs/.9ef00e5cbc035d62aeb1cb5a0a868a1c9e04b084-audit.json",
+    "files": [
+        {
+            "date": 1766762635935,
+            "name": "/Users/luispaniagua/multimarca/apps/web/logs/error-2025-12-26.log",
+            "hash": "9671566e16adb24b90e77fd304435b47a484369587bd8c0e804040b36c8f7238"
+        }
+    ],
+    "hashType": "sha256"
+}

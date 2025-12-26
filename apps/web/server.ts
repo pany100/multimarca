@@ -4,6 +4,7 @@ import next from "next";
 import path from "path";
 import { Server as SocketIOServer } from "socket.io";
 import { parse } from "url";
+import logger from "./src/lib/logger.js";
 
 const { loadEnvConfig } = pkg;
 loadEnvConfig(path.resolve(process.cwd(), "../.."), true);
@@ -26,11 +27,11 @@ app.prepare().then(() => {
   (global as any).io = io;
 
   io.on("connection", (socket) => {
-    console.log("Un cliente se ha conectado");
+    logger.info("Un cliente se ha conectado");
   });
 
   const PORT = process.env.PORT || 3000;
   server.listen(PORT, () => {
-    console.log(`> Servidor listo en http://localhost:${PORT}`);
+    logger.info(`Servidor listo en http://localhost:${PORT}`);
   });
 });

@@ -4,14 +4,13 @@ import { exec } from "child_process";
 import fs from "fs";
 import cron from "node-cron";
 import path from "path";
+import logger from "../lib/logger.js";
 
 const prisma = new PrismaClient();
 
 async function realizarBackup() {
   try {
-    console.log(
-      `[${new Date().toISOString()}] Iniciando backup de la base de datos`
-    );
+    logger.info("Iniciando backup de la base de datos");
 
     const timestamp = new Date().toISOString().replace(/[:.]/g, "");
     const nombreArchivo = `dump_${process.env.DATABASE_NAME}_${timestamp}.sql`;
@@ -27,10 +26,10 @@ async function realizarBackup() {
 
     exec(comando, async (error, stdout, stderr) => {
       if (error) {
-        console.error(`Error al realizar el backup: ${error}`);
+        logger.error("Error al realizar el backup", { error: error.message });
         return;
       }
-      console.log(`Backup completado exitosamente: ${rutaCompleta}`);
+      logger.info("Backup completado exitosamente", { rutaCompleta });
 
       const s3Client = new S3Client({
         region: process.env.AWS_DEFAULT_REGION,
@@ -52,23 +51,23 @@ async function realizarBackup() {
       try {
         const command = new PutObjectCommand(uploadParams);
         await s3Client.send(command);
-        console.log(`Backup subido exitosamente a S3: ${s3ObjectKey}`);
+        logger.info("Backup subido exitosamente a S3", { s3ObjectKey });
         // Eliminar el archivo de backup local después de subirlo a S3
         fs.unlink(rutaCompleta, (err) => {
           if (err) {
-            console.error(
-              `Error al eliminar el archivo de backup local: ${err}`
-            );
+            logger.error("Error al eliminar el archivo de backup local", {
+              error: err.message,
+            });
           } else {
-            console.log(`Archivo de backup local eliminado: ${rutaCompleta}`);
+            logger.info("Archivo de backup local eliminado", { rutaCompleta });
           }
         });
       } catch (uploadError) {
-        console.error("Error al subir el backup a S3:", uploadError);
+        logger.error("Error al subir el backup a S3", { error: uploadError });
       }
     });
   } catch (error) {
-    console.error("Error al realizar el backup:", error);
+    logger.error("Error al realizar el backup", { error });
   }
 }
 
@@ -78,5 +77,5 @@ export function initBackupCron() {
     timezone: "America/Argentina/Buenos_Aires",
   });
 
-  console.log("Cron job para backup de la base de datos iniciado");
+  logger.info("Cron job para backup de la base de datos iniciado");
 }
