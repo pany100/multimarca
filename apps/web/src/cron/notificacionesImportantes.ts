@@ -4,6 +4,7 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import cron from "node-cron";
+import logger from "../lib/logger.js";
 
 // Configurar dayjs para usar timezone
 dayjs.extend(utc);
@@ -19,17 +20,11 @@ async function enviarNotificacionesTurnos() {
     const startOfDay = today.startOf("day").toDate();
     const endOfDay = today.endOf("day").toDate();
 
-    console.log("Fecha en Argentina:", today.format("YYYY-MM-DD"));
-    console.log(
-      "Buscando turnos entre:",
-      startOfDay.toLocaleString("es-AR", {
-        timeZone: "America/Argentina/Buenos_Aires",
-      }),
-      "y",
-      endOfDay.toLocaleString("es-AR", {
-        timeZone: "America/Argentina/Buenos_Aires",
-      })
-    );
+    logger.info("[NotificacionesImportantes] Buscando turnos del día", {
+      fecha: today.format("YYYY-MM-DD"),
+      startOfDay: startOfDay.toISOString(),
+      endOfDay: endOfDay.toISOString(),
+    });
 
     // Obtener turnos del día
     const turnosHoy = await prisma.turno.findMany({
@@ -49,7 +44,9 @@ async function enviarNotificacionesTurnos() {
     });
 
     if (turnosHoy.length > 0) {
-      console.log(`Turnos encontrados: ${turnosHoy.length}`);
+      logger.info(
+        `[NotificacionesImportantes] Turnos encontrados: ${turnosHoy.length}`
+      );
       // Crear notificación interna para los turnos del día
       const users = await getUsersToNotify();
       for (const user of users) {
@@ -72,10 +69,13 @@ async function enviarNotificacionesTurnos() {
         });
       }
     } else {
-      console.log("No hay turnos encontrados");
+      logger.info("[NotificacionesImportantes] No hay turnos para hoy");
     }
   } catch (error) {
-    console.error("Error al procesar notificaciones de turnos:", error);
+    logger.error(
+      "[NotificacionesImportantes] Error al procesar notificaciones de turnos",
+      { error }
+    );
   }
 }
 
@@ -83,7 +83,10 @@ async function enviarRecordatoriosMantenimiento() {
   try {
     const today = dayjs().tz("America/Argentina/Buenos_Aires");
     const fechaHoy = today.format("YYYY-MM-DD");
-    console.log(`Buscando recordatorios para el día ${fechaHoy}`);
+    logger.info(
+      "[NotificacionesImportantes] Buscando recordatorios de mantenimiento",
+      { fecha: fechaHoy }
+    );
     const trabajosParaRecordar: {
       fullName: string;
       phone: string;
@@ -143,7 +146,10 @@ async function enviarRecordatoriosMantenimiento() {
       }
     }
   } catch (error) {
-    console.error("Error al enviar recordatorios de mantenimiento:", error);
+    logger.error(
+      "[NotificacionesImportantes] Error al enviar recordatorios de mantenimiento",
+      { error }
+    );
   }
 }
 
@@ -156,11 +162,12 @@ async function enviarNotificacionesAgenda() {
     const month = today.month() + 1; // dayjs months are 0-indexed
     const day = today.date();
 
-    console.log(
-      `Fecha en Argentina: ${today.format(
-        "YYYY-MM-DD"
-      )} (Año: ${year}, Mes: ${month}, Día: ${day})`
-    );
+    logger.info("[NotificacionesImportantes] Buscando eventos de agenda", {
+      fecha: today.format("YYYY-MM-DD"),
+      year,
+      month,
+      day,
+    });
 
     // Usar el repositorio para obtener eventos del día (incluyendo recurrentes)
     const { PrismaAgendaRepository } = await import(
@@ -174,18 +181,21 @@ async function enviarNotificacionesAgenda() {
       onlyPending: true,
     });
 
-    console.log(`Eventos encontrados: ${eventosHoy.length}`);
-    console.log(eventosHoy);
+    logger.info(
+      `[NotificacionesImportantes] Eventos de agenda encontrados: ${eventosHoy.length}`
+    );
 
     if (eventosHoy.length > 0) {
-      console.log(`Eventos de agenda encontrados: ${eventosHoy.length}`);
-
       // Procesar cada evento individualmente
       for (const evento of eventosHoy) {
         // Si el evento no tiene usuario creador, lo saltamos
         if (!evento.userId) {
-          console.log(
-            `Evento "${evento.titulo}" no tiene usuario creador, saltando notificación`
+          logger.warn(
+            "[NotificacionesImportantes] Evento sin usuario creador",
+            {
+              eventoId: evento.id,
+              titulo: evento.titulo,
+            }
           );
           continue;
         }
@@ -206,25 +216,32 @@ async function enviarNotificacionesAgenda() {
           },
         });
 
-        console.log(
-          `Notificación enviada al usuario ${evento.userId} para el evento "${evento.titulo}"`
+        logger.info(
+          "[NotificacionesImportantes] Notificación de evento enviada",
+          {
+            userId: evento.userId,
+            eventoId: evento.id,
+            titulo: evento.titulo,
+          }
         );
       }
     } else {
-      console.log("No hay eventos de agenda encontrados para hoy");
+      logger.info(
+        "[NotificacionesImportantes] No hay eventos de agenda para hoy"
+      );
     }
   } catch (error) {
-    console.error(
-      "Error al procesar notificaciones de eventos de agenda:",
-      error
+    logger.error(
+      "[NotificacionesImportantes] Error al procesar notificaciones de eventos de agenda",
+      { error }
     );
   }
 }
 
 async function procesarNotificacionesImportantes() {
   try {
-    console.log(
-      `[${new Date().toISOString()}] Iniciando cronjob de notificaciones importantes`
+    logger.info(
+      "[NotificacionesImportantes] ========== INICIANDO CRONJOB =========="
     );
 
     await Promise.all([
@@ -233,20 +250,27 @@ async function procesarNotificacionesImportantes() {
       enviarNotificacionesAgenda(),
     ]);
 
-    console.log(
-      `[${new Date().toISOString()}] Finalizando cronjob de notificaciones importantes`
+    logger.info(
+      "[NotificacionesImportantes] ========== CRONJOB COMPLETADO =========="
     );
   } catch (error) {
-    console.error("Error al procesar notificaciones importantes:", error);
+    logger.error(
+      "[NotificacionesImportantes] Error crítico al procesar notificaciones",
+      { error }
+    );
   }
 }
 
 export function initNotificacionesImportantesCron() {
   // Programar el cronjob para que se ejecute a las 7am todos los días
   cron.schedule("0 7 * * *", () => {
-    console.log("Ejecutando cronjob de notificaciones importantes");
+    logger.info(
+      "[NotificacionesImportantes] Ejecutando cronjob de notificaciones importantes"
+    );
     procesarNotificacionesImportantes();
   });
 
-  console.log("Cron job para notificaciones importantes iniciado");
+  logger.info(
+    "[NotificacionesImportantes] Cron job para notificaciones importantes iniciado - Ejecuta diariamente a las 7:00 AM"
+  );
 }

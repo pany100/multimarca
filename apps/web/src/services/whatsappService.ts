@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import axios from "axios";
+import logger from "../lib/logger.js";
 const prisma = new PrismaClient();
 
 async function sendWhatsappTextMessage(numeroDestino: string, body: string) {
@@ -22,11 +23,17 @@ async function sendWhatsappTextMessage(numeroDestino: string, body: string) {
 
   try {
     const response = await axios.post(url, data, { headers });
-    console.log("Mensaje enviado con éxito:", response.data);
+    logger.info("[WhatsAppService] Mensaje de texto enviado con éxito", {
+      to: numeroDestino,
+      messageId: response.data.messages?.[0]?.id,
+    });
     await saveMessage("me", "5491156007307", body, "texto");
     return response.data;
   } catch (error) {
-    console.error("Error al enviar mensaje:", error);
+    logger.error("[WhatsAppService] Error al enviar mensaje de texto", {
+      to: numeroDestino,
+      error,
+    });
     throw error;
   }
 }
@@ -92,11 +99,19 @@ async function sendWhatsAppMessage(
 
   try {
     const response = await axios.post(url, data, { headers });
-    console.log("Mensaje enviado con éxito:", response.data);
+    logger.info("[WhatsAppService] Template enviado con éxito", {
+      to: numeroDestino,
+      template: nombreDelTemplate,
+      messageId: response.data.messages?.[0]?.id,
+    });
     await saveMessage("me", "5491156007307", bodyText, "template_enviado");
     return response.data;
   } catch (error) {
-    console.error("Error al enviar mensaje:", error);
+    logger.error("[WhatsAppService] Error al enviar template", {
+      to: numeroDestino,
+      template: nombreDelTemplate,
+      error,
+    });
     throw error;
   }
 }
@@ -121,10 +136,12 @@ async function uploadMedia(pdfBuffer: Buffer): Promise<string> {
 
   try {
     const response = await axios.post(mediaUrl, formData, { headers });
-    console.log("Archivo subido con éxito:", response.data);
+    logger.info("[WhatsAppService] Archivo subido con éxito", {
+      mediaId: response.data.id,
+    });
     return response.data.id;
   } catch (error) {
-    console.error("Error al subir el archivo:", error);
+    logger.error("[WhatsAppService] Error al subir el archivo", { error });
     throw error;
   }
 }
@@ -151,7 +168,10 @@ async function getMedia(mediaId: string) {
       contentType: mediaResponse.headers["content-type"],
     };
   } catch (error) {
-    console.error("Error al obtener el archivo:", error);
+    logger.error("[WhatsAppService] Error al obtener el archivo", {
+      mediaId,
+      error,
+    });
     throw error;
   }
 }
@@ -173,7 +193,10 @@ async function saveMessage(
   });
 
   if (!cliente) {
-    console.log(`No se encontró cliente para el número: ${from}`);
+    logger.warn("[WhatsAppService] No se encontró cliente para el número", {
+      from,
+      clientNumber,
+    });
     return false;
   }
 
@@ -212,10 +235,17 @@ async function saveMessage(
       data: { ultimoMensaje: new Date() },
     });
 
-    console.log(`Mensaje guardado en la conversación: ${tipo} de ${from}`);
+    logger.info("[WhatsAppService] Mensaje guardado en la conversación", {
+      tipo,
+      from,
+      conversacionId: conversacion.id,
+    });
     return true;
   } catch (error) {
-    console.error("Error al guardar el mensaje en la base de datos:", error);
+    logger.error(
+      "[WhatsAppService] Error al guardar el mensaje en la base de datos",
+      { from, tipo, error }
+    );
     return false;
   }
 }

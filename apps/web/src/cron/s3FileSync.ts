@@ -1,6 +1,7 @@
 import { S3FileStorageAdapter } from "@/core/infrastructure/external/s3-file-storage.adapter";
 import { EstadoArchivo, PrismaClient } from "@prisma/client";
 import cron from "node-cron";
+import logger from "../lib/logger.js";
 
 const prisma = new PrismaClient();
 const fileStorage = new S3FileStorageAdapter();
@@ -10,7 +11,7 @@ const fileStorage = new S3FileStorageAdapter();
  */
 async function limpiarArchivosHuerfanos() {
   try {
-    console.log(`[${new Date().toISOString()}] Buscando archivos huérfanos...`);
+    logger.info("[S3FileSync] Iniciando búsqueda de archivos huérfanos");
 
     const archivosHuerfanos = await prisma.customFile.findMany({
       where: {
@@ -20,13 +21,18 @@ async function limpiarArchivosHuerfanos() {
       },
     });
 
-    console.log(
-      `Se encontraron ${archivosHuerfanos.length} archivos huérfanos`
+    logger.info(
+      `[S3FileSync] Archivos huérfanos encontrados: ${archivosHuerfanos.length}`
     );
 
     for (const archivo of archivosHuerfanos) {
       try {
-        console.log(`Procesando archivo huérfano ID ${archivo.id}`);
+        logger.info("[S3FileSync] Procesando archivo huérfano", {
+          archivoId: archivo.id,
+          tempPath: archivo.tempPath,
+          finalPath: archivo.finalPath,
+          status: archivo.status,
+        });
 
         // Verificar que el archivo no esté siendo usado por otro registro válido
         // Buscar tanto en finalPath como en tempPath
@@ -47,17 +53,28 @@ async function limpiarArchivosHuerfanos() {
               },
             },
           });
-          console.log("######");
-          console.log("Archivo valido", archivoValido);
-          console.log("######");
           if (archivoValido) {
-            console.log(
-              `Archivo ${pathToCheck} está siendo usado por otro registro (ID ${archivoValido.id}), NO se eliminará de S3`
+            logger.info(
+              "[S3FileSync] Archivo compartido detectado - NO se eliminará de S3",
+              {
+                archivoHuerfanoId: archivo.id,
+                archivoValidoId: archivoValido.id,
+                path: pathToCheck,
+                entidadValida: {
+                  ordenReparacionId: archivoValido.ordenReparacionId,
+                  reciboORepId: archivoValido.reciboORepId,
+                  reparacionDeTerceroId: archivoValido.reparacionDeTerceroId,
+                },
+              }
             );
           } else {
             // Solo eliminar de S3 si no hay otro registro válido usando este archivo
             await fileStorage.removeFile(pathToCheck);
-            console.log(`Archivo eliminado de S3: ${pathToCheck}`);
+            logger.info("[S3FileSync] Archivo eliminado de S3", {
+              archivoId: archivo.id,
+              path: pathToCheck,
+              accion: "DELETE_FROM_S3",
+            });
           }
         }
 
@@ -66,16 +83,26 @@ async function limpiarArchivosHuerfanos() {
           where: { id: archivo.id },
         });
 
-        console.log(`Registro de archivo huérfano eliminado: ID ${archivo.id}`);
-      } catch (error) {
-        console.error(
-          `Error al eliminar archivo huérfano ID ${archivo.id}:`,
-          error
+        logger.info(
+          "[S3FileSync] Registro de archivo huérfano eliminado de BD",
+          {
+            archivoId: archivo.id,
+            accion: "DELETE_FROM_DB",
+          }
         );
+      } catch (error) {
+        logger.error("[S3FileSync] Error al eliminar archivo huérfano", {
+          archivoId: archivo.id,
+          tempPath: archivo.tempPath,
+          finalPath: archivo.finalPath,
+          error,
+        });
       }
     }
   } catch (error) {
-    console.error("Error al limpiar archivos huérfanos:", error);
+    logger.error("[S3FileSync] Error general al limpiar archivos huérfanos", {
+      error,
+    });
   }
 }
 
@@ -84,8 +111,8 @@ async function limpiarArchivosHuerfanos() {
  */
 async function procesarArchivosConError() {
   try {
-    console.log(
-      `[${new Date().toISOString()}] Procesando archivos con estado Error...`
+    logger.info(
+      "[S3FileSync] Iniciando procesamiento de archivos con estado Error"
     );
 
     const archivosConError = await prisma.customFile.findMany({
@@ -94,20 +121,34 @@ async function procesarArchivosConError() {
       },
     });
 
-    console.log(
-      `Se encontraron ${archivosConError.length} archivos con estado Error`
+    logger.info(
+      `[S3FileSync] Archivos con estado Error encontrados: ${archivosConError.length}`
     );
 
     for (const archivo of archivosConError) {
       try {
         if (!archivo.tempPath) {
-          console.log(`Archivo ID ${archivo.id} no tiene tempPath, omitiendo`);
+          logger.warn("[S3FileSync] Archivo sin tempPath - omitiendo", {
+            archivoId: archivo.id,
+            status: archivo.status,
+            ordenReparacionId: archivo.ordenReparacionId,
+            reciboORepId: archivo.reciboORepId,
+            reparacionDeTerceroId: archivo.reparacionDeTerceroId,
+          });
           continue;
         }
 
         if (archivo.finalPath) {
-          console.log(
-            `Archivo ID ${archivo.id} tiene finalPath, actualizando status to Listo`
+          logger.info(
+            "[S3FileSync] Archivo Error con finalPath - actualizando a Listo",
+            {
+              archivoId: archivo.id,
+              finalPath: archivo.finalPath,
+              ordenReparacionId: archivo.ordenReparacionId,
+              reciboORepId: archivo.reciboORepId,
+              reparacionDeTerceroId: archivo.reparacionDeTerceroId,
+              accion: "UPDATE_STATUS_TO_LISTO",
+            }
           );
           await prisma.customFile.update({
             where: { id: archivo.id },
@@ -121,9 +162,17 @@ async function procesarArchivosConError() {
 
         // Determinar la carpeta de destino basada en las relaciones
         let folder = "archivos";
-        if (archivo.ordenReparacionId) folder = "scanner";
-        else if (archivo.reciboORepId) folder = "recibos";
-        else if (archivo.reparacionDeTerceroId) folder = "recibos";
+        let entidad = "ninguna";
+        if (archivo.ordenReparacionId) {
+          folder = "scanner";
+          entidad = "ordenReparacion";
+        } else if (archivo.reciboORepId) {
+          folder = "recibos";
+          entidad = "reciboORep";
+        } else if (archivo.reparacionDeTerceroId) {
+          folder = "recibos";
+          entidad = "reparacionDeTercero";
+        }
 
         const finalPath = await fileStorage.moveTempTo(
           archivo.tempPath,
@@ -139,18 +188,37 @@ async function procesarArchivosConError() {
           },
         });
 
-        console.log(
-          `Archivo ID ${archivo.id} movido correctamente: ${finalPath}`
-        );
+        logger.info("[S3FileSync] Archivo Error movido exitosamente", {
+          archivoId: archivo.id,
+          tempPath: archivo.tempPath,
+          finalPath,
+          folder,
+          entidad,
+          ordenReparacionId: archivo.ordenReparacionId,
+          reciboORepId: archivo.reciboORepId,
+          reparacionDeTerceroId: archivo.reparacionDeTerceroId,
+          accion: "MOVE_TEMP_TO_FINAL",
+        });
       } catch (error) {
-        console.error(
-          `Error al procesar archivo con error ID ${archivo.id}:`,
-          error
+        logger.error(
+          "[S3FileSync] Error al procesar archivo con estado Error",
+          {
+            archivoId: archivo.id,
+            tempPath: archivo.tempPath,
+            finalPath: archivo.finalPath,
+            ordenReparacionId: archivo.ordenReparacionId,
+            reciboORepId: archivo.reciboORepId,
+            reparacionDeTerceroId: archivo.reparacionDeTerceroId,
+            error,
+          }
         );
       }
     }
   } catch (error) {
-    console.error("Error al procesar archivos con estado Error:", error);
+    logger.error(
+      "[S3FileSync] Error general al procesar archivos con estado Error",
+      { error }
+    );
   }
 }
 
@@ -159,8 +227,8 @@ async function procesarArchivosConError() {
  */
 async function procesarArchivosPending() {
   try {
-    console.log(
-      `[${new Date().toISOString()}] Procesando archivos con estado Pending...`
+    logger.info(
+      "[S3FileSync] Iniciando procesamiento de archivos con estado Pending"
     );
 
     const archivosPending = await prisma.customFile.findMany({
@@ -169,15 +237,23 @@ async function procesarArchivosPending() {
       },
     });
 
-    console.log(
-      `Se encontraron ${archivosPending.length} archivos con estado Pending`
+    logger.info(
+      `[S3FileSync] Archivos con estado Pending encontrados: ${archivosPending.length}`
     );
 
     for (const archivo of archivosPending) {
       try {
         if (!archivo.tempPath) {
-          console.log(
-            `Archivo ID ${archivo.id} no tiene tempPath, omitiendo, estado corrupto`
+          logger.warn(
+            "[S3FileSync] Archivo sin tempPath - marcando como Error",
+            {
+              archivoId: archivo.id,
+              status: archivo.status,
+              ordenReparacionId: archivo.ordenReparacionId,
+              reciboORepId: archivo.reciboORepId,
+              reparacionDeTerceroId: archivo.reparacionDeTerceroId,
+              accion: "MARK_AS_ERROR",
+            }
           );
           await prisma.customFile.update({
             where: { id: archivo.id },
@@ -190,8 +266,16 @@ async function procesarArchivosPending() {
         }
 
         if (archivo.finalPath) {
-          console.log(
-            `Archivo ID ${archivo.id} tiene finalPath, actualizando status to Listo`
+          logger.info(
+            "[S3FileSync] Archivo Pending con finalPath - actualizando a Listo",
+            {
+              archivoId: archivo.id,
+              finalPath: archivo.finalPath,
+              ordenReparacionId: archivo.ordenReparacionId,
+              reciboORepId: archivo.reciboORepId,
+              reparacionDeTerceroId: archivo.reparacionDeTerceroId,
+              accion: "UPDATE_STATUS_TO_LISTO",
+            }
           );
           await prisma.customFile.update({
             where: { id: archivo.id },
@@ -205,9 +289,17 @@ async function procesarArchivosPending() {
 
         // Determinar la carpeta de destino basada en las relaciones
         let folder = "archivos";
-        if (archivo.ordenReparacionId) folder = "scanner";
-        else if (archivo.reciboORepId) folder = "recibos";
-        else if (archivo.reparacionDeTerceroId) folder = "recibos";
+        let entidad = "ninguna";
+        if (archivo.ordenReparacionId) {
+          folder = "scanner";
+          entidad = "ordenReparacion";
+        } else if (archivo.reciboORepId) {
+          folder = "recibos";
+          entidad = "reciboORep";
+        } else if (archivo.reparacionDeTerceroId) {
+          folder = "recibos";
+          entidad = "reparacionDeTercero";
+        }
 
         const finalPath = await fileStorage.moveTempTo(
           archivo.tempPath,
@@ -223,18 +315,33 @@ async function procesarArchivosPending() {
           },
         });
 
-        console.log(
-          `Archivo ID ${archivo.id} movido correctamente: ${finalPath}`
-        );
+        logger.info("[S3FileSync] Archivo Pending movido exitosamente", {
+          archivoId: archivo.id,
+          tempPath: archivo.tempPath,
+          finalPath,
+          folder,
+          entidad,
+          ordenReparacionId: archivo.ordenReparacionId,
+          reciboORepId: archivo.reciboORepId,
+          reparacionDeTerceroId: archivo.reparacionDeTerceroId,
+          accion: "MOVE_TEMP_TO_FINAL",
+        });
       } catch (error) {
-        console.error(
-          `Error al procesar archivo con error ID ${archivo.id}:`,
-          error
-        );
+        logger.error("[S3FileSync] Error al procesar archivo Pending", {
+          archivoId: archivo.id,
+          tempPath: archivo.tempPath,
+          finalPath: archivo.finalPath,
+          ordenReparacionId: archivo.ordenReparacionId,
+          reciboORepId: archivo.reciboORepId,
+          reparacionDeTerceroId: archivo.reparacionDeTerceroId,
+          error,
+        });
       }
     }
   } catch (error) {
-    console.error("Error al procesar archivos con estado Error:", error);
+    logger.error("[S3FileSync] Error general al procesar archivos Pending", {
+      error,
+    });
   }
 }
 
@@ -243,8 +350,8 @@ async function procesarArchivosPending() {
  */
 async function eliminarArchivosBorrados() {
   try {
-    console.log(
-      `[${new Date().toISOString()}] Eliminando archivos marcados como borrados...`
+    logger.info(
+      "[S3FileSync] Iniciando eliminación de archivos marcados como Borrado"
     );
 
     const archivosBorrados = await prisma.customFile.findMany({
@@ -253,8 +360,8 @@ async function eliminarArchivosBorrados() {
       },
     });
 
-    console.log(
-      `Se encontraron ${archivosBorrados.length} archivos marcados como borrados`
+    logger.info(
+      `[S3FileSync] Archivos marcados como Borrado encontrados: ${archivosBorrados.length}`
     );
 
     for (const archivo of archivosBorrados) {
@@ -262,7 +369,14 @@ async function eliminarArchivosBorrados() {
         // Eliminar del S3 si tiene finalPath
         if (archivo.finalPath) {
           await fileStorage.removeFile(archivo.finalPath);
-          console.log(`Archivo eliminado de S3: ${archivo.finalPath}`);
+          logger.info("[S3FileSync] Archivo Borrado eliminado de S3", {
+            archivoId: archivo.id,
+            finalPath: archivo.finalPath,
+            ordenReparacionId: archivo.ordenReparacionId,
+            reciboORepId: archivo.reciboORepId,
+            reparacionDeTerceroId: archivo.reparacionDeTerceroId,
+            accion: "DELETE_FROM_S3",
+          });
         }
 
         // Eliminar el registro de la base de datos
@@ -270,16 +384,28 @@ async function eliminarArchivosBorrados() {
           where: { id: archivo.id },
         });
 
-        console.log(`Registro de archivo borrado eliminado: ID ${archivo.id}`);
-      } catch (error) {
-        console.error(
-          `Error al eliminar archivo borrado ID ${archivo.id}:`,
-          error
+        logger.info(
+          "[S3FileSync] Registro de archivo Borrado eliminado de BD",
+          {
+            archivoId: archivo.id,
+            accion: "DELETE_FROM_DB",
+          }
         );
+      } catch (error) {
+        logger.error("[S3FileSync] Error al eliminar archivo Borrado", {
+          archivoId: archivo.id,
+          finalPath: archivo.finalPath,
+          ordenReparacionId: archivo.ordenReparacionId,
+          reciboORepId: archivo.reciboORepId,
+          reparacionDeTerceroId: archivo.reparacionDeTerceroId,
+          error,
+        });
       }
     }
   } catch (error) {
-    console.error("Error al eliminar archivos borrados:", error);
+    logger.error("[S3FileSync] Error general al eliminar archivos Borrado", {
+      error,
+    });
   }
 }
 
@@ -287,8 +413,8 @@ async function eliminarArchivosBorrados() {
  * Ejecuta todas las tareas de sincronización de archivos
  */
 async function sincronizarArchivos() {
-  console.log(
-    `[${new Date().toISOString()}] Iniciando sincronización de archivos S3...`
+  logger.info(
+    "[S3FileSync] ========== INICIANDO SINCRONIZACIÓN DE ARCHIVOS S3 =========="
   );
 
   try {
@@ -304,11 +430,13 @@ async function sincronizarArchivos() {
     // 4. Procesar archivos pendientes
     await procesarArchivosPending();
 
-    console.log(
-      `[${new Date().toISOString()}] Sincronización de archivos S3 completada`
+    logger.info(
+      "[S3FileSync] ========== SINCRONIZACIÓN DE ARCHIVOS S3 COMPLETADA =========="
     );
   } catch (error) {
-    console.error("Error durante la sincronización de archivos S3:", error);
+    logger.error("[S3FileSync] Error crítico durante la sincronización", {
+      error,
+    });
   }
 }
 
@@ -322,7 +450,9 @@ export function initS3FileSyncCron() {
     timezone: "America/Argentina/Buenos_Aires",
   });
 
-  console.log("Cron job para sincronización de archivos S3 iniciado");
+  logger.info(
+    "[S3FileSync] Cron job para sincronización de archivos S3 iniciado - Ejecuta diariamente a las 3:00 AM"
+  );
 }
 
 // Ejecutar inmediatamente al iniciar la aplicación (opcional)

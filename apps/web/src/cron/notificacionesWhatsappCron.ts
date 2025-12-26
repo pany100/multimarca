@@ -1,12 +1,13 @@
 import { PrismaClient } from "@prisma/client";
 import cron from "node-cron";
+import logger from "../lib/logger.js";
 
 const prisma = new PrismaClient();
 
 async function enviarNotificacionesWhatsApp() {
   try {
-    console.log(
-      `[${new Date().toISOString()}] Iniciando cronjob de notificaciones WhatsApp`
+    logger.info(
+      "[NotificacionesWhatsApp] Iniciando cronjob de notificaciones WhatsApp"
     );
 
     const hoy = new Date();
@@ -22,7 +23,9 @@ async function enviarNotificacionesWhatsApp() {
         processed: false,
       },
     });
-    console.log(notificaciones);
+    logger.info("[NotificacionesWhatsApp] Notificaciones encontradas", {
+      cantidad: notificaciones.length,
+    });
 
     // Obtener clientes no silenciados
     const clientesNoSilenciados = await prisma.cliente.findMany({
@@ -36,9 +39,10 @@ async function enviarNotificacionesWhatsApp() {
         // Aquí iría la lógica para enviar el mensaje de WhatsApp
         if (cliente.phone) {
           // await sendWhatsAppMessage(cliente.phone, notificacion.whatsappKey);
-          console.log(
-            `Notificación enviada a ${cliente.fullName}: ${notificacion.description}`
-          );
+          logger.info("[NotificacionesWhatsApp] Notificación enviada", {
+            cliente: cliente.fullName,
+            descripcion: notificacion.description,
+          });
         }
       }
 
@@ -49,20 +53,26 @@ async function enviarNotificacionesWhatsApp() {
       });
     }
 
-    console.log(
-      `[${new Date().toISOString()}] Finalizando cronjob de notificaciones WhatsApp`
+    logger.info(
+      "[NotificacionesWhatsApp] Finalizando cronjob de notificaciones WhatsApp"
     );
   } catch (error) {
-    console.error("Error al procesar notificaciones:", error);
+    logger.error("[NotificacionesWhatsApp] Error al procesar notificaciones", {
+      error,
+    });
   }
 }
 
 export function initNotificacionesWhatsappCron() {
   // Programar el cronjob para que se ejecute todos los días a las 9:00 AM
   cron.schedule("0 9 * * *", () => {
-    console.log("Ejecutando cronjob de notificaciones WhatsApp");
+    logger.info(
+      "[NotificacionesWhatsApp] Ejecutando cronjob de notificaciones WhatsApp"
+    );
     enviarNotificacionesWhatsApp();
   });
 
-  console.log("Cron job para notificaciones de whatsapp");
+  logger.info(
+    "[NotificacionesWhatsApp] Cron job para notificaciones de WhatsApp iniciado - Ejecuta diariamente a las 9:00 AM"
+  );
 }
