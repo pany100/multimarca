@@ -18,30 +18,23 @@ export class CreateDraftOrdenV2UseCase {
     }
 
     // Crear la orden en estado Borrador
-    const ordenData = {
-      data: {
-        autoId: dto.autoId,
-        kilometros: dto.kilometros ?? null,
-        observacionesCliente: dto.observacionesCliente,
-        observacionesEntrada: "",
-        observacionesSalida: "",
-        estado: "Borrador" as any,
-        descuento: 0,
-        incremento: 0,
-        incrementoInterno: 0,
-        porcentajeRecargo: 0,
-      },
-      include: {
-        auto: {
-          include: {
-            owner: true,
-          },
+    const ordenCreada = await this.ordenRepository.createDraft({
+      auto: {
+        connect: {
+          id: dto.autoId,
         },
       },
-    };
+      kilometros: dto.kilometros ?? null,
+      observacionesCliente: dto.observacionesCliente,
+      observacionesEntrada: "",
+      observacionesSalida: "",
+      estado: "Borrador" as any,
+      descuento: 0,
+      incremento: 0,
+      incrementoInterno: 0,
+      porcentajeRecargo: 0,
+    });
 
-    const created = await this.ordenRepository.create(null, ordenData);
-
-    return created;
+    return ordenCreada;
   }
 }

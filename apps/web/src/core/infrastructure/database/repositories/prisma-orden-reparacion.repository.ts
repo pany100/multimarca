@@ -188,4 +188,17 @@ export class PrismaOrdenReparacionRepository
       },
     });
   }
+
+  async createDraft(data: any) {
+    return prisma.ordenReparacion.create({
+      data,
+      include: {
+        auto: {
+          include: {
+            owner: true,
+          },
+        },
+      },
+    });
+  }
 }

@@ -100,6 +100,7 @@ export interface OrdenReparacionRepository {
   listPaged(params: ListOrdenesParams): Promise<PageResult<any>>;
   findMatchingIdsByFormattedDate(query: string): Promise<number[]>;
   create(tx: any, payload: CreateOrdenPersist["data"]): Promise<any>;
+  createDraft(data: Prisma.OrdenReparacionCreateInput): Promise<any>;
   findById(id: number): Promise<any | null>;
   delete(tx: any, id: number): Promise<void>;
   update(
