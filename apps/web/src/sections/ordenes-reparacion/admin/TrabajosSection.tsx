@@ -1,10 +1,8 @@
 import { Card, CardContent, Typography } from "@mui/material";
+import { useOrden } from "./contexts/OrdenContext";
 
-interface TrabajosSectionProps {
-  ordenReparacion: any;
-}
-
-const TrabajosSection = ({ ordenReparacion }: TrabajosSectionProps) => {
+const TrabajosSection = () => {
+  const { orden } = useOrden();
   return (
     <Card>
       <CardContent>

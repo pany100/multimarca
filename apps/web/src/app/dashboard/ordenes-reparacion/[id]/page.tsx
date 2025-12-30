@@ -1,9 +1,19 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
+import ControlesSection from "@/sections/ordenes-reparacion/admin/ControlesSection";
+import EstadoYFechasSection from "@/sections/ordenes-reparacion/admin/EstadoYFechasSection";
+import InformacionGeneralSection from "@/sections/ordenes-reparacion/admin/InformacionGeneralSection";
+import MecanicosSection from "@/sections/ordenes-reparacion/admin/MecanicosSection";
+import ObservacionesSection from "@/sections/ordenes-reparacion/admin/ObservacionesSection";
 import OrdenHeader from "@/sections/ordenes-reparacion/admin/OrdenHeader";
+import PreciosSection from "@/sections/ordenes-reparacion/admin/PreciosSection";
+import RepuestosSection from "@/sections/ordenes-reparacion/admin/RepuestosSection";
+import TercerosSection from "@/sections/ordenes-reparacion/admin/TercerosSection";
+import TrabajosSection from "@/sections/ordenes-reparacion/admin/TrabajosSection";
+import { OrdenProvider } from "@/sections/ordenes-reparacion/admin/contexts/OrdenContext";
 import { useOrdenReparacion } from "@/sections/ordenes-reparacion/hooks/useOrdenReparacion";
-import { Box, CircularProgress, Paper } from "@mui/material";
+import { Box, CircularProgress, Grid, Paper, Stack } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -45,9 +55,35 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
   }
 
   return (
-    <Box>
-      <OrdenHeader orden={ordenReparacion} />
-    </Box>
+    <OrdenProvider orden={ordenReparacion}>
+      <Box>
+        <OrdenHeader orden={ordenReparacion} />
+
+        {/* Grid de 2 columnas para las secciones */}
+        <Grid container spacing={3}>
+          {/* Columna izquierda */}
+          <Grid item xs={12} md={6}>
+            <Stack spacing={3}>
+              <EstadoYFechasSection />
+              <ObservacionesSection />
+              <MecanicosSection />
+              <RepuestosSection />
+            </Stack>
+          </Grid>
+
+          {/* Columna derecha */}
+          <Grid item xs={12} md={6}>
+            <Stack spacing={3}>
+              <InformacionGeneralSection />
+              <ControlesSection />
+              <TrabajosSection />
+              <TercerosSection />
+              <PreciosSection />
+            </Stack>
+          </Grid>
+        </Grid>
+      </Box>
+    </OrdenProvider>
   );
 };
 

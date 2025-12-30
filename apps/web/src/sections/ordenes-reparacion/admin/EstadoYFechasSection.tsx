@@ -1,12 +1,9 @@
 import { Card, CardContent, Typography } from "@mui/material";
+import { useOrden } from "./contexts/OrdenContext";
 
-interface EstadoYFechasSectionProps {
-  ordenReparacion: any;
-}
+const EstadoYFechasSection = () => {
+  const { orden } = useOrden();
 
-const EstadoYFechasSection = ({
-  ordenReparacion,
-}: EstadoYFechasSectionProps) => {
   return (
     <Card>
       <CardContent>
