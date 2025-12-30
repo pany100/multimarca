@@ -29,7 +29,7 @@ function BoschTemplateButton() {
         variant="contained"
         onClick={showModal}
         sx={{
-          backgroundColor: boschColors.boschBlue[75],
+          backgroundColor: "purple",
           "&:hover": { backgroundColor: boschColors.boschBlue[50] },
           marginLeft: "20px",
         }}
