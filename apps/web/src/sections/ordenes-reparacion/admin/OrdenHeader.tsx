@@ -1,0 +1,208 @@
+"use client";
+
+import OrdenClienteInterna from "@/components/orden-reparacion/pdf/OrdenClienteInterna";
+import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
+import { getStatusColor } from "@/utils/ordenHelper";
+import CloseIcon from "@mui/icons-material/Close";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  Snackbar,
+  Tooltip,
+  Typography,
+} from "@mui/material";
+import { PrintMenu } from "./components/PrintMenu";
+import { WhatsAppConfirmDialog } from "./components/WhatsAppConfirmDialog";
+import { useCerrarOrdenHandler } from "./hooks/useCerrarOrdenHandler";
+import { usePrintHandlers } from "./hooks/usePrintHandlers";
+import { useWhatsAppHandlers } from "./hooks/useWhatsAppHandlers";
+
+interface OrdenHeaderProps {
+  orden: any;
+}
+
+function OrdenHeader({ orden }: OrdenHeaderProps) {
+  // WhatsApp handlers
+  const {
+    openConfirmModal,
+    snackbar,
+    setSnackbar,
+    handleOpenConfirmModal,
+    handleCloseConfirmModal,
+    handleSendNotification,
+  } = useWhatsAppHandlers(orden.id);
+
+  // Print handlers
+  const {
+    isMobile,
+    mechanicOrderRef,
+    internClientOrderRef,
+    printMenuAnchor,
+    openPrintMenu,
+    handleMechanicOrderPrint,
+    handleClientOrderPrint,
+    handleInternClientOrderPrint,
+    handlePdfPrint,
+    handleOpenPrintMenu,
+    handleClosePrintMenu,
+  } = usePrintHandlers(orden.id, (message) => {
+    setSnackbar({
+      open: true,
+      message,
+      severity: "error",
+    });
+  });
+
+  // Cerrar orden handler
+  const { loading: cerrandoOrden, handleCerrarOrden } = useCerrarOrdenHandler(
+    orden.id
+  );
+
+  return (
+    <>
+      <Box
+        sx={{
+          borderBottom: "1px solid",
+          borderColor: "divider",
+          pb: 3,
+          mb: 3,
+        }}
+      >
+        {/* Single Row with Title, Status and Buttons */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 2,
+          }}
+        >
+          {/* Left side: Title */}
+          <Box>
+            <Typography
+              variant="h4"
+              component="h1"
+              sx={{
+                fontWeight: 600,
+                fontSize: { xs: "1.5rem", md: "2rem" },
+              }}
+            >
+              Orden #{orden.id} - Patente {orden.auto?.patent || "N/A"}
+            </Typography>
+          </Box>
+
+          {/* Right side: Status and Action Buttons */}
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flexWrap: "wrap",
+            }}
+          >
+            <Chip
+              label={orden.estado}
+              color={getStatusColor(orden.estado)}
+              size="medium"
+              sx={{
+                fontWeight: 500,
+                px: 1,
+                "& .MuiChip-label": {
+                  px: 1,
+                },
+              }}
+            />
+
+            {/* Close Order Button */}
+            <Button
+              variant="outlined"
+              startIcon={<CloseIcon />}
+              onClick={handleCerrarOrden}
+              disabled={cerrandoOrden}
+              sx={{ textTransform: "none" }}
+            >
+              {cerrandoOrden ? "Cerrando..." : "Cerrar Orden"}
+            </Button>
+
+            <PrintMenu
+              isMobile={isMobile}
+              printMenuAnchor={printMenuAnchor}
+              openPrintMenu={openPrintMenu}
+              pdfPath={orden.pdfPath}
+              handleOpenPrintMenu={handleOpenPrintMenu}
+              handleClosePrintMenu={handleClosePrintMenu}
+              handleMechanicOrderPrint={handleMechanicOrderPrint}
+              handleInternClientOrderPrint={handleInternClientOrderPrint}
+              handleClientOrderPrint={handleClientOrderPrint}
+              handlePdfPrint={handlePdfPrint}
+            />
+
+            {/* WhatsApp button */}
+            {orden.estado !== "Terminado" ? (
+              <Tooltip title="Solo disponible para reparaciones terminadas">
+                <span>
+                  <Button
+                    variant="outlined"
+                    startIcon={<WhatsAppIcon />}
+                    disabled
+                    sx={{ textTransform: "none" }}
+                  >
+                    Enviar por WhatsApp
+                  </Button>
+                </span>
+              </Tooltip>
+            ) : (
+              <Button
+                variant="outlined"
+                color="success"
+                startIcon={<WhatsAppIcon />}
+                onClick={handleOpenConfirmModal}
+                sx={{ textTransform: "none" }}
+              >
+                Enviar por WhatsApp
+              </Button>
+            )}
+          </Box>
+        </Box>
+      </Box>
+
+      <WhatsAppConfirmDialog
+        open={openConfirmModal}
+        orden={orden}
+        onClose={handleCloseConfirmModal}
+        onConfirm={handleSendNotification}
+      />
+
+      {/* Notification snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+      >
+        <Alert
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
+          severity={snackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+
+      {/* Hidden PDF components for printing */}
+      <div style={{ display: "none" }}>
+        {orden !== null && (
+          <OrdenMecanicoPdf ref={mechanicOrderRef} repair={orden} />
+        )}
+        {orden !== null && (
+          <OrdenClienteInterna ref={internClientOrderRef} repair={orden} />
+        )}
+      </div>
+    </>
+  );
+}
+
+export default OrdenHeader;

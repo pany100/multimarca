@@ -154,7 +154,8 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
             >
               Historia
             </Typography>
-            {JSON.parse(repair.observacionesEntrada).length > 0 &&
+            {repair.observacionesEntrada &&
+              JSON.parse(repair.observacionesEntrada).length > 0 &&
               JSON.parse(repair.observacionesEntrada).map((el: string) => (
                 <Typography key={el.toString()} sx={{ color: "common.black" }}>
                   {el}

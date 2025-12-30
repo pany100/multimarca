@@ -1,6 +1,7 @@
 "use client";
 
 import { useAuth } from "@/hooks/useAuth";
+import OrdenHeader from "@/sections/ordenes-reparacion/admin/OrdenHeader";
 import { useOrdenReparacion } from "@/sections/ordenes-reparacion/hooks/useOrdenReparacion";
 import { Box, CircularProgress, Paper } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -44,23 +45,9 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
   }
 
   return (
-    <Paper
-      elevation={1}
-      sx={{
-        p: { xs: 2, md: 3 },
-        borderRadius: 2,
-        mb: 3,
-      }}
-    >
-      <Box>
-        <h1>Administrar Orden #{ordenReparacion.id}</h1>
-        <p>Estado: {ordenReparacion.estado}</p>
-        <p>
-          Auto: {ordenReparacion.auto?.brand} {ordenReparacion.auto?.model}
-        </p>
-        {/* Aquí irá el contenido de administración */}
-      </Box>
-    </Paper>
+    <Box>
+      <OrdenHeader orden={ordenReparacion} />
+    </Box>
   );
 };
 
