@@ -45,7 +45,7 @@ const InformacionGeneralSection = () => {
         {/* Columna Izquierda - Cliente */}
         <Grid item xs={12} md={6}>
           <Typography
-            variant="subtitle2"
+            variant="subtitle1"
             sx={{ fontWeight: 600, mb: 2, color: "text.secondary" }}
           >
             Cliente
@@ -89,7 +89,7 @@ const InformacionGeneralSection = () => {
         {/* Columna Derecha - Vehículo */}
         <Grid item xs={12} md={6}>
           <Typography
-            variant="subtitle2"
+            variant="subtitle1"
             sx={{ fontWeight: 600, mb: 2, color: "text.secondary" }}
           >
             Vehículo

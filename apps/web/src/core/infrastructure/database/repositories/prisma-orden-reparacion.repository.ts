@@ -174,4 +174,18 @@ export class PrismaOrdenReparacionRepository
       },
     });
   }
+
+  async updatePartial(id: number, data: any) {
+    return prisma.ordenReparacion.update({
+      where: { id },
+      data,
+      include: {
+        auto: {
+          include: {
+            owner: true,
+          },
+        },
+      },
+    });
+  }
 }

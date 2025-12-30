@@ -1,4 +1,5 @@
-import { prisma } from "@/core/infrastructure/database/prisma";
+import { CreateDraftOrdenV2UseCase } from "@/core/application/use-cases/orden-reparacion/create-draft-orden-v2.use-case";
+import { PrismaOrdenReparacionRepository } from "@/core/infrastructure/database/repositories/prisma-orden-reparacion.repository";
 import { createDraftOrdenSchema } from "@/core/infrastructure/validation/schemas/orden-reparacion.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
@@ -9,27 +10,9 @@ export async function POST(request: Request) {
     const body = await request.json();
     const dto = await validateRequest(body, createDraftOrdenSchema);
 
-    const created = await prisma.ordenReparacion.create({
-      data: {
-        autoId: dto.autoId,
-        kilometros: dto.kilometros ?? null,
-        observacionesCliente: dto.observacionesCliente,
-        observacionesEntrada: "",
-        observacionesSalida: "",
-        estado: "Borrador" as any,
-        descuento: 0,
-        incremento: 0,
-        incrementoInterno: 0,
-        porcentajeRecargo: 0,
-      },
-      include: {
-        auto: {
-          include: {
-            owner: true,
-          },
-        },
-      },
-    });
+    const created = await new CreateDraftOrdenV2UseCase(
+      new PrismaOrdenReparacionRepository()
+    ).execute(dto);
 
     return NextResponse.json(created, { status: 201 });
   } catch (e) {

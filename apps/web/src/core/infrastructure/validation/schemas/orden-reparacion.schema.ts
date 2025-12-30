@@ -112,3 +112,14 @@ export const createDraftOrdenSchema = z.object({
   kilometros: z.coerce.number().nullable().optional(),
   observacionesCliente: z.string(),
 });
+
+export const patchOrdenV2Schema = z.object({
+  id: z.string(),
+  autoId: z.coerce.number().optional(),
+  kilometros: z.coerce.number().nullable().optional(),
+  observacionesCliente: z.string().optional(),
+  estado: z.string().optional(),
+  observacionesInternas: z.string().optional(),
+  observacionesSalida: z.string().optional(),
+  observacionesOcultas: z.string().nullable().optional(),
+});

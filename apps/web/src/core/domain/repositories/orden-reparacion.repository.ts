@@ -106,6 +106,10 @@ export interface OrdenReparacionRepository {
     tx: any,
     payload: UpdateOrdenPersist["data"]
   ): Promise<OrdenReparacionWithRelations>;
+  updatePartial(
+    id: number,
+    data: Partial<Prisma.OrdenReparacionUpdateInput>
+  ): Promise<any>;
   listForCliente(
     clienteId: number
   ): Promise<OrdenReparacionWithRelationsForClient[]>;
