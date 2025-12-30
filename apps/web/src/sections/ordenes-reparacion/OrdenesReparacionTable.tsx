@@ -2,6 +2,7 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import CarRepairIcon from "@mui/icons-material/CarRepair";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
@@ -161,6 +162,15 @@ const OrdenesReparacionTable = ({
       >
         <EditIcon sx={{ mr: 1 }} />
         Editar
+      </MenuItem>,
+      <MenuItem
+        key="edit"
+        onClick={() =>
+          router.push(`/dashboard/ordenes-reparacion/${params.id}`)
+        }
+      >
+        <CarRepairIcon sx={{ mr: 1 }} />
+        Administrar
       </MenuItem>,
       <MenuItem
         key="view"
