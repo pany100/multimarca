@@ -59,7 +59,12 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
       <Box>
         <OrdenHeader orden={ordenReparacion} />
 
-        {/* Grid de 2 columnas para las secciones */}
+        {/* Información General - Ocupa todo el ancho */}
+        <Box sx={{ mb: 3 }}>
+          <InformacionGeneralSection />
+        </Box>
+
+        {/* Grid de 2 columnas para las demás secciones */}
         <Grid container spacing={3}>
           {/* Columna izquierda */}
           <Grid item xs={12} md={6}>
@@ -74,7 +79,6 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
           {/* Columna derecha */}
           <Grid item xs={12} md={6}>
             <Stack spacing={3}>
-              <InformacionGeneralSection />
               <ControlesSection />
               <TrabajosSection />
               <TercerosSection />
