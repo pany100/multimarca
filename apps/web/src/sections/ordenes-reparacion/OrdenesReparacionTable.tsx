@@ -11,6 +11,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
 
 const estadosDisplay: Record<EstadoOrdenReparacion, string> = {
+  [EstadoOrdenReparacion.Borrador]: "Borrador",
   [EstadoOrdenReparacion.Presupuestado]: "Presupuestado",
   [EstadoOrdenReparacion.Aceptado]: "Aceptado",
   [EstadoOrdenReparacion.EnProgreso]: "En Proceso",
@@ -20,6 +21,7 @@ const estadosDisplay: Record<EstadoOrdenReparacion, string> = {
 };
 
 const estadoColors = {
+  [EstadoOrdenReparacion.Borrador]: "#808080",
   [EstadoOrdenReparacion.Presupuestado]: "#FFA500",
   [EstadoOrdenReparacion.Aceptado]: "#FFD700",
   [EstadoOrdenReparacion.EnProgreso]: "#4169E1",
@@ -30,6 +32,7 @@ const estadoColors = {
 
 const estados = [
   "TODOS",
+  EstadoOrdenReparacion.Borrador,
   EstadoOrdenReparacion.Aceptado,
   EstadoOrdenReparacion.EnProgreso,
   EstadoOrdenReparacion.SeRetira,
@@ -193,6 +196,16 @@ const OrdenesReparacionTable = ({
           <CustomTable
             title="Ordenes de reparación"
             apiEndpoint="/api/orden-reparacion"
+            extraActions={customActions}
+            ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
+            columns={columns}
+            {...rest}
+          />
+        )}
+        {estadoActual === EstadoOrdenReparacion.Borrador && (
+          <CustomTable
+            title="Orden de reparación"
+            apiEndpoint="/api/orden-reparacion?estado=Borrador"
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
             columns={columns}

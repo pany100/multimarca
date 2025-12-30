@@ -930,6 +930,7 @@ enum TipoEmpleado {
 }
 
 enum EstadoOrdenReparacion {
+  Borrador
   Presupuestado
   EnProgreso
   Aceptado

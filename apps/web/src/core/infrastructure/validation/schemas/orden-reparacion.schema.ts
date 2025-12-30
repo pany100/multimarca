@@ -106,3 +106,9 @@ export const updateOrdenSchema = z.object({
   incrementoInterno: z.coerce.number().optional(),
   porcentajeRecargo: z.coerce.number().optional(),
 });
+
+export const createDraftOrdenSchema = z.object({
+  autoId: z.coerce.number(),
+  kilometros: z.coerce.number().nullable().optional(),
+  observacionesCliente: z.string(),
+});
