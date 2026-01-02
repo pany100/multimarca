@@ -36,8 +36,8 @@ function ReparacionAnteriorItem({ reparacion, index, addObservacion }: Props) {
   return (
     <Box>
       {index > 0 && <Divider />}
-      <Box p={2}>
-        <Box display="flex" alignItems="center" mb={1}>
+      <Box p={1}>
+        <Box display="flex" alignItems="center">
           <Chip
             label={new Date(reparacion.fechaCreacion).toLocaleDateString(
               "es-AR"
