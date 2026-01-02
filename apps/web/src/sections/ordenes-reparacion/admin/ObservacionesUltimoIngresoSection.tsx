@@ -4,6 +4,7 @@ import { useState } from "react";
 import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
 import JsonStringTable from "./components/JsonStringTable";
 import ObservacionModal from "./components/ObservacionModal";
+import ReparacionesAnteriores from "./components/ReparacionesAnteriores";
 import { useOrden } from "./contexts/OrdenContext";
 import { useObservacionesManager } from "./hooks/useObservacionesManager";
 
@@ -79,6 +80,12 @@ const ObservacionesUltimoIngresoSection = () => {
         message="¿Está seguro que desea eliminar esta observación? Esta acción no se puede deshacer."
         loading={loading}
       />
+      <Box sx={{ m: 2, mt: 0 }}>
+        <ReparacionesAnteriores
+          addObservacion={(observacion: string) => handleSubmit(observacion)}
+          observacionesActuales={orden?.observacionesEntrada || []}
+        />
+      </Box>
     </Card>
   );
 };
