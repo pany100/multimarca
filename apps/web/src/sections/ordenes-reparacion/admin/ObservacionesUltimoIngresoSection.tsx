@@ -83,7 +83,6 @@ const ObservacionesUltimoIngresoSection = () => {
       <Box sx={{ m: 2, mt: 0 }}>
         <ReparacionesAnteriores
           addObservacion={(observacion: string) => handleSubmit(observacion)}
-          observacionesActuales={orden?.observacionesEntrada || []}
         />
       </Box>
     </Card>

@@ -1,37 +1,18 @@
 import HistoryIcon from "@mui/icons-material/History";
-import {
-  Box,
-  Button,
-  Chip,
-  CircularProgress,
-  Divider,
-  List,
-  ListItem,
-  ListItemText,
-  Paper,
-  Tooltip,
-  Typography,
-} from "@mui/material";
+import { Box, CircularProgress, Paper, Typography } from "@mui/material";
 import { useOrden } from "../contexts/OrdenContext";
 import { usePreviousReparations } from "../hooks/usePreviousReparations";
+import ReparacionAnteriorItem from "./ReparacionAnteriorItem";
 
 type Props = {
   addObservacion: (observacion: string) => void;
-  observacionesActuales: string[];
 };
 
-function ReparacionesAnteriores({
-  addObservacion,
-  observacionesActuales,
-}: Props) {
+function ReparacionesAnteriores({ addObservacion }: Props) {
   const { orden } = useOrden();
   const { reparacionesAnteriores, loading } = usePreviousReparations(
     orden?.autoId
   );
-
-  const isObservationAlreadyAdded = (observation: string) => {
-    return observacionesActuales.includes(observation);
-  };
 
   if (loading) {
     return (
@@ -76,77 +57,14 @@ function ReparacionesAnteriores({
                   kilometros: number;
                 },
                 index: number
-              ) => {
-                const observacionesSalida = JSON.parse(
-                  reparacion.observacionesSalida || "[]"
-                );
-
-                return (
-                  <Box key={reparacion.id}>
-                    {index > 0 && <Divider />}
-                    <Box p={2}>
-                      <Box display="flex" alignItems="center" mb={1}>
-                        <Chip
-                          label={new Date(
-                            reparacion.fechaCreacion
-                          ).toLocaleDateString("es-AR")}
-                          size="small"
-                          color="primary"
-                          variant="outlined"
-                        />
-                      </Box>
-                      <List dense disablePadding>
-                        {observacionesSalida.map(
-                          (obs: string, obsIndex: number) => {
-                            const obsString = `${new Date(
-                              reparacion.fechaCreacion
-                            ).toLocaleDateString("es-AR")} - Kms: ${
-                              reparacion.kilometros
-                            } - ${obs}`;
-                            const ultimoIngreso = `Observación último ingreso: ${obsString}`;
-                            return (
-                              <ListItem
-                                key={obsIndex}
-                                sx={{ py: 0.5 }}
-                                secondaryAction={
-                                  <Tooltip
-                                    title={
-                                      isObservationAlreadyAdded(ultimoIngreso)
-                                        ? "Esta observación ya fue agregada"
-                                        : "Agregar a observaciones actuales"
-                                    }
-                                  >
-                                    <span>
-                                      <Button
-                                        variant="contained"
-                                        size="small"
-                                        onClick={() =>
-                                          addObservacion(ultimoIngreso)
-                                        }
-                                        color="primary"
-                                        disabled={isObservationAlreadyAdded(
-                                          ultimoIngreso
-                                        )}
-                                      >
-                                        AGREGAR
-                                      </Button>
-                                    </span>
-                                  </Tooltip>
-                                }
-                              >
-                                <ListItemText
-                                  primary={obsString}
-                                  primaryTypographyProps={{ variant: "body2" }}
-                                />
-                              </ListItem>
-                            );
-                          }
-                        )}
-                      </List>
-                    </Box>
-                  </Box>
-                );
-              }
+              ) => (
+                <ReparacionAnteriorItem
+                  key={reparacion.id}
+                  reparacion={reparacion}
+                  index={index}
+                  addObservacion={addObservacion}
+                />
+              )
             )}
         </Paper>
       ) : (
