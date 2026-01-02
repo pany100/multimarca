@@ -5,7 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 import ControlesSection from "@/sections/ordenes-reparacion/admin/ControlesSection";
 import InformacionGeneralSection from "@/sections/ordenes-reparacion/admin/InformacionGeneralSection";
 import MecanicosSection from "@/sections/ordenes-reparacion/admin/MecanicosSection";
-import ObservacionesSection from "@/sections/ordenes-reparacion/admin/ObservacionesSection";
+import ObservacionesUltimoIngresoSection from "@/sections/ordenes-reparacion/admin/ObservacionesUltimoIngresoSection";
 import OrdenHeader from "@/sections/ordenes-reparacion/admin/OrdenHeader";
 import PreciosSection from "@/sections/ordenes-reparacion/admin/PreciosSection";
 import RepuestosSection from "@/sections/ordenes-reparacion/admin/RepuestosSection";
@@ -68,16 +68,16 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
           {/* Grid de 2 columnas para las demás secciones */}
           <Grid container spacing={3}>
             {/* Columna izquierda */}
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12}>
               <Stack spacing={3}>
-                <ObservacionesSection />
+                <ObservacionesUltimoIngresoSection />
                 <MecanicosSection />
                 <RepuestosSection />
               </Stack>
             </Grid>
 
             {/* Columna derecha */}
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12}>
               <Stack spacing={3}>
                 <ControlesSection />
                 <TrabajosSection />
