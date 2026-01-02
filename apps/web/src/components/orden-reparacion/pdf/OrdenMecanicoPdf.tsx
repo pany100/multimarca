@@ -8,9 +8,9 @@ import TextWithFillLine from "./TextWithFillLine";
 
 import Checkbox from "@mui/material/Checkbox";
 
-import useControles from "@/hooks/orden-reparacion/useControles";
 import { getFormattedDate } from "@/utils/fieldHelper";
 import { styled } from "@mui/material/styles";
+import useControlesFetch from "@/hooks/orden-reparacion/useControlesFetch";
 
 const CheckTypeControlsTwoColumns = styled("div")(() => ({
   display: "grid",
@@ -56,11 +56,7 @@ function sortControls(a: any, b: any) {
 
 export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
   ({ repair }, ref) => {
-    const { checkControls, textControls, groupControls } = useControles({
-      controlesList: repair.controlesEnReparacion.map(
-        (control: any) => control.controlMecanico
-      ),
-    });
+    const { checkControls, textControls, groupControls } = useControlesFetch();
     return (
       <div ref={ref}>
         <style>{setPageStyles()}</style>

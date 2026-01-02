@@ -2,6 +2,7 @@
 
 import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
+import ControlesSection from "@/sections/ordenes-reparacion/admin/ControlesSection";
 import InformacionGeneralSection from "@/sections/ordenes-reparacion/admin/InformacionGeneralSection";
 import MecanicosSection from "@/sections/ordenes-reparacion/admin/MecanicosSection";
 import NotasInternasSection from "@/sections/ordenes-reparacion/admin/NotasInternasSection";
@@ -77,6 +78,11 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
             <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <ObservacionesSalidaSection />
+              </Box>
+            </Grid>
+            <Grid item xs={12} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <ControlesSection />
               </Box>
             </Grid>
             <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
