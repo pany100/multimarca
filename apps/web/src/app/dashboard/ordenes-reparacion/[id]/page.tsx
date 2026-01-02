@@ -2,20 +2,16 @@
 
 import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
-import ControlesSection from "@/sections/ordenes-reparacion/admin/ControlesSection";
 import InformacionGeneralSection from "@/sections/ordenes-reparacion/admin/InformacionGeneralSection";
 import MecanicosSection from "@/sections/ordenes-reparacion/admin/MecanicosSection";
 import NotasInternasSection from "@/sections/ordenes-reparacion/admin/NotasInternasSection";
 import ObservacionesSalidaSection from "@/sections/ordenes-reparacion/admin/ObservacionesSalidaSection";
 import ObservacionesUltimoIngresoSection from "@/sections/ordenes-reparacion/admin/ObservacionesUltimoIngresoSection";
 import OrdenHeader from "@/sections/ordenes-reparacion/admin/OrdenHeader";
-import PreciosSection from "@/sections/ordenes-reparacion/admin/PreciosSection";
 import RepuestosSection from "@/sections/ordenes-reparacion/admin/RepuestosSection";
-import TercerosSection from "@/sections/ordenes-reparacion/admin/TercerosSection";
-import TrabajosSection from "@/sections/ordenes-reparacion/admin/TrabajosSection";
 import { OrdenProvider } from "@/sections/ordenes-reparacion/admin/contexts/OrdenContext";
 import { useOrdenReparacion } from "@/sections/ordenes-reparacion/hooks/useOrdenReparacion";
-import { Box, CircularProgress, Grid, Paper, Stack } from "@mui/material";
+import { Box, CircularProgress, Grid, Paper } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -62,32 +58,36 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
         <Box>
           <OrdenHeader />
 
-          {/* Información General - Ocupa todo el ancho */}
-          <Box sx={{ mb: 3 }}>
-            <InformacionGeneralSection />
-          </Box>
-
-          {/* Grid de 2 columnas para las demás secciones */}
-          <Grid container spacing={3}>
-            {/* Columna izquierda */}
-            <Grid item xs={12}>
-              <Stack spacing={3}>
-                <ObservacionesUltimoIngresoSection />
-                <NotasInternasSection />
-                <ObservacionesSalidaSection />
-                <MecanicosSection />
-                <RepuestosSection />
-              </Stack>
+          <Grid container spacing={3} alignItems="stretch">
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <InformacionGeneralSection />
+              </Box>
             </Grid>
-
-            {/* Columna derecha */}
-            <Grid item xs={12}>
-              <Stack spacing={3}>
-                <ControlesSection />
-                <TrabajosSection />
-                <TercerosSection />
-                <PreciosSection />
-              </Stack>
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <ObservacionesUltimoIngresoSection />
+              </Box>
+            </Grid>
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <NotasInternasSection />
+              </Box>
+            </Grid>
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <ObservacionesSalidaSection />
+              </Box>
+            </Grid>
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <MecanicosSection />
+              </Box>
+            </Grid>
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <RepuestosSection />
+              </Box>
             </Grid>
           </Grid>
         </Box>

@@ -21,8 +21,8 @@ const ObservacionesSalidaSection = () => {
   const [editValue, setEditValue] = useState<string | undefined>();
 
   return (
-    <Card>
-      <CardContent>
+    <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <CardContent sx={{ flex: 1 }}>
         <Typography variant="h6" gutterBottom>
           Observaciones de salida
         </Typography>

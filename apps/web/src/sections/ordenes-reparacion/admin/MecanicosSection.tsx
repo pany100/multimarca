@@ -4,8 +4,8 @@ import { useOrden } from "./contexts/OrdenContext";
 const MecanicosSection = () => {
   const { orden } = useOrden();
   return (
-    <Card>
-      <CardContent>
+    <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <CardContent sx={{ flex: 1 }}>
         <Typography variant="h6" gutterBottom>
           Mecánicos Asignados
         </Typography>

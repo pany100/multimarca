@@ -50,8 +50,8 @@ export const CommonOrderCard = ({
 
   return (
     <>
-      <Card>
-        <CardContent>
+      <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+        <CardContent sx={{ flex: 1 }}>
           {/* Header con título y botón editar */}
           <div
             style={{
