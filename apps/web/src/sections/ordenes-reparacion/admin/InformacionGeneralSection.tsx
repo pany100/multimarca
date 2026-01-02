@@ -1,5 +1,7 @@
 "use client";
 
+import { useSnackbarContext } from "@/contexts/SnackbarContext";
+import { yupResolver } from "@hookform/resolvers/yup";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import EmailIcon from "@mui/icons-material/Email";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
@@ -7,25 +9,63 @@ import PersonIcon from "@mui/icons-material/Person";
 import PhoneIcon from "@mui/icons-material/Phone";
 import SpeedIcon from "@mui/icons-material/Speed";
 import { Box, Chip, Grid, Typography } from "@mui/material";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import * as yup from "yup";
 import { CommonOrderCard } from "./components/CommonOrderCard";
 import { useOrden } from "./contexts/OrdenContext";
+import EditInformacionGeneralForm from "./forms/EditInformacionGeneralForm";
+import { useUpdateOrdenGeneralInfo } from "./hooks/useUpdateOrdenGeneralInfo";
+
+const schema = yup.object({
+  autoId: yup.number().required("El vehículo es requerido"),
+  kilometros: yup.number().nullable().optional(),
+  observacionesCliente: yup
+    .string()
+    .required("Las observaciones son requeridas"),
+});
+
+type FormData = yup.InferType<typeof schema>;
 
 const InformacionGeneralSection = () => {
-  const { orden } = useOrden();
+  const { orden, setOrden } = useOrden();
+  const router = useRouter();
+  const { setSnackbar } = useSnackbarContext();
+  const { updateOrdenGeneralInfo, loading } = useUpdateOrdenGeneralInfo();
 
-  // Form methods para el modal
-  const methods = useForm({
+  // Form methods para el modal con datos precargados
+  const methods = useForm<FormData>({
+    resolver: yupResolver(schema),
     defaultValues: {
+      autoId: orden.autoId,
       kilometros: orden.kilometros,
       observacionesCliente: orden.observacionesCliente,
     },
   });
 
   // Handler para el submit del formulario
-  const handleSubmit = async (data: any) => {
-    console.log("Datos del formulario:", data);
-    // Aquí irá la lógica para actualizar la información general
+  const handleSubmit = async (data: FormData) => {
+    try {
+      const ordenActualizada = await updateOrdenGeneralInfo(orden.id, {
+        autoId: data.autoId,
+        kilometros: data.kilometros,
+        observacionesCliente: data.observacionesCliente,
+      });
+
+      setOrden(ordenActualizada);
+
+      setSnackbar({
+        open: true,
+        message: "Información actualizada correctamente",
+        severity: "success",
+      });
+    } catch (error) {
+      setSnackbar({
+        open: true,
+        message: "Error al actualizar la información",
+        severity: "error",
+      });
+    }
   };
 
   return (
@@ -33,13 +73,8 @@ const InformacionGeneralSection = () => {
       title="Información General"
       formMethods={methods}
       onSubmit={handleSubmit}
-      formContent={
-        <>
-          <Typography variant="body2" color="text.secondary">
-            Formulario para editar kilómetros y observaciones (por implementar)
-          </Typography>
-        </>
-      }
+      loading={loading}
+      formContent={<EditInformacionGeneralForm />}
     >
       <Grid container spacing={3}>
         {/* Columna Izquierda - Cliente */}

@@ -122,4 +122,6 @@ export const patchOrdenV2Schema = z.object({
   observacionesInternas: z.string().optional(),
   observacionesSalida: z.string().optional(),
   observacionesOcultas: z.string().nullable().optional(),
+  fechaEntradaReparacion: z.coerce.date().nullable().optional(),
+  fechaSalidaReparacion: z.coerce.date().nullable().optional(),
 });

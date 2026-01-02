@@ -185,6 +185,45 @@ export class PrismaOrdenReparacionRepository
             owner: true,
           },
         },
+        mecanicos: {
+          include: {
+            mecanico: true,
+          },
+        },
+        repuestosUsados: {
+          include: {
+            stock: {
+              include: {
+                proveedor: true,
+              },
+            },
+          },
+        },
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
+            reciboFile: true,
+          },
+        },
+        ingresos: {
+          include: {
+            dolar: true,
+          },
+        },
+        trabajosRealizados: true,
+        revisadoPor: true,
+        controlesEnReparacion: {
+          include: {
+            controlMecanico: {
+              include: {
+                parent: true,
+              },
+            },
+          },
+        },
+        pagos: true,
+        recibosFiles: true,
+        scannerFile: true,
       },
     });
   }

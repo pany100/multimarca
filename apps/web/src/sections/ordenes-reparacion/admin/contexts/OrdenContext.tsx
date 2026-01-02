@@ -1,22 +1,27 @@
 "use client";
 
-import { createContext, useContext } from "react";
+import { createContext, useContext, useState } from "react";
 
 interface OrdenContextType {
   orden: any;
+  setOrden: (orden: any) => void;
 }
 
 const OrdenContext = createContext<OrdenContextType | undefined>(undefined);
 
 export const OrdenProvider = ({
   children,
-  orden,
+  orden: initialOrden,
 }: {
   children: React.ReactNode;
   orden: any;
 }) => {
+  const [orden, setOrden] = useState(initialOrden);
+
   return (
-    <OrdenContext.Provider value={{ orden }}>{children}</OrdenContext.Provider>
+    <OrdenContext.Provider value={{ orden, setOrden }}>
+      {children}
+    </OrdenContext.Provider>
   );
 };
 

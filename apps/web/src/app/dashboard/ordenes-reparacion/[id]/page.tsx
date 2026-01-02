@@ -1,5 +1,6 @@
 "use client";
 
+import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
 import ControlesSection from "@/sections/ordenes-reparacion/admin/ControlesSection";
 import EstadoYFechasSection from "@/sections/ordenes-reparacion/admin/EstadoYFechasSection";
@@ -55,39 +56,41 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
   }
 
   return (
-    <OrdenProvider orden={ordenReparacion}>
-      <Box>
-        <OrdenHeader orden={ordenReparacion} />
+    <SnackbarProvider>
+      <OrdenProvider orden={ordenReparacion}>
+        <Box>
+          <OrdenHeader />
 
-        {/* Información General - Ocupa todo el ancho */}
-        <Box sx={{ mb: 3 }}>
-          <InformacionGeneralSection />
+          {/* Información General - Ocupa todo el ancho */}
+          <Box sx={{ mb: 3 }}>
+            <InformacionGeneralSection />
+          </Box>
+
+          {/* Grid de 2 columnas para las demás secciones */}
+          <Grid container spacing={3}>
+            {/* Columna izquierda */}
+            <Grid item xs={12} md={6}>
+              <Stack spacing={3}>
+                <EstadoYFechasSection />
+                <ObservacionesSection />
+                <MecanicosSection />
+                <RepuestosSection />
+              </Stack>
+            </Grid>
+
+            {/* Columna derecha */}
+            <Grid item xs={12} md={6}>
+              <Stack spacing={3}>
+                <ControlesSection />
+                <TrabajosSection />
+                <TercerosSection />
+                <PreciosSection />
+              </Stack>
+            </Grid>
+          </Grid>
         </Box>
-
-        {/* Grid de 2 columnas para las demás secciones */}
-        <Grid container spacing={3}>
-          {/* Columna izquierda */}
-          <Grid item xs={12} md={6}>
-            <Stack spacing={3}>
-              <EstadoYFechasSection />
-              <ObservacionesSection />
-              <MecanicosSection />
-              <RepuestosSection />
-            </Stack>
-          </Grid>
-
-          {/* Columna derecha */}
-          <Grid item xs={12} md={6}>
-            <Stack spacing={3}>
-              <ControlesSection />
-              <TrabajosSection />
-              <TercerosSection />
-              <PreciosSection />
-            </Stack>
-          </Grid>
-        </Grid>
-      </Box>
-    </OrdenProvider>
+      </OrdenProvider>
+    </SnackbarProvider>
   );
 };
 

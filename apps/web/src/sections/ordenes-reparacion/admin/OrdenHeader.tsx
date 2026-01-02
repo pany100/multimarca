@@ -2,7 +2,6 @@
 
 import OrdenClienteInterna from "@/components/orden-reparacion/pdf/OrdenClienteInterna";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
-import { getStatusColor } from "@/utils/ordenHelper";
 import CloseIcon from "@mui/icons-material/Close";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import {
@@ -16,15 +15,15 @@ import {
 } from "@mui/material";
 import { PrintMenu } from "./components/PrintMenu";
 import { WhatsAppConfirmDialog } from "./components/WhatsAppConfirmDialog";
+import { useOrden } from "./contexts/OrdenContext";
+import { getEstadoColor, getEstadoLabel } from "./helpers/estadoHelpers";
 import { useCerrarOrdenHandler } from "./hooks/useCerrarOrdenHandler";
 import { usePrintHandlers } from "./hooks/usePrintHandlers";
 import { useWhatsAppHandlers } from "./hooks/useWhatsAppHandlers";
 
-interface OrdenHeaderProps {
-  orden: any;
-}
-
-function OrdenHeader({ orden }: OrdenHeaderProps) {
+function OrdenHeader() {
+  const { orden } = useOrden();
+  console.log(orden);
   // WhatsApp handlers
   const {
     openConfirmModal,
@@ -105,8 +104,8 @@ function OrdenHeader({ orden }: OrdenHeaderProps) {
             }}
           >
             <Chip
-              label={orden.estado}
-              color={getStatusColor(orden.estado)}
+              label={getEstadoLabel(orden.estado)}
+              color={getEstadoColor(orden.estado)}
               size="medium"
               sx={{
                 fontWeight: 500,
