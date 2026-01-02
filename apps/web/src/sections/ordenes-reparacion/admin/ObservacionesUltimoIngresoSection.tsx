@@ -8,8 +8,6 @@ import ReparacionesAnteriores from "./components/ReparacionesAnteriores";
 import { useOrden } from "./contexts/OrdenContext";
 import { useObservacionesManager } from "./hooks/useObservacionesManager";
 
-interface ObservacionesSectionProps {}
-
 const ObservacionesUltimoIngresoSection = () => {
   const { orden } = useOrden();
   const {

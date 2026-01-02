@@ -1,5 +1,84 @@
-function ObservacionesSalidaSection() {
-  return <div>Observaciones Salida</div>;
-}
+import AddIcon from "@mui/icons-material/Add";
+import { Box, Button, Card, CardContent, Typography } from "@mui/material";
+import { useState } from "react";
+import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
+import JsonStringTable from "./components/JsonStringTable";
+import ObservacionModal from "./components/ObservacionModal";
+import { useOrden } from "./contexts/OrdenContext";
+import { useObservacionesSalidaManager } from "./hooks/useObservacionesSalidaManager";
+
+const ObservacionesSalidaSection = () => {
+  const { orden } = useOrden();
+  const {
+    loading,
+    handleSubmit,
+    handleDeleteClick,
+    deleteConfirmOpen,
+    handleDeleteConfirm,
+    handleDeleteCancel,
+  } = useObservacionesSalidaManager();
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editValue, setEditValue] = useState<string | undefined>();
+
+  return (
+    <Card>
+      <CardContent>
+        <Typography variant="h6" gutterBottom>
+          Observaciones de salida
+        </Typography>
+        <JsonStringTable
+          jsonString={orden?.observacionesSalida || "[]"}
+          columnName="Observaciones"
+          onEdit={(item) => {
+            setEditValue(item.value);
+            setModalOpen(true);
+          }}
+          onDelete={handleDeleteClick}
+          emptyMessage="No hay observaciones"
+          loading={loading}
+        />
+        <Box display="flex" justifyContent="flex-end" sx={{ mt: 1 }}>
+          <Button
+            variant="contained"
+            startIcon={<AddIcon />}
+            onClick={() => {
+              setEditValue(undefined);
+              setModalOpen(true);
+            }}
+            sx={{ mt: 1 }}
+          >
+            Agregar Observacion
+          </Button>
+        </Box>
+      </CardContent>
+
+      <ObservacionModal
+        open={modalOpen}
+        onClose={() => {
+          setModalOpen(false);
+          setEditValue(undefined);
+        }}
+        onSubmit={async (observacion) => {
+          const success = await handleSubmit(observacion, editValue);
+          if (success) {
+            setModalOpen(false);
+            setEditValue(undefined);
+          }
+        }}
+        initialValue={editValue}
+        loading={loading}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteConfirmOpen}
+        onClose={handleDeleteCancel}
+        onConfirm={handleDeleteConfirm}
+        title="Eliminar observación"
+        message="¿Está seguro que desea eliminar esta observación? Esta acción no se puede deshacer."
+        loading={loading}
+      />
+    </Card>
+  );
+};
 
 export default ObservacionesSalidaSection;
