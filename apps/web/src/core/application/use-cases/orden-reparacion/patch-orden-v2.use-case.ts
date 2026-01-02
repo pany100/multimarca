@@ -32,6 +32,10 @@ export class PatchOrdenV2UseCase {
       dataToUpdate.observacionesCliente = dto.observacionesCliente;
     }
 
+    if (dto.observacionesEntrada !== undefined) {
+      dataToUpdate.observacionesEntrada = dto.observacionesEntrada;
+    }
+
     if (dto.estado !== undefined) {
       dataToUpdate.estado = dto.estado;
     }

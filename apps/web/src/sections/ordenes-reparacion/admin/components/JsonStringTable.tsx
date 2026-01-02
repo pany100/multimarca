@@ -62,6 +62,18 @@ const JsonStringTable = ({
       headerName: columnName,
       flex: 1,
       sortable: false,
+      renderCell: (params) => (
+        <div
+          style={{
+            whiteSpace: "normal",
+            wordWrap: "break-word",
+            lineHeight: "1.5",
+            padding: "8px 0",
+          }}
+        >
+          {params.value}
+        </div>
+      ),
     },
   ];
 
@@ -140,8 +152,14 @@ const JsonStringTable = ({
         "& .MuiDataGrid-cell": {
           display: "flex",
           alignItems: "center",
+          whiteSpace: "normal",
+          wordWrap: "break-word",
+        },
+        "& .MuiDataGrid-row": {
+          maxHeight: "none !important",
         },
       }}
+      getRowHeight={() => "auto"}
     />
   );
 };
