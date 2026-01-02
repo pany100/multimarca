@@ -35,9 +35,16 @@ const CommonModalForm = ({
   loading = false,
   submitButtonText = "Guardar",
   cancelButtonText = "Cancelar",
+  maxWidth = "xs",
+  fullWidth = true,
 }: CommonModalFormProps) => {
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth={maxWidth}
+      fullWidth={fullWidth}
+    >
       <DialogTitle sx={{ paddingBottom: 0 }}>{title}</DialogTitle>
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(onSubmit)}>

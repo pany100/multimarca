@@ -5,6 +5,8 @@ import { useAuth } from "@/hooks/useAuth";
 import ControlesSection from "@/sections/ordenes-reparacion/admin/ControlesSection";
 import InformacionGeneralSection from "@/sections/ordenes-reparacion/admin/InformacionGeneralSection";
 import MecanicosSection from "@/sections/ordenes-reparacion/admin/MecanicosSection";
+import NotasInternasSection from "@/sections/ordenes-reparacion/admin/NotasInternasSection";
+import ObservacionesSalidaSection from "@/sections/ordenes-reparacion/admin/ObservacionesSalidaSection";
 import ObservacionesUltimoIngresoSection from "@/sections/ordenes-reparacion/admin/ObservacionesUltimoIngresoSection";
 import OrdenHeader from "@/sections/ordenes-reparacion/admin/OrdenHeader";
 import PreciosSection from "@/sections/ordenes-reparacion/admin/PreciosSection";
@@ -71,6 +73,8 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
             <Grid item xs={12}>
               <Stack spacing={3}>
                 <ObservacionesUltimoIngresoSection />
+                <NotasInternasSection />
+                <ObservacionesSalidaSection />
                 <MecanicosSection />
                 <RepuestosSection />
               </Stack>
