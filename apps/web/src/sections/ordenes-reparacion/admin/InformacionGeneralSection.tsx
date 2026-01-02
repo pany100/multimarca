@@ -2,17 +2,15 @@
 
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { yupResolver } from "@hookform/resolvers/yup";
-import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
-import EmailIcon from "@mui/icons-material/Email";
-import LocationOnIcon from "@mui/icons-material/LocationOn";
-import PersonIcon from "@mui/icons-material/Person";
-import PhoneIcon from "@mui/icons-material/Phone";
-import SpeedIcon from "@mui/icons-material/Speed";
-import { Box, Chip, Grid, Typography } from "@mui/material";
+import { Divider, Grid } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
+import { ClienteInfo } from "./components/ClienteInfo";
 import { CommonOrderCard } from "./components/CommonOrderCard";
+import { EstadoYFechasInfo } from "./components/EstadoYFechasInfo";
+import { ObservacionesClienteInfo } from "./components/ObservacionesClienteInfo";
+import { VehiculoInfo } from "./components/VehiculoInfo";
 import { useOrden } from "./contexts/OrdenContext";
 import EditInformacionGeneralForm from "./forms/EditInformacionGeneralForm";
 import { useUpdateOrdenGeneralInfo } from "./hooks/useUpdateOrdenGeneralInfo";
@@ -20,6 +18,9 @@ import { useUpdateOrdenGeneralInfo } from "./hooks/useUpdateOrdenGeneralInfo";
 const schema = yup.object({
   autoId: yup.number().required("El vehículo es requerido"),
   kilometros: yup.number().nullable().optional(),
+  estado: yup.string().required("El estado es requerido"),
+  fechaEntradaReparacion: yup.string().nullable().optional(),
+  fechaSalidaReparacion: yup.string().nullable().optional(),
   observacionesCliente: yup
     .string()
     .required("Las observaciones son requeridas"),
@@ -39,9 +40,32 @@ const InformacionGeneralSection = () => {
     defaultValues: {
       autoId: orden.autoId,
       kilometros: orden.kilometros,
+      estado: orden.estado,
+      fechaEntradaReparacion: orden.fechaEntradaReparacion
+        ? new Date(orden.fechaEntradaReparacion).toISOString().split("T")[0]
+        : null,
+      fechaSalidaReparacion: orden.fechaSalidaReparacion
+        ? new Date(orden.fechaSalidaReparacion).toISOString().split("T")[0]
+        : null,
       observacionesCliente: orden.observacionesCliente,
     },
   });
+
+  // Handler para resetear el formulario con los valores actuales de la orden
+  const handleOpenModal = () => {
+    methods.reset({
+      autoId: orden.autoId,
+      kilometros: orden.kilometros,
+      estado: orden.estado,
+      fechaEntradaReparacion: orden.fechaEntradaReparacion
+        ? new Date(orden.fechaEntradaReparacion).toISOString().split("T")[0]
+        : null,
+      fechaSalidaReparacion: orden.fechaSalidaReparacion
+        ? new Date(orden.fechaSalidaReparacion).toISOString().split("T")[0]
+        : null,
+      observacionesCliente: orden.observacionesCliente,
+    });
+  };
 
   // Handler para el submit del formulario
   const handleSubmit = async (data: FormData) => {
@@ -49,6 +73,9 @@ const InformacionGeneralSection = () => {
       const ordenActualizada = await updateOrdenGeneralInfo(orden.id, {
         autoId: data.autoId,
         kilometros: data.kilometros,
+        estado: data.estado,
+        fechaEntradaReparacion: data.fechaEntradaReparacion || null,
+        fechaSalidaReparacion: data.fechaSalidaReparacion || null,
         observacionesCliente: data.observacionesCliente,
       });
 
@@ -73,145 +100,38 @@ const InformacionGeneralSection = () => {
       title="Información General"
       formMethods={methods}
       onSubmit={handleSubmit}
+      onOpen={handleOpenModal}
       loading={loading}
       formContent={<EditInformacionGeneralForm />}
     >
+      {/* Primera fila: Cliente (izq) / Vehículo (der) */}
       <Grid container spacing={3}>
-        {/* Columna Izquierda - Cliente */}
         <Grid item xs={12} md={6}>
-          <Typography
-            variant="subtitle1"
-            sx={{ fontWeight: 600, mb: 2, color: "text.secondary" }}
-          >
-            Cliente
-          </Typography>
-
-          {/* Nombre */}
-          <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
-            <PersonIcon sx={{ color: "text.secondary", mr: 1, fontSize: 20 }} />
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {orden.auto?.owner?.fullName || "N/A"}
-            </Typography>
-          </Box>
-
-          {/* Teléfono */}
-          <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
-            <PhoneIcon sx={{ color: "text.secondary", mr: 1, fontSize: 20 }} />
-            <Typography variant="body2" color="text.secondary">
-              {orden.auto?.owner?.phone || "N/A"}
-            </Typography>
-          </Box>
-
-          {/* Email */}
-          <Box sx={{ display: "flex", alignItems: "center", mb: 1.5 }}>
-            <EmailIcon sx={{ color: "text.secondary", mr: 1, fontSize: 20 }} />
-            <Typography variant="body2" color="text.secondary">
-              {orden.auto?.owner?.email || "N/A"}
-            </Typography>
-          </Box>
-
-          {/* Dirección */}
-          <Box sx={{ display: "flex", alignItems: "center" }}>
-            <LocationOnIcon
-              sx={{ color: "text.secondary", mr: 1, fontSize: 20 }}
-            />
-            <Typography variant="body2" color="text.secondary">
-              {orden.auto?.owner?.address || "N/A"}
-            </Typography>
-          </Box>
+          <ClienteInfo cliente={orden.auto?.owner} />
         </Grid>
-
-        {/* Columna Derecha - Vehículo */}
         <Grid item xs={12} md={6}>
-          <Typography
-            variant="subtitle1"
-            sx={{ fontWeight: 600, mb: 2, color: "text.secondary" }}
-          >
-            Vehículo
-          </Typography>
-
-          {/* Marca, Modelo y Patente */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              mb: 1.5,
-            }}
-          >
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              <DirectionsCarIcon
-                sx={{ color: "text.secondary", mr: 1, fontSize: 20 }}
-              />
-              <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                {orden.auto?.brand} {orden.auto?.model}
-              </Typography>
-            </Box>
-            <Chip
-              label={orden.auto?.patent || "N/A"}
-              size="small"
-              sx={{
-                fontWeight: 600,
-                backgroundColor: "action.hover",
-              }}
-            />
-          </Box>
-
-          {/* Año y Color */}
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ ml: 4, mb: 2 }}
-          >
-            {orden.auto?.year} · {orden.auto?.color}
-          </Typography>
-
-          {/* Kilómetros */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              backgroundColor: "action.hover",
-              p: 1.5,
-              borderRadius: 1,
-            }}
-          >
-            <SpeedIcon sx={{ color: "primary.main", mr: 1, fontSize: 20 }} />
-            <Typography variant="body2" sx={{ fontWeight: 600 }}>
-              {orden.kilometros?.toLocaleString() || "0"} km
-            </Typography>
-          </Box>
+          <VehiculoInfo vehiculo={orden.auto} kilometros={orden.kilometros} />
         </Grid>
       </Grid>
 
-      {/* Observaciones del Cliente */}
-      {orden.observacionesCliente && (
-        <Box
-          sx={{
-            mt: 3,
-            p: 2,
-            backgroundColor: "#fffbea",
-            borderRadius: 1,
-            border: "1px solid #fef3c7",
-          }}
-        >
-          <Typography
-            variant="subtitle2"
-            sx={{ fontWeight: 600, mb: 1, color: "#92400e" }}
-          >
-            Observaciones del cliente:
-          </Typography>
-          <Typography
-            variant="body2"
-            sx={{
-              color: "#92400e",
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            {orden.observacionesCliente}
-          </Typography>
-        </Box>
-      )}
+      {/* Separador */}
+      <Divider sx={{ my: 3, borderColor: "divider" }} />
+
+      {/* Segunda fila: Estado y Fechas (izq) / Observaciones (der) */}
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <EstadoYFechasInfo
+            estado={orden.estado}
+            fechaEntradaReparacion={orden.fechaEntradaReparacion}
+            fechaSalidaReparacion={orden.fechaSalidaReparacion}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <ObservacionesClienteInfo
+            observaciones={orden.observacionesCliente}
+          />
+        </Grid>
+      </Grid>
     </CommonOrderCard>
   );
 };

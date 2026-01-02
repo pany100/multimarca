@@ -3,7 +3,6 @@
 import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
 import ControlesSection from "@/sections/ordenes-reparacion/admin/ControlesSection";
-import EstadoYFechasSection from "@/sections/ordenes-reparacion/admin/EstadoYFechasSection";
 import InformacionGeneralSection from "@/sections/ordenes-reparacion/admin/InformacionGeneralSection";
 import MecanicosSection from "@/sections/ordenes-reparacion/admin/MecanicosSection";
 import ObservacionesSection from "@/sections/ordenes-reparacion/admin/ObservacionesSection";
@@ -71,7 +70,6 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
             {/* Columna izquierda */}
             <Grid item xs={12} md={6}>
               <Stack spacing={3}>
-                <EstadoYFechasSection />
                 <ObservacionesSection />
                 <MecanicosSection />
                 <RepuestosSection />

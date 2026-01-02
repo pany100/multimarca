@@ -2,6 +2,7 @@
 
 import OrdenClienteInterna from "@/components/orden-reparacion/pdf/OrdenClienteInterna";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
+import { getFormattedDateArg } from "@/utils/fieldHelper";
 import CloseIcon from "@mui/icons-material/Close";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import {
@@ -91,6 +92,9 @@ function OrdenHeader() {
               }}
             >
               Orden #{orden.id} - Patente {orden.auto?.patent || "N/A"}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Creada el {getFormattedDateArg(orden.fechaCreacion)}
             </Typography>
           </Box>
 

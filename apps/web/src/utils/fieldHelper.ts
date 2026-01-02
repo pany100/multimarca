@@ -22,6 +22,16 @@ function getFormattedDate(date: string) {
   return `${day}/${month}/${year}`;
 }
 
+const getFormattedDateArg = (date: Date | string | null | undefined) => {
+  if (!date) return "No definida";
+  const d = new Date(date);
+  return d.toLocaleDateString("es-AR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
 function getFormattedChequeType(type: string) {
   switch (type) {
     case "VENTA":
@@ -106,6 +116,7 @@ function getSortedGroupControls(controlesList: ControlMecanico[]) {
 export {
   getFormattedChequeType,
   getFormattedDate,
+  getFormattedDateArg,
   getFormattedPrice,
   getFormattedPriceDolar,
   getOperacionChequeLabel,

@@ -11,6 +11,9 @@ export const useUpdateOrdenGeneralInfo = () => {
     data: {
       autoId?: number;
       kilometros?: number | null;
+      estado?: string;
+      fechaEntradaReparacion?: string | null;
+      fechaSalidaReparacion?: string | null;
       observacionesCliente?: string;
     }
   ) => {

@@ -13,6 +13,7 @@ interface CommonOrderCardProps {
   formMethods: UseFormReturn<any>;
   formContent: ReactNode;
   onSubmit: (data: any) => void | Promise<void>;
+  onOpen?: () => void;
   loading?: boolean;
   submitButtonText?: string;
 }
@@ -24,12 +25,16 @@ export const CommonOrderCard = ({
   formMethods,
   formContent,
   onSubmit,
+  onOpen,
   loading = false,
   submitButtonText = "Guardar",
 }: CommonOrderCardProps) => {
   const [openModal, setOpenModal] = useState(false);
 
   const handleOpenModal = () => {
+    if (onOpen) {
+      onOpen();
+    }
     setOpenModal(true);
   };
 
