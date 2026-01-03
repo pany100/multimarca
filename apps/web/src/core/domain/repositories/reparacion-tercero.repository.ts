@@ -1,7 +1,9 @@
 export interface ReparacionTerceroRepository {
   add(
     data: {
-      ordenReparacionId: number;
+      ordenReparacionId?: number;
+      ventaId?: number;
+      presupuestoId?: number;
       nombre: string;
       proveedorId: number;
       precioCompra: number;

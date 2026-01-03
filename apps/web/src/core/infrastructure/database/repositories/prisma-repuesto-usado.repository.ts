@@ -4,7 +4,9 @@ import { prisma } from "@/core/infrastructure/database/prisma";
 export class PrismaRepuestoUsadoRepository implements RepuestoUsadoRepository {
   async add(
     data: {
-      ordenReparacionId: number;
+      ordenReparacionId?: number;
+      ventaId?: number;
+      presupuestoId?: number;
       stockId: number;
       precioCompra: number;
       precioVenta: number;
@@ -17,6 +19,8 @@ export class PrismaRepuestoUsadoRepository implements RepuestoUsadoRepository {
     return db.repuestoUsado.create({
       data: {
         ordenReparacionId: data.ordenReparacionId,
+        ventaId: data.ventaId,
+        presupuestoId: data.presupuestoId,
         stockId: data.stockId,
         precioCompra: data.precioCompra,
         precioVenta: data.precioVenta,

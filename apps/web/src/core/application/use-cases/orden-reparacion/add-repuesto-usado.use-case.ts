@@ -14,6 +14,19 @@ export class AddRepuestoUsadoUseCase {
   ) {}
 
   async execute(input: AddRepuestoUsadoDto) {
+    // Validate that exactly one parent ID is provided
+    const parentIds = [
+      input.ordenReparacionId,
+      input.ventaId,
+      input.presupuestoId,
+    ].filter((id) => id !== undefined && id !== null);
+
+    if (parentIds.length !== 1) {
+      throw new Error(
+        "Debe proporcionar exactamente uno de: ordenReparacionId, ventaId, o presupuestoId"
+      );
+    }
+
     // Create RepuestoUsado VO for stock validation
     const repuestoVO = RepuestoUsado.from({
       stockId: input.stockId,
@@ -31,6 +44,8 @@ export class AddRepuestoUsadoUseCase {
       const result = await this.repo.add(
         {
           ordenReparacionId: input.ordenReparacionId,
+          ventaId: input.ventaId,
+          presupuestoId: input.presupuestoId,
           stockId: input.stockId,
           precioCompra: input.precioCompra,
           precioVenta: input.precioVenta,

@@ -1,7 +1,9 @@
 export interface RepuestoUsadoRepository {
   add(
     data: {
-      ordenReparacionId: number;
+      ordenReparacionId?: number;
+      ventaId?: number;
+      presupuestoId?: number;
       stockId: number;
       precioCompra: number;
       precioVenta: number;

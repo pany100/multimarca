@@ -6,7 +6,9 @@ export class PrismaReparacionTerceroRepository
 {
   async add(
     data: {
-      ordenReparacionId: number;
+      ordenReparacionId?: number;
+      ventaId?: number;
+      presupuestoId?: number;
       nombre: string;
       proveedorId: number;
       precioCompra: number;
@@ -21,6 +23,8 @@ export class PrismaReparacionTerceroRepository
     const reparacion = await db.reparacionDeTercero.create({
       data: {
         ordenReparacionId: data.ordenReparacionId,
+        ventaId: data.ventaId,
+        presupuestoId: data.presupuestoId,
         nombre: data.nombre,
         proveedorId: data.proveedorId,
         precioCompra: data.precioCompra,

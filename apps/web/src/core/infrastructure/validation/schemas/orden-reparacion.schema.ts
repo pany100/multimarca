@@ -146,14 +146,31 @@ export const deleteMecanicoFromOrdenSchema = z.object({
   id: z.coerce.number(),
 });
 
-export const addReparacionTerceroSchema = z.object({
-  ordenReparacionId: z.coerce.number(),
-  nombre: z.string().min(1),
-  proveedorId: z.coerce.number(),
-  precioCompra: z.coerce.number(),
-  precioVenta: z.coerce.number(),
-  recibo: z.string().nullable().optional(),
-});
+export const addReparacionTerceroSchema = z
+  .object({
+    ordenReparacionId: z.coerce.number().optional(),
+    ventaId: z.coerce.number().optional(),
+    presupuestoId: z.coerce.number().optional(),
+    nombre: z.string().min(1),
+    proveedorId: z.coerce.number(),
+    precioCompra: z.coerce.number(),
+    precioVenta: z.coerce.number(),
+    recibo: z.string().nullable().optional(),
+  })
+  .refine(
+    (data) => {
+      const parentIds = [
+        data.ordenReparacionId,
+        data.ventaId,
+        data.presupuestoId,
+      ].filter((id) => id !== undefined);
+      return parentIds.length === 1;
+    },
+    {
+      message:
+        "Debe proporcionar exactamente uno de: ordenReparacionId, ventaId, o presupuestoId",
+    }
+  );
 
 export const updateReparacionTerceroSchema = z.object({
   id: z.coerce.number(),
@@ -168,13 +185,30 @@ export const deleteReparacionTerceroSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
 
-export const addRepuestoUsadoSchema = z.object({
-  ordenReparacionId: z.number().int().positive(),
-  stockId: z.number().int().positive(),
-  precioCompra: z.number().nonnegative(),
-  precioVenta: z.number().nonnegative(),
-  unidadesConsumidas: z.number().int().positive(),
-});
+export const addRepuestoUsadoSchema = z
+  .object({
+    ordenReparacionId: z.number().int().positive().optional(),
+    ventaId: z.number().int().positive().optional(),
+    presupuestoId: z.number().int().positive().optional(),
+    stockId: z.number().int().positive(),
+    precioCompra: z.number().nonnegative(),
+    precioVenta: z.number().nonnegative(),
+    unidadesConsumidas: z.number().int().positive(),
+  })
+  .refine(
+    (data) => {
+      const parentIds = [
+        data.ordenReparacionId,
+        data.ventaId,
+        data.presupuestoId,
+      ].filter((id) => id !== undefined);
+      return parentIds.length === 1;
+    },
+    {
+      message:
+        "Debe proporcionar exactamente uno de: ordenReparacionId, ventaId, o presupuestoId",
+    }
+  );
 
 export const updateRepuestoUsadoSchema = z.object({
   id: z.coerce.number().int().positive(),
