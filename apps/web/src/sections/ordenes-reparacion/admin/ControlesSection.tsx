@@ -1,17 +1,70 @@
-import { Card, CardContent, Typography } from "@mui/material";
-import { useOrden } from "./contexts/OrdenContext";
+"use client";
+
+import EditIcon from "@mui/icons-material/Edit";
+import {
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CircularProgress,
+  IconButton,
+  Typography,
+} from "@mui/material";
+import { useState } from "react";
+import EditControlesForm from "./forms/EditControlesForm";
+import { useUpdateControles } from "./hooks/useUpdateControles";
 
 const ControlesSection = () => {
-  const { orden } = useOrden();
+  const [isEditing, setIsEditing] = useState(false);
+
+  const { loading: updating, updateControles } = useUpdateControles();
   return (
-    <Card>
-      <CardContent>
-        <Typography variant="h6" gutterBottom>
-          Controles
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Placeholder: Scanner, Revisado por, etc.
-        </Typography>
+    <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
+      <CardContent sx={{ flex: 1 }}>
+        {/* Header */}
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={2}
+        >
+          <Typography variant="h6">Controles</Typography>
+          {!isEditing && (
+            <IconButton
+              size="small"
+              onClick={() => setIsEditing(true)}
+              aria-label="Editar"
+              sx={{
+                "&:hover": {
+                  backgroundColor: "action.hover",
+                },
+              }}
+            >
+              <EditIcon fontSize="small" />
+            </IconButton>
+          )}
+        </Box>
+        <EditControlesForm isEditing={isEditing} />
+
+        {isEditing && (
+          <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
+            <Button
+              variant="outlined"
+              onClick={() => setIsEditing(false)}
+              disabled={updating}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              onClick={() => console.log("saving")}
+              disabled={updating}
+              startIcon={updating && <CircularProgress size={20} />}
+            >
+              {updating ? "Guardando..." : "Confirmar"}
+            </Button>
+          </Box>
+        )}
       </CardContent>
     </Card>
   );
