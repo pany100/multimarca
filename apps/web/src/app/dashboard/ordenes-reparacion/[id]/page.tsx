@@ -15,6 +15,7 @@ import RecargoSection from "@/sections/ordenes-reparacion/admin/RecargoSection";
 import RepuestosSection from "@/sections/ordenes-reparacion/admin/RepuestosSection";
 import RevisionSection from "@/sections/ordenes-reparacion/admin/RevisionSection";
 import TercerosSection from "@/sections/ordenes-reparacion/admin/TercerosSection";
+import TrabajosSection from "@/sections/ordenes-reparacion/admin/TrabajosSection";
 import { ControlesProvider } from "@/sections/ordenes-reparacion/admin/contexts/ControlesContext";
 import { OrdenProvider } from "@/sections/ordenes-reparacion/admin/contexts/OrdenContext";
 import { useOrdenReparacion } from "@/sections/ordenes-reparacion/hooks/useOrdenReparacion";
@@ -121,6 +122,11 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
             <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <RecargoSection />
+              </Box>
+            </Grid>
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <TrabajosSection />
               </Box>
             </Grid>
           </Grid>
