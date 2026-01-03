@@ -11,7 +11,7 @@ type Props = {
 };
 
 function CheckboxControlesEdit({ checkControls, isEditing }: Props) {
-  const { updateControl } = useControlesContext();
+  const { isChecked, updateControl } = useControlesContext();
   return (
     <Grid item xs={12}>
       <Paper
@@ -32,18 +32,18 @@ function CheckboxControlesEdit({ checkControls, isEditing }: Props) {
           }}
         >
           {checkControls.map((control: ControlMecanico) => {
-            const isChecked = control.valor === "true";
+            const checked = isChecked(control.id);
             const controlName = control.pdfName || control.name;
             const isLongName = controlName.length > MAX_CONTROL_LENGTH;
 
             return (
               <CheckboxControlItem
                 key={control.id}
-                isChecked={isChecked}
+                isChecked={checked}
                 controlName={controlName}
                 isLongName={isLongName}
                 onClick={() =>
-                  updateControl(control, isChecked ? "false" : "true")
+                  updateControl(control, checked ? "false" : "true")
                 }
                 disabled={!isEditing}
               />

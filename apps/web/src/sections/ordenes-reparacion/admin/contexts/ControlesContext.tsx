@@ -7,6 +7,8 @@ import { useOrden } from "./OrdenContext";
 interface ControlesContextType {
   itemsEdited: ControlMecanico[];
   updateControl: (control: ControlMecanico, valor: string) => void;
+  isChecked: (controlId: number) => boolean;
+  reset: () => void;
 }
 
 const ControlesContext = createContext<ControlesContextType | undefined>(
@@ -43,8 +45,19 @@ export const ControlesProvider = ({
     });
   };
 
+  const isChecked = (controlId: number): boolean => {
+    const control = itemsEdited.find((item) => item.id === controlId);
+    return control?.valor === "true";
+  };
+
+  const reset = () => {
+    setItemsEdited(orden.controlesEnReparacion || []);
+  };
+
   return (
-    <ControlesContext.Provider value={{ itemsEdited, updateControl }}>
+    <ControlesContext.Provider
+      value={{ itemsEdited, updateControl, isChecked, reset }}
+    >
       {children}
     </ControlesContext.Provider>
   );

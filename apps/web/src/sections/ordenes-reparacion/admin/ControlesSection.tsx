@@ -11,6 +11,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+import { useControlesContext } from "./contexts/ControlesContext";
 import EditControlesForm from "./forms/EditControlesForm";
 import { useUpdateControles } from "./hooks/useUpdateControles";
 
@@ -18,6 +19,7 @@ const ControlesSection = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   const { loading: updating, updateControles } = useUpdateControles();
+  const { reset } = useControlesContext();
   return (
     <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <CardContent sx={{ flex: 1 }}>
@@ -50,7 +52,10 @@ const ControlesSection = () => {
           <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
             <Button
               variant="outlined"
-              onClick={() => setIsEditing(false)}
+              onClick={() => {
+                setIsEditing(false);
+                reset();
+              }}
               disabled={updating}
             >
               Cancelar

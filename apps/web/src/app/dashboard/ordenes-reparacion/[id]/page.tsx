@@ -10,6 +10,7 @@ import ObservacionesSalidaSection from "@/sections/ordenes-reparacion/admin/Obse
 import ObservacionesUltimoIngresoSection from "@/sections/ordenes-reparacion/admin/ObservacionesUltimoIngresoSection";
 import OrdenHeader from "@/sections/ordenes-reparacion/admin/OrdenHeader";
 import RepuestosSection from "@/sections/ordenes-reparacion/admin/RepuestosSection";
+import { ControlesProvider } from "@/sections/ordenes-reparacion/admin/contexts/ControlesContext";
 import { OrdenProvider } from "@/sections/ordenes-reparacion/admin/contexts/OrdenContext";
 import { useOrdenReparacion } from "@/sections/ordenes-reparacion/hooks/useOrdenReparacion";
 import { Box, CircularProgress, Grid, Paper } from "@mui/material";
@@ -82,7 +83,9 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
             </Grid>
             <Grid item xs={12} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
-                <ControlesSection />
+                <ControlesProvider>
+                  <ControlesSection />
+                </ControlesProvider>
               </Box>
             </Grid>
             <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
