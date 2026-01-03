@@ -1,6 +1,9 @@
 "use client";
 
-import { ControlMecanico } from "@/hooks/orden-reparacion/useControles";
+import {
+  ControlEnReparacion,
+  ControlMecanico,
+} from "@/hooks/orden-reparacion/useControles";
 import { createContext, useContext, useState } from "react";
 import { useOrden } from "./OrdenContext";
 
@@ -22,7 +25,12 @@ export const ControlesProvider = ({
 }) => {
   const { orden } = useOrden();
   const [itemsEdited, setItemsEdited] = useState<ControlMecanico[]>(
-    orden.controlesEnReparacion || []
+    orden.controlesEnReparacion.map(
+      (controlEnReparacion: ControlEnReparacion) => ({
+        valor: controlEnReparacion.valor,
+        id: controlEnReparacion.controlMecanicoId,
+      })
+    ) || []
   );
 
   const updateControl = (control: ControlMecanico, valor: string) => {
@@ -47,7 +55,12 @@ export const ControlesProvider = ({
   };
 
   const reset = () => {
-    setItemsEdited(orden.controlesEnReparacion || []);
+    orden.controlesEnReparacion.map(
+      (controlEnReparacion: ControlEnReparacion) => ({
+        valor: controlEnReparacion.valor,
+        id: controlEnReparacion.controlMecanicoId,
+      })
+    ) || [];
   };
 
   return (

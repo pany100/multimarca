@@ -626,6 +626,7 @@ model ControlEnReparacion {
   controlMecanico   ControlMecanico @relation(fields: [controlMecanicoId], references: [id], onDelete: Cascade)
   ordenReparacion   OrdenReparacion @relation("OrdenReparacionControlesEnReparacion", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
 
+  @@unique([ordenReparacionId, controlMecanicoId])
   @@index([ordenReparacionId])
   @@index([controlMecanicoId])
 }

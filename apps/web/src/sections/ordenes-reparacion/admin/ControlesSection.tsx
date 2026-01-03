@@ -64,7 +64,11 @@ const ControlesSection = () => {
             </Button>
             <Button
               variant="contained"
-              onClick={() => updateControles(orden.id, itemsEdited)}
+              onClick={() => {
+                updateControles(orden.id, itemsEdited);
+                setIsEditing(false);
+                reset();
+              }}
               disabled={updating}
               startIcon={updating && <CircularProgress size={20} />}
             >

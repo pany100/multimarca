@@ -1,11 +1,13 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { ControlMecanico } from "@/hooks/orden-reparacion/useControles";
 import { useState } from "react";
+import { useOrden } from "../contexts/OrdenContext";
 
 export const useUpdateControles = () => {
   const { authFetch } = useFetch();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { setOrden } = useOrden();
 
   const updateControles = async (
     ordenId: number,
@@ -15,18 +17,13 @@ export const useUpdateControles = () => {
     setError(null);
 
     try {
-      const controlesParaEnviar = controles.map((control) => ({
-        id: control.id,
-        valor: control.valor,
-      }));
-
       const response = await authFetch(`/api/orden-reparacion/v2/${ordenId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          controlesEnReparacion: controlesParaEnviar,
+          controlesEnReparacion: controles,
         }),
       });
 
@@ -35,7 +32,7 @@ export const useUpdateControles = () => {
       }
 
       const ordenActualizada = await response.json();
-      return ordenActualizada;
+      setOrden(ordenActualizada);
     } catch (err: any) {
       setError(err.message);
       throw err;

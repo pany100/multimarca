@@ -175,10 +175,72 @@ export class PrismaOrdenReparacionRepository
     });
   }
 
-  async updatePartial(id: number, data: any) {
+  async patchOrden(
+    id: number,
+    dto: {
+      autoId?: number;
+      kilometros?: number | null;
+      observacionesCliente?: string;
+      observacionesEntrada?: string;
+      estado?: string;
+      observacionesInternas?: string;
+      observacionesSalida?: string;
+      observacionesOcultas?: string | null;
+      fechaEntradaReparacion?: Date | null;
+      fechaSalidaReparacion?: Date | null;
+      controlesEnReparacion?: Array<{ id: number; valor: string }>;
+    }
+  ) {
+    const dataToUpdate: any = {};
+
+    if (dto.autoId !== undefined) dataToUpdate.autoId = dto.autoId;
+    if (dto.kilometros !== undefined) dataToUpdate.kilometros = dto.kilometros;
+    if (dto.observacionesCliente !== undefined)
+      dataToUpdate.observacionesCliente = dto.observacionesCliente;
+    if (dto.observacionesEntrada !== undefined)
+      dataToUpdate.observacionesEntrada = dto.observacionesEntrada;
+    if (dto.estado !== undefined) dataToUpdate.estado = dto.estado;
+    if (dto.observacionesInternas !== undefined)
+      dataToUpdate.observacionesInternas = dto.observacionesInternas;
+    if (dto.observacionesSalida !== undefined)
+      dataToUpdate.observacionesSalida = dto.observacionesSalida;
+    if (dto.observacionesOcultas !== undefined)
+      dataToUpdate.observacionesOcultas = dto.observacionesOcultas;
+    if (dto.fechaEntradaReparacion !== undefined)
+      dataToUpdate.fechaEntradaReparacion = dto.fechaEntradaReparacion;
+    if (dto.fechaSalidaReparacion !== undefined)
+      dataToUpdate.fechaSalidaReparacion = dto.fechaSalidaReparacion;
+
+    if (dto.controlesEnReparacion !== undefined) {
+      const controlIds = dto.controlesEnReparacion.map((c) => c.id);
+
+      dataToUpdate.controlesEnReparacion = {
+        deleteMany: {
+          controlMecanicoId: {
+            notIn: controlIds,
+          },
+        },
+        upsert: dto.controlesEnReparacion.map((control) => ({
+          where: {
+            ordenReparacionId_controlMecanicoId: {
+              ordenReparacionId: id,
+              controlMecanicoId: control.id,
+            },
+          },
+          update: {
+            valor: control.valor,
+          },
+          create: {
+            controlMecanicoId: control.id,
+            valor: control.valor,
+          },
+        })),
+      };
+    }
+
     return prisma.ordenReparacion.update({
       where: { id },
-      data,
+      data: dataToUpdate,
       include: {
         auto: {
           include: {

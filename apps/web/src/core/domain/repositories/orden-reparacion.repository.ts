@@ -107,9 +107,21 @@ export interface OrdenReparacionRepository {
     tx: any,
     payload: UpdateOrdenPersist["data"]
   ): Promise<OrdenReparacionWithRelations>;
-  updatePartial(
+  patchOrden(
     id: number,
-    data: Partial<Prisma.OrdenReparacionUpdateInput>
+    dto: {
+      autoId?: number;
+      kilometros?: number | null;
+      observacionesCliente?: string;
+      observacionesEntrada?: string;
+      estado?: string;
+      observacionesInternas?: string;
+      observacionesSalida?: string;
+      observacionesOcultas?: string | null;
+      fechaEntradaReparacion?: Date | null;
+      fechaSalidaReparacion?: Date | null;
+      controlesEnReparacion?: Array<{ id: number; valor: string }>;
+    }
   ): Promise<any>;
   listForCliente(
     clienteId: number

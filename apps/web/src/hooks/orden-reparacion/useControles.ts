@@ -17,6 +17,14 @@ export type ControlMecanico = {
   } | null;
 };
 
+export type ControlEnReparacion = {
+  controlMecanico: ControlMecanico;
+  controlMecanicoId: number;
+  valor: string;
+  ordenReparacionId: number;
+  id: number;
+};
+
 const useControles = ({
   controlesList,
 }: {

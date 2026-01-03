@@ -17,82 +17,7 @@ export class PatchOrdenV2UseCase {
       throw new Error("Orden de reparación no encontrada");
     }
 
-    // Preparar datos para actualizar (solo los campos que vienen en el DTO)
-    const dataToUpdate: any = {};
-
-    if (dto.autoId !== undefined) {
-      dataToUpdate.autoId = dto.autoId;
-    }
-
-    if (dto.kilometros !== undefined) {
-      dataToUpdate.kilometros = dto.kilometros;
-    }
-
-    if (dto.observacionesCliente !== undefined) {
-      dataToUpdate.observacionesCliente = dto.observacionesCliente;
-    }
-
-    if (dto.observacionesEntrada !== undefined) {
-      dataToUpdate.observacionesEntrada = dto.observacionesEntrada;
-    }
-
-    if (dto.estado !== undefined) {
-      dataToUpdate.estado = dto.estado;
-    }
-
-    if (dto.observacionesInternas !== undefined) {
-      dataToUpdate.observacionesInternas = dto.observacionesInternas;
-    }
-
-    if (dto.observacionesSalida !== undefined) {
-      dataToUpdate.observacionesSalida = dto.observacionesSalida;
-    }
-
-    if (dto.observacionesOcultas !== undefined) {
-      dataToUpdate.observacionesOcultas = dto.observacionesOcultas;
-    }
-
-    if (dto.fechaEntradaReparacion !== undefined) {
-      dataToUpdate.fechaEntradaReparacion = dto.fechaEntradaReparacion;
-    }
-
-    if (dto.fechaSalidaReparacion !== undefined) {
-      dataToUpdate.fechaSalidaReparacion = dto.fechaSalidaReparacion;
-    }
-
-    if (dto.controlesEnReparacion !== undefined) {
-      const controlIds = dto.controlesEnReparacion.map((c) => c.id);
-
-      dataToUpdate.controlesEnReparacion = {
-        deleteMany: {
-          controlMecanicoId: {
-            notIn: controlIds,
-          },
-        },
-        upsert: dto.controlesEnReparacion.map((control) => ({
-          where: {
-            ordenReparacionId_controlMecanicoId: {
-              ordenReparacionId: ordenId,
-              controlMecanicoId: control.id,
-            },
-          },
-          update: {
-            valor: control.valor,
-          },
-          create: {
-            controlMecanicoId: control.id,
-            valor: control.valor,
-          },
-        })),
-      };
-    }
-
     // Validaciones de negocio
-    if (dto.autoId !== undefined) {
-      // Aquí podrías agregar validaciones adicionales, como verificar que el auto existe
-      // Por ahora dejamos que Prisma maneje la foreign key constraint
-    }
-
     if (
       dto.kilometros !== undefined &&
       dto.kilometros !== null &&
@@ -101,11 +26,8 @@ export class PatchOrdenV2UseCase {
       throw new Error("Los kilómetros no pueden ser negativos");
     }
 
-    // Actualizar la orden
-    const order = await this.ordenRepository.updatePartial(
-      ordenId,
-      dataToUpdate
-    );
+    // Delegar al repositorio la lógica de mapeo y actualización
+    const order = await this.ordenRepository.patchOrden(ordenId, dto);
 
     // Procesar la orden actualizada igual que GetOrdenUseCase
     const { mecanicos, ...ordenReparacionWithoutMecanicos } = order;
