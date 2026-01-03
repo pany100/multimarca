@@ -1,5 +1,6 @@
 "use client";
 
+import FormSnackbar from "@/components/orden-reparacion/formV2/commons/FormSnackbar";
 import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
 import ControlesSection from "@/sections/ordenes-reparacion/admin/ControlesSection";
@@ -119,6 +120,7 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
           </Grid>
         </Box>
       </OrdenProvider>
+      <FormSnackbar />
     </SnackbarProvider>
   );
 };

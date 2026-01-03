@@ -168,10 +168,8 @@ export const useRepuestosManager = () => {
         severity: "success",
       });
 
-      setTimeout(() => {
-        setDeleteConfirmOpen(false);
-        setRepuestoToDelete(null);
-      }, 100);
+      setDeleteConfirmOpen(false);
+      setRepuestoToDelete(null);
     } catch (error: any) {
       setSnackbar({
         open: true,
@@ -179,10 +177,8 @@ export const useRepuestosManager = () => {
         severity: "error",
       });
 
-      setTimeout(() => {
-        setDeleteConfirmOpen(false);
-        setRepuestoToDelete(null);
-      }, 100);
+      setDeleteConfirmOpen(false);
+      setRepuestoToDelete(null);
     } finally {
       setLoading(false);
     }
