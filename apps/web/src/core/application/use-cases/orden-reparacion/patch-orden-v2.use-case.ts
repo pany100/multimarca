@@ -60,6 +60,33 @@ export class PatchOrdenV2UseCase {
       dataToUpdate.fechaSalidaReparacion = dto.fechaSalidaReparacion;
     }
 
+    if (dto.controlesEnReparacion !== undefined) {
+      const controlIds = dto.controlesEnReparacion.map((c) => c.id);
+
+      dataToUpdate.controlesEnReparacion = {
+        deleteMany: {
+          controlMecanicoId: {
+            notIn: controlIds,
+          },
+        },
+        upsert: dto.controlesEnReparacion.map((control) => ({
+          where: {
+            ordenReparacionId_controlMecanicoId: {
+              ordenReparacionId: ordenId,
+              controlMecanicoId: control.id,
+            },
+          },
+          update: {
+            valor: control.valor,
+          },
+          create: {
+            controlMecanicoId: control.id,
+            valor: control.valor,
+          },
+        })),
+      };
+    }
+
     // Validaciones de negocio
     if (dto.autoId !== undefined) {
       // Aquí podrías agregar validaciones adicionales, como verificar que el auto existe

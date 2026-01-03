@@ -24,7 +24,6 @@ import { useWhatsAppHandlers } from "./hooks/useWhatsAppHandlers";
 
 function OrdenHeader() {
   const { orden } = useOrden();
-  console.log(orden);
   // WhatsApp handlers
   const {
     openConfirmModal,

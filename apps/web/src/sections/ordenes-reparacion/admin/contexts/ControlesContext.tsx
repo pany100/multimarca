@@ -1,7 +1,7 @@
 "use client";
 
 import { ControlMecanico } from "@/hooks/orden-reparacion/useControles";
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState } from "react";
 import { useOrden } from "./OrdenContext";
 
 interface ControlesContextType {
@@ -24,10 +24,6 @@ export const ControlesProvider = ({
   const [itemsEdited, setItemsEdited] = useState<ControlMecanico[]>(
     orden.controlesEnReparacion || []
   );
-
-  useEffect(() => {
-    console.log(itemsEdited);
-  }, [itemsEdited]);
 
   const updateControl = (control: ControlMecanico, valor: string) => {
     setItemsEdited((prevItems) => {

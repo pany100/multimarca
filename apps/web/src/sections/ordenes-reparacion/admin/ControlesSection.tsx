@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useControlesContext } from "./contexts/ControlesContext";
+import { useOrden } from "./contexts/OrdenContext";
 import EditControlesForm from "./forms/EditControlesForm";
 import { useUpdateControles } from "./hooks/useUpdateControles";
 
@@ -19,7 +20,8 @@ const ControlesSection = () => {
   const [isEditing, setIsEditing] = useState(false);
 
   const { loading: updating, updateControles } = useUpdateControles();
-  const { reset } = useControlesContext();
+  const { itemsEdited, reset } = useControlesContext();
+  const { orden } = useOrden();
   return (
     <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <CardContent sx={{ flex: 1 }}>
@@ -62,7 +64,7 @@ const ControlesSection = () => {
             </Button>
             <Button
               variant="contained"
-              onClick={() => console.log("saving")}
+              onClick={() => updateControles(orden.id, itemsEdited)}
               disabled={updating}
               startIcon={updating && <CircularProgress size={20} />}
             >

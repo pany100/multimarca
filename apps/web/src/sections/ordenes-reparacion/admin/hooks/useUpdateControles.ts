@@ -1,10 +1,6 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { ControlMecanico } from "@/hooks/orden-reparacion/useControles";
 import { useState } from "react";
-
-type ControlEnReparacion = {
-  controlMecanicoId: number;
-  valor: string;
-};
 
 export const useUpdateControles = () => {
   const { authFetch } = useFetch();
@@ -13,19 +9,24 @@ export const useUpdateControles = () => {
 
   const updateControles = async (
     ordenId: number,
-    controles: ControlEnReparacion[]
+    controles: ControlMecanico[]
   ) => {
     setLoading(true);
     setError(null);
 
     try {
+      const controlesParaEnviar = controles.map((control) => ({
+        id: control.id,
+        valor: control.valor,
+      }));
+
       const response = await authFetch(`/api/orden-reparacion/v2/${ordenId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          controlesEnReparacion: controles,
+          controlesEnReparacion: controlesParaEnviar,
         }),
       });
 
