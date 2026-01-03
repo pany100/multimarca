@@ -102,6 +102,7 @@ const TrabajosModal = ({
           onClose={onClose}
           onSubmit={onSubmit}
           loading={loading}
+          editTrabajo={editTrabajo}
         />
       </TrabajosProvider>
     </Dialog>
