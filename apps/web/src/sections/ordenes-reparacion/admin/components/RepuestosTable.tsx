@@ -1,96 +1,69 @@
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import ReceiptIcon from "@mui/icons-material/Receipt";
-import {
-  Box,
-  Button,
-  CircularProgress,
-  IconButton,
-  Typography,
-} from "@mui/material";
+import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import Link from "next/link";
-import { useOrden } from "../contexts/OrdenContext";
 
-interface ReparacionTercero {
+interface RepuestoUsado {
   id: number;
-  nombre: string;
+  stockId: number;
   precioCompra: number;
   precioVenta: number;
-  proveedor: {
+  unidadesConsumidas: number;
+  stock: {
     id: number;
-    name: string;
+    nombre: string;
   };
-  recibo?: string | null;
 }
 
-interface TercerosTableProps {
-  terceros: ReparacionTercero[];
-  onEdit: (tercero: ReparacionTercero) => void;
-  onDelete: (tercero: ReparacionTercero) => void;
+interface RepuestosTableProps {
+  repuestos: RepuestoUsado[];
+  onEdit: (repuesto: RepuestoUsado) => void;
+  onDelete: (repuesto: RepuestoUsado) => void;
   loading?: boolean;
 }
 
-const TercerosTable = ({
-  terceros,
+const RepuestosTable = ({
+  repuestos,
   onEdit,
   onDelete,
   loading = false,
-}: TercerosTableProps) => {
-  const { orden } = useOrden();
+}: RepuestosTableProps) => {
   const columns: GridColDef[] = [
     {
-      field: "nombre",
-      headerName: "Nombre",
-      flex: 1,
+      field: "stock",
+      headerName: "Repuesto",
+      flex: 3,
+      valueFormatter: (value: { name: string }) => value?.name,
     },
     {
       field: "proveedor",
       headerName: "Proveedor",
       flex: 1,
-      renderCell: (params) => params.row.proveedor?.name || "-",
+      renderCell: (params) => params.row.stock?.proveedor?.name,
+    },
+    {
+      field: "label",
+      headerName: "Rótulo",
+      flex: 1,
+      renderCell: (params) => params.row.stock?.label,
     },
     {
       field: "precioCompra",
       headerName: "Precio Compra",
-      width: 130,
-      renderCell: (params) => getFormattedPrice(params.row.precioCompra),
+      flex: 1,
+      valueGetter: (value) => getFormattedPrice(value),
+    },
+    {
+      field: "unidadesConsumidas",
+      headerName: "Unidades Consumidas",
+      flex: 1,
     },
     {
       field: "precioVenta",
-      headerName: "Precio Venta",
-      width: 130,
-      renderCell: (params) => getFormattedPrice(params.row.precioVenta),
-    },
-    {
-      field: "precioConRecargo",
-      headerName: `Precio con recargo (${orden?.porcentajeRecargo || 0}%)`,
+      headerName: "Precio Final",
       flex: 1,
-      valueFormatter: (value: number) => getFormattedPrice(value || 0),
-    },
-    {
-      field: "recibo",
-      headerName: "Recibo",
-      flex: 1,
-      renderCell: (params: any) => {
-        const recibo = params.row.recibo;
-        if (recibo) {
-          return (
-            <Link href={recibo} target="_blank">
-              <Button size="small" color="primary" startIcon={<ReceiptIcon />}>
-                Ver recibo
-              </Button>
-            </Link>
-          );
-        } else {
-          return (
-            <Typography variant="body2" color="text.secondary">
-              Sin recibo
-            </Typography>
-          );
-        }
-      },
+      valueFormatter: (value) => getFormattedPrice(value),
     },
     {
       field: "actions",
@@ -127,11 +100,11 @@ const TercerosTable = ({
     );
   }
 
-  if (!terceros || terceros.length === 0) {
+  if (!repuestos || repuestos.length === 0) {
     return (
       <Box p={3} textAlign="center">
         <Typography variant="body2" color="text.secondary">
-          No hay reparaciones de terceros
+          No hay repuestos usados
         </Typography>
       </Box>
     );
@@ -140,7 +113,7 @@ const TercerosTable = ({
   return (
     <Box sx={{ width: "100%" }}>
       <DataGrid
-        rows={terceros}
+        rows={repuestos}
         columns={columns}
         disableRowSelectionOnClick
         hideFooter
@@ -172,4 +145,4 @@ const TercerosTable = ({
   );
 };
 
-export default TercerosTable;
+export default RepuestosTable;

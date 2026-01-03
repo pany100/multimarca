@@ -1,13 +1,16 @@
 import {
   addMecanicoToOrdenSchema,
   addReparacionTerceroSchema,
+  addRepuestoUsadoSchema,
   createOrdenSchema,
   deleteMecanicoFromOrdenSchema,
   deleteReparacionTerceroSchema,
+  deleteRepuestoUsadoSchema,
   listOrdenesQuerySchema,
   updateMecanicoInOrdenSchema,
   updateOrdenSchema,
   updateReparacionTerceroSchema,
+  updateRepuestoUsadoSchema,
 } from "@/core/infrastructure/validation/schemas/orden-reparacion.schema";
 import { z } from "zod";
 
@@ -32,3 +35,7 @@ export type UpdateReparacionTerceroDto = z.infer<
 export type DeleteReparacionTerceroDto = z.infer<
   typeof deleteReparacionTerceroSchema
 >;
+
+export type AddRepuestoUsadoDto = z.infer<typeof addRepuestoUsadoSchema>;
+export type UpdateRepuestoUsadoDto = z.infer<typeof updateRepuestoUsadoSchema>;
+export type DeleteRepuestoUsadoDto = z.infer<typeof deleteRepuestoUsadoSchema>;
