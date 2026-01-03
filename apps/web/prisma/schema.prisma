@@ -284,13 +284,14 @@ model AusenciaProgramada {
 }
 
 model OrdenReparacionMecanico {
+  id                Int             @id @default(autoincrement())
   ordenReparacionId Int
   mecanicoId        Int
   detalle           String?         @db.Text
   mecanico          Empleado        @relation(fields: [mecanicoId], references: [id], onDelete: Restrict)
   ordenReparacion   OrdenReparacion @relation(fields: [ordenReparacionId], references: [id], onDelete: Cascade)
 
-  @@id([ordenReparacionId, mecanicoId])
+  @@unique([ordenReparacionId, mecanicoId])
   @@index([mecanicoId], map: "OrdenReparacionMecanico_mecanicoId_fkey")
 }
 

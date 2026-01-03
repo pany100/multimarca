@@ -302,4 +302,33 @@ export class PrismaOrdenReparacionRepository
       },
     });
   }
+
+  async addMecanicoToOrden(data: {
+    ordenReparacionId: number;
+    mecanicoId: number;
+    detalle?: string | null;
+  }) {
+    return prisma.ordenReparacionMecanico.create({
+      data: {
+        ordenReparacionId: data.ordenReparacionId,
+        mecanicoId: data.mecanicoId,
+        detalle: data.detalle,
+      },
+      include: {
+        mecanico: true,
+        ordenReparacion: true,
+      },
+    });
+  }
+
+  async updateMecanicoInOrden(id: number, detalle: string | null) {
+    return prisma.ordenReparacionMecanico.update({
+      where: { id } as any,
+      data: { detalle },
+      include: {
+        mecanico: true,
+        ordenReparacion: true,
+      },
+    });
+  }
 }
