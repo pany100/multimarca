@@ -11,6 +11,7 @@ import NotasInternasSection from "@/sections/ordenes-reparacion/admin/NotasInter
 import ObservacionesSalidaSection from "@/sections/ordenes-reparacion/admin/ObservacionesSalidaSection";
 import ObservacionesUltimoIngresoSection from "@/sections/ordenes-reparacion/admin/ObservacionesUltimoIngresoSection";
 import OrdenHeader from "@/sections/ordenes-reparacion/admin/OrdenHeader";
+import RecargoSection from "@/sections/ordenes-reparacion/admin/RecargoSection";
 import RepuestosSection from "@/sections/ordenes-reparacion/admin/RepuestosSection";
 import RevisionSection from "@/sections/ordenes-reparacion/admin/RevisionSection";
 import TercerosSection from "@/sections/ordenes-reparacion/admin/TercerosSection";
@@ -115,6 +116,11 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
             <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <RepuestosSection />
+              </Box>
+            </Grid>
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <RecargoSection />
               </Box>
             </Grid>
           </Grid>

@@ -128,6 +128,7 @@ export const patchOrdenV2Schema = z.object({
   controlesEnReparacion: z.array(controlesSchema).optional(),
   revisadoPorId: z.coerce.number().nullable().optional(),
   detalleControles: z.string().optional(),
+  porcentajeRecargo: z.coerce.number().nullable().optional(),
 });
 
 export const addMecanicoToOrdenSchema = z.object({
