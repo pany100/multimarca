@@ -127,6 +127,7 @@ export const patchOrdenV2Schema = z.object({
   fechaSalidaReparacion: z.coerce.date().nullable().optional(),
   controlesEnReparacion: z.array(controlesSchema).optional(),
   revisadoPorId: z.coerce.number().nullable().optional(),
+  detalleControles: z.string().optional(),
 });
 
 export const addMecanicoToOrdenSchema = z.object({

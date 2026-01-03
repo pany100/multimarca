@@ -190,6 +190,7 @@ export class PrismaOrdenReparacionRepository
       fechaSalidaReparacion?: Date | null;
       controlesEnReparacion?: Array<{ id: number; valor: string }>;
       revisadoPorId?: number | null;
+      detalleControles?: string;
     }
   ) {
     const dataToUpdate: any = {};
@@ -213,6 +214,8 @@ export class PrismaOrdenReparacionRepository
       dataToUpdate.fechaSalidaReparacion = dto.fechaSalidaReparacion;
     if (dto.revisadoPorId !== undefined)
       dataToUpdate.revisadoPorId = dto.revisadoPorId;
+    if (dto.detalleControles !== undefined)
+      dataToUpdate.detalleControles = dto.detalleControles;
 
     if (dto.controlesEnReparacion !== undefined) {
       const controlIds = dto.controlesEnReparacion.map((c) => c.id);
