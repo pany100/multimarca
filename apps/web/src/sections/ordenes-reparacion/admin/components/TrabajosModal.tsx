@@ -1,20 +1,16 @@
-import ORepObjectAutocomplete from "@/components/orden-reparacion/formV2/commons/inputs/ORepObjectAutocomplete";
-import ORepTextField from "@/components/orden-reparacion/formV2/commons/inputs/ORepTextField";
-import useTrabajosObjectAutocomplete from "@/hooks/orden-reparacion/useTrabajosObjectAutocomplete";
 import {
-  Box,
   Button,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  Grid,
-  ToggleButton,
-  ToggleButtonGroup,
-  Typography,
 } from "@mui/material";
-import { useEffect, useState } from "react";
+import {
+  TrabajosProvider,
+  useTrabajosContext,
+} from "../contexts/TrabajosContext";
+import TrabajosModalContent from "./TrabajosModalContent";
 
 interface ManoDeObra {
   id: number;
@@ -22,8 +18,8 @@ interface ManoDeObra {
   sellPrice: number;
 }
 
-interface TrabajoRealizado {
-  id: number;
+export interface TrabajoRealizado {
+  id?: number;
   precioUnitario: number;
   descripcion: string;
   diasParaRecordatorio?: number | null;
@@ -42,174 +38,34 @@ interface TrabajosModalProps {
   editTrabajo?: TrabajoRealizado;
 }
 
-const TrabajosModal = ({
-  open,
+const TrabajosModalInner = ({
   onClose,
   onSubmit,
   loading = false,
   editTrabajo,
-}: TrabajosModalProps) => {
-  const { searchTrabajo, initialTrabajo } = useTrabajosObjectAutocomplete();
-
-  const [tipoTrabajo, setTipoTrabajo] = useState<"lista" | "otros">("lista");
-  const [manoDeObra, setManoDeObra] = useState<ManoDeObra | null>(null);
-  const [descripcion, setDescripcion] = useState("");
-  const [precioUnitario, setPrecioUnitario] = useState<string>("");
-  const [diasParaRecordatorio, setDiasParaRecordatorio] = useState<string>("");
-
-  useEffect(() => {
-    if (open) {
-      if (editTrabajo) {
-        setDescripcion(editTrabajo.descripcion);
-        setPrecioUnitario(editTrabajo.precioUnitario.toString());
-        setDiasParaRecordatorio(
-          editTrabajo.diasParaRecordatorio?.toString() || ""
-        );
-        setTipoTrabajo("otros"); // Default to "Otros trabajos" for edit
-      } else {
-        setTipoTrabajo("lista");
-        setManoDeObra(null);
-        setDescripcion("");
-        setPrecioUnitario("");
-        setDiasParaRecordatorio("");
-      }
-    }
-  }, [open, editTrabajo]);
+}: Omit<TrabajosModalProps, "open">) => {
+  const { descripcion, precioUnitario, diasParaRecordatorio } =
+    useTrabajosContext();
 
   const handleSubmit = async () => {
-    if (!precioUnitario) return;
+    if (precioUnitario === null || !descripcion) return;
 
-    const data: any = {
-      precioUnitario: Number(precioUnitario),
-      diasParaRecordatorio: diasParaRecordatorio
-        ? Number(diasParaRecordatorio)
-        : null,
-    };
-
-    if (tipoTrabajo === "lista" && manoDeObra) {
-      data.manoDeObra = { name: manoDeObra.name };
-      data.descripcion = manoDeObra.name;
-    } else {
-      data.descripcion = descripcion;
-    }
-
-    await onSubmit(data);
+    await onSubmit({
+      precioUnitario,
+      descripcion,
+      diasParaRecordatorio,
+    });
   };
 
-  const isValid =
-    precioUnitario &&
-    Number(precioUnitario) >= 0 &&
-    (tipoTrabajo === "lista" ? manoDeObra : descripcion);
+  const isValid = precioUnitario !== null && descripcion !== "";
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+    <>
       <DialogTitle>
-        {editTrabajo ? "Editar Trabajo Realizado" : "Agregar Trabajo Realizado"}
+        {editTrabajo ? "Editar Trabajo realizado" : "Agregar Trabajo realizado"}
       </DialogTitle>
       <DialogContent>
-        {!editTrabajo && (
-          <Box sx={{ mb: 3, mt: 2 }}>
-            <ToggleButtonGroup
-              value={tipoTrabajo}
-              exclusive
-              onChange={(_, newTipoTrabajo: "lista" | "otros" | null) => {
-                if (newTipoTrabajo !== null) {
-                  setTipoTrabajo(newTipoTrabajo);
-                  setManoDeObra(null);
-                  setDescripcion("");
-                  setPrecioUnitario("");
-                  setDiasParaRecordatorio("");
-                }
-              }}
-              aria-label="tipo de trabajo"
-              fullWidth
-              color="primary"
-            >
-              <ToggleButton value="lista" aria-label="trabajo de lista">
-                Trabajo de Lista
-              </ToggleButton>
-              <ToggleButton value="otros" aria-label="otros trabajos">
-                Otros Trabajos
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Box>
-        )}
-
-        <Grid container spacing={1}>
-          {tipoTrabajo === "lista" && !editTrabajo ? (
-            <>
-              <Grid item xs={12} sx={{ mb: 1 }}>
-                <ORepObjectAutocomplete
-                  label="Trabajo"
-                  searchOptions={searchTrabajo}
-                  initialOptions={initialTrabajo}
-                  selectOption={(option) => {
-                    if (option) {
-                      setManoDeObra(option.object);
-                      setPrecioUnitario(option.object.sellPrice.toString());
-                    } else {
-                      setManoDeObra(null);
-                      setPrecioUnitario("");
-                    }
-                  }}
-                />
-              </Grid>
-              <Grid item xs={12} sx={{ mb: 1 }}>
-                <ORepTextField
-                  label="Precio"
-                  type="number"
-                  value={precioUnitario}
-                  onChange={(e) => setPrecioUnitario(e.target.value)}
-                  disabled={loading}
-                />
-              </Grid>
-              <Grid item xs={12} sx={{ mb: 1 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Recordatorio (opcional)
-                </Typography>
-                <ORepTextField
-                  label="Días para Recordatorio"
-                  type="number"
-                  value={diasParaRecordatorio}
-                  onChange={(e) => setDiasParaRecordatorio(e.target.value)}
-                  disabled={loading}
-                />
-              </Grid>
-            </>
-          ) : (
-            <>
-              <Grid item xs={12} sx={{ mb: 1 }}>
-                <ORepTextField
-                  label="Nombre del Trabajo"
-                  value={descripcion}
-                  onChange={(e) => setDescripcion(e.target.value)}
-                  disabled={loading}
-                />
-              </Grid>
-              <Grid item xs={12} sx={{ mb: 1 }}>
-                <ORepTextField
-                  label="Precio"
-                  type="number"
-                  value={precioUnitario}
-                  onChange={(e) => setPrecioUnitario(e.target.value)}
-                  disabled={loading}
-                />
-              </Grid>
-              <Grid item xs={12} sx={{ mb: 1 }}>
-                <Typography variant="subtitle2" gutterBottom>
-                  Recordatorio (opcional)
-                </Typography>
-                <ORepTextField
-                  label="Días para Recordatorio"
-                  type="number"
-                  value={diasParaRecordatorio}
-                  onChange={(e) => setDiasParaRecordatorio(e.target.value)}
-                  disabled={loading}
-                />
-              </Grid>
-            </>
-          )}
-        </Grid>
+        <TrabajosModalContent />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} disabled={loading}>
@@ -224,6 +80,30 @@ const TrabajosModal = ({
           {editTrabajo ? "Actualizar" : "Agregar"}
         </Button>
       </DialogActions>
+    </>
+  );
+};
+
+const TrabajosModal = ({
+  open,
+  onClose,
+  onSubmit,
+  loading = false,
+  editTrabajo,
+}: TrabajosModalProps) => {
+  return (
+    <Dialog open={open} onClose={onClose} maxWidth="sm" fullWidth>
+      <TrabajosProvider
+        initialDescripcion={editTrabajo?.descripcion}
+        initialPrecioUnitario={editTrabajo?.precioUnitario}
+        initialDiasParaRecordatorio={editTrabajo?.diasParaRecordatorio}
+      >
+        <TrabajosModalInner
+          onClose={onClose}
+          onSubmit={onSubmit}
+          loading={loading}
+        />
+      </TrabajosProvider>
     </Dialog>
   );
 };

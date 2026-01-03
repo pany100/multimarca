@@ -12,12 +12,15 @@ export async function GET(request: Request) {
 
     let whereClause = {};
     if (query) {
-      whereClause = {
-        OR: [
-          { name: { contains: query } },
-          { id: { equals: parseInt(query || "") || undefined } },
-        ],
-      };
+      const orConditions: any[] = [{ name: { contains: query } }];
+
+      // Only search by ID if the query is purely numeric
+      const numericQuery = parseInt(query);
+      if (!isNaN(numericQuery) && query.trim() === numericQuery.toString()) {
+        orConditions.push({ id: { equals: numericQuery } });
+      }
+
+      whereClause = { OR: orConditions };
     }
 
     const [trabajos, total] = await Promise.all([
