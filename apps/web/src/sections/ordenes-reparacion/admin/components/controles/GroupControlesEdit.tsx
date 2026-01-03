@@ -1,21 +1,17 @@
 import { Grid, Paper, Typography } from "@mui/material";
 import GroupCheckboxControlesEdit from "./GroupCheckboxControlesEdit";
-import GroupTextControlesEdit from "./GroupTextControlesEdit";
 
 type Props = {
   groupControls: any[];
-  onChange: (controlId: number, valor: string) => void;
+  isEditing: boolean;
 };
 
-function GroupControlesEdit({ groupControls, onChange }: Props) {
+function GroupControlesEdit({ groupControls, isEditing }: Props) {
   return (
     <>
       {groupControls.map((groupControl: any) => {
         const checkboxControls = groupControl.controls.filter(
           (control: any) => control.type === "checkbox"
-        );
-        const textControls = groupControl.controls.filter(
-          (control: any) => control.type === "texto"
         );
         return (
           <Grid item xs={12} key={groupControl.name}>
@@ -33,11 +29,7 @@ function GroupControlesEdit({ groupControls, onChange }: Props) {
               </Typography>
               <GroupCheckboxControlesEdit
                 controls={checkboxControls}
-                onChange={onChange}
-              />
-              <GroupTextControlesEdit
-                controls={textControls}
-                onChange={onChange}
+                isEditing={isEditing}
               />
             </Paper>
           </Grid>

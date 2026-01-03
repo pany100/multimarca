@@ -3,6 +3,7 @@
 import useControlesFetch from "@/hooks/orden-reparacion/useControlesFetch";
 import { CircularProgress, Grid } from "@mui/material";
 import CheckboxControlesEdit from "../components/controles/CheckboxControlesEdit";
+import GroupControlesEdit from "../components/controles/GroupControlesEdit";
 
 type Props = {
   isEditing: boolean;
@@ -24,6 +25,14 @@ function EditControlesForm({ isEditing }: Props) {
         <Grid container item xs={12} spacing={2}>
           <CheckboxControlesEdit
             checkControls={checkControls}
+            isEditing={isEditing}
+          />
+        </Grid>
+      )}
+      {groupControls.length > 0 && (
+        <Grid container item xs={12} spacing={2}>
+          <GroupControlesEdit
+            groupControls={groupControls}
             isEditing={isEditing}
           />
         </Grid>
