@@ -1,16 +1,28 @@
 import { ControlMecanico } from "@/hooks/orden-reparacion/useControles";
-import { Box, Chip, TextField, Typography } from "@mui/material";
+import { Box, TextField, Typography } from "@mui/material";
+import { useControlesContext } from "../../contexts/ControlesContext";
+import { useOrden } from "../../contexts/OrdenContext";
 
 type Props = {
   textControls: ControlMecanico[];
-  onChange: (controlId: number, valor: string) => void;
+  isEditing: boolean;
 };
 
-function TextControlesEdit({ textControls, onChange }: Props) {
+function TextControlesEdit({ textControls, isEditing }: Props) {
+  const { itemsEdited, updateControl } = useControlesContext();
+  const { orden } = useOrden();
+
   return (
     <>
       {textControls.map((control: ControlMecanico) => {
-        const hasValue = control.valor !== "";
+        const editedControl = itemsEdited.find(
+          (item) => item.id === control.id
+        );
+        const originalControl = orden.controlesEnReparacion?.find(
+          (item: ControlMecanico) => item.id === control.id
+        );
+        const currentValue =
+          editedControl?.valor ?? originalControl?.valor ?? "";
 
         return (
           <Box key={control.id} sx={{ mb: 2 }}>
@@ -18,21 +30,14 @@ function TextControlesEdit({ textControls, onChange }: Props) {
               <Typography variant="body2" sx={{ mr: 1 }}>
                 {control.name}
               </Typography>
-              {hasValue && (
-                <Chip
-                  label="Completado"
-                  color="success"
-                  size="small"
-                  variant="outlined"
-                />
-              )}
             </Box>
             <TextField
               fullWidth
               size="small"
-              defaultValue={control.valor}
+              value={currentValue}
               placeholder={`Ingrese información sobre ${control.name.toLowerCase()}`}
-              onBlur={(e) => onChange(control.id, e.target.value)}
+              onChange={(e) => updateControl(control, e.target.value)}
+              disabled={!isEditing}
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 1,
