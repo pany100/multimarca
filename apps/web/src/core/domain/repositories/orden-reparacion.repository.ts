@@ -126,11 +126,30 @@ export interface OrdenReparacionRepository {
   listForCliente(
     clienteId: number
   ): Promise<OrdenReparacionWithRelationsForClient[]>;
-  addMecanicoToOrden(data: {
-    ordenReparacionId: number;
-    mecanicoId: number;
-    detalle?: string | null;
-  }): Promise<any>;
-  updateMecanicoInOrden(id: number, detalle: string | null): Promise<any>;
+  addMecanicoToOrden(
+    ordenReparacionId: number,
+    mecanicoId: number,
+    detalle?: string | null
+  ): Promise<any>;
+  updateMecanicoInOrden(id: number, detalle?: string | null): Promise<any>;
   deleteMecanicoFromOrden(id: number): Promise<any>;
+  addReparacionTercero(data: {
+    ordenReparacionId: number;
+    nombre: string;
+    proveedorId: number;
+    precioCompra: number;
+    precioVenta: number;
+    recibo?: string | null;
+  }): Promise<any>;
+  updateReparacionTercero(
+    id: number,
+    data: {
+      nombre?: string;
+      proveedorId?: number;
+      precioCompra?: number;
+      precioVenta?: number;
+      recibo?: string | null;
+    }
+  ): Promise<any>;
+  deleteReparacionTercero(id: number): Promise<any>;
 }

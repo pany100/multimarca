@@ -309,16 +309,16 @@ export class PrismaOrdenReparacionRepository
     });
   }
 
-  async addMecanicoToOrden(data: {
-    ordenReparacionId: number;
-    mecanicoId: number;
-    detalle?: string | null;
-  }) {
+  async addMecanicoToOrden(
+    ordenReparacionId: number,
+    mecanicoId: number,
+    detalle?: string | null
+  ) {
     return prisma.ordenReparacionMecanico.create({
       data: {
-        ordenReparacionId: data.ordenReparacionId,
-        mecanicoId: data.mecanicoId,
-        detalle: data.detalle,
+        ordenReparacionId,
+        mecanicoId,
+        detalle,
       },
       include: {
         mecanico: true,
@@ -341,6 +341,67 @@ export class PrismaOrdenReparacionRepository
   async deleteMecanicoFromOrden(id: number) {
     return prisma.ordenReparacionMecanico.delete({
       where: { id } as any,
+    });
+  }
+
+  async addReparacionTercero(data: {
+    ordenReparacionId: number;
+    nombre: string;
+    proveedorId: number;
+    precioCompra: number;
+    precioVenta: number;
+    recibo?: string | null;
+  }) {
+    return prisma.reparacionDeTercero.create({
+      data: {
+        ordenReparacionId: data.ordenReparacionId,
+        nombre: data.nombre,
+        proveedorId: data.proveedorId,
+        precioCompra: data.precioCompra,
+        precioVenta: data.precioVenta,
+        recibo: data.recibo,
+      },
+      include: {
+        proveedor: true,
+        reciboFile: true,
+      },
+    });
+  }
+
+  async updateReparacionTercero(
+    id: number,
+    data: {
+      nombre?: string;
+      proveedorId?: number;
+      precioCompra?: number;
+      precioVenta?: number;
+      recibo?: string | null;
+    }
+  ) {
+    const dataToUpdate: any = {};
+
+    if (data.nombre !== undefined) dataToUpdate.nombre = data.nombre;
+    if (data.proveedorId !== undefined)
+      dataToUpdate.proveedorId = data.proveedorId;
+    if (data.precioCompra !== undefined)
+      dataToUpdate.precioCompra = data.precioCompra;
+    if (data.precioVenta !== undefined)
+      dataToUpdate.precioVenta = data.precioVenta;
+    if (data.recibo !== undefined) dataToUpdate.recibo = data.recibo;
+
+    return prisma.reparacionDeTercero.update({
+      where: { id },
+      data: dataToUpdate,
+      include: {
+        proveedor: true,
+        reciboFile: true,
+      },
+    });
+  }
+
+  async deleteReparacionTercero(id: number) {
+    return prisma.reparacionDeTercero.delete({
+      where: { id },
     });
   }
 }

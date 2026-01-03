@@ -1,39 +1,90 @@
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
-import { Box, CircularProgress, IconButton, Typography } from "@mui/material";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import {
+  Box,
+  Button,
+  CircularProgress,
+  IconButton,
+  Typography,
+} from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
+import Link from "next/link";
 
-interface Mecanico {
+interface ReparacionTercero {
   id: number;
-  name: string;
-  detalle?: string | null;
-  mecanicoOrdenRepId: number;
+  nombre: string;
+  precioCompra: number;
+  precioVenta: number;
+  proveedor: {
+    id: number;
+    name: string;
+  };
+  recibo?: string | null;
 }
 
-interface MecanicosTableProps {
-  mecanicos: Mecanico[];
-  onEdit: (mecanico: Mecanico) => void;
-  onDelete: (mecanico: Mecanico) => void;
+interface TercerosTableProps {
+  terceros: ReparacionTercero[];
+  onEdit: (tercero: ReparacionTercero) => void;
+  onDelete: (tercero: ReparacionTercero) => void;
   loading?: boolean;
 }
 
-const MecanicosTable = ({
-  mecanicos,
+const TercerosTable = ({
+  terceros,
   onEdit,
   onDelete,
   loading = false,
-}: MecanicosTableProps) => {
+}: TercerosTableProps) => {
+  console.log("terceros", terceros);
   const columns: GridColDef[] = [
     {
-      field: "name",
-      headerName: "Mecánico",
+      field: "nombre",
+      headerName: "Nombre",
       flex: 1,
     },
     {
-      field: "detalle",
-      headerName: "Detalle",
-      flex: 2,
-      renderCell: (params) => params.row.detalle || "-",
+      field: "proveedor",
+      headerName: "Proveedor",
+      flex: 1,
+      renderCell: (params) => params.row.proveedor?.name || "-",
+    },
+    {
+      field: "precioCompra",
+      headerName: "Precio Compra",
+      width: 130,
+      renderCell: (params) => getFormattedPrice(params.row.precioCompra),
+    },
+    {
+      field: "precioVenta",
+      headerName: "Precio Venta",
+      width: 130,
+      renderCell: (params) => getFormattedPrice(params.row.precioVenta),
+    },
+    {
+      field: "recibo",
+      headerName: "Recibo",
+      flex: 1,
+      renderCell: (params: any) => {
+        console.log(params);
+        const recibo = params.row.recibo;
+        if (recibo) {
+          return (
+            <Link href={recibo} target="_blank">
+              <Button size="small" color="primary" startIcon={<ReceiptIcon />}>
+                Ver recibo
+              </Button>
+            </Link>
+          );
+        } else {
+          return (
+            <Typography variant="body2" color="text.secondary">
+              Sin recibo
+            </Typography>
+          );
+        }
+      },
     },
     {
       field: "actions",
@@ -70,11 +121,11 @@ const MecanicosTable = ({
     );
   }
 
-  if (!mecanicos || mecanicos.length === 0) {
+  if (!terceros || terceros.length === 0) {
     return (
       <Box p={3} textAlign="center">
         <Typography variant="body2" color="text.secondary">
-          No hay mecánicos asignados
+          No hay reparaciones de terceros
         </Typography>
       </Box>
     );
@@ -83,7 +134,7 @@ const MecanicosTable = ({
   return (
     <Box sx={{ width: "100%" }}>
       <DataGrid
-        rows={mecanicos}
+        rows={terceros}
         columns={columns}
         disableRowSelectionOnClick
         hideFooter
@@ -115,4 +166,4 @@ const MecanicosTable = ({
   );
 };
 
-export default MecanicosTable;
+export default TercerosTable;

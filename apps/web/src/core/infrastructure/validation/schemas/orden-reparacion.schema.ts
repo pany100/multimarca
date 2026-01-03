@@ -144,3 +144,25 @@ export const updateMecanicoInOrdenSchema = z.object({
 export const deleteMecanicoFromOrdenSchema = z.object({
   id: z.coerce.number(),
 });
+
+export const addReparacionTerceroSchema = z.object({
+  ordenReparacionId: z.coerce.number(),
+  nombre: z.string().min(1),
+  proveedorId: z.coerce.number(),
+  precioCompra: z.coerce.number(),
+  precioVenta: z.coerce.number(),
+  recibo: z.string().nullable().optional(),
+});
+
+export const updateReparacionTerceroSchema = z.object({
+  id: z.coerce.number(),
+  nombre: z.string().min(1).optional(),
+  proveedorId: z.coerce.number().optional(),
+  precioCompra: z.coerce.number().optional(),
+  precioVenta: z.coerce.number().optional(),
+  recibo: z.string().nullable().optional(),
+});
+
+export const deleteReparacionTerceroSchema = z.object({
+  id: z.coerce.number(),
+});
