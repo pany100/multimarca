@@ -1,10 +1,10 @@
 import type { DeleteReparacionTerceroDto } from "@/core/application/dto/orden-reparacion.dto";
-import type { OrdenReparacionRepository } from "@/core/domain/repositories/orden-reparacion.repository";
+import type { ReparacionTerceroRepository } from "@/core/domain/repositories/reparacion-tercero.repository";
 
 export class DeleteReparacionTerceroUseCase {
-  constructor(private readonly repo: OrdenReparacionRepository) {}
+  constructor(private readonly repo: ReparacionTerceroRepository) {}
 
   async execute(input: DeleteReparacionTerceroDto) {
-    return this.repo.deleteReparacionTercero(input.id);
+    return this.repo.delete(input.id);
   }
 }

@@ -29,6 +29,7 @@ export class GetOrdenUseCase {
         precioVenta: number;
       }) => ({
         ...el,
+        recibo: el.reciboFile?.finalPath || el.reciboFile?.tempPath || null,
         precioConRecargo: comprobanteCalculado.getPrecioFinalForReparaciones(
           el.precioVenta
         ),

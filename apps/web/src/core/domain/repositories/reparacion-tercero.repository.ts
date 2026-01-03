@@ -1,0 +1,27 @@
+export interface ReparacionTerceroRepository {
+  add(
+    data: {
+      ordenReparacionId: number;
+      nombre: string;
+      proveedorId: number;
+      precioCompra: number;
+      precioVenta: number;
+      recibo?: string | null;
+    },
+    deps?: { tx?: any }
+  ): Promise<any>;
+
+  update(
+    id: number,
+    data: {
+      nombre?: string;
+      proveedorId?: number;
+      precioCompra?: number;
+      precioVenta?: number;
+      recibo?: string | null;
+    },
+    deps?: { tx?: any }
+  ): Promise<any>;
+
+  delete(id: number): Promise<any>;
+}

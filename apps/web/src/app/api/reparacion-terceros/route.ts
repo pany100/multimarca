@@ -1,5 +1,6 @@
 import { AddReparacionTerceroUseCase } from "@/core/application/use-cases/orden-reparacion/add-reparacion-tercero.use-case";
-import { PrismaOrdenReparacionRepository } from "@/core/infrastructure/database/repositories/prisma-orden-reparacion.repository";
+import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
+import { PrismaReparacionTerceroRepository } from "@/core/infrastructure/database/repositories/prisma-reparacion-tercero.repository";
 import { addReparacionTerceroSchema } from "@/core/infrastructure/validation/schemas/orden-reparacion.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
@@ -11,7 +12,8 @@ export async function POST(request: Request) {
     const dto = await validateRequest(body, addReparacionTerceroSchema);
 
     const useCase = new AddReparacionTerceroUseCase(
-      new PrismaOrdenReparacionRepository()
+      new PrismaReparacionTerceroRepository(),
+      new PrismaUnitOfWork()
     );
 
     const result = await useCase.execute(dto);

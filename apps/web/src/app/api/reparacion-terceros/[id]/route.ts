@@ -1,6 +1,7 @@
 import { DeleteReparacionTerceroUseCase } from "@/core/application/use-cases/orden-reparacion/delete-reparacion-tercero.use-case";
 import { UpdateReparacionTerceroUseCase } from "@/core/application/use-cases/orden-reparacion/update-reparacion-tercero.use-case";
-import { PrismaOrdenReparacionRepository } from "@/core/infrastructure/database/repositories/prisma-orden-reparacion.repository";
+import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
+import { PrismaReparacionTerceroRepository } from "@/core/infrastructure/database/repositories/prisma-reparacion-tercero.repository";
 import {
   deleteReparacionTerceroSchema,
   updateReparacionTerceroSchema,
@@ -24,7 +25,8 @@ export async function PATCH(
     );
 
     const useCase = new UpdateReparacionTerceroUseCase(
-      new PrismaOrdenReparacionRepository()
+      new PrismaReparacionTerceroRepository(),
+      new PrismaUnitOfWork()
     );
 
     const result = await useCase.execute(dto);
@@ -47,7 +49,7 @@ export async function DELETE(
     );
 
     const useCase = new DeleteReparacionTerceroUseCase(
-      new PrismaOrdenReparacionRepository()
+      new PrismaReparacionTerceroRepository()
     );
 
     await useCase.execute(dto);

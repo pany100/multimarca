@@ -133,23 +133,4 @@ export interface OrdenReparacionRepository {
   ): Promise<any>;
   updateMecanicoInOrden(id: number, detalle?: string | null): Promise<any>;
   deleteMecanicoFromOrden(id: number): Promise<any>;
-  addReparacionTercero(data: {
-    ordenReparacionId: number;
-    nombre: string;
-    proveedorId: number;
-    precioCompra: number;
-    precioVenta: number;
-    recibo?: string | null;
-  }): Promise<any>;
-  updateReparacionTercero(
-    id: number,
-    data: {
-      nombre?: string;
-      proveedorId?: number;
-      precioCompra?: number;
-      precioVenta?: number;
-      recibo?: string | null;
-    }
-  ): Promise<any>;
-  deleteReparacionTercero(id: number): Promise<any>;
 }
