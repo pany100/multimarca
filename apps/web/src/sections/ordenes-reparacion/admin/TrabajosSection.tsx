@@ -1,3 +1,5 @@
+import ResumenCostosFooter from "@/components/orden-reparacion/formV2/sections/resumen-costos/ResumenCostosFooter";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import AddIcon from "@mui/icons-material/Add";
 import { Box, Button, Card, CardContent, Typography } from "@mui/material";
 import { useState } from "react";
@@ -67,6 +69,12 @@ const TrabajosSection = () => {
           onDelete={handleDeleteClick}
           loading={loading}
         />
+        <Box sx={{ my: 2 }}>
+          <ResumenCostosFooter
+            descripcion="Total Mano de obra"
+            total={getFormattedPrice(orden?.totalManoDeObra || 0)}
+          />
+        </Box>
 
         <Box display="flex" justifyContent="flex-end" sx={{ mt: 1 }}>
           <Button
