@@ -24,6 +24,7 @@ export const useTrabajosManager = () => {
     precioUnitario: number;
     descripcion: string;
     diasParaRecordatorio?: number | null;
+    manoDeObra?: { name: string };
   }) => {
     setLoading(true);
     try {
@@ -77,6 +78,7 @@ export const useTrabajosManager = () => {
       precioUnitario?: number;
       descripcion?: string;
       diasParaRecordatorio?: number | null;
+      manoDeObra?: { name: string };
     }
   ) => {
     setLoading(true);
