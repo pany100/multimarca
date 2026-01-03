@@ -331,4 +331,10 @@ export class PrismaOrdenReparacionRepository
       },
     });
   }
+
+  async deleteMecanicoFromOrden(id: number) {
+    return prisma.ordenReparacionMecanico.delete({
+      where: { id } as any,
+    });
+  }
 }

@@ -132,4 +132,5 @@ export interface OrdenReparacionRepository {
     detalle?: string | null;
   }): Promise<any>;
   updateMecanicoInOrden(id: number, detalle: string | null): Promise<any>;
+  deleteMecanicoFromOrden(id: number): Promise<any>;
 }

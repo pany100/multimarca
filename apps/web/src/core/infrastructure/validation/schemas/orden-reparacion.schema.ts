@@ -138,3 +138,7 @@ export const updateMecanicoInOrdenSchema = z.object({
   id: z.coerce.number(),
   detalle: z.string().nullable().optional(),
 });
+
+export const deleteMecanicoFromOrdenSchema = z.object({
+  id: z.coerce.number(),
+});

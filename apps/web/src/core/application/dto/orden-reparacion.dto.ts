@@ -1,6 +1,7 @@
 import {
   addMecanicoToOrdenSchema,
   createOrdenSchema,
+  deleteMecanicoFromOrdenSchema,
   listOrdenesQuerySchema,
   updateMecanicoInOrdenSchema,
   updateOrdenSchema,
@@ -13,4 +14,7 @@ export type UpdateOrdenDto = z.infer<typeof updateOrdenSchema>;
 export type AddMecanicoToOrdenDto = z.infer<typeof addMecanicoToOrdenSchema>;
 export type UpdateMecanicoInOrdenDto = z.infer<
   typeof updateMecanicoInOrdenSchema
+>;
+export type DeleteMecanicoFromOrdenDto = z.infer<
+  typeof deleteMecanicoFromOrdenSchema
 >;

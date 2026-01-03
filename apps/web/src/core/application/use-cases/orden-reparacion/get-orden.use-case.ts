@@ -12,10 +12,12 @@ export class GetOrdenUseCase {
     const { mecanicos, ...ordenReparacionWithoutMecanicos } = order;
     const mecanicosWithoutMecanico = mecanicos.map(
       (el: {
+        id: number;
         mecanico: { id: number; name: string };
         detalle: string | null;
       }) => ({
         id: el.mecanico.id,
+        mecanicoOrdenRepId: el.id,
         name: el.mecanico.name,
         detalle: el.detalle,
       })
