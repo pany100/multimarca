@@ -14,6 +14,7 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { useEffect, useState } from "react";
 import { PrintMenu } from "./components/PrintMenu";
 import { WhatsAppConfirmDialog } from "./components/WhatsAppConfirmDialog";
 import { useOrden } from "./contexts/OrdenContext";
@@ -24,6 +25,17 @@ import { useWhatsAppHandlers } from "./hooks/useWhatsAppHandlers";
 
 function OrdenHeader() {
   const { orden, setOrden } = useOrden();
+  const [isSticky, setIsSticky] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsSticky(scrollPosition > 100);
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
   // WhatsApp handlers
   const {
     openConfirmModal,
@@ -81,10 +93,19 @@ function OrdenHeader() {
     <>
       <Box
         sx={{
+          position: isSticky ? "fixed" : "relative",
+          top: isSticky ? 64 : "auto",
+          left: isSticky ? 0 : "auto",
+          right: isSticky ? 0 : "auto",
+          zIndex: isSticky ? 1000 : "auto",
+          backgroundColor: "background.default",
           borderBottom: "1px solid",
           borderColor: "divider",
           pb: 3,
-          mb: 3,
+          pt: isSticky ? 2 : 3,
+          mb: isSticky ? 0 : 3,
+          px: isSticky ? 3 : 0,
+          transition: "all 0.3s ease",
         }}
       >
         {/* Single Row with Title, Status and Buttons */}
@@ -95,6 +116,7 @@ function OrdenHeader() {
             alignItems: "center",
             flexWrap: "wrap",
             gap: 2,
+            px: isSticky ? 0 : 2,
           }}
         >
           {/* Left side: Title */}
