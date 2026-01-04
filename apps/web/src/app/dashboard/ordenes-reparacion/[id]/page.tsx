@@ -136,7 +136,7 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
                 <ScannerSection />
               </Box>
             </Grid>
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+            <Grid item xs={12} xl={6} sx={{ display: "flex", mb: 4 }}>
               <Box sx={{ width: "100%" }}>
                 <RecibosSection />
               </Box>
