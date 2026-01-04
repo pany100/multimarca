@@ -192,6 +192,7 @@ export class PrismaOrdenReparacionRepository
       revisadoPorId?: number | null;
       detalleControles?: string;
       porcentajeRecargo?: number | null;
+      scannerFile?: string | null;
     }
   ) {
     const dataToUpdate: any = {};
@@ -247,7 +248,14 @@ export class PrismaOrdenReparacionRepository
       };
     }
 
-    return prisma.ordenReparacion.update({
+    // Get the current orden to compare scannerFile value
+    const currentOrden = await prisma.ordenReparacion.findUnique({
+      where: { id },
+      select: { scannerFile: true },
+    });
+
+    // Update the orden
+    const orden = await prisma.ordenReparacion.update({
       where: { id },
       data: dataToUpdate,
       include: {
@@ -297,6 +305,101 @@ export class PrismaOrdenReparacionRepository
         scannerFile: true,
       },
     });
+
+    // Only handle CustomFile if scannerFile field is being updated AND is different from current value
+    if (
+      dto.scannerFile !== undefined &&
+      dto.scannerFile !== currentOrden?.scannerFile
+    ) {
+      // Check if there's an existing CustomFile
+      const existingFile = await prisma.customFile.findFirst({
+        where: { ordenReparacionId: id },
+      });
+
+      if (dto.scannerFile) {
+        // If new scannerFile is provided, dereference old file and create new one
+        if (existingFile) {
+          // Dereference the old CustomFile (remove the relation)
+          await prisma.customFile.update({
+            where: { id: existingFile.id },
+            data: {
+              ordenReparacionId: null,
+            },
+          });
+        }
+
+        // Create a new CustomFile for the new scannerFile
+        await prisma.customFile.create({
+          data: {
+            tempPath: dto.scannerFile,
+            finalPath: dto.scannerFile,
+            ordenReparacionId: id,
+          },
+        });
+      } else if (existingFile) {
+        // If scannerFile is explicitly set to null, dereference the existing file
+        await prisma.customFile.update({
+          where: { id: existingFile.id },
+          data: {
+            ordenReparacionId: null,
+          },
+        });
+      }
+
+      // Fetch the updated orden with the scannerFile relation
+      return prisma.ordenReparacion.findUnique({
+        where: { id },
+        include: {
+          auto: {
+            include: {
+              owner: true,
+            },
+          },
+          mecanicos: {
+            include: {
+              mecanico: true,
+            },
+          },
+          repuestosUsados: {
+            include: {
+              stock: {
+                include: {
+                  proveedor: true,
+                },
+              },
+            },
+          },
+          reparacionesDeTercero: {
+            include: {
+              proveedor: true,
+              reciboFile: true,
+            },
+          },
+          ingresos: {
+            include: {
+              dolar: true,
+            },
+          },
+          trabajosRealizados: true,
+          revisadoPor: true,
+          controlesEnReparacion: {
+            include: {
+              controlMecanico: {
+                include: {
+                  parent: true,
+                },
+              },
+            },
+          },
+          pagos: true,
+          recibosFiles: true,
+          scannerFile: true,
+        },
+      });
+    }
+
+    // If scannerFile field is not being updated or is the same value, return the orden as is
+    return orden;
   }
 
   async createDraft(data: any) {

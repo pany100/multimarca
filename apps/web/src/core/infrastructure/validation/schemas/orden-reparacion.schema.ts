@@ -85,6 +85,7 @@ export const updateOrdenSchema = z.object({
   revisadoPorId: z.coerce.number().nullable().optional(),
   estado: z.string().optional(),
   pdfPath: z.string().nullable().optional(),
+  scannerFile: z.string().nullable().optional(),
   mecanicos: z
     .array(
       z.object({
@@ -129,6 +130,7 @@ export const patchOrdenV2Schema = z.object({
   revisadoPorId: z.coerce.number().nullable().optional(),
   detalleControles: z.string().optional(),
   porcentajeRecargo: z.coerce.number().nullable().optional(),
+  scannerFile: z.string().nullable().optional(),
 });
 
 export const addMecanicoToOrdenSchema = z.object({

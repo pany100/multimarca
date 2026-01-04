@@ -16,6 +16,7 @@ type Props = {
   filePath: string | null;
   setFilePath: (file: string | null) => void;
   acceptedTypes?: "images" | "pdfs" | "both";
+  onErrorUploading?: (error: string) => void;
 };
 
 function FilesInput({
@@ -23,6 +24,7 @@ function FilesInput({
   label,
   setFilePath,
   acceptedTypes = "both",
+  onErrorUploading,
 }: Props) {
   const [loading, setLoading] = useState(false);
 
@@ -65,13 +67,20 @@ function FilesInput({
       });
 
       if (!response.ok) {
-        throw new Error("Error al subir el archivo");
+        const errorData = await response.json();
+        const serverMessage = errorData.mensaje || "Error al subir el archivo";
+        throw new Error(serverMessage);
       }
 
       const data = await response.json();
       setFilePath(data.url);
     } catch (error) {
       console.error("Error al subir archivo:", error);
+      const errorMessage =
+        error instanceof Error ? error.message : "Error al subir el archivo";
+      if (onErrorUploading) {
+        onErrorUploading(errorMessage);
+      }
     } finally {
       setLoading(false);
     }
@@ -110,6 +119,7 @@ function FilesInput({
             maxWidth: 400,
             borderRadius: 2,
             backgroundColor: "#f5f5f5",
+            mb: 2,
           }}
         >
           <Typography variant="body2" color="text.secondary" textAlign="center">
@@ -203,27 +213,44 @@ function FilesInput({
 
         {!loading && filePath && (
           <>
-            {renderFilePreview()}
-            <Stack spacing={1}>
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<DeleteIcon />}
-                onClick={handleDeleteFile}
-                size="small"
-              >
-                Eliminar
-              </Button>
-              <Button variant="contained" component="label" size="small">
-                Cambiar archivo
-                <input
-                  type="file"
-                  accept={getAcceptAttribute()}
-                  onChange={handleFileChange}
-                  hidden
-                />
-              </Button>
-            </Stack>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                width: "100%",
+                mb: 3,
+              }}
+            >
+              {renderFilePreview()}
+            </Box>
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                width: "100%",
+              }}
+            >
+              <Stack direction="row" spacing={2}>
+                <Button
+                  variant="outlined"
+                  color="error"
+                  startIcon={<DeleteIcon />}
+                  onClick={handleDeleteFile}
+                  size="small"
+                >
+                  Eliminar
+                </Button>
+                <Button variant="contained" component="label" size="small">
+                  Cambiar archivo
+                  <input
+                    type="file"
+                    accept={getAcceptAttribute()}
+                    onChange={handleFileChange}
+                    hidden
+                  />
+                </Button>
+              </Stack>
+            </Box>
           </>
         )}
 
