@@ -23,7 +23,7 @@ import { usePrintHandlers } from "./hooks/usePrintHandlers";
 import { useWhatsAppHandlers } from "./hooks/useWhatsAppHandlers";
 
 function OrdenHeader() {
-  const { orden } = useOrden();
+  const { orden, setOrden } = useOrden();
   // WhatsApp handlers
   const {
     openConfirmModal,
@@ -56,9 +56,26 @@ function OrdenHeader() {
   });
 
   // Cerrar orden handler
-  const { loading: cerrandoOrden, handleCerrarOrden } = useCerrarOrdenHandler(
-    orden.id
-  );
+  const { loading: cerrandoOrden, handleCerrarOrden: cerrarOrden } =
+    useCerrarOrdenHandler(orden.id);
+
+  const handleCerrarOrden = async () => {
+    try {
+      const ordenActualizada = await cerrarOrden();
+      setOrden(ordenActualizada);
+      setSnackbar({
+        open: true,
+        message: "Orden cerrada correctamente",
+        severity: "success",
+      });
+    } catch (error: any) {
+      setSnackbar({
+        open: true,
+        message: error.message || "Error al cerrar la orden",
+        severity: "error",
+      });
+    }
+  };
 
   return (
     <>

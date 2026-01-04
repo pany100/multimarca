@@ -16,6 +16,7 @@ interface CommonOrderCardProps {
   onOpen?: () => void;
   loading?: boolean;
   submitButtonText?: string;
+  maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
 }
 
 export const CommonOrderCard = ({
@@ -28,6 +29,7 @@ export const CommonOrderCard = ({
   onOpen,
   loading = false,
   submitButtonText = "Guardar",
+  maxWidth = "xs",
 }: CommonOrderCardProps) => {
   const [openModal, setOpenModal] = useState(false);
 
@@ -90,6 +92,7 @@ export const CommonOrderCard = ({
         methods={formMethods}
         loading={loading}
         submitButtonText={submitButtonText}
+        maxWidth={maxWidth}
       >
         {formContent}
       </CommonModalForm>

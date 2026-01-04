@@ -1,6 +1,9 @@
+import { hasAllRequiredFields } from "@/core/domain/policies/orden-reparacion.policy";
 import { OrdenReparacionRepository } from "@/core/domain/repositories/orden-reparacion.repository";
 import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
+import { EstadoOrden } from "@/core/domain/value-objects/estado-orden.vo";
 import { patchOrdenV2Schema } from "@/core/infrastructure/validation/schemas/orden-reparacion.schema";
+import { EstadoOrdenReparacion } from "@prisma/client";
 import { z } from "zod";
 
 type PatchOrdenV2Dto = z.infer<typeof patchOrdenV2Schema>;
@@ -15,6 +18,29 @@ export class PatchOrdenV2UseCase {
     const ordenExistente = await this.ordenRepository.findById(ordenId);
     if (!ordenExistente) {
       throw new Error("Orden de reparación no encontrada");
+    }
+
+    // Validación de estado "terminada"
+    if (dto.estado) {
+      const estado = EstadoOrden.from(dto.estado as EstadoOrdenReparacion);
+      if (estado.isTerminado()) {
+        // Combinar datos existentes con los del patch para validar
+        const dataToValidate = {
+          ...ordenExistente,
+          ...dto,
+          mecanicos: ordenExistente.mecanicos?.map((m: any) => ({
+            mecanicoId: m.mecanico?.id || m.mecanicoId,
+          })),
+          repuestosUsados: ordenExistente.repuestosUsados,
+          reparacionesDeTercero: ordenExistente.reparacionesDeTercero,
+          trabajosRealizados: ordenExistente.trabajosRealizados,
+        };
+        if (!hasAllRequiredFields(dataToValidate)) {
+          throw new Error(
+            "Para finalizar, se requieren mecánicos, fechas y al menos un trabajo/repuesto/tercero."
+          );
+        }
+      }
     }
 
     // Validaciones de negocio

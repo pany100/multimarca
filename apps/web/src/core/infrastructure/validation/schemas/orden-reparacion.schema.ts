@@ -131,6 +131,11 @@ export const patchOrdenV2Schema = z.object({
   detalleControles: z.string().optional(),
   porcentajeRecargo: z.coerce.number().nullable().optional(),
   scannerFile: z.string().nullable().optional(),
+  incrementoInterno: z.coerce.number().nullable().optional(),
+  descuento: z.coerce.number().nullable().optional(),
+  descripcionDescuento: z.string().nullable().optional(),
+  incremento: z.coerce.number().nullable().optional(),
+  descripcionIncremento: z.string().nullable().optional(),
 });
 
 export const addMecanicoToOrdenSchema = z.object({

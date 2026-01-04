@@ -193,6 +193,11 @@ export class PrismaOrdenReparacionRepository
       detalleControles?: string;
       porcentajeRecargo?: number | null;
       scannerFile?: string | null;
+      incrementoInterno?: number | null;
+      descuento?: number | null;
+      descripcionDescuento?: string | null;
+      incremento?: number | null;
+      descripcionIncremento?: string | null;
     }
   ) {
     const dataToUpdate: any = {};
@@ -220,6 +225,14 @@ export class PrismaOrdenReparacionRepository
       dataToUpdate.detalleControles = dto.detalleControles;
     if (dto.porcentajeRecargo !== undefined)
       dataToUpdate.porcentajeRecargo = dto.porcentajeRecargo;
+    if (dto.incrementoInterno !== undefined)
+      dataToUpdate.incrementoInterno = dto.incrementoInterno;
+    if (dto.descuento !== undefined) dataToUpdate.descuento = dto.descuento;
+    if (dto.descripcionDescuento !== undefined)
+      dataToUpdate.descripcionDescuento = dto.descripcionDescuento;
+    if (dto.incremento !== undefined) dataToUpdate.incremento = dto.incremento;
+    if (dto.descripcionIncremento !== undefined)
+      dataToUpdate.descripcionIncremento = dto.descripcionIncremento;
 
     if (dto.controlesEnReparacion !== undefined) {
       const controlIds = dto.controlesEnReparacion.map((c) => c.id);

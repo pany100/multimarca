@@ -1,11 +1,19 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { useState } from "react";
 
-export const useCerrarOrdenHandler = (ordenId: number) => {
+interface UpdateCostosDto {
+  incrementoInterno?: number | null;
+  descuento?: number | null;
+  descripcionDescuento?: string | null;
+  incremento?: number | null;
+  descripcionIncremento?: string | null;
+}
+
+export const useUpdateCostos = () => {
   const [loading, setLoading] = useState(false);
   const { authFetch } = useFetch();
 
-  const handleCerrarOrden = async () => {
+  const updateCostos = async (ordenId: number, data: UpdateCostosDto) => {
     setLoading(true);
     try {
       const response = await authFetch(`/api/orden-reparacion/v2/${ordenId}`, {
@@ -13,20 +21,17 @@ export const useCerrarOrdenHandler = (ordenId: number) => {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          estado: "Terminado",
-        }),
+        body: JSON.stringify(data),
       });
 
       if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al cerrar la orden");
+        throw new Error("Error al actualizar los costos");
       }
 
       const result = await response.json();
       return result;
     } catch (error) {
-      console.error("Error al cerrar orden:", error);
+      console.error("Error al actualizar costos:", error);
       throw error;
     } finally {
       setLoading(false);
@@ -34,7 +39,7 @@ export const useCerrarOrdenHandler = (ordenId: number) => {
   };
 
   return {
+    updateCostos,
     loading,
-    handleCerrarOrden,
   };
 };
