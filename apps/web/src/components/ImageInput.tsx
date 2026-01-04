@@ -68,19 +68,16 @@ function ImageInput({ image, label, setImage }: Props) {
         {label}
       </FormLabel>
 
-      <Stack
-        direction="row"
-        justifyContent="flex-end"
-        spacing={2}
-        alignItems="center"
-      >
-        {loading && (
-          <Box display="flex" justifyContent="center" alignItems="center">
-            <CircularProgress />
-          </Box>
-        )}
-        {!loading && image && (
-          <>
+      {loading && (
+        <Box display="flex" justifyContent="center" alignItems="center" py={4}>
+          <CircularProgress />
+        </Box>
+      )}
+
+      {!loading && image && (
+        <Box>
+          {/* Imagen centrada */}
+          <Box display="flex" justifyContent="center" mb={2}>
             <Image
               src={image}
               alt="Imagen seleccionada"
@@ -88,34 +85,25 @@ function ImageInput({ image, label, setImage }: Props) {
               height={200}
               style={{ width: "300px", height: "auto" }}
             />
-            <Box sx={{ mt: 2 }}>
-              <Button
-                variant="outlined"
-                color="error"
-                startIcon={<DeleteIcon />}
-                onClick={handleDeleteImage}
-              >
-                Eliminar
-              </Button>
-              <Box sx={{ mt: 2 }}>
-                <Button variant="contained" component="label" sx={{ mt: 1 }}>
-                  Subir imagen
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageChange}
-                    hidden
-                  />
-                </Button>
-              </Box>
-            </Box>
-          </>
-        )}
-        {!loading && !image && (
-          <>
-            <Typography>No hay imagen seleccionada</Typography>
-            <Button variant="contained" component="label" sx={{ mt: 1 }}>
-              Subir imagen
+          </Box>
+
+          {/* Botones en fila centrados */}
+          <Stack
+            direction="row"
+            spacing={2}
+            justifyContent="center"
+            alignItems="center"
+          >
+            <Button
+              variant="outlined"
+              color="error"
+              startIcon={<DeleteIcon />}
+              onClick={handleDeleteImage}
+            >
+              Eliminar
+            </Button>
+            <Button variant="contained" component="label">
+              Cargar imagen
               <input
                 type="file"
                 accept="image/*"
@@ -123,9 +111,24 @@ function ImageInput({ image, label, setImage }: Props) {
                 hidden
               />
             </Button>
-          </>
-        )}
-      </Stack>
+          </Stack>
+        </Box>
+      )}
+
+      {!loading && !image && (
+        <Box display="flex" flexDirection="column" alignItems="center" py={2}>
+          <Typography mb={2}>No hay imagen seleccionada</Typography>
+          <Button variant="contained" component="label">
+            Subir imagen
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleImageChange}
+              hidden
+            />
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 }

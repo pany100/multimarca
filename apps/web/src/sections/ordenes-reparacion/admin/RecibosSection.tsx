@@ -1,7 +1,7 @@
 "use client";
 
-import ImageInput from "@/components/ImageInput";
 import CommonModalForm from "@/components/commons/CommonModalForm";
+import ImageInput from "@/components/ImageInput";
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AddIcon from "@mui/icons-material/Add";
@@ -19,6 +19,7 @@ import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { useOrden } from "./contexts/OrdenContext";
 import { useAddRecibo } from "./hooks/useAddRecibo";
+import RecibosContent from "./RecibosContent";
 
 const schema = yup.object({
   reciboPath: yup
@@ -73,6 +74,7 @@ function RecibosSection() {
       });
 
       handleCloseModal();
+      setEditing(false);
     } catch (error) {
       setSnackbar({
         open: true,
@@ -110,12 +112,14 @@ function RecibosSection() {
             </IconButton>
           </div>
 
-          {(!orden.recibosFiles || orden.recibosFiles.length === 0) && (
+          {!orden.recibosFiles || orden.recibosFiles.length === 0 ? (
             <Box p={3} textAlign="center">
               <Typography variant="body2" color="text.secondary">
                 No hay recibos cargados
               </Typography>
             </Box>
+          ) : (
+            <RecibosContent editing={editing} />
           )}
 
           {editing && (
@@ -149,7 +153,7 @@ function RecibosSection() {
         title="Agregar Recibo"
         methods={methods}
         loading={loading}
-        submitButtonText="Agregar"
+        submitButtonText="Agregar Recibo"
       >
         <Box sx={{ mt: 2 }}>
           <Controller
