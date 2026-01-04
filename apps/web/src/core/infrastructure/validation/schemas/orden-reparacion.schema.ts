@@ -223,3 +223,13 @@ export const updateRepuestoUsadoSchema = z.object({
 export const deleteRepuestoUsadoSchema = z.object({
   id: z.coerce.number().int().positive(),
 });
+
+export const addReciboSchema = z.object({
+  ordenId: z.coerce.number().int().positive(),
+  reciboPath: z.string().min(1, "La ruta del recibo es requerida"),
+});
+
+export const deleteReciboSchema = z.object({
+  ordenId: z.coerce.number().int().positive(),
+  reciboPath: z.string().min(1, "La ruta del recibo es requerida"),
+});

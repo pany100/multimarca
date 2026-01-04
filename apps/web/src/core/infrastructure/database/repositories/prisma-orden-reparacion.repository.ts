@@ -449,4 +449,73 @@ export class PrismaOrdenReparacionRepository
       where: { id } as any,
     });
   }
+
+  async addRecibo(ordenId: number, reciboPath: string) {
+    // Verificar que la orden existe
+    const orden = await prisma.ordenReparacion.findUnique({
+      where: { id: ordenId },
+      select: { id: true },
+    });
+
+    if (!orden) {
+      throw new Error("Orden de reparación no encontrada");
+    }
+
+    // Crear el CustomFile para el recibo
+    const customFile = await prisma.customFile.create({
+      data: {
+        tempPath: reciboPath,
+        finalPath: reciboPath,
+        reciboORepId: ordenId,
+      },
+    });
+
+    // Obtener la orden actualizada con todos los recibos
+    const ordenActualizada = await prisma.ordenReparacion.findUnique({
+      where: { id: ordenId },
+      include: {
+        recibosFiles: true,
+      },
+    });
+
+    return {
+      recibo: customFile,
+      recibos: ordenActualizada?.recibosFiles || [],
+    };
+  }
+
+  async deleteRecibo(ordenId: number, reciboPath: string) {
+    // Buscar el CustomFile por el path y que pertenezca a la orden
+    const customFile = await prisma.customFile.findFirst({
+      where: {
+        OR: [{ tempPath: reciboPath }, { finalPath: reciboPath }],
+        reciboORepId: ordenId,
+      },
+      select: { id: true },
+    });
+
+    if (!customFile) {
+      throw new Error("Recibo no encontrado o no pertenece a esta orden");
+    }
+
+    // Desreferenciar el CustomFile (remover la relación con la orden)
+    await prisma.customFile.update({
+      where: { id: customFile.id },
+      data: {
+        reciboORepId: null,
+      },
+    });
+
+    // Obtener la orden actualizada con los recibos restantes
+    const ordenActualizada = await prisma.ordenReparacion.findUnique({
+      where: { id: ordenId },
+      include: {
+        recibosFiles: true,
+      },
+    });
+
+    return {
+      recibos: ordenActualizada?.recibosFiles || [],
+    };
+  }
 }
