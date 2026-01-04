@@ -18,10 +18,10 @@ export class AddMecanicoToOrdenUseCase {
       throw new Error("El mecánico ya está asignado a esta orden");
     }
 
-    return this.repo.addMecanicoToOrden({
-      ordenReparacionId: input.ordenReparacionId,
-      mecanicoId: input.mecanicoId,
-      detalle: input.detalle,
-    });
+    return this.repo.addMecanicoToOrden(
+      input.ordenReparacionId,
+      input.mecanicoId,
+      input.detalle
+    );
   }
 }
