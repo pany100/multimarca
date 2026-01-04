@@ -1,4 +1,6 @@
 export interface RepuestoUsadoRepository {
+  findById(id: number): Promise<any>;
+
   add(
     data: {
       ordenReparacionId?: number;
@@ -23,5 +25,5 @@ export interface RepuestoUsadoRepository {
     deps?: { tx?: any }
   ): Promise<any>;
 
-  delete(id: number): Promise<any>;
+  delete(id: number, deps?: { tx?: any }): Promise<any>;
 }

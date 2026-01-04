@@ -2,6 +2,15 @@ import { RepuestoUsadoRepository } from "@/core/domain/repositories/repuesto-usa
 import { prisma } from "@/core/infrastructure/database/prisma";
 
 export class PrismaRepuestoUsadoRepository implements RepuestoUsadoRepository {
+  async findById(id: number) {
+    return prisma.repuestoUsado.findUnique({
+      where: { id },
+      include: {
+        stock: true,
+      },
+    });
+  }
+
   async add(
     data: {
       ordenReparacionId?: number;
@@ -62,8 +71,9 @@ export class PrismaRepuestoUsadoRepository implements RepuestoUsadoRepository {
     });
   }
 
-  async delete(id: number) {
-    return prisma.repuestoUsado.delete({
+  async delete(id: number, deps?: { tx?: any }) {
+    const db = deps?.tx ?? prisma;
+    return db.repuestoUsado.delete({
       where: { id },
     });
   }

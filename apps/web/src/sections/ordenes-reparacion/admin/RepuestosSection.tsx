@@ -4,10 +4,8 @@ import { useState } from "react";
 import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
 import RepuestosModal from "./components/RepuestosModal";
 import RepuestosTable from "./components/RepuestosTable";
-import { useOrden } from "./contexts/OrdenContext";
-import { useRepuestosManager } from "./hooks/useRepuestosManager";
 
-interface RepuestoUsado {
+export interface RepuestoUsado {
   id: number;
   stockId: number;
   precioCompra: number;
@@ -19,18 +17,40 @@ interface RepuestoUsado {
   };
 }
 
-const RepuestosSection = () => {
-  const { orden } = useOrden();
-  const {
-    loading,
-    handleAddRepuesto,
-    handleUpdateRepuesto,
-    handleDeleteClick,
-    deleteConfirmOpen,
-    handleDeleteConfirm,
-    handleDeleteCancel,
-  } = useRepuestosManager();
+interface RepuestosSectionProps {
+  repuestos: RepuestoUsado[];
+  loading: boolean;
+  onAddRepuesto: (data: {
+    stockId: number;
+    precioCompra: number;
+    precioVenta: number;
+    unidadesConsumidas: number;
+  }) => Promise<boolean>;
+  onUpdateRepuesto: (
+    id: number,
+    data: {
+      stockId?: number;
+      precioCompra?: number;
+      precioVenta?: number;
+      unidadesConsumidas?: number;
+    }
+  ) => Promise<boolean>;
+  onDeleteRepuesto: (repuesto: RepuestoUsado) => void;
+  deleteConfirmOpen: boolean;
+  onDeleteConfirm: () => Promise<void>;
+  onDeleteCancel: () => void;
+}
 
+const RepuestosSection = ({
+  repuestos,
+  loading,
+  onAddRepuesto,
+  onUpdateRepuesto,
+  onDeleteRepuesto,
+  deleteConfirmOpen,
+  onDeleteConfirm,
+  onDeleteCancel,
+}: RepuestosSectionProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editRepuesto, setEditRepuesto] = useState<RepuestoUsado | undefined>();
 
@@ -40,17 +60,23 @@ const RepuestosSection = () => {
     precioVenta: number;
     unidadesConsumidas: number;
   }) => {
+    let success = false;
+
     if (editRepuesto) {
       // Update existing repuesto
-      await handleUpdateRepuesto(editRepuesto.id, data);
+      success = await onUpdateRepuesto(editRepuesto.id, data);
     } else {
       // Add new repuesto
-      await handleAddRepuesto(data);
+      success = await onAddRepuesto(data);
     }
 
-    // Always close modal after operation (success or error)
-    setModalOpen(false);
-    setEditRepuesto(undefined);
+    // Only close modal if operation was successful
+    if (success) {
+      setModalOpen(false);
+      setEditRepuesto(undefined);
+    }
+
+    return success;
   };
 
   const handleEdit = (repuesto: RepuestoUsado) => {
@@ -66,9 +92,9 @@ const RepuestosSection = () => {
         </Typography>
 
         <RepuestosTable
-          repuestos={orden?.repuestosUsados || []}
+          repuestos={repuestos}
           onEdit={handleEdit}
-          onDelete={handleDeleteClick}
+          onDelete={onDeleteRepuesto}
           loading={loading}
         />
 
@@ -100,8 +126,8 @@ const RepuestosSection = () => {
 
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
+        onClose={onDeleteCancel}
+        onConfirm={onDeleteConfirm}
         title="Eliminar repuesto usado"
         message="¿Está seguro que desea eliminar este repuesto usado? Esta acción no se puede deshacer."
         loading={loading}

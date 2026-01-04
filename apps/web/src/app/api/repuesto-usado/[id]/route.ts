@@ -58,8 +58,15 @@ export async function DELETE(
       deleteRepuestoUsadoSchema
     );
 
+    const notificationService = new NotificationService(
+      new PrismaNotificationRepository()
+    );
+
     const useCase = new DeleteRepuestoUsadoUseCase(
-      new PrismaRepuestoUsadoRepository()
+      new PrismaRepuestoUsadoRepository(),
+      new PrismaUnitOfWork(),
+      new StockManagerService(),
+      new PrismaInventoryAdapter(notificationService)
     );
 
     await useCase.execute(dto);

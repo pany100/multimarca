@@ -34,7 +34,7 @@ interface RepuestosModalProps {
     precioCompra: number;
     precioVenta: number;
     unidadesConsumidas: number;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
   loading?: boolean;
   editRepuesto?: RepuestoUsado;
 }
@@ -143,7 +143,14 @@ const RepuestosModal = ({
               searchOptions={searchStockObject}
               initialOptions={initialStock}
               selectOption={(option) => {
+                const precioVentaCalculado =
+                  option?.object?.buyPrice *
+                    (1 + (option?.object?.markup || 0) / 100) || 0;
                 setStock(option?.object || null);
+                setPrecioCompra(option?.object?.buyPrice.toString());
+                setPrecioUnitario(precioVentaCalculado.toString());
+                setUnidadesConsumidas("1");
+                setPrecioVenta(precioVentaCalculado.toString());
               }}
               initialValue={editRepuesto?.stock?.id.toString()}
             />
