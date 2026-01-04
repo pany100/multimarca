@@ -112,6 +112,28 @@ function OrdenHeader() {
             <Typography variant="body2" color="text.secondary">
               Creada el {getFormattedDateArg(orden.fechaCreacion)}
             </Typography>
+            <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
+              <Typography variant="body1" fontWeight="medium">
+                Total a pagar:{" "}
+                <Typography component="span" fontWeight="bold">
+                  $
+                  {orden.total?.toLocaleString("es-AR", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }) || "0.00"}
+                </Typography>
+              </Typography>
+              <Typography variant="body1" fontWeight="medium" color="error">
+                Deuda:{" "}
+                <Typography component="span" fontWeight="bold" color="error">
+                  $
+                  {orden.deuda?.toLocaleString("es-AR", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }) || "0.00"}
+                </Typography>
+              </Typography>
+            </Box>
           </Box>
 
           {/* Right side: Status and Action Buttons */}

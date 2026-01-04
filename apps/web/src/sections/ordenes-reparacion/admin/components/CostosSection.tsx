@@ -3,7 +3,7 @@
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Paper, Stack, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { useOrden } from "../contexts/OrdenContext";
@@ -151,6 +151,41 @@ function CostosSection() {
                 No hay costos adicionales configurados
               </Typography>
             )}
+
+          {/* Total de la orden */}
+          <Paper
+            elevation={0}
+            sx={{
+              mt: 2,
+              backgroundColor: "primary.lighter",
+              borderRadius: 1,
+            }}
+          >
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+            >
+              <Typography variant="h6" fontWeight="bold" color="primary.dark">
+                Total Orden de Reparación
+              </Typography>
+              <Typography
+                variant="h5"
+                fontWeight="bold"
+                color="primary.dark"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                ${" "}
+                {orden.total?.toLocaleString("es-AR", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                }) || "0.00"}
+              </Typography>
+            </Box>
+          </Paper>
         </Stack>
       </Box>
     </CommonOrderCard>
