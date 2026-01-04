@@ -58,7 +58,7 @@ function ReparacionAnteriorItem({ reparacion, index, addObservacion }: Props) {
             return (
               <ListItem
                 key={obsIndex}
-                sx={{ py: 0.5 }}
+                sx={{ py: 0.5, pr: 12 }}
                 secondaryAction={
                   <Tooltip
                     title={
@@ -83,7 +83,10 @@ function ReparacionAnteriorItem({ reparacion, index, addObservacion }: Props) {
               >
                 <ListItemText
                   primary={obsString}
-                  primaryTypographyProps={{ variant: "body2" }}
+                  primaryTypographyProps={{
+                    variant: "body2",
+                    sx: { pr: 2 },
+                  }}
                 />
               </ListItem>
             );

@@ -95,7 +95,7 @@ function OrdenHeader() {
         sx={{
           position: isSticky ? "fixed" : "relative",
           top: isSticky ? 64 : "auto",
-          left: isSticky ? 0 : "auto",
+          left: isSticky ? { xs: 0, sm: 240 } : "auto",
           right: isSticky ? 0 : "auto",
           zIndex: isSticky ? 1000 : "auto",
           backgroundColor: "background.default",
