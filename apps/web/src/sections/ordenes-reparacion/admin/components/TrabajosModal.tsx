@@ -33,7 +33,7 @@ interface TrabajosModalProps {
     descripcion: string;
     diasParaRecordatorio?: number | null;
     manoDeObra?: { name: string };
-  }) => Promise<void>;
+  }) => Promise<boolean>;
   loading?: boolean;
   editTrabajo?: TrabajoRealizado;
 }

@@ -6,28 +6,50 @@ import { useState } from "react";
 import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
 import TrabajosModal from "./components/TrabajosModal";
 import TrabajosTable from "./components/TrabajosTable";
-import { useOrden } from "./contexts/OrdenContext";
-import { useTrabajosManager } from "./hooks/useTrabajosManager";
 
-interface TrabajoRealizado {
+export interface TrabajoRealizado {
   id: number;
   precioUnitario: number;
   descripcion: string;
   diasParaRecordatorio?: number | null;
 }
 
-const TrabajosSection = () => {
-  const { orden } = useOrden();
-  const {
-    loading,
-    handleAddTrabajo,
-    handleUpdateTrabajo,
-    handleDeleteClick,
-    deleteConfirmOpen,
-    handleDeleteConfirm,
-    handleDeleteCancel,
-  } = useTrabajosManager();
+interface TrabajosSectionProps {
+  trabajos: TrabajoRealizado[];
+  totalManoDeObra: number;
+  loading: boolean;
+  onAddTrabajo: (data: {
+    precioUnitario: number;
+    descripcion: string;
+    diasParaRecordatorio?: number | null;
+    manoDeObra?: { name: string };
+  }) => Promise<boolean>;
+  onUpdateTrabajo: (
+    id: number,
+    data: {
+      precioUnitario: number;
+      descripcion: string;
+      diasParaRecordatorio?: number | null;
+      manoDeObra?: { name: string };
+    }
+  ) => Promise<boolean>;
+  onDeleteTrabajo: (trabajo: TrabajoRealizado) => void;
+  deleteConfirmOpen: boolean;
+  onDeleteConfirm: () => Promise<void>;
+  onDeleteCancel: () => void;
+}
 
+const TrabajosSection = ({
+  trabajos,
+  totalManoDeObra,
+  loading,
+  onAddTrabajo,
+  onUpdateTrabajo,
+  onDeleteTrabajo,
+  deleteConfirmOpen,
+  onDeleteConfirm,
+  onDeleteCancel,
+}: TrabajosSectionProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editTrabajo, setEditTrabajo] = useState<
     TrabajoRealizado | undefined
@@ -38,17 +60,23 @@ const TrabajosSection = () => {
     descripcion: string;
     diasParaRecordatorio?: number | null;
   }) => {
+    let success = false;
+
     if (editTrabajo) {
       // Update existing trabajo
-      await handleUpdateTrabajo(editTrabajo.id, data);
+      success = await onUpdateTrabajo(editTrabajo.id, data);
     } else {
       // Add new trabajo
-      await handleAddTrabajo(data);
+      success = await onAddTrabajo(data);
     }
 
-    // Always close modal after operation (success or error)
-    setModalOpen(false);
-    setEditTrabajo(undefined);
+    // Only close modal if operation was successful
+    if (success) {
+      setModalOpen(false);
+      setEditTrabajo(undefined);
+    }
+
+    return success;
   };
 
   const handleEdit = (trabajo: TrabajoRealizado) => {
@@ -64,15 +92,15 @@ const TrabajosSection = () => {
         </Typography>
 
         <TrabajosTable
-          trabajos={orden?.trabajosRealizados || []}
+          trabajos={trabajos}
           onEdit={handleEdit}
-          onDelete={handleDeleteClick}
+          onDelete={onDeleteTrabajo}
           loading={loading}
         />
         <Box sx={{ my: 2 }}>
           <ResumenCostosFooter
             descripcion="Total Mano de obra"
-            total={getFormattedPrice(orden?.totalManoDeObra || 0)}
+            total={getFormattedPrice(totalManoDeObra)}
           />
         </Box>
 
@@ -104,8 +132,8 @@ const TrabajosSection = () => {
 
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
+        onClose={onDeleteCancel}
+        onConfirm={onDeleteConfirm}
         title="Eliminar trabajo realizado"
         message="¿Está seguro que desea eliminar este trabajo realizado? Esta acción no se puede deshacer."
         loading={loading}
