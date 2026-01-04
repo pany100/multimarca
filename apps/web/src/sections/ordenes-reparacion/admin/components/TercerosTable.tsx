@@ -11,7 +11,6 @@ import {
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
-import { useOrden } from "../contexts/OrdenContext";
 
 interface ReparacionTercero {
   id: number;
@@ -27,6 +26,7 @@ interface ReparacionTercero {
 
 interface TercerosTableProps {
   terceros: ReparacionTercero[];
+  porcentajeRecargo?: number;
   onEdit: (tercero: ReparacionTercero) => void;
   onDelete: (tercero: ReparacionTercero) => void;
   loading?: boolean;
@@ -34,11 +34,11 @@ interface TercerosTableProps {
 
 const TercerosTable = ({
   terceros,
+  porcentajeRecargo = 0,
   onEdit,
   onDelete,
   loading = false,
 }: TercerosTableProps) => {
-  const { orden } = useOrden();
   const columns: GridColDef[] = [
     {
       field: "nombre",
@@ -65,7 +65,7 @@ const TercerosTable = ({
     },
     {
       field: "precioConRecargo",
-      headerName: `Precio con recargo (${orden?.porcentajeRecargo || 0}%)`,
+      headerName: `Precio con recargo (${porcentajeRecargo}%)`,
       flex: 1,
       valueFormatter: (value: number) => getFormattedPrice(value || 0),
     },

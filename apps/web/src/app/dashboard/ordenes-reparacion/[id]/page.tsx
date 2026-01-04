@@ -12,10 +12,10 @@ import ObservacionesSalidaSection from "@/sections/ordenes-reparacion/admin/Obse
 import ObservacionesUltimoIngresoSection from "@/sections/ordenes-reparacion/admin/ObservacionesUltimoIngresoSection";
 import OrdenHeader from "@/sections/ordenes-reparacion/admin/OrdenHeader";
 import OrdenRepuestosSection from "@/sections/ordenes-reparacion/admin/OrdenRepuestosSection";
+import OrdenTercerosSection from "@/sections/ordenes-reparacion/admin/OrdenTercerosSection";
 import OrdenTrabajosSection from "@/sections/ordenes-reparacion/admin/OrdenTrabajosSection";
 import RecargoSection from "@/sections/ordenes-reparacion/admin/RecargoSection";
 import RevisionSection from "@/sections/ordenes-reparacion/admin/RevisionSection";
-import TercerosSection from "@/sections/ordenes-reparacion/admin/TercerosSection";
 import { ControlesProvider } from "@/sections/ordenes-reparacion/admin/contexts/ControlesContext";
 import { OrdenProvider } from "@/sections/ordenes-reparacion/admin/contexts/OrdenContext";
 import { useOrdenReparacion } from "@/sections/ordenes-reparacion/hooks/useOrdenReparacion";
@@ -111,7 +111,7 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
             </Grid>
             <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
-                <TercerosSection />
+                <OrdenTercerosSection />
               </Box>
             </Grid>
             <Grid item xs={12} xl={6} sx={{ display: "flex" }}>

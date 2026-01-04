@@ -4,10 +4,8 @@ import { useState } from "react";
 import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
 import TercerosModal from "./components/TercerosModal";
 import TercerosTable from "./components/TercerosTable";
-import { useOrden } from "./contexts/OrdenContext";
-import { useTercerosManager } from "./hooks/useTercerosManager";
 
-interface ReparacionTercero {
+export interface ReparacionTercero {
   id: number;
   nombre: string;
   precioCompra: number;
@@ -19,18 +17,44 @@ interface ReparacionTercero {
   recibo?: string | null;
 }
 
-const TercerosSection = () => {
-  const { orden } = useOrden();
-  const {
-    loading,
-    handleAddTercero,
-    handleUpdateTercero,
-    handleDeleteClick,
-    deleteConfirmOpen,
-    handleDeleteConfirm,
-    handleDeleteCancel,
-  } = useTercerosManager();
+interface TercerosSectionProps {
+  terceros: ReparacionTercero[];
+  porcentajeRecargo?: number;
+  loading: boolean;
+  onAddTercero: (data: {
+    nombre: string;
+    proveedorId: number;
+    precioCompra: number;
+    precioVenta: number;
+    recibo?: string | null;
+  }) => Promise<boolean>;
+  onUpdateTercero: (
+    id: number,
+    data: {
+      nombre?: string;
+      proveedorId?: number;
+      precioCompra?: number;
+      precioVenta?: number;
+      recibo?: string | null;
+    }
+  ) => Promise<boolean>;
+  onDeleteTercero: (tercero: ReparacionTercero) => void;
+  deleteConfirmOpen: boolean;
+  onDeleteConfirm: () => Promise<void>;
+  onDeleteCancel: () => void;
+}
 
+const TercerosSection = ({
+  terceros,
+  porcentajeRecargo,
+  loading,
+  onAddTercero,
+  onUpdateTercero,
+  onDeleteTercero,
+  deleteConfirmOpen,
+  onDeleteConfirm,
+  onDeleteCancel,
+}: TercerosSectionProps) => {
   const [modalOpen, setModalOpen] = useState(false);
   const [editTercero, setEditTercero] = useState<
     ReparacionTercero | undefined
@@ -46,17 +70,17 @@ const TercerosSection = () => {
     let success = false;
 
     if (editTercero) {
-      // Update existing tercero
-      success = await handleUpdateTercero(editTercero.id, data);
+      success = await onUpdateTercero(editTercero.id, data);
     } else {
-      // Add new tercero
-      success = await handleAddTercero(data);
+      success = await onAddTercero(data);
     }
 
     if (success) {
       setModalOpen(false);
       setEditTercero(undefined);
     }
+
+    return success;
   };
 
   const handleEdit = (tercero: ReparacionTercero) => {
@@ -72,9 +96,10 @@ const TercerosSection = () => {
         </Typography>
 
         <TercerosTable
-          terceros={orden?.reparacionesDeTercero || []}
+          terceros={terceros}
+          porcentajeRecargo={porcentajeRecargo}
           onEdit={handleEdit}
-          onDelete={handleDeleteClick}
+          onDelete={onDeleteTercero}
           loading={loading}
         />
 
@@ -106,8 +131,8 @@ const TercerosSection = () => {
 
       <DeleteConfirmDialog
         open={deleteConfirmOpen}
-        onClose={handleDeleteCancel}
-        onConfirm={handleDeleteConfirm}
+        onClose={onDeleteCancel}
+        onConfirm={onDeleteConfirm}
         title="Eliminar reparación de tercero"
         message="¿Está seguro que desea eliminar esta reparación de tercero? Esta acción no se puede deshacer."
         loading={loading}

@@ -38,7 +38,7 @@ interface TercerosModalProps {
     precioCompra: number;
     precioVenta: number;
     recibo?: string | null;
-  }) => Promise<void>;
+  }) => Promise<boolean>;
   loading?: boolean;
   editTercero?: ReparacionTercero;
 }
