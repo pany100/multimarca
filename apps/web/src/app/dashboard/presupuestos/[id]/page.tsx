@@ -6,6 +6,7 @@ import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
 import { PresupuestoProvider } from "@/sections/presupuestos/admin/contexts/PresupuestoContext";
 import PresupuestoInformacionGeneral from "@/sections/presupuestos/admin/PresupuestoInformacionGeneral";
+import PresupuestoTareasAdministrativas from "@/sections/presupuestos/admin/PresupuestoTareasAdministrativas";
 import { usePresupuesto } from "@/sections/presupuestos/hooks/usePresupuesto";
 import { Box, CircularProgress, Grid } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -59,6 +60,13 @@ const PresupuestoAdminPage = ({ params }: { params: { id: string } }) => {
             <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <PresupuestoInformacionGeneral />
+              </Box>
+            </Grid>
+
+            {/* Tareas Administrativas */}
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <PresupuestoTareasAdministrativas />
               </Box>
             </Grid>
           </Grid>
