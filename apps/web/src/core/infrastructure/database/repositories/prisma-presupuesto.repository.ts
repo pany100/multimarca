@@ -219,15 +219,23 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
       dataToUpdate.fechaRespuesta = dto.fechaRespuesta;
     if (dto.fechaEnvio !== undefined) dataToUpdate.fechaEnvio = dto.fechaEnvio;
     if (dto.descuento !== undefined)
-      dataToUpdate.descuento = new Prisma.Decimal(dto.descuento);
+      dataToUpdate.descuento =
+        dto.descuento !== null ? new Prisma.Decimal(dto.descuento) : null;
     if (dto.porcentajeRecargo !== undefined)
-      dataToUpdate.porcentajeRecargo = new Prisma.Decimal(dto.porcentajeRecargo);
+      dataToUpdate.porcentajeRecargo =
+        dto.porcentajeRecargo !== null
+          ? new Prisma.Decimal(dto.porcentajeRecargo)
+          : null;
     if (dto.descripcionDescuento !== undefined)
       dataToUpdate.descripcionDescuento = dto.descripcionDescuento;
     if (dto.incrementoInterno !== undefined)
-      dataToUpdate.incrementoInterno = new Prisma.Decimal(dto.incrementoInterno);
+      dataToUpdate.incrementoInterno =
+        dto.incrementoInterno !== null
+          ? new Prisma.Decimal(dto.incrementoInterno)
+          : null;
     if (dto.incremento !== undefined)
-      dataToUpdate.incremento = new Prisma.Decimal(dto.incremento);
+      dataToUpdate.incremento =
+        dto.incremento !== null ? new Prisma.Decimal(dto.incremento) : null;
     if (dto.descripcionIncremento !== undefined)
       dataToUpdate.descripcionIncremento = dto.descripcionIncremento;
 
