@@ -5,8 +5,9 @@ import PresupuestoHeader from "@/components/orden-reparacion/presupuesto/Presupu
 import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
 import { PresupuestoProvider } from "@/sections/presupuestos/admin/contexts/PresupuestoContext";
+import PresupuestoInformacionGeneral from "@/sections/presupuestos/admin/PresupuestoInformacionGeneral";
 import { usePresupuesto } from "@/sections/presupuestos/hooks/usePresupuesto";
-import { Box, CircularProgress, Grid, Paper } from "@mui/material";
+import { Box, CircularProgress, Grid } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
@@ -41,9 +42,9 @@ const PresupuestoAdminPage = ({ params }: { params: { id: string } }) => {
 
   if (!presupuesto) {
     return (
-      <Paper sx={{ p: 3 }}>
+      <Box sx={{ p: 3 }}>
         <Box>No se encontró el presupuesto</Box>
-      </Paper>
+      </Box>
     );
   }
 
@@ -54,11 +55,11 @@ const PresupuestoAdminPage = ({ params }: { params: { id: string } }) => {
           <PresupuestoHeader />
 
           <Grid container spacing={3} alignItems="stretch">
-            {/* Aquí se agregarán las secciones */}
-            <Grid item xs={12}>
-              <Paper sx={{ p: 3 }}>
-                <Box>Secciones de administración se agregarán aquí</Box>
-              </Paper>
+            {/* Información General */}
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <PresupuestoInformacionGeneral />
+              </Box>
             </Grid>
           </Grid>
         </Box>
