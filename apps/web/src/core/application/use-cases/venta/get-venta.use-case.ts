@@ -14,7 +14,8 @@ export class GetVentaUseCase {
     const reparacionesDeTercero = venta.reparacionesDeTercero.map((el) => ({
       ...el,
       recibo: el.reciboFile?.finalPath || el.reciboFile?.tempPath || null,
-      precioVenta: comprobante.getPrecioFinalForReparaciones(
+      precioVenta: el.precioVenta.toNumber(),
+      precioConRecargo: comprobante.getPrecioFinalForReparaciones(
         el.precioVenta.toNumber()
       ),
     }));
@@ -31,6 +32,9 @@ export class GetVentaUseCase {
       totalBase: comprobante.totalBase,
       total: comprobante.total,
       totalPagos: comprobante.totalPagado,
+      totalManoDeObra: comprobante.totalManoDeObra,
+      totalRepuestos: comprobante.totalRepuestos,
+      totalReparacionesDeTerceros: comprobante.totalTerceros,
     };
   }
 }

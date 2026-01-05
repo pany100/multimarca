@@ -13,7 +13,6 @@ const VentaTercerosSection = () => {
     handleDeleteConfirm,
     handleDeleteCancel,
   } = useTercerosVentaManager();
-
   return (
     <TercerosSection
       terceros={venta?.reparacionesDeTercero || []}
