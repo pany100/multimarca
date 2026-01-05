@@ -1,3 +1,5 @@
+import { PresupuestoService } from "@/core/application/services/presupuesto.service";
+import { DeletePresupuestoUseCase } from "@/core/application/use-cases/presupuesto/delete-presupuesto.use-case";
 import { PatchPresupuestoUseCase } from "@/core/application/use-cases/presupuesto/patch-presupuesto.use-case";
 import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 import { PrismaPresupuestoRepository } from "@/core/infrastructure/database/repositories/prisma-presupuesto.repository";
@@ -77,5 +79,29 @@ export async function PATCH(
     return NextResponse.json(presupuestoActualizado, { status: 200 });
   } catch (error) {
     return handleApiError(error);
+  }
+}
+
+export async function DELETE(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const dto = await validateRequest(
+      { id: params.id },
+      getPresupuestoQuerySchema
+    );
+
+    const repository = new PrismaPresupuestoRepository();
+    const service = new PresupuestoService(repository);
+
+    await new DeletePresupuestoUseCase(service).execute(dto.id);
+
+    return NextResponse.json(
+      { message: "Presupuesto eliminado exitosamente" },
+      { status: 200 }
+    );
+  } catch (e) {
+    return handleApiError(e);
   }
 }

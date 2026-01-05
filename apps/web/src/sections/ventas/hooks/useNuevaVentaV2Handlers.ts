@@ -33,16 +33,11 @@ export const useNuevaVentaV2Handlers = ({
 
       refreshTable();
       closeModal();
-
-      // Redirect to edit page
-      router.push(`/dashboard/ventas/${venta.id}/editar`);
     } catch (error) {
       setSnackbar({
         open: true,
         message:
-          error instanceof Error
-            ? error.message
-            : "Error al crear la venta",
+          error instanceof Error ? error.message : "Error al crear la venta",
         severity: "error",
       });
     }

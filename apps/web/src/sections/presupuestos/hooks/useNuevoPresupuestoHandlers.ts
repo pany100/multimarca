@@ -41,9 +41,6 @@ export const useNuevoPresupuestoHandlers = ({
         refreshTable();
       }
       onClose();
-
-      // Opcional: redirigir a la página de edición
-      router.push(`/dashboard/presupuestos/${result.id}/editar`);
     } catch (error) {
       setSnackbar({
         message: "Error al crear el presupuesto",
