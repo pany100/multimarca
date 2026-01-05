@@ -1,59 +1,68 @@
 import { PatchVentaDto } from "@/core/application/dto/venta.dto";
-import { ComprobanteCalculado } from "@/core/application/services/comprobante-calculado";
 import {
   VentaRepository,
   VentaWithRelations,
 } from "@/core/domain/repositories/venta.repository";
-import { getPrecioFinalForReparaciones } from "@/utils/fieldHelper";
+import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 
 export class PatchVentaUseCase {
   constructor(private readonly ventaRepository: VentaRepository) {}
 
   async execute(dto: PatchVentaDto): Promise<VentaWithRelations> {
-    const { id, ...updateData } = dto;
+    const ventaId = Number(dto.id);
 
-    // Update venta with only provided fields
-    const updatedVenta = await this.ventaRepository.patchVenta(id, updateData);
+    // Verificar que la venta existe
+    const ventaExistente = await this.ventaRepository.findById(ventaId);
+    if (!ventaExistente) {
+      throw new Error("Venta no encontrada");
+    }
 
-    // Recalculate totals
-    const trabajosPrecio = updatedVenta.trabajosRealizados.reduce(
-      (sum, trabajo) => sum + Number(trabajo.precioUnitario),
-      0
-    );
+    // Validaciones de negocio
+    // Aquí puedes agregar validaciones específicas según las reglas de negocio
 
-    const repuestosPrecio = updatedVenta.repuestosUsados.reduce(
-      (sum, repuesto) => sum + Number(repuesto.precioVenta),
-      0
-    );
+    // Preparar datos de actualización
+    const updateData: any = {};
+    if (dto.clienteId !== undefined) updateData.clienteId = dto.clienteId;
+    if (dto.informacionCliente !== undefined)
+      updateData.informacionCliente = dto.informacionCliente;
+    if (dto.fecha !== undefined) updateData.fecha = dto.fecha;
+    if (dto.descuento !== undefined) updateData.descuento = dto.descuento;
+    if (dto.descripcionDescuento !== undefined)
+      updateData.descripcionDescuento = dto.descripcionDescuento;
+    if (dto.incremento !== undefined) updateData.incremento = dto.incremento;
+    if (dto.descripcionIncremento !== undefined)
+      updateData.descripcionIncremento = dto.descripcionIncremento;
+    if (dto.porcentajeRecargo !== undefined)
+      updateData.porcentajeRecargo = dto.porcentajeRecargo;
+    if (dto.estado !== undefined) updateData.estado = dto.estado;
 
-    const reparacionesPrecio = updatedVenta.reparacionesDeTercero
-      .map((el) => {
-        const precioConRecargo = getPrecioFinalForReparaciones(
-          Number(el.precioVenta),
-          Number(updatedVenta.porcentajeRecargo)
-        );
-        return {
-          precioConRecargo,
-        };
-      })
-      .reduce((sum, el) => sum + el.precioConRecargo, 0);
+    // Delegar al repositorio la lógica de mapeo y actualización
+    const venta = await this.ventaRepository.patchVenta(ventaId, updateData);
 
-    const precioBase = trabajosPrecio + repuestosPrecio + reparacionesPrecio;
+    // Procesar la venta actualizada
+    const comprobanteCalculado = ComprobanteCalculadoFactory.fromVenta(venta);
 
-    const comprobante = new ComprobanteCalculado(
-      precioBase,
-      Number(updatedVenta.descuento),
-      Number(updatedVenta.incremento)
-    );
+    const reparacionesDeTercero = venta.reparacionesDeTercero.map((el) => ({
+      ...el,
+      recibo: el.reciboFile?.finalPath || el.reciboFile?.tempPath || null,
+      precioConRecargo: comprobanteCalculado.getPrecioFinalForReparaciones(
+        Number(el.precioVenta)
+      ),
+    }));
 
-    const totalPagado = updatedVenta.ingresos.reduce(
+    const totalPagado = venta.ingresos.reduce(
       (sum, ingreso) => sum + Number(ingreso.monto),
       0
     );
 
     return {
-      ...updatedVenta,
-      precioTotal: comprobante.totalPagado,
+      ...venta,
+      reparacionesDeTercero,
+      precioTotal: comprobanteCalculado.total,
+      total: comprobanteCalculado.total,
+      totalManoDeObra: comprobanteCalculado.totalManoDeObra,
+      totalRepuestos: comprobanteCalculado.totalRepuestos,
+      totalReparacionesDeTerceros: comprobanteCalculado.totalTerceros,
       totalPagado,
     } as any;
   }

@@ -68,3 +68,35 @@ export const getEstadoPresupuestoLabel = (estado: string) => {
   };
   return labels[estado] || "Estado Desconocido";
 };
+
+// Venta helpers
+export const getEstadoVentaColor = (estado: string) => {
+  const colors: Record<
+    string,
+    | "default"
+    | "primary"
+    | "secondary"
+    | "error"
+    | "info"
+    | "success"
+    | "warning"
+  > = {
+    Borrador: "default",
+    Presupuestado: "info",
+    Preparado: "warning",
+    Entregado: "success",
+    Cerrado: "primary",
+  };
+  return colors[estado] || "default";
+};
+
+export const getEstadoVentaLabel = (estado: string) => {
+  const labels: Record<string, string> = {
+    Borrador: "Borrador",
+    Presupuestado: "Presupuestado",
+    Preparado: "Preparado",
+    Entregado: "Entregado",
+    Cerrado: "Cerrado",
+  };
+  return labels[estado] || estado;
+};
