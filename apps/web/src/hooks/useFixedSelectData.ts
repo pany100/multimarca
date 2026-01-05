@@ -50,6 +50,7 @@ function useFixedSelectData() {
   ];
 
   const ventaEstadoOptions = [
+    { value: "Borrador", label: "Borrador" },
     { value: "Presupuestado", label: "Presupuestado" },
     { value: "Preparado", label: "Preparado" },
     { value: "Entregado", label: "Entregado" },

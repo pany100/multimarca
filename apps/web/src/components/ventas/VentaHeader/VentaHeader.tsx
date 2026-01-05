@@ -35,7 +35,7 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
           backgroundColor: "background.default",
           borderBottom: "1px solid",
           borderColor: "divider",
-          pb: 3,
+          pb: 1.5,
           pt: isSticky ? 2 : 3,
           mb: isSticky ? 0 : 3,
           px: isSticky ? 3 : 0,

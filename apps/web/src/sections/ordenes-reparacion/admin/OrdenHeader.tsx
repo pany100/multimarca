@@ -3,6 +3,7 @@
 import OrdenClienteInterna from "@/components/orden-reparacion/pdf/OrdenClienteInterna";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
 import { getFormattedDateArg } from "@/utils/fieldHelper";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import {
@@ -10,10 +11,12 @@ import {
   Box,
   Button,
   Chip,
+  Link as MuiLink,
   Snackbar,
   Tooltip,
   Typography,
 } from "@mui/material";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 import { PrintMenu } from "./components/PrintMenu";
 import { WhatsAppConfirmDialog } from "./components/WhatsAppConfirmDialog";
@@ -101,7 +104,7 @@ function OrdenHeader() {
           backgroundColor: "background.default",
           borderBottom: "1px solid",
           borderColor: "divider",
-          pb: 3,
+          pb: 1.5,
           pt: isSticky ? 2 : 3,
           mb: isSticky ? 0 : 3,
           px: isSticky ? 3 : 0,
@@ -134,6 +137,25 @@ function OrdenHeader() {
             <Typography variant="body2" color="text.secondary">
               Creada el {getFormattedDateArg(orden.fechaCreacion)}
             </Typography>
+            <Link href="/dashboard/ordenes-reparacion" passHref legacyBehavior>
+              <MuiLink
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  fontSize: "0.875rem",
+                  mt: 0.5,
+                  textDecoration: "none",
+                  color: "primary.main",
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                <ArrowBackIcon sx={{ fontSize: 16 }} />
+                Volver a órdenes
+              </MuiLink>
+            </Link>
             <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
               <Typography variant="body1" fontWeight="medium">
                 Total a pagar:{" "}

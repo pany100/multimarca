@@ -24,12 +24,13 @@ function getFormattedDate(date: string) {
 
 const getFormattedDateArg = (date: Date | string | null | undefined) => {
   if (!date) return "No definida";
-  const d = new Date(date);
-  return d.toLocaleDateString("es-AR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
+  
+  // Extraer la fecha del string ISO sin conversión de timezone
+  const dateStr = typeof date === 'string' ? date : date.toISOString();
+  const datePart = dateStr.split("T")[0]; // "YYYY-MM-DD"
+  const [year, month, day] = datePart.split("-");
+  
+  return `${day}/${month}/${year}`;
 };
 
 function getFormattedChequeType(type: string) {

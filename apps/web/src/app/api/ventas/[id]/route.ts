@@ -1,3 +1,4 @@
+import { GetVentaUseCase } from "@/core/application/use-cases/venta/get-venta.use-case";
 import { PatchVentaUseCase } from "@/core/application/use-cases/venta/patch-venta.use-case";
 import { PrismaVentaRepository } from "@/core/infrastructure/database/repositories/prisma-venta.repository";
 import { patchVentaSchema } from "@/core/infrastructure/validation/schemas/venta.schema";
@@ -11,15 +12,8 @@ export async function GET(
 ) {
   try {
     const id = parseInt(params.id);
-    const repository = new PrismaVentaRepository();
-    const venta = await repository.findById(id);
-
-    if (!venta) {
-      return NextResponse.json(
-        { error: "Venta no encontrada" },
-        { status: 404 }
-      );
-    }
+    const useCase = new GetVentaUseCase(new PrismaVentaRepository());
+    const venta = await useCase.execute({ id });
 
     return NextResponse.json(venta, { status: 200 });
   } catch (e) {

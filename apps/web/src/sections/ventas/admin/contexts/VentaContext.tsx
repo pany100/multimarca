@@ -30,3 +30,11 @@ export const useVenta = () => {
   }
   return context;
 };
+
+export const useVentaRequired = () => {
+  const context = useContext(VentaContext);
+  if (!context) {
+    throw new Error("useVentaRequired must be used within a VentaProvider");
+  }
+  return context;
+};

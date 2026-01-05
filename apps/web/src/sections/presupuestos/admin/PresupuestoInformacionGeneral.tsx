@@ -64,10 +64,10 @@ const PresupuestoInformacionGeneral = () => {
       informacionCliente: presupuesto.informacionCliente || "",
       estado: presupuesto.estado,
       fechaEnvio: presupuesto.fechaEnvio
-        ? new Date(presupuesto.fechaEnvio).toISOString().split("T")[0]
+        ? presupuesto.fechaEnvio.toString().split("T")[0]
         : null,
       fechaRespuesta: presupuesto.fechaRespuesta
-        ? new Date(presupuesto.fechaRespuesta).toISOString().split("T")[0]
+        ? presupuesto.fechaRespuesta.toString().split("T")[0]
         : null,
       observacionesCliente: presupuesto.observacionesCliente,
     },
@@ -81,10 +81,10 @@ const PresupuestoInformacionGeneral = () => {
       informacionCliente: presupuesto.informacionCliente || "",
       estado: presupuesto.estado,
       fechaEnvio: presupuesto.fechaEnvio
-        ? new Date(presupuesto.fechaEnvio).toISOString().split("T")[0]
+        ? presupuesto.fechaEnvio.toString().split("T")[0]
         : null,
       fechaRespuesta: presupuesto.fechaRespuesta
-        ? new Date(presupuesto.fechaRespuesta).toISOString().split("T")[0]
+        ? presupuesto.fechaRespuesta.toString().split("T")[0]
         : null,
       observacionesCliente: presupuesto.observacionesCliente,
     });

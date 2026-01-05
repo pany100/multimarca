@@ -1,5 +1,7 @@
 import { getFormattedDateArg, getFormattedPrice } from "@/utils/fieldHelper";
-import { Box, Typography } from "@mui/material";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import { Box, Link as MuiLink, Typography } from "@mui/material";
+import Link from "next/link";
 
 interface PresupuestoInfoProps {
   presupuesto: any;
@@ -25,6 +27,25 @@ export const PresupuestoInfo = ({
       <Typography variant="body2" color="text.secondary">
         Creado el {getFormattedDateArg(presupuesto.fecha)}
       </Typography>
+      <Link href="/dashboard/presupuestos" passHref legacyBehavior>
+        <MuiLink
+          sx={{
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 0.5,
+            fontSize: "0.875rem",
+            mt: 0.5,
+            textDecoration: "none",
+            color: "primary.main",
+            "&:hover": {
+              textDecoration: "underline",
+            },
+          }}
+        >
+          <ArrowBackIcon sx={{ fontSize: 16 }} />
+          Volver a presupuestos
+        </MuiLink>
+      </Link>
       <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
         <Typography variant="body1" fontWeight="medium">
           Total a pagar:{" "}

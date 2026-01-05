@@ -42,10 +42,10 @@ const InformacionGeneralSection = () => {
       kilometros: orden.kilometros,
       estado: orden.estado,
       fechaEntradaReparacion: orden.fechaEntradaReparacion
-        ? new Date(orden.fechaEntradaReparacion).toISOString().split("T")[0]
+        ? orden.fechaEntradaReparacion.toString().split("T")[0]
         : null,
       fechaSalidaReparacion: orden.fechaSalidaReparacion
-        ? new Date(orden.fechaSalidaReparacion).toISOString().split("T")[0]
+        ? orden.fechaSalidaReparacion.toString().split("T")[0]
         : null,
       observacionesCliente: orden.observacionesCliente,
     },
@@ -58,10 +58,10 @@ const InformacionGeneralSection = () => {
       kilometros: orden.kilometros,
       estado: orden.estado,
       fechaEntradaReparacion: orden.fechaEntradaReparacion
-        ? new Date(orden.fechaEntradaReparacion).toISOString().split("T")[0]
+        ? orden.fechaEntradaReparacion.toString().split("T")[0]
         : null,
       fechaSalidaReparacion: orden.fechaSalidaReparacion
-        ? new Date(orden.fechaSalidaReparacion).toISOString().split("T")[0]
+        ? orden.fechaSalidaReparacion.toString().split("T")[0]
         : null,
       observacionesCliente: orden.observacionesCliente,
     });
