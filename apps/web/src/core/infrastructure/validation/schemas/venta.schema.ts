@@ -2,6 +2,7 @@ import { EstadoVenta } from "@prisma/client";
 import { z } from "zod";
 
 export const ventaEstadoEnum = z.enum([
+  EstadoVenta.Borrador,
   EstadoVenta.Presupuestado,
   EstadoVenta.Preparado,
   EstadoVenta.Entregado,

@@ -418,7 +418,7 @@ model Venta {
   incremento            Decimal               @default(0.00) @db.Decimal(10, 2)
   descripcionIncremento String?               @db.VarChar(255)
   porcentajeRecargo     Decimal               @default(0.00) @db.Decimal(10, 2)
-  estado                EstadoVenta           @default(Presupuestado)
+  estado                EstadoVenta           @default(Borrador)
   ingresos              IngresoPorVenta[]     @relation("VentaIngresos")
   reparacionesDeTercero ReparacionDeTercero[] @relation("VentaReparacionTercero")
   repuestosUsados       RepuestoUsado[]       @relation("VentaRepuestos")
@@ -976,6 +976,7 @@ enum EstadoVenta {
   Preparado
   Entregado
   Cerrado
+  Borrador
 }
 
 enum EstadoArchivo {

@@ -54,6 +54,7 @@ const estadosDisplay: Record<EstadoVenta, string> = {
   [EstadoVenta.Preparado]: "Preparado",
   [EstadoVenta.Entregado]: "Entregado",
   [EstadoVenta.Cerrado]: "Cerrado",
+  [EstadoVenta.Borrador]: "Borrador",
 };
 
 const estadoColors: Record<EstadoVenta, string> = {
@@ -61,10 +62,12 @@ const estadoColors: Record<EstadoVenta, string> = {
   [EstadoVenta.Preparado]: "#FF8C00", // Dark Orange
   [EstadoVenta.Entregado]: "#32CD32", // Lime Green
   [EstadoVenta.Cerrado]: "#8A2BE2", // Blue Violet
+  [EstadoVenta.Borrador]: "#9E9E9E", // Gray
 };
 
 const estados = [
   "TODOS",
+  EstadoVenta.Borrador,
   EstadoVenta.Presupuestado,
   EstadoVenta.Preparado,
   EstadoVenta.Entregado,
@@ -224,6 +227,17 @@ function VentasTable({
           <CustomTable
             title="Ventas"
             apiEndpoint="/api/ventas"
+            extraActions={customActions}
+            ctaCb={() => router.push("/dashboard/ventas/nueva")}
+            columns={columns}
+            getRowClassName={getRowClassName}
+            {...rest}
+          />
+        )}
+        {estadoActual === EstadoVenta.Borrador && (
+          <CustomTable
+            title="Ventas"
+            apiEndpoint="/api/ventas?estado=Borrador"
             extraActions={customActions}
             ctaCb={() => router.push("/dashboard/ventas/nueva")}
             columns={columns}
