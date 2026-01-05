@@ -27,6 +27,14 @@ export const PresupuestoInfo = ({
       <Typography variant="body2" color="text.secondary">
         Creado el {getFormattedDateArg(presupuesto.fecha)}
       </Typography>
+      <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
+        <Typography variant="body1" fontWeight="medium">
+          Total a pagar:{" "}
+          <Typography component="span" fontWeight="bold">
+            {getFormattedPrice(presupuesto.total)}
+          </Typography>
+        </Typography>
+      </Box>
       <Link href="/dashboard/presupuestos" passHref legacyBehavior>
         <MuiLink
           sx={{
@@ -46,14 +54,6 @@ export const PresupuestoInfo = ({
           Volver a presupuestos
         </MuiLink>
       </Link>
-      <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
-        <Typography variant="body1" fontWeight="medium">
-          Total a pagar:{" "}
-          <Typography component="span" fontWeight="bold">
-            {getFormattedPrice(presupuesto.total)}
-          </Typography>
-        </Typography>
-      </Box>
     </Box>
   );
 };

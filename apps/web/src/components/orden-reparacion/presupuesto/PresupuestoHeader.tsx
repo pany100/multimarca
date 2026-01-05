@@ -56,7 +56,7 @@ function PresupuestoHeader({
           pb: 1.5,
           pt: isSticky ? 2 : 3,
           mb: isSticky ? 0 : 3,
-          px: isSticky ? 3 : 0,
+          px: isSticky ? 3 : 2,
           transition: "all 0.3s ease",
           ml: isSticky ? { xs: 0, sm: "240px" } : 0,
           width: isSticky ? { xs: "100%", sm: "calc(100% - 240px)" } : "100%",

@@ -137,25 +137,6 @@ function OrdenHeader() {
             <Typography variant="body2" color="text.secondary">
               Creada el {getFormattedDateArg(orden.fechaCreacion)}
             </Typography>
-            <Link href="/dashboard/ordenes-reparacion" passHref legacyBehavior>
-              <MuiLink
-                sx={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 0.5,
-                  fontSize: "0.875rem",
-                  mt: 0.5,
-                  textDecoration: "none",
-                  color: "primary.main",
-                  "&:hover": {
-                    textDecoration: "underline",
-                  },
-                }}
-              >
-                <ArrowBackIcon sx={{ fontSize: 16 }} />
-                Volver a órdenes
-              </MuiLink>
-            </Link>
             <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
               <Typography variant="body1" fontWeight="medium">
                 Total a pagar:{" "}
@@ -178,6 +159,25 @@ function OrdenHeader() {
                 </Typography>
               </Typography>
             </Box>
+            <Link href="/dashboard/ordenes-reparacion" passHref legacyBehavior>
+              <MuiLink
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  fontSize: "0.875rem",
+                  mt: 0.5,
+                  textDecoration: "none",
+                  color: "primary.main",
+                  "&:hover": {
+                    textDecoration: "underline",
+                  },
+                }}
+              >
+                <ArrowBackIcon sx={{ fontSize: 16 }} />
+                Volver a órdenes
+              </MuiLink>
+            </Link>
           </Box>
 
           {/* Right side: Status and Action Buttons */}
