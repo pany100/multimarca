@@ -2,7 +2,8 @@ import CustomAutocompleteInput from "@/components/formV2/CustomAutocomplete";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
-import { Box, Grid, MenuItem, Tab, Tabs } from "@mui/material";
+import useFixedSelectData from "@/hooks/useFixedSelectData";
+import { Box, Grid, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
@@ -19,6 +20,7 @@ const estadosPresupuesto = [
 const EditInformacionGeneralPresupuestoForm = () => {
   const { watch, setValue } = useFormContext();
   const { searchAutos, initialAuto } = useAutosAutocomplete();
+  const { presupuestoEstadoOptions } = useFixedSelectData();
 
   const autoId = watch("autoId");
   const informacionAuto = watch("informacionAuto");
@@ -41,13 +43,11 @@ const EditInformacionGeneralPresupuestoForm = () => {
     <Grid container spacing={3}>
       {/* Estado */}
       <Grid item xs={12} md={6}>
-        <CustomSelect name="estado" label="Estado">
-          {estadosPresupuesto.map((estado) => (
-            <MenuItem key={estado.value} value={estado.value}>
-              {estado.label}
-            </MenuItem>
-          ))}
-        </CustomSelect>
+        <CustomSelect
+          name="estado"
+          label="Estado"
+          options={presupuestoEstadoOptions}
+        />
       </Grid>
 
       {/* Fecha de Envío */}

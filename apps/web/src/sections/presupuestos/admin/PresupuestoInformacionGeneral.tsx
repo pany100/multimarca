@@ -1,7 +1,7 @@
 "use client";
 
-import { CommonOrderCard } from "@/sections/ordenes-reparacion/admin/components/CommonOrderCard";
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
+import { CommonOrderCard } from "@/sections/ordenes-reparacion/admin/components/CommonOrderCard";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Divider, Grid } from "@mui/material";
 import { useForm } from "react-hook-form";
@@ -97,8 +97,8 @@ const PresupuestoInformacionGeneral = () => {
         presupuesto.id,
         {
           autoId: data.autoId,
-          informacionAuto: data.informacionAuto,
-          informacionCliente: data.informacionCliente,
+          informacionAuto: data.informacionAuto || undefined,
+          informacionCliente: data.informacionCliente || undefined,
           estado: data.estado,
           fechaEnvio: data.fechaEnvio || null,
           fechaRespuesta: data.fechaRespuesta || null,
@@ -161,9 +161,7 @@ const PresupuestoInformacionGeneral = () => {
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <PedidoClienteInfo
-            observaciones={presupuesto.observacionesCliente}
-          />
+          <PedidoClienteInfo observaciones={presupuesto.observacionesCliente} />
         </Grid>
       </Grid>
     </CommonOrderCard>
