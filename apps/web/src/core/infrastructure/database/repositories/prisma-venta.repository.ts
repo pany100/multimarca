@@ -137,7 +137,11 @@ export class PrismaVentaRepository implements VentaRepository {
   ): Promise<VentaWithRelations> {
     const updateData: Prisma.VentaUpdateInput = {};
 
-    if (dto.clienteId !== undefined) updateData.clienteId = dto.clienteId;
+    if (dto.clienteId !== undefined) {
+      updateData.cliente = dto.clienteId
+        ? { connect: { id: dto.clienteId } }
+        : { disconnect: true };
+    }
     if (dto.informacionCliente !== undefined)
       updateData.informacionCliente = dto.informacionCliente;
     if (dto.fecha !== undefined) updateData.fecha = dto.fecha;
@@ -145,24 +149,27 @@ export class PrismaVentaRepository implements VentaRepository {
 
     // Handle Decimal conversions
     if (dto.descuento !== undefined) {
-      updateData.descuento =
-        dto.descuento !== null ? new Prisma.Decimal(dto.descuento) : null;
+      updateData.descuento = (
+        dto.descuento !== null ? new Prisma.Decimal(dto.descuento) : null
+      ) as any;
     }
     if (dto.descripcionDescuento !== undefined) {
       updateData.descripcionDescuento = dto.descripcionDescuento;
     }
     if (dto.incremento !== undefined) {
-      updateData.incremento =
-        dto.incremento !== null ? new Prisma.Decimal(dto.incremento) : null;
+      updateData.incremento = (
+        dto.incremento !== null ? new Prisma.Decimal(dto.incremento) : null
+      ) as any;
     }
     if (dto.descripcionIncremento !== undefined) {
       updateData.descripcionIncremento = dto.descripcionIncremento;
     }
     if (dto.porcentajeRecargo !== undefined) {
-      updateData.porcentajeRecargo =
+      updateData.porcentajeRecargo = (
         dto.porcentajeRecargo !== null
           ? new Prisma.Decimal(dto.porcentajeRecargo)
-          : null;
+          : null
+      ) as any;
     }
 
     return prisma.venta.update({
