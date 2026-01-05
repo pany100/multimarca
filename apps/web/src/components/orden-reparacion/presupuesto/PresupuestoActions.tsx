@@ -92,6 +92,7 @@ export const PresupuestoActions = ({
           target="_blank"
           rel="noopener noreferrer"
           sx={{ textTransform: "none" }}
+          disabled
         >
           Enviar por WhatsApp
         </Button>
