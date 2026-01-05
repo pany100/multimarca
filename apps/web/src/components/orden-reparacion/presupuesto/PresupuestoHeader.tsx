@@ -40,12 +40,15 @@ function PresupuestoHeader({
 
   return (
     <>
+      {/* Spacer cuando el header es sticky */}
+      {isSticky && <Box sx={{ height: "100px" }} />}
+
       <Box
         sx={{
           position: isSticky ? "fixed" : "relative",
           top: isSticky ? 64 : "auto",
-          left: isSticky ? { xs: 0, sm: 240 } : "auto",
-          right: isSticky ? 0 : "auto",
+          left: 0,
+          right: 0,
           zIndex: isSticky ? 1000 : "auto",
           backgroundColor: "background.default",
           borderBottom: "1px solid",
@@ -55,6 +58,8 @@ function PresupuestoHeader({
           mb: isSticky ? 0 : 3,
           px: isSticky ? 3 : 0,
           transition: "all 0.3s ease",
+          ml: isSticky ? { xs: 0, sm: "240px" } : 0,
+          width: isSticky ? { xs: "100%", sm: "calc(100% - 240px)" } : "100%",
         }}
       >
         <Box
@@ -64,7 +69,6 @@ function PresupuestoHeader({
             alignItems: "center",
             flexWrap: "wrap",
             gap: 2,
-            px: isSticky ? 0 : 2,
           }}
         >
           <PresupuestoInfo

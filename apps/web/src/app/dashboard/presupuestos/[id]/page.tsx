@@ -5,8 +5,14 @@ import PresupuestoHeader from "@/components/orden-reparacion/presupuesto/Presupu
 import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
 import { PresupuestoProvider } from "@/sections/presupuestos/admin/contexts/PresupuestoContext";
+import PresupuestoCostosSection from "@/sections/presupuestos/admin/PresupuestoCostosSection";
 import PresupuestoInformacionGeneral from "@/sections/presupuestos/admin/PresupuestoInformacionGeneral";
+import PresupuestoRecargoSection from "@/sections/presupuestos/admin/PresupuestoRecargoSection";
+import PresupuestoRepuestosSection from "@/sections/presupuestos/admin/PresupuestoRepuestosSection";
 import PresupuestoTareasAdministrativas from "@/sections/presupuestos/admin/PresupuestoTareasAdministrativas";
+import PresupuestoTercerosSection from "@/sections/presupuestos/admin/PresupuestoTercerosSection";
+import PresupuestoTrabajosARealizar from "@/sections/presupuestos/admin/PresupuestoTrabajosARealizar";
+import PresupuestoTrabajosSection from "@/sections/presupuestos/admin/PresupuestoTrabajosSection";
 import { usePresupuesto } from "@/sections/presupuestos/hooks/usePresupuesto";
 import { Box, CircularProgress, Grid } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -52,7 +58,7 @@ const PresupuestoAdminPage = ({ params }: { params: { id: string } }) => {
   return (
     <SnackbarProvider>
       <PresupuestoProvider presupuesto={presupuesto}>
-        <Box>
+        <Box sx={{ px: 3 }}>
           <PresupuestoHeader />
 
           <Grid container spacing={3} alignItems="stretch">
@@ -67,6 +73,48 @@ const PresupuestoAdminPage = ({ params }: { params: { id: string } }) => {
             <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <PresupuestoTareasAdministrativas />
+              </Box>
+            </Grid>
+
+            {/* Trabajos a Realizar */}
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <PresupuestoTrabajosARealizar />
+              </Box>
+            </Grid>
+
+            {/* Reparaciones de Terceros */}
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <PresupuestoTercerosSection />
+              </Box>
+            </Grid>
+
+            {/* Repuestos */}
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <PresupuestoRepuestosSection />
+              </Box>
+            </Grid>
+
+            {/* Recargo */}
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <PresupuestoRecargoSection />
+              </Box>
+            </Grid>
+
+            {/* Trabajos Realizados */}
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <PresupuestoTrabajosSection />
+              </Box>
+            </Grid>
+
+            {/* Costos */}
+            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <PresupuestoCostosSection />
               </Box>
             </Grid>
           </Grid>
