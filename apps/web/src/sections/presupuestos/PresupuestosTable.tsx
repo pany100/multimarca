@@ -9,6 +9,7 @@ import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
+import { useGlobalModal } from "@/sections/commons/contexts/GlobalModalContext";
 
 // Define the estados for the presupuestos
 const estados = [
@@ -81,6 +82,7 @@ function PresupuestosTable({
 }: InheritedTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { showModal } = useGlobalModal();
   const [tabValue, setTabValue] = useState(0);
   const [estadoActual, setEstadoActual] = useState<string | null>(null);
 
@@ -271,7 +273,7 @@ function PresupuestosTable({
             title="Presupuestos"
             apiEndpoint="/api/presupuestos"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
+            ctaCb={showModal}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -282,7 +284,7 @@ function PresupuestosTable({
             title="Presupuestos en Preparación"
             apiEndpoint="/api/presupuestos?estado=EnPreparacion"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
+            ctaCb={showModal}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -293,7 +295,7 @@ function PresupuestosTable({
             title="Presupuestos Terminados"
             apiEndpoint="/api/presupuestos?estado=Terminado"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
+            ctaCb={showModal}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -304,7 +306,7 @@ function PresupuestosTable({
             title="Presupuestos Enviados"
             apiEndpoint="/api/presupuestos?estado=Enviado"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
+            ctaCb={showModal}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -315,7 +317,7 @@ function PresupuestosTable({
             title="Presupuestos A Definir"
             apiEndpoint="/api/presupuestos?estado=ADefinir"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
+            ctaCb={showModal}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -326,7 +328,7 @@ function PresupuestosTable({
             title="Presupuestos Aceptados"
             apiEndpoint="/api/presupuestos?estado=Aceptado"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
+            ctaCb={showModal}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -337,7 +339,7 @@ function PresupuestosTable({
             title="Presupuestos Rechazados"
             apiEndpoint="/api/presupuestos?estado=Rechazado"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
+            ctaCb={showModal}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -348,7 +350,7 @@ function PresupuestosTable({
             title="Presupuestos Descartados"
             apiEndpoint="/api/presupuestos?estado=Descartado"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/presupuestos/nuevo")}
+            ctaCb={showModal}
             columns={columns}
             searchByDate={true}
             {...rest}
