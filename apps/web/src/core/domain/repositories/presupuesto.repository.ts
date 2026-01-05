@@ -46,4 +46,24 @@ export interface PresupuestoRepository {
   findById(id: number): Promise<PresupuestoWithRelations | null>;
   delete(id: number): Promise<void>;
   update(data: Prisma.PresupuestoUpdateArgs): Promise<PresupuestoWithRelations>;
+  patchPresupuesto(
+    id: number,
+    dto: {
+      autoId?: number | null;
+      observacionesCliente?: string;
+      detallesDeTrabajo?: string | null;
+      informacionAuto?: string | null;
+      informacionCliente?: string | null;
+      estado?: string;
+      fecha?: Date;
+      fechaRespuesta?: Date | null;
+      fechaEnvio?: Date | null;
+      descuento?: number | null;
+      porcentajeRecargo?: number | null;
+      descripcionDescuento?: string | null;
+      incrementoInterno?: number | null;
+      incremento?: number | null;
+      descripcionIncremento?: string | null;
+    }
+  ): Promise<PresupuestoWithRelations>;
 }

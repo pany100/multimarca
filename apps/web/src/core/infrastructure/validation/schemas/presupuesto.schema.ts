@@ -70,3 +70,22 @@ export const updatePresupuestoSchema = z.object({
   ...getPresupuestoQuerySchema.shape,
   ...createPresupuestoSchema.shape,
 });
+
+export const patchPresupuestoSchema = z.object({
+  id: z.string(),
+  autoId: z.coerce.number().nullable().optional(),
+  observacionesCliente: z.string().optional(),
+  detallesDeTrabajo: z.string().nullable().optional(),
+  informacionAuto: z.string().nullable().optional(),
+  informacionCliente: z.string().nullable().optional(),
+  estado: z.string().optional(),
+  fecha: z.coerce.date().optional(),
+  fechaRespuesta: z.coerce.date().nullable().optional(),
+  fechaEnvio: z.coerce.date().nullable().optional(),
+  descuento: z.coerce.number().nullable().optional(),
+  porcentajeRecargo: z.coerce.number().nullable().optional(),
+  descripcionDescuento: z.string().nullable().optional(),
+  incrementoInterno: z.coerce.number().nullable().optional(),
+  incremento: z.coerce.number().nullable().optional(),
+  descripcionIncremento: z.string().nullable().optional(),
+});

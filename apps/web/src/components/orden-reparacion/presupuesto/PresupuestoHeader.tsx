@@ -1,31 +1,22 @@
+"use client";
+
 import { useFetch } from "@/contexts/FetchContext";
 import { useGeneratePdf } from "@/hooks/orden-reparacion/useGeneratePdf";
-import { getFormattedPrice } from "@/utils/fieldHelper";
+import { usePresupuesto } from "@/sections/presupuestos/admin/contexts/PresupuestoContext";
+import { getFormattedDateArg } from "@/utils/fieldHelper";
+import PrintIcon from "@mui/icons-material/Print";
+import SendIcon from "@mui/icons-material/Send";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import {
   Alert,
   Box,
   Button,
   Chip,
-  Dialog,
-  DialogActions,
-  DialogContent,
-  DialogContentText,
-  DialogTitle,
-  Grid,
   Snackbar,
+  Tooltip,
   Typography,
-  useMediaQuery,
-  useTheme,
 } from "@mui/material";
-import { format } from "date-fns";
-import { es } from "date-fns/locale";
-import Link from "next/link";
-import { useRef, useState } from "react";
-
-// Icons
-import EditIcon from "@mui/icons-material/Edit";
-import PrintIcon from "@mui/icons-material/Print";
-import WhatsAppIcon from "@mui/icons-material/WhatsApp";
+import { useEffect, useState } from "react";
 
 // Helper function to map estado to a readable string
 const mapEstadoPresupuesto = (estado: string) => {
@@ -49,236 +40,253 @@ const mapEstadoPresupuesto = (estado: string) => {
   }
 };
 
-// Helper function to map estado to a color
-const mapEstadoColor = (estado: string) => {
+// Helper function to map estado to a color (chip color)
+const mapEstadoColor = (
+  estado: string
+):
+  | "default"
+  | "primary"
+  | "secondary"
+  | "error"
+  | "info"
+  | "success"
+  | "warning" => {
   switch (estado) {
     case "EnPreparacion":
-      return "#FFA500"; // Orange
+      return "warning"; // Orange
     case "Terminado":
-      return "#FFD700"; // Amarillo fuerte
+      return "info"; // Blue
     case "Enviado":
-      return "#3498db"; // Blue
+      return "primary"; // Blue
     case "Aceptado":
-      return "#2ecc71"; // Green
+      return "success"; // Green
     case "Rechazado":
-      return "#e74c3c"; // Red
+      return "error"; // Red
     case "Descartado":
-      return "#9b59b6"; // Purple light
+      return "default"; // Gray
     default:
-      return "#95a5a6"; // Gray
+      return "default";
   }
 };
 
-function PresupuestoHeader({ presupuesto }: { presupuesto: any }) {
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+function PresupuestoHeader({
+  presupuesto: presupuestoProp,
+}: {
+  presupuesto?: any;
+}) {
   const { authFetch } = useFetch();
-  const { generatePdf } = useGeneratePdf({
-    onError: () => {
-      setSnackbar({
-        open: true,
-        message: "Error al generar el PDF del cliente",
-        severity: "error",
-      });
-    },
-    printDirectly: true,
-  });
-  // Ref for printing
-  const clientePresupuestoRef = useRef(null);
 
-  // State for notification dialog and snackbar
-  const [openConfirmModal, setOpenConfirmModal] = useState(false);
+  // Intentar obtener del contexto, si no está disponible usar la prop
+  const context = usePresupuesto();
+  const presupuesto = presupuestoProp || context?.presupuesto;
+  const setPresupuesto = context?.setPresupuesto || (() => {});
+  const [isSticky, setIsSticky] = useState(false);
+  const [enviandoPresupuesto, setEnviandoPresupuesto] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
     severity: "success" as "success" | "error",
   });
 
-  // Print handlers
-  const handleClientePresupuestoPrint = async () => {
-    await generatePdf(`/api/presupuestos/${presupuesto.id}/pdf-completo`);
-  };
-  // Notification handlers
-  const handleOpenConfirmModal = () => {
-    setOpenConfirmModal(true);
-  };
+  const { generatePdf } = useGeneratePdf({
+    onError: () => {
+      setSnackbar({
+        open: true,
+        message: "Error al generar el PDF",
+        severity: "error",
+      });
+    },
+    printDirectly: true,
+  });
 
-  const handleCloseConfirmModal = () => {
-    setOpenConfirmModal(false);
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsSticky(scrollPosition > 100);
+    };
 
-  const handleSendNotification = async () => {
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  // Enviar presupuesto handler
+  const handleEnviarPresupuesto = async () => {
     try {
-      const response = await authFetch(
-        `/api/presupuestos/${presupuesto.id}/send-notification`,
-        {
-          method: "POST",
-        }
-      );
+      setEnviandoPresupuesto(true);
+      const response = await authFetch(`/api/presupuestos/${presupuesto.id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          estado: "Enviado",
+          fechaEnvio: new Date().toISOString(),
+        }),
+      });
 
       if (response.ok) {
+        const presupuestoActualizado = await response.json();
+        setPresupuesto(presupuestoActualizado);
         setSnackbar({
           open: true,
-          message: "Notificación enviada con éxito",
+          message: "Presupuesto enviado correctamente",
           severity: "success",
         });
       } else {
-        const errorData = await response.json();
-        setSnackbar({
-          open: true,
-          message: errorData.error || "Error al enviar la notificación",
-          severity: "error",
-        });
+        throw new Error("Error al enviar el presupuesto");
       }
-    } catch (error) {
-      console.error("Error:", error);
+    } catch (error: any) {
       setSnackbar({
         open: true,
-        message: "Error al enviar la notificación",
+        message: error.message || "Error al enviar el presupuesto",
         severity: "error",
       });
     } finally {
-      handleCloseConfirmModal();
+      setEnviandoPresupuesto(false);
     }
   };
 
   // WhatsApp share
   const createWhatsAppLink = () => {
-    if (!presupuesto.auto?.owner?.phone) return "";
+    const phone =
+      presupuesto.auto?.owner?.phone || presupuesto.informacionCliente;
+    if (!phone) return "";
 
-    const total = presupuesto.total;
-    const message = `Hola ${
-      presupuesto.auto.owner.fullName
-    }, le enviamos el presupuesto para su vehículo ${presupuesto.auto.brand} ${
-      presupuesto.auto.model
-    } (${presupuesto.auto.patent}). El total es de ${getFormattedPrice(
-      total
-    )}.`;
+    const total = presupuesto.totalAPagar || presupuesto.total;
+    const vehicleInfo = presupuesto.auto
+      ? `${presupuesto.auto.brand} ${presupuesto.auto.model} (${presupuesto.auto.patent})`
+      : presupuesto.informacionAuto || "su vehículo";
 
-    return `https://wa.me/${presupuesto.auto.owner.phone.replace(
-      /\D/g,
-      ""
-    )}?text=${encodeURIComponent(message)}`;
+    const clientName = presupuesto.auto?.owner?.fullName || "Estimado cliente";
+
+    const message = `Hola ${clientName}, le enviamos el presupuesto para ${vehicleInfo}. El total es de $${
+      total?.toLocaleString("es-AR", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2,
+      }) || "0.00"
+    }.`;
+
+    return `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(
+      message
+    )}`;
   };
+
+  // Print handler
+  const handleClientePresupuestoPrint = async () => {
+    await generatePdf(`/api/presupuestos/${presupuesto.id}/pdf-completo`);
+  };
+
+  const vehicleInfo = presupuesto.auto
+    ? `${presupuesto.auto.brand} ${presupuesto.auto.model} - ${presupuesto.auto.patent}`
+    : presupuesto.informacionAuto || "N/A";
 
   return (
     <>
-      {/* Main header container */}
-      <Grid container spacing={2}>
-        {/* Presupuesto title and status */}
-        <Grid item xs={12} md={7}>
+      <Box
+        sx={{
+          position: isSticky ? "fixed" : "relative",
+          top: isSticky ? 64 : "auto",
+          left: isSticky ? { xs: 0, sm: 240 } : "auto",
+          right: isSticky ? 0 : "auto",
+          zIndex: isSticky ? 1000 : "auto",
+          backgroundColor: "background.default",
+          borderBottom: "1px solid",
+          borderColor: "divider",
+          pb: 3,
+          pt: isSticky ? 2 : 3,
+          mb: isSticky ? 0 : 3,
+          px: isSticky ? 3 : 0,
+          transition: "all 0.3s ease",
+        }}
+      >
+        {/* Single Row with Title, Status and Buttons */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            flexWrap: "wrap",
+            gap: 2,
+            px: isSticky ? 0 : 2,
+          }}
+        >
+          {/* Left side: Title */}
           <Box>
-            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-              <Typography
-                variant="h4"
-                component="h1"
-                sx={{
-                  fontWeight: 600,
-                  fontSize: { xs: "1.5rem", md: "2rem" },
-                }}
-              >
-                Presupuesto #{presupuesto.id}
-              </Typography>
-            </Box>
-
-            <Box
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                gap: 1,
-                mb: 2,
-              }}
-            >
-              <Chip
-                label={mapEstadoPresupuesto(presupuesto.estado)}
-                sx={{
-                  backgroundColor: mapEstadoColor(presupuesto.estado),
-                  color: "white",
-                  fontWeight: 500,
-                  px: 1,
-                  "& .MuiChip-label": {
-                    px: 1,
-                  },
-                }}
-              />
-
-              <Typography variant="body2" color="text.secondary">
-                Fecha:{" "}
-                {format(new Date(presupuesto.fecha), "PPP", { locale: es })}
-              </Typography>
-              <Typography
-                variant="body2"
-                sx={{
-                  fontWeight: 600,
-                  fontSize: { xs: "0.8rem", md: "1.5rem" },
-                }}
-              >
-                Administrativos:
-              </Typography>
-              {presupuesto.tareasAdministrativas.map((tarea: any) => (
-                <Typography
-                  variant="body2"
-                  color="text.secondary"
-                  key={tarea.id}
-                >
-                  {tarea.usuario.fullName} - {tarea.descripcion}
-                </Typography>
-              ))}
-            </Box>
-          </Box>
-        </Grid>
-
-        {/* Price and edit button */}
-        <Grid item xs={12} md={5}>
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: { xs: "row", md: "column" },
-              justifyContent: { xs: "space-between", md: "flex-end" },
-              alignItems: { xs: "center", md: "flex-end" },
-              height: "100%",
-            }}
-          >
             <Typography
               variant="h4"
+              component="h1"
               sx={{
                 fontWeight: 600,
-                color: "primary.main",
                 fontSize: { xs: "1.5rem", md: "2rem" },
-                order: { xs: 1, md: 0 },
               }}
             >
-              {getFormattedPrice(presupuesto.total)}
+              Presupuesto #{presupuesto.id} - {vehicleInfo}
             </Typography>
-
-            <Button
-              variant="contained"
-              color="primary"
-              component={Link}
-              href={`/dashboard/presupuestos/${presupuesto.id}/editar`}
-              startIcon={<EditIcon />}
-              size={isMobile ? "small" : "medium"}
-              sx={{
-                mt: { md: 2 },
-                order: { xs: 0, md: 1 },
-                textTransform: "none",
-              }}
-            >
-              Editar presupuesto
-            </Button>
+            <Typography variant="body2" color="text.secondary">
+              Creado el {getFormattedDateArg(presupuesto.fecha)}
+            </Typography>
+            <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
+              <Typography variant="body1" fontWeight="medium">
+                Total a pagar:{" "}
+                <Typography component="span" fontWeight="bold">
+                  $
+                  {presupuesto.totalAPagar?.toLocaleString("es-AR", {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2,
+                  }) || "0.00"}
+                </Typography>
+              </Typography>
+            </Box>
           </Box>
-        </Grid>
 
-        {/* Action buttons */}
-        <Grid item xs={12}>
+          {/* Right side: Status and Action Buttons */}
           <Box
             sx={{
               display: "flex",
-              flexDirection: { xs: "column", sm: "row" },
-              gap: 2,
-              mt: 1,
+              alignItems: "center",
+              gap: 1,
+              flexWrap: "wrap",
             }}
           >
+            <Chip
+              label={mapEstadoPresupuesto(presupuesto.estado)}
+              color={mapEstadoColor(presupuesto.estado)}
+              size="medium"
+              sx={{
+                fontWeight: 500,
+                px: 1,
+                "& .MuiChip-label": {
+                  px: 1,
+                },
+              }}
+            />
+
+            {/* Enviar Presupuesto Button */}
+            {presupuesto.estado === "Enviado" ? (
+              <Tooltip title="Presupuesto ya enviado">
+                <span>
+                  <Button
+                    variant="outlined"
+                    startIcon={<SendIcon />}
+                    disabled
+                    sx={{ textTransform: "none" }}
+                  >
+                    Presupuesto Enviado
+                  </Button>
+                </span>
+              </Tooltip>
+            ) : (
+              <Button
+                variant="outlined"
+                startIcon={<SendIcon />}
+                onClick={handleEnviarPresupuesto}
+                disabled={enviandoPresupuesto}
+                sx={{ textTransform: "none" }}
+              >
+                {enviandoPresupuesto ? "Enviando..." : "Enviar Presupuesto"}
+              </Button>
+            )}
+
             {/* Print button */}
             <Button
               variant="outlined"
@@ -287,11 +295,12 @@ function PresupuestoHeader({ presupuesto }: { presupuesto: any }) {
               onClick={handleClientePresupuestoPrint}
               sx={{ textTransform: "none" }}
             >
-              Imprimir presupuesto para cliente
+              Imprimir
             </Button>
 
             {/* WhatsApp button */}
-            {presupuesto.auto?.owner?.phone && (
+            {(presupuesto.auto?.owner?.phone ||
+              presupuesto.informacionCliente) && (
               <Button
                 variant="outlined"
                 color="success"
@@ -306,44 +315,17 @@ function PresupuestoHeader({ presupuesto }: { presupuesto: any }) {
               </Button>
             )}
           </Box>
-        </Grid>
-      </Grid>
+        </Box>
+      </Box>
 
-      {/* Notification dialog */}
-      <Dialog
-        open={openConfirmModal}
-        onClose={handleCloseConfirmModal}
-        aria-labelledby="notification-dialog-title"
-        aria-describedby="notification-dialog-description"
-      >
-        <DialogTitle id="notification-dialog-title">
-          Enviar notificación
-        </DialogTitle>
-        <DialogContent>
-          <DialogContentText id="notification-dialog-description">
-            ¿Está seguro que desea enviar una notificación al cliente sobre este
-            presupuesto?
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseConfirmModal} color="primary">
-            Cancelar
-          </Button>
-          <Button onClick={handleSendNotification} color="primary" autoFocus>
-            Enviar
-          </Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* Snackbar for notifications */}
+      {/* Notification snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
       >
         <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          onClose={() => setSnackbar((prev) => ({ ...prev, open: false }))}
           severity={snackbar.severity}
           sx={{ width: "100%" }}
         >

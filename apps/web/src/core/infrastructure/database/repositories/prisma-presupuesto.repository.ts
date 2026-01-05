@@ -180,4 +180,91 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
       },
     });
   }
+
+  async patchPresupuesto(
+    id: number,
+    dto: {
+      autoId?: number | null;
+      observacionesCliente?: string;
+      detallesDeTrabajo?: string | null;
+      informacionAuto?: string | null;
+      informacionCliente?: string | null;
+      estado?: string;
+      fecha?: Date;
+      fechaRespuesta?: Date | null;
+      fechaEnvio?: Date | null;
+      descuento?: number | null;
+      porcentajeRecargo?: number | null;
+      descripcionDescuento?: string | null;
+      incrementoInterno?: number | null;
+      incremento?: number | null;
+      descripcionIncremento?: string | null;
+    }
+  ): Promise<PresupuestoWithRelations> {
+    const dataToUpdate: any = {};
+
+    // Solo incluir campos que están definidos en el dto
+    if (dto.autoId !== undefined) dataToUpdate.autoId = dto.autoId;
+    if (dto.observacionesCliente !== undefined)
+      dataToUpdate.observacionesCliente = dto.observacionesCliente;
+    if (dto.detallesDeTrabajo !== undefined)
+      dataToUpdate.detallesDeTrabajo = dto.detallesDeTrabajo;
+    if (dto.informacionAuto !== undefined)
+      dataToUpdate.informacionAuto = dto.informacionAuto;
+    if (dto.informacionCliente !== undefined)
+      dataToUpdate.informacionCliente = dto.informacionCliente;
+    if (dto.estado !== undefined) dataToUpdate.estado = dto.estado;
+    if (dto.fecha !== undefined) dataToUpdate.fecha = dto.fecha;
+    if (dto.fechaRespuesta !== undefined)
+      dataToUpdate.fechaRespuesta = dto.fechaRespuesta;
+    if (dto.fechaEnvio !== undefined) dataToUpdate.fechaEnvio = dto.fechaEnvio;
+    if (dto.descuento !== undefined)
+      dataToUpdate.descuento = new Prisma.Decimal(dto.descuento);
+    if (dto.porcentajeRecargo !== undefined)
+      dataToUpdate.porcentajeRecargo = new Prisma.Decimal(dto.porcentajeRecargo);
+    if (dto.descripcionDescuento !== undefined)
+      dataToUpdate.descripcionDescuento = dto.descripcionDescuento;
+    if (dto.incrementoInterno !== undefined)
+      dataToUpdate.incrementoInterno = new Prisma.Decimal(dto.incrementoInterno);
+    if (dto.incremento !== undefined)
+      dataToUpdate.incremento = new Prisma.Decimal(dto.incremento);
+    if (dto.descripcionIncremento !== undefined)
+      dataToUpdate.descripcionIncremento = dto.descripcionIncremento;
+
+    return prisma.presupuesto.update({
+      where: { id },
+      data: dataToUpdate,
+      include: {
+        auto: {
+          include: {
+            owner: true,
+          },
+        },
+        administrativo: true,
+        creador: true,
+        dolar: true,
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
+            reciboFile: true,
+          },
+        },
+        repuestosUsados: {
+          include: {
+            stock: {
+              include: {
+                proveedor: true,
+              },
+            },
+          },
+        },
+        trabajosRealizados: true,
+        tareasAdministrativas: {
+          include: {
+            usuario: true,
+          },
+        },
+      },
+    });
+  }
 }

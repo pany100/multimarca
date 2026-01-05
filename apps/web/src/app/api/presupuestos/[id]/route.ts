@@ -1,15 +1,13 @@
-import { PresupuestoService } from "@/core/application/services/presupuesto.service";
-import { DeletePresupuestoUseCase } from "@/core/application/use-cases/presupuesto/delete-presupuesto.use-case";
-import { GetPresupuestoUseCase } from "@/core/application/use-cases/presupuesto/get-presupuesto.use-case";
-import { UpdatePresupuestoUseCase } from "@/core/application/use-cases/presupuesto/update-presupuesto.use-case";
+import { PatchPresupuestoUseCase } from "@/core/application/use-cases/presupuesto/patch-presupuesto.use-case";
+import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 import { PrismaPresupuestoRepository } from "@/core/infrastructure/database/repositories/prisma-presupuesto.repository";
 import {
   getPresupuestoQuerySchema,
-  updatePresupuestoSchema,
+  patchPresupuestoSchema,
 } from "@/core/infrastructure/validation/schemas/presupuesto.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(
   request: Request,
@@ -17,63 +15,71 @@ export async function GET(
 ) {
   try {
     const dto = await validateRequest(
-      {
-        id: params.id,
-      },
+      { id: params.id },
       getPresupuestoQuerySchema
     );
-    const presupuesto = await new GetPresupuestoUseCase(
-      new PrismaPresupuestoRepository()
-    ).execute(dto.id);
-    return NextResponse.json(presupuesto);
-  } catch (e) {
-    return handleApiError(e);
-  }
-}
+    const repository = new PrismaPresupuestoRepository();
+    const presupuesto = await repository.findById(dto.id);
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const id = parseInt(params.id);
-    const body = await request.json();
-    const dto = await validateRequest(
-      {
-        id,
-        ...body,
-      },
-      updatePresupuestoSchema
+    if (!presupuesto) {
+      return NextResponse.json(
+        { error: "Presupuesto no encontrado" },
+        { status: 404 }
+      );
+    }
+
+    // Calcular totales
+    const comprobanteCalculado =
+      ComprobanteCalculadoFactory.fromPresupuesto(presupuesto);
+
+    const reparacionesDeTercero = presupuesto.reparacionesDeTercero.map(
+      (el: {
+        reciboFile: { finalPath?: string; tempPath?: string } | null;
+        precioVenta: number;
+      }) => ({
+        ...el,
+        recibo: el.reciboFile?.finalPath || el.reciboFile?.tempPath || null,
+        precioConRecargo: comprobanteCalculado.getPrecioFinalForReparaciones(
+          el.precioVenta
+        ),
+      })
     );
-    const updated = await new UpdatePresupuestoUseCase(
-      new PresupuestoService(new PrismaPresupuestoRepository())
-    ).execute(dto);
-
-    return NextResponse.json(updated);
-  } catch (e) {
-    return handleApiError(e);
-  }
-}
-
-export async function DELETE(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const dto = await validateRequest(
-      {
-        id: params.id,
-      },
-      getPresupuestoQuerySchema
-    );
-    await new DeletePresupuestoUseCase(
-      new PresupuestoService(new PrismaPresupuestoRepository())
-    ).execute(dto.id);
 
     return NextResponse.json({
-      mensaje: "Presupuesto eliminado correctamente",
+      ...presupuesto,
+      reparacionesDeTercero,
+      total: comprobanteCalculado.total,
+      totalAPagar: comprobanteCalculado.totalAPagar,
+      totalManoDeObra: comprobanteCalculado.totalManoDeObra,
+      totalRepuestos: comprobanteCalculado.totalRepuestos,
+      totalReparacionesDeTerceros: comprobanteCalculado.totalTerceros,
     });
   } catch (e) {
     return handleApiError(e);
+  }
+}
+
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const body = await req.json();
+
+    const dto = await validateRequest(
+      {
+        id: params.id,
+        ...body,
+      },
+      patchPresupuestoSchema
+    );
+
+    const presupuestoActualizado = await new PatchPresupuestoUseCase(
+      new PrismaPresupuestoRepository()
+    ).execute(dto);
+
+    return NextResponse.json(presupuestoActualizado, { status: 200 });
+  } catch (error) {
+    return handleApiError(error);
   }
 }

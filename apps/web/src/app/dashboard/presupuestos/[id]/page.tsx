@@ -1,13 +1,30 @@
 "use client";
 
-import { Box, Card, CardContent, CircularProgress, Typography } from "@mui/material";
-import { useParams } from "next/navigation";
+import FormSnackbar from "@/components/orden-reparacion/formV2/commons/FormSnackbar";
+import PresupuestoHeader from "@/components/orden-reparacion/presupuesto/PresupuestoHeader";
+import { SnackbarProvider } from "@/contexts/SnackbarContext";
+import { useAuth } from "@/hooks/useAuth";
+import { PresupuestoProvider } from "@/sections/presupuestos/admin/contexts/PresupuestoContext";
+import { usePresupuesto } from "@/sections/presupuestos/hooks/usePresupuesto";
+import { Box, CircularProgress, Grid, Paper } from "@mui/material";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
-const PresupuestoAdminPage = () => {
-  const params = useParams();
-  const presupuestoId = params?.id as string;
+const PresupuestoAdminPage = ({ params }: { params: { id: string } }) => {
+  const router = useRouter();
+  const { userData, isLoading } = useAuth();
+  const { presupuesto, loading, error } = usePresupuesto(params.id);
 
-  if (!presupuestoId) {
+  useEffect(() => {
+    if (!isLoading) {
+      const permisos = userData?.permisos || [];
+      if (!permisos.includes("Reparaciones")) {
+        router.push("/dashboard");
+      }
+    }
+  }, [userData, router, isLoading]);
+
+  if (loading) {
     return (
       <Box
         sx={{
@@ -22,24 +39,32 @@ const PresupuestoAdminPage = () => {
     );
   }
 
+  if (!presupuesto) {
+    return (
+      <Paper sx={{ p: 3 }}>
+        <Box>No se encontró el presupuesto</Box>
+      </Paper>
+    );
+  }
+
   return (
-    <Box sx={{ p: 4 }}>
-      <Card>
-        <CardContent>
-          <Typography variant="h4" gutterBottom>
-            Administración de Presupuesto
-          </Typography>
-          <Typography variant="h6" color="text.secondary">
-            ID del Presupuesto: {presupuestoId}
-          </Typography>
-          <Box sx={{ mt: 3 }}>
-            <Typography variant="body1" color="text.secondary">
-              Esta es una página temporal. Aquí se implementará la administración completa del presupuesto.
-            </Typography>
-          </Box>
-        </CardContent>
-      </Card>
-    </Box>
+    <SnackbarProvider>
+      <PresupuestoProvider presupuesto={presupuesto}>
+        <Box>
+          <PresupuestoHeader />
+
+          <Grid container spacing={3} alignItems="stretch">
+            {/* Aquí se agregarán las secciones */}
+            <Grid item xs={12}>
+              <Paper sx={{ p: 3 }}>
+                <Box>Secciones de administración se agregarán aquí</Box>
+              </Paper>
+            </Grid>
+          </Grid>
+        </Box>
+      </PresupuestoProvider>
+      <FormSnackbar />
+    </SnackbarProvider>
   );
 };
 
