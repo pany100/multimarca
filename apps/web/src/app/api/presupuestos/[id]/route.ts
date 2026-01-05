@@ -33,14 +33,11 @@ export async function GET(
       ComprobanteCalculadoFactory.fromPresupuesto(presupuesto);
 
     const reparacionesDeTercero = presupuesto.reparacionesDeTercero.map(
-      (el: {
-        reciboFile: { finalPath?: string; tempPath?: string } | null;
-        precioVenta: number;
-      }) => ({
+      (el) => ({
         ...el,
         recibo: el.reciboFile?.finalPath || el.reciboFile?.tempPath || null,
         precioConRecargo: comprobanteCalculado.getPrecioFinalForReparaciones(
-          el.precioVenta
+          Number(el.precioVenta)
         ),
       })
     );
@@ -49,7 +46,6 @@ export async function GET(
       ...presupuesto,
       reparacionesDeTercero,
       total: comprobanteCalculado.total,
-      totalAPagar: comprobanteCalculado.totalAPagar,
       totalManoDeObra: comprobanteCalculado.totalManoDeObra,
       totalRepuestos: comprobanteCalculado.totalRepuestos,
       totalReparacionesDeTerceros: comprobanteCalculado.totalTerceros,
