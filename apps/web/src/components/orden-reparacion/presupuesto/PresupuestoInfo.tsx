@@ -1,4 +1,4 @@
-import { getFormattedDateArg } from "@/utils/fieldHelper";
+import { getFormattedDateArg, getFormattedPrice } from "@/utils/fieldHelper";
 import { Box, Typography } from "@mui/material";
 
 interface PresupuestoInfoProps {
@@ -29,11 +29,7 @@ export const PresupuestoInfo = ({
         <Typography variant="body1" fontWeight="medium">
           Total a pagar:{" "}
           <Typography component="span" fontWeight="bold">
-            $
-            {presupuesto.totalAPagar?.toLocaleString("es-AR", {
-              minimumFractionDigits: 2,
-              maximumFractionDigits: 2,
-            }) || "0.00"}
+            {getFormattedPrice(presupuesto.total)}
           </Typography>
         </Typography>
       </Box>

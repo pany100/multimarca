@@ -27,6 +27,29 @@ export class AddRepuestoUsadoUseCase {
       );
     }
 
+    // Si es un presupuesto, no validar ni consumir stock
+    const isPresupuesto = input.presupuestoId !== undefined && input.presupuestoId !== null;
+
+    if (isPresupuesto) {
+      // Para presupuestos, solo agregar el repuesto sin afectar stock
+      return this.uow.run(async (deps) => {
+        const result = await this.repo.add(
+          {
+            ordenReparacionId: input.ordenReparacionId,
+            ventaId: input.ventaId,
+            presupuestoId: input.presupuestoId,
+            stockId: input.stockId,
+            precioCompra: input.precioCompra,
+            precioVenta: input.precioVenta,
+            unidadesConsumidas: input.unidadesConsumidas,
+          },
+          deps
+        );
+
+        return result;
+      });
+    }
+
     // Create RepuestoUsado VO for stock validation
     const repuestoVO = RepuestoUsado.from({
       stockId: input.stockId,

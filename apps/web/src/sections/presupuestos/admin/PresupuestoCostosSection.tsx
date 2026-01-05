@@ -2,6 +2,7 @@
 
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import EditCostosForm from "@/sections/ordenes-reparacion/admin/forms/EditCostosForm";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import { Box, Paper, Stack, Typography } from "@mui/material";
@@ -182,11 +183,7 @@ function PresupuestoCostosSection() {
                   alignItems: "center",
                 }}
               >
-                ${" "}
-                {presupuesto.totalAPagar?.toLocaleString("es-AR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }) || "0.00"}
+                {getFormattedPrice(presupuesto.total)}
               </Typography>
             </Box>
           </Paper>

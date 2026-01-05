@@ -17,6 +17,17 @@ export class DeleteRepuestoUsadoUseCase {
     const existing = await this.repo.findById(input.id);
     if (!existing) throw new Error("Repuesto usado no encontrado");
 
+    // Si es un presupuesto, no restaurar stock
+    const isPresupuesto = existing.presupuestoId !== null;
+
+    if (isPresupuesto) {
+      // Para presupuestos, solo eliminar el repuesto sin afectar stock
+      return this.uow.run(async (deps) => {
+        await this.repo.delete(input.id, deps);
+        return [];
+      });
+    }
+
     const repuestoVO = RepuestoUsado.from({
       stockId: existing.stockId,
       unidadesConsumidas: existing.unidadesConsumidas,

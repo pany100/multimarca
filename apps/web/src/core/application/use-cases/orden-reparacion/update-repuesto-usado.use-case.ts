@@ -24,6 +24,27 @@ export class UpdateRepuestoUsadoUseCase {
       throw new Error("Repuesto usado no encontrado");
     }
 
+    // Si es un presupuesto, no validar ni sincronizar stock
+    const isPresupuesto = existing.presupuestoId !== null;
+
+    if (isPresupuesto) {
+      // Para presupuestos, solo actualizar el repuesto sin afectar stock
+      return this.uow.run(async (deps) => {
+        const result = await this.repo.update(
+          input.id,
+          {
+            stockId: input.stockId,
+            precioCompra: input.precioCompra,
+            precioVenta: input.precioVenta,
+            unidadesConsumidas: input.unidadesConsumidas,
+          },
+          deps
+        );
+
+        return result;
+      });
+    }
+
     // Create VOs for stock validation
     const existingVO = RepuestoUsado.from({
       stockId: existing.stockId,
