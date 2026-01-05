@@ -1,8 +1,9 @@
+import { useFetch } from "@/contexts/FetchContext";
 import { useState } from "react";
-import { useUpdatePresupuesto } from "@/sections/presupuestos/hooks/useUpdatePresupuesto";
 
 export const useUpdatePresupuestoGeneralInfo = () => {
-  const updatePresupuestoGeneric = useUpdatePresupuesto;
+  const { authFetch } = useFetch();
+  const [loading, setLoading] = useState(false);
 
   const updatePresupuestoGeneralInfo = async (
     presupuestoId: number,
@@ -16,12 +17,33 @@ export const useUpdatePresupuestoGeneralInfo = () => {
       observacionesCliente?: string;
     }
   ) => {
-    const { updatePresupuesto } = updatePresupuestoGeneric(presupuestoId);
-    return await updatePresupuesto(data);
+    setLoading(true);
+
+    try {
+      const response = await authFetch(`/api/presupuestos/${presupuestoId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || "Error al actualizar el presupuesto");
+      }
+
+      const result = await response.json();
+      setLoading(false);
+      return result;
+    } catch (err) {
+      setLoading(false);
+      throw err;
+    }
   };
 
   return {
     updatePresupuestoGeneralInfo,
-    loading: false, // El loading se maneja en el hook genérico
+    loading,
   };
 };

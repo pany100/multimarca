@@ -116,7 +116,7 @@ const PresupuestoInformacionGeneral = () => {
     } catch (error) {
       setSnackbar({
         open: true,
-        message: "Error al actualizar la información",
+        message: "Error al actualizar la información: " + error,
         severity: "error",
       });
     }

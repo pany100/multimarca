@@ -3,8 +3,8 @@ import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
-import { Box, Grid, Tab, Tabs } from "@mui/material";
-import { useState } from "react";
+import { Box, Divider, Grid, Tab, Tabs } from "@mui/material";
+import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 const estadosPresupuesto = [
@@ -28,48 +28,24 @@ const EditInformacionGeneralPresupuestoForm = () => {
     autoId || (!autoId && !informacionAuto) ? 0 : 1
   );
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-    // Limpiar los campos del otro tab cuando se cambia
-    if (newValue === 0) {
+  // Cuando se selecciona un vehículo existente, limpiar información manual
+  useEffect(() => {
+    if (autoId) {
       setValue("informacionAuto", "");
       setValue("informacionCliente", "");
-    } else {
+    }
+  }, [autoId, setValue]);
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+    // Solo limpiar autoId cuando se va al tab de vehículo nuevo
+    if (newValue === 1) {
       setValue("autoId", null);
     }
   };
 
   return (
     <Grid container spacing={3}>
-      {/* Estado */}
-      <Grid item xs={12} md={6}>
-        <CustomSelect
-          name="estado"
-          label="Estado"
-          options={presupuestoEstadoOptions}
-        />
-      </Grid>
-
-      {/* Fecha de Envío */}
-      <Grid item xs={12} md={6}>
-        <CustomInputText
-          name="fechaEnvio"
-          label="Fecha de Envío"
-          type="date"
-          InputLabelProps={{ shrink: true }}
-        />
-      </Grid>
-
-      {/* Fecha de Respuesta */}
-      <Grid item xs={12} md={6}>
-        <CustomInputText
-          name="fechaRespuesta"
-          label="Fecha de Respuesta"
-          type="date"
-          InputLabelProps={{ shrink: true }}
-        />
-      </Grid>
-
       {/* Información del Vehículo con Tabs */}
       <Grid item xs={12}>
         <Box sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}>
@@ -108,6 +84,38 @@ const EditInformacionGeneralPresupuestoForm = () => {
           </Grid>
         </>
       )}
+
+      <Grid item xs={12}>
+        <Divider sx={{ my: 1, borderColor: "divider" }} />
+      </Grid>
+      {/* Estado */}
+      <Grid item xs={12} md={6}>
+        <CustomSelect
+          name="estado"
+          label="Estado"
+          options={presupuestoEstadoOptions}
+        />
+      </Grid>
+
+      {/* Fecha de Envío */}
+      <Grid item xs={12} md={6}>
+        <CustomInputText
+          name="fechaEnvio"
+          label="Fecha de Envío"
+          type="date"
+          InputLabelProps={{ shrink: true }}
+        />
+      </Grid>
+
+      {/* Fecha de Respuesta */}
+      <Grid item xs={12} md={6}>
+        <CustomInputText
+          name="fechaRespuesta"
+          label="Fecha de Respuesta"
+          type="date"
+          InputLabelProps={{ shrink: true }}
+        />
+      </Grid>
 
       {/* Pedido del Cliente */}
       <Grid item xs={12}>
