@@ -6,7 +6,7 @@ export const schema = yup.object({
   informacionCliente: yup.string().nullable(),
   estado: yup
     .string()
-    .oneOf(["Presupuestado", "Preparado", "Entregado", "Cerrado"])
+    .oneOf(["Borrador", "Presupuestado", "Preparado", "Entregado", "Cerrado"])
     .required(),
   repuestosUsados: yup.array().of(
     yup.object().shape({
