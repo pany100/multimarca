@@ -14,9 +14,17 @@ import { useUpdateRecargoPresupuesto } from "./hooks/useUpdateRecargoPresupuesto
 const schema = yup.object({
   porcentajeRecargo: yup
     .number()
-    .nullable()
-    .transform((value, originalValue) => (originalValue === "" ? null : value))
-    .optional(),
+    .transform((value, originalValue) => {
+      // Si el valor original es vacío o null, convertir a 0
+      if (originalValue === "" || originalValue === null || originalValue === undefined) {
+        return 0;
+      }
+      return value;
+    })
+    .min(0, "El porcentaje de recargo no puede ser negativo")
+    .max(100, "El porcentaje de recargo no puede ser mayor a 100")
+    .typeError("El porcentaje de recargo debe ser un número")
+    .default(0),
 });
 
 type FormData = yup.InferType<typeof schema>;
@@ -29,26 +37,20 @@ function PresupuestoRecargoSection() {
   const methods = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
-      porcentajeRecargo:
-        presupuesto.porcentajeRecargo && presupuesto.porcentajeRecargo !== 0
-          ? presupuesto.porcentajeRecargo
-          : null,
+      porcentajeRecargo: presupuesto.porcentajeRecargo ?? 0,
     },
   });
 
   const handleOpenModal = () => {
     methods.reset({
-      porcentajeRecargo:
-        presupuesto.porcentajeRecargo && presupuesto.porcentajeRecargo !== 0
-          ? presupuesto.porcentajeRecargo
-          : null,
+      porcentajeRecargo: presupuesto.porcentajeRecargo ?? 0,
     });
   };
 
   const handleSubmit = async (data: FormData) => {
     try {
       const presupuestoActualizado = await updateRecargo(presupuesto.id, {
-        porcentajeRecargo: data.porcentajeRecargo || null,
+        porcentajeRecargo: data.porcentajeRecargo ?? 0,
       });
 
       setPresupuesto(presupuestoActualizado);

@@ -12,10 +12,25 @@ import { useUpdateCostos } from "../hooks/useUpdateCostos";
 import { CommonOrderCard } from "./CommonOrderCard";
 
 const schema = yup.object({
-  incrementoInterno: yup.number().nullable().optional(),
-  descuento: yup.number().nullable().optional(),
+  incrementoInterno: yup
+    .number()
+    .nullable()
+    .min(0, "El incremento interno no puede ser negativo")
+    .typeError("El incremento interno debe ser un número")
+    .optional(),
+  descuento: yup
+    .number()
+    .nullable()
+    .min(0, "El descuento no puede ser negativo")
+    .typeError("El descuento debe ser un número")
+    .optional(),
   descripcionDescuento: yup.string().nullable().optional(),
-  incremento: yup.number().nullable().optional(),
+  incremento: yup
+    .number()
+    .nullable()
+    .min(0, "El incremento no puede ser negativo")
+    .typeError("El incremento debe ser un número")
+    .optional(),
   descripcionIncremento: yup.string().nullable().optional(),
 });
 
@@ -29,21 +44,21 @@ function CostosSection() {
   const methods = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
-      incrementoInterno: orden.incrementoInterno || null,
-      descuento: orden.descuento || null,
-      descripcionDescuento: orden.descripcionDescuento || null,
-      incremento: orden.incremento || null,
-      descripcionIncremento: orden.descripcionIncremento || null,
+      incrementoInterno: orden.incrementoInterno ?? null,
+      descuento: orden.descuento ?? null,
+      descripcionDescuento: orden.descripcionDescuento ?? null,
+      incremento: orden.incremento ?? null,
+      descripcionIncremento: orden.descripcionIncremento ?? null,
     },
   });
 
   const handleOpenModal = () => {
     methods.reset({
-      incrementoInterno: orden.incrementoInterno || null,
-      descuento: orden.descuento || null,
-      descripcionDescuento: orden.descripcionDescuento || null,
-      incremento: orden.incremento || null,
-      descripcionIncremento: orden.descripcionIncremento || null,
+      incrementoInterno: orden.incrementoInterno ?? null,
+      descuento: orden.descuento ?? null,
+      descripcionDescuento: orden.descripcionDescuento ?? null,
+      incremento: orden.incremento ?? null,
+      descripcionIncremento: orden.descripcionIncremento ?? null,
     });
   };
 

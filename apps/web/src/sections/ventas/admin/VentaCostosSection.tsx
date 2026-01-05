@@ -13,9 +13,19 @@ import EditCostosVentaForm from "./forms/EditCostosVentaForm";
 import { useUpdateCostosVenta } from "./hooks/useUpdateCostosVenta";
 
 const schema = yup.object({
-  descuento: yup.number().nullable().optional(),
+  descuento: yup
+    .number()
+    .nullable()
+    .min(0, "El descuento no puede ser negativo")
+    .typeError("El descuento debe ser un número")
+    .optional(),
   descripcionDescuento: yup.string().nullable().optional(),
-  incremento: yup.number().nullable().optional(),
+  incremento: yup
+    .number()
+    .nullable()
+    .min(0, "El incremento no puede ser negativo")
+    .typeError("El incremento debe ser un número")
+    .optional(),
   descripcionIncremento: yup.string().nullable().optional(),
 });
 
@@ -29,19 +39,19 @@ function VentaCostosSection() {
   const methods = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
-      descuento: venta.descuento || null,
-      descripcionDescuento: venta.descripcionDescuento || null,
-      incremento: venta.incremento || null,
-      descripcionIncremento: venta.descripcionIncremento || null,
+      descuento: venta.descuento ?? null,
+      descripcionDescuento: venta.descripcionDescuento ?? null,
+      incremento: venta.incremento ?? null,
+      descripcionIncremento: venta.descripcionIncremento ?? null,
     },
   });
 
   const handleOpenModal = () => {
     methods.reset({
-      descuento: venta.descuento || null,
-      descripcionDescuento: venta.descripcionDescuento || null,
-      incremento: venta.incremento || null,
-      descripcionIncremento: venta.descripcionIncremento || null,
+      descuento: venta.descuento ?? null,
+      descripcionDescuento: venta.descripcionDescuento ?? null,
+      incremento: venta.incremento ?? null,
+      descripcionIncremento: venta.descripcionIncremento ?? null,
     });
   };
 

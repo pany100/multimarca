@@ -13,10 +13,25 @@ import { usePresupuestoRequired } from "./contexts/PresupuestoContext";
 import { useUpdateCostosPresupuesto } from "./hooks/useUpdateCostosPresupuesto";
 
 const schema = yup.object({
-  incrementoInterno: yup.number().nullable().optional(),
-  descuento: yup.number().nullable().optional(),
+  incrementoInterno: yup
+    .number()
+    .nullable()
+    .min(0, "El incremento interno no puede ser negativo")
+    .typeError("El incremento interno debe ser un número")
+    .optional(),
+  descuento: yup
+    .number()
+    .nullable()
+    .min(0, "El descuento no puede ser negativo")
+    .typeError("El descuento debe ser un número")
+    .optional(),
   descripcionDescuento: yup.string().nullable().optional(),
-  incremento: yup.number().nullable().optional(),
+  incremento: yup
+    .number()
+    .nullable()
+    .min(0, "El incremento no puede ser negativo")
+    .typeError("El incremento debe ser un número")
+    .optional(),
   descripcionIncremento: yup.string().nullable().optional(),
 });
 
@@ -30,21 +45,21 @@ function PresupuestoCostosSection() {
   const methods = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
-      incrementoInterno: presupuesto.incrementoInterno || null,
-      descuento: presupuesto.descuento || null,
-      descripcionDescuento: presupuesto.descripcionDescuento || null,
-      incremento: presupuesto.incremento || null,
-      descripcionIncremento: presupuesto.descripcionIncremento || null,
+      incrementoInterno: presupuesto.incrementoInterno ?? null,
+      descuento: presupuesto.descuento ?? null,
+      descripcionDescuento: presupuesto.descripcionDescuento ?? null,
+      incremento: presupuesto.incremento ?? null,
+      descripcionIncremento: presupuesto.descripcionIncremento ?? null,
     },
   });
 
   const handleOpenModal = () => {
     methods.reset({
-      incrementoInterno: presupuesto.incrementoInterno || null,
-      descuento: presupuesto.descuento || null,
-      descripcionDescuento: presupuesto.descripcionDescuento || null,
-      incremento: presupuesto.incremento || null,
-      descripcionIncremento: presupuesto.descripcionIncremento || null,
+      incrementoInterno: presupuesto.incrementoInterno ?? null,
+      descuento: presupuesto.descuento ?? null,
+      descripcionDescuento: presupuesto.descripcionDescuento ?? null,
+      incremento: presupuesto.incremento ?? null,
+      descripcionIncremento: presupuesto.descripcionIncremento ?? null,
     });
   };
 
