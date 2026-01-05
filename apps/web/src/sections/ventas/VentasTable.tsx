@@ -4,6 +4,7 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import AssignmentIcon from "@mui/icons-material/Assignment";
 import EditIcon from "@mui/icons-material/Edit";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs } from "@mui/material";
@@ -188,6 +189,13 @@ function VentasTable({
   const customActions = (params: any) => {
     const defaultActions = extraActions ? extraActions(params) : [];
     const customActions: React.ReactNode[] = [
+      <MenuItem
+        key="admin"
+        onClick={() => router.push(`/dashboard/ventas/${params.id}`)}
+      >
+        <AssignmentIcon sx={{ mr: 1 }} />
+        Administrar
+      </MenuItem>,
       <MenuItem
         key="edit"
         onClick={() => router.push(`/dashboard/ventas/${params.id}/editar`)}

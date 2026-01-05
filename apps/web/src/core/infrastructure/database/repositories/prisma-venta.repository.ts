@@ -120,4 +120,78 @@ export class PrismaVentaRepository implements VentaRepository {
       },
     });
   }
+
+  async patchVenta(
+    id: number,
+    dto: {
+      clienteId?: number | null;
+      informacionCliente?: string | null;
+      fecha?: Date;
+      descuento?: number | null;
+      descripcionDescuento?: string | null;
+      incremento?: number | null;
+      descripcionIncremento?: string | null;
+      porcentajeRecargo?: number | null;
+      estado?: string;
+    }
+  ): Promise<VentaWithRelations> {
+    const updateData: Prisma.VentaUpdateInput = {};
+
+    if (dto.clienteId !== undefined) updateData.clienteId = dto.clienteId;
+    if (dto.informacionCliente !== undefined)
+      updateData.informacionCliente = dto.informacionCliente;
+    if (dto.fecha !== undefined) updateData.fecha = dto.fecha;
+    if (dto.estado !== undefined) updateData.estado = dto.estado as any;
+
+    // Handle Decimal conversions
+    if (dto.descuento !== undefined) {
+      updateData.descuento =
+        dto.descuento !== null ? new Prisma.Decimal(dto.descuento) : null;
+    }
+    if (dto.descripcionDescuento !== undefined) {
+      updateData.descripcionDescuento = dto.descripcionDescuento;
+    }
+    if (dto.incremento !== undefined) {
+      updateData.incremento =
+        dto.incremento !== null ? new Prisma.Decimal(dto.incremento) : null;
+    }
+    if (dto.descripcionIncremento !== undefined) {
+      updateData.descripcionIncremento = dto.descripcionIncremento;
+    }
+    if (dto.porcentajeRecargo !== undefined) {
+      updateData.porcentajeRecargo =
+        dto.porcentajeRecargo !== null
+          ? new Prisma.Decimal(dto.porcentajeRecargo)
+          : null;
+    }
+
+    return prisma.venta.update({
+      where: { id },
+      data: updateData,
+      include: {
+        cliente: true,
+        repuestosUsados: {
+          include: {
+            stock: {
+              include: {
+                proveedor: true,
+              },
+            },
+          },
+        },
+        reparacionesDeTercero: {
+          include: {
+            proveedor: true,
+            reciboFile: true,
+          },
+        },
+        trabajosRealizados: true,
+        ingresos: {
+          include: {
+            dolar: true,
+          },
+        },
+      },
+    });
+  }
 }

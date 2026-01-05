@@ -39,4 +39,18 @@ export interface VentaRepository {
   findById(id: number): Promise<VentaWithRelations | null>;
   delete(tx: any, id: number): Promise<void>;
   update(tx: any, data: Prisma.VentaUpdateArgs): Promise<VentaWithRelations>;
+  patchVenta(
+    id: number,
+    dto: {
+      clienteId?: number | null;
+      informacionCliente?: string | null;
+      fecha?: Date;
+      descuento?: number | null;
+      descripcionDescuento?: string | null;
+      incremento?: number | null;
+      descripcionIncremento?: string | null;
+      porcentajeRecargo?: number | null;
+      estado?: string;
+    }
+  ): Promise<VentaWithRelations>;
 }

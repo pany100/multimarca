@@ -65,3 +65,16 @@ export const updateVentaDtoSchema = z.object({
   ...getVentaQuerySchema.shape,
   ...createVentaDtoSchema.shape,
 });
+
+export const patchVentaSchema = z.object({
+  id: z.coerce.number().positive(),
+  clienteId: z.coerce.number().nullable().optional(),
+  informacionCliente: z.string().nullable().optional(),
+  fecha: z.coerce.date().optional(),
+  descuento: z.coerce.number().optional(),
+  descripcionDescuento: z.string().nullable().optional(),
+  incremento: z.coerce.number().optional(),
+  descripcionIncremento: z.string().nullable().optional(),
+  porcentajeRecargo: z.coerce.number().optional(),
+  estado: ventaEstadoEnum.optional(),
+});
