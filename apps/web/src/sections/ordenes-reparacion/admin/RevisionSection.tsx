@@ -48,10 +48,10 @@ function RevisionSection() {
         message: "Revisión actualizada correctamente",
         severity: "success",
       });
-    } catch (error) {
+    } catch (error: any) {
       setSnackbar({
         open: true,
-        message: "Error al actualizar la revisión",
+        message: error.message || "Error al actualizar la revisión",
         severity: "error",
       });
     }

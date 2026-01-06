@@ -28,7 +28,8 @@ export const useUpdateCostosPresupuesto = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Error al actualizar los costos");
+        const errorData = await response.json();
+        throw new Error(errorData.error || errorData.message || "Error al actualizar los costos");
       }
 
       const result = await response.json();

@@ -45,10 +45,10 @@ function RecibosContent({ editing }: RecibosContentProps) {
         message: "Recibo eliminado correctamente",
         severity: "success",
       });
-    } catch (error) {
+    } catch (error: any) {
       setSnackbar({
         open: true,
-        message: "Error al eliminar el recibo",
+        message: error.message || "Error al eliminar el recibo",
         severity: "error",
       });
     } finally {

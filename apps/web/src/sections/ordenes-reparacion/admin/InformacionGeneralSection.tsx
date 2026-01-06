@@ -86,10 +86,10 @@ const InformacionGeneralSection = () => {
         message: "Información actualizada correctamente",
         severity: "success",
       });
-    } catch (error) {
+    } catch (error: any) {
       setSnackbar({
         open: true,
-        message: "Error al actualizar la información",
+        message: error.message || "Error al actualizar la información",
         severity: "error",
       });
     }

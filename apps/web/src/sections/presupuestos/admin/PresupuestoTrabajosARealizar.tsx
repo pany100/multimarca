@@ -51,10 +51,10 @@ function PresupuestoTrabajosARealizar() {
         message: "Trabajos a realizar actualizados correctamente",
         severity: "success",
       });
-    } catch (error) {
+    } catch (error: any) {
       setSnackbar({
         open: true,
-        message: "Error al actualizar los trabajos a realizar",
+        message: error.message || "Error al actualizar los trabajos a realizar",
         severity: "error",
       });
     }

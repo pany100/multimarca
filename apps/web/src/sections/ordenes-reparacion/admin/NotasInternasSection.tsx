@@ -48,10 +48,10 @@ function NotasInternasSection() {
         message: "Notas internas actualizadas correctamente",
         severity: "success",
       });
-    } catch (error) {
+    } catch (error: any) {
       setSnackbar({
         open: true,
-        message: "Error al actualizar las notas internas",
+        message: error.message || "Error al actualizar las notas internas",
         severity: "error",
       });
     }

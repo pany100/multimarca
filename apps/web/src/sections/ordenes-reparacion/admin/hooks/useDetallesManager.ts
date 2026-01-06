@@ -24,10 +24,10 @@ export const useDetallesManager = () => {
       );
       setOrden(ordenActualizada);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       setSnackbar({
         open: true,
-        message: "Error al actualizar los detalles",
+        message: error.message || "Error al actualizar los detalles",
         severity: "error",
       });
       return false;

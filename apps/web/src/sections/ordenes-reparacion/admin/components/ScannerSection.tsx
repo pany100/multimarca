@@ -56,10 +56,10 @@ function ScannerSection() {
         message: "Scanner actualizado correctamente",
         severity: "success",
       });
-    } catch (error) {
+    } catch (error: any) {
       setSnackbar({
         open: true,
-        message: "Error al actualizar el scanner",
+        message: error.message || "Error al actualizar el scanner",
         severity: "error",
       });
     }

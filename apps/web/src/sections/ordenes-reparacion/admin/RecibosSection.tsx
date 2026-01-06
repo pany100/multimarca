@@ -75,10 +75,10 @@ function RecibosSection() {
 
       handleCloseModal();
       setEditing(false);
-    } catch (error) {
+    } catch (error: any) {
       setSnackbar({
         open: true,
-        message: "Error al agregar el recibo",
+        message: error.message || "Error al agregar el recibo",
         severity: "error",
       });
     }

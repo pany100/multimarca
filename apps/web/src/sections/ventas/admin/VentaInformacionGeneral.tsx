@@ -90,10 +90,10 @@ const VentaInformacionGeneral = () => {
         message: "Información actualizada correctamente",
         severity: "success",
       });
-    } catch (error) {
+    } catch (error: any) {
       setSnackbar({
         open: true,
-        message: "Error al actualizar la información: " + error,
+        message: error.message || "Error al actualizar la información",
         severity: "error",
       });
     }

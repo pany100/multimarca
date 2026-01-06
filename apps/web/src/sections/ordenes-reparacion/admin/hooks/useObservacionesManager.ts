@@ -25,10 +25,10 @@ export const useObservacionesManager = () => {
       );
       setOrden(ordenActualizada);
       return true;
-    } catch (error) {
+    } catch (error: any) {
       setSnackbar({
         open: true,
-        message: "Error al actualizar las observaciones",
+        message: error.message || "Error al actualizar las observaciones",
         severity: "error",
       });
       return false;
