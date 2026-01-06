@@ -8,12 +8,14 @@ import { Box, Button, Chip, CircularProgress } from "@mui/material";
 interface VentaActionsProps {
   venta: any;
   printLoading: boolean;
+  isSticky?: boolean;
   onPrint: () => void;
 }
 
 export const VentaActions = ({
   venta,
   printLoading,
+  isSticky = false,
   onPrint,
 }: VentaActionsProps) => {
   return (
@@ -21,30 +23,31 @@ export const VentaActions = ({
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 1,
+        gap: isSticky ? 0.5 : 1,
         flexWrap: "wrap",
       }}
     >
       <Chip
         label={getEstadoVentaLabel(venta.estado)}
         color={getEstadoVentaColor(venta.estado)}
-        size="medium"
+        size={isSticky ? "small" : "medium"}
         sx={{
           fontWeight: 500,
-          px: 1,
+          px: isSticky ? 0.5 : 1,
           "& .MuiChip-label": {
-            px: 1,
+            px: isSticky ? 0.5 : 1,
           },
         }}
       />
       <Button
         variant="outlined"
-        startIcon={printLoading ? <CircularProgress size={20} /> : <PrintIcon />}
+        size={isSticky ? "small" : "medium"}
+        startIcon={!isSticky && (printLoading ? <CircularProgress size={20} /> : <PrintIcon />)}
         onClick={onPrint}
         disabled={printLoading}
-        sx={{ textTransform: "none" }}
+        sx={{ textTransform: "none", minWidth: isSticky ? "auto" : undefined }}
       >
-        Imprimir
+        {isSticky ? (printLoading ? <CircularProgress size={16} /> : <PrintIcon fontSize="small" />) : "Imprimir"}
       </Button>
     </Box>
   );

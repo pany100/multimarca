@@ -23,7 +23,7 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
   return (
     <>
       {/* Spacer cuando el header es sticky */}
-      {isSticky && <Box sx={{ height: "100px" }} />}
+      {isSticky && <Box sx={{ height: 80 }} />}
 
       <Box
         sx={{
@@ -35,11 +35,10 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
           backgroundColor: "background.default",
           borderBottom: "1px solid",
           borderColor: "divider",
-          pb: 1.5,
-          pt: isSticky ? 2 : 3,
+          py: isSticky ? 1 : 2,
           mb: isSticky ? 0 : 3,
           px: isSticky ? 3 : 0,
-          transition: "all 0.3s ease",
+          transition: "all 0.2s ease",
         }}
       >
         <Box
@@ -48,15 +47,16 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: 2,
+            gap: isSticky ? 1 : 2,
             px: isSticky ? 0 : 2,
           }}
         >
-          <VentaInfo venta={venta} />
+          <VentaInfo venta={venta} isSticky={isSticky} />
 
           <VentaActions
             venta={venta}
             printLoading={printLoading}
+            isSticky={isSticky}
             onPrint={handlePrint}
           />
         </Box>

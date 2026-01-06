@@ -11,6 +11,7 @@ interface PresupuestoActionsProps {
   presupuesto: any;
   enviandoPresupuesto: boolean;
   whatsappLink: string;
+  isSticky?: boolean;
   onEnviar: () => void;
   onPrint: () => void;
 }
@@ -19,6 +20,7 @@ export const PresupuestoActions = ({
   presupuesto,
   enviandoPresupuesto,
   whatsappLink,
+  isSticky = false,
   onEnviar,
   onPrint,
 }: PresupuestoActionsProps) => {
@@ -27,19 +29,19 @@ export const PresupuestoActions = ({
       sx={{
         display: "flex",
         alignItems: "center",
-        gap: 1,
+        gap: isSticky ? 0.5 : 1,
         flexWrap: "wrap",
       }}
     >
       <Chip
         label={getEstadoPresupuestoLabel(presupuesto.estado)}
         color={getEstadoPresupuestoColor(presupuesto.estado)}
-        size="medium"
+        size={isSticky ? "small" : "medium"}
         sx={{
           fontWeight: 500,
-          px: 1,
+          px: isSticky ? 0.5 : 1,
           "& .MuiChip-label": {
-            px: 1,
+            px: isSticky ? 0.5 : 1,
           },
         }}
       />
@@ -50,23 +52,37 @@ export const PresupuestoActions = ({
           <span>
             <Button
               variant="outlined"
-              startIcon={<SendIcon />}
+              size={isSticky ? "small" : "medium"}
+              startIcon={!isSticky && <SendIcon />}
               disabled
-              sx={{ textTransform: "none" }}
+              sx={{
+                textTransform: "none",
+                minWidth: isSticky ? "auto" : undefined,
+              }}
             >
-              Presupuesto Enviado
+              {isSticky ? <SendIcon fontSize="small" /> : "Presupuesto Enviado"}
             </Button>
           </span>
         </Tooltip>
       ) : (
         <Button
           variant="outlined"
-          startIcon={<SendIcon />}
+          size={isSticky ? "small" : "medium"}
+          startIcon={!isSticky && <SendIcon />}
           onClick={onEnviar}
           disabled={enviandoPresupuesto}
-          sx={{ textTransform: "none" }}
+          sx={{
+            textTransform: "none",
+            minWidth: isSticky ? "auto" : undefined,
+          }}
         >
-          {enviandoPresupuesto ? "Enviando..." : "Enviar Presupuesto"}
+          {enviandoPresupuesto ? (
+            "..."
+          ) : isSticky ? (
+            <SendIcon fontSize="small" />
+          ) : (
+            "Enviar Presupuesto"
+          )}
         </Button>
       )}
 
@@ -74,11 +90,12 @@ export const PresupuestoActions = ({
       <Button
         variant="outlined"
         color="primary"
-        startIcon={<PrintIcon />}
+        size={isSticky ? "small" : "medium"}
+        startIcon={!isSticky && <PrintIcon />}
         onClick={onPrint}
-        sx={{ textTransform: "none" }}
+        sx={{ textTransform: "none", minWidth: isSticky ? "auto" : undefined }}
       >
-        Imprimir
+        {isSticky ? <PrintIcon fontSize="small" /> : "Imprimir"}
       </Button>
 
       {/* WhatsApp button */}
@@ -86,15 +103,19 @@ export const PresupuestoActions = ({
         <Button
           variant="outlined"
           color="success"
-          startIcon={<WhatsAppIcon />}
+          size={isSticky ? "small" : "medium"}
+          startIcon={!isSticky && <WhatsAppIcon />}
           component="a"
           href={whatsappLink}
           target="_blank"
           rel="noopener noreferrer"
-          sx={{ textTransform: "none" }}
+          sx={{
+            textTransform: "none",
+            minWidth: isSticky ? "auto" : undefined,
+          }}
           disabled
         >
-          Enviar por WhatsApp
+          {isSticky ? <WhatsAppIcon fontSize="small" /> : "Enviar por WhatsApp"}
         </Button>
       )}
     </Box>

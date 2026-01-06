@@ -94,6 +94,9 @@ function OrdenHeader() {
 
   return (
     <>
+      {/* Spacer cuando el header es sticky */}
+      {isSticky && <Box sx={{ height: isSticky ? 80 : 0 }} />}
+
       <Box
         sx={{
           position: isSticky ? "fixed" : "relative",
@@ -104,11 +107,10 @@ function OrdenHeader() {
           backgroundColor: "background.default",
           borderBottom: "1px solid",
           borderColor: "divider",
-          pb: 1.5,
-          pt: isSticky ? 2 : 3,
+          py: isSticky ? 1 : 2,
           mb: isSticky ? 0 : 3,
           px: isSticky ? 3 : 0,
-          transition: "all 0.3s ease",
+          transition: "all 0.2s ease",
         }}
       >
         {/* Single Row with Title, Status and Buttons */}
@@ -118,66 +120,91 @@ function OrdenHeader() {
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: 2,
+            gap: isSticky ? 1 : 2,
             px: isSticky ? 0 : 2,
           }}
         >
           {/* Left side: Title */}
-          <Box>
+          <Box sx={{ display: "flex", alignItems: isSticky ? "center" : "flex-start", gap: isSticky ? 2 : 0, flexDirection: isSticky ? "row" : "column" }}>
             <Typography
-              variant="h4"
+              variant={isSticky ? "h6" : "h4"}
               component="h1"
               sx={{
                 fontWeight: 600,
-                fontSize: { xs: "1.5rem", md: "2rem" },
+                fontSize: isSticky ? "1rem" : { xs: "1.5rem", md: "2rem" },
+                whiteSpace: isSticky ? "nowrap" : "normal",
               }}
             >
-              Orden #{orden.id} - Patente {orden.auto?.patent || "N/A"}
+              Orden #{orden.id} - {orden.auto?.patent || "N/A"}
             </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Creada el {getFormattedDateArg(orden.fechaCreacion)}
-            </Typography>
-            <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
-              <Typography variant="body1" fontWeight="medium">
-                Total a pagar:{" "}
-                <Typography component="span" fontWeight="bold">
-                  $
-                  {orden.total?.toLocaleString("es-AR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }) || "0.00"}
+            
+            {/* Info adicional - solo visible cuando NO es sticky */}
+            {!isSticky && (
+              <>
+                <Typography variant="body2" color="text.secondary">
+                  Creada el {getFormattedDateArg(orden.fechaCreacion)}
                 </Typography>
-              </Typography>
-              <Typography variant="body1" fontWeight="medium" color="error">
-                Deuda:{" "}
-                <Typography component="span" fontWeight="bold" color="error">
-                  $
-                  {orden.deuda?.toLocaleString("es-AR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  }) || "0.00"}
+                <Box sx={{ display: "flex", gap: 3, mt: 1 }}>
+                  <Typography variant="body1" fontWeight="medium">
+                    Total a pagar:{" "}
+                    <Typography component="span" fontWeight="bold">
+                      $
+                      {orden.total?.toLocaleString("es-AR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }) || "0.00"}
+                    </Typography>
+                  </Typography>
+                  <Typography variant="body1" fontWeight="medium" color="error">
+                    Deuda:{" "}
+                    <Typography component="span" fontWeight="bold" color="error">
+                      $
+                      {orden.deuda?.toLocaleString("es-AR", {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2,
+                      }) || "0.00"}
+                    </Typography>
+                  </Typography>
+                </Box>
+                <Link href="/dashboard/ordenes-reparacion" passHref legacyBehavior>
+                  <MuiLink
+                    sx={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: 0.5,
+                      fontSize: "0.875rem",
+                      mt: 0.5,
+                      textDecoration: "none",
+                      color: "primary.main",
+                      "&:hover": {
+                        textDecoration: "underline",
+                      },
+                    }}
+                  >
+                    <ArrowBackIcon sx={{ fontSize: 16 }} />
+                    Volver a órdenes
+                  </MuiLink>
+                </Link>
+              </>
+            )}
+
+            {/* Info compacta - solo visible cuando ES sticky */}
+            {isSticky && (
+              <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
+                <Typography variant="body2" fontWeight="medium" sx={{ display: "flex", gap: 0.5 }}>
+                  Total:{" "}
+                  <Typography component="span" fontWeight="bold" variant="body2">
+                    ${orden.total?.toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || "0"}
+                  </Typography>
                 </Typography>
-              </Typography>
-            </Box>
-            <Link href="/dashboard/ordenes-reparacion" passHref legacyBehavior>
-              <MuiLink
-                sx={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: 0.5,
-                  fontSize: "0.875rem",
-                  mt: 0.5,
-                  textDecoration: "none",
-                  color: "primary.main",
-                  "&:hover": {
-                    textDecoration: "underline",
-                  },
-                }}
-              >
-                <ArrowBackIcon sx={{ fontSize: 16 }} />
-                Volver a órdenes
-              </MuiLink>
-            </Link>
+                <Typography variant="body2" fontWeight="medium" color="error" sx={{ display: "flex", gap: 0.5 }}>
+                  Deuda:{" "}
+                  <Typography component="span" fontWeight="bold" color="error" variant="body2">
+                    ${orden.deuda?.toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || "0"}
+                  </Typography>
+                </Typography>
+              </Box>
+            )}
           </Box>
 
           {/* Right side: Status and Action Buttons */}
@@ -185,19 +212,19 @@ function OrdenHeader() {
             sx={{
               display: "flex",
               alignItems: "center",
-              gap: 1,
+              gap: isSticky ? 0.5 : 1,
               flexWrap: "wrap",
             }}
           >
             <Chip
               label={getEstadoLabel(orden.estado)}
               color={getEstadoColor(orden.estado)}
-              size="medium"
+              size={isSticky ? "small" : "medium"}
               sx={{
                 fontWeight: 500,
-                px: 1,
+                px: isSticky ? 0.5 : 1,
                 "& .MuiChip-label": {
-                  px: 1,
+                  px: isSticky ? 0.5 : 1,
                 },
               }}
             />
@@ -205,16 +232,18 @@ function OrdenHeader() {
             {/* Close Order Button */}
             <Button
               variant="outlined"
-              startIcon={<CloseIcon />}
+              size={isSticky ? "small" : "medium"}
+              startIcon={!isSticky && <CloseIcon />}
               onClick={handleCerrarOrden}
               disabled={cerrandoOrden}
-              sx={{ textTransform: "none" }}
+              sx={{ textTransform: "none", minWidth: isSticky ? "auto" : undefined }}
             >
-              {cerrandoOrden ? "Cerrando..." : "Cerrar Orden"}
+              {cerrandoOrden ? "..." : isSticky ? <CloseIcon fontSize="small" /> : "Cerrar Orden"}
             </Button>
 
             <PrintMenu
               isMobile={isMobile}
+              isSticky={isSticky}
               printMenuAnchor={printMenuAnchor}
               openPrintMenu={openPrintMenu}
               pdfPath={orden.pdfPath}
@@ -232,11 +261,12 @@ function OrdenHeader() {
                 <span>
                   <Button
                     variant="outlined"
-                    startIcon={<WhatsAppIcon />}
+                    size={isSticky ? "small" : "medium"}
+                    startIcon={!isSticky && <WhatsAppIcon />}
                     disabled
-                    sx={{ textTransform: "none" }}
+                    sx={{ textTransform: "none", minWidth: isSticky ? "auto" : undefined }}
                   >
-                    Enviar por WhatsApp
+                    {isSticky ? <WhatsAppIcon fontSize="small" /> : "Enviar por WhatsApp"}
                   </Button>
                 </span>
               </Tooltip>
@@ -244,11 +274,12 @@ function OrdenHeader() {
               <Button
                 variant="outlined"
                 color="success"
-                startIcon={<WhatsAppIcon />}
+                size={isSticky ? "small" : "medium"}
+                startIcon={!isSticky && <WhatsAppIcon />}
                 onClick={handleOpenConfirmModal}
-                sx={{ textTransform: "none" }}
+                sx={{ textTransform: "none", minWidth: isSticky ? "auto" : undefined }}
               >
-                Enviar por WhatsApp
+                {isSticky ? <WhatsAppIcon fontSize="small" /> : "Enviar por WhatsApp"}
               </Button>
             )}
           </Box>

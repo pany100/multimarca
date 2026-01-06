@@ -41,7 +41,7 @@ function PresupuestoHeader({
   return (
     <>
       {/* Spacer cuando el header es sticky */}
-      {isSticky && <Box sx={{ height: "100px" }} />}
+      {isSticky && <Box sx={{ height: 80 }} />}
 
       <Box
         sx={{
@@ -53,11 +53,10 @@ function PresupuestoHeader({
           backgroundColor: "background.default",
           borderBottom: "1px solid",
           borderColor: "divider",
-          pb: 1.5,
-          pt: isSticky ? 2 : 3,
+          py: isSticky ? 1 : 2,
           mb: isSticky ? 0 : 3,
           px: isSticky ? 3 : 2,
-          transition: "all 0.3s ease",
+          transition: "all 0.2s ease",
           ml: isSticky ? { xs: 0, sm: "240px" } : 0,
           width: isSticky ? { xs: "100%", sm: "calc(100% - 240px)" } : "100%",
         }}
@@ -68,18 +67,20 @@ function PresupuestoHeader({
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
-            gap: 2,
+            gap: isSticky ? 1 : 2,
           }}
         >
           <PresupuestoInfo
             presupuesto={presupuesto}
             vehicleInfo={vehicleInfo}
+            isSticky={isSticky}
           />
 
           <PresupuestoActions
             presupuesto={presupuesto}
             enviandoPresupuesto={enviandoPresupuesto}
             whatsappLink={whatsappLink}
+            isSticky={isSticky}
             onEnviar={handleEnviarPresupuesto}
             onPrint={handlePrint}
           />

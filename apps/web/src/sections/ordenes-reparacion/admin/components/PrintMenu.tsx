@@ -12,6 +12,7 @@ import {
 
 interface PrintMenuProps {
   isMobile: boolean;
+  isSticky?: boolean;
   printMenuAnchor: HTMLElement | null;
   openPrintMenu: boolean;
   pdfPath?: string;
@@ -25,6 +26,7 @@ interface PrintMenuProps {
 
 export const PrintMenu = ({
   isMobile,
+  isSticky = false,
   printMenuAnchor,
   openPrintMenu,
   pdfPath,
@@ -43,15 +45,16 @@ export const PrintMenu = ({
           <Button
             variant="outlined"
             color="primary"
-            startIcon={<PrintIcon />}
+            size={isSticky ? "small" : "medium"}
+            startIcon={!isSticky && <PrintIcon />}
             onClick={handleOpenPrintMenu}
             aria-label="Opciones de impresión"
             aria-controls={openPrintMenu ? "print-menu" : undefined}
             aria-haspopup="true"
             aria-expanded={openPrintMenu ? "true" : undefined}
-            sx={{ textTransform: "none" }}
+            sx={{ textTransform: "none", minWidth: isSticky ? "auto" : undefined }}
           >
-            Imprimir
+            {isSticky ? <PrintIcon fontSize="small" /> : "Imprimir"}
           </Button>
           <Menu
             id="print-menu"
