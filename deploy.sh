@@ -8,7 +8,7 @@ REPO_ROOT="/home/ubuntu/multimarca"
 REMOTE_PATH="$REPO_ROOT/apps/web"
 TUNNEL_PORT=2222
 
-NODE_VER="18.17.0"
+NODE_VER="20"
 NEXT_APP_NAME="next-app"
 
 # ========= Util =========
@@ -29,6 +29,7 @@ trap cleanup EXIT
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
 echo "🚀 Iniciando despliegue"
+nvm install "$NODE_VER" || true
 nvm use "$NODE_VER" || handle_error "Falló NVM"
 echo "📦 Build local (apps/web)"
 yarn --cwd apps/web build || handle_error "Falló el build local"
