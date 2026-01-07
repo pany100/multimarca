@@ -51,7 +51,7 @@ fi
 
 # ========= Empaquetado y copia por túnel =========
 echo "🧩 Empaquetando .next → $TMP_TAR"
-tar -C apps/web -czf "$TMP_TAR" .next
+COPYFILE_DISABLE=1 tar -C apps/web -czf "$TMP_TAR" .next
 
 echo "📤 Subiendo paquete por túnel (scp -P ${TUNNEL_PORT})..."
 scp -P "$TUNNEL_PORT" \

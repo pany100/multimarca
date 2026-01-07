@@ -5,6 +5,7 @@ import type {
   UpdateOrdenPersist,
 } from "@/core/domain/repositories/orden-reparacion.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
+import logger from "@/lib/logger";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
 import { EstadoOrdenReparacion } from "@prisma/client";
 
@@ -139,7 +140,53 @@ export class PrismaOrdenReparacionRepository
 
   async delete(tx: any, id: number) {
     const db = tx?.tx ?? prisma;
-    await db.ordenReparacion.delete({ where: { id } });
+
+    // Log para debugging: verificar relaciones antes de eliminar
+    logger.info(`[DELETE] Intentando eliminar orden ${id}`);
+
+    try {
+      // Verificar y eliminar CustomFiles relacionados manualmente
+      const customFiles = await db.customFile.findMany({
+        where: {
+          OR: [{ ordenReparacionId: id }, { reciboORepId: id }],
+        },
+      });
+
+      logger.info(`[DELETE] CustomFiles encontrados para orden ${id}`, {
+        ordenId: id,
+        customFilesCount: customFiles.length,
+        customFiles: customFiles.map((f: any) => ({
+          id: f.id,
+          ordenReparacionId: f.ordenReparacionId,
+          reciboORepId: f.reciboORepId,
+        })),
+      });
+
+      // Eliminar CustomFiles primero
+      if (customFiles.length > 0) {
+        await db.customFile.deleteMany({
+          where: {
+            OR: [{ ordenReparacionId: id }, { reciboORepId: id }],
+          },
+        });
+        logger.info(`[DELETE] CustomFiles eliminados para orden ${id}`, {
+          ordenId: id,
+          customFilesDeleted: customFiles.length,
+        });
+      }
+
+      // Ahora eliminar la orden
+      await db.ordenReparacion.delete({ where: { id } });
+      logger.info(`[DELETE] Orden eliminada exitosamente`, { ordenId: id });
+    } catch (error: any) {
+      logger.error(`[DELETE] Error al eliminar orden`, {
+        ordenId: id,
+        errorMessage: error.message,
+        errorCode: error.code,
+        errorMeta: error.meta,
+      });
+      throw error;
+    }
   }
 
   async listForCliente(clienteId: number) {
