@@ -7,10 +7,10 @@ import {
 } from "@/core/domain/repositories/orden-reparacion.repository";
 import { OrdenReparacionVO } from "@/core/domain/value-objects/orden-reparacion.vo";
 import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
+import logger from "@/lib/logger";
 import { CustomFile, OrdenReparacion, Prisma } from "@prisma/client";
 import { OrdenReparacionDBMapper } from "../mapper/orden-reparacion-db.mapper";
 import { StockManagerService } from "./stock-manager.service";
-import logger from "@/lib/logger";
 
 type OrdenReparacionWithReparaciones = Prisma.OrdenReparacionGetPayload<{
   include: {
@@ -27,20 +27,13 @@ export class OrdenReparacionService {
   ) {}
 
   async delete({ tx }: any, id: number) {
-    logger.info(`[SERVICE DELETE] Iniciando eliminación de orden`, { ordenId: id });
-    
+    logger.info(`[SERVICE DELETE] Iniciando eliminación de orden`, {
+      ordenId: id,
+    });
+
     const existing = await this.repo.findById(id);
     if (!existing) throw new Error("Orden de reparación no encontrada");
-    
-    logger.info(`[SERVICE DELETE] Orden encontrada`, {
-      ordenId: existing.id,
-      repuestosCount: existing.repuestosUsados?.length ?? 0,
-      tercerosCount: existing.reparacionesDeTercero?.length ?? 0,
-      trabajosCount: existing.trabajosRealizados?.length ?? 0,
-      mecanicosCount: existing.mecanicos?.length ?? 0,
-      ingresosCount: existing.ingresosPorReparacion?.length ?? 0
-    });
-    
+
     const repuestos = (existing.repuestosUsados ?? []).map(
       (r: RepuestoFromOrderInDb): RepuestoUsado => RepuestoUsado.fromOrderDb(r)
     );
@@ -49,14 +42,16 @@ export class OrdenReparacionService {
     const stockActions = this.stockManager.generateReleaseActions(repuestos);
     logger.info(`[SERVICE DELETE] Acciones de stock generadas`, {
       ordenId: id,
-      stockActionsCount: stockActions.length
+      stockActionsCount: stockActions.length,
     });
 
     await this.inventory.restoreStock(stockActions, { tx });
     logger.info(`[SERVICE DELETE] Stock restaurado`, { ordenId: id });
-    
+
     await this.repo.delete(tx, id);
-    logger.info(`[SERVICE DELETE] Orden eliminada exitosamente`, { ordenId: id });
+    logger.info(`[SERVICE DELETE] Orden eliminada exitosamente`, {
+      ordenId: id,
+    });
 
     return stockActions; // Retornar las acciones generadas para logging/auditoría
   }
