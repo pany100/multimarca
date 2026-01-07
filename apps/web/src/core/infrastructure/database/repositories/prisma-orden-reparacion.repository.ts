@@ -141,41 +141,81 @@ export class PrismaOrdenReparacionRepository
   async delete(tx: any, id: number) {
     const db = tx?.tx ?? prisma;
 
-    // Log para debugging: verificar relaciones antes de eliminar
     logger.info(`[DELETE] Intentando eliminar orden ${id}`);
 
     try {
-      // Verificar y eliminar CustomFiles relacionados manualmente
-      const customFiles = await db.customFile.findMany({
-        where: {
-          OR: [{ ordenReparacionId: id }, { reciboORepId: id }],
+      // Verificar constraints de la base de datos
+      const constraints = await db.$queryRaw`
+        SELECT 
+          tc.table_name,
+          tc.constraint_name,
+          kcu.column_name
+        FROM information_schema.table_constraints tc
+        JOIN information_schema.key_column_usage kcu 
+          ON tc.constraint_name = kcu.constraint_name
+        WHERE tc.constraint_type = 'FOREIGN KEY'
+          AND kcu.column_name = 'ordenReparacionId'
+      `;
+
+      logger.info(`[DELETE] Foreign key constraints en BD`, {
+        ordenId: id,
+        constraints,
+      });
+
+      // Verificar TODAS las relaciones antes de eliminar
+      const [
+        customFiles,
+        mecanicos,
+        repuestos,
+        terceros,
+        trabajos,
+        controles,
+        pagos,
+        ingresos,
+        notificaciones,
+      ] = await Promise.all([
+        db.customFile.findMany({
+          where: { OR: [{ ordenReparacionId: id }, { reciboORepId: id }] },
+        }),
+        db.ordenReparacionMecanico.findMany({
+          where: { ordenReparacionId: id },
+        }),
+        db.repuestoUsado.findMany({ where: { ordenReparacionId: id } }),
+        db.reparacionDeTercero.findMany({ where: { ordenReparacionId: id } }),
+        db.trabajoRealizado.findMany({ where: { ordenReparacionId: id } }),
+        db.controlEnReparacion.findMany({ where: { ordenReparacionId: id } }),
+        db.pagoAMecanico.findMany({ where: { ordenReparacionId: id } }),
+        db.ingresoPorReparacion.findMany({ where: { ordenReparacionId: id } }),
+        db.notificacionInterna.findMany({ where: { ordenReparacionId: id } }),
+      ]);
+
+      logger.info(`[DELETE] Relaciones encontradas para orden ${id}`, {
+        ordenId: id,
+        counts: {
+          customFiles: customFiles.length,
+          mecanicos: mecanicos.length,
+          repuestos: repuestos.length,
+          terceros: terceros.length,
+          trabajos: trabajos.length,
+          controles: controles.length,
+          pagos: pagos.length,
+          ingresos: ingresos.length,
+          notificaciones: notificaciones.length,
+        },
+        details: {
+          customFiles: customFiles.map((f: any) => ({ id: f.id })),
+          mecanicos: mecanicos.map((m: any) => ({ id: m.id })),
+          repuestos: repuestos.map((r: any) => ({ id: r.id })),
+          terceros: terceros.map((t: any) => ({ id: t.id })),
+          trabajos: trabajos.map((t: any) => ({ id: t.id })),
+          controles: controles.map((c: any) => ({ id: c.id })),
+          pagos: pagos.map((p: any) => ({ id: p.id })),
+          ingresos: ingresos.map((i: any) => ({ id: i.id })),
+          notificaciones: notificaciones.map((n: any) => ({ id: n.id })),
         },
       });
 
-      logger.info(`[DELETE] CustomFiles encontrados para orden ${id}`, {
-        ordenId: id,
-        customFilesCount: customFiles.length,
-        customFiles: customFiles.map((f: any) => ({
-          id: f.id,
-          ordenReparacionId: f.ordenReparacionId,
-          reciboORepId: f.reciboORepId,
-        })),
-      });
-
-      // Eliminar CustomFiles primero
-      if (customFiles.length > 0) {
-        await db.customFile.deleteMany({
-          where: {
-            OR: [{ ordenReparacionId: id }, { reciboORepId: id }],
-          },
-        });
-        logger.info(`[DELETE] CustomFiles eliminados para orden ${id}`, {
-          ordenId: id,
-          customFilesDeleted: customFiles.length,
-        });
-      }
-
-      // Ahora eliminar la orden
+      // Ahora eliminar la orden (el resto debería eliminarse en cascada)
       await db.ordenReparacion.delete({ where: { id } });
       logger.info(`[DELETE] Orden eliminada exitosamente`, { ordenId: id });
     } catch (error: any) {
