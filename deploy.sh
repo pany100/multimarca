@@ -95,9 +95,9 @@ ssh -p "$TUNNEL_PORT" \
       cd ..
       cd ..
       echo '🔄 Migraciones Prisma...'
-      npx prisma migrate deploy --schema=apps/web/prisma/schema.prisma
+      yarn --cwd apps/web prisma migrate deploy
       echo '⚙️  Generando Prisma client...'
-      npx prisma generate --schema=apps/web/prisma/schema.prisma
+      yarn --cwd apps/web prisma generate
 
       echo '🏗️  Prebuild (si existe)...'
       yarn --cwd apps/web prebuild || true
