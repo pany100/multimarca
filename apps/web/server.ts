@@ -1,11 +1,59 @@
 import pkg from "@next/env";
-import { createServer } from "http";
+import { createServer, IncomingMessage } from "http";
 import * as jose from "jose";
 import next from "next";
 import path from "path";
 import { Server as SocketIOServer } from "socket.io";
+import { Readable } from "stream";
 import { parse } from "url";
 import logger from "./src/lib/logger.js";
+
+// Configuración para logging del body
+const MAX_BODY_LOG_SIZE = 10 * 1024; // 10KB máximo
+const SKIP_BODY_LOG_ROUTES = ["/api/upload", "/api/images"];
+
+// Helper para leer el body y crear un request "restaurado"
+async function readBodyAndCloneRequest(
+  req: IncomingMessage
+): Promise<{ clonedReq: IncomingMessage; body: string }> {
+  // Leer el body como string directamente
+  let body = "";
+  const chunks: string[] = [];
+
+  await new Promise<void>((resolve, reject) => {
+    req.setEncoding("utf8");
+    req.on("data", (chunk: string) => chunks.push(chunk));
+    req.on("end", () => resolve());
+    req.on("error", reject);
+  });
+
+  body = chunks.join("");
+  const bodyBuffer = Buffer.from(body, "utf8");
+
+  // Crear un nuevo Readable stream con el body
+  const readable = Readable.from(bodyBuffer);
+
+  // Copiar todas las propiedades del request original al nuevo stream
+  const clonedReq = Object.assign(readable, {
+    headers: req.headers,
+    method: req.method,
+    url: req.url,
+    httpVersion: req.httpVersion,
+    httpVersionMajor: req.httpVersionMajor,
+    httpVersionMinor: req.httpVersionMinor,
+    socket: req.socket,
+    connection: req.connection,
+    rawHeaders: req.rawHeaders,
+    trailers: req.trailers,
+    rawTrailers: req.rawTrailers,
+    complete: req.complete,
+    aborted: req.aborted,
+    statusCode: req.statusCode,
+    statusMessage: req.statusMessage,
+  }) as IncomingMessage;
+
+  return { clonedReq, body };
+}
 
 const { loadEnvConfig } = pkg;
 loadEnvConfig(path.resolve(process.cwd(), "../.."), true);
@@ -43,8 +91,43 @@ app.prepare().then(() => {
     const startTime = Date.now();
     const { method, url } = req;
 
+    // Determinar si debemos capturar el body
+    const shouldCaptureBody =
+      ["POST", "PUT", "PATCH"].includes(method || "") &&
+      url?.startsWith("/api/") &&
+      !SKIP_BODY_LOG_ROUTES.some((route) => url?.startsWith(route)) &&
+      !req.headers["content-type"]?.includes("multipart/form-data");
+
+    // Variables para el logging
+    let requestBody = "";
+    let requestToHandle: IncomingMessage = req;
+
+    // Capturar body si aplica
+    if (shouldCaptureBody) {
+      try {
+        const { clonedReq, body } = await readBodyAndCloneRequest(req);
+        requestToHandle = clonedReq;
+
+        // Formatear body para el log
+        try {
+          const parsed = JSON.parse(body);
+          requestBody = JSON.stringify(parsed);
+        } catch {
+          requestBody = body;
+        }
+
+        // Truncar si es muy largo
+        if (requestBody.length > MAX_BODY_LOG_SIZE) {
+          requestBody =
+            requestBody.substring(0, MAX_BODY_LOG_SIZE) + "... [truncado]";
+        }
+      } catch (error) {
+        logger.warn(`Error capturando body: ${error}`);
+      }
+    }
+
     // Obtener información del usuario del token JWT
-    let userInfo = "visitor";
+    let userInfo = "VISITOR";
     const authHeader = req.headers["authorization"];
     if (authHeader?.startsWith("Bearer ")) {
       const token = authHeader.substring(7);
@@ -69,7 +152,12 @@ app.prepare().then(() => {
 
       // Solo loggear rutas API
       if (url?.startsWith("/api/")) {
-        const logMessage = `[API] ${method} ${url} → ${statusCode} | User: ${userInfo} | ${duration}ms`;
+        let logMessage = `[API] ${method} ${url} → ${statusCode} | User: ${userInfo} | ${duration}ms`;
+
+        // Agregar body si existe
+        if (requestBody) {
+          logMessage += ` | Body: ${requestBody}`;
+        }
 
         if (statusCode >= 500) {
           logger.error(logMessage);
@@ -83,7 +171,7 @@ app.prepare().then(() => {
       return originalEnd(chunk, encoding, callback);
     };
 
-    handle(req, res, parsedUrl);
+    handle(requestToHandle, res, parsedUrl);
   });
 
   const io = new SocketIOServer(server, {
