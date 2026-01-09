@@ -100,10 +100,10 @@ function ImageInput({ image, label, setImage }: Props) {
               startIcon={<DeleteIcon />}
               onClick={handleDeleteImage}
             >
-              Eliminar
+              Eliminar imagen
             </Button>
             <Button variant="contained" component="label">
-              Cargar imagen
+              Cambiar imagen
               <input
                 type="file"
                 accept="image/*"
