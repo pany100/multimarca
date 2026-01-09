@@ -3,6 +3,8 @@ import { GetResumenUseCase } from "@/core/application/use-cases/resumen-transacc
 import { ResumenTransaccionesQueriesService } from "@/core/infrastructure/database/queries/resumen-transacciones-queries.service";
 import { PrismaUsuarioRepository } from "@/core/infrastructure/database/repositories/prisma-usuario.repository";
 import { resumenSchema } from "@/core/infrastructure/validation/schemas/resumen-transaccion.schema";
+
+export const dynamic = 'force-dynamic';
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";

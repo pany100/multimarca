@@ -3,6 +3,8 @@ import { GetTransaccionesUseCase } from "@/core/application/use-cases/estadistic
 import { getByFechaQuerySchema } from "@/core/infrastructure/validation/schemas/estadisticas.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
+
+export const dynamic = 'force-dynamic';
 import { NextRequest, NextResponse } from "next/server";
 
 export async function GET(request: NextRequest) {

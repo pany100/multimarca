@@ -3,6 +3,8 @@ import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
 import { NextResponse } from "next/server";
+
+export const dynamic = 'force-dynamic';
 import { getCurrentUser } from "src/utils/authFetch";
 
 // Configurar dayjs para usar timezone

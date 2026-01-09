@@ -2,6 +2,8 @@ import { getCurrentUser } from "@/utils/authFetch";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: Request) {
   try {
     const user = await getCurrentUser(request);

@@ -3,6 +3,8 @@ import { UltimaSemanaCompartidaUseCase } from "@/core/application/use-cases/gast
 import { PrismaGastoRepository } from "@/core/infrastructure/database/repositories/prisma-gasto.repository";
 import { PrismaUsuarioRepository } from "@/core/infrastructure/database/repositories/prisma-usuario.repository";
 import { getUltimaSemanaSchema } from "@/core/infrastructure/validation/schemas/gasto.schema";
+
+export const dynamic = 'force-dynamic';
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
