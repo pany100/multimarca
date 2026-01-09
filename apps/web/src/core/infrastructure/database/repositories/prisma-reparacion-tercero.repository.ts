@@ -2,6 +2,11 @@ import { ReparacionTerceroRepository } from "@/core/domain/repositories/reparaci
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { EstadoArchivo } from "@prisma/client";
 
+// Filtro para excluir archivos marcados para borrar
+const VISIBLE_FILE_FILTER = {
+  status: { notIn: [EstadoArchivo.ListoParaBorrar, EstadoArchivo.Borrado] },
+};
+
 export class PrismaReparacionTerceroRepository
   implements ReparacionTerceroRepository
 {
@@ -34,7 +39,7 @@ export class PrismaReparacionTerceroRepository
       },
       include: {
         proveedor: true,
-        reciboFile: true,
+        reciboFile: { where: VISIBLE_FILE_FILTER },
       },
     });
 
@@ -52,7 +57,7 @@ export class PrismaReparacionTerceroRepository
         where: { id: reparacion.id },
         include: {
           proveedor: true,
-          reciboFile: true,
+          reciboFile: { where: VISIBLE_FILE_FILTER },
         },
       });
     }
@@ -95,7 +100,7 @@ export class PrismaReparacionTerceroRepository
       data: dataToUpdate,
       include: {
         proveedor: true,
-        reciboFile: true,
+        reciboFile: { where: VISIBLE_FILE_FILTER },
       },
     });
 
@@ -145,7 +150,7 @@ export class PrismaReparacionTerceroRepository
         where: { id },
         include: {
           proveedor: true,
-          reciboFile: true,
+          reciboFile: { where: VISIBLE_FILE_FILTER },
         },
       });
     }

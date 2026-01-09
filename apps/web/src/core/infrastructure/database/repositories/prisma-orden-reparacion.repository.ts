@@ -9,6 +9,11 @@ import logger from "@/lib/logger";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
 import { EstadoArchivo, EstadoOrdenReparacion } from "@prisma/client";
 
+// Filtro para excluir archivos marcados para borrar
+const VISIBLE_FILE_FILTER = {
+  status: { notIn: [EstadoArchivo.ListoParaBorrar, EstadoArchivo.Borrado] },
+};
+
 export class PrismaOrdenReparacionRepository
   implements OrdenReparacionRepository
 {
@@ -54,7 +59,7 @@ export class PrismaOrdenReparacionRepository
           reparacionesDeTercero: {
             include: {
               proveedor: true,
-              reciboFile: true,
+              reciboFile: { where: VISIBLE_FILE_FILTER },
             },
           },
           trabajosRealizados: true,
@@ -112,7 +117,7 @@ export class PrismaOrdenReparacionRepository
         reparacionesDeTercero: {
           include: {
             proveedor: true,
-            reciboFile: true,
+            reciboFile: { where: VISIBLE_FILE_FILTER },
           },
         },
         ingresos: {
@@ -132,8 +137,8 @@ export class PrismaOrdenReparacionRepository
           },
         },
         pagos: true,
-        recibosFiles: true,
-        scannerFile: true,
+        recibosFiles: { where: VISIBLE_FILE_FILTER },
+        scannerFile: { where: VISIBLE_FILE_FILTER },
       },
     });
   }
@@ -310,7 +315,7 @@ export class PrismaOrdenReparacionRepository
         reparacionesDeTercero: {
           include: {
             proveedor: true,
-            reciboFile: true,
+            reciboFile: { where: VISIBLE_FILE_FILTER },
           },
         },
         ingresos: {
@@ -330,8 +335,8 @@ export class PrismaOrdenReparacionRepository
           },
         },
         pagos: true,
-        recibosFiles: true,
-        scannerFile: true,
+        recibosFiles: { where: VISIBLE_FILE_FILTER },
+        scannerFile: { where: VISIBLE_FILE_FILTER },
       },
     });
 
@@ -402,7 +407,7 @@ export class PrismaOrdenReparacionRepository
           reparacionesDeTercero: {
             include: {
               proveedor: true,
-              reciboFile: true,
+              reciboFile: { where: VISIBLE_FILE_FILTER },
             },
           },
           ingresos: {
@@ -422,8 +427,8 @@ export class PrismaOrdenReparacionRepository
             },
           },
           pagos: true,
-          recibosFiles: true,
-          scannerFile: true,
+          recibosFiles: { where: VISIBLE_FILE_FILTER },
+          scannerFile: { where: VISIBLE_FILE_FILTER },
         },
       });
     }
@@ -503,7 +508,7 @@ export class PrismaOrdenReparacionRepository
     const ordenActualizada = await prisma.ordenReparacion.findUnique({
       where: { id: ordenId },
       include: {
-        recibosFiles: true,
+        recibosFiles: { where: VISIBLE_FILE_FILTER },
       },
     });
 
@@ -540,7 +545,7 @@ export class PrismaOrdenReparacionRepository
     const ordenActualizada = await prisma.ordenReparacion.findUnique({
       where: { id: ordenId },
       include: {
-        recibosFiles: true,
+        recibosFiles: { where: VISIBLE_FILE_FILTER },
       },
     });
 
