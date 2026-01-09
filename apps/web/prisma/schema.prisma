@@ -983,6 +983,8 @@ enum EstadoArchivo {
   Pendiente
   Listo
   Error
+  ErrorAlSubir
+  ErrorAlBorrar
   ListoParaBorrar
   Borrado
 }
