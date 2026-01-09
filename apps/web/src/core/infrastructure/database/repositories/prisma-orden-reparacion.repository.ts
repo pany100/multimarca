@@ -7,7 +7,7 @@ import type {
 import { prisma } from "@/core/infrastructure/database/prisma";
 import logger from "@/lib/logger";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
-import { EstadoOrdenReparacion } from "@prisma/client";
+import { EstadoArchivo, EstadoOrdenReparacion } from "@prisma/client";
 
 export class PrismaOrdenReparacionRepository
   implements OrdenReparacionRepository
@@ -348,11 +348,12 @@ export class PrismaOrdenReparacionRepository
       if (dto.scannerFile) {
         // If new scannerFile is provided, dereference old file and create new one
         if (existingFile) {
-          // Dereference the old CustomFile (remove the relation)
+          // Dereference the old CustomFile (remove the relation) and mark for deletion
           await prisma.customFile.update({
             where: { id: existingFile.id },
             data: {
               ordenReparacionId: null,
+              status: EstadoArchivo.ListoParaBorrar,
             },
           });
         }
@@ -365,11 +366,12 @@ export class PrismaOrdenReparacionRepository
           },
         });
       } else if (existingFile) {
-        // If scannerFile is explicitly set to null, dereference the existing file
+        // If scannerFile is explicitly set to null, dereference the existing file and mark for deletion
         await prisma.customFile.update({
           where: { id: existingFile.id },
           data: {
             ordenReparacionId: null,
+            status: EstadoArchivo.ListoParaBorrar,
           },
         });
       }
@@ -525,11 +527,12 @@ export class PrismaOrdenReparacionRepository
       throw new Error("Recibo no encontrado o no pertenece a esta orden");
     }
 
-    // Desreferenciar el CustomFile (remover la relación con la orden)
+    // Desreferenciar el CustomFile (remover la relación con la orden) y marcar para borrar
     await prisma.customFile.update({
       where: { id: customFile.id },
       data: {
         reciboORepId: null,
+        status: EstadoArchivo.ListoParaBorrar,
       },
     });
 

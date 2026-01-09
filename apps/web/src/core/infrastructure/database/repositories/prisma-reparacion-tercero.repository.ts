@@ -1,5 +1,6 @@
 import { ReparacionTerceroRepository } from "@/core/domain/repositories/reparacion-tercero.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
+import { EstadoArchivo } from "@prisma/client";
 
 export class PrismaReparacionTerceroRepository
   implements ReparacionTerceroRepository
@@ -111,11 +112,12 @@ export class PrismaReparacionTerceroRepository
       if (data.recibo) {
         // If new recibo is provided, dereference old file and create new one
         if (existingFile) {
-          // Dereference the old CustomFile (remove the relation)
+          // Dereference the old CustomFile (remove the relation) and mark for deletion
           await db.customFile.update({
             where: { id: existingFile.id },
             data: {
               reparacionDeTerceroId: null,
+              status: EstadoArchivo.ListoParaBorrar,
             },
           });
         }
@@ -128,11 +130,12 @@ export class PrismaReparacionTerceroRepository
           },
         });
       } else if (existingFile) {
-        // If recibo is explicitly set to null, dereference the existing file
+        // If recibo is explicitly set to null, dereference the existing file and mark for deletion
         await db.customFile.update({
           where: { id: existingFile.id },
           data: {
             reparacionDeTerceroId: null,
+            status: EstadoArchivo.ListoParaBorrar,
           },
         });
       }
