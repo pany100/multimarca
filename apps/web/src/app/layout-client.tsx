@@ -1,6 +1,7 @@
 "use client";
 
 import { FetchProvider } from "@/contexts/FetchContext";
+import { useTokenRefresh } from "@/hooks/useTokenRefresh";
 import NotificacionesClientSide from "@/sections/notificaciones-importantes/NotificacionesClientSide";
 import { PaletteMode } from "@mui/material";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -15,6 +16,9 @@ export default function ClientLayout({
 }>) {
   const [mode, setMode] = useState<PaletteMode>("light");
   const theme = useMemo(() => createTheme(mode), [mode]);
+
+  // Refrescar automáticamente el token de autenticación
+  useTokenRefresh();
 
   return (
     <ThemeProvider theme={theme}>

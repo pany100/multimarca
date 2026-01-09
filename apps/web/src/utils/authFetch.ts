@@ -1,5 +1,34 @@
-import { getCookie } from "cookies-next";
+import { getCookie, setCookie } from "cookies-next";
 import prisma from "src/lib/prisma";
+
+// Helper para refrescar el token (solo en cliente)
+async function tryRefreshToken(currentToken: string): Promise<string | null> {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const response = await fetch("/api/auth/refresh", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${currentToken}`,
+      },
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      setCookie("auth_token", data.token, {
+        maxAge: 7 * 24 * 60 * 60,
+        path: "/",
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+      });
+      console.log("[Auth] Token refrescado automáticamente tras 401");
+      return data.token;
+    }
+  } catch (error) {
+    console.error("[Auth] Error al refrescar token:", error);
+  }
+  return null;
+}
 
 const authFetch = async (
   url: string,
@@ -36,7 +65,28 @@ const authFetch = async (
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
-  return fetch(fullUrl, { ...options, headers });
+  const response = await fetch(fullUrl, { ...options, headers });
+
+  // Si recibimos 401 y estamos en el cliente, intentar refrescar el token
+  if (
+    response.status === 401 &&
+    typeof window !== "undefined" &&
+    token &&
+    !url.includes("/api/auth/") // Evitar loop infinito en endpoints de auth
+  ) {
+    const newToken = await tryRefreshToken(token as string);
+
+    if (newToken) {
+      // Reintentar la petición con el nuevo token
+      const newHeaders = {
+        ...options.headers,
+        Authorization: `Bearer ${newToken}`,
+      };
+      return fetch(fullUrl, { ...options, headers: newHeaders });
+    }
+  }
+
+  return response;
 };
 
 export async function getCurrentUser(request: Request) {
