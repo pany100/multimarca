@@ -117,7 +117,7 @@ const RepuestosModal = ({
       const salePrice = Number(value);
       setPrecioVenta(value);
       const units = Number(unidadesConsumidas) || 1;
-      setPrecioUnitario((salePrice / units).toFixed(2));
+      setPrecioUnitario(Math.ceil(salePrice / units).toString());
     }
   };
 
@@ -143,9 +143,10 @@ const RepuestosModal = ({
               searchOptions={searchStockObject}
               initialOptions={initialStock}
               selectOption={(option) => {
-                const precioVentaCalculado =
+                const precioVentaCalculado = Math.ceil(
                   option?.object?.buyPrice *
-                    (1 + (option?.object?.markup || 0) / 100) || 0;
+                    (1 + (option?.object?.markup || 0) / 100) || 0
+                );
                 setStock(option?.object || null);
                 setPrecioCompra(option?.object?.buyPrice.toString());
                 setPrecioUnitario(precioVentaCalculado.toString());

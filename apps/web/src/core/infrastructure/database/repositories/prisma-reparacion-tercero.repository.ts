@@ -4,7 +4,13 @@ import { EstadoArchivo } from "@prisma/client";
 
 // Filtro para excluir archivos marcados para borrar
 const VISIBLE_FILE_FILTER = {
-  status: { notIn: [EstadoArchivo.ListoParaBorrar, EstadoArchivo.Borrado] },
+  status: {
+    notIn: [
+      EstadoArchivo.ListoParaBorrar,
+      EstadoArchivo.Borrado,
+      EstadoArchivo.ErrorAlBorrar,
+    ],
+  },
 };
 
 export class PrismaReparacionTerceroRepository

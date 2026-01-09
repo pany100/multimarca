@@ -77,7 +77,7 @@ function ScannerSection() {
       <Box display="flex" alignItems="flex-start" gap={2}>
         <DescriptionIcon sx={{ color: "text.secondary", mt: 0.5 }} />
         <Box flex={1}>
-          {orden.scannerFile?.finalPath ? (
+          {orden.scannerFile ? (
             <Box>
               <Typography variant="body2" color="text.secondary" mb={1}>
                 <strong>Archivo scanner cargado</strong>
@@ -93,7 +93,7 @@ function ScannerSection() {
                 }}
               >
                 <iframe
-                  src={`${orden.scannerFile.finalPath}#toolbar=0&navpanes=0&scrollbar=0`}
+                  src={`${orden.scannerFile}#toolbar=0&navpanes=0&scrollbar=0`}
                   width="100%"
                   height="100%"
                   style={{ border: "none" }}
@@ -104,9 +104,7 @@ function ScannerSection() {
                 variant="outlined"
                 size="small"
                 sx={{ mt: 1 }}
-                onClick={() =>
-                  window.open(orden.scannerFile?.finalPath!, "_blank")
-                }
+                onClick={() => window.open(orden.scannerFile!, "_blank")}
               >
                 Abrir en nueva pestaña
               </Button>
