@@ -81,7 +81,7 @@ echo "🔍 Preparando base para comparación..."
 ssh -p "$TUNNEL_PORT" \
     -o StrictHostKeyChecking=accept-new \
     -i "$PEM_PATH" ubuntu@localhost \
-    bash -lc "
+    bash -l <<EOF
       cd ${REMOTE_PATH}
       # Si .next2 no existe pero .next sí, copiar .next a .next2
       # Así rsync tiene contra qué comparar (solo sube diferencias)
@@ -94,7 +94,7 @@ ssh -p "$TUNNEL_PORT" \
       else
         echo '   → .next2 existe, rsync comparará contra él'
       fi
-    "
+EOF
 
 # ========= Rsync incremental por túnel =========
 echo "📤 Sincronizando .next con rsync (solo cambios)..."
@@ -124,11 +124,11 @@ echo "🔧 Actualizando en servidor..."
 ssh -p "$TUNNEL_PORT" \
     -o StrictHostKeyChecking=accept-new \
     -i "$PEM_PATH" ubuntu@localhost \
-    bash -lc "
+    bash -l <<EOF || handle_error "Fallo remoto"
       set -e
 
-      export NVM_DIR=\"\$HOME/.nvm\"
-      [ -s \"\$NVM_DIR/nvm.sh\" ] && . \"\$NVM_DIR/nvm.sh\"
+      export NVM_DIR="\$HOME/.nvm"
+      [ -s "\$NVM_DIR/nvm.sh" ] && . "\$NVM_DIR/nvm.sh"
 
       # Node y PM2
       nvm use ${NODE_VER}
@@ -159,7 +159,7 @@ ssh -p "$TUNNEL_PORT" \
 
       echo '🚀 Iniciando Next con PM2...'
       pm2 start npm --name ${NEXT_APP_NAME} --cwd ${REMOTE_PATH} -- run start
-    " || handle_error "Fallo remoto"
+EOF
 
 # ========= Fin =========
 END_TIME=$(date +%s); DURATION=$((END_TIME - START_TIME))
