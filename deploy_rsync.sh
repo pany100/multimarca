@@ -81,14 +81,25 @@ ssh -p "$TUNNEL_PORT" \
 # ========= Rsync incremental por túnel =========
 echo "📤 Sincronizando .next con rsync (solo cambios)..."
 
-rsync -avz --delete \
-    --progress \
+RSYNC_OUTPUT=$(rsync -avz --delete \
     --compress-level=9 \
     --stats \
     -e "ssh -p ${TUNNEL_PORT} -i ${PEM_PATH} -o StrictHostKeyChecking=accept-new" \
     apps/web/.next/ \
     "ubuntu@localhost:${REMOTE_PATH}/.next2/" \
-    || handle_error "Falló rsync"
+    2>&1) || handle_error "Falló rsync"
+
+# Extraer estadísticas relevantes
+TOTAL_SIZE=$(echo "$RSYNC_OUTPUT" | grep "Total file size" | awk '{print $4}')
+SENT_BYTES=$(echo "$RSYNC_OUTPUT" | grep "Total bytes sent" | awk '{print $4}')
+FILES_TRANSFERRED=$(echo "$RSYNC_OUTPUT" | grep "Number of regular files transferred" | awk '{print $6}')
+
+echo ""
+echo "📊 Estadísticas de transferencia:"
+echo "   📁 Archivos transferidos: ${FILES_TRANSFERRED:-0}"
+echo "   📤 Datos enviados: $(numfmt --to=iec ${SENT_BYTES:-0} 2>/dev/null || echo "${SENT_BYTES:-0} bytes")"
+echo "   💾 Tamaño total del build: $(numfmt --to=iec ${TOTAL_SIZE:-0} 2>/dev/null || echo "${TOTAL_SIZE:-0} bytes")"
+echo ""
 
 # ========= Operaciones remotas (swap, pm2) vía túnel =========
 echo "🔧 Actualizando en servidor..."
@@ -136,4 +147,11 @@ ssh -p "$TUNNEL_PORT" \
 END_TIME=$(date +%s); DURATION=$((END_TIME - START_TIME))
 echo ""
 echo "✅ ¡Despliegue completado! ⏱️ ${DURATION}s"
-echo "💡 Tip: Los siguientes deploys serán mucho más rápidos gracias a rsync"
+
+# Mostrar resumen de ahorro
+if [ -n "$SENT_BYTES" ] && [ -n "$TOTAL_SIZE" ] && [ "$TOTAL_SIZE" -gt 0 ] 2>/dev/null; then
+  SAVINGS=$((100 - (SENT_BYTES * 100 / TOTAL_SIZE)))
+  echo "💡 Ahorro rsync: ${SAVINGS}% (enviaste $(numfmt --to=iec ${SENT_BYTES} 2>/dev/null || echo "${SENT_BYTES} bytes") de $(numfmt --to=iec ${TOTAL_SIZE} 2>/dev/null || echo "${TOTAL_SIZE} bytes"))"
+else
+  echo "💡 Tip: Los siguientes deploys serán mucho más rápidos gracias a rsync"
+fi
