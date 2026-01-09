@@ -22,6 +22,24 @@ START_TIME=$(date +%s)
 
 handle_error() { echo "❌ Error: $1"; exit 1; }
 
+# Convertir bytes a formato legible (funciona en macOS y Linux)
+bytes_to_human() {
+  local bytes=$1
+  if [ -z "$bytes" ] || [ "$bytes" -eq 0 ] 2>/dev/null; then
+    echo "0 B"
+    return
+  fi
+  if [ "$bytes" -ge 1073741824 ]; then
+    echo "$(awk "BEGIN {printf \"%.2f GB\", $bytes/1073741824}")"
+  elif [ "$bytes" -ge 1048576 ]; then
+    echo "$(awk "BEGIN {printf \"%.2f MB\", $bytes/1048576}")"
+  elif [ "$bytes" -ge 1024 ]; then
+    echo "$(awk "BEGIN {printf \"%.2f KB\", $bytes/1024}")"
+  else
+    echo "${bytes} B"
+  fi
+}
+
 cleanup() {
   # cerrar túnel si quedó abierto
   pkill -f "ssh .* -L ${TUNNEL_PORT}:localhost:22 .* ${REMOTE_HOST}" >/dev/null 2>&1 || true
@@ -97,8 +115,8 @@ FILES_TRANSFERRED=$(echo "$RSYNC_OUTPUT" | grep "Number of regular files transfe
 echo ""
 echo "📊 Estadísticas de transferencia:"
 echo "   📁 Archivos transferidos: ${FILES_TRANSFERRED:-0}"
-echo "   📤 Datos enviados: $(numfmt --to=iec ${SENT_BYTES:-0} 2>/dev/null || echo "${SENT_BYTES:-0} bytes")"
-echo "   💾 Tamaño total del build: $(numfmt --to=iec ${TOTAL_SIZE:-0} 2>/dev/null || echo "${TOTAL_SIZE:-0} bytes")"
+echo "   📤 Datos enviados: $(bytes_to_human ${SENT_BYTES:-0})"
+echo "   💾 Tamaño total del build: $(bytes_to_human ${TOTAL_SIZE:-0})"
 echo ""
 
 # ========= Operaciones remotas (swap, pm2) vía túnel =========
@@ -151,7 +169,7 @@ echo "✅ ¡Despliegue completado! ⏱️ ${DURATION}s"
 # Mostrar resumen de ahorro
 if [ -n "$SENT_BYTES" ] && [ -n "$TOTAL_SIZE" ] && [ "$TOTAL_SIZE" -gt 0 ] 2>/dev/null; then
   SAVINGS=$((100 - (SENT_BYTES * 100 / TOTAL_SIZE)))
-  echo "💡 Ahorro rsync: ${SAVINGS}% (enviaste $(numfmt --to=iec ${SENT_BYTES} 2>/dev/null || echo "${SENT_BYTES} bytes") de $(numfmt --to=iec ${TOTAL_SIZE} 2>/dev/null || echo "${TOTAL_SIZE} bytes"))"
+  echo "💡 Ahorro rsync: ${SAVINGS}% (enviaste $(bytes_to_human ${SENT_BYTES}) de $(bytes_to_human ${TOTAL_SIZE}))"
 else
   echo "💡 Tip: Los siguientes deploys serán mucho más rápidos gracias a rsync"
 fi
