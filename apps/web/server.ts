@@ -76,6 +76,26 @@ process.on("uncaughtException", (error: Error) => {
 });
 
 process.on("unhandledRejection", (reason: any, promise: Promise<any>) => {
+  // Ignorar errores internos de Next.js (redirects, not-found, etc.)
+  if (reason?.digest?.startsWith?.("NEXT_")) {
+    return;
+  }
+
+  // El error "Cannot read properties of null (reading 'digest')" es interno de Next.js
+  // y típicamente ocurre cuando hay un problema con el contexto de React Server Components
+  const isDigestError = String(reason).includes("reading 'digest'");
+
+  if (isDigestError) {
+    logger.warn(
+      "[UNHANDLED REJECTION] Error interno de Next.js (digest null)",
+      {
+        reason: reason instanceof Error ? reason.message : String(reason),
+        note: "Este error es interno de Next.js y generalmente no afecta la funcionalidad",
+      }
+    );
+    return;
+  }
+
   logger.error("[UNHANDLED REJECTION] Promise rechazada sin catch", {
     reason: reason instanceof Error ? reason.message : String(reason),
     stack: reason instanceof Error ? reason.stack : undefined,
@@ -171,7 +191,23 @@ app.prepare().then(() => {
       return originalEnd(chunk, encoding, callback);
     };
 
-    handle(requestToHandle, res, parsedUrl);
+    try {
+      await handle(requestToHandle, res, parsedUrl);
+    } catch (err: any) {
+      // Ignorar errores de Next.js que son esperados (NEXT_REDIRECT, NEXT_NOT_FOUND)
+      if (err?.digest?.startsWith?.("NEXT_")) {
+        // Estos son errores internos de Next.js que se manejan automáticamente
+        return;
+      }
+      logger.error(`Error manejando request ${method} ${url}:`, {
+        error: err?.message || err,
+        stack: err?.stack,
+      });
+      if (!res.headersSent) {
+        res.statusCode = 500;
+        res.end("Internal Server Error");
+      }
+    }
   });
 
   const io = new SocketIOServer(server, {
