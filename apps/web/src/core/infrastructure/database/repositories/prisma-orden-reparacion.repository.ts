@@ -357,11 +357,10 @@ export class PrismaOrdenReparacionRepository
           });
         }
 
-        // Create a new CustomFile for the new scannerFile
+        // Create a new CustomFile for the new scannerFile (archivo en /tmp de S3, estado Pendiente)
         await prisma.customFile.create({
           data: {
             tempPath: dto.scannerFile,
-            finalPath: dto.scannerFile,
             ordenReparacionId: id,
           },
         });
@@ -490,11 +489,10 @@ export class PrismaOrdenReparacionRepository
       throw new Error("Orden de reparación no encontrada");
     }
 
-    // Crear el CustomFile para el recibo
+    // Crear el CustomFile para el recibo (archivo en /tmp de S3, estado Pendiente)
     const customFile = await prisma.customFile.create({
       data: {
         tempPath: reciboPath,
-        finalPath: reciboPath,
         reciboORepId: ordenId,
       },
     });

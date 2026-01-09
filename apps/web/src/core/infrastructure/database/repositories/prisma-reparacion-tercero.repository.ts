@@ -37,12 +37,11 @@ export class PrismaReparacionTerceroRepository
       },
     });
 
-    // If recibo is provided, create CustomFile
+    // If recibo is provided, create CustomFile (archivo en /tmp de S3, estado Pendiente)
     if (data.recibo) {
       await db.customFile.create({
         data: {
           tempPath: data.recibo,
-          finalPath: data.recibo,
           reparacionDeTerceroId: reparacion.id,
         },
       });
@@ -121,11 +120,10 @@ export class PrismaReparacionTerceroRepository
           });
         }
 
-        // Create a new CustomFile for the new recibo
+        // Create a new CustomFile for the new recibo (archivo en /tmp de S3, estado Pendiente)
         await db.customFile.create({
           data: {
             tempPath: data.recibo,
-            finalPath: data.recibo,
             reparacionDeTerceroId: id,
           },
         });
