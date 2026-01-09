@@ -30,11 +30,11 @@ bytes_to_human() {
     return
   fi
   if [ "$bytes" -ge 1073741824 ]; then
-    echo "$(awk "BEGIN {printf \"%.2f GB\", $bytes/1073741824}")"
+    echo "$((bytes / 1073741824)).$((bytes % 1073741824 * 100 / 1073741824)) GB"
   elif [ "$bytes" -ge 1048576 ]; then
-    echo "$(awk "BEGIN {printf \"%.2f MB\", $bytes/1048576}")"
+    echo "$((bytes / 1048576)).$((bytes % 1048576 * 100 / 1048576)) MB"
   elif [ "$bytes" -ge 1024 ]; then
-    echo "$(awk "BEGIN {printf \"%.2f KB\", $bytes/1024}")"
+    echo "$((bytes / 1024)).$((bytes % 1024 * 100 / 1024)) KB"
   else
     echo "${bytes} B"
   fi
