@@ -105,18 +105,27 @@ RSYNC_OUTPUT=$(rsync -avz --delete \
     -e "ssh -p ${TUNNEL_PORT} -i ${PEM_PATH} -o StrictHostKeyChecking=accept-new" \
     apps/web/.next/ \
     "ubuntu@localhost:${REMOTE_PATH}/.next2/" \
-    2>&1) || handle_error "Falló rsync"
+    2>&1) || {
+      echo "❌ Rsync falló. Output:"
+      echo "$RSYNC_OUTPUT"
+      exit 1
+    }
 
-# Extraer estadísticas relevantes
-TOTAL_SIZE=$(echo "$RSYNC_OUTPUT" | grep "Total file size" | awk '{print $4}')
-SENT_BYTES=$(echo "$RSYNC_OUTPUT" | grep "Total bytes sent" | awk '{print $4}')
-FILES_TRANSFERRED=$(echo "$RSYNC_OUTPUT" | grep "Number of regular files transferred" | awk '{print $6}')
+# Extraer estadísticas relevantes (|| true para evitar que grep falle si no encuentra)
+TOTAL_SIZE=$(echo "$RSYNC_OUTPUT" | grep "Total file size" | awk '{print $4}' || echo "0")
+SENT_BYTES=$(echo "$RSYNC_OUTPUT" | grep "Total bytes sent" | awk '{print $4}' || echo "0")
+FILES_TRANSFERRED=$(echo "$RSYNC_OUTPUT" | grep "Number of regular files transferred" | awk '{print $6}' || echo "0")
+
+# Asegurar valores por defecto
+TOTAL_SIZE=${TOTAL_SIZE:-0}
+SENT_BYTES=${SENT_BYTES:-0}
+FILES_TRANSFERRED=${FILES_TRANSFERRED:-0}
 
 echo ""
 echo "📊 Estadísticas de transferencia:"
-echo "   📁 Archivos transferidos: ${FILES_TRANSFERRED:-0}"
-echo "   📤 Datos enviados: $(bytes_to_human ${SENT_BYTES:-0})"
-echo "   💾 Tamaño total del build: $(bytes_to_human ${TOTAL_SIZE:-0})"
+echo "   📁 Archivos transferidos: ${FILES_TRANSFERRED}"
+echo "   📤 Datos enviados: $(bytes_to_human "${SENT_BYTES}")"
+echo "   💾 Tamaño total del build: $(bytes_to_human "${TOTAL_SIZE}")"
 echo ""
 
 # ========= Operaciones remotas (swap, pm2) vía túnel =========
