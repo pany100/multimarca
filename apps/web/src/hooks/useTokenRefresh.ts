@@ -1,11 +1,14 @@
 import { getCookie, setCookie } from "cookies-next";
 import { useEffect, useRef } from "react";
 
+// Cambiar a true para probar con intervalos cortos
+const IS_TESTING = false;
+
 // Intervalo de refresh: cada 6 horas (en milisegundos)
-const REFRESH_INTERVAL = 6 * 60 * 60 * 1000;
+const REFRESH_INTERVAL = IS_TESTING ? 30 * 1000 : 6 * 60 * 60 * 1000; // 30 seg en testing, 6h normal
 
 // También refrescar si el usuario está activo después de X tiempo de inactividad
-const ACTIVITY_CHECK_INTERVAL = 30 * 60 * 1000; // 30 minutos
+const ACTIVITY_CHECK_INTERVAL = IS_TESTING ? 5 * 60 * 1000 : 30 * 60 * 1000; // 5 min en testing, 30 min normal
 
 // Claves para sincronización entre tabs
 const REFRESH_LOCK_KEY = "auth_refresh_lock";
@@ -71,8 +74,9 @@ export function useTokenRefresh() {
       const lastRefreshStr = localStorage.getItem(LAST_REFRESH_KEY);
       if (lastRefreshStr) {
         const lastRefresh = parseInt(lastRefreshStr, 10);
-        // Si se refrescó en los últimos 5 minutos, no refrescar de nuevo
-        if (Date.now() - lastRefresh < 5 * 60 * 1000) {
+        // Cooldown: 10 seg en testing, 5 min normal
+        const cooldown = IS_TESTING ? 10 * 1000 : 5 * 60 * 1000;
+        if (Date.now() - lastRefresh < cooldown) {
           console.log(
             "[Auth] Token ya fue refrescado recientemente por otro tab"
           );
@@ -145,8 +149,9 @@ export function useTokenRefresh() {
       }
     };
 
-    // Revisar cada 5 minutos
-    const intervalId = setInterval(checkAndRefresh, 5 * 60 * 1000);
+    // Revisar periódicamente (cada 10 seg en testing, cada 5 min normal)
+    const checkInterval = IS_TESTING ? 10 * 1000 : 5 * 60 * 1000;
+    const intervalId = setInterval(checkAndRefresh, checkInterval);
 
     // También refrescar inmediatamente si la página se vuelve visible
     // (el usuario volvió a la pestaña)

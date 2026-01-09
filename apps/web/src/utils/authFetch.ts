@@ -1,5 +1,23 @@
-import { getCookie, setCookie } from "cookies-next";
+import { deleteCookie, getCookie, setCookie } from "cookies-next";
 import prisma from "src/lib/prisma";
+
+// Helper para redirigir al login (solo en cliente)
+function redirectToLogin() {
+  if (typeof window === "undefined") return;
+
+  // Limpiar la cookie del token
+  deleteCookie("auth_token");
+
+  // Limpiar localStorage de refresh
+  localStorage.removeItem("auth_last_refresh");
+  localStorage.removeItem("auth_refresh_lock");
+
+  // Redirigir al login (solo si no estamos ya en login)
+  if (!window.location.pathname.includes("/login")) {
+    console.log("[Auth] Sesión expirada, redirigiendo al login...");
+    window.location.href = "/login";
+  }
+}
 
 // Helper para refrescar el token (solo en cliente)
 async function tryRefreshToken(currentToken: string): Promise<string | null> {
@@ -23,6 +41,12 @@ async function tryRefreshToken(currentToken: string): Promise<string | null> {
       });
       console.log("[Auth] Token refrescado automáticamente tras 401");
       return data.token;
+    }
+
+    // Si el refresh falló con 401, el token es inválido → redirigir al login
+    if (response.status === 401) {
+      console.warn("[Auth] Token inválido, redirigiendo al login...");
+      redirectToLogin();
     }
   } catch (error) {
     console.error("[Auth] Error al refrescar token:", error);
