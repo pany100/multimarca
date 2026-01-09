@@ -322,3 +322,6 @@ export function initS3FileSyncCron() {
     "[S3FileSync] Cron job para sincronización de archivos S3 iniciado - Ejecuta diariamente a las 3:00 AM"
   );
 }
+
+// Ejecutar inmediatamente al iniciar la aplicación (opcional)
+// sincronizarArchivos();
