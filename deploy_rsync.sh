@@ -52,9 +52,28 @@ if ! nc -z localhost "$TUNNEL_PORT" 2>/dev/null; then
   handle_error "No se pudo abrir el túnel en localhost:${TUNNEL_PORT}"
 fi
 
+# ========= Preparar .next2 para comparación =========
+echo "🔍 Preparando base para comparación..."
+ssh -p "$TUNNEL_PORT" \
+    -o StrictHostKeyChecking=accept-new \
+    -i "$PEM_PATH" ubuntu@localhost \
+    bash -lc "
+      cd ${REMOTE_PATH}
+      # Si .next2 no existe pero .next sí, copiar .next a .next2
+      # Así rsync tiene contra qué comparar (solo sube diferencias)
+      if [ ! -d .next2 ] && [ -d .next ]; then
+        echo '   → Copiando .next a .next2 como base (hard links, instantáneo)'
+        cp -al .next .next2
+      elif [ ! -d .next2 ]; then
+        echo '   → Primer deploy, se subirá todo'
+        mkdir -p .next2
+      else
+        echo '   → .next2 existe, rsync comparará contra él'
+      fi
+    "
+
 # ========= Rsync incremental por túnel =========
 echo "📤 Sincronizando .next con rsync (solo cambios)..."
-echo "   → Primera vez: ~700MB | Siguientes: ~10-50MB"
 
 rsync -avz --delete \
     --progress \
@@ -101,7 +120,7 @@ ssh -p "$TUNNEL_PORT" \
       
       echo '📦 Switcheando .next...'
       rm -rf apps/web/.next
-      mv apps/web/.next2 apps/web/.next
+      cp -al apps/web/.next2 apps/web/.next
 
       echo '🚀 Iniciando Next con PM2...'
       pm2 start npm --name ${NEXT_APP_NAME} --cwd ${REMOTE_PATH} -- run start
