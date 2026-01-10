@@ -34,7 +34,7 @@ function BoschTemplateButton() {
           marginLeft: "20px",
         }}
       >
-        Nueva Orden V2
+        Nueva Orden Versión 2
       </Button>
       <div style={{ display: "none" }}>
         <BoschTemplate ref={boschTemplateRef} />
