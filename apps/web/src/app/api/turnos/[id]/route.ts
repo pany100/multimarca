@@ -105,16 +105,6 @@ export async function DELETE(
       );
     }
 
-    // Check if the turno is in the past
-    const turnoDateTime = new Date(turno.fecha);
-    const now = new Date();
-    if (turnoDateTime < now) {
-      return NextResponse.json(
-        { error: "No se puede eliminar un turno pasado" },
-        { status: 400 }
-      );
-    }
-
     await prisma.turno.delete({
       where: { id },
     });
