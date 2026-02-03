@@ -19,6 +19,7 @@ type Props = {
   crudActions: CrudAction[];
   schema?: yup.ObjectSchema<any>;
   postCallbackFn?: () => void;
+  onAddClick?: () => void;
 };
 
 function ABMPage({
@@ -30,6 +31,7 @@ function ABMPage({
   crudActions,
   schema,
   postCallbackFn,
+  onAddClick,
 }: Props) {
   const { authFetch } = useFetch();
 
@@ -170,9 +172,9 @@ function ABMPage({
 
   const tableProps = {
     ...(shouldShowAdd && {
-      ctaCb: () => {
+      ctaCb: onAddClick || (() => {
         setIsAddModalOpen(true);
-      },
+      }),
     }),
     ...(shouldShowExtraActions && { extraActions }),
     refreshTrigger,

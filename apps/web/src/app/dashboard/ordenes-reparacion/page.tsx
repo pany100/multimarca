@@ -3,7 +3,7 @@
 import { CrudAction } from "@/components/formV2/constants";
 import ABMPage from "@/components/pageV2/ABMPage";
 import { SnackbarProvider } from "@/contexts/SnackbarContext";
-import { GlobalModalProvider } from "@/sections/commons/contexts/GlobalModalContext";
+import { GlobalModalProvider, useGlobalModal } from "@/sections/commons/contexts/GlobalModalContext";
 import BoschTemplateButton from "@/sections/ordenes-reparacion/BoschTemplateButton";
 import { RefreshTableProvider } from "@/sections/ordenes-reparacion/contexts/RefreshTableContext";
 import OrdenesReparacionTable from "@/sections/ordenes-reparacion/OrdenesReparacionTable";
@@ -20,16 +20,25 @@ const ExtraContentWrapper = ({ setRefreshTrigger }: any) => {
   );
 };
 
+const OrdenesReparacionPageContent = () => {
+  const { showModal } = useGlobalModal();
+
+  return (
+    <ABMPage
+      apiEndpoint="/api/orden-reparacion"
+      table={OrdenesReparacionTable}
+      crudActions={[CrudAction.ADD, CrudAction.DELETE]}
+      extraContent={ExtraContentWrapper}
+      onAddClick={showModal}
+    />
+  );
+};
+
 const OrdenesReparacionPage = () => {
   return (
     <GlobalModalProvider>
       <SnackbarProvider>
-        <ABMPage
-          apiEndpoint="/api/orden-reparacion"
-          table={OrdenesReparacionTable}
-          crudActions={[CrudAction.ADD, CrudAction.DELETE]}
-          extraContent={ExtraContentWrapper}
-        />
+        <OrdenesReparacionPageContent />
       </SnackbarProvider>
     </GlobalModalProvider>
   );

@@ -51,7 +51,7 @@ const ControlesSection = () => {
         <EditControlesForm isEditing={isEditing} />
 
         {isEditing && (
-          <Box display="flex" justifyContent="flex-end" gap={2} mt={3}>
+          <Box display="flex" justifyContent="flex-start" gap={2} mt={3}>
             <Button
               variant="outlined"
               onClick={() => {

@@ -3,8 +3,6 @@ import CustomTable, {
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import CarRepairIcon from "@mui/icons-material/CarRepair";
-import EditIcon from "@mui/icons-material/Edit";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
 import { EstadoOrdenReparacion } from "@prisma/client";
@@ -157,29 +155,11 @@ const OrdenesReparacionTable = ({
       <MenuItem
         key="edit"
         onClick={() =>
-          router.push(`/dashboard/ordenes-reparacion/${params.id}/editar`)
-        }
-      >
-        <EditIcon sx={{ mr: 1 }} />
-        Editar
-      </MenuItem>,
-      <MenuItem
-        key="edit"
-        onClick={() =>
           router.push(`/dashboard/ordenes-reparacion/${params.id}`)
         }
       >
         <CarRepairIcon sx={{ mr: 1 }} />
         Administrar
-      </MenuItem>,
-      <MenuItem
-        key="view"
-        onClick={() =>
-          router.push(`/dashboard/ordenes-reparacion/${params.id}/ver`)
-        }
-      >
-        <VisibilityIcon sx={{ mr: 1 }} />
-        Ver
       </MenuItem>,
     ];
     return customActions.concat(defaultActions);
@@ -207,7 +187,7 @@ const OrdenesReparacionTable = ({
             title="Ordenes de reparación"
             apiEndpoint="/api/orden-reparacion"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
+            ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
             {...rest}
           />
@@ -217,7 +197,7 @@ const OrdenesReparacionTable = ({
             title="Orden de reparación"
             apiEndpoint="/api/orden-reparacion?estado=Borrador"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
+            ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
             {...rest}
           />
@@ -227,7 +207,7 @@ const OrdenesReparacionTable = ({
             title="Orden de reparación"
             apiEndpoint="/api/orden-reparacion?estado=Aceptado"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
+            ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
             {...rest}
           />
@@ -237,7 +217,7 @@ const OrdenesReparacionTable = ({
             title="Orden de reparación"
             apiEndpoint="/api/orden-reparacion?estado=EnProgreso"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
+            ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
             {...rest}
           />
@@ -247,7 +227,7 @@ const OrdenesReparacionTable = ({
             title="Orden de reparación"
             apiEndpoint="/api/orden-reparacion?estado=SeRetira"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
+            ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
             {...rest}
           />
@@ -257,7 +237,7 @@ const OrdenesReparacionTable = ({
             title="Orden de reparación"
             apiEndpoint="/api/orden-reparacion?estado=Terminado"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
+            ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
             {...rest}
           />
@@ -267,7 +247,7 @@ const OrdenesReparacionTable = ({
             title="Orden de reparación"
             apiEndpoint="/api/orden-reparacion?estado=Incobrable"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ordenes-reparacion/nueva")}
+            ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
             {...rest}
           />

@@ -5,8 +5,6 @@ import CustomTable, {
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import AssignmentIcon from "@mui/icons-material/Assignment";
-import EditIcon from "@mui/icons-material/Edit";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import { EstadoVenta } from "@prisma/client";
@@ -196,20 +194,6 @@ function VentasTable({
         <AssignmentIcon sx={{ mr: 1 }} />
         Administrar
       </MenuItem>,
-      <MenuItem
-        key="edit"
-        onClick={() => router.push(`/dashboard/ventas/${params.id}/editar`)}
-      >
-        <EditIcon sx={{ mr: 1 }} />
-        Editar
-      </MenuItem>,
-      <MenuItem
-        key="view"
-        onClick={() => router.push(`/dashboard/ventas/${params.id}/ver`)}
-      >
-        <VisibilityIcon sx={{ mr: 1 }} />
-        Ver
-      </MenuItem>,
     ];
     return customActions.concat(defaultActions);
   };
@@ -236,7 +220,7 @@ function VentasTable({
             title="Ventas"
             apiEndpoint="/api/ventas"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ventas/nueva")}
+            ctaCb={ctaCb || (() => router.push("/dashboard/ventas/nueva"))}
             columns={columns}
             getRowClassName={getRowClassName}
             {...rest}
@@ -247,7 +231,7 @@ function VentasTable({
             title="Ventas"
             apiEndpoint="/api/ventas?estado=Borrador"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ventas/nueva")}
+            ctaCb={ctaCb || (() => router.push("/dashboard/ventas/nueva"))}
             columns={columns}
             getRowClassName={getRowClassName}
             {...rest}
@@ -258,7 +242,7 @@ function VentasTable({
             title="Ventas"
             apiEndpoint="/api/ventas?estado=Presupuestado"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ventas/nueva")}
+            ctaCb={ctaCb || (() => router.push("/dashboard/ventas/nueva"))}
             columns={columns}
             getRowClassName={getRowClassName}
             {...rest}
@@ -269,7 +253,7 @@ function VentasTable({
             title="Ventas"
             apiEndpoint="/api/ventas?estado=Preparado"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ventas/nueva")}
+            ctaCb={ctaCb || (() => router.push("/dashboard/ventas/nueva"))}
             columns={columns}
             getRowClassName={getRowClassName}
             {...rest}
@@ -280,7 +264,7 @@ function VentasTable({
             title="Ventas"
             apiEndpoint="/api/ventas?estado=Entregado"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ventas/nueva")}
+            ctaCb={ctaCb || (() => router.push("/dashboard/ventas/nueva"))}
             columns={columns}
             getRowClassName={getRowClassName}
             {...rest}
@@ -291,7 +275,7 @@ function VentasTable({
             title="Ventas"
             apiEndpoint="/api/ventas?estado=Cerrado"
             extraActions={customActions}
-            ctaCb={() => router.push("/dashboard/ventas/nueva")}
+            ctaCb={ctaCb || (() => router.push("/dashboard/ventas/nueva"))}
             columns={columns}
             getRowClassName={getRowClassName}
             {...rest}
