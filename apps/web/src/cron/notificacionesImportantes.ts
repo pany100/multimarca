@@ -59,7 +59,9 @@ async function enviarNotificacionesTurnos() {
             } turno(s) programado(s) para hoy:\n${turnosHoy
               .map(
                 (turno) =>
-                  `- ${turno.hora} - ${turno.auto.owner.fullName} (${turno.auto.patent})`
+                  turno.auto
+                    ? `- ${turno.hora} - ${turno.auto.owner.fullName} (${turno.auto.patent})`
+                    : `- ${turno.hora} - ${turno.informacionCliente || "Sin información"}${turno.informacionAuto ? ` (${turno.informacionAuto})` : ""}`
               )
               .join("\n")}`,
             leida: false,
