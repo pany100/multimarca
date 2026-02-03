@@ -17,6 +17,9 @@ export async function GET(
         buyPrice: true,
         markup: true,
         id: true,
+        reportName: true,
+        sector: true,
+        carBrand: true,
       },
     });
 
@@ -53,6 +56,9 @@ export async function PUT(
       label,
       markup,
       proveedorId,
+      reportName,
+      sector,
+      carBrand,
     } = body;
 
     if (
@@ -78,7 +84,10 @@ export async function PUT(
         label,
         markup: markup ? parseFloat(markup) : null,
         proveedorId,
-      },
+        reportName: reportName || null,
+        sector: sector || null,
+        carBrand: carBrand || null,
+      } as any,
       include: {
         proveedor: true,
       },

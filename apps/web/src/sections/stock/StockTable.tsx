@@ -36,6 +36,9 @@ function StockTable({
       flex: 0.8,
       valueGetter: (buyPrice: any) => getFormattedPrice(buyPrice),
     },
+    { field: "reportName", headerName: "Nombre de Reporte", flex: 0.5 },
+    { field: "sector", headerName: "Sector", flex: 0.5 },
+    { field: "carBrand", headerName: "Marca de Auto", flex: 0.5 },
     {
       field: "sellPrice",
       headerName: "Precio de venta sugerido",

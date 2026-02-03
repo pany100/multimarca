@@ -12,6 +12,9 @@ export const schema = yup.object({
   label: yup.string().nullable(),
   markup: yup.number().nullable(),
   proveedorId: yup.number().required("El proveedor es requerido"),
+  reportName: yup.string().nullable(),
+  sector: yup.string().nullable(),
+  carBrand: yup.string().nullable(),
 });
 
 export const unitsSchema = yup.object({
@@ -23,6 +26,9 @@ export const unitsSchema = yup.object({
   label: yup.string().nullable(),
   markup: yup.number().nullable(),
   proveedorId: yup.number().required("El proveedor es requerido"),
+  reportName: yup.string().nullable(),
+  sector: yup.string().nullable(),
+  carBrand: yup.string().nullable(),
 });
 
 const StockForm = () => {
@@ -68,6 +74,15 @@ const StockForm = () => {
             searchOptions={searchProveedores}
             initialOptions={initialProveedor}
           />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <CustomInputText name="reportName" label="Nombre de Reporte" />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <CustomInputText name="sector" label="Sector" />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <CustomInputText name="carBrand" label="Marca de Auto" />
         </Grid>
       </Grid>
     </>

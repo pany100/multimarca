@@ -17,6 +17,9 @@ export async function GET(request: Request) {
         { name: { contains: query } },
         { brand: { contains: query } },
         { label: { contains: query } },
+        { reportName: { contains: query } },
+        { sector: { contains: query } },
+        { carBrand: { contains: query } },
       ],
     };
 
@@ -39,7 +42,7 @@ export async function GET(request: Request) {
         where: whereClause,
         skip,
         take: size,
-        orderBy: { name: "asc" },
+        orderBy: { id: "desc" },
         include: { proveedor: true },
       }),
       prisma.stock.count({
@@ -66,8 +69,18 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, brand, buyPrice, restockValue, label, markup, proveedorId } =
-      body;
+    const { 
+      name, 
+      brand, 
+      buyPrice, 
+      restockValue, 
+      label, 
+      markup, 
+      proveedorId,
+      reportName,
+      sector,
+      carBrand
+    } = body;
 
     if (
       !name ||
@@ -91,7 +104,10 @@ export async function POST(request: Request) {
         label,
         markup: markup ? parseFloat(markup) : null,
         proveedorId,
-      },
+        reportName: reportName || null,
+        sector: sector || null,
+        carBrand: carBrand || null,
+      } as any,
       include: {
         proveedor: true,
       },

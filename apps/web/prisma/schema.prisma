@@ -305,6 +305,9 @@ model Stock {
   markup                 Float?
   proveedorId            Int
   label                  String                 @unique @db.VarChar(250)
+  reportName             String?                @db.Text
+  sector                 String?                @db.Text
+  carBrand               String?                @db.Text
   notificacionesInternas NotificacionInterna[]
   ordenDeCompraItems     OrdenDeCompraItem[]
   repuestosUsados        RepuestoUsado[]
