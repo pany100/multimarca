@@ -9,7 +9,24 @@ set -euo pipefail
 
 # ========= Config =========
 REMOTE_HOST="ubuntu@ec2-3-22-211-91.us-east-2.compute.amazonaws.com"
-PEM_PATH="/Users/luispaniagua/scripts/mtservice.pem"
+
+# Detectar SO y asignar ruta del PEM
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  # macOS
+  PEM_PATH="/Users/luispaniagua/scripts/mtservice.pem"
+elif [[ "$OSTYPE" == "linux-gnu"* ]]; then
+  # Ubuntu/Linux
+  PEM_PATH="/home/luis/scripts/mtservice.pem"
+else
+  echo "❌ Sistema operativo no soportado: $OSTYPE"
+  exit 1
+fi
+
+# Verificar que el PEM existe
+if [ ! -f "$PEM_PATH" ]; then
+  echo "❌ No se encontró el archivo PEM en: $PEM_PATH"
+  exit 1
+fi
 REPO_ROOT="/home/ubuntu/multimarca"
 REMOTE_PATH="$REPO_ROOT/apps/web"
 TUNNEL_PORT=2222

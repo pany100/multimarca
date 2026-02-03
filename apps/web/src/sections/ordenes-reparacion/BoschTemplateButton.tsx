@@ -1,4 +1,3 @@
-import BoschTemplate from "@/components/orden-reparacion/pdf/BoschTemplate";
 import { boschColors } from "@/theme";
 import { Box, Button } from "@mui/material";
 import { useRef } from "react";
@@ -23,9 +22,6 @@ function BoschTemplateButton() {
       >
         Imprimir Plantilla Bosch
       </Button>
-      <div style={{ display: "none" }}>
-        <BoschTemplate ref={boschTemplateRef} />
-      </div>
     </Box>
   );
 }
