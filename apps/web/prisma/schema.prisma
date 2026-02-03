@@ -846,8 +846,10 @@ model Turno {
   hora     String
   fecha    DateTime
   problema String   @db.Text
-  autoId   Int
-  auto     Auto     @relation(fields: [autoId], references: [id])
+  autoId   Int?
+  auto     Auto?    @relation(fields: [autoId], references: [id])
+  informacionAuto       String?               @db.Text
+  informacionCliente    String?               @db.Text
 
   @@index([fecha])
   @@index([autoId])

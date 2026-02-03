@@ -38,8 +38,10 @@ function TurnosTable({
       headerName: "Cliente",
       flex: 1,
       renderCell: (params: any) => {
-        const client = params.row.auto.owner;
-        return client ? `${client.fullName}` : "";
+        if (params.row.auto?.owner) {
+          return params.row.auto.owner.fullName;
+        }
+        return params.row.informacionCliente || "No ingresado";
       },
     },
     {
@@ -47,16 +49,21 @@ function TurnosTable({
       headerName: "Teléfono",
       flex: 1,
       renderCell: (params: any) => {
-        const client = params.row.auto.owner;
-        return client ? `${client.phone}` : "";
+        if (params.row.auto?.owner) {
+          return params.row.auto.owner.phone || "";
+        }
+        return "";
       },
     },
     {
       field: "auto",
       headerName: "Auto",
       flex: 1,
-      valueGetter: (value: any) => {
-        return value ? `${value.brand} ${value.model} - ${value.patent}` : "";
+      renderCell: (params: any) => {
+        if (params.row.auto) {
+          return `${params.row.auto.brand} ${params.row.auto.model} - ${params.row.auto.patent}`;
+        }
+        return params.row.informacionAuto || "No ingresado";
       },
     },
     {

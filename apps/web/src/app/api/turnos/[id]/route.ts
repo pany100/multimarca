@@ -8,11 +8,19 @@ export async function PUT(
   try {
     const { id } = params;
     const body = await request.json();
-    const { hora, fecha, problema, autoId } = body;
+    const { hora, fecha, problema, autoId, informacionAuto, informacionCliente } = body;
 
-    if (!hora || !fecha || !problema || !autoId) {
+    if (!hora || !fecha || !problema) {
       return NextResponse.json(
-        { error: "Todos los campos son requeridos" },
+        { error: "Hora, fecha y problema son requeridos" },
+        { status: 400 }
+      );
+    }
+
+    // Validar que al menos uno de autoId o informacionAuto esté presente
+    if (!autoId && !informacionAuto) {
+      return NextResponse.json(
+        { error: "Debe seleccionar un vehículo o ingresar información del vehículo nuevo" },
         { status: 400 }
       );
     }
@@ -65,8 +73,10 @@ export async function PUT(
         hora,
         fecha: new Date(fecha),
         problema,
-        autoId,
-      },
+        autoId: autoId || null,
+        informacionAuto: informacionAuto || null,
+        informacionCliente: informacionCliente || null,
+      } as any,
       include: {
         auto: {
           include: {

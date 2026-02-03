@@ -161,12 +161,19 @@ export async function POST(request: NextRequest) {
 
                   return `
                     <tr>
-                      <td>${turno.auto?.owner?.fullName || "N/A"}</td>
-                      <td>${turno.auto?.owner?.phone || "N/A"}</td>
+                      <td>${
+                        turno.auto?.owner?.fullName || 
+                        turno.informacionCliente || 
+                        "N/A"
+                      }</td>
+                      <td>${
+                        turno.auto?.owner?.phone || 
+                        ""
+                      }</td>
                       <td>${
                         turno.auto
                           ? `${turno.auto.brand} ${turno.auto.model} - ${turno.auto.patent}`
-                          : "N/A"
+                          : turno.informacionAuto || "N/A"
                       }</td>
                       <td>${turno.problema || ""}</td>
                       ${weekDays
