@@ -5,12 +5,9 @@ import CustomTable, {
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import AssignmentIcon from "@mui/icons-material/Assignment";
-import EditIcon from "@mui/icons-material/Edit";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useGlobalModal } from "@/sections/commons/contexts/GlobalModalContext";
 
 // Define the estados for the presupuestos
 const estados = [
@@ -83,7 +80,6 @@ function PresupuestosTable({
 }: InheritedTableProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { showModal } = useGlobalModal();
   const [tabValue, setTabValue] = useState(0);
   const [estadoActual, setEstadoActual] = useState<string | null>(null);
 
@@ -237,27 +233,11 @@ function PresupuestosTable({
     const defaultActions = extraActions ? extraActions(params) : [];
     const customActions: React.ReactNode[] = [
       <MenuItem
-        key="edit"
-        onClick={() =>
-          router.push(`/dashboard/presupuestos/${params.id}/editar`)
-        }
-      >
-        <EditIcon sx={{ mr: 1 }} />
-        Editar
-      </MenuItem>,
-      <MenuItem
         key="admin"
         onClick={() => router.push(`/dashboard/presupuestos/${params.id}`)}
       >
         <AssignmentIcon sx={{ mr: 1 }} />
         Administrar
-      </MenuItem>,
-      <MenuItem
-        key="view"
-        onClick={() => router.push(`/dashboard/presupuestos/${params.id}/ver`)}
-      >
-        <VisibilityIcon sx={{ mr: 1 }} />
-        Ver
       </MenuItem>,
     ];
     return customActions.concat(defaultActions);
@@ -281,7 +261,7 @@ function PresupuestosTable({
             title="Presupuestos"
             apiEndpoint="/api/presupuestos"
             extraActions={customActions}
-            ctaCb={showModal}
+            ctaCb={ctaCb}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -292,7 +272,7 @@ function PresupuestosTable({
             title="Presupuestos en Preparación"
             apiEndpoint="/api/presupuestos?estado=EnPreparacion"
             extraActions={customActions}
-            ctaCb={showModal}
+            ctaCb={ctaCb}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -303,7 +283,7 @@ function PresupuestosTable({
             title="Presupuestos Terminados"
             apiEndpoint="/api/presupuestos?estado=Terminado"
             extraActions={customActions}
-            ctaCb={showModal}
+            ctaCb={ctaCb}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -314,7 +294,7 @@ function PresupuestosTable({
             title="Presupuestos Enviados"
             apiEndpoint="/api/presupuestos?estado=Enviado"
             extraActions={customActions}
-            ctaCb={showModal}
+            ctaCb={ctaCb}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -325,7 +305,7 @@ function PresupuestosTable({
             title="Presupuestos A Definir"
             apiEndpoint="/api/presupuestos?estado=ADefinir"
             extraActions={customActions}
-            ctaCb={showModal}
+            ctaCb={ctaCb}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -336,7 +316,7 @@ function PresupuestosTable({
             title="Presupuestos Aceptados"
             apiEndpoint="/api/presupuestos?estado=Aceptado"
             extraActions={customActions}
-            ctaCb={showModal}
+            ctaCb={ctaCb}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -347,7 +327,7 @@ function PresupuestosTable({
             title="Presupuestos Rechazados"
             apiEndpoint="/api/presupuestos?estado=Rechazado"
             extraActions={customActions}
-            ctaCb={showModal}
+            ctaCb={ctaCb}
             columns={columns}
             searchByDate={true}
             {...rest}
@@ -358,7 +338,7 @@ function PresupuestosTable({
             title="Presupuestos Descartados"
             apiEndpoint="/api/presupuestos?estado=Descartado"
             extraActions={customActions}
-            ctaCb={showModal}
+            ctaCb={ctaCb}
             columns={columns}
             searchByDate={true}
             {...rest}
