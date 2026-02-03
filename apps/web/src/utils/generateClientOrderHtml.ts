@@ -349,12 +349,12 @@ export default function generateClientOrderHtml(repair: any): string {
         ${repair.repuestosUsados
           .map(
             (el: {
-              stock: { id: number; name: string };
+              stock: { id: number; name: string; reportName?: string | null };
               precioVenta: number;
               unidadesConsumidas: number;
             }) => `
                 <div class="TypographyBody1">
-                  ${el.stock.name} - ${el.unidadesConsumidas} unidades
+                  ${el.stock.reportName || el.stock.name} - ${el.unidadesConsumidas} unidades
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
                   $${Number(
