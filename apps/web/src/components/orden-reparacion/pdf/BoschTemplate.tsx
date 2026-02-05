@@ -234,7 +234,13 @@ const BoschTemplate = React.forwardRef<HTMLDivElement>((_, ref) => {
               </DatePart>
             </KilometerAndDate>
           </CarInfoDoubleColumn>
-          <CarInfoLine>TRANSMISIÓN:</CarInfoLine>
+          <CarInfoDoubleColumn>
+            <div>TRANSMISIÓN:</div>
+            <div>NAFTA / DIESEL:</div>
+          </CarInfoDoubleColumn>
+          <CarInfoDoubleColumn>
+            <div>GRUA: SI/NO</div>
+          </CarInfoDoubleColumn>
         </CarInfo>
         <Section>
           <SectionText>
@@ -242,8 +248,6 @@ const BoschTemplate = React.forwardRef<HTMLDivElement>((_, ref) => {
           </SectionText>
         </Section>
         <CarInfoLine>Cliente solicita turno por:</CarInfoLine>
-        <LightLine />
-        <WhiteLine />
         <LightLine />
         <WhiteLine />
         <LightLine />
@@ -287,6 +291,8 @@ const BoschTemplate = React.forwardRef<HTMLDivElement>((_, ref) => {
               src="/costado-2.png"
             />
             <div>
+              <Cell>Matafuegos</Cell>
+              <Cell>VTV</Cell>
               <Cell>Escobillas delanteras (control)</Cell>
               <Cell>Escobillas traseras (control)</Cell>
               <Cell>Neumáticos (estado)</Cell>
