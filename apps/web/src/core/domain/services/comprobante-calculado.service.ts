@@ -71,6 +71,35 @@ export class ComprobanteCalculado {
     );
   }
 
+  private getIncrementoDistribuido() {
+    const incrementoDistribuido = this.ajustes.incrementoInterno / this.trabajos.length;
+    const incrementoParcial = this.roundToNearestThousandOrFiveHundred(incrementoDistribuido);
+    const incrementoFinal = this.ajustes.incrementoInterno  - (incrementoParcial * (this.trabajos.length - 1));
+    return {
+      incrementoParcial,
+      incrementoFinal,
+    }
+  }
+
+  get manoDeObraForRecibosDiscriminado() {
+    const { incrementoParcial, incrementoFinal } = this.getIncrementoDistribuido();
+    return this.trabajos.map((t, idx) => {
+      const isLast = idx === this.trabajos.length - 1;
+      const incremento =
+        this.trabajos.length > 0
+          ? isLast
+            ? incrementoFinal
+            : incrementoParcial
+          : 0;
+      return {
+        descripcion: t.descripcion,
+        precioUnitario:
+          this.calcularPrecioFinal(t.precioUnitario.toNumber(), 0) +
+          incremento,
+      };
+    });
+  }
+
   get totalBase() {
     return this.totalRepuestos + this.totalTerceros + this.totalManoDeObra;
   }

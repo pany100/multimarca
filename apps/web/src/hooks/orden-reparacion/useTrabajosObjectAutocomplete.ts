@@ -5,7 +5,7 @@ function useTrabajosObjectAutocomplete() {
 
   const searchTrabajo = async (query: string) => {
     const response = await authFetch(
-      `/api/mano-de-obra?query=${query}&limit=20&page=0`
+      `/api/mano-de-obra?query=${query}&size=20&page=0`
     );
     const data = await response.json();
     return data.items.map(

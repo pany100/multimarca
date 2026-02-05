@@ -374,9 +374,26 @@ export default function generateClientOrderHtml(repair: any): string {
         <div class="TypographyBody1" style="font-weight: bold;">
           Mano de Obra
         </div>
-        <div class="TypographyBody1" style="text-align: right;">
-          $${calculoVO.manoDeObraForRecibos.toLocaleString("es-AR")}
+        <div class="TypographyBody1" style="text-align: right;font-weight: bold;">
+          Importe
         </div>
+        ${calculoVO.manoDeObraForRecibosDiscriminado.map(
+          (t) => `
+            <div class="TypographyBody1">
+              ${t.descripcion}
+            </div>
+            <div class="TypographyBody1" style="text-align: right;">
+              $${t.precioUnitario.toLocaleString("es-AR")}
+            </div>
+          `
+        ).join("")}
+        </div>
+        <hr class="divider" style="border-color: rgba(0, 0, 0, 0.12);"/>
+        <div style='
+          display: grid;
+          grid-template-columns: 80% 20%;
+          margin-right: 15px;
+        '>
         ${
           repair.incremento > 0
             ? `
