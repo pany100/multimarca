@@ -8,6 +8,7 @@ export const addTrabajoRealizadoSchema = z
     precioUnitario: z.coerce.number(),
     descripcion: z.string().min(1),
     diasParaRecordatorio: z.coerce.number().int().nullable().optional(),
+    pdfName: z.string().nullable().optional(),
   })
   .refine(
     (data) => {
@@ -29,6 +30,7 @@ export const updateTrabajoRealizadoSchema = z.object({
   precioUnitario: z.coerce.number().optional(),
   descripcion: z.string().min(1).optional(),
   diasParaRecordatorio: z.coerce.number().int().nullable().optional(),
+  pdfName: z.string().nullable().optional(),
 });
 
 export const deleteTrabajoRealizadoSchema = z.object({

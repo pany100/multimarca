@@ -12,6 +12,7 @@ export interface TrabajoRealizado {
   precioUnitario: number;
   descripcion: string;
   diasParaRecordatorio?: number | null;
+  pdfName?: string | null;
 }
 
 interface TrabajosSectionProps {
@@ -22,6 +23,7 @@ interface TrabajosSectionProps {
     precioUnitario: number;
     descripcion: string;
     diasParaRecordatorio?: number | null;
+    pdfName?: string | null;
     manoDeObra?: { name: string };
   }) => Promise<boolean>;
   onUpdateTrabajo: (
@@ -30,6 +32,7 @@ interface TrabajosSectionProps {
       precioUnitario: number;
       descripcion: string;
       diasParaRecordatorio?: number | null;
+      pdfName?: string | null;
       manoDeObra?: { name: string };
     }
   ) => Promise<boolean>;
@@ -59,6 +62,7 @@ const TrabajosSection = ({
     precioUnitario: number;
     descripcion: string;
     diasParaRecordatorio?: number | null;
+    pdfName?: string | null;
   }) => {
     let success = false;
 

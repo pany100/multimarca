@@ -5,6 +5,7 @@ export interface AddTrabajoRealizadoDto {
   precioUnitario: number;
   descripcion: string;
   diasParaRecordatorio?: number | null;
+  pdfName?: string | null;
 }
 
 export interface UpdateTrabajoRealizadoDto {
@@ -12,6 +13,7 @@ export interface UpdateTrabajoRealizadoDto {
   precioUnitario?: number;
   descripcion?: string;
   diasParaRecordatorio?: number | null;
+  pdfName?: string | null;
 }
 
 export interface DeleteTrabajoRealizadoDto {

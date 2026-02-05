@@ -9,13 +9,19 @@ function useTrabajosObjectAutocomplete() {
     );
     const data = await response.json();
     return data.items.map(
-      (trabajo: { name: string; id: number; sellPrice: number }) => ({
+      (trabajo: {
+        name: string;
+        id: number;
+        sellPrice: number;
+        pdfName?: string | null;
+      }) => ({
         value: trabajo.id,
         label: `${trabajo.name}`,
         object: {
           id: trabajo.id,
           name: trabajo.name,
           sellPrice: trabajo.sellPrice,
+          pdfName: trabajo.pdfName ?? undefined,
         },
       })
     );

@@ -10,6 +10,8 @@ function OtrosTrabajosForm() {
     setPrecioUnitario,
     diasParaRecordatorio,
     setDiasParaRecordatorio,
+    pdfName,
+    setPdfName,
   } = useTrabajosContext();
   return (
     <Grid container spacing={1}>
@@ -26,6 +28,14 @@ function OtrosTrabajosForm() {
           type="number"
           value={precioUnitario || ""}
           onChange={(e) => setPrecioUnitario(Number(e.target.value))}
+        />
+      </Grid>
+      <Grid item xs={12} sx={{ mb: 1 }}>
+        <ORepTextField
+          label="Nombre del PDF (opcional)"
+          value={pdfName || ""}
+          onChange={(e) => setPdfName(e.target.value)}
+          placeholder="-"
         />
       </Grid>
       <Grid item xs={12} sx={{ mb: 1 }}>

@@ -15,7 +15,7 @@ function TrabajosModalContent() {
   const { getCurrentManoDeObra } = useGetCurrentManoDeObra();
   const [tipoTrabajo, setTipoTrabajo] = useState<"lista" | "otros">("lista");
   const [initialManoDeObra, setInitialManoDeObra] = useState<ManoDeObra | null>(
-    null
+    null,
   );
   const { descripcion } = useTrabajosContext();
 
@@ -45,7 +45,7 @@ function TrabajosModalContent() {
         exclusive
         onChange={(
           _: React.MouseEvent<HTMLElement>,
-          newTipoTrabajo: "lista" | "otros" | null
+          newTipoTrabajo: "lista" | "otros" | null,
         ) => {
           if (newTipoTrabajo !== null) {
             setTipoTrabajo(newTipoTrabajo);

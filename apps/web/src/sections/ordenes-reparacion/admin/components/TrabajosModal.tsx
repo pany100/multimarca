@@ -23,6 +23,7 @@ export interface TrabajoRealizado {
   precioUnitario: number;
   descripcion: string;
   diasParaRecordatorio?: number | null;
+  pdfName?: string | null;
 }
 
 interface TrabajosModalProps {
@@ -32,6 +33,7 @@ interface TrabajosModalProps {
     precioUnitario: number;
     descripcion: string;
     diasParaRecordatorio?: number | null;
+    pdfName?: string | null;
     manoDeObra?: { name: string };
   }) => Promise<boolean>;
   loading?: boolean;
@@ -44,7 +46,7 @@ const TrabajosModalInner = ({
   loading = false,
   editTrabajo,
 }: Omit<TrabajosModalProps, "open">) => {
-  const { descripcion, precioUnitario, diasParaRecordatorio } =
+  const { descripcion, precioUnitario, diasParaRecordatorio, pdfName } =
     useTrabajosContext();
 
   const handleSubmit = async () => {
@@ -54,6 +56,7 @@ const TrabajosModalInner = ({
       precioUnitario,
       descripcion,
       diasParaRecordatorio,
+      pdfName: pdfName?.trim() || null,
     });
   };
 
@@ -97,6 +100,7 @@ const TrabajosModal = ({
         initialDescripcion={editTrabajo?.descripcion}
         initialPrecioUnitario={editTrabajo?.precioUnitario}
         initialDiasParaRecordatorio={editTrabajo?.diasParaRecordatorio}
+        initialPdfName={editTrabajo?.pdfName}
       >
         <TrabajosModalInner
           onClose={onClose}

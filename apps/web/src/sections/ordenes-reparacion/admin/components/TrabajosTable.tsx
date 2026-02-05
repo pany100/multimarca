@@ -10,6 +10,7 @@ interface TrabajoRealizado {
   precioUnitario: number;
   descripcion: string;
   diasParaRecordatorio?: number | null;
+  pdfName?: string | null;
 }
 
 interface TrabajosTableProps {
@@ -30,6 +31,13 @@ const TrabajosTable = ({
       field: "descripcion",
       headerName: "Trabajo",
       flex: 3,
+    },
+    {
+      field: "pdfName",
+      headerName: "PDF",
+      flex: 1,
+      renderCell: (params) =>
+        params.value?.trim() ? params.value : "-",
     },
     {
       field: "precioUnitario",

@@ -16,6 +16,7 @@ export class UpdateTrabajoRealizadoUseCase {
           precioUnitario: input.precioUnitario,
           descripcion: input.descripcion,
           diasParaRecordatorio: input.diasParaRecordatorio,
+          pdfName: input.pdfName,
         },
         deps
       );

@@ -12,6 +12,7 @@ export class PrismaTrabajoRealizadoRepository
       precioUnitario: number;
       descripcion: string;
       diasParaRecordatorio?: number | null;
+      pdfName?: string | null;
     },
     deps?: { tx?: any }
   ) {
@@ -25,6 +26,7 @@ export class PrismaTrabajoRealizadoRepository
         precioUnitario: data.precioUnitario,
         descripcion: data.descripcion,
         diasParaRecordatorio: data.diasParaRecordatorio,
+        pdfName: data.pdfName ?? undefined,
       },
     });
   }
@@ -35,6 +37,7 @@ export class PrismaTrabajoRealizadoRepository
       precioUnitario?: number;
       descripcion?: string;
       diasParaRecordatorio?: number | null;
+      pdfName?: string | null;
     },
     deps?: { tx?: any }
   ) {
@@ -47,6 +50,8 @@ export class PrismaTrabajoRealizadoRepository
       dataToUpdate.descripcion = data.descripcion;
     if (data.diasParaRecordatorio !== undefined)
       dataToUpdate.diasParaRecordatorio = data.diasParaRecordatorio;
+    if (data.pdfName !== undefined)
+      dataToUpdate.pdfName = data.pdfName;
 
     return db.trabajoRealizado.update({
       where: { id },

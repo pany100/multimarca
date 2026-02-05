@@ -193,11 +193,11 @@ export default function generateClientOrderHtml(repair: any): string {
           </div>
           <div class="TypographyBody1">
             Vehículo: ${repair.auto.brand} ${repair.auto.model} ${
-    repair.auto.color
-  }
+              repair.auto.color
+            }
             ${repair.auto.transmission_type === "Manual" ? "MT" : "AT"} - ${
-    repair.auto.year
-  }
+              repair.auto.year
+            }
           </div>
           <div class="TypographyBody1">
             Patente: ${repair.auto.patent}
@@ -213,7 +213,7 @@ export default function generateClientOrderHtml(repair: any): string {
             ${
               repair.fechaEntradaReparacion
                 ? new Date(repair.fechaEntradaReparacion).toLocaleDateString(
-                    "es-AR"
+                    "es-AR",
                   )
                 : "-"
             }
@@ -223,7 +223,7 @@ export default function generateClientOrderHtml(repair: any): string {
             ${
               repair.fechaSalidaReparacion
                 ? new Date(repair.fechaSalidaReparacion).toLocaleDateString(
-                    "es-AR"
+                    "es-AR",
                   )
                 : "-"
             }
@@ -257,7 +257,7 @@ export default function generateClientOrderHtml(repair: any): string {
       ${
         repair.estado !== EstadoOrdenReparacion.Presupuestado &&
         repair.controlesEnReparacion.filter(
-          (control: any) => control.valor === "true"
+          (control: any) => control.valor === "true",
         ).length > 0
           ? `
           <hr class="divider" />
@@ -267,7 +267,7 @@ export default function generateClientOrderHtml(repair: any): string {
           </div>
         ${repair.controlesEnReparacion
           .filter(
-            (control: any) => control.valor !== "false" && control.valor !== ""
+            (control: any) => control.valor !== "false" && control.valor !== "",
           )
           .filter((control: any) => control.controlMecanico.type !== "group")
           .sort((a: any, b: any) => {
@@ -286,15 +286,15 @@ export default function generateClientOrderHtml(repair: any): string {
                   ? `${control.controlMecanico.parent.pdfName} `
                   : ""
               }${
-              control.controlMecanico.pdfName || control.controlMecanico.name
-            }
+                control.controlMecanico.pdfName || control.controlMecanico.name
+              }
               ${
                 control.controlMecanico.type === "texto"
                   ? `: ${control.valor}`
                   : ""
               }
             </div>
-          `
+          `,
           )
           .join("")}
         </div>
@@ -311,7 +311,7 @@ export default function generateClientOrderHtml(repair: any): string {
           ${JSON.parse(repair.detalleControles || "[]")
             .map(
               (element: string) =>
-                `<div class="TypographyBody1">- ${element}</div>`
+                `<div class="TypographyBody1">- ${element}</div>`,
             )
             .join("")}
       `
@@ -340,10 +340,10 @@ export default function generateClientOrderHtml(repair: any): string {
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
                   $${Number(
-                    calculoVO.getPrecioFinalForReparaciones(el.precioVenta)
+                    calculoVO.getPrecioFinalForReparaciones(el.precioVenta),
                   ).toLocaleString("es-AR")}
                 </div>
-              `
+              `,
           )
           .join("")}
         ${repair.repuestosUsados
@@ -358,10 +358,10 @@ export default function generateClientOrderHtml(repair: any): string {
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
                   $${Number(
-                    calculoVO.getPrecioFinalForRepuestos(el.precioVenta)
+                    calculoVO.getPrecioFinalForRepuestos(el.precioVenta),
                   ).toLocaleString("es-AR")}
                 </div>
-            `
+            `,
           )
           .join("")}
         </div>
@@ -374,19 +374,8 @@ export default function generateClientOrderHtml(repair: any): string {
         <div class="TypographyBody1" style="font-weight: bold;">
           Mano de Obra
         </div>
-        <div class="TypographyBody1" style="text-align: right;font-weight: bold;">
-          Importe
-        </div>
-        ${calculoVO.manoDeObraForRecibosDiscriminado.map(
-          (t) => `
-            <div class="TypographyBody1">
-              ${t.descripcion}
-            </div>
-            <div class="TypographyBody1" style="text-align: right;">
-              $${t.precioUnitario.toLocaleString("es-AR")}
-            </div>
-          `
-        ).join("")}
+        <div class="TypographyBody1" style="text-align: right;">
+          $${calculoVO.manoDeObraForRecibos.toLocaleString("es-AR")}
         </div>
         <hr class="divider" style="border-color: rgba(0, 0, 0, 0.12);"/>
         <div style='
@@ -441,10 +430,10 @@ export default function generateClientOrderHtml(repair: any): string {
           justify-content: space-between; margin-bottom: 20px; margin-right: 15px;">
           <div style="font-weight: bold;">
             <p>Total abonado hasta el momento (en pesos): <strong>${getFormattedPrice(
-              Math.min(calculoVO.totalPagado, calculoVO.total)
+              Math.min(calculoVO.totalPagado, calculoVO.total),
             )}</strong></p>
             <p>Resta pagar (en pesos): <strong>${getFormattedPrice(
-              Math.max(0, calculoVO.deuda)
+              Math.max(0, calculoVO.deuda),
             )}</strong></p>
           </div>
           ${(() => {

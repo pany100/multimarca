@@ -21,6 +21,8 @@ function TrabajoDeListaForm({ initialManoDeObra }: TrabajoDeListaFormProps) {
     setPrecioUnitario,
     diasParaRecordatorio,
     setDiasParaRecordatorio,
+    pdfName,
+    setPdfName,
     setDescripcion,
   } = useTrabajosContext();
   return (
@@ -34,6 +36,7 @@ function TrabajoDeListaForm({ initialManoDeObra }: TrabajoDeListaFormProps) {
             setDescripcion(option?.object.name);
             setPrecioUnitario(Number(option?.object.sellPrice));
             setDiasParaRecordatorio(null);
+            setPdfName(option?.object.pdfName ?? "");
           }}
           initialValue={initialManoDeObra?.id.toString()}
         />
@@ -44,6 +47,14 @@ function TrabajoDeListaForm({ initialManoDeObra }: TrabajoDeListaFormProps) {
           type="number"
           value={precioUnitario || ""}
           onChange={(e) => setPrecioUnitario(Number(e.target.value))}
+        />
+      </Grid>
+      <Grid item xs={12} sx={{ mb: 1 }}>
+        <ORepTextField
+          label="Nombre del PDF (opcional)"
+          value={pdfName || ""}
+          onChange={(e) => setPdfName(e.target.value)}
+          placeholder="-"
         />
       </Grid>
       <Grid item xs={12} sx={{ mb: 1 }}>

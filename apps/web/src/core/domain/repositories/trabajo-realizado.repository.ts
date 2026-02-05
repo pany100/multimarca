@@ -7,6 +7,7 @@ export interface TrabajoRealizadoRepository {
       precioUnitario: number;
       descripcion: string;
       diasParaRecordatorio?: number | null;
+      pdfName?: string | null;
     },
     deps?: { tx?: any }
   ): Promise<any>;
@@ -17,6 +18,7 @@ export interface TrabajoRealizadoRepository {
       precioUnitario?: number;
       descripcion?: string;
       diasParaRecordatorio?: number | null;
+      pdfName?: string | null;
     },
     deps?: { tx?: any }
   ): Promise<any>;

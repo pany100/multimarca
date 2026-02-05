@@ -8,6 +8,7 @@ interface TrabajoRealizado {
   precioUnitario: number;
   descripcion: string;
   diasParaRecordatorio?: number | null;
+  pdfName?: string | null;
 }
 
 export const useTrabajosPresupuestoManager = () => {
@@ -24,6 +25,7 @@ export const useTrabajosPresupuestoManager = () => {
     precioUnitario: number;
     descripcion: string;
     diasParaRecordatorio?: number | null;
+    pdfName?: string | null;
     manoDeObra?: { name: string };
   }) => {
     setLoading(true);
@@ -78,6 +80,7 @@ export const useTrabajosPresupuestoManager = () => {
       precioUnitario?: number;
       descripcion?: string;
       diasParaRecordatorio?: number | null;
+      pdfName?: string | null;
       manoDeObra?: { name: string };
     }
   ) => {
