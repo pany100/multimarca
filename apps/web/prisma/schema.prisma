@@ -148,6 +148,18 @@ model PrestamoHerramientas {
   devuelto    Boolean  @default(false)
 }
 
+model InformacionSensible {
+  id          Int      @id @default(autoincrement())
+  titulo      String  @db.VarChar(200)
+  texto       String  @db.Text
+}
+
+model InformacionGeneral {
+  id          Int      @id @default(autoincrement())
+  titulo      String  @db.VarChar(200)
+  texto       String  @db.Text
+}
+
 model Empleado {
   id                Int                       @id @default(autoincrement())
   name              String                    @unique @db.VarChar(150)

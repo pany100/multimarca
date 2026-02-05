@@ -1,9 +1,13 @@
-import { PrestamoHerramientasRepository } from "@/core/domain/repositories/prestamo-herramientas.repository";
+import {
+  ListPrestamoHerramientasParams,
+  PrestamoHerramientasRepository,
+} from "@/core/domain/repositories/prestamo-herramientas.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import {
   CreatePrestamoHerramientasData,
   UpdatePrestamoHerramientasData,
 } from "@/core/infrastructure/validation/schemas/prestamo-herramientas.schema";
+import { PageResult, prismaPaged } from "@/shared/utils/pagination";
 import { PrestamoHerramientas } from "@prisma/client";
 
 export class PrismaPrestamoHerramientasRepository
@@ -25,6 +29,33 @@ export class PrismaPrestamoHerramientasRepository
     return prisma.prestamoHerramientas.findUnique({
       where: { id },
     });
+  }
+
+  async listPaged<T = PrestamoHerramientas>({
+    page,
+    size,
+    query = "",
+  }: ListPrestamoHerramientasParams): Promise<PageResult<T>> {
+    const where: any = {};
+
+    if (query) {
+      const queryNum = parseInt(query);
+      where.OR = [
+        ...(queryNum ? [{ id: queryNum }] : []),
+        { nombre: { contains: query } },
+        { herramienta: { contains: query } },
+      ];
+    }
+
+    return prismaPaged<T>(
+      prisma.prestamoHerramientas,
+      {
+        where,
+        orderBy: { fecha: "desc" },
+      },
+      page,
+      size
+    );
   }
 
   update(data: UpdatePrestamoHerramientasData): Promise<PrestamoHerramientas> {

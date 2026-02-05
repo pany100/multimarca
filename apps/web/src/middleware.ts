@@ -43,6 +43,8 @@ export const config = {
     "/api/extracciones/:path*",
     "/api/gastos/:path*",
     "/api/ingresos-reparacion/:path*",
+    "/api/informacion-general/:path*",
+    "/api/informacion-sensible/:path*",
     "/api/mano-de-obra/:path*",
     "/api/mecanicos/:path*",
     "/api/recordatorios-whatsapp/:path*",
