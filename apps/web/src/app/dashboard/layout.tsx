@@ -227,7 +227,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const menuSections = useMemo(
     () => [
       {
-        title: "Administración de Usuarios",
+        title: "Administración general",
         icono: <PeopleIcon />,
         items: [
           {
@@ -247,6 +247,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Colaboradores",
             icono: <BuildIcon />,
             ruta: "/dashboard/mecanicos",
+          },
+          {
+            permiso: "AdministracionGeneral",
+            texto: "Préstamo De Herramientas",
+            icono: <HandymanIcon />,
+            ruta: "/dashboard/prestamo-herramientas",
           },
         ],
       },

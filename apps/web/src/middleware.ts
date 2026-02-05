@@ -50,6 +50,7 @@ export const config = {
     "/api/orden-reparacion/:path*",
     "/api/pago-a-mecanico/:path*",
     "/api/permisos/:path*",
+    "/api/prestamo-herramientas/:path*",
     "/api/proveedores/:path*",
     "/api/roles/:path*",
     "/api/ventas/:path*",

@@ -140,6 +140,14 @@ model Proveedor {
   @@index([cuit])
 }
 
+model PrestamoHerramientas {
+  id          Int      @id @default(autoincrement())
+  nombre      String   @db.VarChar(150)
+  fecha       DateTime
+  herramienta String  @db.Text
+  devuelto    Boolean  @default(false)
+}
+
 model Empleado {
   id                Int                       @id @default(autoincrement())
   name              String                    @unique @db.VarChar(150)
