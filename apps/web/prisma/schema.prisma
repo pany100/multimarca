@@ -115,6 +115,7 @@ model ControlMecanico {
 model ManoDeObra {
   id        Int      @id @default(autoincrement())
   name      String   @unique @db.VarChar(250)
+  pdfName   String?
   sellPrice Decimal? @db.Decimal(10, 2)
 
   @@index([name])
@@ -621,6 +622,7 @@ model TrabajoRealizado {
   presupuestoId          Int?
   precioUnitario         Decimal               @db.Decimal(10, 2)
   descripcion            String                @db.Text
+  pdfName                String?
   diasParaRecordatorio   Int?
   plantillaPresupuestoId Int?
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionTrabajosRealizados", fields: [ordenReparacionId], references: [id], onDelete: Cascade)

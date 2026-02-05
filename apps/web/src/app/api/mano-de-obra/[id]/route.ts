@@ -1,83 +1,48 @@
+import { DeleteManoDeObraUseCase } from "@/core/application/use-cases/mano-de-obra/delete-mano-de-obra.use-case";
+import { GetManoDeObraByIdUseCase } from "@/core/application/use-cases/mano-de-obra/get-mano-de-obra-by-id.use-case";
+import { UpdateManoDeObraUseCase } from "@/core/application/use-cases/mano-de-obra/update-mano-de-obra.use-case";
+import { PrismaManoDeObraRepository } from "@/core/infrastructure/database/repositories/prisma-mano-de-obra.repository";
+import {
+  getManoDeObraByIdSchema,
+  updateManoDeObraSchema,
+} from "@/core/infrastructure/validation/schemas/mano-de-obra.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
-import prisma from "src/lib/prisma";
 
-export async function PUT(
-  request: Request,
-  { params }: { params: { id: string } }
-) {
-  try {
-    const id = parseInt(params.id);
-    const body = await request.json();
-    const { name, sellPrice } = body;
-
-    if (!name || typeof name !== "string") {
-      return NextResponse.json(
-        { error: "Nombre de trabajo inválido o faltante" },
-        { status: 400 }
-      );
-    }
-
-    if (isNaN(parseFloat(sellPrice))) {
-      return NextResponse.json(
-        { error: "Precio de venta inválido" },
-        { status: 400 }
-      );
-    }
-
-    const sellPriceNumber = parseFloat(sellPrice);
-
-    const trabajoActualizado = await prisma.manoDeObra.update({
-      where: { id },
-      data: {
-        name,
-        sellPrice: sellPriceNumber,
-      },
-    });
-
-    return NextResponse.json(trabajoActualizado);
-  } catch (error) {
-    console.error("Error al actualizar trabajo de mano de obra:", error);
-    return NextResponse.json(
-      { error: "Error al actualizar el trabajo de mano de obra" },
-      { status: 500 }
-    );
-  }
-}
+const repository = new PrismaManoDeObraRepository();
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
-
-    if (isNaN(id)) {
-      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
-    }
-
-    const trabajo = await prisma.manoDeObra.findUnique({
-      where: { id },
-      select: {
-        id: true,
-        name: true,
-        sellPrice: true,
-      },
-    });
-
-    if (!trabajo) {
-      return NextResponse.json(
-        { error: "Trabajo de mano de obra no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(trabajo);
-  } catch (error) {
-    console.error("Error al obtener trabajo de mano de obra:", error);
-    return NextResponse.json(
-      { error: "Error al obtener el trabajo de mano de obra" },
-      { status: 500 }
+    const { id } = params;
+    const { id: parsedId } = await validateRequest(
+      { id },
+      getManoDeObraByIdSchema
     );
+    const result = await new GetManoDeObraByIdUseCase(repository).execute(
+      parsedId
+    );
+    return NextResponse.json(result);
+  } catch (e) {
+    return handleApiError(e);
+  }
+}
+
+export async function PUT(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const { id } = params;
+    const body = await request.json();
+    const dto = await validateRequest({ id, ...body }, updateManoDeObraSchema);
+    const result = await new UpdateManoDeObraUseCase(repository).execute(dto);
+    return NextResponse.json(result);
+  } catch (e) {
+    return handleApiError(e);
   }
 }
 
@@ -86,27 +51,16 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
-
-    const trabajoEliminado = await prisma.manoDeObra.delete({
-      where: { id },
-    });
-
-    if (!trabajoEliminado) {
-      return NextResponse.json(
-        { error: "Trabajo de mano de obra no encontrado" },
-        { status: 404 }
-      );
-    }
-
+    const { id } = params;
+    const { id: parsedId } = await validateRequest(
+      { id },
+      getManoDeObraByIdSchema
+    );
+    await new DeleteManoDeObraUseCase(repository).execute(parsedId);
     return NextResponse.json({
       message: "Trabajo de mano de obra eliminado con éxito",
     });
-  } catch (error) {
-    console.error("Error al eliminar trabajo de mano de obra:", error);
-    return NextResponse.json(
-      { error: "Error al eliminar el trabajo de mano de obra" },
-      { status: 500 }
-    );
+  } catch (e) {
+    return handleApiError(e);
   }
 }

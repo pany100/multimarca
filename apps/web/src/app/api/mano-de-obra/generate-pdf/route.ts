@@ -1,3 +1,6 @@
+import { generatePdfManoDeObraSchema } from "@/core/infrastructure/validation/schemas/mano-de-obra.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -6,13 +9,15 @@ import puppeteer from "puppeteer";
 
 export async function POST(request: NextRequest) {
   try {
-    const { trabajosData } = await request.json();
+    const body = await request.json();
+    const { trabajosData } = await validateRequest(
+      body,
+      generatePdfManoDeObraSchema,
+    );
 
-    // Launch a browser instance
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
 
-    // Generate HTML content for the PDF
     const htmlContent = `
       <!DOCTYPE html>
       <html>
@@ -62,6 +67,7 @@ export async function POST(request: NextRequest) {
         </head>
         <body>
           <h1>Lista de Mano de Obra</h1>
+          <div style="text-align: center; font-size: 12px; margin-bottom: 10px; color: #666;">Precios no incluyen IVA</div>
           <div class="date">
             Fecha: ${format(new Date(), "PPP", { locale: es })}
           </div>
@@ -75,12 +81,12 @@ export async function POST(request: NextRequest) {
             <tbody>
               ${trabajosData
                 .map(
-                  (item: any) => `
+                  (item) => `
                 <tr>
                   <td>${item.name}</td>
-                  <td>${getFormattedPrice(item.sellPrice)}</td>
+                  <td>${getFormattedPrice(item.sellPrice ?? 0)}</td>
                 </tr>
-              `
+              `,
                 )
                 .join("")}
             </tbody>
@@ -94,10 +100,8 @@ export async function POST(request: NextRequest) {
       </html>
     `;
 
-    // Set the HTML content
     await page.setContent(htmlContent);
 
-    // Generate PDF
     const pdfBuffer = await page.pdf({
       format: "A4",
       printBackground: true,
@@ -109,26 +113,19 @@ export async function POST(request: NextRequest) {
       },
     });
 
-    // Close the browser
     await browser.close();
 
-    // Return the PDF as a response - convert Buffer to Uint8Array for compatibility
     return new Response(new Uint8Array(pdfBuffer), {
       headers: {
         "Content-Type": "application/pdf",
         "Content-Disposition": `attachment; filename="ManoDeObra_${format(
           new Date(),
-          "yyyy-MM-dd"
+          "yyyy-MM-dd",
         )}.pdf"`,
       },
     });
-  } catch (error) {
-    console.error("Error generating PDF:", error);
-    return new Response(JSON.stringify({ error: "Error generating PDF" }), {
-      status: 500,
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+  } catch (e) {
+    const response = handleApiError(e);
+    return response;
   }
 }

@@ -1,43 +1,28 @@
+import { UpdateAllPreciosManoDeObraUseCase } from "@/core/application/use-cases/mano-de-obra/update-all-precios-mano-de-obra.use-case";
+import { PrismaManoDeObraRepository } from "@/core/infrastructure/database/repositories/prisma-mano-de-obra.repository";
+import { updateAllManoDeObraSchema } from "@/core/infrastructure/validation/schemas/mano-de-obra.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
-import prisma from "src/lib/prisma";
+
+const repository = new PrismaManoDeObraRepository();
 
 export async function PUT(request: Request) {
   try {
     const body = await request.json();
-    const { porcentajeAumento } = body;
-
-    if (
-      isNaN(porcentajeAumento) ||
-      porcentajeAumento < 0 ||
-      porcentajeAumento > 100
-    ) {
-      return NextResponse.json(
-        { error: "El porcentaje de aumento debe ser un número entre 0 y 100" },
-        { status: 400 }
+    const { porcentajeAumento } = await validateRequest(
+      body,
+      updateAllManoDeObraSchema
+    );
+    const trabajosActualizados =
+      await new UpdateAllPreciosManoDeObraUseCase(repository).execute(
+        porcentajeAumento
       );
-    }
-
-    const factorAumento = 1 + porcentajeAumento / 100;
-
-    const trabajosActualizados = await prisma.$executeRaw`
-    UPDATE ManoDeObra
-    SET sellPrice = 
-      CASE 
-        WHEN ROUND(sellPrice * ${factorAumento}, 2) % 1000 > 0 
-        THEN CEILING(ROUND(sellPrice * ${factorAumento}, 2) / 1000) * 1000
-        ELSE ROUND(sellPrice * ${factorAumento}, 2)
-      END
-  `;
-
     return NextResponse.json({
       mensaje: "Precios de mano de obra actualizados con éxito",
-      trabajosActualizados: trabajosActualizados,
+      trabajosActualizados,
     });
-  } catch (error) {
-    console.error("Error al actualizar precios de mano de obra:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+  } catch (e) {
+    return handleApiError(e);
   }
 }

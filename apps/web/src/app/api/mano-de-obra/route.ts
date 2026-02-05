@@ -1,90 +1,46 @@
+import { CreateManoDeObraUseCase } from "@/core/application/use-cases/mano-de-obra/create-mano-de-obra.use-case";
+import { ListManoDeObraUseCase } from "@/core/application/use-cases/mano-de-obra/list-mano-de-obra.use-case";
+import { PrismaManoDeObraRepository } from "@/core/infrastructure/database/repositories/prisma-mano-de-obra.repository";
+import {
+  createManoDeObraSchema,
+  listManoDeObraQuerySchema,
+} from "@/core/infrastructure/validation/schemas/mano-de-obra.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
-import prisma from "src/lib/prisma";
+
+const repository = new PrismaManoDeObraRepository();
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "0");
-    const size = parseInt(searchParams.get("size") || "10");
-    const query = searchParams.get("query") || "";
-
-    const skip = page * size;
-
-    let whereClause = {};
-    if (query) {
-      const orConditions: any[] = [{ name: { contains: query } }];
-
-      // Only search by ID if the query is purely numeric
-      const numericQuery = parseInt(query);
-      if (!isNaN(numericQuery) && query.trim() === numericQuery.toString()) {
-        orConditions.push({ id: { equals: numericQuery } });
-      }
-
-      whereClause = { OR: orConditions };
-    }
-
-    const [trabajos, total] = await Promise.all([
-      prisma.manoDeObra.findMany({
-        where: whereClause,
-        skip,
-        take: size,
-        orderBy: { name: "asc" },
-      }),
-      prisma.manoDeObra.count({
-        where: whereClause,
-      }),
-    ]);
-
-    return NextResponse.json({
-      items: trabajos,
-      total,
-      page,
-      size,
-      totalPages: Math.ceil(total / size),
-    });
-  } catch (error) {
-    console.error("Error al obtener trabajos de mano de obra:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
+    const parsed = await validateRequest(
+      {
+        page: searchParams.get("page") ?? "0",
+        size: searchParams.get("size") ?? "10",
+        query: searchParams.get("query") ?? "",
+      },
+      listManoDeObraQuerySchema
     );
+    const query = {
+      page: parsed.page ?? 0,
+      size: parsed.size ?? 10,
+      query: parsed.query ?? "",
+    };
+    const result = await new ListManoDeObraUseCase(repository).execute(query);
+    return NextResponse.json(result);
+  } catch (e) {
+    return handleApiError(e);
   }
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, sellPrice } = body;
-
-    if (!name || typeof name !== "string") {
-      return NextResponse.json(
-        { error: "Nombre de trabajo inválido o faltante" },
-        { status: 400 }
-      );
-    }
-
-    if (isNaN(parseFloat(sellPrice))) {
-      return NextResponse.json(
-        { error: "Precio de venta inválido" },
-        { status: 400 }
-      );
-    }
-
-    const sellPriceNumber = parseFloat(sellPrice);
-
-    const nuevoTrabajo = await prisma.manoDeObra.create({
-      data: {
-        name,
-        sellPrice: sellPriceNumber,
-      },
-    });
-
-    return NextResponse.json(nuevoTrabajo, { status: 201 });
-  } catch (error) {
-    console.error("Error al crear trabajo de mano de obra:", error);
-    return NextResponse.json(
-      { error: "No se pudo crear el trabajo de mano de obra" },
-      { status: 500 }
-    );
+    const dto = await validateRequest(body, createManoDeObraSchema);
+    const result = await new CreateManoDeObraUseCase(repository).execute(dto);
+    return NextResponse.json(result, { status: 201 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }

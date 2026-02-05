@@ -13,6 +13,12 @@ function ManoDeObraTable({
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "name", headerName: "Nombre del Trabajo", flex: 2 },
     {
+      field: "pdfName",
+      headerName: "Nombre en pdf",
+      flex: 1,
+      renderCell: (params: any) => (params.value?.trim() ? params.value : "-"),
+    },
+    {
       field: "sellPrice",
       headerName: "Precio de Venta",
       flex: 1,
