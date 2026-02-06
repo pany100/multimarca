@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `CertificadoEstudio` ADD COLUMN `descripcion` TEXT NULL,
+    ADD COLUMN `fecha` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3);

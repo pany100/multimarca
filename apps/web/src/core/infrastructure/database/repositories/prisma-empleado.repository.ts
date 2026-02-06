@@ -58,6 +58,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         horasExtra: true,
         premios: true,
         apercibimientos: true,
+        certificadosEstudio: true,
       },
     });
   }

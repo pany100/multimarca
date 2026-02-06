@@ -183,6 +183,7 @@ model Empleado {
   curriculumPath String?                   @db.VarChar(1000)
   fechaBaja                   DateTime?
   ausenciasProgramadas        AusenciaProgramada[]
+  certificadosEstudio         CertificadoEstudio[]
 
   gastosRealizados  Gasto[]
   ordenesReparacion OrdenReparacionMecanico[]
@@ -196,6 +197,18 @@ model Empleado {
   @@index([dni])
   @@index([dni], map: "Mecanico_dni_idx")
   @@index([name], map: "Mecanico_name_idx")
+}
+
+model CertificadoEstudio {
+  id         Int      @id @default(autoincrement())
+  empleadoId Int
+  nombre     String?  @db.VarChar(255)
+  ruta       String?  @db.VarChar(1000)
+  fecha            DateTime    @default(now())
+  descripcion      String?      @db.Text
+  empleado   Empleado @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
+
+  @@index([empleadoId])
 }
 
 model Premio {
