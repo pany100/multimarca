@@ -3,7 +3,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import * as yup from "yup";
 import useSueldoPersistence from "../hooks/useSueldoPersistence";
 import SueldoForm from "../SueldoForm";
 import { schema } from "./NewSueldoForm";
@@ -21,8 +20,8 @@ function EditSueldoForm({ id }: Props) {
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      fecha: null,
-      monto: "",
+      fecha: undefined as Date | undefined,
+      monto: undefined as number | undefined,
       descripcion: "",
     },
   });
@@ -45,12 +44,12 @@ function EditSueldoForm({ id }: Props) {
 
   useEffect(() => {
     if (sueldo) {
-      const montoNum = sueldo.monto != null ? Number(sueldo.monto) : "";
       methods.reset({
-        fecha: sueldo.fecha
-          ? new Date(sueldo.fecha).toISOString().split("T")[0]
-          : null,
-        monto: montoNum,
+        fecha: sueldo.fecha ? new Date(sueldo.fecha) : undefined,
+        monto:
+          sueldo.monto != null && sueldo.monto !== ""
+            ? Number(sueldo.monto)
+            : undefined,
         descripcion: sueldo.descripcion ?? "",
       });
     }
