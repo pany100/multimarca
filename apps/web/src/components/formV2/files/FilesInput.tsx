@@ -51,7 +51,7 @@ function FilesInput({
   };
 
   const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
+    event: React.ChangeEvent<HTMLInputElement>,
   ) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -100,7 +100,12 @@ function FilesInput({
           alt="Imagen seleccionada"
           width={300}
           height={200}
-          style={{ width: "300px", height: "auto", borderRadius: "8px" }}
+          style={{
+            width: "300px",
+            height: "auto",
+            borderRadius: "8px",
+            marginBottom: "10px",
+          }}
         />
       );
     }

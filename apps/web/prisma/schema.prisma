@@ -479,6 +479,7 @@ model Venta {
   descripcionIncremento String?               @db.VarChar(255)
   porcentajeRecargo     Decimal               @default(0.00) @db.Decimal(10, 2)
   estado                EstadoVenta           @default(Borrador)
+  cedulaFile            CustomFile?           @relation("VentaCedula")
   ingresos              IngresoPorVenta[]     @relation("VentaIngresos")
   reparacionesDeTercero ReparacionDeTercero[] @relation("VentaReparacionTercero")
   repuestosUsados       RepuestoUsado[]       @relation("VentaRepuestos")
@@ -557,9 +558,13 @@ model CustomFile {
   ordenReparacionId     Int?                 @unique
   reciboORepId          Int?
   reparacionDeTerceroId Int?                 @unique
+  presupuestoCedulaId   Int?                 @unique
+  ventaCedulaId         Int?                 @unique
   ordenReparacion       OrdenReparacion?     @relation("ORepScanner", fields: [ordenReparacionId], references: [id])
   reciboDeORep          OrdenReparacion?     @relation("ORepRecibos", fields: [reciboORepId], references: [id])
   reparacionDeTercero   ReparacionDeTercero? @relation("ReparacionDeTerceroRecibos", fields: [reparacionDeTerceroId], references: [id])
+  presupuestoCedula     Presupuesto?         @relation("PresupuestoCedula", fields: [presupuestoCedulaId], references: [id])
+  ventaCedula           Venta?               @relation("VentaCedula", fields: [ventaCedulaId], references: [id])
 
   @@index([status])
   @@index([reciboORepId], map: "CustomFile_reciboORepId_fkey")
@@ -585,6 +590,7 @@ model Presupuesto {
   incremento            Decimal               @default(0.00) @db.Decimal(10, 2)
   descripcionIncremento String?               @db.VarChar(255)
   estado                EstadoPresupuesto     @default(EnPreparacion)
+  cedulaFile            CustomFile?           @relation("PresupuestoCedula")
   administrativo        Usuario?              @relation("PresupuestoAdministrativo", fields: [administrativoId], references: [id])
   auto                  Auto?                 @relation("AutoPresupuesto", fields: [autoId], references: [id])
   creador               Usuario?              @relation("PresupuestoCreador", fields: [creadorId], references: [id])

@@ -6,6 +6,7 @@ interface NuevoPresupuestoFormData {
   autoId?: number | null;
   informacionAuto?: string;
   informacionCliente?: string;
+  cedulaFilePath?: string | null;
   observacionesCliente: string;
 }
 
@@ -28,6 +29,7 @@ export const useNuevoPresupuestoHandlers = ({
         autoId: data.autoId,
         informacionAuto: data.informacionAuto,
         informacionCliente: data.informacionCliente,
+        cedulaFilePath: data.cedulaFilePath,
         observacionesCliente: data.observacionesCliente,
       });
 

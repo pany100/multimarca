@@ -14,6 +14,7 @@ export const useUpdatePresupuestoGeneralInfo = () => {
       fechaRespuesta?: string | null;
       informacionAuto?: string;
       informacionCliente?: string;
+      cedulaFilePath?: string | null;
       observacionesCliente?: string;
     }
   ) => {

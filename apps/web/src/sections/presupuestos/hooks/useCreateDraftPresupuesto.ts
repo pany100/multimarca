@@ -5,6 +5,7 @@ interface CreateDraftPresupuestoData {
   autoId?: number | null;
   informacionAuto?: string;
   informacionCliente?: string;
+  cedulaFilePath?: string | null;
   observacionesCliente: string;
 }
 

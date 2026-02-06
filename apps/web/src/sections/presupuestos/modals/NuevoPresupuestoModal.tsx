@@ -3,12 +3,14 @@
 import CommonModalForm from "@/components/commons/CommonModalForm";
 import CustomAutocompleteInput from "@/components/formV2/CustomAutocomplete";
 import CustomInputText from "@/components/formV2/CustomInputText";
+import FilesInput from "@/components/formV2/files/FilesInput";
+import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
 import { useGlobalModal } from "@/sections/commons/contexts/GlobalModalContext";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Grid, Tab, Tabs } from "@mui/material";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import * as yup from "yup";
 import { useNuevoPresupuestoHandlers } from "../hooks/useNuevoPresupuestoHandlers";
 
@@ -23,7 +25,7 @@ const schema = yup.object({
       function (value) {
         const { informacionAuto } = this.parent;
         return !!value || !!informacionAuto;
-      }
+      },
     ),
   informacionAuto: yup
     .string()
@@ -35,9 +37,10 @@ const schema = yup.object({
       function (value) {
         const { autoId } = this.parent;
         return !!autoId || !!value;
-      }
+      },
     ),
   informacionCliente: yup.string().nullable().optional(),
+  cedulaFilePath: yup.string().nullable().optional(),
   observacionesCliente: yup
     .string()
     .required("Las observaciones del cliente son requeridas"),
@@ -53,6 +56,7 @@ const NuevoPresupuestoModal = ({
   refreshTable,
 }: NuevoPresupuestoModalProps) => {
   const { isOpen, hideModal } = useGlobalModal();
+  const { setSnackbar } = useSnackbarContext();
   const { searchAutos, initialAuto } = useAutosAutocomplete();
   const [tabValue, setTabValue] = useState(0);
 
@@ -62,6 +66,7 @@ const NuevoPresupuestoModal = ({
       autoId: null,
       informacionAuto: "",
       informacionCliente: "",
+      cedulaFilePath: null,
       observacionesCliente: "",
     },
   });
@@ -79,7 +84,7 @@ const NuevoPresupuestoModal = ({
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
-    // Limpiar los campos del otro tab cuando se cambia
+    // Limpiar los campos del otro tab cuando se cambia (cedulaFilePath se mantiene)
     if (newValue === 0) {
       methods.setValue("informacionAuto", "");
       methods.setValue("informacionCliente", "");
@@ -137,6 +142,36 @@ const NuevoPresupuestoModal = ({
               <CustomInputText
                 name="informacionCliente"
                 label="Datos del cliente"
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <Controller
+                name="cedulaFilePath"
+                control={methods.control}
+                render={({ field }) => (
+                  <Box
+                    sx={{
+                      border: 1,
+                      borderColor: "divider",
+                      p: 2,
+                      borderRadius: 1,
+                    }}
+                  >
+                    <FilesInput
+                      label="Cédula (imagen)"
+                      filePath={field.value || null}
+                      setFilePath={field.onChange}
+                      acceptedTypes="images"
+                      onErrorUploading={(error) =>
+                        setSnackbar({
+                          open: true,
+                          message: error,
+                          severity: "error",
+                        })
+                      }
+                    />
+                  </Box>
+                )}
               />
             </Grid>
           </>

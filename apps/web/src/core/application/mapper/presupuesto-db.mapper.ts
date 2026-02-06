@@ -56,6 +56,16 @@ export class PresupuestoDBMapper {
         tareasAdministrativas: {
           create: presupuesto.tareasAdministrativas,
         },
+        ...(presupuesto.cedulaTempPath &&
+          presupuesto.autoId == null && {
+            cedulaFile: {
+              create: {
+                tempPath: presupuesto.cedulaTempPath,
+                finalPath: null,
+                status: EstadoArchivo.Pendiente,
+              },
+            },
+          }),
       },
       include: {
         auto: {
@@ -64,6 +74,7 @@ export class PresupuestoDBMapper {
           },
         },
         dolar: true,
+        cedulaFile: true,
         repuestosUsados: {
           include: {
             stock: true,

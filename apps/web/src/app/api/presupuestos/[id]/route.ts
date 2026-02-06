@@ -44,8 +44,12 @@ export async function GET(
       })
     );
 
+    const cedulaPath =
+      presupuesto.cedulaFile?.finalPath || presupuesto.cedulaFile?.tempPath || null;
+
     return NextResponse.json({
       ...presupuesto,
+      cedulaPath,
       reparacionesDeTercero,
       total: comprobanteCalculado.total,
       totalManoDeObra: comprobanteCalculado.totalManoDeObra,

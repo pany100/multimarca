@@ -19,6 +19,7 @@ export type PresupuestoProps = {
   detallesDeTrabajo: string | null;
   informacionAuto: string | null;
   informacionCliente: string | null;
+  cedulaTempPath?: string | null;
   estado: string;
   dolarId?: number | null;
   descuento?: number;
@@ -45,6 +46,7 @@ export class PresupuestoVO {
     public readonly detallesDeTrabajo: string | null = null,
     public readonly informacionAuto: string | null = null,
     public readonly informacionCliente: string | null = null,
+    public readonly cedulaTempPath: string | null = null,
     public readonly estado: EstadoPresupuesto,
     public readonly dolarId: number | null = null,
     public readonly descuento: number = 0,
@@ -71,6 +73,7 @@ export class PresupuestoVO {
       props.detallesDeTrabajo,
       props.informacionAuto,
       props.informacionCliente,
+      props.cedulaTempPath ?? null,
       props.estado as EstadoPresupuesto,
       props.dolarId,
       props.descuento,

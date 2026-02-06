@@ -5,7 +5,7 @@ import {
 } from "@/core/domain/repositories/presupuesto.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
-import { Presupuesto, Prisma } from "@prisma/client";
+import { EstadoArchivo, Presupuesto, Prisma } from "@prisma/client";
 
 export class PrismaPresupuestoRepository implements PresupuestoRepository {
   async listPaged<T = any>({
@@ -111,6 +111,7 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
         administrativo: true,
         creador: true,
         dolar: true,
+        cedulaFile: true,
         reparacionesDeTercero: {
           include: {
             proveedor: true,
@@ -189,6 +190,7 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
       detallesDeTrabajo?: string | null;
       informacionAuto?: string | null;
       informacionCliente?: string | null;
+      cedulaFilePath?: string | null;
       estado?: string;
       fecha?: Date;
       fechaRespuesta?: Date | null;
@@ -201,6 +203,51 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
       descripcionIncremento?: string | null;
     }
   ): Promise<PresupuestoWithRelations> {
+    const currentPresupuesto = await prisma.presupuesto.findUnique({
+      where: { id },
+      select: { cedulaFile: true },
+    });
+
+    // Cedula: si hay autoId (vehículo existente) borramos cedula si existía; no guardamos cedulaFilePath. Si no hay autoId (vehículo nuevo) y se envía cedulaFilePath, crear/actualizar CustomFile.
+    if (dto.autoId != null) {
+      if (currentPresupuesto?.cedulaFile) {
+        await prisma.customFile.update({
+          where: { id: currentPresupuesto.cedulaFile.id },
+          data: {
+            presupuestoCedulaId: null,
+            status: EstadoArchivo.ListoParaBorrar,
+          },
+        });
+      }
+    } else if (dto.cedulaFilePath !== undefined) {
+      const existingCedula = currentPresupuesto?.cedulaFile;
+      if (dto.cedulaFilePath) {
+        if (existingCedula) {
+          await prisma.customFile.update({
+            where: { id: existingCedula.id },
+            data: {
+              presupuestoCedulaId: null,
+              status: EstadoArchivo.ListoParaBorrar,
+            },
+          });
+        }
+        await prisma.customFile.create({
+          data: {
+            tempPath: dto.cedulaFilePath,
+            presupuestoCedulaId: id,
+          },
+        });
+      } else if (existingCedula) {
+        await prisma.customFile.update({
+          where: { id: existingCedula.id },
+          data: {
+            presupuestoCedulaId: null,
+            status: EstadoArchivo.ListoParaBorrar,
+          },
+        });
+      }
+    }
+
     const dataToUpdate: any = {};
 
     // Solo incluir campos que están definidos en el dto
@@ -251,6 +298,7 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
         administrativo: true,
         creador: true,
         dolar: true,
+        cedulaFile: true,
         reparacionesDeTercero: {
           include: {
             proveedor: true,

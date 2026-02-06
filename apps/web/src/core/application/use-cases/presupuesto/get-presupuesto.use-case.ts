@@ -22,8 +22,12 @@ export class GetPresupuestoUseCase {
       })
     );
 
+    const cedulaPath =
+      presupuesto.cedulaFile?.finalPath || presupuesto.cedulaFile?.tempPath || null;
+
     return {
       ...presupuesto,
+      cedulaPath,
       reparacionesDeTercero,
       total: comprobanteCalculado.total,
       totalManoDeObra: comprobanteCalculado.totalManoDeObra,

@@ -3,7 +3,7 @@
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { CommonOrderCard } from "@/sections/ordenes-reparacion/admin/components/CommonOrderCard";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Divider, Grid } from "@mui/material";
+import { Box, Divider, Grid, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { ClienteInfoPresupuesto } from "./components/ClienteInfoPresupuesto";
@@ -40,6 +40,7 @@ const schema = yup.object({
       }
     ),
   informacionCliente: yup.string().nullable().optional(),
+  cedulaFilePath: yup.string().nullable().optional(),
   estado: yup.string().required("El estado es requerido"),
   fechaEnvio: yup.string().nullable().optional(),
   fechaRespuesta: yup.string().nullable().optional(),
@@ -62,6 +63,7 @@ const PresupuestoInformacionGeneral = () => {
       autoId: presupuesto.autoId,
       informacionAuto: presupuesto.informacionAuto || "",
       informacionCliente: presupuesto.informacionCliente || "",
+      cedulaFilePath: (presupuesto as { cedulaPath?: string | null }).cedulaPath ?? null,
       estado: presupuesto.estado,
       fechaEnvio: presupuesto.fechaEnvio
         ? presupuesto.fechaEnvio.toString().split("T")[0]
@@ -79,6 +81,7 @@ const PresupuestoInformacionGeneral = () => {
       autoId: presupuesto.autoId,
       informacionAuto: presupuesto.informacionAuto || "",
       informacionCliente: presupuesto.informacionCliente || "",
+      cedulaFilePath: (presupuesto as { cedulaPath?: string | null }).cedulaPath ?? null,
       estado: presupuesto.estado,
       fechaEnvio: presupuesto.fechaEnvio
         ? presupuesto.fechaEnvio.toString().split("T")[0]
@@ -99,6 +102,7 @@ const PresupuestoInformacionGeneral = () => {
           autoId: data.autoId,
           informacionAuto: data.informacionAuto || undefined,
           informacionCliente: data.informacionCliente || undefined,
+          cedulaFilePath: data.cedulaFilePath ?? undefined,
           estado: data.estado,
           fechaEnvio: data.fechaEnvio || null,
           fechaRespuesta: data.fechaRespuesta || null,
@@ -129,7 +133,18 @@ const PresupuestoInformacionGeneral = () => {
       onSubmit={handleSubmit}
       onOpen={handleOpenModal}
       loading={false}
-      formContent={<EditInformacionGeneralPresupuestoForm />}
+      formContent={
+        <EditInformacionGeneralPresupuestoForm
+          initialTab={presupuesto.autoId != null ? 0 : 1}
+          onErrorUploadingCedula={(error) =>
+            setSnackbar({
+              open: true,
+              message: error,
+              severity: "error",
+            })
+          }
+        />
+      }
       maxWidth="md"
     >
       {/* Primera fila: Cliente (izq) / Vehículo (der) */}
@@ -145,6 +160,30 @@ const PresupuestoInformacionGeneral = () => {
             vehiculo={presupuesto.auto}
             informacionAuto={presupuesto.informacionAuto}
           />
+          {(presupuesto as { cedulaPath?: string | null }).cedulaPath && (
+            <Box sx={{ mt: 2 }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 600, mb: 1, color: "text.secondary" }}
+              >
+                Cédula
+              </Typography>
+              <Box
+                component="img"
+                src={(presupuesto as { cedulaPath: string }).cedulaPath}
+                alt="Cédula"
+                sx={{
+                  display: "block",
+                  maxWidth: 200,
+                  width: "100%",
+                  height: "auto",
+                  borderRadius: 1,
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              />
+            </Box>
+          )}
         </Grid>
       </Grid>
 

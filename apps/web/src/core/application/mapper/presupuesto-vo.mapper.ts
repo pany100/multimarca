@@ -72,6 +72,7 @@ export class PresupuestoVOMapper {
       detallesDeTrabajo: input.detallesDeTrabajo || null,
       informacionAuto: input.informacionAuto || null,
       informacionCliente: input.informacionCliente || null,
+      cedulaTempPath: input.cedulaFilePath ?? null,
       estado: input.estado || EstadoPresupuesto.EnPreparacion,
       dolarId: dolar?.id,
       descuento: input.descuento,

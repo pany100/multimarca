@@ -1,11 +1,12 @@
 import CustomAutocompleteInput from "@/components/formV2/CustomAutocomplete";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
+import FilesInput from "@/components/formV2/files/FilesInput";
 import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import { Box, Divider, Grid, Tab, Tabs } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 
 const estadosPresupuesto = [
   { value: "EnPreparacion", label: "En Preparación" },
@@ -17,16 +18,26 @@ const estadosPresupuesto = [
   { value: "Descartado", label: "Descartado" },
 ];
 
-const EditInformacionGeneralPresupuestoForm = () => {
-  const { watch, setValue } = useFormContext();
+interface EditInformacionGeneralPresupuestoFormProps {
+  initialTab?: number;
+  onErrorUploadingCedula?: (error: string) => void;
+}
+
+const EditInformacionGeneralPresupuestoForm = ({
+  initialTab = 0,
+  onErrorUploadingCedula,
+}: EditInformacionGeneralPresupuestoFormProps) => {
+  const { watch, setValue, control } = useFormContext();
   const { searchAutos, initialAuto } = useAutosAutocomplete();
   const { presupuestoEstadoOptions } = useFixedSelectData();
 
   const autoId = watch("autoId");
   const informacionAuto = watch("informacionAuto");
-  const [tabValue, setTabValue] = useState(
-    autoId || (!autoId && !informacionAuto) ? 0 : 1
-  );
+  const [tabValue, setTabValue] = useState(initialTab);
+
+  useEffect(() => {
+    setTabValue(initialTab);
+  }, [initialTab]);
 
   // Cuando se selecciona un vehículo existente, limpiar información manual
   useEffect(() => {
@@ -80,6 +91,21 @@ const EditInformacionGeneralPresupuestoForm = () => {
             <CustomInputText
               name="informacionCliente"
               label="Datos del cliente"
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
+              name="cedulaFilePath"
+              control={control}
+              render={({ field }) => (
+                <FilesInput
+                  label="Cédula (imagen)"
+                  filePath={field.value || null}
+                  setFilePath={field.onChange}
+                  acceptedTypes="images"
+                  onErrorUploading={onErrorUploadingCedula}
+                />
+              )}
             />
           </Grid>
         </>
