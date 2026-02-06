@@ -35,6 +35,8 @@ export class PatchVentaUseCase {
     if (dto.porcentajeRecargo !== undefined)
       updateData.porcentajeRecargo = dto.porcentajeRecargo;
     if (dto.estado !== undefined) updateData.estado = dto.estado;
+    if (dto.cedulaFilePath !== undefined)
+      updateData.cedulaFilePath = dto.cedulaFilePath;
 
     // Delegar al repositorio la lógica de mapeo y actualización
     const venta = await this.ventaRepository.patchVenta(ventaId, updateData);
@@ -55,8 +57,12 @@ export class PatchVentaUseCase {
       0
     );
 
+    const cedulaPath =
+      venta.cedulaFile?.finalPath || venta.cedulaFile?.tempPath || null;
+
     return {
       ...venta,
+      cedulaPath,
       reparacionesDeTercero,
       precioTotal: comprobanteCalculado.total,
       total: comprobanteCalculado.total,

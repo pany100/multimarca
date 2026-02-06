@@ -25,8 +25,12 @@ export class GetVentaUseCase {
         el.precioVenta.toNumber()
       ),
     }));
+    const cedulaPath =
+      venta.cedulaFile?.finalPath || venta.cedulaFile?.tempPath || null;
+
     return {
       ...venta,
+      cedulaPath,
       reparacionesDeTercero,
       repuestosUsados,
       totalBase: comprobante.totalBase,

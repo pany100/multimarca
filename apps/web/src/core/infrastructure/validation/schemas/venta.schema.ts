@@ -34,6 +34,7 @@ const trabajoSchema = z.object({
 export const createVentaDtoSchema = z.object({
   clienteId: z.number().int().positive().nullable().optional(),
   informacionCliente: z.string().nullable().optional(),
+  cedulaFilePath: z.string().nullable().optional(),
   fecha: z.coerce.date(),
 
   descripcionDescuento: z.string().nullable().optional(),
@@ -70,6 +71,7 @@ export const patchVentaSchema = z.object({
   id: z.coerce.number().positive(),
   clienteId: z.coerce.number().nullable().optional(),
   informacionCliente: z.string().nullable().optional(),
+  cedulaFilePath: z.string().nullable().optional(),
   fecha: z.coerce.date().optional(),
   descuento: z.coerce.number().optional(),
   descripcionDescuento: z.string().nullable().optional(),

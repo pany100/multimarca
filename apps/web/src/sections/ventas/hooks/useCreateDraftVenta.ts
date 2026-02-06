@@ -4,6 +4,7 @@ import { useState } from "react";
 interface CreateDraftVentaData {
   clienteId?: number | null;
   informacionCliente?: string;
+  cedulaFilePath?: string | null;
   fecha: Date;
 }
 

@@ -1,22 +1,33 @@
 import CustomAutocompleteInput from "@/components/formV2/CustomAutocomplete";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
+import FilesInput from "@/components/formV2/files/FilesInput";
 import useClientesAutocomplete from "@/hooks/useClientesAutocomplete";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import { Box, Divider, Grid, Tab, Tabs } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 
-const EditInformacionGeneralVentaForm = () => {
-  const { watch, setValue } = useFormContext();
+interface EditInformacionGeneralVentaFormProps {
+  initialTab?: number;
+  onErrorUploadingCedula?: (error: string) => void;
+}
+
+const EditInformacionGeneralVentaForm = ({
+  initialTab = 0,
+  onErrorUploadingCedula,
+}: EditInformacionGeneralVentaFormProps) => {
+  const { watch, setValue, control } = useFormContext();
   const { ventaEstadoOptions } = useFixedSelectData();
   const { searchClientes, initialCliente } = useClientesAutocomplete();
 
   const clienteId = watch("clienteId");
   const informacionCliente = watch("informacionCliente");
-  const [tabValue, setTabValue] = useState(
-    clienteId || (!clienteId && !informacionCliente) ? 0 : 1
-  );
+  const [tabValue, setTabValue] = useState(initialTab);
+
+  useEffect(() => {
+    setTabValue(initialTab);
+  }, [initialTab]);
 
   // Cuando se selecciona un cliente existente, limpiar información manual
   useEffect(() => {
@@ -61,15 +72,32 @@ const EditInformacionGeneralVentaForm = () => {
         </Grid>
       ) : (
         // Cliente nuevo
-        <Grid item xs={12}>
-          <CustomInputText
-            name="informacionCliente"
-            label="Datos del cliente"
-            placeholder="Nombre, teléfono, dirección, etc."
-            multiline
-            rows={3}
-          />
-        </Grid>
+        <>
+          <Grid item xs={12}>
+            <CustomInputText
+              name="informacionCliente"
+              label="Datos del cliente"
+              placeholder="Nombre, teléfono, dirección, etc."
+              multiline
+              rows={3}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <Controller
+              name="cedulaFilePath"
+              control={control}
+              render={({ field }) => (
+                <FilesInput
+                  label="Cédula (imagen)"
+                  filePath={field.value || null}
+                  setFilePath={field.onChange}
+                  acceptedTypes="images"
+                  onErrorUploading={onErrorUploadingCedula}
+                />
+              )}
+            />
+          </Grid>
+        </>
       )}
 
       <Grid item xs={12}>

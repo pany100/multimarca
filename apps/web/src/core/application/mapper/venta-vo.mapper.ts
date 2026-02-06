@@ -60,6 +60,7 @@ export class VentaVOMapper {
       tercerosVO: terceros,
       clienteId: input.clienteId,
       informacionCliente: input.informacionCliente,
+      cedulaTempPath: input.cedulaFilePath ?? null,
       fecha,
       estado: input.estado,
       dolarId: dolar?.id,

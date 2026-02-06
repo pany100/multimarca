@@ -1,5 +1,6 @@
 import CustomAutocompleteInput from "@/components/formV2/CustomAutocomplete";
 import CustomInputText from "@/components/formV2/CustomInputText";
+import FilesInput from "@/components/formV2/files/FilesInput";
 import useClientesAutocomplete from "@/hooks/useClientesAutocomplete";
 import useScrollToError from "@/hooks/useScrollToError";
 import { useGlobalModal } from "@/sections/commons/contexts/GlobalModalContext";
@@ -26,6 +27,7 @@ import { useNuevaVentaV2Handlers } from "../hooks/useNuevaVentaV2Handlers";
 const schema = yup.object().shape({
   clienteId: yup.number().nullable().optional(),
   informacionCliente: yup.string().nullable().optional(),
+  cedulaFilePath: yup.string().nullable().optional(),
   fecha: yup.date().required("La fecha es obligatoria"),
 });
 
@@ -43,6 +45,7 @@ const NuevaVentaV2Modal = ({ refreshTable }: NuevaVentaV2ModalProps) => {
     defaultValues: {
       clienteId: null,
       informacionCliente: "",
+      cedulaFilePath: null,
       fecha: new Date(),
     },
   });
@@ -68,7 +71,7 @@ const NuevaVentaV2Modal = ({ refreshTable }: NuevaVentaV2ModalProps) => {
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
     if (newValue === 0) {
-      // Clear informacionCliente when switching to existing client
+      // Clear informacionCliente when switching to existing client (cedulaFilePath se mantiene)
       setValue("informacionCliente", "");
     } else {
       // Clear clienteId when switching to new client
@@ -143,17 +146,27 @@ const NuevaVentaV2Modal = ({ refreshTable }: NuevaVentaV2ModalProps) => {
                   />
                 </Grid>
               ) : (
-                <Grid
-                  item
-                  xs={12}
-                  ref={(el) => registerFieldRef("informacionCliente", el)}
-                >
-                  <CustomInputText
-                    name="informacionCliente"
-                    label="Datos del cliente"
-                    placeholder="Nombre, teléfono, dirección, etc."
-                  />
-                </Grid>
+                <>
+                  <Grid
+                    item
+                    xs={12}
+                    ref={(el) => registerFieldRef("informacionCliente", el)}
+                  >
+                    <CustomInputText
+                      name="informacionCliente"
+                      label="Datos del cliente"
+                      placeholder="Nombre, teléfono, dirección, etc."
+                    />
+                  </Grid>
+                  <Grid item xs={12}>
+                    <FilesInput
+                      label="Cédula (imagen)"
+                      filePath={watch("cedulaFilePath") || null}
+                      setFilePath={(url) => setValue("cedulaFilePath", url)}
+                      acceptedTypes="images"
+                    />
+                  </Grid>
+                </>
               )}
 
               <Grid item xs={12}>

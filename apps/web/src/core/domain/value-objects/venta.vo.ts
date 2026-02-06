@@ -10,6 +10,7 @@ export type VentaProps = {
   id?: number | null;
   clienteId?: number | null;
   informacionCliente?: string | null;
+  cedulaTempPath?: string | null;
   fecha: Date;
 
   estado: EstadoVenta;
@@ -30,6 +31,7 @@ export class VentaVO {
     public readonly id: number | null,
     public readonly clienteId: number | null,
     public readonly informacionCliente: string | null,
+    public readonly cedulaTempPath: string | null = null,
     public readonly fecha: Date,
     public readonly estado: EstadoVenta,
     public readonly descripcionDescuento: string | null = null,
@@ -47,6 +49,7 @@ export class VentaVO {
       props.id ?? null,
       props.clienteId ?? null,
       props.informacionCliente ?? null,
+      props.cedulaTempPath ?? null,
       props.fecha,
       props.estado,
       props.descripcionDescuento,

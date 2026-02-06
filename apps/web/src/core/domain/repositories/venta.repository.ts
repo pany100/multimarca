@@ -10,6 +10,7 @@ export type ListVentasParams = Omit<ListVentasQueryDto, "page" | "size"> & {
 export type VentaWithRelations = Prisma.VentaGetPayload<{
   include: {
     cliente: true;
+    cedulaFile: true;
     repuestosUsados: {
       include: {
         stock: true;
@@ -44,6 +45,7 @@ export interface VentaRepository {
     dto: {
       clienteId?: number | null;
       informacionCliente?: string | null;
+      cedulaFilePath?: string | null;
       fecha?: Date;
       descuento?: number | null;
       descripcionDescuento?: string | null;

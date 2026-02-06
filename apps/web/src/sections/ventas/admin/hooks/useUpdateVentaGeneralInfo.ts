@@ -12,6 +12,7 @@ export const useUpdateVentaGeneralInfo = () => {
     data: {
       clienteId?: number | null;
       informacionCliente?: string | null;
+      cedulaFilePath?: string | null;
       estado?: string;
       fecha?: string | null;
     }
@@ -26,6 +27,7 @@ export const useUpdateVentaGeneralInfo = () => {
         body: JSON.stringify({
           clienteId: data.clienteId,
           informacionCliente: data.informacionCliente,
+          cedulaFilePath: data.cedulaFilePath,
           estado: data.estado,
           fecha: data.fecha ? new Date(data.fecha).toISOString() : undefined,
         }),

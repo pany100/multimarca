@@ -5,6 +5,7 @@ import { useCreateDraftVenta } from "./useCreateDraftVenta";
 interface FormData {
   clienteId?: number | null;
   informacionCliente?: string;
+  cedulaFilePath?: string | null;
   fecha: Date;
 }
 

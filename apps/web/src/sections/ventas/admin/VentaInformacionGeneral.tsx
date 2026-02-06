@@ -3,7 +3,7 @@
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { CommonOrderCard } from "@/sections/ordenes-reparacion/admin/components/CommonOrderCard";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { Grid } from "@mui/material";
+import { Box, Grid, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { ClienteInfoVenta } from "./components/ClienteInfoVenta";
@@ -37,6 +37,7 @@ const schema = yup.object({
         return !!clienteId || !!value;
       }
     ),
+  cedulaFilePath: yup.string().nullable().optional(),
   estado: yup.string().required("El estado es requerido"),
   fecha: yup.string().required("La fecha es requerida"),
 });
@@ -54,6 +55,7 @@ const VentaInformacionGeneral = () => {
     defaultValues: {
       clienteId: venta.clienteId,
       informacionCliente: venta.informacionCliente || "",
+      cedulaFilePath: (venta as { cedulaPath?: string | null }).cedulaPath ?? null,
       estado: venta.estado,
       fecha: venta.fecha
         ? venta.fecha.toString().split("T")[0]
@@ -66,6 +68,7 @@ const VentaInformacionGeneral = () => {
     methods.reset({
       clienteId: venta.clienteId,
       informacionCliente: venta.informacionCliente || "",
+      cedulaFilePath: (venta as { cedulaPath?: string | null }).cedulaPath ?? null,
       estado: venta.estado,
       fecha: venta.fecha
         ? venta.fecha.toString().split("T")[0]
@@ -79,6 +82,7 @@ const VentaInformacionGeneral = () => {
       const ventaActualizada = await updateVentaGeneralInfo(venta.id, {
         clienteId: data.clienteId,
         informacionCliente: data.informacionCliente || null,
+        cedulaFilePath: data.cedulaFilePath ?? undefined,
         estado: data.estado,
         fecha: data.fecha,
       });
@@ -106,7 +110,18 @@ const VentaInformacionGeneral = () => {
       onSubmit={handleSubmit}
       onOpen={handleOpenModal}
       loading={false}
-      formContent={<EditInformacionGeneralVentaForm />}
+      formContent={
+        <EditInformacionGeneralVentaForm
+          initialTab={venta.clienteId != null ? 0 : 1}
+          onErrorUploadingCedula={(error) =>
+            setSnackbar({
+              open: true,
+              message: error,
+              severity: "error",
+            })
+          }
+        />
+      }
       maxWidth="sm"
     >
       {/* Primera fila: Cliente (izq) / Estado y Fecha (der) */}
@@ -116,6 +131,30 @@ const VentaInformacionGeneral = () => {
             cliente={venta.cliente}
             informacionCliente={venta.informacionCliente}
           />
+          {(venta as { cedulaPath?: string | null }).cedulaPath && (
+            <Box sx={{ mt: 2 }}>
+              <Typography
+                variant="subtitle2"
+                sx={{ fontWeight: 600, mb: 1, color: "text.secondary" }}
+              >
+                Cédula
+              </Typography>
+              <Box
+                component="img"
+                src={(venta as { cedulaPath: string }).cedulaPath}
+                alt="Cédula"
+                sx={{
+                  display: "block",
+                  maxWidth: 200,
+                  width: "100%",
+                  height: "auto",
+                  borderRadius: 1,
+                  border: "1px solid",
+                  borderColor: "divider",
+                }}
+              />
+            </Box>
+          )}
         </Grid>
         <Grid item xs={12} md={6}>
           <EstadoYFechaInfoVenta estado={venta.estado} fecha={venta.fecha} />

@@ -5,6 +5,7 @@ export function mapVentaVOToPrismaCreate(vo: VentaVO): Prisma.VentaCreateInput {
   const {
     clienteId,
     informacionCliente,
+    cedulaTempPath,
     fecha,
     estado,
     priceAdjustmentsVO,
@@ -22,6 +23,16 @@ export function mapVentaVOToPrismaCreate(vo: VentaVO): Prisma.VentaCreateInput {
     estado,
     dolar: dolarId ? { connect: { id: dolarId } } : undefined,
     cliente: clienteId ? { connect: { id: clienteId } } : undefined,
+    ...(cedulaTempPath &&
+      clienteId == null && {
+        cedulaFile: {
+          create: {
+            tempPath: cedulaTempPath,
+            finalPath: null,
+            status: EstadoArchivo.Pendiente,
+          },
+        },
+      }),
 
     descuento: new Prisma.Decimal(priceAdjustmentsVO.descuento),
     descripcionDescuento,

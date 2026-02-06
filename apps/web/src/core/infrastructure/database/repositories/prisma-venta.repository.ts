@@ -5,7 +5,7 @@ import {
 } from "@/core/domain/repositories/venta.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
-import { EstadoVenta, Prisma, Venta } from "@prisma/client";
+import { EstadoArchivo, EstadoVenta, Prisma, Venta } from "@prisma/client";
 
 export class PrismaVentaRepository implements VentaRepository {
   create(
@@ -70,6 +70,7 @@ export class PrismaVentaRepository implements VentaRepository {
       where: { id },
       include: {
         cliente: true,
+        cedulaFile: true,
         repuestosUsados: {
           include: {
             stock: {
@@ -126,6 +127,7 @@ export class PrismaVentaRepository implements VentaRepository {
     dto: {
       clienteId?: number | null;
       informacionCliente?: string | null;
+      cedulaFilePath?: string | null;
       fecha?: Date;
       descuento?: number | null;
       descripcionDescuento?: string | null;
@@ -135,6 +137,51 @@ export class PrismaVentaRepository implements VentaRepository {
       estado?: string;
     }
   ): Promise<VentaWithRelations> {
+    const currentVenta = await prisma.venta.findUnique({
+      where: { id },
+      select: { cedulaFile: true },
+    });
+
+    // Cedula: si hay clienteId (cliente existente) borramos cedula si existía; no guardamos cedulaFilePath. Si no hay clienteId (cliente nuevo) y se envía cedulaFilePath, crear/actualizar CustomFile.
+    if (dto.clienteId != null) {
+      if (currentVenta?.cedulaFile) {
+        await prisma.customFile.update({
+          where: { id: currentVenta.cedulaFile.id },
+          data: {
+            ventaCedulaId: null,
+            status: EstadoArchivo.ListoParaBorrar,
+          },
+        });
+      }
+    } else if (dto.cedulaFilePath !== undefined) {
+      const existingCedula = currentVenta?.cedulaFile;
+      if (dto.cedulaFilePath) {
+        if (existingCedula) {
+          await prisma.customFile.update({
+            where: { id: existingCedula.id },
+            data: {
+              ventaCedulaId: null,
+              status: EstadoArchivo.ListoParaBorrar,
+            },
+          });
+        }
+        await prisma.customFile.create({
+          data: {
+            tempPath: dto.cedulaFilePath,
+            ventaCedulaId: id,
+          },
+        });
+      } else if (existingCedula) {
+        await prisma.customFile.update({
+          where: { id: existingCedula.id },
+          data: {
+            ventaCedulaId: null,
+            status: EstadoArchivo.ListoParaBorrar,
+          },
+        });
+      }
+    }
+
     const updateData: Prisma.VentaUpdateInput = {};
 
     if (dto.clienteId !== undefined) {
@@ -177,6 +224,7 @@ export class PrismaVentaRepository implements VentaRepository {
       data: updateData,
       include: {
         cliente: true,
+        cedulaFile: true,
         repuestosUsados: {
           include: {
             stock: {
