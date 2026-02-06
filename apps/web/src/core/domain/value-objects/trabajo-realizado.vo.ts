@@ -1,12 +1,11 @@
 import { Decimal } from "@prisma/client/runtime/library";
 import { Money } from "./money.vo";
 
-function normalizeDiasParaRecordatorio(
-  value?: number | number[] | null,
-): number[] {
+function normalizeDiasParaRecordatorio(value?: unknown): number[] {
   if (value == null) return [];
-  if (Array.isArray(value)) return value.filter((n) => typeof n === "number");
-  return [value];
+  if (Array.isArray(value)) return value.filter((n) => typeof n === "number") as number[];
+  if (typeof value === "number") return [value];
+  return [];
 }
 
 export interface TrabajoRealizadoProps {
@@ -54,7 +53,8 @@ export class TrabajoRealizado {
   static fromOrderDb(p: {
     precioUnitario: Decimal;
     descripcion: string;
-    diasParaRecordatorio?: number | number[] | null;
+    /** Prisma devuelve JsonValue (number | number[] | null); se normaliza a number[] */
+    diasParaRecordatorio?: unknown;
   }) {
     return new TrabajoRealizado(
       p.descripcion.trim(),
