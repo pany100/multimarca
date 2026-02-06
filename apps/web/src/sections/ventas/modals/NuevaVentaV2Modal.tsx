@@ -159,12 +159,21 @@ const NuevaVentaV2Modal = ({ refreshTable }: NuevaVentaV2ModalProps) => {
                     />
                   </Grid>
                   <Grid item xs={12}>
-                    <FilesInput
-                      label="Cédula (imagen)"
-                      filePath={watch("cedulaFilePath") || null}
-                      setFilePath={(url) => setValue("cedulaFilePath", url)}
-                      acceptedTypes="images"
-                    />
+                    <Box
+                      sx={{
+                        border: 1,
+                        borderColor: "grey.400",
+                        p: 2,
+                        borderRadius: 1,
+                      }}
+                    >
+                      <FilesInput
+                        label="Cédula (imagen)"
+                        filePath={watch("cedulaFilePath") || null}
+                        setFilePath={(url) => setValue("cedulaFilePath", url)}
+                        acceptedTypes="images"
+                      />
+                    </Box>
                   </Grid>
                 </>
               )}

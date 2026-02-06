@@ -152,7 +152,7 @@ const NuevoPresupuestoModal = ({
                   <Box
                     sx={{
                       border: 1,
-                      borderColor: "divider",
+                      borderColor: "grey.400",
                       p: 2,
                       borderRadius: 1,
                     }}

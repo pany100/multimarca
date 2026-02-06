@@ -98,13 +98,22 @@ const EditInformacionGeneralPresupuestoForm = ({
               name="cedulaFilePath"
               control={control}
               render={({ field }) => (
-                <FilesInput
-                  label="Cédula (imagen)"
-                  filePath={field.value || null}
-                  setFilePath={field.onChange}
-                  acceptedTypes="images"
-                  onErrorUploading={onErrorUploadingCedula}
-                />
+                <Box
+                  sx={{
+                    border: 1,
+                    borderColor: "grey.400",
+                    p: 2,
+                    borderRadius: 1,
+                  }}
+                >
+                  <FilesInput
+                    label="Cédula (imagen)"
+                    filePath={field.value || null}
+                    setFilePath={field.onChange}
+                    acceptedTypes="images"
+                    onErrorUploading={onErrorUploadingCedula}
+                  />
+                </Box>
               )}
             />
           </Grid>
