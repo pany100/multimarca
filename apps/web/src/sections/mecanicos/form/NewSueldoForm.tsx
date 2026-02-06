@@ -20,8 +20,8 @@ function NewSueldoForm({ empleadoId }: Props) {
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      fecha: null,
-      monto: "",
+      fecha: undefined as Date | undefined,
+      monto: undefined as number | undefined,
       descripcion: "",
     },
   });
