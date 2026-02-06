@@ -1,6 +1,7 @@
 import ORepTextField from "@/components/orden-reparacion/formV2/commons/inputs/ORepTextField";
-import { Grid, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
 import { useTrabajosContext } from "../contexts/TrabajosContext";
+import DiasParaRecordatorioInput from "./DiasParaRecordatorioInput";
 
 function OtrosTrabajosForm() {
   const {
@@ -39,14 +40,9 @@ function OtrosTrabajosForm() {
         />
       </Grid>
       <Grid item xs={12} sx={{ mb: 1 }}>
-        <Typography variant="subtitle2" gutterBottom>
-          Recordatorio (opcional)
-        </Typography>
-        <ORepTextField
-          label="Días para Recordatorio"
-          type="number"
-          value={diasParaRecordatorio || ""}
-          onChange={(e) => setDiasParaRecordatorio(Number(e.target.value))}
+        <DiasParaRecordatorioInput
+          value={diasParaRecordatorio}
+          onChange={setDiasParaRecordatorio}
         />
       </Grid>
     </Grid>

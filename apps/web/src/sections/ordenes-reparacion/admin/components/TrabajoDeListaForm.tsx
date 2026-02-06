@@ -1,8 +1,9 @@
 import ORepObjectAutocomplete from "@/components/orden-reparacion/formV2/commons/inputs/ORepObjectAutocomplete";
 import ORepTextField from "@/components/orden-reparacion/formV2/commons/inputs/ORepTextField";
 import useTrabajosObjectAutocomplete from "@/hooks/orden-reparacion/useTrabajosObjectAutocomplete";
-import { Grid, Typography } from "@mui/material";
+import { Grid } from "@mui/material";
 import { useTrabajosContext } from "../contexts/TrabajosContext";
+import DiasParaRecordatorioInput from "./DiasParaRecordatorioInput";
 
 interface ManoDeObra {
   id: number | string;
@@ -35,7 +36,7 @@ function TrabajoDeListaForm({ initialManoDeObra }: TrabajoDeListaFormProps) {
           selectOption={(option) => {
             setDescripcion(option?.object.name);
             setPrecioUnitario(Number(option?.object.sellPrice));
-            setDiasParaRecordatorio(null);
+            setDiasParaRecordatorio([]);
             setPdfName(option?.object.pdfName ?? "");
           }}
           initialValue={initialManoDeObra?.id.toString()}
@@ -58,14 +59,9 @@ function TrabajoDeListaForm({ initialManoDeObra }: TrabajoDeListaFormProps) {
         />
       </Grid>
       <Grid item xs={12} sx={{ mb: 1 }}>
-        <Typography variant="subtitle2" gutterBottom>
-          Recordatorio (opcional)
-        </Typography>
-        <ORepTextField
-          label="Días para Recordatorio"
-          type="number"
-          value={diasParaRecordatorio || ""}
-          onChange={(e) => setDiasParaRecordatorio(Number(e.target.value))}
+        <DiasParaRecordatorioInput
+          value={diasParaRecordatorio}
+          onChange={setDiasParaRecordatorio}
         />
       </Grid>
     </Grid>

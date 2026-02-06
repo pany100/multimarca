@@ -5,8 +5,8 @@ interface TrabajosContextType {
   setDescripcion: (descripcion: string) => void;
   precioUnitario: number | null;
   setPrecioUnitario: (precio: number | null) => void;
-  diasParaRecordatorio: number | null;
-  setDiasParaRecordatorio: (dias: number | null) => void;
+  diasParaRecordatorio: number[];
+  setDiasParaRecordatorio: (dias: number[] | null) => void;
   pdfName: string;
   setPdfName: (pdfName: string) => void;
   resetForm: () => void;
@@ -26,11 +26,19 @@ export const useTrabajosContext = () => {
   return context;
 };
 
+function normalizeDiasParaRecordatorio(
+  value?: number | number[] | null
+): number[] {
+  if (value == null) return [];
+  if (Array.isArray(value)) return value.filter((n) => typeof n === "number");
+  return [value];
+}
+
 interface TrabajosProviderProps {
   children: React.ReactNode;
   initialDescripcion?: string;
   initialPrecioUnitario?: number | null;
-  initialDiasParaRecordatorio?: number | null;
+  initialDiasParaRecordatorio?: number | number[] | null;
   initialPdfName?: string | null;
 }
 
@@ -38,22 +46,26 @@ export const TrabajosProvider = ({
   children,
   initialDescripcion = "",
   initialPrecioUnitario = null,
-  initialDiasParaRecordatorio = null,
+  initialDiasParaRecordatorio,
   initialPdfName = "",
 }: TrabajosProviderProps) => {
   const [descripcion, setDescripcion] = useState<string>(initialDescripcion);
   const [precioUnitario, setPrecioUnitario] = useState<number | null>(
     initialPrecioUnitario
   );
-  const [diasParaRecordatorio, setDiasParaRecordatorio] = useState<
-    number | null
-  >(initialDiasParaRecordatorio);
+  const [diasParaRecordatorio, setDiasParaRecordatorioState] =
+    useState<number[]>(() =>
+      normalizeDiasParaRecordatorio(initialDiasParaRecordatorio)
+    );
+  const setDiasParaRecordatorio = (dias: number[] | null) => {
+    setDiasParaRecordatorioState(dias ?? []);
+  };
   const [pdfName, setPdfName] = useState<string>(initialPdfName ?? "");
 
   const resetForm = () => {
     setDescripcion("");
     setPrecioUnitario(null);
-    setDiasParaRecordatorio(null);
+    setDiasParaRecordatorio([]);
     setPdfName("");
   };
 

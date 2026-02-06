@@ -9,7 +9,7 @@ interface TrabajoRealizado {
   id: number;
   precioUnitario: number;
   descripcion: string;
-  diasParaRecordatorio?: number | null;
+  diasParaRecordatorio?: number[] | null;
   pdfName?: string | null;
 }
 
@@ -50,21 +50,26 @@ const TrabajosTable = ({
       headerName: "Recordatorio (días)",
       flex: 1,
       renderCell: (params) => {
-        const diasParaRecordatorio = params.row.diasParaRecordatorio;
-        if (!diasParaRecordatorio) {
+        const dias = params.row.diasParaRecordatorio;
+        const arr = Array.isArray(dias) ? dias : dias != null ? [dias] : null;
+        if (!arr || arr.length === 0) {
           return (
             <Typography variant="body2" color="text.secondary">
               Sin recordatorio
             </Typography>
           );
         }
+        const text =
+          arr.length === 1
+            ? `${arr[0]} días`
+            : `${arr.sort((a, b) => a - b).join(", ")} días`;
         return (
           <Box display="flex" alignItems="center">
             <EventNoteIcon
               fontSize="small"
               sx={{ mr: 0.5, color: "text.secondary" }}
             />
-            {diasParaRecordatorio} días
+            {text}
           </Box>
         );
       },

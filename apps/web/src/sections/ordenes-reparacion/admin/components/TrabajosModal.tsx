@@ -22,7 +22,7 @@ export interface TrabajoRealizado {
   id?: number;
   precioUnitario: number;
   descripcion: string;
-  diasParaRecordatorio?: number | null;
+  diasParaRecordatorio?: number[] | null;
   pdfName?: string | null;
 }
 
@@ -32,7 +32,7 @@ interface TrabajosModalProps {
   onSubmit: (data: {
     precioUnitario: number;
     descripcion: string;
-    diasParaRecordatorio?: number | null;
+    diasParaRecordatorio?: number[] | null;
     pdfName?: string | null;
     manoDeObra?: { name: string };
   }) => Promise<boolean>;
@@ -55,7 +55,8 @@ const TrabajosModalInner = ({
     await onSubmit({
       precioUnitario,
       descripcion,
-      diasParaRecordatorio,
+      diasParaRecordatorio:
+        diasParaRecordatorio.length > 0 ? diasParaRecordatorio : null,
       pdfName: pdfName?.trim() || null,
     });
   };
