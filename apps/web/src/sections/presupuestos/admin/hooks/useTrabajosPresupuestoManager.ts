@@ -7,7 +7,7 @@ interface TrabajoRealizado {
   id: number;
   precioUnitario: number;
   descripcion: string;
-  diasParaRecordatorio?: number | null;
+  diasParaRecordatorio?: number[] | null;
   pdfName?: string | null;
 }
 
@@ -24,7 +24,7 @@ export const useTrabajosPresupuestoManager = () => {
   const handleAddTrabajo = async (data: {
     precioUnitario: number;
     descripcion: string;
-    diasParaRecordatorio?: number | null;
+    diasParaRecordatorio?: number[] | null;
     pdfName?: string | null;
     manoDeObra?: { name: string };
   }) => {
@@ -79,7 +79,7 @@ export const useTrabajosPresupuestoManager = () => {
     data: {
       precioUnitario?: number;
       descripcion?: string;
-      diasParaRecordatorio?: number | null;
+      diasParaRecordatorio?: number[] | null;
       pdfName?: string | null;
       manoDeObra?: { name: string };
     }
