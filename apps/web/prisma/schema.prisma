@@ -179,11 +179,11 @@ model Empleado {
   licenciaConducirPath String?                   @db.VarChar(1000)
   inscripcionMonotributoPath String?                   @db.VarChar(1000)
   recategorizacionMonotributoPath String?                   @db.VarChar(1000)
-  notasAdministrativas String?                   @db.Text
   curriculumPath String?                   @db.VarChar(1000)
   fechaBaja                   DateTime?
   ausenciasProgramadas        AusenciaProgramada[]
   certificadosEstudio         CertificadoEstudio[]
+  sueldos                     Sueldo[]
 
   gastosRealizados  Gasto[]
   ordenesReparacion OrdenReparacionMecanico[]
@@ -206,6 +206,17 @@ model CertificadoEstudio {
   ruta       String?  @db.VarChar(1000)
   fecha            DateTime    @default(now())
   descripcion      String?      @db.Text
+  empleado   Empleado @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
+
+  @@index([empleadoId])
+}
+
+model Sueldo {
+  id         Int      @id @default(autoincrement())
+  empleadoId Int
+  fecha      DateTime @default(now())
+  monto      Decimal  @db.Decimal(10, 2)
+  descripcion String? @db.Text
   empleado   Empleado @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
 
   @@index([empleadoId])

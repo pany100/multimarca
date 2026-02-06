@@ -59,6 +59,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         premios: true,
         apercibimientos: true,
         certificadosEstudio: true,
+        sueldos: true,
       },
     });
   }

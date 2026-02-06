@@ -10,6 +10,7 @@ import { useEmpleadosContext } from "./context/EmpleadosContext";
 import MecanicosActivity from "./perfil/MecanicosActivity";
 import MecanicosCertificadosData from "./perfil/MecanicosCertificadosData";
 import MecanicosDocumentacionData from "./perfil/MecanicosDocumentacionData";
+import MecanicosSueldosData from "./perfil/MecanicosSueldosData";
 import MecanicosInasistenciasData from "./perfil/MecanicosInasistenciasData";
 import MecanicosLlegadasTardeData from "./perfil/MecanicosLlegadasTardeData";
 import MecanicosHorasExtrasData from "./perfil/MecanicosHorasExtrasData";
@@ -67,6 +68,7 @@ function MecanicosPage() {
       {empleado?.tipo === "Mecanico" && <MecanicosActivity />}
       <MecanicosDocumentacionData />
       <MecanicosCertificadosData />
+      <MecanicosSueldosData />
       <MecanicosVacacionesData />
       <MecanicosLicenciasData />
       <MecanicosInasistenciasData />

@@ -1,6 +1,6 @@
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import useWeek from "@/sections/gastos/hooks/useWeek";
-import { AusenciaProgramada, CertificadoEstudio, Empleado, Inasistencia, LlegadaTarde, HoraExtra, Premio, Apercibimiento } from "@prisma/client";
+import { AusenciaProgramada, CertificadoEstudio, Empleado, Inasistencia, LlegadaTarde, HoraExtra, Premio, Apercibimiento, Sueldo } from "@prisma/client";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import useEmpleadoFetcher from "../hooks/useEmpleadoFetcher";
 
@@ -25,6 +25,7 @@ type EmpleadoWithAusencias = Empleado & {
   premios?: Premio[];
   apercibimientos?: Apercibimiento[];
   certificadosEstudio?: CertificadoEstudio[];
+  sueldos?: Sueldo[];
 };
 
 interface EmpleadoContextType {
