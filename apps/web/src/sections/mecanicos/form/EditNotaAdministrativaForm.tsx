@@ -47,9 +47,7 @@ function EditNotaAdministrativaForm({ id }: Props) {
   useEffect(() => {
     if (nota) {
       methods.reset({
-        fecha: nota.fecha
-          ? new Date(nota.fecha).toISOString().split("T")[0]
-          : null,
+        fecha: nota.fecha ? new Date(nota.fecha) : null,
         titulo: nota.titulo ?? "",
         descripcion: nota.descripcion ?? "",
       });
