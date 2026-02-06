@@ -23,7 +23,8 @@ export interface TrabajosRealizadosHTTPInput {
       }
     | undefined;
   descripcion?: string | undefined;
-  diasParaRecordatorio?: number[] | null | undefined;
+  /** Acepta número único (legacy) o array de días; fromHttpInput normaliza a number[] */
+  diasParaRecordatorio?: number | number[] | null | undefined;
 }
 
 export class TrabajoRealizado {
