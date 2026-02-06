@@ -184,6 +184,7 @@ model Empleado {
   ausenciasProgramadas        AusenciaProgramada[]
   certificadosEstudio         CertificadoEstudio[]
   sueldos                     Sueldo[]
+  notasAdministrativas        NotaAdministrativa[]
 
   gastosRealizados  Gasto[]
   ordenesReparacion OrdenReparacionMecanico[]
@@ -218,6 +219,17 @@ model Sueldo {
   monto      Decimal  @db.Decimal(10, 2)
   descripcion String? @db.Text
   empleado   Empleado @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
+
+  @@index([empleadoId])
+}
+
+model NotaAdministrativa {
+  id          Int      @id @default(autoincrement())
+  empleadoId  Int
+  fecha       DateTime @default(now())
+  titulo      String   @db.VarChar(255)
+  descripcion String?  @db.Text
+  empleado    Empleado @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
 
   @@index([empleadoId])
 }
