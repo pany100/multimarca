@@ -1,10 +1,18 @@
 import { Decimal } from "@prisma/client/runtime/library";
 import { Money } from "./money.vo";
 
+function normalizeDiasParaRecordatorio(
+  value?: number | number[] | null,
+): number[] {
+  if (value == null) return [];
+  if (Array.isArray(value)) return value.filter((n) => typeof n === "number");
+  return [value];
+}
+
 export interface TrabajoRealizadoProps {
   descripcion: string;
   precioUnitario: number;
-  diasParaRecordatorio?: number | null;
+  diasParaRecordatorio?: number[] | null;
 }
 
 export interface TrabajosRealizadosHTTPInput {
@@ -15,14 +23,14 @@ export interface TrabajosRealizadosHTTPInput {
       }
     | undefined;
   descripcion?: string | undefined;
-  diasParaRecordatorio?: number | null | undefined;
+  diasParaRecordatorio?: number[] | null | undefined;
 }
 
 export class TrabajoRealizado {
   constructor(
     public readonly descripcion: string,
     public readonly precioUnitario: Money,
-    public readonly diasParaRecordatorio: number | null
+    public readonly diasParaRecordatorio: number[],
   ) {
     if (!descripcion?.trim()) throw new Error("Descripción requerida");
   }
@@ -30,7 +38,7 @@ export class TrabajoRealizado {
     return new TrabajoRealizado(
       p.descripcion.trim(),
       Money.from(p.precioUnitario),
-      p.diasParaRecordatorio ?? null
+      normalizeDiasParaRecordatorio(p.diasParaRecordatorio),
     );
   }
 
@@ -38,19 +46,19 @@ export class TrabajoRealizado {
     return new TrabajoRealizado(
       p.manoDeObra?.name ?? p.descripcion ?? "",
       Money.from(p.precioUnitario),
-      p.diasParaRecordatorio ?? null
+      normalizeDiasParaRecordatorio(p.diasParaRecordatorio),
     );
   }
 
   static fromOrderDb(p: {
     precioUnitario: Decimal;
     descripcion: string;
-    diasParaRecordatorio: number | null;
+    diasParaRecordatorio?: number | number[] | null;
   }) {
     return new TrabajoRealizado(
       p.descripcion.trim(),
       Money.from(p.precioUnitario),
-      p.diasParaRecordatorio ?? null
+      normalizeDiasParaRecordatorio(p.diasParaRecordatorio),
     );
   }
 }
