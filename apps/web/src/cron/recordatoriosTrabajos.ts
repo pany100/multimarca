@@ -2,7 +2,13 @@ import { sendWhatsAppMessage } from "@/services/whatsappService";
 import { getUsersToNotify } from "@/utils/notificationUtils";
 import { PrismaClient, TipoNotificacionInterna } from "@prisma/client";
 import dayjs from "dayjs";
+import timezone from "dayjs/plugin/timezone";
+import utc from "dayjs/plugin/utc";
 import cron from "node-cron";
+
+dayjs.extend(utc);
+dayjs.extend(timezone);
+dayjs.tz.setDefault("America/Argentina/Buenos_Aires");
 
 const prisma = new PrismaClient();
 
@@ -16,19 +22,22 @@ async function enviarRecordatoriosTrabajos() {
     const fechaHoy = today.format("YYYY-MM-DD");
     console.log(`Buscando recordatorios para el día ${fechaHoy}`);
 
-    const trabajosParaRecordar: {
+    type Row = {
       fullName: string;
       phone: string;
-      fechaSalidaReparacion: string;
+      fechaSalidaReparacion: Date;
       patent: string;
       descripcion: string;
-    }[] = await prisma.$queryRaw`
+      diasParaRecordatorio: unknown;
+    };
+    const rows: Row[] = await prisma.$queryRaw`
       SELECT 
         c.fullName, 
         c.phone,
         a.patent,
         orep.fechaSalidaReparacion, 
-        tr.descripcion
+        tr.descripcion,
+        tr.diasParaRecordatorio
       FROM
         OrdenReparacion orep
       JOIN
@@ -44,8 +53,30 @@ async function enviarRecordatoriosTrabajos() {
       AND 
         tr.diasParaRecordatorio IS NOT NULL
       AND 
-        DATE(DATE_ADD(orep.fechaSalidaReparacion, INTERVAL tr.diasParaRecordatorio DAY)) = ${fechaHoy}
+        JSON_LENGTH(tr.diasParaRecordatorio) > 0
     `;
+
+    const diasToArray = (val: unknown): number[] => {
+      if (val == null) return [];
+      if (Array.isArray(val)) return val.filter((n) => typeof n === "number");
+      if (typeof val === "number") return [val];
+      try {
+        const parsed = typeof val === "string" ? JSON.parse(val) : val;
+        return Array.isArray(parsed) ? parsed.filter((n: unknown) => typeof n === "number") : [];
+      } catch {
+        return [];
+      }
+    };
+
+    const trabajosParaRecordar = rows.filter((row) => {
+      const dias = diasToArray(row.diasParaRecordatorio);
+      const fechaSalida = dayjs(row.fechaSalidaReparacion).tz(
+        "America/Argentina/Buenos_Aires"
+      );
+      return dias.some(
+        (dia) => fechaSalida.add(dia, "day").format("YYYY-MM-DD") === fechaHoy
+      );
+    });
 
     for (const trabajo of trabajosParaRecordar) {
       // Enviar mensaje de WhatsApp de recordatorio

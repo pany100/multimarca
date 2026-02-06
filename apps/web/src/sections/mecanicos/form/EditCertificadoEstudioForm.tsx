@@ -4,8 +4,8 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import useCertificadoEstudioPersistence from "../hooks/useCertificadoEstudioPersistence";
 import CertificadoEstudioForm from "../CertificadoEstudioForm";
+import useCertificadoEstudioPersistence from "../hooks/useCertificadoEstudioPersistence";
 import { schema } from "./NewCertificadoEstudioForm";
 
 type Props = {
@@ -19,7 +19,8 @@ function EditCertificadoEstudioForm({ id }: Props) {
   const { setSnackbar } = useSnackbarContext();
   const router = useRouter();
 
-  const methods = useForm({
+  type FormData = yup.InferType<typeof schema>;
+  const methods = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
       nombre: "",

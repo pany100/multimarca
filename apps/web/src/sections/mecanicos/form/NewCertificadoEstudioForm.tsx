@@ -8,7 +8,7 @@ import CertificadoEstudioForm from "../CertificadoEstudioForm";
 
 export const schema = yup.object({
   nombre: yup.string().nullable(),
-  fecha: yup.date().nullable(),
+  fecha: yup.string().nullable(), // input type="date" usa string YYYY-MM-DD
   descripcion: yup.string().nullable(),
   ruta: yup.string().nullable(),
 });

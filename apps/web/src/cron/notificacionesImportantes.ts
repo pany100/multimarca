@@ -89,19 +89,22 @@ async function enviarRecordatoriosMantenimiento() {
       "[NotificacionesImportantes] Buscando recordatorios de mantenimiento",
       { fecha: fechaHoy }
     );
-    const trabajosParaRecordar: {
+    type Row = {
       fullName: string;
       phone: string;
-      fechaSalidaReparacion: string;
+      fechaSalidaReparacion: Date;
       patent: string;
       descripcion: string;
-    }[] = await prisma.$queryRaw`
+      diasParaRecordatorio: unknown;
+    };
+    const rows: Row[] = await prisma.$queryRaw`
       SELECT 
         c.fullName, 
         c.phone,
         a.patent,
         orep.fechaSalidaReparacion, 
-        tr.descripcion
+        tr.descripcion,
+        tr.diasParaRecordatorio
       FROM
         OrdenReparacion orep
       JOIN
@@ -121,8 +124,32 @@ async function enviarRecordatoriosMantenimiento() {
       AND 
         tr.diasParaRecordatorio IS NOT NULL
       AND 
-        DATE(DATE_ADD(orep.fechaSalidaReparacion, INTERVAL tr.diasParaRecordatorio DAY)) = ${fechaHoy}
+        JSON_LENGTH(tr.diasParaRecordatorio) > 0
     `;
+
+    const diasToArray = (val: unknown): number[] => {
+      if (val == null) return [];
+      if (Array.isArray(val)) return val.filter((n) => typeof n === "number");
+      if (typeof val === "number") return [val];
+      try {
+        const parsed = typeof val === "string" ? JSON.parse(val) : val;
+        return Array.isArray(parsed)
+          ? parsed.filter((n: unknown) => typeof n === "number")
+          : [];
+      } catch {
+        return [];
+      }
+    };
+
+    const trabajosParaRecordar = rows.filter((row) => {
+      const dias = diasToArray(row.diasParaRecordatorio);
+      const fechaSalida = dayjs(row.fechaSalidaReparacion).tz(
+        "America/Argentina/Buenos_Aires"
+      );
+      return dias.some(
+        (dia) => fechaSalida.add(dia, "day").format("YYYY-MM-DD") === fechaHoy
+      );
+    });
 
     if (trabajosParaRecordar.length > 0) {
       const users = await getUsersToNotify();
