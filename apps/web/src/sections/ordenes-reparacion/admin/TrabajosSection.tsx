@@ -11,7 +11,7 @@ export interface TrabajoRealizado {
   id: number;
   precioUnitario: number;
   descripcion: string;
-  diasParaRecordatorio?: number | null;
+  diasParaRecordatorio?: number[] | null;
   pdfName?: string | null;
 }
 
@@ -22,7 +22,7 @@ interface TrabajosSectionProps {
   onAddTrabajo: (data: {
     precioUnitario: number;
     descripcion: string;
-    diasParaRecordatorio?: number | null;
+    diasParaRecordatorio?: number[] | null;
     pdfName?: string | null;
     manoDeObra?: { name: string };
   }) => Promise<boolean>;
@@ -31,7 +31,7 @@ interface TrabajosSectionProps {
     data: {
       precioUnitario: number;
       descripcion: string;
-      diasParaRecordatorio?: number | null;
+      diasParaRecordatorio?: number[] | null;
       pdfName?: string | null;
       manoDeObra?: { name: string };
     }
@@ -61,7 +61,7 @@ const TrabajosSection = ({
   const handleSubmit = async (data: {
     precioUnitario: number;
     descripcion: string;
-    diasParaRecordatorio?: number | null;
+    diasParaRecordatorio?: number[] | null;
     pdfName?: string | null;
   }) => {
     let success = false;
