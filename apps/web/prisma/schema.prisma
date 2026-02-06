@@ -665,7 +665,7 @@ model TrabajoRealizado {
   precioUnitario         Decimal               @db.Decimal(10, 2)
   descripcion            String                @db.Text
   pdfName                String?
-  diasParaRecordatorio   Int?
+  diasParaRecordatorio   Json?                 // array de días, ej: [30, 60, 90]. En app usar como number[].
   plantillaPresupuestoId Int?
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionTrabajosRealizados", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoTrabajosRealizados", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)

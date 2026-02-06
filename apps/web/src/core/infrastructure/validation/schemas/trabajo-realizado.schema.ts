@@ -7,7 +7,10 @@ export const addTrabajoRealizadoSchema = z
     presupuestoId: z.coerce.number().optional(),
     precioUnitario: z.coerce.number(),
     descripcion: z.string().min(1),
-    diasParaRecordatorio: z.coerce.number().int().nullable().optional(),
+    diasParaRecordatorio: z
+      .array(z.coerce.number().int())
+      .nullable()
+      .optional(),
     pdfName: z.string().nullable().optional(),
   })
   .refine(
@@ -29,7 +32,10 @@ export const updateTrabajoRealizadoSchema = z.object({
   id: z.coerce.number().int().positive(),
   precioUnitario: z.coerce.number().optional(),
   descripcion: z.string().min(1).optional(),
-  diasParaRecordatorio: z.coerce.number().int().nullable().optional(),
+  diasParaRecordatorio: z
+    .array(z.coerce.number().int())
+    .nullable()
+    .optional(),
   pdfName: z.string().nullable().optional(),
 });
 

@@ -11,7 +11,7 @@ export class PrismaTrabajoRealizadoRepository
       presupuestoId?: number;
       precioUnitario: number;
       descripcion: string;
-      diasParaRecordatorio?: number | null;
+      diasParaRecordatorio?: number[] | null;
       pdfName?: string | null;
     },
     deps?: { tx?: any }
@@ -25,7 +25,7 @@ export class PrismaTrabajoRealizadoRepository
         presupuestoId: data.presupuestoId,
         precioUnitario: data.precioUnitario,
         descripcion: data.descripcion,
-        diasParaRecordatorio: data.diasParaRecordatorio,
+        diasParaRecordatorio: data.diasParaRecordatorio ?? undefined,
         pdfName: data.pdfName ?? undefined,
       },
     });
@@ -36,7 +36,7 @@ export class PrismaTrabajoRealizadoRepository
     data: {
       precioUnitario?: number;
       descripcion?: string;
-      diasParaRecordatorio?: number | null;
+      diasParaRecordatorio?: number[] | null;
       pdfName?: string | null;
     },
     deps?: { tx?: any }

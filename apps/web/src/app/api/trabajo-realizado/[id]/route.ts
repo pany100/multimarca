@@ -1,5 +1,6 @@
 import { DeleteTrabajoRealizadoUseCase } from "@/core/application/use-cases/trabajo-realizado/delete-trabajo-realizado.use-case";
 import { UpdateTrabajoRealizadoUseCase } from "@/core/application/use-cases/trabajo-realizado/update-trabajo-realizado.use-case";
+import { prisma } from "@/core/infrastructure/database/prisma";
 import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
 import { PrismaTrabajoRealizadoRepository } from "@/core/infrastructure/database/repositories/prisma-trabajo-realizado.repository";
 import {
@@ -9,6 +10,34 @@ import {
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
+import { normalizeTrabajoRealizadoResponse } from "../utils";
+
+export async function GET(
+  request: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const id = parseInt(params.id, 10);
+    if (Number.isNaN(id)) {
+      return NextResponse.json(
+        { error: "ID inválido" },
+        { status: 400 }
+      );
+    }
+    const trabajo = await prisma.trabajoRealizado.findUnique({
+      where: { id },
+    });
+    if (!trabajo) {
+      return NextResponse.json(
+        { error: "Trabajo realizado no encontrado" },
+        { status: 404 }
+      );
+    }
+    return NextResponse.json(normalizeTrabajoRealizadoResponse(trabajo));
+  } catch (e) {
+    return handleApiError(e);
+  }
+}
 
 export async function PATCH(
   request: Request,
@@ -27,7 +56,7 @@ export async function PATCH(
     );
 
     const result = await useCase.execute(dto);
-    return NextResponse.json(result);
+    return NextResponse.json(normalizeTrabajoRealizadoResponse(result));
   } catch (e) {
     return handleApiError(e);
   }

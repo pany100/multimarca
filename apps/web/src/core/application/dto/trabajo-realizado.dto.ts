@@ -4,7 +4,7 @@ export interface AddTrabajoRealizadoDto {
   presupuestoId?: number;
   precioUnitario: number;
   descripcion: string;
-  diasParaRecordatorio?: number | null;
+  diasParaRecordatorio?: number[] | null;
   pdfName?: string | null;
 }
 
@@ -12,7 +12,7 @@ export interface UpdateTrabajoRealizadoDto {
   id: number;
   precioUnitario?: number;
   descripcion?: string;
-  diasParaRecordatorio?: number | null;
+  diasParaRecordatorio?: number[] | null;
   pdfName?: string | null;
 }
 

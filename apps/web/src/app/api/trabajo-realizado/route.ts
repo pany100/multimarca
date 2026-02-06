@@ -5,6 +5,7 @@ import { addTrabajoRealizadoSchema } from "@/core/infrastructure/validation/sche
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
+import { normalizeTrabajoRealizadoResponse } from "./utils";
 
 export async function POST(request: Request) {
   try {
@@ -17,7 +18,9 @@ export async function POST(request: Request) {
     );
 
     const result = await useCase.execute(dto);
-    return NextResponse.json(result, { status: 201 });
+    return NextResponse.json(normalizeTrabajoRealizadoResponse(result), {
+      status: 201,
+    });
   } catch (e) {
     return handleApiError(e);
   }
