@@ -20,6 +20,7 @@ export type PresupuestoWithRelations = Prisma.PresupuestoGetPayload<{
     administrativo: true;
     creador: true;
     dolar: true;
+    cedulaFile: true;
     reparacionesDeTercero: {
       include: {
         proveedor: true;
@@ -64,6 +65,6 @@ export interface PresupuestoRepository {
       incrementoInterno?: number | null;
       incremento?: number | null;
       descripcionIncremento?: string | null;
-    }
+    },
   ): Promise<PresupuestoWithRelations>;
 }

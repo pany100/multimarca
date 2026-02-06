@@ -91,7 +91,7 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
         },
       },
       page,
-      size
+      size,
     );
   }
 
@@ -144,7 +144,7 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
   }
 
   async update(
-    data: Prisma.PresupuestoUpdateArgs
+    data: Prisma.PresupuestoUpdateArgs,
   ): Promise<PresupuestoWithRelations> {
     return prisma.presupuesto.update({
       ...data,
@@ -157,6 +157,7 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
         administrativo: true,
         creador: true,
         dolar: true,
+        cedulaFile: true,
         reparacionesDeTercero: {
           include: {
             proveedor: true,
@@ -201,7 +202,7 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
       incrementoInterno?: number | null;
       incremento?: number | null;
       descripcionIncremento?: string | null;
-    }
+    },
   ): Promise<PresupuestoWithRelations> {
     const currentPresupuesto = await prisma.presupuesto.findUnique({
       where: { id },
