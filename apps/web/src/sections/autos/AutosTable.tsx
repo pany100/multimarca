@@ -1,9 +1,9 @@
+import ImageWithPreview from "@/components/ImageWithPreview";
 import UploadImageModal from "@/components/UploadImageModal";
 import { useFetch } from "@/contexts/FetchContext";
 import CameraAltIcon from "@mui/icons-material/CameraAlt";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Alert, MenuItem, Snackbar } from "@mui/material";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import CustomTable, {
@@ -88,9 +88,10 @@ function AutosTable({
       flex: 0.7,
       renderCell: (params: any) =>
         params.row.cedulaVerdePath ? (
-          <Image
+          <ImageWithPreview
             src={params.row.cedulaVerdePath}
             alt="Cédula Verde"
+            title="Cédula Verde"
             width={100}
             height={50}
           />
