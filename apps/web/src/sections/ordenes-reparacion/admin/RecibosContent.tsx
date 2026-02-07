@@ -25,7 +25,7 @@ function RecibosContent({ editing }: RecibosContentProps) {
   const { deleteRecibo, loading } = useAddRecibo();
   const { setSnackbar } = useSnackbarContext();
   const [deletingReciboPath, setDeletingReciboPath] = useState<string | null>(
-    null
+    null,
   );
 
   const recibos = orden.recibosFiles || [];
@@ -83,28 +83,62 @@ function RecibosContent({ editing }: RecibosContentProps) {
                   </Typography>
                 </Box>
 
-                {/* Preview de la imagen */}
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: 200,
-                    position: "relative",
-                    borderRadius: 1,
-                    overflow: "hidden",
-                    backgroundColor: "grey.100",
-                    border: "1px solid",
-                    borderColor: "divider",
-                  }}
-                >
-                  {imagePath && (
-                    <Image
-                      src={imagePath}
-                      alt={`Recibo #${recibo.id}`}
-                      fill
-                      style={{ objectFit: "contain" }}
-                    />
-                  )}
-                </Box>
+                {/* Preview: misma estructura que ScannerSection para PDF, Image para imágenes */}
+                {imagePath?.toLowerCase().endsWith(".pdf") ? (
+                  <Box>
+                    <Typography variant="body2" color="text.secondary" mb={1}>
+                      <strong>Recibo en PDF</strong>
+                    </Typography>
+                    <Box
+                      sx={{
+                        width: "100%",
+                        maxWidth: 400,
+                        height: 300,
+                        border: "1px solid #ddd",
+                        borderRadius: 1,
+                        overflow: "hidden",
+                      }}
+                    >
+                      <iframe
+                        src={`${imagePath}#toolbar=0&navpanes=0&scrollbar=0`}
+                        width="100%"
+                        height="100%"
+                        style={{ border: "none" }}
+                        title={`Recibo #${recibo.id} (PDF)`}
+                      />
+                    </Box>
+                    <Button
+                      variant="outlined"
+                      size="small"
+                      sx={{ mt: 1 }}
+                      onClick={() => window.open(imagePath, "_blank")}
+                    >
+                      Abrir en nueva pestaña
+                    </Button>
+                  </Box>
+                ) : (
+                  <Box
+                    sx={{
+                      width: "100%",
+                      height: 200,
+                      position: "relative",
+                      borderRadius: 1,
+                      overflow: "hidden",
+                      backgroundColor: "grey.100",
+                      border: "1px solid",
+                      borderColor: "divider",
+                    }}
+                  >
+                    {imagePath && (
+                      <Image
+                        src={imagePath}
+                        alt={`Recibo #${recibo.id}`}
+                        fill
+                        style={{ objectFit: "contain" }}
+                      />
+                    )}
+                  </Box>
+                )}
 
                 {/* Botón de eliminar solo cuando está en modo edición */}
                 {editing && (
@@ -130,7 +164,7 @@ function RecibosContent({ editing }: RecibosContentProps) {
               </Paper>
             </Grid>
           );
-        }
+        },
       )}
     </Grid>
   );

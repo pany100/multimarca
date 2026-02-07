@@ -40,7 +40,7 @@ export const createOrdenSchema = z.object({
       z.object({
         id: z.coerce.number(),
         detalle: z.string().nullable().optional(),
-      })
+      }),
     )
     .optional(),
   repuestosUsados: z.array(repuestoSchema).optional(),
@@ -91,7 +91,7 @@ export const updateOrdenSchema = z.object({
       z.object({
         id: z.coerce.number(),
         detalle: z.string().nullable().optional(),
-      })
+      }),
     )
     .optional(),
   repuestosUsados: z.array(repuestoSchema).optional(),
@@ -176,7 +176,7 @@ export const addReparacionTerceroSchema = z
     {
       message:
         "Debe proporcionar exactamente uno de: ordenReparacionId, ventaId, o presupuestoId",
-    }
+    },
   );
 
 export const updateReparacionTerceroSchema = z.object({
@@ -214,7 +214,7 @@ export const addRepuestoUsadoSchema = z
     {
       message:
         "Debe proporcionar exactamente uno de: ordenReparacionId, ventaId, o presupuestoId",
-    }
+    },
   );
 
 export const updateRepuestoUsadoSchema = z.object({

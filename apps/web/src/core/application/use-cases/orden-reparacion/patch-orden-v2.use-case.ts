@@ -89,7 +89,7 @@ export class PatchOrdenV2UseCase {
         (el: { finalPath?: string; tempPath?: string }) =>
           el.finalPath || el.tempPath || null
       ),
-      scannerFile:
+      pdfPath:
         order.scannerFile?.finalPath || order.scannerFile?.tempPath || null,
       total: comprobanteCalculado.total,
       totalPagado: comprobanteCalculado.totalPagado,
