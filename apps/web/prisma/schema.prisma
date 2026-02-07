@@ -130,6 +130,7 @@ model Proveedor {
   mobile                String?               @db.VarChar(150)
   iva                   String?               @db.VarChar(150)
   cuit                  String?               @db.VarChar(150)
+  alias                 String?               @db.VarChar(150)
   numeroProveedor       Int
   gastos                Gasto[]
   ordenesDeCompra       OrdenDeCompra[]

@@ -40,6 +40,18 @@ function ProveedoresTable({
     { field: "id", headerName: "ID", flex: 0.5 },
     { field: "numeroProveedor", headerName: "Número de proveedor", flex: 1 },
     { field: "name", headerName: "Nombre", flex: 1 },
+    {
+      field: "alias",
+      headerName: "Alias",
+      flex: 1,
+      renderCell: (params: any) => params.row.alias ?? "-",
+    },
+    {
+      field: "cuit",
+      headerName: "CUIT",
+      flex: 1,
+      renderCell: (params: any) => params.row.cuit ?? "-",
+    },
     { field: "email", headerName: "Email", flex: 2 },
     { field: "phone", headerName: "Teléfono", flex: 1 },
     { field: "mobile", headerName: "Móvil", flex: 1 },

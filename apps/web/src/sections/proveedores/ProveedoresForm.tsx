@@ -4,6 +4,7 @@ import * as yup from "yup";
 
 export const schema = yup.object({
   name: yup.string().required("El nombre es requerido"),
+  alias: yup.string().nullable(),
   address: yup.string().nullable(),
   email: yup.string().email("El email es inválido").nullable(),
   phone: yup.string().nullable(),
@@ -27,6 +28,9 @@ const ProveedoresForm = () => {
       <Grid container spacing={2}>
         <Grid item xs={12}>
           <CustomInputText name="name" label="Nombre" />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomInputText name="alias" label="Alias" />
         </Grid>
         <Grid item xs={12} md={6}>
           <CustomInputText name="numeroProveedor" label="Número de proveedor" />

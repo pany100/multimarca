@@ -313,6 +313,7 @@ export default function generateBudgetHtml(repair: any): string {
         <div class="TypographyBody1" style="text-align: right;">
           $${calculoVO.manoDeObraForRecibos.toLocaleString("es-AR")}
         </div>
+        </div>
         ${
           repair.incremento > 0
             ? `
@@ -328,7 +329,7 @@ export default function generateBudgetHtml(repair: any): string {
         ${
           repair.descuento > 0
             ? `
-              <div class="TypographyBody1" style="margin-top: 20px;">
+              <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold;">
                 Descuento
                 ${
                   repair.descripcionDescuento !== null
@@ -336,7 +337,7 @@ export default function generateBudgetHtml(repair: any): string {
                     : ""
                 }
               </div>
-              <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
+              <div class="TypographyBody1" style="margin-top: 20px; text-align: right; font-weight: bold;">
                 ${"- "}$${Number(repair.descuento).toLocaleString("es-AR")}
               </div>
           `

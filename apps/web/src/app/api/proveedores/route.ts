@@ -10,20 +10,26 @@ export async function GET(request: Request) {
 
     const skip = page * size;
 
+    const queryNum = query ? parseInt(query, 10) : NaN;
+    const isNumQuery = !isNaN(queryNum);
+
     const [proveedores, total] = await Promise.all([
       prisma.proveedor.findMany({
         where: {
           OR: [
-            { id: { equals: parseInt(query) || undefined } },
+            { id: { equals: isNumQuery ? queryNum : undefined } },
             { name: { contains: query } },
+            ...(query ? [{ alias: { contains: query } }] : []),
+            ...(isNumQuery ? [{ numeroProveedor: queryNum }] : []),
           ],
         },
         skip,
         take: size,
-        orderBy: { name: "asc" },
+        orderBy: { numeroProveedor: "desc" },
         select: {
           id: true,
           name: true,
+          alias: true,
           address: true,
           email: true,
           phone: true,
@@ -46,7 +52,11 @@ export async function GET(request: Request) {
       }),
       prisma.proveedor.count({
         where: {
-          name: { contains: query },
+          OR: [
+            { name: { contains: query } },
+            ...(query ? [{ alias: { contains: query } }] : []),
+            ...(isNumQuery ? [{ numeroProveedor: queryNum }] : []),
+          ],
         },
       }),
     ]);
@@ -87,8 +97,17 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { name, address, email, phone, mobile, iva, cuit, numeroProveedor } =
-      body;
+    const {
+      name,
+      address,
+      email,
+      phone,
+      mobile,
+      iva,
+      cuit,
+      alias,
+      numeroProveedor,
+    } = body;
 
     if (!name || typeof name !== "string") {
       return NextResponse.json(
@@ -117,6 +136,7 @@ export async function POST(request: Request) {
         mobile,
         iva,
         cuit,
+        alias: alias ?? undefined,
         numeroProveedor,
       },
     });

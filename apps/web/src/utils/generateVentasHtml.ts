@@ -228,6 +228,7 @@ export default function generateClientOrderHtml(venta: any): string {
           <div class="TypographyBody1" style="text-align: right;">
             $${calculoVO.manoDeObraForRecibos.toLocaleString("es-AR")}
           </div>
+          </div>
           ${
             venta.incremento > 0
               ? `
@@ -247,7 +248,7 @@ export default function generateClientOrderHtml(venta: any): string {
           ${
             venta.descuento > 0
               ? `
-                <div class="TypographyBody1" style="margin-top: 20px;">
+                <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold;">
                   Descuento
                   ${
                     venta.descripcionDescuento
@@ -255,7 +256,7 @@ export default function generateClientOrderHtml(venta: any): string {
                       : ""
                   }
                 </div>
-                <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
+                <div class="TypographyBody1" style="margin-top: 20px; text-align: right; font-weight: bold;">
                   ${"- "}$${Number(venta.descuento).toLocaleString("es-AR")}
                 </div>
             `

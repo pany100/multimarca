@@ -189,8 +189,17 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { name, address, email, phone, mobile, iva, cuit, numeroProveedor } =
-      body;
+    const {
+      name,
+      address,
+      email,
+      phone,
+      mobile,
+      iva,
+      cuit,
+      alias,
+      numeroProveedor,
+    } = body;
 
     if (!name || typeof name !== "string") {
       return NextResponse.json(
@@ -223,6 +232,7 @@ export async function PUT(
         mobile,
         iva,
         cuit,
+        alias: alias ?? undefined,
         numeroProveedor,
       },
     });
