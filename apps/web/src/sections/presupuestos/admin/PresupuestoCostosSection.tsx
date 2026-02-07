@@ -2,7 +2,6 @@
 
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import EditCostosForm from "@/sections/ordenes-reparacion/admin/forms/EditCostosForm";
-import { getFormattedPrice } from "@/utils/fieldHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import { Box, Paper, Stack, Typography } from "@mui/material";
@@ -11,6 +10,12 @@ import * as yup from "yup";
 import { CommonOrderCard } from "../../ordenes-reparacion/admin/components/CommonOrderCard";
 import { usePresupuestoRequired } from "./contexts/PresupuestoContext";
 import { useUpdateCostosPresupuesto } from "./hooks/useUpdateCostosPresupuesto";
+
+const formatPrecio = (value: number | string | null | undefined) =>
+  Number(value ?? 0).toLocaleString("es-AR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
 const schema = yup.object({
   incrementoInterno: yup
@@ -96,16 +101,37 @@ function PresupuestoCostosSection() {
       <Box display="flex" alignItems="flex-start" gap={2}>
         <AttachMoneyIcon sx={{ color: "text.secondary", mt: 0.5 }} />
         <Stack spacing={1} flex={1}>
+          {/* Total Reparaciones de terceros */}
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Total Reparaciones de terceros:</strong> $
+              {formatPrecio(presupuesto.totalReparacionesDeTerceros)}
+            </Typography>
+          </Box>
+
+          {/* Total Repuestos */}
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Total Repuestos:</strong> $
+              {formatPrecio(presupuesto.totalRepuestos)}
+            </Typography>
+          </Box>
+
+          {/* Total Mano de obra */}
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Total Mano de obra:</strong> $
+              {formatPrecio(presupuesto.totalManoDeObra)}
+            </Typography>
+          </Box>
+
           {/* Incremento Interno */}
           {presupuesto.incrementoInterno !== null &&
             presupuesto.incrementoInterno !== undefined && (
               <Box>
                 <Typography variant="body2" color="text.secondary">
                   <strong>Incremento Interno:</strong> $
-                  {presupuesto.incrementoInterno.toLocaleString("es-AR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  {formatPrecio(presupuesto.incrementoInterno)}
                 </Typography>
                 <Typography
                   variant="caption"
@@ -123,11 +149,8 @@ function PresupuestoCostosSection() {
             presupuesto.descuento !== undefined && (
               <Box>
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Descuento:</strong> $
-                  {presupuesto.descuento.toLocaleString("es-AR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  <strong>Descuento:</strong> ${" "}
+                  {formatPrecio(presupuesto.descuento)}
                 </Typography>
                 {presupuesto.descripcionDescuento && (
                   <Typography variant="caption" color="text.disabled">
@@ -142,11 +165,8 @@ function PresupuestoCostosSection() {
             presupuesto.incremento !== undefined && (
               <Box>
                 <Typography variant="body2" color="text.secondary">
-                  <strong>Incremento:</strong> $
-                  {presupuesto.incremento.toLocaleString("es-AR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  <strong>Incremento:</strong> ${" "}
+                  {formatPrecio(presupuesto.incremento)}
                 </Typography>
                 {presupuesto.descripcionIncremento && (
                   <Typography variant="caption" color="text.disabled">
@@ -198,7 +218,7 @@ function PresupuestoCostosSection() {
                   alignItems: "center",
                 }}
               >
-                {getFormattedPrice(presupuesto.total)}
+                $ {formatPrecio(presupuesto.total)}
               </Typography>
             </Box>
           </Paper>

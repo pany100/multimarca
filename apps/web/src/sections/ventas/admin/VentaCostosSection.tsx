@@ -1,7 +1,6 @@
 "use client";
 
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
-import { getFormattedPrice } from "@/utils/fieldHelper";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import { Box, Paper, Stack, Typography } from "@mui/material";
@@ -11,6 +10,12 @@ import { CommonOrderCard } from "../../ordenes-reparacion/admin/components/Commo
 import { useVentaRequired } from "./contexts/VentaContext";
 import EditCostosVentaForm from "./forms/EditCostosVentaForm";
 import { useUpdateCostosVenta } from "./hooks/useUpdateCostosVenta";
+
+const formatPrecio = (value: number | string | null | undefined) =>
+  Number(value ?? 0).toLocaleString("es-AR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
 const schema = yup.object({
   descuento: yup
@@ -88,15 +93,35 @@ function VentaCostosSection() {
       <Box display="flex" alignItems="flex-start" gap={2}>
         <AttachMoneyIcon sx={{ color: "text.secondary", mt: 0.5 }} />
         <Stack spacing={1} flex={1}>
+          {/* Total Reparaciones de terceros */}
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Total Reparaciones de terceros:</strong> $
+              {formatPrecio(venta.totalReparacionesDeTerceros)}
+            </Typography>
+          </Box>
+
+          {/* Total Repuestos */}
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Total Repuestos:</strong> $
+              {formatPrecio(venta.totalRepuestos)}
+            </Typography>
+          </Box>
+
+          {/* Total Mano de obra */}
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Total Mano de obra:</strong> $
+              {formatPrecio(venta.totalManoDeObra)}
+            </Typography>
+          </Box>
+
           {/* Descuento */}
           {venta.descuento !== null && venta.descuento !== undefined && (
             <Box>
               <Typography variant="body2" color="text.secondary">
-                <strong>Descuento:</strong> $
-                {venta.descuento.toLocaleString("es-AR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                <strong>Descuento:</strong> $ {formatPrecio(venta.descuento)}
               </Typography>
               {venta.descripcionDescuento && (
                 <Typography variant="caption" color="text.disabled">
@@ -110,11 +135,7 @@ function VentaCostosSection() {
           {venta.incremento !== null && venta.incremento !== undefined && (
             <Box>
               <Typography variant="body2" color="text.secondary">
-                <strong>Incremento:</strong> $
-                {venta.incremento.toLocaleString("es-AR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                <strong>Incremento:</strong> $ {formatPrecio(venta.incremento)}
               </Typography>
               {venta.descripcionIncremento && (
                 <Typography variant="caption" color="text.disabled">
@@ -162,7 +183,7 @@ function VentaCostosSection() {
                   alignItems: "center",
                 }}
               >
-                {getFormattedPrice(venta.total)}
+                $ {formatPrecio(venta.total)}
               </Typography>
             </Box>
           </Paper>

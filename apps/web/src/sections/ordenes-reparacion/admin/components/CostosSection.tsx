@@ -11,6 +11,12 @@ import EditCostosForm from "../forms/EditCostosForm";
 import { useUpdateCostos } from "../hooks/useUpdateCostos";
 import { CommonOrderCard } from "./CommonOrderCard";
 
+const formatPrecio = (value: number | string | null | undefined) =>
+  Number(value ?? 0).toLocaleString("es-AR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
+
 const schema = yup.object({
   incrementoInterno: yup
     .number()
@@ -95,16 +101,37 @@ function CostosSection() {
       <Box display="flex" alignItems="flex-start" gap={2}>
         <AttachMoneyIcon sx={{ color: "text.secondary", mt: 0.5 }} />
         <Stack spacing={1} flex={1}>
+          {/* Total Reparaciones de terceros */}
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Total Reparaciones de terceros:</strong> $
+              {formatPrecio(orden.totalReparacionesDeTerceros)}
+            </Typography>
+          </Box>
+
+          {/* Total Repuestos */}
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Total Repuestos:</strong> $
+              {formatPrecio(orden.totalRepuestos)}
+            </Typography>
+          </Box>
+
+          {/* Total Mano de obra */}
+          <Box>
+            <Typography variant="body2" color="text.secondary">
+              <strong>Total Mano de obra:</strong> $
+              {formatPrecio(orden.totalManoDeObra)}
+            </Typography>
+          </Box>
+
           {/* Incremento Interno */}
           {orden.incrementoInterno !== null &&
             orden.incrementoInterno !== undefined && (
               <Box>
                 <Typography variant="body2" color="text.secondary">
                   <strong>Incremento Interno:</strong> $
-                  {orden.incrementoInterno.toLocaleString("es-AR", {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2,
-                  })}
+                  {formatPrecio(orden.incrementoInterno)}
                 </Typography>
                 <Typography
                   variant="caption"
@@ -121,11 +148,7 @@ function CostosSection() {
           {orden.descuento !== null && orden.descuento !== undefined && (
             <Box>
               <Typography variant="body2" color="text.secondary">
-                <strong>Descuento:</strong> $
-                {orden.descuento.toLocaleString("es-AR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                <strong>Descuento:</strong> $ {formatPrecio(orden.descuento)}
               </Typography>
               {orden.descripcionDescuento && (
                 <Typography variant="caption" color="text.disabled">
@@ -139,11 +162,7 @@ function CostosSection() {
           {orden.incremento !== null && orden.incremento !== undefined && (
             <Box>
               <Typography variant="body2" color="text.secondary">
-                <strong>Incremento:</strong> $
-                {orden.incremento.toLocaleString("es-AR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}
+                <strong>Incremento:</strong> $ {formatPrecio(orden.incremento)}
               </Typography>
               {orden.descripcionIncremento && (
                 <Typography variant="caption" color="text.disabled">
@@ -194,10 +213,7 @@ function CostosSection() {
                 }}
               >
                 ${" "}
-                {orden.total?.toLocaleString("es-AR", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                }) || "0.00"}
+                {formatPrecio(orden.total)}
               </Typography>
             </Box>
           </Paper>
