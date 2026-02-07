@@ -191,10 +191,10 @@ export default function generateClientOrderHtml(venta: any): string {
                   </div>
                   <div class="TypographyBody1" style="text-align: right;">
                     $${Number(
-                      calculoVO.getPrecioFinalForReparaciones(el.precioVenta)
+                      calculoVO.getPrecioFinalForReparaciones(el.precioVenta),
                     ).toLocaleString("es-AR")}
                   </div>
-                `
+                `,
             )
             .join("")}
           ${venta.repuestosUsados
@@ -205,14 +205,14 @@ export default function generateClientOrderHtml(venta: any): string {
                 unidadesConsumidas: number;
               }) => `
                   <div class="TypographyBody1">
-                    ${el.stock.reportName || el.stock.name} - ${el.unidadesConsumidas} unidades
+                    ${el.unidadesConsumidas} - ${el.stock.reportName || el.stock.name}
                   </div>
                   <div class="TypographyBody1" style="text-align: right;">
                     $${Number(
-                      calculoVO.getPrecioFinalForRepuestos(el.precioVenta)
+                      calculoVO.getPrecioFinalForRepuestos(el.precioVenta),
                     ).toLocaleString("es-AR")}
                   </div>
-              `
+              `,
             )
             .join("")}
           </div>
@@ -274,10 +274,10 @@ export default function generateClientOrderHtml(venta: any): string {
           <div class="TypographyBody1" style="display: flex;
             justify-content: space-between; margin-bottom: 20px; margin-right: 15px;">
             <p>Total abonado hasta el momento (en pesos): <strong>${getFormattedPrice(
-              Math.min(calculoVO.totalPagado, calculoVO.total)
+              Math.min(calculoVO.totalPagado, calculoVO.total),
             )}</strong></p>
             <p>Resta pagar (en pesos): <strong>${getFormattedPrice(
-              Math.max(0, calculoVO.deuda)
+              Math.max(0, calculoVO.deuda),
             )}</strong></p>
           </div>
               `

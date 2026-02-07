@@ -354,7 +354,7 @@ export default function generateClientOrderHtml(repair: any): string {
               unidadesConsumidas: number;
             }) => `
                 <div class="TypographyBody1">
-                  ${el.stock.reportName || el.stock.name} - ${el.unidadesConsumidas} unidades
+                  ${el.unidadesConsumidas} - ${el.stock.reportName || el.stock.name}
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
                   $${Number(

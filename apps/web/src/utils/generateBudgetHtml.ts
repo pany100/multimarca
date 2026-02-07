@@ -276,10 +276,10 @@ export default function generateBudgetHtml(repair: any): string {
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
                   $${Number(
-                    calculoVO.getPrecioFinalForReparaciones(el.precioVenta)
+                    calculoVO.getPrecioFinalForReparaciones(el.precioVenta),
                   ).toLocaleString("es-AR")}
                 </div>
-              `
+              `,
           )
           .join("")}
         ${repair.repuestosUsados
@@ -290,14 +290,14 @@ export default function generateBudgetHtml(repair: any): string {
               unidadesConsumidas: number;
             }) => `
                 <div class="TypographyBody1">
-                  ${el.stock.reportName || el.stock.name} - ${el.unidadesConsumidas} unidades
+                  ${el.unidadesConsumidas} - ${el.stock.reportName || el.stock.name}
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
                   $${Number(
-                    calculoVO.getPrecioFinalForRepuestos(el.precioVenta)
+                    calculoVO.getPrecioFinalForRepuestos(el.precioVenta),
                   ).toLocaleString("es-AR")}
                 </div>
-            `
+            `,
           )
           .join("")}
         </div>
