@@ -13,7 +13,7 @@ function useStockObjectAutocomplete() {
 
   const searchStockObject = async (query: string) => {
     const response = await authFetch(
-      `/api/stock?query=${query}&limit=10&page=0`
+      `/api/stock?query=${query}&size=20&page=0`,
     );
     const data = await response.json();
     return data.items.map(
@@ -27,7 +27,7 @@ function useStockObjectAutocomplete() {
         value: repuesto.id,
         label: `${repuesto.name} - ${repuesto.label}`,
         object: repuesto,
-      })
+      }),
     );
   };
 
