@@ -3,7 +3,7 @@ import prisma from "src/lib/prisma";
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const id = parseInt(params.id);
@@ -13,7 +13,7 @@ export async function PUT(
     if (!proveedorId || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { error: "Datos de orden de compra inválidos o faltantes" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -48,9 +48,12 @@ export async function PUT(
               },
             });
 
-            if (stockActualizado.units !== null && stockActualizado.units < 0) {
+            if (
+              stockActualizado.units !== null &&
+              Number(stockActualizado.units) < 0
+            ) {
               throw new Error(
-                `Stock insuficiente para el ítem ${itemActual.stock.name}`
+                `Stock insuficiente para el ítem ${itemActual.stock.name}`,
               );
             }
           }
@@ -94,7 +97,7 @@ export async function PUT(
         }
 
         return ordenActualizada;
-      }
+      },
     );
 
     const ordenDeCompraActualizadaConLabel = {
@@ -111,14 +114,14 @@ export async function PUT(
     console.error("Error al actualizar orden de compra:", error);
     return NextResponse.json(
       { error: `Error al actualizar la orden de compra: ${error}` },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const id = parseInt(params.id);
@@ -126,7 +129,7 @@ export async function DELETE(
     if (isNaN(id)) {
       return NextResponse.json(
         { error: "ID de orden de compra inválido" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -173,14 +176,14 @@ export async function DELETE(
     console.error("Error al eliminar orden de compra:", error);
     return NextResponse.json(
       { error: "Error al eliminar la orden de compra" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const id = parseInt(params.id);
@@ -188,7 +191,7 @@ export async function GET(
     if (isNaN(id)) {
       return NextResponse.json(
         { error: "ID de orden de compra inválido" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -207,7 +210,7 @@ export async function GET(
     if (!ordenDeCompra) {
       return NextResponse.json(
         { error: "Orden de compra no encontrada" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
@@ -225,7 +228,7 @@ export async function GET(
     console.error("Error al obtener orden de compra:", error);
     return NextResponse.json(
       { error: "Error interno del servidor" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
