@@ -13,12 +13,12 @@ export class VentaService {
   constructor(
     private readonly repo: VentaRepository,
     private readonly inventory: InventoryPort,
-    private readonly stockManager: StockManagerService
+    private readonly stockManager: StockManagerService,
   ) {}
 
   async create({ tx }: any, ventaVO: VentaVO) {
     const stockActions = this.stockManager.generateTakeActions(
-      ventaVO.repuestosVO
+      ventaVO.repuestosVO,
     );
     if (ventaVO.estado !== EstadoVenta.Presupuestado) {
       await this.inventory.ensureSufficient(stockActions);
@@ -35,7 +35,7 @@ export class VentaService {
     const existing = await this.repo.findById(id);
     if (!existing) throw new Error("Venta no encontrada");
     const repuestos = (existing.repuestosUsados ?? []).map(
-      (r): RepuestoUsado => RepuestoUsado.fromOrderDb(r)
+      (r): RepuestoUsado => RepuestoUsado.fromOrderDb(r),
     );
 
     // Generar acciones de stock para liberar repuestos
@@ -64,11 +64,11 @@ export class VentaService {
     }
 
     const existingRepuestos = (existing.repuestosUsados ?? []).map(
-      (r): RepuestoUsado => RepuestoUsado.fromOrderDb(r)
+      (r): RepuestoUsado => RepuestoUsado.fromOrderDb(r),
     );
     const stockActions = this.stockManager.generateSyncActions(
       existingRepuestos,
-      ventaVO.repuestosVO
+      ventaVO.repuestosVO,
     );
     if (ventaVO.estado !== EstadoVenta.Presupuestado) {
       await this.inventory.ensureSufficient(stockActions);
