@@ -48,7 +48,7 @@ export class UpdateRepuestoUsadoUseCase {
     // Create VOs for stock validation
     const existingVO = RepuestoUsado.from({
       stockId: existing.stockId,
-      unidadesConsumidas: existing.unidadesConsumidas,
+      unidadesConsumidas: Number(existing.unidadesConsumidas),
       precioCompra: Number(existing.precioCompra),
       precioVenta: Number(existing.precioVenta),
     });
@@ -56,7 +56,7 @@ export class UpdateRepuestoUsadoUseCase {
     const newVO = RepuestoUsado.from({
       stockId: input.stockId ?? existing.stockId,
       unidadesConsumidas:
-        input.unidadesConsumidas ?? existing.unidadesConsumidas,
+        input.unidadesConsumidas ?? Number(existing.unidadesConsumidas),
       precioCompra: input.precioCompra ?? Number(existing.precioCompra),
       precioVenta: input.precioVenta ?? Number(existing.precioVenta),
     });
