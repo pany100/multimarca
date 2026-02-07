@@ -8,9 +8,9 @@ import TextWithFillLine from "./TextWithFillLine";
 
 import Checkbox from "@mui/material/Checkbox";
 
+import useControlesFetch from "@/hooks/orden-reparacion/useControlesFetch";
 import { getFormattedDate } from "@/utils/fieldHelper";
 import { styled } from "@mui/material/styles";
-import useControlesFetch from "@/hooks/orden-reparacion/useControlesFetch";
 
 const CheckTypeControlsTwoColumns = styled("div")(() => ({
   display: "grid",
@@ -24,6 +24,9 @@ const GroupContainer = styled("div")(() => ({
   marginBottom: "10px",
   width: "98%",
   padding: "10px",
+  // Evita que el grupo se parta a mitad de página en el PDF
+  breakInside: "avoid",
+  pageBreakInside: "avoid",
 }));
 
 type Props = {
@@ -39,6 +42,10 @@ const setPageStyles = () => {
       .pagebreak {
         clear: both;
         page-break-after: always;
+      }
+      .pdf-group-container {
+        break-inside: avoid;
+        page-break-inside: avoid;
       }
     }
   `;
@@ -132,16 +139,80 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
               </Typography>
             </div>
           </div>
-          <div style={{ marginBottom: 15 }}>
-            <Typography
-              variant="h6"
-              sx={{ color: "common.black", textTransform: "uppercase" }}
-            >
-              Motivos:
-            </Typography>
-            <Typography sx={{ color: "common.black" }}>
-              {repair.observacionesCliente || "-"}
-            </Typography>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: "15px",
+              marginBottom: 15,
+              paddingRight: "8px",
+              alignItems: "center",
+            }}
+          >
+            <div>
+              <Typography
+                variant="h6"
+                sx={{ color: "common.black", textTransform: "uppercase" }}
+              >
+                Motivos:
+              </Typography>
+              <Typography sx={{ color: "common.black" }}>
+                {repair.observacionesCliente || "-"}
+              </Typography>
+            </div>
+            <div style={{ minWidth: 0, paddingRight: "4px" }}>
+              <table
+                style={{
+                  width: "100%",
+                  maxWidth: "100%",
+                  borderCollapse: "collapse",
+                  border: "1px solid black",
+                  boxSizing: "border-box",
+                }}
+              >
+                <thead>
+                  <tr>
+                    <th
+                      style={{
+                        border: "1px solid black",
+                        padding: "8px",
+                        textAlign: "left",
+                        backgroundColor: "#f0f0f0",
+                      }}
+                    >
+                      Carga
+                    </th>
+                    <th
+                      style={{
+                        border: "1px solid black",
+                        padding: "8px",
+                        textAlign: "left",
+                        backgroundColor: "#f0f0f0",
+                      }}
+                    >
+                      Listo para retirar
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "8px",
+                        height: "32px",
+                      }}
+                    />
+                    <td
+                      style={{
+                        border: "1px solid black",
+                        padding: "8px",
+                      }}
+                    />
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
           <div style={{ marginBottom: 15 }}>
             <Typography
@@ -245,6 +316,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
             <div>
               {groupControls.map((control) => (
                 <GroupContainer
+                  className="pdf-group-container"
                   sx={{
                     color: "common.black",
                     textTransform: "uppercase",
@@ -314,7 +386,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
         </PDFPage>
       </div>
     );
-  }
+  },
 );
 
 OrdenMecanicoPdf.displayName = "OrdenMecanicoPdf";
