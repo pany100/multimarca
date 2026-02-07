@@ -1,4 +1,5 @@
 import CustomForm from "@/components/formV2/CustomForm";
+import CustomInputBoolean from "@/components/formV2/CustomInputBoolean";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import FormModal from "@/components/formV2/FormModal";
 import { useFetch } from "@/contexts/FetchContext";
@@ -22,7 +23,13 @@ function UnitsForm() {
       </Typography>
       <Grid container spacing={2}>
         <Grid item xs={12} md={12}>
-          <CustomInputText name="units" label="Unidades" />
+          <CustomInputText name="units" label="Unidades" type="number" />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomInputBoolean
+            name="fraccionable"
+            label="Fraccionable (Para litros)"
+          />
         </Grid>
       </Grid>
     </>

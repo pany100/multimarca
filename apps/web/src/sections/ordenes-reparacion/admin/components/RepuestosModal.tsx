@@ -15,6 +15,7 @@ import { useEffect, useState } from "react";
 interface Stock {
   id: number;
   nombre: string;
+  fraccionable?: boolean;
 }
 
 interface RepuestoUsado {
@@ -33,7 +34,7 @@ interface RepuestosModalProps {
     stockId: number;
     precioCompra: number;
     precioVenta: number;
-    unidadesConsumidas: number;
+    unidadesConsumidas: number; // entero o decimal si el ítem es fraccionable
   }) => Promise<boolean>;
   loading?: boolean;
   editRepuesto?: RepuestoUsado;
@@ -60,10 +61,15 @@ const RepuestosModal = ({
         setStock(editRepuesto.stock);
         setPrecioCompra(editRepuesto.precioCompra.toString());
         setPrecioVenta(editRepuesto.precioVenta.toString());
-        setUnidadesConsumidas(editRepuesto.unidadesConsumidas.toString());
-        const unitPrice = (
-          editRepuesto.precioVenta / editRepuesto.unidadesConsumidas
-        ).toFixed(2);
+        setUnidadesConsumidas(
+          String(
+            typeof editRepuesto.unidadesConsumidas === "number"
+              ? editRepuesto.unidadesConsumidas
+              : Number(editRepuesto.unidadesConsumidas),
+          ),
+        );
+        const u = Number(editRepuesto.unidadesConsumidas) || 1;
+        const unitPrice = (editRepuesto.precioVenta / u).toFixed(2);
         setPrecioUnitario(unitPrice);
       } else {
         setStock(null);
@@ -145,10 +151,10 @@ const RepuestosModal = ({
               selectOption={(option) => {
                 const precioVentaCalculado = Math.ceil(
                   option?.object?.buyPrice *
-                    (1 + (option?.object?.markup || 0) / 100) || 0
+                    (1 + (option?.object?.markup || 0) / 100) || 0,
                 );
                 setStock(option?.object || null);
-                setPrecioCompra(option?.object?.buyPrice.toString());
+                setPrecioCompra(option?.object?.buyPrice?.toString() ?? "");
                 setPrecioUnitario(precioVentaCalculado.toString());
                 setUnidadesConsumidas("1");
                 setPrecioVenta(precioVentaCalculado.toString());
@@ -180,12 +186,20 @@ const RepuestosModal = ({
 
           <Grid item xs={12}>
             <ORepTextField
-              label="Unidades Consumidas"
+              label={
+                stock?.fraccionable
+                  ? "Litros consumidos"
+                  : "Unidades consumidas"
+              }
               type="number"
               value={unidadesConsumidas}
               onChange={(e) => handleUnidadesChange(e.target.value)}
               disabled={loading}
               required
+              inputProps={{
+                min: 0,
+                step: stock?.fraccionable ? 0.1 : 1,
+              }}
             />
           </Grid>
 

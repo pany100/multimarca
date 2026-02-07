@@ -1,4 +1,5 @@
 import CustomAutocomplete from "@/components/formV2/CustomAutocomplete";
+import CustomInputBoolean from "@/components/formV2/CustomInputBoolean";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import useProveedorAutocomplete from "@/hooks/useProveedorAutocomplete";
 import { Grid, Typography } from "@mui/material";
@@ -15,6 +16,7 @@ export const schema = yup.object({
   reportName: yup.string().nullable(),
   sector: yup.string().nullable(),
   carBrand: yup.string().nullable(),
+  fraccionable: yup.boolean().default(false),
 });
 
 export const unitsSchema = yup.object({
@@ -29,6 +31,7 @@ export const unitsSchema = yup.object({
   reportName: yup.string().nullable(),
   sector: yup.string().nullable(),
   carBrand: yup.string().nullable(),
+  fraccionable: yup.boolean().default(false),
 });
 
 const StockForm = () => {
@@ -83,6 +86,12 @@ const StockForm = () => {
         </Grid>
         <Grid item xs={12} md={4}>
           <CustomInputText name="carBrand" label="Marca de Auto" />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomInputBoolean
+            name="fraccionable"
+            label="Fraccionable (Para litros)"
+          />
         </Grid>
       </Grid>
     </>

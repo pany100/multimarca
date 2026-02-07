@@ -27,7 +27,8 @@ export class RepuestoUsado {
     public readonly precioVenta: Money,
     public readonly stockName?: string
   ) {
-    if (!Number.isInteger(unidadesConsumidas) || unidadesConsumidas <= 0) {
+    const u = Number(unidadesConsumidas);
+    if (!Number.isFinite(u) || u <= 0) {
       throw new Error("Unidades consumidas inválidas");
     }
   }

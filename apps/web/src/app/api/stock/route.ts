@@ -69,17 +69,18 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { 
-      name, 
-      brand, 
-      buyPrice, 
-      restockValue, 
-      label, 
-      markup, 
+    const {
+      name,
+      brand,
+      buyPrice,
+      restockValue,
+      label,
+      markup,
       proveedorId,
       reportName,
       sector,
-      carBrand
+      carBrand,
+      fraccionable,
     } = body;
 
     if (
@@ -107,6 +108,7 @@ export async function POST(request: Request) {
         reportName: reportName || null,
         sector: sector || null,
         carBrand: carBrand || null,
+        fraccionable: Boolean(fraccionable),
       } as any,
       include: {
         proveedor: true,

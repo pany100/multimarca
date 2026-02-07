@@ -24,7 +24,8 @@ export class PrismaInventoryAdapter implements InventoryPort {
         where: { id: action.stockId },
         select: { units: true, name: true },
       });
-      if (!stock || (stock.units ?? 0) < action.cantidad) {
+      const unitsNum = Number(stock?.units ?? 0);
+      if (!stock || unitsNum < action.cantidad) {
         const name = stock?.name ?? String(action.stockId);
         throw new Error(`Stock insuficiente para ${name}`);
       }
@@ -47,12 +48,14 @@ export class PrismaInventoryAdapter implements InventoryPort {
         where: { id: action.stockId },
         data: { units: { decrement: action.cantidad } },
       });
-      if ((updated.units ?? 0) <= (updated.restockValue ?? 0)) {
+      const updatedUnits = Number(updated.units ?? 0);
+      const restockVal = Number(updated.restockValue ?? 0);
+      if (updatedUnits <= restockVal) {
         await this.notificationService.create(
           {
             fecha: new Date(),
             titulo: `${updated.name} necesita reposición`,
-            texto: `El elemento ${updated.name} quedó con ${updated.units} unidades. Necesita reponer stock.`,
+            texto: `El elemento ${updated.name} quedó con ${updatedUnits} unidades. Necesita reponer stock.`,
             leida: false,
             tipo: TipoNotificacionInterna.REPOSICION_STOCK,
             stockId: updated.id,

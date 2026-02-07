@@ -51,9 +51,17 @@ function StockTable({
       headerName: "Unidades",
       width: 100,
       valueGetter: (units: any) => {
-        return units === null || units === undefined ? 0 : units;
+        if (units === null || units === undefined) return 0;
+        return Number(units);
       },
       flex: 0.5,
+    },
+    {
+      field: "fraccionable",
+      headerName: "Fraccionable (Para litros)",
+      flex: 0.5,
+      valueGetter: (fraccionable: any) =>
+        fraccionable === true ? "Sí" : "No",
     },
     { field: "restockValue", headerName: "Valor de reposición", flex: 0.5 },
     { field: "label", headerName: "Rótulo", flex: 0.5 },
@@ -67,7 +75,9 @@ function StockTable({
   ];
 
   const getRowClassName = (params: GridRowParams) => {
-    if (params.row.units < params.row.restockValue) {
+    const units = Number(params.row.units ?? 0);
+    const restock = Number(params.row.restockValue ?? 0);
+    if (units < restock) {
       return "low-stock-row";
     }
     return "";

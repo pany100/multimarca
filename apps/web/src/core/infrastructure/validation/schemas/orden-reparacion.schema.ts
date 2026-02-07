@@ -2,7 +2,7 @@ import { z } from "zod";
 
 export const repuestoSchema = z.object({
   stock: z.object({ id: z.coerce.number(), name: z.string().optional() }),
-  unidadesConsumidas: z.coerce.number().int().positive(),
+  unidadesConsumidas: z.coerce.number().positive(),
   precioCompra: z.coerce.number().optional(),
   precioVenta: z.coerce.number().optional(),
 });
@@ -200,7 +200,7 @@ export const addRepuestoUsadoSchema = z
     stockId: z.number().int().positive(),
     precioCompra: z.number().nonnegative(),
     precioVenta: z.number().nonnegative(),
-    unidadesConsumidas: z.number().int().positive(),
+    unidadesConsumidas: z.number().positive(),
   })
   .refine(
     (data) => {
@@ -222,7 +222,7 @@ export const updateRepuestoUsadoSchema = z.object({
   stockId: z.number().int().positive().optional(),
   precioCompra: z.number().nonnegative().optional(),
   precioVenta: z.number().nonnegative().optional(),
-  unidadesConsumidas: z.number().int().positive().optional(),
+  unidadesConsumidas: z.number().positive().optional(),
 });
 
 export const deleteRepuestoUsadoSchema = z.object({

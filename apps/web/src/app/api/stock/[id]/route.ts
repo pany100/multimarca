@@ -20,6 +20,7 @@ export async function GET(
         reportName: true,
         sector: true,
         carBrand: true,
+        fraccionable: true,
       },
     });
 
@@ -59,6 +60,7 @@ export async function PUT(
       reportName,
       sector,
       carBrand,
+      fraccionable,
     } = body;
 
     if (
@@ -87,6 +89,7 @@ export async function PUT(
         reportName: reportName || null,
         sector: sector || null,
         carBrand: carBrand || null,
+        fraccionable: fraccionable !== undefined ? Boolean(fraccionable) : undefined,
       } as any,
       include: {
         proveedor: true,

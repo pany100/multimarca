@@ -1,6 +1,12 @@
 import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
 import { StockAction } from "@/core/domain/value-objects/stock-action.vo";
 
+const CANTIDAD_EPSILON = 0.0001;
+
+function cantidadesIguales(a: number, b: number): boolean {
+  return Math.abs(Number(a) - Number(b)) < CANTIDAD_EPSILON;
+}
+
 export class StockManagerService {
   /**
    * Genera acciones de stock para tomar repuestos del inventario
@@ -61,10 +67,11 @@ export class StockManagerService {
     );
     actions.push(...this.generateTakeActions(addedRepuestos));
 
-    // Ajustar cantidades de repuestos modificados
+    // Ajustar cantidades de repuestos modificados (soporta decimales; comparación con tolerancia)
     const modifiedRepuestos = newRepuestos.filter((curr) => {
       const prev = previousRepuestos.find((p) => p.stockId === curr.stockId);
-      return prev && prev.unidadesConsumidas !== curr.unidadesConsumidas;
+      if (!prev) return false;
+      return !cantidadesIguales(prev.unidadesConsumidas, curr.unidadesConsumidas);
     });
 
     for (const current of modifiedRepuestos) {
@@ -72,7 +79,7 @@ export class StockManagerService {
         (p) => p.stockId === current.stockId
       )!;
       const difference =
-        current.unidadesConsumidas - previous.unidadesConsumidas;
+        Number(current.unidadesConsumidas) - Number(previous.unidadesConsumidas);
 
       if (difference > 0) {
         actions.push(StockAction.take(current.stockId, difference));
