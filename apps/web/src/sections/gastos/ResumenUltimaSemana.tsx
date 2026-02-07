@@ -2,7 +2,7 @@ import { useFetch } from "@/contexts/FetchContext";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import { Box, Grid, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { format } from "date-fns";
+import { addDays, format } from "date-fns";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import WeekPicker from "./WeekPicker";
@@ -36,6 +36,15 @@ type ReparacionCompartida = {
   manoDeObraPagada: number;
 };
 
+/** Formatea una fecha ISO en dd/MM/yyyy usando UTC (evita que se muestre el día anterior por timezone). */
+function formatFechaUTC(isoDate: string): string {
+  const d = new Date(isoDate);
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  const month = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const year = d.getUTCFullYear();
+  return `${day}/${month}/${year}`;
+}
+
 function ResumenUltimaSemana() {
   const [data, setData] = useState<MecanicoData[]>([]);
   const [compartida, setCompartida] = useState<ReparacionCompartida[]>([]);
@@ -54,12 +63,16 @@ function ResumenUltimaSemana() {
   useEffect(() => {
     const fetchData = async (start: Date, end: Date) => {
       setLoading(true);
+      // Enviar solo YYYY-MM-DD para que el backend use medianoche UTC y no excluya
+      // órdenes por diferencia de timezone (ej. 00:00 local → 03:00 UTC en Argentina).
+      const startStr = format(start, "yyyy-MM-dd");
+      const endStr = format(addDays(end, 1), "yyyy-MM-dd"); // día siguiente para incluir todo el último día
       try {
         const response = await authFetch(
-          `/api/gastos/ultima-semana?start=${start.toISOString()}&end=${end.toISOString()}`
+          `/api/gastos/ultima-semana?start=${startStr}&end=${endStr}`,
         );
         const response2 = await authFetch(
-          `/api/gastos/ultima-semana-compartida?start=${start.toISOString()}&end=${end.toISOString()}`
+          `/api/gastos/ultima-semana-compartida?start=${startStr}&end=${endStr}`,
         );
         if (!response.ok || !response2.ok) {
           throw new Error("Error al obtener los datos");
@@ -152,10 +165,7 @@ function ResumenUltimaSemana() {
               >
                 <Link href={`/dashboard/ordenes-reparacion/${rep.idOrep}/ver`}>
                   *{" "}
-                  {`${rep.auto} - ${format(
-                    new Date(rep.fecha),
-                    "dd/MM/yyyy"
-                  )}: ${getFormattedPrice(rep.manoDeObra)}`}
+                  {`${rep.auto} - ${formatFechaUTC(rep.fecha)}: ${getFormattedPrice(rep.manoDeObra)}`}
                 </Link>
               </Typography>
             ))}
@@ -206,10 +216,7 @@ function ResumenUltimaSemana() {
           >
             <Link href={`/dashboard/ordenes-reparacion/${params.row.id}/ver`}>
               *{" "}
-              {`${params.row.auto} - ${format(
-                new Date(params.row.fecha),
-                "dd/MM/yyyy"
-              )}`}
+              {`${params.row.auto} - ${formatFechaUTC(params.row.fecha)}`}
             </Link>
           </Typography>
         );
