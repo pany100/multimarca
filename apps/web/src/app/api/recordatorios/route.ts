@@ -1,111 +1,48 @@
-import { Prisma } from "@prisma/client";
+import { RecordatorioManoDeObraService } from "@/core/application/services/recordatorio-mano-de-obra.service";
+import { ListRecordatoriosUseCase } from "@/core/application/use-cases/recordatorio-mano-de-obra/list-recordatorios.use-case";
+import { PrismaRecordatorioManoDeObraRepository } from "@/core/infrastructure/database/repositories/prisma-recordatorio-mano-de-obra.repository";
+import {
+  listRecordatoriosQuerySchema,
+  ListRecordatoriosQueryDto,
+} from "@/core/infrastructure/validation/schemas/recordatorio.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
+import { ZodSchema } from "zod";
 import { NextResponse } from "next/server";
-import prisma from "src/lib/prisma";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
+/**
+ * GET: Lista recordatorios de mano de obra (expandidos por diasParaRecordatorio).
+ * Query: page, size, query (búsqueda), estado (pendiente | enviado).
+ */
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "0");
-    const size = parseInt(searchParams.get("size") || "10");
-    const query = searchParams.get("query") || "";
-    const estado = searchParams.get("estado");
-
-    const skip = page * size;
-
-    const hoy = new Date();
-    const fechaHoy = hoy.toISOString().split("T")[0];
-    const seisMesesAtras = new Date(hoy);
-    seisMesesAtras.setMonth(hoy.getMonth() - 6);
-    const fechaSeisMesesAtras = seisMesesAtras.toISOString().split("T")[0];
-
-    let estadoCondition = null;
-    if (estado === "enviado") {
-      estadoCondition = Prisma.sql`AND DATE(DATE_ADD(orep.fechaSalidaReparacion, INTERVAL tr.diasParaRecordatorio DAY)) <= ${fechaHoy}`;
-    } else if (estado === "pendiente") {
-      estadoCondition = Prisma.sql`AND DATE(DATE_ADD(orep.fechaSalidaReparacion, INTERVAL tr.diasParaRecordatorio DAY)) > ${fechaHoy}`;
-    } else {
-      estadoCondition = Prisma.sql``;
-    }
-
-    const [recordatorios, total] = await Promise.all([
-      prisma.$queryRaw`
-        SELECT 
-          c.fullName, 
-          c.phone, 
-          orep.fechaSalidaReparacion,
-          a.patent,
-          orep.kilometros,
-          tr.descripcion,
-          DATE_ADD(orep.fechaSalidaReparacion, INTERVAL tr.diasParaRecordatorio DAY) as fechaRecordatorio,
-          CASE 
-            WHEN DATE(DATE_ADD(orep.fechaSalidaReparacion, INTERVAL tr.diasParaRecordatorio DAY)) <= ${fechaHoy} 
-            THEN true 
-            ELSE false 
-          END as enviado
-        FROM
-          OrdenReparacion orep
-        JOIN
-          Auto a on a.id = orep.autoId
-        JOIN 
-          Cliente c ON a.ownerId = c.id
-        JOIN 
-          TrabajoRealizado tr ON orep.id = tr.ordenReparacionId
-        WHERE 
-          orep.estado = 'Terminado'
-        AND 
-          c.can_receive_notifications = true
-        AND 
-          tr.diasParaRecordatorio IS NOT NULL
-        AND 
-          DATE(DATE_ADD(orep.fechaSalidaReparacion, INTERVAL tr.diasParaRecordatorio DAY)) 
-          BETWEEN ${fechaSeisMesesAtras} AND DATE_ADD(${fechaHoy}, INTERVAL 365 DAY)
-        AND
-          (c.fullName LIKE ${`%${query}%`} OR tr.descripcion LIKE ${`%${query}%`})
-        ${estadoCondition}
-        ORDER BY DATE(fechaRecordatorio) ASC
-        LIMIT ${size} OFFSET ${skip}
-      `,
-      prisma.$queryRaw`
-        SELECT CAST(COUNT(*) AS SIGNED) as count
-        FROM
-          OrdenReparacion orep
-        JOIN
-          Auto a on a.id = orep.autoId
-        JOIN 
-          Cliente c ON a.ownerId = c.id
-        JOIN 
-          TrabajoRealizado tr ON orep.id = tr.ordenReparacionId
-        WHERE 
-          orep.estado = 'Terminado'
-        AND 
-          c.can_receive_notifications = true
-        AND 
-          tr.diasParaRecordatorio IS NOT NULL
-        AND 
-          DATE(DATE_ADD(orep.fechaSalidaReparacion, INTERVAL tr.diasParaRecordatorio DAY)) 
-          BETWEEN ${fechaSeisMesesAtras} AND DATE_ADD(${fechaHoy}, INTERVAL 365 DAY)
-        AND
-          (c.fullName LIKE ${`%${query}%`} OR tr.descripcion LIKE ${`%${query}%`})
-        ${estadoCondition}
-      `,
-    ]);
-
-    const totalCount = Number((total as any)[0].count);
-
-    return NextResponse.json({
-      items: recordatorios,
-      total: totalCount,
-      page,
-      size,
-      totalPages: Math.ceil(totalCount / size),
-    });
-  } catch (error) {
-    console.error("Error al obtener recordatorios:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
+    const raw = {
+      page: searchParams.get("page") ?? "0",
+      size: searchParams.get("size") ?? "10",
+      query: searchParams.get("query") ?? undefined,
+      estado: searchParams.get("estado") ?? undefined,
+    };
+    const dto = await validateRequest(
+      raw as unknown,
+      listRecordatoriosQuerySchema as unknown as ZodSchema<ListRecordatoriosQueryDto>
     );
+
+    const repository = new PrismaRecordatorioManoDeObraRepository();
+    const recordatorioService = new RecordatorioManoDeObraService(repository);
+    const result = await new ListRecordatoriosUseCase(
+      recordatorioService
+    ).execute({
+      page: dto.page,
+      size: dto.size,
+      query: dto.query,
+      estado: dto.estado,
+    });
+
+    return NextResponse.json(result);
+  } catch (error) {
+    return handleApiError(error);
   }
 }
