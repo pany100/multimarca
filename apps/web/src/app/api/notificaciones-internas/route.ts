@@ -1,58 +1,53 @@
+import { NotificationService } from "@/core/application/services/notification.service";
+import { ListNotificationsByUserUseCase } from "@/core/application/use-cases/notificacion/list-notifications-by-user.use-case";
+import { PrismaNotificationRepository } from "@/core/infrastructure/database/repositories/prisma-notification.repository";
+import {
+  listNotificationsQuerySchema,
+  ListNotificationsQueryDto,
+} from "@/core/infrastructure/validation/schemas/notificacion.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
+import { ZodSchema } from "zod";
 import { NextResponse } from "next/server";
-import prisma from "src/lib/prisma";
 import { getCurrentUser } from "src/utils/authFetch";
+
 export const dynamic = "force-dynamic";
 
+/**
+ * GET: Lista notificaciones del usuario autenticado (solo las suyas).
+ * Query: page, size, leidas ("true" | "false" | sin enviar = todas).
+ */
 export async function GET(request: Request) {
   try {
-    const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "0");
-    const size = parseInt(searchParams.get("size") || "10");
-    const leidas = searchParams.get("leidas");
     const user = await getCurrentUser(request);
     if (!user) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
-    const skip = page * size;
-
-    const where = {
-      AND: [
-        leidas === null
-          ? {}
-          : leidas === "true"
-          ? { leida: true }
-          : leidas === "false"
-          ? { leida: false }
-          : {},
-        {
-          OR: [{ userId: null }, { userId: user.id }],
-        },
-      ],
+    const { searchParams } = new URL(request.url);
+    const raw = {
+      page: searchParams.get("page") ?? "0",
+      size: searchParams.get("size") ?? "10",
+      leidas: searchParams.get("leidas") ?? undefined,
     };
-
-    const [notificaciones, total] = await Promise.all([
-      prisma.notificacionInterna.findMany({
-        where,
-        skip,
-        take: size,
-        orderBy: { fecha: "desc" },
-      }),
-      prisma.notificacionInterna.count({ where }),
-    ]);
-
-    return NextResponse.json({
-      items: notificaciones,
-      total,
-      page,
-      size,
-      totalPages: Math.ceil(total / size),
-    });
-  } catch (error) {
-    console.error("Error al obtener notificaciones internas:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
+    const dto = await validateRequest(
+      raw as unknown,
+      listNotificationsQuerySchema as unknown as ZodSchema<ListNotificationsQueryDto>
     );
+
+    const repository = new PrismaNotificationRepository();
+    const notificationService = new NotificationService(repository);
+    const result = await new ListNotificationsByUserUseCase(
+      notificationService
+    ).execute({
+      userId: user.id,
+      page: dto.page,
+      size: dto.size,
+      leidas: dto.leidas,
+    });
+
+    return NextResponse.json(result);
+  } catch (error) {
+    return handleApiError(error);
   }
 }

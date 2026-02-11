@@ -30,7 +30,7 @@ interface NotificacionInterna {
 const NotificacionesInternas = () => {
   const [tabValue, setTabValue] = useState(0);
   const [notificaciones, setNotificaciones] = useState<NotificacionInterna[]>(
-    []
+    [],
   );
   const [loading, setLoading] = useState(false);
   const [paginationModel, setPaginationModel] = useState({
@@ -42,13 +42,14 @@ const NotificacionesInternas = () => {
   const [confirmDialogOpen, setConfirmDialogOpen] = useState(false);
   const [notificacionToUpdate, setNotificacionToUpdate] =
     useState<NotificacionInterna | null>(null);
+  const [markingAllRead, setMarkingAllRead] = useState(false);
 
   const fetchNotificaciones = useCallback(async () => {
     setLoading(true);
     try {
       const url = new URL(
         "/api/notificaciones-internas",
-        window.location.origin
+        window.location.origin,
       );
       url.searchParams.append("page", paginationModel.page.toString());
       url.searchParams.append("size", paginationModel.pageSize.toString());
@@ -86,6 +87,20 @@ const NotificacionesInternas = () => {
     setConfirmDialogOpen(true);
   };
 
+  const handleMarkAllAsRead = async () => {
+    setMarkingAllRead(true);
+    try {
+      await authFetch("/api/notificaciones-internas/marcar-todas-leidas", {
+        method: "POST",
+      });
+      fetchNotificaciones();
+    } catch (error) {
+      console.error("Error al marcar todas como leídas:", error);
+    } finally {
+      setMarkingAllRead(false);
+    }
+  };
+
   const handleConfirmLeidaChange = async () => {
     if (!notificacionToUpdate) return;
 
@@ -97,7 +112,7 @@ const NotificacionesInternas = () => {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ leida: newValue }),
-        }
+        },
       );
       fetchNotificaciones();
     } catch (error) {
@@ -161,14 +176,40 @@ const NotificacionesInternas = () => {
       <Typography variant="h5" component="h2" gutterBottom>
         Notificaciones Internas
       </Typography>
-      <Box sx={{ width: "100%" }}>
+      <Box
+        sx={{
+          width: "100%",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
         <Tabs value={tabValue} onChange={handleTabChange}>
           <Tab label="No leídas" />
           <Tab label="Leídas" />
           <Tab label="Todas" />
         </Tabs>
+        {tabValue === 0 && (
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={handleMarkAllAsRead}
+            disabled={markingAllRead || totalItems === 0}
+            startIcon={
+              markingAllRead ? (
+                <CircularProgress size={16} color="inherit" />
+              ) : (
+                <CheckIcon />
+              )
+            }
+          >
+            Marcar todas como leídas
+          </Button>
+        )}
       </Box>
-      <Box sx={{ height: 400, width: "100%", mt: 2 }}>
+      <Box sx={{ width: "100%", mt: 2 }}>
         {loading && <CircularProgress />}
         {!loading && (
           <DataGrid
