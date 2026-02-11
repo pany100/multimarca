@@ -1,7 +1,5 @@
-import { NotificationService } from "@/core/application/services/notification.service";
-import { PrismaNotificationRepository } from "@/core/infrastructure/database/repositories/prisma-notification.repository";
 import { sendWhatsAppMessage } from "@/services/whatsappService";
-import { PrismaClient, TipoNotificacionInterna } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
@@ -12,14 +10,15 @@ dayjs.extend(timezone);
 dayjs.tz.setDefault("America/Argentina/Buenos_Aires");
 
 const prisma = new PrismaClient();
-const notificationService = new NotificationService(
-  new PrismaNotificationRepository(),
-);
 
-async function enviarRecordatoriosTrabajos() {
+/**
+ * Envía por WhatsApp recordatorios de mano de obra a clientes
+ * (solo WhatsApp, no crea notificaciones internas).
+ */
+export async function enviarRecordatoriosManoDeObraAClientes() {
   try {
     console.log(
-      `[${new Date().toISOString()}] Iniciando cronjob de recordatorios de trabajos`
+      `[${new Date().toISOString()}] Iniciando envío de recordatorios de mano de obra a clientes`
     );
 
     const today = dayjs().tz("America/Argentina/Buenos_Aires");
@@ -66,7 +65,9 @@ async function enviarRecordatoriosTrabajos() {
       if (typeof val === "number") return [val];
       try {
         const parsed = typeof val === "string" ? JSON.parse(val) : val;
-        return Array.isArray(parsed) ? parsed.filter((n: unknown) => typeof n === "number") : [];
+        return Array.isArray(parsed)
+          ? parsed.filter((n: unknown) => typeof n === "number")
+          : [];
       } catch {
         return [];
       }
@@ -83,7 +84,6 @@ async function enviarRecordatoriosTrabajos() {
     });
 
     for (const trabajo of trabajosParaRecordar) {
-      // Enviar mensaje de WhatsApp de recordatorio
       await sendWhatsAppMessage(trabajo.phone, "recordatorio_reparacion", [
         trabajo.fullName,
         trabajo.descripcion,
@@ -94,29 +94,26 @@ async function enviarRecordatoriosTrabajos() {
           year: "numeric",
         }),
       ]);
-      await notificationService.create({
-        fecha: new Date(),
-        titulo: `Recordatorios de mano de obra`,
-        texto: `El cliente ${trabajo.fullName} tiene un recordatorio de mano de obra para hoy: ${trabajo.descripcion} para el auto ${trabajo.patent}`,
-        leida: false,
-        tipo: TipoNotificacionInterna.RECORDATORIOS_MANO_DE_OBRA,
-      });
     }
 
     console.log(
-      `[${new Date().toISOString()}] Finalizando cronjob de recordatorios de trabajos`
+      `[${new Date().toISOString()}] Finalizando envío de recordatorios de mano de obra a clientes`
     );
   } catch (error) {
-    console.error("Error al enviar recordatorios de trabajos:", error);
+    console.error(
+      "Error al enviar recordatorios de mano de obra a clientes:",
+      error
+    );
   }
 }
 
-export function initRecordatoriosTrabajosCron() {
-  // Programar el cronjob para que se ejecute todos los días a las 9:00 AM
+export function initRecordatoriosManoDeObraAClientesCron() {
   cron.schedule("0 10 * * *", () => {
-    console.log("Ejecutando cronjob de recordatorios de trabajos");
-    enviarRecordatoriosTrabajos();
+    console.log("Ejecutando cron: recordatorios de mano de obra a clientes");
+    enviarRecordatoriosManoDeObraAClientes();
   });
 
-  console.log("Cron job para recordatorios de trabajos iniciado");
+  console.log(
+    "Cron recordatorios de mano de obra a clientes iniciado (diario 10:00)"
+  );
 }

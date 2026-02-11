@@ -22,7 +22,7 @@ export function initCronJobs() {
   require("src/cron/dolar").initDolarCron();
   require("src/cron/notificacionesWhatsappCron").initNotificacionesWhatsappCron();
   require("src/cron/birthdays").initCumpleañosCron();
-  require("src/cron/recordatoriosTrabajos").initRecordatoriosTrabajosCron();
+  require("src/cron/recordatoriosManoDeObraAClientes").initRecordatoriosManoDeObraAClientesCron();
   require("src/cron/notificacionesCheques").initNotificacionesChequesCron();
   require("src/cron/notificacionesImportantes").initNotificacionesImportantesCron();
   require("src/cron/s3FileSync").initS3FileSyncCron();

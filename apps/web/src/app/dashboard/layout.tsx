@@ -148,7 +148,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       socket.on("newNotification", (data?: { texto?: string }) => {
         fetchCantidadNotificaciones();
         setNotificationMessage(
-          data?.texto ?? "Tienes una nueva notificación"
+          data?.texto ?? "Tienes mensajes sin leer"
         );
         setNotificationOpen(true);
       });
