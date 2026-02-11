@@ -8,10 +8,10 @@ const notificationService = new NotificationService(
   new PrismaNotificationRepository(),
 );
 
-async function enviarNotificacionesCheques() {
+export async function enviarNotificacionesCheques() {
   try {
     console.log(
-      `[${new Date().toISOString()}] Iniciando cronjob de notificaciones de cheques`
+      `[${new Date().toISOString()}] Iniciando cronjob de notificaciones de cheques`,
     );
 
     const hoy = new Date();
@@ -33,16 +33,14 @@ async function enviarNotificacionesCheques() {
         titulo: `Cheque próximo a vencer`,
         texto: `El cheque N° ${cheque.numero} por $${
           cheque.importe
-        } vence el ${new Date(cheque.fechaCobro).toLocaleDateString(
-          "es-AR"
-        )}`,
+        } vence el ${new Date(cheque.fechaCobro).toLocaleDateString("es-AR")}`,
         leida: false,
         tipo: TipoNotificacionInterna.CHEQUE_POR_VENCER,
       });
     }
 
     console.log(
-      `[${new Date().toISOString()}] Finalizando cronjob de notificaciones de cheques`
+      `[${new Date().toISOString()}] Finalizando cronjob de notificaciones de cheques`,
     );
   } catch (error) {
     console.error("Error al procesar notificaciones de cheques:", error);
