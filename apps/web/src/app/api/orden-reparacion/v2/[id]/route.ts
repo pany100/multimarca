@@ -24,12 +24,19 @@ export async function PATCH(
       patchOrdenV2Schema
     );
 
+    const repository = new PrismaOrdenReparacionRepository();
+    const ordenAntes = await repository.findById(parseInt(dto.id));
+    const estadoAnterior = ordenAntes?.estado ?? null;
+
     const ordenActualizada = await new PatchOrdenV2UseCase(
-      new PrismaOrdenReparacionRepository()
+      repository
     ).execute(dto);
 
-    // Al cerrar la orden (estado Terminado), crear pago mecánico y notificación igual que en UpdateOrdenUseCase
-    if (dto.estado === "Terminado") {
+    // Solo crear pago y notificación cuando el estado PASA a Terminado (no si ya estaba Terminado)
+    const pasoATerminado =
+      estadoAnterior !== "Terminado" && dto.estado === "Terminado";
+
+    if (pasoATerminado) {
       const notificationRepo = new PrismaNotificationRepository();
       const notificationService = new NotificationService(notificationRepo);
       const pagoRepo = new PrismaPagoMecanicoRepository();

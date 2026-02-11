@@ -49,7 +49,7 @@ async function enviarNotificacionesTurnos() {
 
     if (turnosHoy.length > 0) {
       logger.info(
-        `[NotificacionesImportantes] Turnos encontrados: ${turnosHoy.length}`
+        `[NotificacionesImportantes] Turnos encontrados: ${turnosHoy.length}`,
       );
       // Crear notificación interna para los turnos del día (una por usuario que puede recibir notificaciones)
       await notificationService.create({
@@ -58,11 +58,10 @@ async function enviarNotificacionesTurnos() {
         texto: `Hay ${
           turnosHoy.length
         } turno(s) programado(s) para hoy:\n${turnosHoy
-          .map(
-            (turno) =>
-              turno.auto
-                ? `- ${turno.hora} - ${turno.auto.owner.fullName} (${turno.auto.patent})`
-                : `- ${turno.hora} - ${turno.informacionCliente || "Sin información"}${turno.informacionAuto ? ` (${turno.informacionAuto})` : ""}`
+          .map((turno) =>
+            turno.auto
+              ? `- ${turno.hora} - ${turno.auto.owner.fullName} (${turno.auto.patent})`
+              : `- ${turno.hora} - ${turno.informacionCliente || "Sin información"}${turno.informacionAuto ? ` (${turno.informacionAuto})` : ""}`,
           )
           .join("\n")}`,
         leida: false,
@@ -74,7 +73,7 @@ async function enviarNotificacionesTurnos() {
   } catch (error) {
     logger.error(
       "[NotificacionesImportantes] Error al procesar notificaciones de turnos",
-      { error }
+      { error },
     );
   }
 }
@@ -85,7 +84,7 @@ async function enviarRecordatoriosMantenimiento() {
     const fechaHoy = today.format("YYYY-MM-DD");
     logger.info(
       "[NotificacionesImportantes] Buscando recordatorios de mantenimiento",
-      { fecha: fechaHoy }
+      { fecha: fechaHoy },
     );
     type Row = {
       fullName: string;
@@ -111,14 +110,10 @@ async function enviarRecordatoriosMantenimiento() {
         Cliente c ON a.ownerId = c.id
       JOIN 
         TrabajoRealizado tr ON orep.id = tr.ordenReparacionId
-      JOIN
-        ManoDeObra mo ON tr.descripcion = mo.name
       WHERE 
         orep.estado = 'Terminado'
       AND 
         c.can_receive_notifications = true
-      AND 
-        mo.id IN (106, 108, 110, 289, 1, 2, 304, 153, 320, 9, 156, 4, 154, 7, 8, 155, 157, 10, 11)
       AND 
         tr.diasParaRecordatorio IS NOT NULL
       AND 
@@ -141,13 +136,22 @@ async function enviarRecordatoriosMantenimiento() {
 
     const trabajosParaRecordar = rows.filter((row) => {
       const dias = diasToArray(row.diasParaRecordatorio);
-      const fechaSalida = dayjs(row.fechaSalidaReparacion).tz(
-        "America/Argentina/Buenos_Aires"
-      );
+      const fechaSalida = dayjs(row.fechaSalidaReparacion)
+        .tz("America/Argentina/Buenos_Aires")
+        .startOf("day");
       return dias.some(
-        (dia) => fechaSalida.add(dia, "day").format("YYYY-MM-DD") === fechaHoy
+        (dia) => fechaSalida.add(dia, "day").format("YYYY-MM-DD") === fechaHoy,
       );
     });
+
+    logger.info(
+      "[NotificacionesImportantes] Recordatorios mantenimiento",
+      {
+        fechaHoy,
+        totalFilasQuery: rows.length,
+        totalParaRecordarHoy: trabajosParaRecordar.length,
+      },
+    );
 
     if (trabajosParaRecordar.length > 0) {
       await notificationService.create({
@@ -158,7 +162,7 @@ async function enviarRecordatoriosMantenimiento() {
         } recordatorio(s) de mantenimiento para hoy:\n${trabajosParaRecordar
           .map(
             (trabajo) =>
-              `- ${trabajo.fullName} (${trabajo.patent}) - ${trabajo.descripcion}`
+              `- ${trabajo.fullName} (${trabajo.patent}) - ${trabajo.descripcion}`,
           )
           .join("\n")}`,
         leida: false,
@@ -168,7 +172,7 @@ async function enviarRecordatoriosMantenimiento() {
   } catch (error) {
     logger.error(
       "[NotificacionesImportantes] Error al enviar recordatorios de mantenimiento",
-      { error }
+      { error, stack: error instanceof Error ? error.stack : undefined },
     );
   }
 }
@@ -190,9 +194,8 @@ async function enviarNotificacionesAgenda() {
     });
 
     // Usar el repositorio para obtener eventos del día (incluyendo recurrentes)
-    const { PrismaAgendaRepository } = await import(
-      "@/core/infrastructure/database/repositories/prisma-agenda.repository"
-    );
+    const { PrismaAgendaRepository } =
+      await import("@/core/infrastructure/database/repositories/prisma-agenda.repository");
     const agendaRepo = new PrismaAgendaRepository();
     const eventosHoy = await agendaRepo.listByDay({
       year,
@@ -202,7 +205,7 @@ async function enviarNotificacionesAgenda() {
     });
 
     logger.info(
-      `[NotificacionesImportantes] Eventos de agenda encontrados: ${eventosHoy.length}`
+      `[NotificacionesImportantes] Eventos de agenda encontrados: ${eventosHoy.length}`,
     );
 
     if (eventosHoy.length > 0) {
@@ -215,7 +218,7 @@ async function enviarNotificacionesAgenda() {
             {
               eventoId: evento.id,
               titulo: evento.titulo,
-            }
+            },
           );
           continue;
         }
@@ -225,7 +228,7 @@ async function enviarNotificacionesAgenda() {
           fecha: new Date(),
           titulo: `Evento de agenda para hoy`,
           texto: `Tienes un evento programado para hoy:\n- ${dayjs(
-            evento.fecha
+            evento.fecha,
           ).format("HH:mm")} - ${evento.titulo}${
             evento.descripcion ? `: ${evento.descripcion}` : ""
           }`,
@@ -240,18 +243,18 @@ async function enviarNotificacionesAgenda() {
             userId: evento.userId,
             eventoId: evento.id,
             titulo: evento.titulo,
-          }
+          },
         );
       }
     } else {
       logger.info(
-        "[NotificacionesImportantes] No hay eventos de agenda para hoy"
+        "[NotificacionesImportantes] No hay eventos de agenda para hoy",
       );
     }
   } catch (error) {
     logger.error(
       "[NotificacionesImportantes] Error al procesar notificaciones de eventos de agenda",
-      { error }
+      { error },
     );
   }
 }
@@ -259,7 +262,7 @@ async function enviarNotificacionesAgenda() {
 export async function procesarNotificacionesImportantes() {
   try {
     logger.info(
-      "[NotificacionesImportantes] ========== INICIANDO CRONJOB =========="
+      "[NotificacionesImportantes] ========== INICIANDO CRONJOB ==========",
     );
 
     await Promise.all([
@@ -269,12 +272,12 @@ export async function procesarNotificacionesImportantes() {
     ]);
 
     logger.info(
-      "[NotificacionesImportantes] ========== CRONJOB COMPLETADO =========="
+      "[NotificacionesImportantes] ========== CRONJOB COMPLETADO ==========",
     );
   } catch (error) {
     logger.error(
       "[NotificacionesImportantes] Error crítico al procesar notificaciones",
-      { error }
+      { error },
     );
   }
 }
@@ -283,12 +286,12 @@ export function initNotificacionesImportantesCron() {
   // Programar el cronjob para que se ejecute a las 7am todos los días
   cron.schedule("0 7 * * *", () => {
     logger.info(
-      "[NotificacionesImportantes] Ejecutando cronjob de notificaciones importantes"
+      "[NotificacionesImportantes] Ejecutando cronjob de notificaciones importantes",
     );
     procesarNotificacionesImportantes();
   });
 
   logger.info(
-    "[NotificacionesImportantes] Cron job para notificaciones importantes iniciado - Ejecuta diariamente a las 7:00 AM"
+    "[NotificacionesImportantes] Cron job para notificaciones importantes iniciado - Ejecuta diariamente a las 7:00 AM",
   );
 }

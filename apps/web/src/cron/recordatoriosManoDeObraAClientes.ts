@@ -75,8 +75,12 @@ export async function enviarRecordatoriosManoDeObraAClientes() {
 
     const trabajosParaRecordar = rows.filter((row) => {
       const dias = diasToArray(row.diasParaRecordatorio);
-      const fechaSalida = dayjs(row.fechaSalidaReparacion).tz(
-        "America/Argentina/Buenos_Aires"
+      const fechaSalidaStr = dayjs.utc(row.fechaSalidaReparacion).format(
+        "YYYY-MM-DD",
+      );
+      const fechaSalida = dayjs.tz(
+        fechaSalidaStr,
+        "America/Argentina/Buenos_Aires",
       );
       return dias.some(
         (dia) => fechaSalida.add(dia, "day").format("YYYY-MM-DD") === fechaHoy
