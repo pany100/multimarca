@@ -8,6 +8,7 @@ export type NotificationData = {
   ordenReparacionId?: number;
   tipo: TipoNotificacionInterna;
   stockId?: number;
+  userId?: number | null;
 };
 
 export interface NotificationRepository {

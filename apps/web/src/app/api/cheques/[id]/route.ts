@@ -1,5 +1,6 @@
+import { NotificationService } from "@/core/application/services/notification.service";
+import { PrismaNotificationRepository } from "@/core/infrastructure/database/repositories/prisma-notification.repository";
 import prisma from "@/lib/prisma";
-import { getIO } from "@/lib/socketio";
 import {
   chequeQueryData,
   deleteCheque,
@@ -176,29 +177,20 @@ export async function PUT(
         }
         return `Venta ID: ${operacion.idOperacion}`;
       });
-      await prisma.notificacionInterna.create({
-        data: {
-          fecha: new Date(),
-          titulo: "Hay operaciones a revisar",
-          texto: `El cheque ${
-            existingCheque.numero
-          } se ha rechazado. Debe revisar las siguientes operaciones: ${operacionesLinks.join(
-            ", "
-          )}`,
-          leida: false,
-          tipo: TipoNotificacionInterna.CHEQUE_RECHAZADO,
-        },
+      const notificationService = new NotificationService(
+        new PrismaNotificationRepository(),
+      );
+      await notificationService.create({
+        fecha: new Date(),
+        titulo: "Hay operaciones a revisar",
+        texto: `El cheque ${
+          existingCheque.numero
+        } se ha rechazado. Debe revisar las siguientes operaciones: ${operacionesLinks.join(
+          ", "
+        )}`,
+        leida: false,
+        tipo: TipoNotificacionInterna.CHEQUE_RECHAZADO,
       });
-      const io = getIO();
-      if (io) {
-        io.emit("newNotification", {
-          texto: `El cheque ${
-            existingCheque.numero
-          } se ha rechazado. Debe revisar las siguientes operaciones: ${operacionesLinks.join(
-            ", "
-          )}`,
-        });
-      }
     }
 
     return NextResponse.json(updatedCheque);

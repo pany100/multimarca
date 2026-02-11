@@ -1,5 +1,6 @@
+import { NotificationService } from "@/core/application/services/notification.service";
+import { PrismaNotificationRepository } from "@/core/infrastructure/database/repositories/prisma-notification.repository";
 import { sendWhatsAppMessage } from "@/services/whatsappService";
-import { getUsersToNotify } from "@/utils/notificationUtils";
 import { PrismaClient, TipoNotificacionInterna } from "@prisma/client";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
@@ -11,6 +12,9 @@ dayjs.extend(timezone);
 dayjs.tz.setDefault("America/Argentina/Buenos_Aires");
 
 const prisma = new PrismaClient();
+const notificationService = new NotificationService(
+  new PrismaNotificationRepository(),
+);
 
 async function enviarRecordatoriosTrabajos() {
   try {
@@ -90,20 +94,13 @@ async function enviarRecordatoriosTrabajos() {
           year: "numeric",
         }),
       ]);
-      const users = await getUsersToNotify();
-      // Crear notificación interna para los recordatorios
-      for (const user of users) {
-        await prisma.notificacionInterna.create({
-          data: {
-            fecha: new Date(),
-            titulo: `Recordatorios de mano de obra`,
-            texto: `El cliente ${trabajo.fullName} tiene un recordatorio de mano de obra para hoy: ${trabajo.descripcion} para el auto ${trabajo.patent}`,
-            leida: false,
-            tipo: TipoNotificacionInterna.RECORDATORIOS_MANO_DE_OBRA,
-            userId: user.id,
-          },
-        });
-      }
+      await notificationService.create({
+        fecha: new Date(),
+        titulo: `Recordatorios de mano de obra`,
+        texto: `El cliente ${trabajo.fullName} tiene un recordatorio de mano de obra para hoy: ${trabajo.descripcion} para el auto ${trabajo.patent}`,
+        leida: false,
+        tipo: TipoNotificacionInterna.RECORDATORIOS_MANO_DE_OBRA,
+      });
     }
 
     console.log(

@@ -1,8 +1,12 @@
-import { getUsersToNotify } from "@/utils/notificationUtils";
+import { NotificationService } from "@/core/application/services/notification.service";
+import { PrismaNotificationRepository } from "@/core/infrastructure/database/repositories/prisma-notification.repository";
 import { PrismaClient, TipoNotificacionInterna } from "@prisma/client";
 import cron from "node-cron";
 
 const prisma = new PrismaClient();
+const notificationService = new NotificationService(
+  new PrismaNotificationRepository(),
+);
 
 async function enviarNotificacionesCheques() {
   try {
@@ -23,26 +27,18 @@ async function enviarNotificacionesCheques() {
       },
     });
 
-    const users = await getUsersToNotify();
-
     for (const cheque of cheques) {
-      // Crear notificación interna
-      for (const user of users) {
-        await prisma.notificacionInterna.create({
-          data: {
-            fecha: new Date(),
-            titulo: `Cheque próximo a vencer`,
-            texto: `El cheque N° ${cheque.numero} por $${
-              cheque.importe
-            } vence el ${new Date(cheque.fechaCobro).toLocaleDateString(
-              "es-AR"
-            )}`,
-            leida: false,
-            tipo: TipoNotificacionInterna.CHEQUE_POR_VENCER,
-            userId: user.id,
-          },
-        });
-      }
+      await notificationService.create({
+        fecha: new Date(),
+        titulo: `Cheque próximo a vencer`,
+        texto: `El cheque N° ${cheque.numero} por $${
+          cheque.importe
+        } vence el ${new Date(cheque.fechaCobro).toLocaleDateString(
+          "es-AR"
+        )}`,
+        leida: false,
+        tipo: TipoNotificacionInterna.CHEQUE_POR_VENCER,
+      });
     }
 
     console.log(

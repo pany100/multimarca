@@ -1,5 +1,6 @@
+import { NotificationService } from "@/core/application/services/notification.service";
+import { PrismaNotificationRepository } from "@/core/infrastructure/database/repositories/prisma-notification.repository";
 import logger from "@/lib/logger";
-import { getUsersToNotify } from "@/utils/notificationUtils";
 import { PrismaClient, TipoNotificacionInterna } from "@prisma/client";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
@@ -12,6 +13,9 @@ dayjs.extend(timezone);
 dayjs.tz.setDefault("America/Argentina/Buenos_Aires");
 
 const prisma = new PrismaClient();
+const notificationService = new NotificationService(
+  new PrismaNotificationRepository(),
+);
 
 async function enviarNotificacionesTurnos() {
   try {
@@ -47,29 +51,23 @@ async function enviarNotificacionesTurnos() {
       logger.info(
         `[NotificacionesImportantes] Turnos encontrados: ${turnosHoy.length}`
       );
-      // Crear notificación interna para los turnos del día
-      const users = await getUsersToNotify();
-      for (const user of users) {
-        await prisma.notificacionInterna.create({
-          data: {
-            fecha: new Date(),
-            titulo: `Turnos del día`,
-            texto: `Hay ${
-              turnosHoy.length
-            } turno(s) programado(s) para hoy:\n${turnosHoy
-              .map(
-                (turno) =>
-                  turno.auto
-                    ? `- ${turno.hora} - ${turno.auto.owner.fullName} (${turno.auto.patent})`
-                    : `- ${turno.hora} - ${turno.informacionCliente || "Sin información"}${turno.informacionAuto ? ` (${turno.informacionAuto})` : ""}`
-              )
-              .join("\n")}`,
-            leida: false,
-            tipo: TipoNotificacionInterna.TURNOS_DEL_DIA,
-            userId: user.id,
-          },
-        });
-      }
+      // Crear notificación interna para los turnos del día (una por usuario que puede recibir notificaciones)
+      await notificationService.create({
+        fecha: new Date(),
+        titulo: `Turnos del día`,
+        texto: `Hay ${
+          turnosHoy.length
+        } turno(s) programado(s) para hoy:\n${turnosHoy
+          .map(
+            (turno) =>
+              turno.auto
+                ? `- ${turno.hora} - ${turno.auto.owner.fullName} (${turno.auto.patent})`
+                : `- ${turno.hora} - ${turno.informacionCliente || "Sin información"}${turno.informacionAuto ? ` (${turno.informacionAuto})` : ""}`
+          )
+          .join("\n")}`,
+        leida: false,
+        tipo: TipoNotificacionInterna.TURNOS_DEL_DIA,
+      });
     } else {
       logger.info("[NotificacionesImportantes] No hay turnos para hoy");
     }
@@ -152,27 +150,20 @@ async function enviarRecordatoriosMantenimiento() {
     });
 
     if (trabajosParaRecordar.length > 0) {
-      const users = await getUsersToNotify();
-      // Crear notificación interna para los recordatorios
-      for (const user of users) {
-        await prisma.notificacionInterna.create({
-          data: {
-            fecha: new Date(),
-            titulo: `Recordatorios de mantenimiento`,
-            texto: `Hay ${
-              trabajosParaRecordar.length
-            } recordatorio(s) de mantenimiento para hoy:\n${trabajosParaRecordar
-              .map(
-                (trabajo) =>
-                  `- ${trabajo.fullName} (${trabajo.patent}) - ${trabajo.descripcion}`
-              )
-              .join("\n")}`,
-            leida: false,
-            tipo: TipoNotificacionInterna.RECORDATORIOS_MANO_DE_OBRA,
-            userId: user.id,
-          },
-        });
-      }
+      await notificationService.create({
+        fecha: new Date(),
+        titulo: `Recordatorios de mantenimiento`,
+        texto: `Hay ${
+          trabajosParaRecordar.length
+        } recordatorio(s) de mantenimiento para hoy:\n${trabajosParaRecordar
+          .map(
+            (trabajo) =>
+              `- ${trabajo.fullName} (${trabajo.patent}) - ${trabajo.descripcion}`
+          )
+          .join("\n")}`,
+        leida: false,
+        tipo: TipoNotificacionInterna.RECORDATORIOS_MANO_DE_OBRA,
+      });
     }
   } catch (error) {
     logger.error(
@@ -230,19 +221,17 @@ async function enviarNotificacionesAgenda() {
         }
 
         // Enviar notificación solo al creador del evento
-        await prisma.notificacionInterna.create({
-          data: {
-            fecha: new Date(),
-            titulo: `Evento de agenda para hoy`,
-            texto: `Tienes un evento programado para hoy:\n- ${dayjs(
-              evento.fecha
-            ).format("HH:mm")} - ${evento.titulo}${
-              evento.descripcion ? `: ${evento.descripcion}` : ""
-            }`,
-            leida: false,
-            tipo: TipoNotificacionInterna.EVENTO_AGENDA,
-            userId: evento.userId,
-          },
+        await notificationService.create({
+          fecha: new Date(),
+          titulo: `Evento de agenda para hoy`,
+          texto: `Tienes un evento programado para hoy:\n- ${dayjs(
+            evento.fecha
+          ).format("HH:mm")} - ${evento.titulo}${
+            evento.descripcion ? `: ${evento.descripcion}` : ""
+          }`,
+          leida: false,
+          tipo: TipoNotificacionInterna.EVENTO_AGENDA,
+          userId: evento.userId,
         });
 
         logger.info(
