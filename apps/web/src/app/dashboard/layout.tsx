@@ -521,9 +521,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 cantidadNotificaciones + notificacionesWhatsappNoLeidas
               }
               color="error"
-              sx={{ ml: 1 }}
-            />
-          ) : null,
+            >
+              <NotificationsIcon />
+            </Badge>
+          ) : (
+            <NotificationsIcon />
+          ),
         items: [
           {
             permiso: "Notificaciones",
