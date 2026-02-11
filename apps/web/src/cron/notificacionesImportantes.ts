@@ -223,19 +223,34 @@ async function enviarNotificacionesAgenda() {
           continue;
         }
 
-        // Enviar notificación solo al creador del evento
+        const textoEvento = `Tienes un evento programado para hoy:\n- ${dayjs(
+          evento.fecha,
+        ).format("HH:mm")} - ${evento.titulo}${
+          evento.descripcion ? `: ${evento.descripcion}` : ""
+        }`;
+
+        // Notificación al creador del evento
         await notificationService.create({
           fecha: new Date(),
           titulo: `Evento de agenda para hoy`,
-          texto: `Tienes un evento programado para hoy:\n- ${dayjs(
-            evento.fecha,
-          ).format("HH:mm")} - ${evento.titulo}${
-            evento.descripcion ? `: ${evento.descripcion}` : ""
-          }`,
+          texto: textoEvento,
           leida: false,
           tipo: TipoNotificacionInterna.EVENTO_AGENDA,
           userId: evento.userId,
         });
+
+        // También notificar al usuario id 1 si no es el creador (evitar duplicado)
+        const USER_ID_ADMIN = 1;
+        if (evento.userId !== USER_ID_ADMIN) {
+          await notificationService.create({
+            fecha: new Date(),
+            titulo: `Evento de agenda para hoy`,
+            texto: textoEvento,
+            leida: false,
+            tipo: TipoNotificacionInterna.EVENTO_AGENDA,
+            userId: USER_ID_ADMIN,
+          });
+        }
 
         logger.info(
           "[NotificacionesImportantes] Notificación de evento enviada",
