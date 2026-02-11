@@ -11,8 +11,9 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
 
+    // Solo contar no leídas del usuario logueado (mismo criterio que el listado)
     const cantidadNoLeidas = await prisma.notificacionInterna.count({
-      where: { leida: false, OR: [{ userId: null }, { userId: user.id }] },
+      where: { leida: false, userId: user.id },
     });
 
     return NextResponse.json({ cantidadNoLeidas });

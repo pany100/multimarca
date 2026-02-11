@@ -145,12 +145,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   useEffect(() => {
     if (socket) {
-      socket.on("newNotification", (data?: { texto: string }) => {
+      socket.on("newNotification", (data?: { texto?: string }) => {
         setCantidadNotificaciones((prev) => prev + 1);
-        if (data?.texto) {
-          setNotificationMessage(data.texto);
-          setNotificationOpen(true);
-        }
+        setNotificationMessage(
+          data?.texto ?? "Tienes una nueva notificación"
+        );
+        setNotificationOpen(true);
       });
 
       socket.on("whatsappNotification", () => {
@@ -991,7 +991,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       >
         <Alert
           onClose={() => setNotificationOpen(false)}
-          severity="success"
+          severity="error"
           sx={{ width: "100%" }}
         >
           {notificationMessage}

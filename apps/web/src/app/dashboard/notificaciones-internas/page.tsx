@@ -54,9 +54,10 @@ const NotificacionesInternas = () => {
       url.searchParams.append("page", paginationModel.page.toString());
       url.searchParams.append("size", paginationModel.pageSize.toString());
 
-      if (tabValue === 1) {
+      // tab 0 = No leídas, tab 1 = Leídas, tab 2 = Todas
+      if (tabValue === 0) {
         url.searchParams.append("leidas", "false");
-      } else if (tabValue === 2) {
+      } else if (tabValue === 1) {
         url.searchParams.append("leidas", "true");
       }
 
