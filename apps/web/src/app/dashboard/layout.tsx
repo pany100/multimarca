@@ -99,23 +99,23 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { tareas, obtenerTareasDiarias } = useTareasDiarias();
   const [cantidadTareas, setCantidadTareas] = useState(0);
 
-  useEffect(() => {
-    const fetchNotificaciones = async () => {
-      try {
-        const response = await authFetch(
-          "/api/notificaciones-internas/cant-no-leidas"
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setCantidadNotificaciones(data.cantidadNoLeidas);
-        }
-      } catch (error) {
-        console.error("Error al obtener notificaciones:", error);
+  const fetchCantidadNotificaciones = useCallback(async () => {
+    try {
+      const response = await authFetch(
+        "/api/notificaciones-internas/cant-no-leidas"
+      );
+      if (response.ok) {
+        const data = await response.json();
+        setCantidadNotificaciones(data.cantidadNoLeidas);
       }
-    };
-
-    fetchNotificaciones();
+    } catch (error) {
+      console.error("Error al obtener notificaciones:", error);
+    }
   }, [authFetch]);
+
+  useEffect(() => {
+    fetchCantidadNotificaciones();
+  }, [fetchCantidadNotificaciones]);
 
   useEffect(() => {
     obtenerTareasDiarias();
@@ -146,7 +146,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     if (socket) {
       socket.on("newNotification", (data?: { texto?: string }) => {
-        setCantidadNotificaciones((prev) => prev + 1);
+        fetchCantidadNotificaciones();
         setNotificationMessage(
           data?.texto ?? "Tienes una nueva notificación"
         );
@@ -158,7 +158,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       });
 
       socket.on("readNotification", () => {
-        setCantidadNotificaciones((prev) => Math.max(0, prev - 1));
+        fetchCantidadNotificaciones();
       });
 
       socket.on("newTarea", () => {
@@ -175,7 +175,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         socket.off("whatsappNotification");
       };
     }
-  }, [socket, fetchWhatsappNoLeido]);
+  }, [socket, fetchWhatsappNoLeido, fetchCantidadNotificaciones]);
 
   useEffect(() => {
     if (socket) {

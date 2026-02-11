@@ -256,7 +256,7 @@ async function enviarNotificacionesAgenda() {
   }
 }
 
-async function procesarNotificacionesImportantes() {
+export async function procesarNotificacionesImportantes() {
   try {
     logger.info(
       "[NotificacionesImportantes] ========== INICIANDO CRONJOB =========="
