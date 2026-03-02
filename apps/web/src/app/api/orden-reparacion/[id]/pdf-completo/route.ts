@@ -73,14 +73,28 @@ export async function GET(
     // Inicializar el PDF final con el PDF base
     let finalPdfBuffer = basePdfBuffer;
 
-    // 2. Verificar si hay un PDF adicional (scanner)
+    // 2. Verificar si hay un PDF adicional (scanner) — puede ser imagen o PDF
     if (ordenReparacion.scannerFile) {
-      const scannerPdfBuffer = await getFileFromS3(
+      const scannerPath =
         ordenReparacion.scannerFile?.finalPath ||
-          ordenReparacion.scannerFile?.tempPath
+        ordenReparacion.scannerFile?.tempPath;
+      const scannerBuffer = await getFileFromS3(scannerPath);
+
+      let scannerPdfBuffer: Buffer;
+      if (isImageUrl(scannerPath)) {
+        scannerPdfBuffer = await imageUrlToSinglePdf(scannerPath);
+      } else if (getImageFormatFromBuffer(scannerBuffer)) {
+        const format = getImageFormatFromBuffer(scannerBuffer)!;
+        scannerPdfBuffer = await imageBufferToSinglePdf(scannerBuffer, format);
+      } else {
+        scannerPdfBuffer = scannerBuffer;
+      }
+
+      finalPdfBuffer = await mergePdfs(
+        finalPdfBuffer,
+        scannerPdfBuffer,
+        "scanner"
       );
-      // Combinar el PDF base con el PDF del scanner
-      finalPdfBuffer = await mergePdfs(finalPdfBuffer, scannerPdfBuffer);
     }
 
     // 3. Verificar si hay recibos para añadir
@@ -96,7 +110,11 @@ export async function GET(
         ) as string[]
       );
       // Combinar el PDF actual con el PDF de recibos
-      finalPdfBuffer = await mergePdfs(finalPdfBuffer, recibosPdfBuffer);
+      finalPdfBuffer = await mergePdfs(
+        finalPdfBuffer,
+        recibosPdfBuffer,
+        "recibos"
+      );
     }
 
     // 4. Devolver el PDF final como descarga
@@ -197,12 +215,32 @@ async function getFileFromS3(fileUrl: string): Promise<Buffer> {
 
 async function mergePdfs(
   pdf1Buffer: Buffer,
-  pdf2Buffer: Buffer
+  pdf2Buffer: Buffer,
+  label2 = "segundo"
 ): Promise<Buffer> {
   try {
-    // Cargar los documentos PDF
-    const pdf1Doc = await PDFDocument.load(new Uint8Array(pdf1Buffer));
-    const pdf2Doc = await PDFDocument.load(new Uint8Array(pdf2Buffer));
+    if (!isPdfBuffer(pdf2Buffer)) {
+      console.warn(
+        `[pdf-completo] Se omite el ${label2} documento: no es un PDF válido (cabecera %PDF- no encontrada). Se devuelve el PDF sin ese adjunto.`
+      );
+      return pdf1Buffer;
+    }
+
+    const pdf1Doc = await PDFDocument.load(new Uint8Array(pdf1Buffer), {
+      ignoreEncryption: true,
+    });
+    const pdf2Doc = await PDFDocument.load(new Uint8Array(pdf2Buffer), {
+      ignoreEncryption: true,
+    });
+
+    // Si el segundo PDF está cifrado, no podemos copiar el contenido (quedan hojas en blanco).
+    // Devolvemos solo el primero y avisamos.
+    if (pdf2Doc.isEncrypted) {
+      console.warn(
+        `[pdf-completo] Se omite el ${label2} documento: está cifrado y no se puede incluir el contenido. Se devuelve el PDF sin ese adjunto.`
+      );
+      return pdf1Buffer;
+    }
 
     // Crear un nuevo documento PDF
     const mergedPdf = await PDFDocument.create();
@@ -225,10 +263,17 @@ async function mergePdfs(
       mergedPdf.addPage(page);
     }
 
-    // Guardar el documento combinado como buffer
     const mergedPdfBytes = await mergedPdf.save();
     return Buffer.from(mergedPdfBytes);
   } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error);
+    if (msg.includes("No PDF header") || msg.includes("Failed to parse PDF")) {
+      console.warn(
+        `[pdf-completo] Se omite el ${label2} documento: no pudo parsearse como PDF (posible imagen o archivo corrupto). Se devuelve el PDF sin ese adjunto.`,
+        { error: msg }
+      );
+      return pdf1Buffer;
+    }
     console.error("Error al combinar PDFs:", error);
     throw error;
   }
@@ -371,4 +416,73 @@ function isImageUrl(url: string): boolean {
     lowerUrl.endsWith(".jpeg") ||
     lowerUrl.endsWith(".png")
   );
+}
+
+const PDF_HEADER_BYTES = [0x25, 0x50, 0x44, 0x46, 0x2d]; // %PDF-
+
+function isPdfBuffer(buffer: Buffer): boolean {
+  if (!buffer || buffer.length < 5) return false;
+  return PDF_HEADER_BYTES.every((byte, i) => buffer[i] === byte);
+}
+
+/** Detecta si el buffer es JPEG o PNG por magic bytes. */
+function getImageFormatFromBuffer(
+  buffer: Buffer
+): "jpeg" | "png" | null {
+  if (!buffer || buffer.length < 8) return null;
+  // JPEG: FF D8 FF
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff)
+    return "jpeg";
+  // PNG: 89 50 4E 47 0D 0A 1A 0A
+  if (
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47 &&
+    buffer[4] === 0x0d &&
+    buffer[5] === 0x0a &&
+    buffer[6] === 0x1a &&
+    buffer[7] === 0x0a
+  )
+    return "png";
+  return null;
+}
+
+/** Genera un PDF de una sola página con una imagen desde URL (S3). */
+async function imageUrlToSinglePdf(imageUrl: string): Promise<Buffer> {
+  const imageBuffer = await getFileFromS3(imageUrl);
+  const format =
+    imageUrl.toLowerCase().endsWith(".png") ? "png" : "jpeg";
+  return imageBufferToSinglePdf(imageBuffer, format);
+}
+
+/** Genera un PDF de una sola página con una imagen desde buffer. */
+async function imageBufferToSinglePdf(
+  imageBuffer: Buffer,
+  format: "jpeg" | "png"
+): Promise<Buffer> {
+  const pdfDoc = await PDFDocument.create();
+  const page = pdfDoc.addPage();
+  const { width, height } = page.getSize();
+
+  const image =
+    format === "png"
+      ? await pdfDoc.embedPng(new Uint8Array(imageBuffer))
+      : await pdfDoc.embedJpg(new Uint8Array(imageBuffer));
+
+  const imgW = image.width;
+  const imgH = image.height;
+  let drawWidth = width * 0.9;
+  let drawHeight = (imgH / imgW) * drawWidth;
+  if (drawHeight > height * 0.9) {
+    drawHeight = height * 0.9;
+    drawWidth = (imgW / imgH) * drawHeight;
+  }
+
+  const x = (width - drawWidth) / 2;
+  const y = (height - drawHeight) / 2;
+  page.drawImage(image, { x, y, width: drawWidth, height: drawHeight });
+
+  const pdfBytes = await pdfDoc.save();
+  return Buffer.from(pdfBytes);
 }
