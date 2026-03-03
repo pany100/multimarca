@@ -59,12 +59,12 @@ export class PrismaIngresoReparacionRepository
   }
 
   async update(dto: UpdateRevisadoYEnviadoDto) {
+    const data: { revisado?: boolean; reciboEnviado?: boolean } = {};
+    if (dto.revisado !== undefined) data.revisado = dto.revisado;
+    if (dto.reciboEnviado !== undefined) data.reciboEnviado = dto.reciboEnviado;
     return prisma.ingresoPorReparacion.update({
       where: { id: dto.id },
-      data: {
-        revisado: dto.revisado || false,
-        reciboEnviado: dto.reciboEnviado || false,
-      },
+      data,
     });
   }
 }

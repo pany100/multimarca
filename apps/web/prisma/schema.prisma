@@ -923,7 +923,7 @@ model Turno {
   informacionAuto    String?   @db.Text
   clienteNombre      String?   @db.Text
   clienteTelefono    String?   @db.VarChar(50)
-  vino               Boolean?  @default(false)
+  vino               Boolean?
   observaciones      String?   @db.Text
 
   @@index([fecha])

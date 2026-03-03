@@ -6,9 +6,20 @@ import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomInputTime from "@/components/formV2/CustomInputTime";
 import { useFormInfo } from "@/contexts/FormInfoContext";
 import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
-import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
+import {
+  Box,
+  FormControl,
+  FormHelperText,
+  Grid,
+  InputLabel,
+  MenuItem,
+  Select,
+  Tab,
+  Tabs,
+  Typography,
+} from "@mui/material";
 import { useEffect, useState } from "react";
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 import * as yup from "yup";
 
 export const schema = yup.object({
@@ -44,12 +55,13 @@ export const schema = yup.object({
     ),
   clienteNombre: yup.string().nullable().optional(),
   clienteTelefono: yup.string().nullable().optional(),
+  vino: yup.boolean().nullable().optional(),
   observaciones: yup.string().nullable().optional(),
 });
 
 const TurnosForm = () => {
   const { searchAutos, initialAuto } = useAutosAutocomplete();
-  const { setValue, watch } = useFormContext();
+  const { control, setValue, watch } = useFormContext();
   const { isEditing } = useFormInfo();
   const [tabValue, setTabValue] = useState(0);
 
@@ -168,6 +180,41 @@ const TurnosForm = () => {
             label="Descripción del problema"
             multiline
             rows={3}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <Controller
+            name="vino"
+            control={control}
+            render={({ field: { value, onChange, ...field }, fieldState: { error } }) => {
+              const selectValue =
+                value === null || value === undefined
+                  ? ""
+                  : value
+                    ? "true"
+                    : "false";
+              return (
+                <FormControl fullWidth error={!!error}>
+                  <InputLabel id="vino-label">Vino</InputLabel>
+                  <Select
+                    {...field}
+                    labelId="vino-label"
+                    label="Vino"
+                    value={selectValue}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      onChange(v === "" ? null : v === "true");
+                    }}
+                  >
+                    <MenuItem value="">Sin responder</MenuItem>
+                    <MenuItem value="true">Sí</MenuItem>
+                    <MenuItem value="false">No</MenuItem>
+                  </Select>
+                  {error && <FormHelperText>{error.message}</FormHelperText>}
+                </FormControl>
+              );
+            }}
           />
         </Grid>
 

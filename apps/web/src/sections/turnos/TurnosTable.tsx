@@ -1,11 +1,10 @@
 "use client";
 
-import { Box, Checkbox, Tab, Tabs } from "@mui/material";
-import { useCallback, useState } from "react";
+import { Box, Tab, Tabs } from "@mui/material";
+import { useState } from "react";
 import CustomTable, {
   InheritedTableProps,
 } from "../../components/tableV2/CustomTable";
-import { usePatchTurnoVino } from "./hooks/usePatchTurnoVino";
 
 function TurnosTable({
   extraActions,
@@ -14,10 +13,6 @@ function TurnosTable({
   ...rest
 }: InheritedTableProps) {
   const [tabValue, setTabValue] = useState(0);
-  const refreshTable = useCallback(() => {
-    setRefreshTrigger((prev) => prev + 1);
-  }, [setRefreshTrigger]);
-  const { patchVino, patchingId } = usePatchTurnoVino(refreshTable);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -61,16 +56,6 @@ function TurnosTable({
       },
     },
     {
-      field: "observaciones",
-      headerName: "Observaciones",
-      flex: 1,
-      renderCell: (params: any) => {
-        const obs = params.row.observaciones;
-        if (!obs) return "—";
-        return obs.length > 40 ? `${obs.slice(0, 40)}…` : obs;
-      },
-    },
-    {
       field: "auto",
       headerName: "Auto",
       flex: 1,
@@ -89,20 +74,21 @@ function TurnosTable({
     {
       field: "vino",
       headerName: "Vino",
-      flex: 0.5,
+      flex: 1,
       renderCell: (params: any) => {
-        const id = Number(params.row.id);
-        const vino = params.row.vino === true;
-        const loading = patchingId === id;
-        return (
-          <Checkbox
-            checked={vino}
-            disabled={loading}
-            onChange={() => patchVino(id, params.row.vino)}
-            size="small"
-            onClick={(e) => e.stopPropagation()}
-          />
-        );
+        const vino = params.row.vino;
+        if (vino === null || vino === undefined) return "No informado";
+        return vino ? "Sí" : "No";
+      },
+    },
+    {
+      field: "observaciones",
+      headerName: "Observaciones",
+      flex: 1,
+      renderCell: (params: any) => {
+        const obs = params.row.observaciones;
+        if (!obs) return "—";
+        return obs.length > 40 ? `${obs.slice(0, 40)}…` : obs;
       },
     },
   ];

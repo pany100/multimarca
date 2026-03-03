@@ -115,24 +115,24 @@ function IngresosVentasTable({
       flex: 1,
       renderCell: (params: any) => (
         <Checkbox
-          checked={params.row.revisado}
-          onChange={(event) => handleRevisadoChange(event, params.row.id)}
+          checked={params.row.reciboEnviado ?? false}
+          onChange={(event) => handleReciboEnviadoChange(event, params.row.id)}
         />
       ),
     },
   ];
 
-  const handleRevisadoChange = async (event: any, ingresoId: string) => {
+  const handleReciboEnviadoChange = async (event: any, ingresoId: string) => {
     try {
       const response = await authFetch(`/api/ingresos-ventas/${ingresoId}`, {
         method: "PATCH",
-        body: JSON.stringify({ revisado: event.target.checked }),
+        body: JSON.stringify({ reciboEnviado: event.target.checked }),
       });
       if (response.ok) {
         setRefreshTrigger((prev) => prev + 1);
       }
     } catch (error) {
-      console.error("Error al actualizar el estado revisado:", error);
+      console.error("Error al actualizar el estado recibo enviado:", error);
     }
   };
 
