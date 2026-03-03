@@ -1,12 +1,11 @@
 import { EstadisticaServiceFactory } from "@/core/application/factory/estadistica-service.factory";
+import { MecanicosDto } from "@/core/application/dto/estadisticas.dto";
 import { GetMecanicosUseCase } from "@/core/application/use-cases/estadisticas/get-mecanicos.use-case";
 import { mecanicosQuerySchema } from "@/core/infrastructure/validation/schemas/estadisticas.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
-import { PrismaClient } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
-
-const prisma = new PrismaClient();
+import { ZodSchema } from "zod";
 
 export const dynamic = "force-dynamic";
 
@@ -35,8 +34,10 @@ export async function GET(request: NextRequest) {
     const dto = await validateRequest(
       {
         moneda: searchParams.get("moneda") || "ARS",
+        from: searchParams.get("from") ?? undefined,
+        to: searchParams.get("to") ?? undefined,
       },
-      mecanicosQuerySchema
+      mecanicosQuerySchema as unknown as ZodSchema<MecanicosDto>
     );
     const result = await new GetMecanicosUseCase(
       EstadisticaServiceFactory.create()

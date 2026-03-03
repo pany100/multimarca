@@ -73,10 +73,18 @@ export class EstadisticaService {
 
   async getMecanicos(dto: EstadisticasMonedaVO) {
     const moneda = dto.moneda ?? "ARS";
+    const from = dto.from ?? null;
+    const to = dto.to ?? null;
     if (moneda === "USD") {
-      return await this.estadisticasMecanicosQueriesService.getMecanicosUsd();
+      return await this.estadisticasMecanicosQueriesService.getMecanicosUsd(
+        from,
+        to
+      );
     } else {
-      return await this.estadisticasMecanicosQueriesService.getMecanicosArs();
+      return await this.estadisticasMecanicosQueriesService.getMecanicosArs(
+        from,
+        to
+      );
     }
   }
 

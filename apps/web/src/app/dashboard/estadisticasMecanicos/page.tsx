@@ -6,6 +6,7 @@ import BuildIcon from "@mui/icons-material/Build";
 import TableChartIcon from "@mui/icons-material/TableChart";
 import {
   Box,
+  Button,
   CircularProgress,
   Grid,
   Paper,
@@ -15,6 +16,7 @@ import {
   TableContainer,
   TableHead,
   TableRow,
+  TextField,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -62,34 +64,38 @@ interface MecanicosData {
 const EstadisticasMecanicosPage = () => {
   const theme = useTheme();
   const { authFetch } = useFetch();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [mecanicosData, setMecanicosData] = useState<MecanicosData | null>(
     null
   );
-  const [moneda, setMoneda] = useState<"ARS" | "USD">("ARS");
+  const [dateFrom, setDateFrom] = useState<string>("");
+  const [dateTo, setDateTo] = useState<string>("");
+
+  const handleConsultar = async () => {
+    setLoading(true);
+    try {
+      const params = new URLSearchParams({ moneda: "ARS" });
+      if (dateFrom && dateTo) {
+        params.set("from", dateFrom);
+        params.set("to", dateTo);
+      }
+      const response = await authFetch(
+        `/api/estadisticas/mecanicos?${params.toString()}`
+      );
+      const data = await response.json();
+      setMecanicosData(data);
+    } catch (error) {
+      console.error("Error al obtener datos de mecánicos:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchMecanicosData = async () => {
-      setLoading(true);
-      try {
-        const response = await authFetch(
-          `/api/estadisticas/mecanicos?moneda=${moneda}`
-        );
-        const data = await response.json();
-        setMecanicosData(data);
-      } catch (error) {
-        console.error("Error al obtener datos de mecánicos:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMecanicosData();
-  }, [authFetch, moneda]);
-
-  const handleMonedaChange = (newMoneda: "ARS" | "USD") => {
-    setMoneda(newMoneda);
-  };
+    // Carga inicial: últimas 10 semanas (sin from/to)
+    handleConsultar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const formatDate = (dateString: string) => {
     // Crear la fecha en hora local para evitar problemas de zona horaria
@@ -105,7 +111,7 @@ const EstadisticasMecanicosPage = () => {
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("es-AR", {
       style: "currency",
-      currency: moneda === "ARS" ? "ARS" : "USD",
+      currency: "ARS",
       minimumFractionDigits: 0,
       maximumFractionDigits: 0,
     }).format(value);
@@ -127,7 +133,16 @@ const EstadisticasMecanicosPage = () => {
       );
     }
 
-    if (!mecanicosData || mecanicosData.data.length === 0) {
+    if (!mecanicosData) {
+      return (
+        <Typography variant="body1" sx={{ textAlign: "center", my: 4 }}>
+          Seleccione un rango de fechas (opcional) y pulse Consultar para ver las
+          estadísticas.
+        </Typography>
+      );
+    }
+
+    if (mecanicosData.data.length === 0) {
       return (
         <Typography variant="h6" sx={{ textAlign: "center", my: 4 }}>
           No hay datos disponibles
@@ -432,35 +447,39 @@ const EstadisticasMecanicosPage = () => {
           justifyContent: "space-between",
           alignItems: "center",
           mb: 3,
+          flexWrap: "wrap",
+          gap: 2,
         }}
       >
         <Typography variant="h5" component="h1" sx={{ fontWeight: "bold" }}>
           Estadísticas de Mecánicos (Sin incluir reparaciones compartidas)
         </Typography>
-        <Box>
-          <Typography
-            component="span"
-            sx={{
-              cursor: "pointer",
-              fontWeight: moneda === "ARS" ? "bold" : "normal",
-              color: moneda === "ARS" ? "primary.main" : "text.secondary",
-              mr: 2,
-            }}
-            onClick={() => handleMonedaChange("ARS")}
+        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          <TextField
+            label="Desde"
+            type="date"
+            size="small"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ width: 160 }}
+          />
+          <TextField
+            label="Hasta"
+            type="date"
+            size="small"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            InputLabelProps={{ shrink: true }}
+            sx={{ width: 160 }}
+          />
+          <Button
+            variant="contained"
+            onClick={handleConsultar}
+            disabled={loading}
           >
-            ARS
-          </Typography>
-          <Typography
-            component="span"
-            sx={{
-              cursor: "pointer",
-              fontWeight: moneda === "USD" ? "bold" : "normal",
-              color: moneda === "USD" ? "primary.main" : "text.secondary",
-            }}
-            onClick={() => handleMonedaChange("USD")}
-          >
-            USD
-          </Typography>
+            Consultar
+          </Button>
         </Box>
       </Box>
 
@@ -483,7 +502,9 @@ const EstadisticasMecanicosPage = () => {
           }}
         >
           <BarChartIcon sx={{ mr: 1, color: theme.palette.primary.main }} />
-          Ganancias de Mecánicos - Últimas 10 Semanas
+          {mecanicosData && dateFrom && dateTo
+            ? `Ganancias de Mecánicos - Del ${formatDate(dateFrom)} al ${formatDate(dateTo)}`
+            : "Ganancias de Mecánicos - Últimas 10 Semanas"}
         </Typography>
 
         <Box sx={{ p: 3 }}>{renderContent()}</Box>

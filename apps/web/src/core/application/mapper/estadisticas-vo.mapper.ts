@@ -27,6 +27,10 @@ export class EstadisticasVOMapper {
   }
 
   static getMecanicosToVo(dto: MecanicosDto) {
-    return new EstadisticasMonedaVO(dto.moneda || "ARS");
+    return new EstadisticasMonedaVO(
+      dto.moneda || "ARS",
+      dto.from ?? null,
+      dto.to ?? null
+    );
   }
 }
