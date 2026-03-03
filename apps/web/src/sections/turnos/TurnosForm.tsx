@@ -8,19 +8,12 @@ import CustomInputTime from "@/components/formV2/CustomInputTime";
 import { useFormInfo } from "@/contexts/FormInfoContext";
 import useAutosAutocomplete from "@/hooks/useAutosAutocomplete";
 import { Box, Grid, Tab, Tabs, Typography } from "@mui/material";
-import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
 
 export const schema = yup.object({
-  fecha: yup
-    .date()
-    .required("La fecha es requerida")
-    .min(
-      dayjs().startOf("day").toDate(),
-      "No se puede crear un turno para una fecha pasada"
-    ),
+  fecha: yup.date().required("La fecha es requerida"),
   hora: yup.string().required("La hora es requerida"),
   problema: yup
     .string()
@@ -36,7 +29,7 @@ export const schema = yup.object({
       function (value) {
         const { informacionAuto } = this.parent;
         return !!value || !!informacionAuto;
-      }
+      },
     ),
   informacionAuto: yup
     .string()
@@ -48,7 +41,7 @@ export const schema = yup.object({
       function (value) {
         const { autoId } = this.parent;
         return !!autoId || !!value;
-      }
+      },
     ),
   clienteNombre: yup.string().nullable().optional(),
   clienteTelefono: yup.string().nullable().optional(),
@@ -139,7 +132,7 @@ const TurnosForm = () => {
 
         {tabValue === 0 ? (
           // Vehículo existente en sistema
-          <Grid item xs={12} sx={{mb: 2}}>
+          <Grid item xs={12} sx={{ mb: 2 }}>
             <CustomAutocompleteInput
               name="autoId"
               label="Vehículo"

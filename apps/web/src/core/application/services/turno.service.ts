@@ -10,7 +10,7 @@ import type {
 export class TurnoService {
   constructor(
     private readonly turnoRepo: TurnoRepository,
-    private readonly feriadoRepo: FeriadoRepository
+    private readonly feriadoRepo: FeriadoRepository,
   ) {}
 
   async list(params: ListTurnosParams): Promise<ListTurnosResult> {
@@ -33,7 +33,7 @@ export class TurnoService {
 
     if (!data.autoId && !data.informacionAuto) {
       throw new Error(
-        "Debe seleccionar un vehículo o ingresar información del vehículo nuevo"
+        "Debe seleccionar un vehículo o ingresar información del vehículo nuevo",
       );
     }
 
@@ -53,15 +53,10 @@ export class TurnoService {
 
     const turnoDate = new Date(current.fecha);
     turnoDate.setHours(0, 0, 0, 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (turnoDate < today) {
-      throw new Error("No se pueden modificar turnos pasados");
-    }
 
     if (!data.autoId && !data.informacionAuto) {
       throw new Error(
-        "Debe seleccionar un vehículo o ingresar información del vehículo nuevo"
+        "Debe seleccionar un vehículo o ingresar información del vehículo nuevo",
       );
     }
 
