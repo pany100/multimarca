@@ -1,7 +1,6 @@
 "use client";
 
 import CustomAutocompleteInput from "@/components/formV2/CustomAutocomplete";
-import CustomInputBoolean from "@/components/formV2/CustomInputBoolean";
 import CustomInputDate from "@/components/formV2/CustomInputDate";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomInputTime from "@/components/formV2/CustomInputTime";
@@ -45,7 +44,6 @@ export const schema = yup.object({
     ),
   clienteNombre: yup.string().nullable().optional(),
   clienteTelefono: yup.string().nullable().optional(),
-  vino: yup.boolean().nullable().optional(),
   observaciones: yup.string().nullable().optional(),
 });
 
@@ -173,12 +171,6 @@ const TurnosForm = () => {
           />
         </Grid>
 
-        <Grid item xs={12} md={6}>
-          <CustomInputBoolean
-            name="vino"
-            label="Vino (marcar si el cliente asistió al turno)"
-          />
-        </Grid>
         <Grid item xs={12}>
           <CustomInputText
             name="observaciones"

@@ -1,10 +1,11 @@
 "use client";
 
-import { Box, Tab, Tabs } from "@mui/material";
-import { useState } from "react";
+import { Box, Checkbox, Tab, Tabs } from "@mui/material";
+import { useCallback, useState } from "react";
 import CustomTable, {
   InheritedTableProps,
 } from "../../components/tableV2/CustomTable";
+import { usePatchTurnoVino } from "./hooks/usePatchTurnoVino";
 
 function TurnosTable({
   extraActions,
@@ -13,6 +14,10 @@ function TurnosTable({
   ...rest
 }: InheritedTableProps) {
   const [tabValue, setTabValue] = useState(0);
+  const refreshTable = useCallback(() => {
+    setRefreshTrigger((prev) => prev + 1);
+  }, [setRefreshTrigger]);
+  const { patchVino, patchingId } = usePatchTurnoVino(refreshTable);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -56,15 +61,6 @@ function TurnosTable({
       },
     },
     {
-      field: "vino",
-      headerName: "Vino",
-      flex: 0.5,
-      renderCell: (params: any) => {
-        if (params.row.vino == null) return "—";
-        return params.row.vino ? "Sí" : "No";
-      },
-    },
-    {
       field: "observaciones",
       headerName: "Observaciones",
       flex: 1,
@@ -89,6 +85,25 @@ function TurnosTable({
       field: "problema",
       headerName: "Problema",
       flex: 1.5,
+    },
+    {
+      field: "vino",
+      headerName: "Vino",
+      flex: 0.5,
+      renderCell: (params: any) => {
+        const id = Number(params.row.id);
+        const vino = params.row.vino === true;
+        const loading = patchingId === id;
+        return (
+          <Checkbox
+            checked={vino}
+            disabled={loading}
+            onChange={() => patchVino(id, params.row.vino)}
+            size="small"
+            onClick={(e) => e.stopPropagation()}
+          />
+        );
+      },
     },
   ];
 
