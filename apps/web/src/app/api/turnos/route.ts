@@ -1,141 +1,81 @@
-import prisma from "@/lib/prisma";
+import { TurnoService } from "@/core/application/services/turno.service";
+import { CreateTurnoUseCase } from "@/core/application/use-cases/turno/create-turno.use-case";
+import { ListTurnosUseCase } from "@/core/application/use-cases/turno/list-turnos.use-case";
+import { PrismaFeriadoRepository } from "@/core/infrastructure/database/repositories/prisma-feriado.repository";
+import { PrismaTurnoRepository } from "@/core/infrastructure/database/repositories/prisma-turno.repository";
+import {
+  createTurnoSchema,
+  CreateTurnoDto,
+  listTurnosQuerySchema,
+  ListTurnosQueryDto,
+} from "@/core/infrastructure/validation/schemas/turno.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
+import type { ZodSchema } from "zod";
+
+export const dynamic = "force-dynamic";
+
+function toCreateData(dto: CreateTurnoDto) {
+  return {
+    hora: dto.hora,
+    fecha: new Date(dto.fecha),
+    problema: dto.problema,
+    autoId: dto.autoId ?? null,
+    informacionAuto: dto.informacionAuto ?? null,
+    clienteNombre: dto.clienteNombre ?? null,
+    clienteTelefono: dto.clienteTelefono ?? null,
+    vino: dto.vino ?? null,
+    observaciones: dto.observaciones ?? null,
+  };
+}
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "1");
-    const size = parseInt(searchParams.get("size") || "10");
-    const query = searchParams.get("query") || "";
-    const fecha = searchParams.get("fecha");
-    const future = searchParams.get("future") === "true";
-
-    const skip = page * size;
-
-    // Get today's date at start of day for comparison
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    const where = {
-      OR: [
-        { problema: { contains: query } },
-        { informacionAuto: { contains: query } },
-        { informacionCliente: { contains: query } },
-        { auto: { patent: { contains: query } } },
-        { auto: { owner: { fullName: { contains: query } } } },
-      ],
-      ...(fecha && { fecha: new Date(fecha) }),
-      ...(future && {
-        fecha: {
-          gte: today,
-        },
-      }),
+    const raw = {
+      page: searchParams.get("page") ?? "0",
+      size: searchParams.get("size") ?? "10",
+      query: searchParams.get("query") ?? "",
+      fecha: searchParams.get("fecha") ?? undefined,
+      future: searchParams.get("future") ?? undefined,
     };
-
-    const [turnos, total] = await Promise.all([
-      prisma.turno.findMany({
-        where,
-        include: {
-          auto: {
-            include: {
-              owner: true,
-            },
-          },
-        },
-        skip,
-        take: size,
-        orderBy: [{ fecha: "asc" }, { hora: "asc" }],
-      }),
-      prisma.turno.count({ where }),
-    ]);
-
-    return NextResponse.json({
-      items: turnos,
-      total,
-      page,
-      size,
-      totalPages: Math.ceil(total / size),
-    });
-  } catch (error) {
-    console.error("Error al obtener turnos:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
+    const dto = await validateRequest(
+      raw as unknown,
+      listTurnosQuerySchema as ZodSchema<ListTurnosQueryDto>
     );
+
+    const turnoRepo = new PrismaTurnoRepository();
+    const feriadoRepo = new PrismaFeriadoRepository();
+    const turnoService = new TurnoService(turnoRepo, feriadoRepo);
+    const result = await new ListTurnosUseCase(turnoService).execute({
+      page: dto.page,
+      size: dto.size,
+      query: dto.query,
+      fecha: dto.fecha,
+      future: dto.future,
+    });
+
+    return NextResponse.json(result);
+  } catch (error) {
+    return handleApiError(error);
   }
 }
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
-    const { hora, fecha, problema, autoId, informacionAuto, informacionCliente } = body;
+    const body = (await request.json()) as unknown;
+    const dto = await validateRequest(body, createTurnoSchema);
 
-    if (!hora || !fecha || !problema) {
-      return NextResponse.json(
-        { error: "Hora, fecha y problema son requeridos" },
-        { status: 400 }
-      );
-    }
-
-    // Validar que al menos uno de autoId o informacionAuto esté presente
-    if (!autoId && !informacionAuto) {
-      return NextResponse.json(
-        { error: "Debe seleccionar un vehículo o ingresar información del vehículo nuevo" },
-        { status: 400 }
-      );
-    }
-
-    // Check if date is in the past
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0); // Reset time to start of day for date comparison
-    const requestDate = new Date(fecha);
-    requestDate.setHours(0, 0, 0, 0); // Reset time to start of day for date comparison
-
-    if (requestDate < currentDate) {
-      return NextResponse.json(
-        { error: "No se pueden crear turnos para fechas pasadas" },
-        { status: 400 }
-      );
-    }
-
-    // Check if the date is a Feriado
-    const feriado = await prisma.feriado.findFirst({
-      where: {
-        fecha: requestDate,
-      },
-    });
-
-    if (feriado) {
-      return NextResponse.json(
-        { error: "No se pueden crear turnos en días feriados" },
-        { status: 400 }
-      );
-    }
-
-    const nuevoTurno = await prisma.turno.create({
-      data: {
-        hora,
-        fecha: new Date(fecha),
-        problema,
-        autoId: autoId || null,
-        informacionAuto: informacionAuto || null,
-        informacionCliente: informacionCliente || null,
-      } as any,
-      include: {
-        auto: {
-          include: {
-            owner: true,
-          },
-        },
-      },
-    });
+    const turnoRepo = new PrismaTurnoRepository();
+    const feriadoRepo = new PrismaFeriadoRepository();
+    const turnoService = new TurnoService(turnoRepo, feriadoRepo);
+    const nuevoTurno = await new CreateTurnoUseCase(turnoService).execute(
+      toCreateData(dto)
+    );
 
     return NextResponse.json(nuevoTurno, { status: 201 });
   } catch (error) {
-    console.error("Error al crear turno:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

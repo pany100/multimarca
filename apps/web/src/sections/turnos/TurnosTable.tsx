@@ -41,7 +41,7 @@ function TurnosTable({
         if (params.row.auto?.owner) {
           return params.row.auto.owner.fullName;
         }
-        return params.row.informacionCliente || "No ingresado";
+        return params.row.clienteNombre || "No ingresado";
       },
     },
     {
@@ -52,7 +52,26 @@ function TurnosTable({
         if (params.row.auto?.owner) {
           return params.row.auto.owner.phone || "";
         }
-        return "";
+        return params.row.clienteTelefono || "";
+      },
+    },
+    {
+      field: "vino",
+      headerName: "Vino",
+      flex: 0.5,
+      renderCell: (params: any) => {
+        if (params.row.vino == null) return "—";
+        return params.row.vino ? "Sí" : "No";
+      },
+    },
+    {
+      field: "observaciones",
+      headerName: "Observaciones",
+      flex: 1,
+      renderCell: (params: any) => {
+        const obs = params.row.observaciones;
+        if (!obs) return "—";
+        return obs.length > 40 ? `${obs.slice(0, 40)}…` : obs;
       },
     },
     {

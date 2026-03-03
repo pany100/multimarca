@@ -61,7 +61,7 @@ async function enviarNotificacionesTurnos() {
           .map((turno) =>
             turno.auto
               ? `- ${turno.hora} - ${turno.auto.owner.fullName} (${turno.auto.patent})`
-              : `- ${turno.hora} - ${turno.informacionCliente || "Sin información"}${turno.informacionAuto ? ` (${turno.informacionAuto})` : ""}`,
+              : `- ${turno.hora} - ${turno.clienteNombre || "Sin información"}${turno.clienteTelefono ? ` (${turno.clienteTelefono})` : ""}${turno.informacionAuto ? ` - ${turno.informacionAuto}` : ""}`,
           )
           .join("\n")}`,
         leida: false,

@@ -1,130 +1,102 @@
-import prisma from "@/lib/prisma";
+import { TurnoService } from "@/core/application/services/turno.service";
+import { DeleteTurnoUseCase } from "@/core/application/use-cases/turno/delete-turno.use-case";
+import { PatchTurnoVinoUseCase } from "@/core/application/use-cases/turno/patch-turno-vino.use-case";
+import { UpdateTurnoUseCase } from "@/core/application/use-cases/turno/update-turno.use-case";
+import { PrismaFeriadoRepository } from "@/core/infrastructure/database/repositories/prisma-feriado.repository";
+import { PrismaTurnoRepository } from "@/core/infrastructure/database/repositories/prisma-turno.repository";
+import {
+  patchTurnoVinoSchema,
+  turnoIdParamSchema,
+  updateTurnoSchema,
+  UpdateTurnoDto,
+} from "@/core/infrastructure/validation/schemas/turno.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+
+function toUpdateData(dto: UpdateTurnoDto) {
+  return {
+    hora: dto.hora,
+    fecha: new Date(dto.fecha),
+    problema: dto.problema,
+    autoId: dto.autoId ?? null,
+    informacionAuto: dto.informacionAuto ?? null,
+    clienteNombre: dto.clienteNombre ?? null,
+    clienteTelefono: dto.clienteTelefono ?? null,
+    vino: dto.vino ?? null,
+    observaciones: dto.observaciones ?? null,
+  };
+}
+
+/**
+ * PATCH: actualiza solo el campo vino (boolean) del turno.
+ * Body: { vino: true | false }
+ */
+export async function PATCH(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const params = await context.params;
+    const idDto = await validateRequest({ id: params.id }, turnoIdParamSchema);
+    const body = (await request.json()) as unknown;
+    const dto = await validateRequest(body, patchTurnoVinoSchema);
+
+    const turnoRepo = new PrismaTurnoRepository();
+    const feriadoRepo = new PrismaFeriadoRepository();
+    const turnoService = new TurnoService(turnoRepo, feriadoRepo);
+    const result = await new PatchTurnoVinoUseCase(turnoService).execute({
+      id: idDto.id,
+      vino: dto.vino,
+    });
+
+    return NextResponse.json(result);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
 
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { id } = params;
-    const body = await request.json();
-    const { hora, fecha, problema, autoId, informacionAuto, informacionCliente } = body;
+    const params = await context.params;
+    const idDto = await validateRequest({ id: params.id }, turnoIdParamSchema);
+    const body = (await request.json()) as unknown;
+    const dto = await validateRequest(body, updateTurnoSchema);
 
-    if (!hora || !fecha || !problema) {
-      return NextResponse.json(
-        { error: "Hora, fecha y problema son requeridos" },
-        { status: 400 }
-      );
-    }
-
-    // Validar que al menos uno de autoId o informacionAuto esté presente
-    if (!autoId && !informacionAuto) {
-      return NextResponse.json(
-        { error: "Debe seleccionar un vehículo o ingresar información del vehículo nuevo" },
-        { status: 400 }
-      );
-    }
-
-    // First, get the current turno
-    const currentTurno = await prisma.turno.findUnique({
-      where: { id: parseInt(id) },
+    const turnoRepo = new PrismaTurnoRepository();
+    const feriadoRepo = new PrismaFeriadoRepository();
+    const turnoService = new TurnoService(turnoRepo, feriadoRepo);
+    const result = await new UpdateTurnoUseCase(turnoService).execute({
+      id: idDto.id,
+      data: toUpdateData(dto),
     });
 
-    if (!currentTurno) {
-      return NextResponse.json(
-        { error: "Turno no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    // Check if the current turno is in the past
-    const currentDate = new Date();
-    currentDate.setHours(0, 0, 0, 0); // Reset time to start of day for date comparison
-    const turnoDate = new Date(currentTurno.fecha);
-    turnoDate.setHours(0, 0, 0, 0); // Reset time to start of day for date comparison
-
-    if (turnoDate < currentDate) {
-      return NextResponse.json(
-        { error: "No se pueden modificar turnos pasados" },
-        { status: 400 }
-      );
-    }
-
-    // Check if the new date is a Feriado
-    const requestDate = new Date(fecha);
-    requestDate.setHours(0, 0, 0, 0); // Reset time to start of day for date comparison
-
-    const feriado = await prisma.feriado.findFirst({
-      where: {
-        fecha: requestDate,
-      },
-    });
-
-    if (feriado) {
-      return NextResponse.json(
-        { error: "No se pueden programar turnos en días feriados" },
-        { status: 400 }
-      );
-    }
-
-    const turnoActualizado = await prisma.turno.update({
-      where: { id: parseInt(id) },
-      data: {
-        hora,
-        fecha: new Date(fecha),
-        problema,
-        autoId: autoId || null,
-        informacionAuto: informacionAuto || null,
-        informacionCliente: informacionCliente || null,
-      } as any,
-      include: {
-        auto: {
-          include: {
-            owner: true,
-          },
-        },
-      },
-    });
-
-    return NextResponse.json(turnoActualizado);
+    return NextResponse.json(result);
   } catch (error) {
-    console.error("Error al actualizar turno:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }
 
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   try {
-    const id = parseInt(params.id);
+    const params = await context.params;
+    const idDto = await validateRequest({ id: params.id }, turnoIdParamSchema);
 
-    // Check if the turno exists
-    const turno = await prisma.turno.findUnique({
-      where: { id },
-    });
-
-    if (!turno) {
-      return NextResponse.json(
-        { error: "Turno no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    await prisma.turno.delete({
-      where: { id },
-    });
+    const turnoRepo = new PrismaTurnoRepository();
+    const feriadoRepo = new PrismaFeriadoRepository();
+    const turnoService = new TurnoService(turnoRepo, feriadoRepo);
+    await new DeleteTurnoUseCase(turnoService).execute({ id: idDto.id });
 
     return NextResponse.json({ message: "Turno eliminado con éxito" });
   } catch (error) {
-    console.error("Error al eliminar turno:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+    return handleApiError(error);
   }
 }

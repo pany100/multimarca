@@ -162,12 +162,13 @@ export async function POST(request: NextRequest) {
                   return `
                     <tr>
                       <td>${
-                        turno.auto?.owner?.fullName || 
-                        turno.informacionCliente || 
+                        turno.auto?.owner?.fullName ||
+                        turno.clienteNombre ||
                         "N/A"
                       }</td>
                       <td>${
-                        turno.auto?.owner?.phone || 
+                        turno.auto?.owner?.phone ||
+                        turno.clienteTelefono ||
                         ""
                       }</td>
                       <td>${

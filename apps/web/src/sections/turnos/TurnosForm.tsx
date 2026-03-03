@@ -1,6 +1,7 @@
 "use client";
 
 import CustomAutocompleteInput from "@/components/formV2/CustomAutocomplete";
+import CustomInputBoolean from "@/components/formV2/CustomInputBoolean";
 import CustomInputDate from "@/components/formV2/CustomInputDate";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomInputTime from "@/components/formV2/CustomInputTime";
@@ -49,7 +50,10 @@ export const schema = yup.object({
         return !!autoId || !!value;
       }
     ),
-  informacionCliente: yup.string().nullable().optional(),
+  clienteNombre: yup.string().nullable().optional(),
+  clienteTelefono: yup.string().nullable().optional(),
+  vino: yup.boolean().nullable().optional(),
+  observaciones: yup.string().nullable().optional(),
 });
 
 const TurnosForm = () => {
@@ -60,16 +64,16 @@ const TurnosForm = () => {
 
   const autoId = watch("autoId");
   const informacionAuto = watch("informacionAuto");
-  const informacionCliente = watch("informacionCliente");
+  const clienteNombre = watch("clienteNombre");
+  const clienteTelefono = watch("clienteTelefono");
+  const hasClienteInfo = !!(clienteNombre || clienteTelefono);
 
   // Inicializar el tab correcto cuando se está editando
   useEffect(() => {
     if (isEditing) {
-      // Si está editando y no hay autoId pero hay informacionAuto o informacionCliente, mostrar tab de vehículo nuevo
-      if (!autoId && (informacionAuto || informacionCliente)) {
+      if (!autoId && (informacionAuto || hasClienteInfo)) {
         setTabValue(1);
       } else if (autoId) {
-        // Si hay autoId, mostrar tab de vehículo existente
         setTabValue(0);
       }
     }
@@ -78,31 +82,27 @@ const TurnosForm = () => {
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
-    // No limpiar los campos al cambiar de tab
-    // Los campos se limpiarán solo cuando el usuario ingrese datos en el tab activo
   };
 
-  // Limpiar campos del otro tab cuando se ingresa algo en el tab actual
   useEffect(() => {
     if (tabValue === 0 && autoId) {
-      // Si estamos en el tab de vehículo existente y hay un autoId, limpiar los campos del otro tab
-      if (informacionAuto || informacionCliente) {
+      if (informacionAuto || hasClienteInfo) {
         setValue("informacionAuto", "");
-        setValue("informacionCliente", "");
+        setValue("clienteNombre", "");
+        setValue("clienteTelefono", "");
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoId, tabValue]);
 
   useEffect(() => {
-    if (tabValue === 1 && (informacionAuto || informacionCliente)) {
-      // Si estamos en el tab de vehículo nuevo y hay datos, limpiar el autoId
+    if (tabValue === 1 && (informacionAuto || hasClienteInfo)) {
       if (autoId) {
         setValue("autoId", null);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [informacionAuto, informacionCliente, tabValue]);
+  }, [informacionAuto, clienteNombre, clienteTelefono, tabValue]);
 
   return (
     <>
@@ -150,16 +150,22 @@ const TurnosForm = () => {
         ) : (
           // Vehículo nuevo
           <>
-            <Grid item xs={12} md={6} sx={{mb: 2}}>
+            <Grid item xs={12} md={6} sx={{ mb: 2 }}>
               <CustomInputText
                 name="informacionAuto"
                 label="Patente y modelo"
               />
             </Grid>
-            <Grid item xs={12} md={6}>
+            <Grid item xs={12} md={6} sx={{ mb: 2 }}>
               <CustomInputText
-                name="informacionCliente"
-                label="Datos del cliente"
+                name="clienteNombre"
+                label="Nombre del cliente"
+              />
+            </Grid>
+            <Grid item xs={12} md={6} sx={{ mb: 2 }}>
+              <CustomInputText
+                name="clienteTelefono"
+                label="Teléfono del cliente"
               />
             </Grid>
           </>
@@ -171,6 +177,21 @@ const TurnosForm = () => {
             label="Descripción del problema"
             multiline
             rows={3}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <CustomInputBoolean
+            name="vino"
+            label="Vino (marcar si el cliente asistió al turno)"
+          />
+        </Grid>
+        <Grid item xs={12}>
+          <CustomInputText
+            name="observaciones"
+            label="Observaciones"
+            multiline
+            rows={2}
           />
         </Grid>
       </Grid>

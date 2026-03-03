@@ -914,14 +914,17 @@ model Feriado {
 }
 
 model Turno {
-  id       Int      @id @default(autoincrement())
-  hora     String
-  fecha    DateTime
-  problema String   @db.Text
-  autoId   Int?
-  auto     Auto?    @relation(fields: [autoId], references: [id])
-  informacionAuto       String?               @db.Text
-  informacionCliente    String?               @db.Text
+  id                 Int       @id @default(autoincrement())
+  hora               String
+  fecha              DateTime
+  problema           String    @db.Text
+  autoId             Int?
+  auto               Auto?     @relation(fields: [autoId], references: [id])
+  informacionAuto    String?   @db.Text
+  clienteNombre      String?   @db.Text
+  clienteTelefono    String?   @db.VarChar(50)
+  vino               Boolean?  @default(false)
+  observaciones      String?   @db.Text
 
   @@index([fecha])
   @@index([autoId])
