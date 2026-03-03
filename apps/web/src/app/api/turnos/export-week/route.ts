@@ -69,23 +69,26 @@ export async function POST(request: NextRequest) {
             h1 {
               color: #1976d2;
               text-align: center;
-              margin-bottom: 20px;
+              margin-bottom: 10px;
+              font-size: 18px;
             }
             .date {
               text-align: right;
-              margin-bottom: 20px;
+              margin-bottom: 10px;
               font-style: italic;
+              font-size: 10px;
             }
             table {
               width: 100%;
               border-collapse: collapse;
-              margin-bottom: 30px;
+              margin-bottom: 15px;
             }
             th, td {
               border: 1px solid #ddd;
-              padding: 8px;
+              padding: 3px 5px;
               text-align: left;
-              font-size: 12px;
+              font-size: 10px;
+              line-height: 1.2;
             }
             th {
               background-color: #f2f2f2;
@@ -96,23 +99,40 @@ export async function POST(request: NextRequest) {
             }
             .footer {
               text-align: center;
-              font-size: 12px;
-              margin-top: 30px;
+              font-size: 10px;
+              margin-top: 15px;
               color: #666;
             }
             .day-header {
               background-color: #1976d2;
               color: white;
               text-align: center;
+              font-size: 10px;
             }
             .feriado {
               background-color: #ffebee;
               color: #c62828;
             }
             .feriado-description {
-              font-size: 10px;
+              font-size: 9px;
               font-style: italic;
               color: #c62828;
+            }
+            .vino td:first-child {
+              position: relative;
+            }
+            .vino td:first-child::after {
+              content: '';
+              position: absolute;
+              top: 50%;
+              left: 0;
+              width: calc(100vw - 40px);
+              height: 1px;
+              background: #999;
+              pointer-events: none;
+            }
+            .vino td {
+              color: #666;
             }
           </style>
         </head>
@@ -133,7 +153,7 @@ export async function POST(request: NextRequest) {
                     const feriado = feriados.find(
                       (f) =>
                         format(new Date(f.fecha), "yyyy-MM-dd") ===
-                        format(day, "yyyy-MM-dd")
+                        format(day, "yyyy-MM-dd"),
                     );
                     return `
                       <th class="day-header ${feriado ? "feriado" : ""}">
@@ -156,20 +176,18 @@ export async function POST(request: NextRequest) {
                   const dayIndex = weekDays.findIndex(
                     (d) =>
                       format(d, "yyyy-MM-dd") ===
-                      format(turnoDate, "yyyy-MM-dd")
+                      format(turnoDate, "yyyy-MM-dd"),
                   );
 
                   return `
-                    <tr>
+                    <tr class="${turno.vino ? "vino" : ""}">
                       <td>${
                         turno.auto?.owner?.fullName ||
                         turno.clienteNombre ||
                         "N/A"
                       }</td>
                       <td>${
-                        turno.auto?.owner?.phone ||
-                        turno.clienteTelefono ||
-                        ""
+                        turno.auto?.owner?.phone || turno.clienteTelefono || ""
                       }</td>
                       <td>${
                         turno.auto
@@ -182,7 +200,7 @@ export async function POST(request: NextRequest) {
                           const feriado = feriados.find(
                             (f) =>
                               format(new Date(f.fecha), "yyyy-MM-dd") ===
-                              format(day, "yyyy-MM-dd")
+                              format(day, "yyyy-MM-dd"),
                           );
                           return index === dayIndex
                             ? `<td class="${feriado ? "feriado" : ""}">${
