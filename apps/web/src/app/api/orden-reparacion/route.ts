@@ -7,7 +7,6 @@ import { PrismaUnitOfWork } from "@/core/infrastructure/database/prisma-uow";
 import { PrismaCustomFileRepository } from "@/core/infrastructure/database/repositories/prisma-custom-file.repository";
 import { PrismaNotificationRepository } from "@/core/infrastructure/database/repositories/prisma-notification.repository";
 import { PrismaOrdenReparacionRepository } from "@/core/infrastructure/database/repositories/prisma-orden-reparacion.repository";
-import { PrismaPagoMecanicoRepository } from "@/core/infrastructure/database/repositories/prisma-pago-mecanico.repository";
 import { PrismaInventoryAdapter } from "@/core/infrastructure/external/prisma-inventory.adapter";
 import {
   createOrdenSchema,
@@ -31,7 +30,7 @@ export async function GET(request: Request) {
         query: searchParams.get("query"),
         estado: searchParams.get("estado"),
       },
-      listOrdenesQuerySchema
+      listOrdenesQuerySchema,
     );
 
     const result = await new ListOrdenesUseCase(buildRepo()).execute(dto);
@@ -47,18 +46,16 @@ export async function POST(request: Request) {
     const dto = await validateRequest(body, createOrdenSchema);
 
     const notificationService = new NotificationService(
-      new PrismaNotificationRepository()
+      new PrismaNotificationRepository(),
     );
     const useCase = new CreateOrdenUseCase(
       new OrdenReparacionService(
         new StockManagerService(),
         new PrismaOrdenReparacionRepository(),
         new PrismaInventoryAdapter(notificationService),
-        new PrismaCustomFileRepository()
+        new PrismaCustomFileRepository(),
       ),
       new PrismaUnitOfWork(),
-      new PrismaPagoMecanicoRepository(),
-      notificationService
     );
 
     const created = await useCase.execute(dto);
