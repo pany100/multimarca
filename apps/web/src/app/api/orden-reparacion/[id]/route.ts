@@ -74,9 +74,7 @@ export async function PUT(
         new PrismaOrdenReparacionRepository(),
         new PrismaInventoryAdapter(notificationService),
         new PrismaCustomFileRepository()
-      ),
-      new PrismaPagoMecanicoRepository(),
-      notificationService
+      )
     ).execute(dto);
 
     return NextResponse.json(updated);
