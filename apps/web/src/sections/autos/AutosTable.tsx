@@ -77,6 +77,12 @@ function AutosTable({
     { field: "color", headerName: "Color", flex: 0.7 },
     { field: "kms", headerName: "Kilómetros", flex: 0.7 },
     {
+      field: "tipoCombustible",
+      headerName: "Combustible",
+      flex: 0.8,
+      valueGetter: (value: string | null) => value || "-",
+    },
+    {
       field: "owner",
       headerName: "Propietario",
       flex: 2,

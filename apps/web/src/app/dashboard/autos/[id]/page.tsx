@@ -106,6 +106,9 @@ const VerAutoPage = ({ params }: { params: { id: string } }) => {
             <Typography>
               <strong>Tipo de Transmisión:</strong> {auto.transmission_type}
             </Typography>
+            <Typography>
+              <strong>Combustible:</strong> {auto.tipoCombustible || "N/A"}
+            </Typography>
           </Grid>
           <Grid item xs={12} md={6}>
             <Typography variant="h6" gutterBottom>

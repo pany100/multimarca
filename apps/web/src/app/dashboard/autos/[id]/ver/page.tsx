@@ -119,6 +119,9 @@ const VerAutoPage = ({ params }: { params: { id: string } }) => {
               <strong>Kilómetros:</strong> {auto.kms}
             </Typography>
             <Typography>
+              <strong>Combustible:</strong> {auto.tipoCombustible || "N/A"}
+            </Typography>
+            <Typography>
               <strong>Número de Chasis:</strong> {auto.chassis_number}
             </Typography>
             <Typography>

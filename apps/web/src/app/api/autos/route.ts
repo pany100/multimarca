@@ -73,6 +73,7 @@ export async function POST(request: Request) {
         engine_number: body.engine_number?.toUpperCase(),
         observations: body.observations,
         transmission_type: body.transmission_type,
+        tipoCombustible: body.tipoCombustible || null,
       },
       include: {
         owner: true,

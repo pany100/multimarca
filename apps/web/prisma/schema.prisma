@@ -87,6 +87,7 @@ model Auto {
   engine_number     String?           @db.VarChar(150)
   observations      String?           @db.VarChar(255)
   transmission_type String?           @db.VarChar(20)
+  tipoCombustible   TipoCombustible?
   cedulaVerdePath   String?           @db.VarChar(1000)
   owner             Cliente           @relation(fields: [ownerId], references: [id])
   ordenesReparacion OrdenReparacion[] @relation("AutoOrdenReparacion")
@@ -95,6 +96,13 @@ model Auto {
 
   @@index([patent])
   @@index([ownerId])
+}
+
+enum TipoCombustible {
+  Nafta
+  Diesel
+  Electrico
+  Hibrido
 }
 
 model ControlMecanico {

@@ -22,6 +22,7 @@ export async function PUT(
       engine_number,
       observations,
       transmission_type,
+      tipoCombustible,
     } = body;
 
     if (!patent) {
@@ -46,6 +47,7 @@ export async function PUT(
         engine_number: engine_number?.toUpperCase(),
         observations,
         transmission_type,
+        tipoCombustible: tipoCombustible || null,
       },
       include: {
         owner: true,

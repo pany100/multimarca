@@ -17,6 +17,7 @@ export const schema = yup.object({
   chassis_number: yup.string().nullable(),
   engine_number: yup.string().nullable(),
   transmission_type: yup.string().nullable(),
+  tipoCombustible: yup.string().nullable(),
   observations: yup.string().nullable(),
 });
 
@@ -72,6 +73,16 @@ const AutosForm = () => {
             options={[
               { value: "Automático", label: "Automático" },
               { value: "Manual", label: "Manual" },
+            ]}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <CustomSelect
+            name="tipoCombustible"
+            label="Tipo de Combustible"
+            options={[
+              { value: "Nafta", label: "Nafta" },
+              { value: "Diesel", label: "Diésel" },
             ]}
           />
         </Grid>
