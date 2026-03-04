@@ -1,4 +1,7 @@
-import { RepuestoUsadoRepository } from "@/core/domain/repositories/repuesto-usado.repository";
+import {
+  AddRepuestoUsadoData,
+  RepuestoUsadoRepository,
+} from "@/core/domain/repositories/repuesto-usado.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
 
 export class PrismaRepuestoUsadoRepository implements RepuestoUsadoRepository {
@@ -11,19 +14,7 @@ export class PrismaRepuestoUsadoRepository implements RepuestoUsadoRepository {
     });
   }
 
-  async add(
-    data: {
-      ordenReparacionId?: number;
-      ventaId?: number;
-      presupuestoId?: number;
-      stockId: number;
-      precioCompra: number;
-      precioVenta: number;
-      unidadesConsumidas: number;
-      ocultoParaCliente?: boolean;
-    },
-    deps?: { tx?: any }
-  ) {
+  async add(data: AddRepuestoUsadoData, deps?: { tx?: any }) {
     const db = deps?.tx ?? prisma;
 
     return db.repuestoUsado.create({

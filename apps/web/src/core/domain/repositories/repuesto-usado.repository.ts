@@ -1,18 +1,18 @@
+export type AddRepuestoUsadoData = {
+  ordenReparacionId?: number;
+  ventaId?: number;
+  presupuestoId?: number;
+  stockId: number;
+  precioCompra: number;
+  precioVenta: number;
+  unidadesConsumidas: number;
+  ocultoParaCliente?: boolean;
+};
+
 export interface RepuestoUsadoRepository {
   findById(id: number): Promise<any>;
 
-  add(
-    data: {
-      ordenReparacionId?: number;
-      ventaId?: number;
-      presupuestoId?: number;
-      stockId: number;
-      precioCompra: number;
-      precioVenta: number;
-      unidadesConsumidas: number;
-    },
-    deps?: { tx?: any }
-  ): Promise<any>;
+  add(data: AddRepuestoUsadoData, deps?: { tx?: any }): Promise<any>;
 
   update(
     id: number,

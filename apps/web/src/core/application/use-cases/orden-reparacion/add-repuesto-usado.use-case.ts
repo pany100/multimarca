@@ -2,7 +2,10 @@ import type { AddRepuestoUsadoDto } from "@/core/application/dto/orden-reparacio
 import { StockManagerService } from "@/core/application/services/stock-manager.service";
 import type { InventoryPort } from "@/core/domain/ports/inventory.port";
 import type { UnitOfWork } from "@/core/domain/ports/uow.port";
-import type { RepuestoUsadoRepository } from "@/core/domain/repositories/repuesto-usado.repository";
+import type {
+  AddRepuestoUsadoData,
+  RepuestoUsadoRepository,
+} from "@/core/domain/repositories/repuesto-usado.repository";
 import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
 
 export class AddRepuestoUsadoUseCase {
@@ -33,8 +36,7 @@ export class AddRepuestoUsadoUseCase {
     if (isPresupuesto) {
       // Para presupuestos, solo agregar el repuesto sin afectar stock
       return this.uow.run(async (deps) => {
-        const result = await this.repo.add(
-          {
+        const addData: AddRepuestoUsadoData = {
             ordenReparacionId: input.ordenReparacionId,
             ventaId: input.ventaId,
             presupuestoId: input.presupuestoId,
@@ -43,9 +45,8 @@ export class AddRepuestoUsadoUseCase {
             precioVenta: input.precioVenta,
             unidadesConsumidas: input.unidadesConsumidas,
             ocultoParaCliente: input.ocultoParaCliente,
-          },
-          deps
-        );
+          };
+      const result = await this.repo.add(addData, deps);
 
         return result;
       });
@@ -65,19 +66,17 @@ export class AddRepuestoUsadoUseCase {
 
     return this.uow.run(async (deps) => {
       // Add repuesto to database
-      const result = await this.repo.add(
-        {
-          ordenReparacionId: input.ordenReparacionId,
-          ventaId: input.ventaId,
-          presupuestoId: input.presupuestoId,
-          stockId: input.stockId,
-          precioCompra: input.precioCompra,
-          precioVenta: input.precioVenta,
-          unidadesConsumidas: input.unidadesConsumidas,
-          ocultoParaCliente: input.ocultoParaCliente,
-        },
-        deps
-      );
+      const addData: AddRepuestoUsadoData = {
+        ordenReparacionId: input.ordenReparacionId,
+        ventaId: input.ventaId,
+        presupuestoId: input.presupuestoId,
+        stockId: input.stockId,
+        precioCompra: input.precioCompra,
+        precioVenta: input.precioVenta,
+        unidadesConsumidas: input.unidadesConsumidas,
+        ocultoParaCliente: input.ocultoParaCliente,
+      };
+      const result = await this.repo.add(addData, deps);
 
       // Consume stock and notify
       await this.inventory.consumeAndNotify(stockActions, deps);
