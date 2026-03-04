@@ -372,12 +372,24 @@ export default function generateClientOrderHtml(repair: any): string {
           grid-template-columns: 80% 20%;
           margin-right: 15px;
         '>
-        <div class="TypographyBody1" style="font-weight: bold;">
+        <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
           Mano de Obra
         </div>
-        <div class="TypographyBody1" style="text-align: right;">
-          $${calculoVO.manoDeObraForRecibos.toLocaleString("es-AR")}
+        <div class="TypographyBody1" style="text-align: right;font-weight: bold;">
+          Importe
         </div>
+        ${calculoVO.manoDeObraForRecibosDiscriminado
+          .map(
+            (t: { descripcion: string; precioUnitario: number; pdfName: string | null }) => `
+              <div class="TypographyBody1">
+                ${t.pdfName ?? t.descripcion}
+              </div>
+              <div class="TypographyBody1" style="text-align: right;">
+                $${Number(t.precioUnitario).toLocaleString("es-AR")}
+              </div>
+            `,
+          )
+          .join("")}
         </div>
         <hr class="divider" style="border-color: rgba(0, 0, 0, 0.12);"/>
         <div style='

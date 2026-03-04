@@ -10,7 +10,7 @@ export class ComprobanteCalculado {
     private readonly terceros: ReparacionTercero[],
     private readonly trabajos: TrabajoRealizado[],
     private readonly pagos: Pago[],
-    private readonly ajustes: PriceAdjustments
+    private readonly ajustes: PriceAdjustments,
   ) {}
 
   private roundToNearestThousandOrFiveHundred(value: number): number {
@@ -19,7 +19,7 @@ export class ComprobanteCalculado {
 
   private calcularPrecioFinal(
     precio: number,
-    porcentajeRecargo: number
+    porcentajeRecargo: number,
   ): number {
     const recargoNum = Number(porcentajeRecargo) || 0;
     const precioNum = Number(precio);
@@ -47,7 +47,7 @@ export class ComprobanteCalculado {
   get totalRepuestos() {
     return this.repuestos.reduce(
       (acc, r) => acc + this.calcularPrecioFinal(r.precioVenta.toNumber(), 0),
-      0
+      0,
     );
   }
 
@@ -57,9 +57,9 @@ export class ComprobanteCalculado {
         acc +
         this.calcularPrecioFinal(
           t.precioVenta.toNumber(),
-          this.ajustes.porcentajeRecargo
+          this.ajustes.porcentajeRecargo,
         ),
-      0
+      0,
     );
   }
 
@@ -67,22 +67,28 @@ export class ComprobanteCalculado {
     return this.trabajos.reduce(
       (acc, t) =>
         acc + this.calcularPrecioFinal(t.precioUnitario.toNumber(), 0),
-      0
+      0,
     );
   }
 
   private getIncrementoDistribuido() {
-    const incrementoDistribuido = this.ajustes.incrementoInterno / this.trabajos.length;
-    const incrementoParcial = this.roundToNearestThousandOrFiveHundred(incrementoDistribuido);
-    const incrementoFinal = this.ajustes.incrementoInterno  - (incrementoParcial * (this.trabajos.length - 1));
+    const incrementoDistribuido =
+      this.ajustes.incrementoInterno / this.trabajos.length;
+    const incrementoParcial = this.roundToNearestThousandOrFiveHundred(
+      incrementoDistribuido,
+    );
+    const incrementoFinal =
+      this.ajustes.incrementoInterno -
+      incrementoParcial * (this.trabajos.length - 1);
     return {
       incrementoParcial,
       incrementoFinal,
-    }
+    };
   }
 
   get manoDeObraForRecibosDiscriminado() {
-    const { incrementoParcial, incrementoFinal } = this.getIncrementoDistribuido();
+    const { incrementoParcial, incrementoFinal } =
+      this.getIncrementoDistribuido();
     return this.trabajos.map((t, idx) => {
       const isLast = idx === this.trabajos.length - 1;
       const incremento =
@@ -94,8 +100,8 @@ export class ComprobanteCalculado {
       return {
         descripcion: t.descripcion,
         precioUnitario:
-          this.calcularPrecioFinal(t.precioUnitario.toNumber(), 0) +
-          incremento,
+          this.calcularPrecioFinal(t.precioUnitario.toNumber(), 0) + incremento,
+        pdfName: t.pdfName ?? null,
       };
     });
   }
