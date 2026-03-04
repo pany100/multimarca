@@ -16,7 +16,7 @@ interface PagedResponse<T> {
   size: number;
 }
 
-// (sin cambios relevantes para ocultoParaCliente)
+const DEFAULT_FROM_DATE = new Date(2026, 0, 22); // 22/1/2026
 
 function useDeudores() {
   const { authFetch } = useFetch();
