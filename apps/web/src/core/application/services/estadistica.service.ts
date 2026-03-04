@@ -18,6 +18,13 @@ export class EstadisticaService {
     return await this.estadisticasAutosQueriesService.getAutos(dto);
   }
 
+  async getModelosPorMarca(dto: EstadisticasBaseVO, marcas: string[]) {
+    return await this.estadisticasAutosQueriesService.getModelosPorMarca(
+      dto,
+      marcas
+    );
+  }
+
   private async getBalanceUsd(dto: EstadisticasBalanceVO) {
     const { fechaInicio, fechaFin } = dto.baseVO.toObjectWithStrings();
     return await Promise.all([

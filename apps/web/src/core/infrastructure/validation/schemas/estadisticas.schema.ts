@@ -5,6 +5,12 @@ export const getAutosQuerySchema = z.object({
   mes: z.string().optional().nullable(),
 });
 
+export const getModelosPorMarcaQuerySchema = z.object({
+  año: z.string().optional().nullable(),
+  mes: z.string().optional().nullable(),
+  marca: z.string().optional().nullable(),
+});
+
 export const getByFechaQuerySchema = z.object({
   año: z.string().optional().nullable(),
   mes: z.string().optional().nullable(),

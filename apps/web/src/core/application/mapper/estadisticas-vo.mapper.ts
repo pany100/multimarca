@@ -5,6 +5,7 @@ import {
   BalanceGeneralDto,
   GetAutosDto,
   GetByFechaDto,
+  GetModelosPorMarcaDto,
   MecanicosDto,
 } from "../dto/estadisticas.dto";
 
@@ -12,6 +13,10 @@ export class EstadisticasVOMapper {
   constructor() {}
 
   static getAutosToVo(dto: GetAutosDto) {
+    return new EstadisticasBaseVO(dto.año?.toString(), dto.mes?.toString());
+  }
+
+  static getModelosPorMarcaToVo(dto: GetModelosPorMarcaDto) {
     return new EstadisticasBaseVO(dto.año?.toString(), dto.mes?.toString());
   }
 

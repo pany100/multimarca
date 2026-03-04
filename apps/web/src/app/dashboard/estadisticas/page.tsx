@@ -6,6 +6,7 @@ import Extracciones from "@/components/estadisticas/Extracciones";
 import GastoEmpleados from "@/components/estadisticas/GastoEmpleados";
 import Gastos from "@/components/estadisticas/Gastos";
 import Marcas from "@/components/estadisticas/Marcas";
+import Modelos from "@/components/estadisticas/Modelos";
 import Reparaciones from "@/components/estadisticas/Reparaciones";
 import Stock from "@/components/estadisticas/Stock";
 import TiposDeOperacion from "@/components/estadisticas/TiposDeOperacion";
@@ -73,6 +74,13 @@ const EstadisticasPage = () => {
             sx={{ width: "100%", display: "flex", flexDirection: "column" }}
           >
             <Marcas />
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={12} sx={{ display: "flex" }}>
+          <Card
+            sx={{ width: "100%", display: "flex", flexDirection: "column" }}
+          >
+            <Modelos />
           </Card>
         </Grid>
         <Grid item xs={12} md={6} sx={{ display: "flex" }}>
