@@ -4,19 +4,27 @@ import {
   CreateInasistenciaData,
   UpdateInasistenciaData,
 } from "@/core/infrastructure/validation/schemas/inasistencia.schema";
-import { Inasistencia } from "@prisma/client";
+import { EstadoArchivo, Inasistencia } from "@prisma/client";
 
 export class PrismaInasistenciaRepository implements InasistenciaRepository {
-  create(data: CreateInasistenciaData): Promise<Inasistencia> {
-    return prisma.inasistencia.create({
+  async create(data: CreateInasistenciaData): Promise<Inasistencia> {
+    const created = await prisma.inasistencia.create({
       data: {
         empleadoId: data.empleadoId,
         fecha: data.fecha,
         motivo: data.motivo,
         tipo: data.tipo,
-        certificadoMedicoPath: data.certificadoMedicoPath,
       },
     });
+    if (data.certificadoMedicoPath != null && data.certificadoMedicoPath !== "") {
+      await prisma.customFile.create({
+        data: {
+          tempPath: data.certificadoMedicoPath,
+          inasistenciaCertificadoId: created.id,
+        },
+      });
+    }
+    return this.findById(created.id) as Promise<Inasistencia>;
   }
 
   findById(id: number): Promise<Inasistencia | null> {
@@ -24,23 +32,61 @@ export class PrismaInasistenciaRepository implements InasistenciaRepository {
       where: { id },
       include: {
         empleado: true,
+        certificadoMedicoPath: true,
       },
     });
   }
 
-  update(data: UpdateInasistenciaData): Promise<Inasistencia> {
-    return prisma.inasistencia.update({
-      where: { id: data.id },
+  async update(data: UpdateInasistenciaData): Promise<Inasistencia> {
+    const id = data.id;
+    const existingFile = await prisma.customFile.findFirst({
+      where: { inasistenciaCertificadoId: id },
+      select: { id: true },
+    });
+    const hasPath =
+      data.certificadoMedicoPath != null && data.certificadoMedicoPath !== "";
+    if (existingFile) {
+      await prisma.customFile.update({
+        where: { id: existingFile.id },
+        data: {
+          inasistenciaCertificadoId: null,
+          status: EstadoArchivo.ListoParaBorrar,
+        },
+      });
+    }
+    if (hasPath) {
+      await prisma.customFile.create({
+        data: {
+          tempPath: data.certificadoMedicoPath!,
+          inasistenciaCertificadoId: id,
+        },
+      });
+    }
+    await prisma.inasistencia.update({
+      where: { id },
       data: {
         fecha: data.fecha,
         motivo: data.motivo,
         tipo: data.tipo,
-        certificadoMedicoPath: data.certificadoMedicoPath,
       },
     });
+    return this.findById(id) as Promise<Inasistencia>;
   }
 
-  delete(id: number): Promise<Inasistencia> {
+  async delete(id: number): Promise<Inasistencia> {
+    const existingFile = await prisma.customFile.findFirst({
+      where: { inasistenciaCertificadoId: id },
+      select: { id: true },
+    });
+    if (existingFile) {
+      await prisma.customFile.update({
+        where: { id: existingFile.id },
+        data: {
+          inasistenciaCertificadoId: null,
+          status: EstadoArchivo.ListoParaBorrar,
+        },
+      });
+    }
     return prisma.inasistencia.delete({
       where: { id },
     });

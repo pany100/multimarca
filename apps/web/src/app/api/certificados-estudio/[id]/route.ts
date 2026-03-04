@@ -1,3 +1,4 @@
+import { mapCertificadoEstudioToResponse } from "@/core/application/mapper/empleado-response.mapper";
 import { DeleteCertificadoEstudioUseCase } from "@/core/application/use-cases/certificado-estudio/delete-certificado-estudio.use-case";
 import { GetCertificadoEstudioByIdUseCase } from "@/core/application/use-cases/certificado-estudio/get-certificado-estudio-by-id.use-case";
 import { UpdateCertificadoEstudioUseCase } from "@/core/application/use-cases/certificado-estudio/update-certificado-estudio.use-case";
@@ -24,7 +25,8 @@ export async function GET(
     );
     const result =
       await new GetCertificadoEstudioByIdUseCase(repository).execute(parsedId);
-    return NextResponse.json(result);
+    if (!result) return NextResponse.json(null, { status: 404 });
+    return NextResponse.json(mapCertificadoEstudioToResponse(result));
   } catch (e) {
     return handleApiError(e);
   }
@@ -43,7 +45,7 @@ export async function PUT(
     );
     const result =
       await new UpdateCertificadoEstudioUseCase(repository).execute(dto);
-    return NextResponse.json(result);
+    return NextResponse.json(mapCertificadoEstudioToResponse(result));
   } catch (e) {
     return handleApiError(e);
   }

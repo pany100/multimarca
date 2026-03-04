@@ -1,3 +1,4 @@
+import { mapLlegadaTardeToResponse } from "@/core/application/mapper/empleado-response.mapper";
 import { DeleteLlegadaTardeUseCase } from "@/core/application/use-cases/llegadas-tarde/delete-llegada-tarde.use-case";
 import { GetLlegadaTardeUseCase } from "@/core/application/use-cases/llegadas-tarde/get-llegada-tarde.use-case";
 import { UpdateLlegadaTardeUseCase } from "@/core/application/use-cases/llegadas-tarde/update-llegada-tarde.use-case";
@@ -16,7 +17,8 @@ export async function GET(
     const result = await new GetLlegadaTardeUseCase(
       new PrismaLlegadaTardeRepository()
     ).execute(id);
-    return NextResponse.json(result);
+    if (!result) return NextResponse.json(null, { status: 404 });
+    return NextResponse.json(mapLlegadaTardeToResponse(result));
   } catch (e) {
     return handleApiError(e);
   }
@@ -36,7 +38,7 @@ export async function PUT(
     const result = await new UpdateLlegadaTardeUseCase(
       new PrismaLlegadaTardeRepository()
     ).execute(dto);
-    return NextResponse.json(result);
+    return NextResponse.json(mapLlegadaTardeToResponse(result));
   } catch (e) {
     return handleApiError(e);
   }
@@ -51,7 +53,7 @@ export async function DELETE(
     const result = await new DeleteLlegadaTardeUseCase(
       new PrismaLlegadaTardeRepository()
     ).execute(id);
-    return NextResponse.json(result);
+    return NextResponse.json(mapLlegadaTardeToResponse(result));
   } catch (e) {
     return handleApiError(e);
   }

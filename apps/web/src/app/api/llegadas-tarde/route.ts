@@ -1,3 +1,4 @@
+import { mapLlegadaTardeToResponse } from "@/core/application/mapper/empleado-response.mapper";
 import { CreateLlegadaTardeUseCase } from "@/core/application/use-cases/llegadas-tarde/create-llegada-tarde.use-case";
 import { PrismaLlegadaTardeRepository } from "@/core/infrastructure/database/repositories/prisma-llegada-tarde.repository";
 import { createLlegadaTardeSchema } from "@/core/infrastructure/validation/schemas/llegada-tarde.schema";
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
     const result = await new CreateLlegadaTardeUseCase(
       new PrismaLlegadaTardeRepository()
     ).execute(dto);
-    return NextResponse.json(result);
+    return NextResponse.json(mapLlegadaTardeToResponse(result));
   } catch (e) {
     return handleApiError(e);
   }

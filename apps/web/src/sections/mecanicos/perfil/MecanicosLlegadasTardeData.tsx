@@ -2,12 +2,14 @@ import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { getFormattedDate } from "@/utils/fieldHelper";
 import DeleteIcon from "@mui/icons-material/Delete";
 import EditIcon from "@mui/icons-material/Edit";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import {
   Box,
   Button,
   CardContent,
   Grid,
   IconButton,
+  Link,
   Typography,
 } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
@@ -125,6 +127,28 @@ function MecanicosLlegadasTardeData() {
       flex: 1,
       align: "center",
       headerAlign: "center",
+    },
+    {
+      field: "certificadoPath",
+      headerName: "Archivo",
+      flex: 0.8,
+      align: "center",
+      headerAlign: "center",
+      renderCell: (params) => {
+        const ruta = params.value as string | null;
+        if (!ruta) return "-";
+        return (
+          <Link
+            href={ruta}
+            target="_blank"
+            rel="noopener noreferrer"
+            sx={{ display: "flex", alignItems: "center", gap: 0.5, justifyContent: "center" }}
+          >
+            <VisibilityIcon fontSize="small" />
+            Ver
+          </Link>
+        );
+      },
     },
     {
       field: "actions",

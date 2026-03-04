@@ -205,7 +205,7 @@ model CertificadoEstudio {
   id         Int      @id @default(autoincrement())
   empleadoId Int
   nombre     String?  @db.VarChar(255)
-  ruta       String?  @db.VarChar(1000)
+  ruta       CustomFile? @relation("CertificadoEstudioRuta")
   fecha            DateTime    @default(now())
   descripcion      String?      @db.Text
   empleado   Empleado @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
@@ -286,14 +286,14 @@ enum TipoApercibimiento {
 }
 
 model Inasistencia {
-  id              Int        @id @default(autoincrement())
-  empleadoId      Int
-  empleado        Empleado   @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
-  fecha           DateTime
-  motivo          String?     @db.VarChar(255)
-  tipo            TipoInasistencia @default(Medica)
-  certificadoMedicoPath String? @db.VarChar(1000)
-  fechaCreacion    DateTime      @default(now())
+  id                   Int        @id @default(autoincrement())
+  empleadoId           Int
+  empleado             Empleado   @relation(fields: [empleadoId], references: [id], onDelete: Cascade)
+  fecha                DateTime
+  motivo               String?     @db.VarChar(255)
+  tipo                 TipoInasistencia @default(Medica)
+  certificadoMedicoPath CustomFile? @relation("InasistenciaCertificado")
+  fechaCreacion        DateTime   @default(now())
 
   @@index([empleadoId])
 }
@@ -313,7 +313,7 @@ model LlegadaTarde {
   minutosRetraso   Int
   motivo           String?      @db.VarChar(255)
   estado           EstadoLlegada @default(Justificada)
-  certificadoPath  String?      @db.VarChar(1000)
+  certificadoPath  CustomFile?  @relation("LlegadaTardeCertificado")
   fechaCreacion    DateTime      @default(now())
 
   @@index([empleadoId])
@@ -568,6 +568,9 @@ model CustomFile {
   empleadoInscripcionMonotributoId  Int?     @unique
   empleadoRecategorizacionMonotributoId Int?  @unique
   empleadoCurriculumId  Int?                 @unique
+  llegadaTardeCertificadoId Int?             @unique
+  inasistenciaCertificadoId Int?            @unique
+  certificadoEstudioRutaId Int?              @unique
   ordenReparacion       OrdenReparacion?     @relation("ORepScanner", fields: [ordenReparacionId], references: [id])
   reciboDeORep          OrdenReparacion?     @relation("ORepRecibos", fields: [reciboORepId], references: [id])
   reparacionDeTercero   ReparacionDeTercero? @relation("ReparacionDeTerceroRecibos", fields: [reparacionDeTerceroId], references: [id])
@@ -577,6 +580,9 @@ model CustomFile {
   empleadoInscripcionMonotributo   Empleado? @relation("EmpleadoInscripcionMonotributo", fields: [empleadoInscripcionMonotributoId], references: [id])
   empleadoRecategorizacionMonotributo Empleado? @relation("EmpleadoRecategorizacionMonotributo", fields: [empleadoRecategorizacionMonotributoId], references: [id])
   empleadoCurriculum   Empleado?            @relation("EmpleadoCurriculum", fields: [empleadoCurriculumId], references: [id])
+  llegadaTardeCertificado LlegadaTarde?      @relation("LlegadaTardeCertificado", fields: [llegadaTardeCertificadoId], references: [id])
+  inasistenciaCertificado Inasistencia?      @relation("InasistenciaCertificado", fields: [inasistenciaCertificadoId], references: [id])
+  certificadoEstudioRuta CertificadoEstudio? @relation("CertificadoEstudioRuta", fields: [certificadoEstudioRutaId], references: [id])
 
   @@index([status])
   @@index([reciboORepId], map: "CustomFile_reciboORepId_fkey")

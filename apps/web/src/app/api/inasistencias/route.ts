@@ -1,3 +1,4 @@
+import { mapInasistenciaToResponse } from "@/core/application/mapper/empleado-response.mapper";
 import { CreateInasistenciaUseCase } from "@/core/application/use-cases/inasistencias/create-inasistencia.use-case";
 import { PrismaInasistenciaRepository } from "@/core/infrastructure/database/repositories/prisma-inasistencia.repository";
 import { createInasistenciaSchema } from "@/core/infrastructure/validation/schemas/inasistencia.schema";
@@ -12,7 +13,7 @@ export async function POST(request: Request) {
     const result = await new CreateInasistenciaUseCase(
       new PrismaInasistenciaRepository()
     ).execute(dto);
-    return NextResponse.json(result);
+    return NextResponse.json(mapInasistenciaToResponse(result));
   } catch (e) {
     return handleApiError(e);
   }

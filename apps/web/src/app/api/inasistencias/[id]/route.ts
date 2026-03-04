@@ -1,3 +1,4 @@
+import { mapInasistenciaToResponse } from "@/core/application/mapper/empleado-response.mapper";
 import { DeleteInasistenciaUseCase } from "@/core/application/use-cases/inasistencias/delete-inasistencia.use-case";
 import { GetInasistenciaUseCase } from "@/core/application/use-cases/inasistencias/get-inasistencia.use-case";
 import { UpdateInasistenciaUseCase } from "@/core/application/use-cases/inasistencias/update-inasistencia.use-case";
@@ -16,7 +17,8 @@ export async function GET(
     const result = await new GetInasistenciaUseCase(
       new PrismaInasistenciaRepository()
     ).execute(id);
-    return NextResponse.json(result);
+    if (!result) return NextResponse.json(null, { status: 404 });
+    return NextResponse.json(mapInasistenciaToResponse(result));
   } catch (e) {
     return handleApiError(e);
   }
@@ -36,7 +38,7 @@ export async function PUT(
     const result = await new UpdateInasistenciaUseCase(
       new PrismaInasistenciaRepository()
     ).execute(dto);
-    return NextResponse.json(result);
+    return NextResponse.json(mapInasistenciaToResponse(result));
   } catch (e) {
     return handleApiError(e);
   }
@@ -51,7 +53,7 @@ export async function DELETE(
     const result = await new DeleteInasistenciaUseCase(
       new PrismaInasistenciaRepository()
     ).execute(id);
-    return NextResponse.json(result);
+    return NextResponse.json(mapInasistenciaToResponse(result));
   } catch (e) {
     return handleApiError(e);
   }

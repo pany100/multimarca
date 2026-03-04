@@ -32,7 +32,10 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile): Promise<void> {
       archivo.empleadoLicenciaConducirId === null &&
       archivo.empleadoInscripcionMonotributoId === null &&
       archivo.empleadoRecategorizacionMonotributoId === null &&
-      archivo.empleadoCurriculumId === null;
+      archivo.empleadoCurriculumId === null &&
+      archivo.llegadaTardeCertificadoId === null &&
+      archivo.inasistenciaCertificadoId === null &&
+      archivo.certificadoEstudioRutaId === null;
     const motivo = esDesreferenciado ? "desref" : "ListoParaBorrar";
 
     let accion = "";
@@ -204,6 +207,9 @@ async function procesarArchivosParaBorrar() {
           empleadoInscripcionMonotributoId: null,
           empleadoRecategorizacionMonotributoId: null,
           empleadoCurriculumId: null,
+          llegadaTardeCertificadoId: null,
+          inasistenciaCertificadoId: null,
+          certificadoEstudioRutaId: null,
           status: { not: EstadoArchivo.Borrado },
         },
         {
