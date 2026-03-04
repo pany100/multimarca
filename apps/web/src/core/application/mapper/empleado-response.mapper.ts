@@ -9,6 +9,8 @@ export function getDocPath(
   return doc.finalPath ?? doc.tempPath ?? null;
 }
 
+type CustomFileLike = { finalPath?: string | null; tempPath: string };
+
 type EmpleadoWithDocRelations = {
   [key: string]: unknown;
   licenciaConducirPath?: { finalPath?: string | null; tempPath: string } | null;
@@ -68,20 +70,23 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
   return mapped;
 }
 
-/** Mapea LlegadaTarde para exponer certificadoPath como string */
-export function mapLlegadaTardeToResponse(lt: { certificadoPath?: { finalPath?: string | null; tempPath: string } | null } & Record<string, unknown>) {
+/** Mapea LlegadaTarde para exponer certificadoPath como string. Acepta CustomFile o string (idempotente). */
+export function mapLlegadaTardeToResponse(lt: { certificadoPath?: CustomFileLike | string | null } & Record<string, unknown>) {
   const { certificadoPath: cp, ...rest } = lt;
-  return { ...rest, certificadoPath: getDocPath(cp ?? null) };
+  const path = typeof cp === "string" ? cp : getDocPath(cp ?? null);
+  return { ...rest, certificadoPath: path ?? null };
 }
 
-/** Mapea Inasistencia para exponer certificadoMedicoPath como string */
-export function mapInasistenciaToResponse(ina: { certificadoMedicoPath?: { finalPath?: string | null; tempPath: string } | null } & Record<string, unknown>) {
+/** Mapea Inasistencia para exponer certificadoMedicoPath como string. Acepta CustomFile o string (idempotente). */
+export function mapInasistenciaToResponse(ina: { certificadoMedicoPath?: CustomFileLike | string | null } & Record<string, unknown>) {
   const { certificadoMedicoPath: cmp, ...rest } = ina;
-  return { ...rest, certificadoMedicoPath: getDocPath(cmp ?? null) };
+  const path = typeof cmp === "string" ? cmp : getDocPath(cmp ?? null);
+  return { ...rest, certificadoMedicoPath: path ?? null };
 }
 
-/** Mapea CertificadoEstudio para exponer ruta como string */
-export function mapCertificadoEstudioToResponse(ce: { ruta?: { finalPath?: string | null; tempPath: string } | null } & Record<string, unknown>) {
+/** Mapea CertificadoEstudio para exponer ruta como string. Acepta CustomFile o string (idempotente). */
+export function mapCertificadoEstudioToResponse(ce: { ruta?: CustomFileLike | string | null } & Record<string, unknown>) {
   const { ruta: r, ...rest } = ce;
-  return { ...rest, ruta: getDocPath(r ?? null) };
+  const path = typeof r === "string" ? r : getDocPath(r ?? null);
+  return { ...rest, ruta: path ?? null };
 }
