@@ -22,6 +22,7 @@ const schema = yup.object({
   recategorizacionMonotributoPath: yup.string().nullable(),
   inscripcionMonotributoPath: yup.string().nullable(),
   curriculumPath: yup.string().nullable(),
+  credencialPagoPath: yup.string().nullable(),
 });
 
 function ActualizarDocumentacionForm() {
@@ -38,6 +39,7 @@ function ActualizarDocumentacionForm() {
       recategorizacionMonotributoPath: empleado?.recategorizacionMonotributoPath ?? null,
       inscripcionMonotributoPath: empleado?.inscripcionMonotributoPath ?? null,
       curriculumPath: empleado?.curriculumPath ?? null,
+      credencialPagoPath: empleado?.credencialPagoPath ?? null,
     },
   });
 
@@ -48,6 +50,7 @@ function ActualizarDocumentacionForm() {
         recategorizacionMonotributoPath: empleado.recategorizacionMonotributoPath ?? null,
         inscripcionMonotributoPath: empleado.inscripcionMonotributoPath ?? null,
         curriculumPath: empleado.curriculumPath ?? null,
+        credencialPagoPath: empleado.credencialPagoPath ?? null,
       });
     }
   }, [empleado, methods]);
@@ -169,6 +172,24 @@ function ActualizarDocumentacionForm() {
                   }}
                 >
                   <CustomFileInput name="curriculumPath" label="Curriculum" />
+                </Grid>
+
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  sx={{
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 1,
+                    p: 2,
+                    mb: 2,
+                  }}
+                >
+                  <CustomFileInput
+                    name="credencialPagoPath"
+                    label="Credencial de Pago"
+                  />
                 </Grid>
               </Grid>
             </Paper>

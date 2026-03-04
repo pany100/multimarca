@@ -20,12 +20,17 @@ interface ReparacionData {
 /** Respuesta API: los paths de documentación vienen como string | null desde el backend */
 type EmpleadoWithAusencias = Omit<
   Empleado,
-  "licenciaConducirPath" | "inscripcionMonotributoPath" | "recategorizacionMonotributoPath" | "curriculumPath"
+  | "licenciaConducirPath"
+  | "inscripcionMonotributoPath"
+  | "recategorizacionMonotributoPath"
+  | "curriculumPath"
+  | "credencialPagoPath"
 > & {
   licenciaConducirPath?: string | null;
   inscripcionMonotributoPath?: string | null;
   recategorizacionMonotributoPath?: string | null;
   curriculumPath?: string | null;
+  credencialPagoPath?: string | null;
 } & {
   ausenciasProgramadas?: AusenciaProgramada[];
   inasistencias?: Inasistencia[];

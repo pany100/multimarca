@@ -31,6 +31,10 @@ function MecanicosDocumentacionData() {
       label: "Curriculum",
       filePath: empleado?.curriculumPath ?? null,
     },
+    {
+      label: "Credencial de Pago",
+      filePath: empleado?.credencialPagoPath ?? null,
+    },
   ];
 
   return (

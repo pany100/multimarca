@@ -33,6 +33,7 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile): Promise<void> {
       archivo.empleadoInscripcionMonotributoId === null &&
       archivo.empleadoRecategorizacionMonotributoId === null &&
       archivo.empleadoCurriculumId === null &&
+      archivo.empleadoCredencialPagoId === null &&
       archivo.llegadaTardeCertificadoId === null &&
       archivo.inasistenciaCertificadoId === null &&
       archivo.certificadoEstudioRutaId === null;
@@ -207,6 +208,7 @@ async function procesarArchivosParaBorrar() {
           empleadoInscripcionMonotributoId: null,
           empleadoRecategorizacionMonotributoId: null,
           empleadoCurriculumId: null,
+          empleadoCredencialPagoId: null,
           llegadaTardeCertificadoId: null,
           inasistenciaCertificadoId: null,
           certificadoEstudioRutaId: null,

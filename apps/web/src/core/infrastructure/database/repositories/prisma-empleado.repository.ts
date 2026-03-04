@@ -65,6 +65,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         inscripcionMonotributoPath: true,
         recategorizacionMonotributoPath: true,
         curriculumPath: true,
+        credencialPagoPath: true,
       },
     });
   }
@@ -174,13 +175,28 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
 
     const processDoc = async (
       path: string | null | undefined,
-      fkField: "empleadoLicenciaConducirId" | "empleadoInscripcionMonotributoId" | "empleadoRecategorizacionMonotributoId" | "empleadoCurriculumId"
+      fkField:
+        | "empleadoLicenciaConducirId"
+        | "empleadoInscripcionMonotributoId"
+        | "empleadoRecategorizacionMonotributoId"
+        | "empleadoCurriculumId"
+        | "empleadoCredencialPagoId"
     ) => {
       const hasPath = path != null && path !== "";
       const existing = await prisma.customFile.findFirst({
         where: { [fkField]: empleadoId },
-        select: { id: true },
+        select: { id: true, tempPath: true, finalPath: true },
       });
+
+      // Si no hay cambios (el path recibido es igual al path actual), no hacemos nada
+      const currentPath =
+        existing != null
+          ? existing.finalPath ?? existing.tempPath
+          : null;
+      if (hasPath && currentPath === path) {
+        return;
+      }
+
       if (hasPath) {
         if (existing) {
           await prisma.customFile.update({
@@ -209,9 +225,16 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
     };
 
     await processDoc(dto.licenciaConducirPath, "empleadoLicenciaConducirId");
-    await processDoc(dto.inscripcionMonotributoPath, "empleadoInscripcionMonotributoId");
-    await processDoc(dto.recategorizacionMonotributoPath, "empleadoRecategorizacionMonotributoId");
+    await processDoc(
+      dto.inscripcionMonotributoPath,
+      "empleadoInscripcionMonotributoId"
+    );
+    await processDoc(
+      dto.recategorizacionMonotributoPath,
+      "empleadoRecategorizacionMonotributoId"
+    );
     await processDoc(dto.curriculumPath, "empleadoCurriculumId");
+    await processDoc(dto.credencialPagoPath, "empleadoCredencialPagoId");
 
     const empleado = await prisma.empleado.findUnique({
       where: { id: empleadoId },
@@ -220,6 +243,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         inscripcionMonotributoPath: true,
         recategorizacionMonotributoPath: true,
         curriculumPath: true,
+        credencialPagoPath: true,
       },
     });
     if (!empleado) throw new Error("Empleado no encontrado");

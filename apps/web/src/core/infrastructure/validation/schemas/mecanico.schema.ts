@@ -66,6 +66,7 @@ export const updateMecanicoDocsSchema = z.object({
   recategorizacionMonotributoPath: z.string().nullable().optional(),
   inscripcionMonotributoPath: z.string().nullable().optional(),
   curriculumPath: z.string().nullable().optional(),
+  credencialPagoPath: z.string().nullable().optional(),
 });
 
 export type UpdateMecanicoDocsData = z.infer<typeof updateMecanicoDocsSchema>;

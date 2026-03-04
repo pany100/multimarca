@@ -23,6 +23,7 @@ type EmpleadoWithDocRelations = {
     tempPath: string;
   } | null;
   curriculumPath?: { finalPath?: string | null; tempPath: string } | null;
+  credencialPagoPath?: { finalPath?: string | null; tempPath: string } | null;
 };
 
 /**
@@ -38,17 +39,20 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
   | "inscripcionMonotributoPath"
   | "recategorizacionMonotributoPath"
   | "curriculumPath"
+  | "credencialPagoPath"
 > & {
   licenciaConducirPath: string | null;
   inscripcionMonotributoPath: string | null;
   recategorizacionMonotributoPath: string | null;
   curriculumPath: string | null;
+  credencialPagoPath: string | null;
 } {
   const {
     licenciaConducirPath: lc,
     inscripcionMonotributoPath: im,
     recategorizacionMonotributoPath: rm,
     curriculumPath: cv,
+    credencialPagoPath: cpago,
     ...rest
   } = empleado;
   type MappedReturn = Omit<
@@ -57,11 +61,13 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
     | "inscripcionMonotributoPath"
     | "recategorizacionMonotributoPath"
     | "curriculumPath"
+    | "credencialPagoPath"
   > & {
     licenciaConducirPath: string | null;
     inscripcionMonotributoPath: string | null;
     recategorizacionMonotributoPath: string | null;
     curriculumPath: string | null;
+    credencialPagoPath: string | null;
   };
   const mapped: MappedReturn = {
     ...rest,
@@ -69,6 +75,7 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
     inscripcionMonotributoPath: getDocPath(im ?? null),
     recategorizacionMonotributoPath: getDocPath(rm ?? null),
     curriculumPath: getDocPath(cv ?? null),
+    credencialPagoPath: getDocPath(cpago ?? null),
   };
   const out = mapped as MappedReturn & {
     certificadosEstudio?: unknown[];
