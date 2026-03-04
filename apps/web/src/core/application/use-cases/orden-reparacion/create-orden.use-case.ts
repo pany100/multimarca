@@ -2,19 +2,15 @@
 import type { CreateOrdenDto } from "@/core/application/dto/orden-reparacion.dto";
 import { hasAllRequiredFields } from "@/core/domain/policies/orden-reparacion.policy";
 import type { UnitOfWork } from "@/core/domain/ports/uow.port";
-import { PagoMecanicoRepository } from "@/core/domain/repositories/pago-mecanico.repository";
 import { EstadoOrden } from "@/core/domain/value-objects/estado-orden.vo";
 import { EstadoOrdenReparacion, OrdenReparacion } from "@prisma/client";
 import { OrdenReparacionVOMapper } from "../../mapper/orden-reparacion-vo.mapper";
-import { NotificationService } from "../../services/notification.service";
 import { OrdenReparacionService } from "../../services/orden-reparacion.service";
 
 export class CreateOrdenUseCase {
   constructor(
     private readonly service: OrdenReparacionService,
-    private readonly uow: UnitOfWork,
-    private readonly pagoMecanicoRepo: PagoMecanicoRepository,
-    private readonly notificationService: NotificationService
+    private readonly uow: UnitOfWork
   ) {}
 
   async execute(input: CreateOrdenDto) {
@@ -39,22 +35,6 @@ export class CreateOrdenUseCase {
         tx,
         ordenReparacionVO
       );
-      if (ordenReparacionVO.estado.isTerminado()) {
-        await this.pagoMecanicoRepo.create({
-          ordenReparacionId: ordenCreada.id,
-        });
-        await this.notificationService.create(
-          {
-            fecha: new Date(),
-            titulo: "Reparación Terminada",
-            texto: `La reparación del auto ${ordenCreada.autoId} se encuentra terminada. Pagar mano de obra.`,
-            leida: false,
-            ordenReparacionId: ordenCreada.id,
-            tipo: "REPARACION_TERMINADA",
-          },
-          { tx }
-        );
-      }
       return ordenCreada;
     });
     return creada;

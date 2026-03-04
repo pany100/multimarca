@@ -50,7 +50,6 @@ export const config = {
     "/api/recordatorios-whatsapp/:path*",
     "/api/orden-de-compra/:path*",
     "/api/orden-reparacion/:path*",
-    "/api/pago-a-mecanico/:path*",
     "/api/permisos/:path*",
     "/api/prestamo-herramientas/:path*",
     "/api/proveedores/:path*",

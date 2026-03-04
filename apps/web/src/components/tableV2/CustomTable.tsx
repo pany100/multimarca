@@ -35,6 +35,12 @@ export interface CustomTableProps {
   refreshTrigger?: number;
   disableMenuForRow?: (item: any) => boolean;
   searchByDate?: boolean;
+  /** Fecha inicial por defecto para el filtro "Desde" cuando searchByDate es true */
+  defaultFromDate?: Date | null;
+  /** Si es false, no hace el primer fetch automáticamente al montar */
+  fetchOnMount?: boolean;
+  /** Si es true, solo muestra el filtro \"Desde\" (sin \"Hasta\") */
+  onlyFromDate?: boolean;
 }
 
 export type InheritedTableProps = {
@@ -56,6 +62,9 @@ function CustomTable<T extends { id: string }>({
   disableMenuForRow,
   refreshTrigger = 0,
   searchByDate = false,
+  defaultFromDate = null,
+  fetchOnMount = true,
+  onlyFromDate = false,
 }: CustomTableProps) {
   const searchParams = useSearchParams();
   const isInitialMount = useRef(true);
@@ -66,7 +75,8 @@ function CustomTable<T extends { id: string }>({
   const [fromDate, setFromDate] = useState<Date | null>(() => {
     if (!searchByDate) return null;
     const fromParam = searchParams.get("from");
-    return fromParam ? new Date(fromParam) : null;
+    if (fromParam) return new Date(fromParam);
+    return defaultFromDate ?? null;
   });
   const [toDate, setToDate] = useState<Date | null>(() => {
     if (!searchByDate) return null;
@@ -76,7 +86,8 @@ function CustomTable<T extends { id: string }>({
   const [fromDateInput, setFromDateInput] = useState<Date | null>(() => {
     if (!searchByDate) return null;
     const fromParam = searchParams.get("from");
-    return fromParam ? new Date(fromParam) : null;
+    if (fromParam) return new Date(fromParam);
+    return defaultFromDate ?? null;
   });
   const [toDateInput, setToDateInput] = useState<Date | null>(() => {
     if (!searchByDate) return null;
@@ -146,9 +157,11 @@ function CustomTable<T extends { id: string }>({
       }
 
       // Set pendingFetch to true to trigger a fetch after initialization
-      pendingFetch.current = true;
+      if (fetchOnMount) {
+        pendingFetch.current = true;
+      }
     }
-  }, [searchParams, searchByDate]);
+  }, [searchParams, searchByDate, fetchOnMount]);
 
   // Listen for popstate events (browser back/forward navigation)
   useEffect(() => {
@@ -472,7 +485,7 @@ function CustomTable<T extends { id: string }>({
           }}
         >
           <Stack
-            direction={{ lg: "column", xl: "row" }}
+            direction="row"
             spacing={2}
             alignItems="center"
             sx={{ flexWrap: "wrap" }}
@@ -531,7 +544,7 @@ function CustomTable<T extends { id: string }>({
                     },
                   }}
                 />
-                {fromDateInput && (
+                {!onlyFromDate && fromDateInput && (
                   <IconButton
                     size="small"
                     onClick={() => setFromDateInput(null)}
@@ -547,38 +560,42 @@ function CustomTable<T extends { id: string }>({
                     <ClearIcon fontSize="small" />
                   </IconButton>
                 )}
-                <DatePicker
-                  label="Hasta"
-                  value={toDateInput}
-                  onChange={handleToDateInputChange}
-                  format="dd-MM-yyyy"
-                  slotProps={{
-                    textField: {
-                      size: "small",
-                      sx: {
-                        width: 300,
-                        "& .MuiOutlinedInput-root": {
-                          backgroundColor: "background.paper",
+                {!onlyFromDate && (
+                  <>
+                    <DatePicker
+                      label="Hasta"
+                      value={toDateInput}
+                      onChange={handleToDateInputChange}
+                      format="dd-MM-yyyy"
+                      slotProps={{
+                        textField: {
+                          size: "small",
+                          sx: {
+                            width: 300,
+                            "& .MuiOutlinedInput-root": {
+                              backgroundColor: "background.paper",
+                            },
+                          },
                         },
-                      },
-                    },
-                  }}
-                />
-                {toDateInput && (
-                  <IconButton
-                    size="small"
-                    onClick={() => setToDateInput(null)}
-                    sx={{
-                      position: "absolute",
-                      right: 35,
-                      top: "50%",
-                      transform: "translateY(-50%)",
-                      p: 0.5,
-                      zIndex: 1,
-                    }}
-                  >
-                    <ClearIcon fontSize="small" />
-                  </IconButton>
+                      }}
+                    />
+                    {toDateInput && (
+                      <IconButton
+                        size="small"
+                        onClick={() => setToDateInput(null)}
+                        sx={{
+                          position: "absolute",
+                          right: 35,
+                          top: "50%",
+                          transform: "translateY(-50%)",
+                          p: 0.5,
+                          zIndex: 1,
+                        }}
+                      >
+                        <ClearIcon fontSize="small" />
+                      </IconButton>
+                    )}
+                  </>
                 )}
               </LocalizationProvider>
             )}

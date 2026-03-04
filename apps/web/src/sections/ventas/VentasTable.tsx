@@ -3,7 +3,7 @@
 import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
-import { getFormattedPrice } from "@/utils/fieldHelper";
+import { getFormattedDateArg, getFormattedPrice } from "@/utils/fieldHelper";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import { Box, Chip, MenuItem, Tab, Tabs } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
@@ -113,8 +113,7 @@ function VentasTable({
       field: "fecha",
       headerName: "Fecha",
       flex: 0.5,
-      valueGetter: (fecha: string) =>
-        new Date(fecha).toLocaleDateString("es-AR"),
+      valueGetter: (fecha: string) => getFormattedDateArg(fecha),
     },
     {
       field: "cliente",

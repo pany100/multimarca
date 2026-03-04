@@ -16,6 +16,9 @@ interface PagedResponse<T> {
   size: number;
 }
 
+// Fecha por defecto: 22 de enero de 2026 (mes 0-based)
+const DEFAULT_FROM_DATE = new Date(2026, 0, 22);
+
 function useDeudores() {
   const { authFetch } = useFetch();
   const [deudores, setDeudores] = useState<Deudor[]>([]);
@@ -25,10 +28,12 @@ function useDeudores() {
     async (from?: Date, to?: Date) => {
       setLoading(true);
       try {
+        const effectiveFrom = from ?? DEFAULT_FROM_DATE;
+
         const params = new URLSearchParams();
         params.set("page", "0");
         params.set("size", "10");
-        if (from) params.set("from", from.toISOString());
+        if (effectiveFrom) params.set("from", effectiveFrom.toISOString());
         if (to) params.set("to", to.toISOString());
 
         const response = await authFetch(`/api/deudores?${params.toString()}`);

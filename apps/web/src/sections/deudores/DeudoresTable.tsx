@@ -78,6 +78,10 @@ function DeudoresTable({
     <CustomTable
       title="Deudores"
       apiEndpoint="/api/deudores"
+      searchByDate
+      defaultFromDate={new Date(2026, 0, 22)}
+      fetchOnMount={false}
+      onlyFromDate
       extraActions={customActions}
       ctaCb={ctaCb}
       columns={columns}

@@ -3,7 +3,7 @@
 import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
-import { getFormattedPrice } from "@/utils/fieldHelper";
+import { getFormattedDateArg, getFormattedPrice } from "@/utils/fieldHelper";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -110,16 +110,14 @@ function PresupuestosTable({
       headerName: "Fecha De Creación",
       flex: 1,
       valueGetter: (fecha: string) =>
-        fecha ? new Date(fecha).toLocaleDateString("es-AR") : "No ingresado",
+        fecha ? getFormattedDateArg(fecha) : "No ingresado",
     },
     {
       field: "fechaEnvio",
       headerName: "Fecha De Envío",
       flex: 1,
       valueGetter: (fechaEnvio: string) =>
-        fechaEnvio
-          ? new Date(fechaEnvio).toLocaleDateString("es-AR")
-          : "No ingresado",
+        fechaEnvio ? getFormattedDateArg(fechaEnvio) : "No ingresado",
     },
     {
       field: "vehículo",

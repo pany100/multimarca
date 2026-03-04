@@ -1,7 +1,7 @@
 import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
-import { getFormattedPrice } from "@/utils/fieldHelper";
+import { getFormattedDateArg, getFormattedPrice } from "@/utils/fieldHelper";
 import CarRepairIcon from "@mui/icons-material/CarRepair";
 import { Box, Chip, MenuItem, Tab, Tabs, Typography } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
@@ -83,11 +83,8 @@ const OrdenesReparacionTable = ({
       field: "fechaEntradaReparacion",
       headerName: "Fecha Entrada a Taller",
       flex: 1,
-      valueGetter: (date) => {
-        return date
-          ? new Date(date).toLocaleDateString("es-AR")
-          : "No ingresado";
-      },
+      valueGetter: (date) =>
+        date ? getFormattedDateArg(date as string) : "No ingresado",
     },
     {
       field: "vehículo",
