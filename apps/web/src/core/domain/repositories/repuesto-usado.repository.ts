@@ -1,3 +1,11 @@
+export type UpdateRepuestoUsadoData = {
+  stockId?: number;
+  precioCompra?: number;
+  precioVenta?: number;
+  unidadesConsumidas?: number;
+  ocultoParaCliente?: boolean;
+};
+
 export type AddRepuestoUsadoData = {
   ordenReparacionId?: number;
   ventaId?: number;
@@ -14,16 +22,7 @@ export interface RepuestoUsadoRepository {
 
   add(data: AddRepuestoUsadoData, deps?: { tx?: any }): Promise<any>;
 
-  update(
-    id: number,
-    data: {
-      stockId?: number;
-      precioCompra?: number;
-      precioVenta?: number;
-      unidadesConsumidas?: number;
-    },
-    deps?: { tx?: any }
-  ): Promise<any>;
+  update(id: number, data: UpdateRepuestoUsadoData, deps?: { tx?: any }): Promise<any>;
 
   delete(id: number, deps?: { tx?: any }): Promise<any>;
 }

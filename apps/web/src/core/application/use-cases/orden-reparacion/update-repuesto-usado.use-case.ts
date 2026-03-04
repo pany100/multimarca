@@ -2,7 +2,10 @@ import type { UpdateRepuestoUsadoDto } from "@/core/application/dto/orden-repara
 import { StockManagerService } from "@/core/application/services/stock-manager.service";
 import type { InventoryPort } from "@/core/domain/ports/inventory.port";
 import type { UnitOfWork } from "@/core/domain/ports/uow.port";
-import type { RepuestoUsadoRepository } from "@/core/domain/repositories/repuesto-usado.repository";
+import type {
+  RepuestoUsadoRepository,
+  UpdateRepuestoUsadoData,
+} from "@/core/domain/repositories/repuesto-usado.repository";
 import { RepuestoUsado } from "@/core/domain/value-objects/repuesto-usado.vo";
 import { prisma } from "@/core/infrastructure/database/prisma";
 
@@ -30,17 +33,14 @@ export class UpdateRepuestoUsadoUseCase {
     if (isPresupuesto) {
       // Para presupuestos, solo actualizar el repuesto sin afectar stock
       return this.uow.run(async (deps) => {
-        const result = await this.repo.update(
-          input.id,
-          {
-            stockId: input.stockId,
-            precioCompra: input.precioCompra,
-            precioVenta: input.precioVenta,
-            unidadesConsumidas: input.unidadesConsumidas,
-            ocultoParaCliente: input.ocultoParaCliente,
-          },
-          deps
-        );
+        const updateData: UpdateRepuestoUsadoData = {
+          stockId: input.stockId,
+          precioCompra: input.precioCompra,
+          precioVenta: input.precioVenta,
+          unidadesConsumidas: input.unidadesConsumidas,
+          ocultoParaCliente: input.ocultoParaCliente,
+        };
+        const result = await this.repo.update(input.id, updateData, deps);
 
         return result;
       });
@@ -70,18 +70,14 @@ export class UpdateRepuestoUsadoUseCase {
     await this.inventory.ensureSufficient(stockActions);
 
     return this.uow.run(async (deps) => {
-      // Update repuesto in database
-      const result = await this.repo.update(
-        input.id,
-        {
-          stockId: input.stockId,
-          precioCompra: input.precioCompra,
-          precioVenta: input.precioVenta,
-          unidadesConsumidas: input.unidadesConsumidas,
-          ocultoParaCliente: input.ocultoParaCliente,
-        },
-        deps
-      );
+      const updateData: UpdateRepuestoUsadoData = {
+        stockId: input.stockId,
+        precioCompra: input.precioCompra,
+        precioVenta: input.precioVenta,
+        unidadesConsumidas: input.unidadesConsumidas,
+        ocultoParaCliente: input.ocultoParaCliente,
+      };
+      const result = await this.repo.update(input.id, updateData, deps);
 
       // Sync stock and notify
       await this.inventory.syncStockAndNotify(stockActions, deps);

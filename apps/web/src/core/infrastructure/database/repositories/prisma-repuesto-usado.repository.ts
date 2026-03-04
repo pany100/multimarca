@@ -1,6 +1,7 @@
 import {
   AddRepuestoUsadoData,
   RepuestoUsadoRepository,
+  UpdateRepuestoUsadoData,
 } from "@/core/domain/repositories/repuesto-usado.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
 
@@ -34,17 +35,7 @@ export class PrismaRepuestoUsadoRepository implements RepuestoUsadoRepository {
     });
   }
 
-  async update(
-    id: number,
-    data: {
-      stockId?: number;
-      precioCompra?: number;
-      precioVenta?: number;
-      unidadesConsumidas?: number;
-      ocultoParaCliente?: boolean;
-    },
-    deps?: { tx?: any }
-  ) {
+  async update(id: number, data: UpdateRepuestoUsadoData, deps?: { tx?: any }) {
     const db = deps?.tx ?? prisma;
     const dataToUpdate: any = {};
 
