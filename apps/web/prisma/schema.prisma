@@ -177,10 +177,10 @@ model Empleado {
   tipo              TipoEmpleado              @default(Mecanico)
   dniImagePath      String?                   @db.VarChar(1000)
   contactoEmergencia String?                   @db.VarChar(150)
-  licenciaConducirPath String?                   @db.VarChar(1000)
-  inscripcionMonotributoPath String?                   @db.VarChar(1000)
-  recategorizacionMonotributoPath String?                   @db.VarChar(1000)
-  curriculumPath String?                   @db.VarChar(1000)
+  licenciaConducirPath           CustomFile?   @relation("EmpleadoLicenciaConducir")
+  inscripcionMonotributoPath     CustomFile?   @relation("EmpleadoInscripcionMonotributo")
+  recategorizacionMonotributoPath CustomFile?   @relation("EmpleadoRecategorizacionMonotributo")
+  curriculumPath                CustomFile?   @relation("EmpleadoCurriculum")
   fechaBaja                   DateTime?
   ausenciasProgramadas        AusenciaProgramada[]
   certificadosEstudio         CertificadoEstudio[]
@@ -564,11 +564,19 @@ model CustomFile {
   reparacionDeTerceroId Int?                 @unique
   presupuestoCedulaId   Int?                 @unique
   ventaCedulaId         Int?                 @unique
+  empleadoLicenciaConducirId        Int?     @unique
+  empleadoInscripcionMonotributoId  Int?     @unique
+  empleadoRecategorizacionMonotributoId Int?  @unique
+  empleadoCurriculumId  Int?                 @unique
   ordenReparacion       OrdenReparacion?     @relation("ORepScanner", fields: [ordenReparacionId], references: [id])
   reciboDeORep          OrdenReparacion?     @relation("ORepRecibos", fields: [reciboORepId], references: [id])
   reparacionDeTercero   ReparacionDeTercero? @relation("ReparacionDeTerceroRecibos", fields: [reparacionDeTerceroId], references: [id])
   presupuestoCedula     Presupuesto?         @relation("PresupuestoCedula", fields: [presupuestoCedulaId], references: [id])
   ventaCedula           Venta?               @relation("VentaCedula", fields: [ventaCedulaId], references: [id])
+  empleadoLicenciaConducir         Empleado? @relation("EmpleadoLicenciaConducir", fields: [empleadoLicenciaConducirId], references: [id])
+  empleadoInscripcionMonotributo   Empleado? @relation("EmpleadoInscripcionMonotributo", fields: [empleadoInscripcionMonotributoId], references: [id])
+  empleadoRecategorizacionMonotributo Empleado? @relation("EmpleadoRecategorizacionMonotributo", fields: [empleadoRecategorizacionMonotributoId], references: [id])
+  empleadoCurriculum   Empleado?            @relation("EmpleadoCurriculum", fields: [empleadoCurriculumId], references: [id])
 
   @@index([status])
   @@index([reciboORepId], map: "CustomFile_reciboORepId_fkey")

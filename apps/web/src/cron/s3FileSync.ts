@@ -22,11 +22,17 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile): Promise<void> {
     const pathToCheck = archivo.finalPath;
     const isInTmp = pathToCheck?.includes("/tmp/") || false;
 
-    // Determinar el motivo
+    // Determinar el motivo (todas las FKs nulas = desreferenciado)
     const esDesreferenciado =
       archivo.ordenReparacionId === null &&
       archivo.reciboORepId === null &&
-      archivo.reparacionDeTerceroId === null;
+      archivo.reparacionDeTerceroId === null &&
+      archivo.presupuestoCedulaId === null &&
+      archivo.ventaCedulaId === null &&
+      archivo.empleadoLicenciaConducirId === null &&
+      archivo.empleadoInscripcionMonotributoId === null &&
+      archivo.empleadoRecategorizacionMonotributoId === null &&
+      archivo.empleadoCurriculumId === null;
     const motivo = esDesreferenciado ? "desref" : "ListoParaBorrar";
 
     let accion = "";
@@ -192,6 +198,12 @@ async function procesarArchivosParaBorrar() {
           ordenReparacionId: null,
           reciboORepId: null,
           reparacionDeTerceroId: null,
+          presupuestoCedulaId: null,
+          ventaCedulaId: null,
+          empleadoLicenciaConducirId: null,
+          empleadoInscripcionMonotributoId: null,
+          empleadoRecategorizacionMonotributoId: null,
+          empleadoCurriculumId: null,
           status: { not: EstadoArchivo.Borrado },
         },
         {

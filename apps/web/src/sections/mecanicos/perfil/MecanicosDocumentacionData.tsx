@@ -10,26 +10,26 @@ function MecanicosDocumentacionData() {
   const handleUpdate = () => {
     if (empleado?.id) {
       router.push(
-        `/dashboard/mecanicos/${empleado.id}/actualizar-documentacion`
+        `/dashboard/mecanicos/${empleado.id}/actualizar-documentacion`,
       );
     }
   };
   const documentos = [
     {
       label: "Licencia de Conducir",
-      filePath: empleado?.licenciaConducirPath,
+      filePath: empleado?.licenciaConducirPath ?? null,
     },
     {
       label: "Recategorización Monotributo",
-      filePath: empleado?.recategorizacionMonotributoPath,
+      filePath: empleado?.recategorizacionMonotributoPath ?? null,
     },
     {
       label: "Inscripción Monotributo",
-      filePath: empleado?.inscripcionMonotributoPath,
+      filePath: empleado?.inscripcionMonotributoPath ?? null,
     },
     {
       label: "Curriculum",
-      filePath: empleado?.curriculumPath,
+      filePath: empleado?.curriculumPath ?? null,
     },
   ];
 
@@ -78,8 +78,8 @@ function MecanicosDocumentacionData() {
                   <MecanicosFileData
                     filePath={documento.filePath || null}
                     alt={documento.label}
-                    maxWidth={280}
-                    maxHeight={280}
+                    maxWidth={250}
+                    maxHeight={250}
                   />
                 </Box>
               </Box>

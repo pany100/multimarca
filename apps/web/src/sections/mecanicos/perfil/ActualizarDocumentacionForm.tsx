@@ -10,7 +10,7 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { useEffect } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -25,46 +25,52 @@ const schema = yup.object({
 });
 
 function ActualizarDocumentacionForm() {
+  const params = useParams();
+  const empleadoId = params?.id ? Number(params.id) : undefined;
   const { empleado, loading } = useEmpleadosContext();
+  const router = useRouter();
+  const { updateEmpleadoDocs } = useEmpleadoPersistence();
+  const { setSnackbar } = useSnackbarContext();
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      licenciaConducirPath: empleado?.licenciaConducirPath || null,
-      recategorizacionMonotributoPath:
-        empleado?.recategorizacionMonotributoPath || null,
-      inscripcionMonotributoPath: empleado?.inscripcionMonotributoPath || null,
-      curriculumPath: empleado?.curriculumPath || null,
+      licenciaConducirPath: empleado?.licenciaConducirPath ?? null,
+      recategorizacionMonotributoPath: empleado?.recategorizacionMonotributoPath ?? null,
+      inscripcionMonotributoPath: empleado?.inscripcionMonotributoPath ?? null,
+      curriculumPath: empleado?.curriculumPath ?? null,
     },
   });
 
   useEffect(() => {
     if (empleado) {
       methods.reset({
-        licenciaConducirPath: empleado?.licenciaConducirPath || null,
-        recategorizacionMonotributoPath:
-          empleado?.recategorizacionMonotributoPath || null,
-        inscripcionMonotributoPath:
-          empleado?.inscripcionMonotributoPath || null,
-        curriculumPath: empleado?.curriculumPath || null,
+        licenciaConducirPath: empleado.licenciaConducirPath ?? null,
+        recategorizacionMonotributoPath: empleado.recategorizacionMonotributoPath ?? null,
+        inscripcionMonotributoPath: empleado.inscripcionMonotributoPath ?? null,
+        curriculumPath: empleado.curriculumPath ?? null,
       });
     }
-  }, [empleado]);
-
-  const router = useRouter();
-  const { updateEmpleadoDocs } = useEmpleadoPersistence();
-  const { setSnackbar } = useSnackbarContext();
+  }, [empleado, methods]);
 
   const handleCancel = () => {
-    router.push(`/dashboard/mecanicos/${empleado?.id}/ver`);
+    router.push(`/dashboard/mecanicos/${empleadoId ?? empleado?.id}/ver`);
   };
 
   const onSubmit = async (data: any) => {
+    if (empleadoId == null) {
+      setSnackbar({
+        message: "No se pudo identificar el empleado",
+        severity: "error",
+        open: true,
+      });
+      return;
+    }
     try {
       await updateEmpleadoDocs({
         ...data,
-        id: empleado?.id,
+        id: empleadoId,
       });
-      router.push(`/dashboard/mecanicos/${empleado?.id}/ver`);
+      router.push(`/dashboard/mecanicos/${empleadoId}/ver`);
     } catch (error) {
       setSnackbar({
         message: "Error al actualizar el mecanico: " + error,

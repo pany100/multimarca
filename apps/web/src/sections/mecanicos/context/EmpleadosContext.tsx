@@ -17,7 +17,16 @@ interface ReparacionData {
   totalManoDeObra: string;
 }
 
-type EmpleadoWithAusencias = Empleado & {
+/** Respuesta API: los paths de documentación vienen como string | null desde el backend */
+type EmpleadoWithAusencias = Omit<
+  Empleado,
+  "licenciaConducirPath" | "inscripcionMonotributoPath" | "recategorizacionMonotributoPath" | "curriculumPath"
+> & {
+  licenciaConducirPath?: string | null;
+  inscripcionMonotributoPath?: string | null;
+  recategorizacionMonotributoPath?: string | null;
+  curriculumPath?: string | null;
+} & {
   ausenciasProgramadas?: AusenciaProgramada[];
   inasistencias?: Inasistencia[];
   llegadasTarde?: LlegadaTarde[];

@@ -7,7 +7,7 @@ import {
   UpdateMecanicoDocsData,
 } from "@/core/infrastructure/validation/schemas/mecanico.schema";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
-import { Empleado } from "@prisma/client";
+import { Empleado, EstadoArchivo } from "@prisma/client";
 
 export class PrismaEmpleadoRepository implements EmpleadoRepository {
   listPaged(dto: ListMecanicosQueryData): Promise<PageResult<Empleado>> {
@@ -61,6 +61,10 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         certificadosEstudio: true,
         sueldos: true,
         notasAdministrativas: true,
+        licenciaConducirPath: true,
+        inscripcionMonotributoPath: true,
+        recategorizacionMonotributoPath: true,
+        curriculumPath: true,
       },
     });
   }
@@ -162,18 +166,63 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
     });
   }
 
-  updateDocs(dto: UpdateMecanicoDocsData): Promise<Empleado> {
+  async updateDocs(dto: UpdateMecanicoDocsData): Promise<Empleado> {
     if (!dto.id) {
       throw new Error("El ID del empleado es requerido");
     }
-    return prisma.empleado.update({
-      where: { id: dto.id },
-      data: {
-        licenciaConducirPath: dto.licenciaConducirPath,
-        recategorizacionMonotributoPath: dto.recategorizacionMonotributoPath,
-        inscripcionMonotributoPath: dto.inscripcionMonotributoPath,
-        curriculumPath: dto.curriculumPath,
+    const empleadoId = dto.id;
+
+    const processDoc = async (
+      path: string | null | undefined,
+      fkField: "empleadoLicenciaConducirId" | "empleadoInscripcionMonotributoId" | "empleadoRecategorizacionMonotributoId" | "empleadoCurriculumId"
+    ) => {
+      const hasPath = path != null && path !== "";
+      const existing = await prisma.customFile.findFirst({
+        where: { [fkField]: empleadoId },
+        select: { id: true },
+      });
+      if (hasPath) {
+        if (existing) {
+          await prisma.customFile.update({
+            where: { id: existing.id },
+            data: {
+              [fkField]: null,
+              status: EstadoArchivo.ListoParaBorrar,
+            },
+          });
+        }
+        await prisma.customFile.create({
+          data: {
+            tempPath: path,
+            [fkField]: empleadoId,
+          },
+        });
+      } else if (existing) {
+        await prisma.customFile.update({
+          where: { id: existing.id },
+          data: {
+            [fkField]: null,
+            status: EstadoArchivo.ListoParaBorrar,
+          },
+        });
+      }
+    };
+
+    await processDoc(dto.licenciaConducirPath, "empleadoLicenciaConducirId");
+    await processDoc(dto.inscripcionMonotributoPath, "empleadoInscripcionMonotributoId");
+    await processDoc(dto.recategorizacionMonotributoPath, "empleadoRecategorizacionMonotributoId");
+    await processDoc(dto.curriculumPath, "empleadoCurriculumId");
+
+    const empleado = await prisma.empleado.findUnique({
+      where: { id: empleadoId },
+      include: {
+        licenciaConducirPath: true,
+        inscripcionMonotributoPath: true,
+        recategorizacionMonotributoPath: true,
+        curriculumPath: true,
       },
     });
+    if (!empleado) throw new Error("Empleado no encontrado");
+    return empleado as Empleado;
   }
 }

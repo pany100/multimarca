@@ -14,7 +14,6 @@ function CustomFileInput({ name, label }: Props) {
     watch,
   } = useFormContext();
   const value = watch(name);
-  console.log(value);
   return (
     <Controller
       name={name}

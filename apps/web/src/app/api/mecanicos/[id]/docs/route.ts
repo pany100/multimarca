@@ -1,3 +1,4 @@
+import { mapEmpleadoToResponse } from "@/core/application/mapper/empleado-response.mapper";
 import { EmpleadoService } from "@/core/application/services/empleados.service";
 import { UpdateEmpleadoDocsUseCase } from "@/core/application/use-cases/mecanicos/update-docs-empleado.use-case";
 import { PrismaEmpleadoRepository } from "@/core/infrastructure/database/repositories/prisma-empleado.repository";
@@ -23,7 +24,7 @@ export async function PUT(
     const empleado = await new UpdateEmpleadoDocsUseCase(
       new EmpleadoService(new PrismaEmpleadoRepository())
     ).execute(dto);
-    return NextResponse.json(empleado);
+    return NextResponse.json(mapEmpleadoToResponse(empleado));
   } catch (error) {
     return handleApiError(error);
   }

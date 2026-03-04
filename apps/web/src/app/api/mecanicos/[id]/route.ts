@@ -1,3 +1,4 @@
+import { mapEmpleadoToResponse } from "@/core/application/mapper/empleado-response.mapper";
 import { EmpleadoService } from "@/core/application/services/empleados.service";
 import { DeleteEmpleadoUseCase } from "@/core/application/use-cases/mecanicos/delete-empleado.use-case";
 import { EditEmpleadoUseCase } from "@/core/application/use-cases/mecanicos/edit-empleado.use-case";
@@ -21,7 +22,8 @@ export async function GET(
     const empleado = await new GetEmpleadoUseCase(
       new EmpleadoService(new PrismaEmpleadoRepository())
     ).execute(dto.id);
-    return NextResponse.json(empleado);
+    if (!empleado) return NextResponse.json(null);
+    return NextResponse.json(mapEmpleadoToResponse(empleado));
   } catch (error) {
     return handleApiError(error);
   }
