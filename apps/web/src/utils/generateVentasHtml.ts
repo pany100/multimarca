@@ -223,12 +223,24 @@ export default function generateClientOrderHtml(venta: any): string {
             grid-template-columns: 80% 20%;
             margin-right: 15px;
           '>
-          <div class="TypographyBody1" style="font-weight: bold;">
+          <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
             Mano de Obra
           </div>
-          <div class="TypographyBody1" style="text-align: right;">
-            $${calculoVO.manoDeObraForRecibos.toLocaleString("es-AR")}
+          <div class="TypographyBody1" style="text-align: right;font-weight: bold;">
+            Importe
           </div>
+          ${calculoVO.manoDeObraForRecibosDiscriminado
+            .map(
+              (t: { descripcion: string; precioUnitario: number; pdfName: string | null }) => `
+                <div class="TypographyBody1">
+                  ${t.pdfName ?? t.descripcion}
+                </div>
+                <div class="TypographyBody1" style="text-align: right;">
+                  $${Number(t.precioUnitario).toLocaleString("es-AR")}
+                </div>
+              `,
+            )
+            .join("")}
           </div>
           ${
             venta.incremento > 0
@@ -263,11 +275,19 @@ export default function generateClientOrderHtml(venta: any): string {
             `
               : ""
           }
-          <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; margin-bottom: 20px;">
-            Importe Total:
-          </div>
-          <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; text-align: right;">        
-            $${Number(calculoVO.total).toLocaleString("es-AR")}
+          <div style='
+            display: grid;
+            grid-template-columns: 80% 20%;
+            margin-top: 20px;
+            margin-right: 15px;
+            margin-bottom: 20px;
+          '>
+            <div class="TypographyBody1" style="font-weight: bold;">
+              Importe Total:
+            </div>
+            <div class="TypographyBody1" style="font-weight: bold; text-align: right;">        
+              $${Number(calculoVO.total).toLocaleString("es-AR")}
+            </div>
           </div>
         </div>
                ${
