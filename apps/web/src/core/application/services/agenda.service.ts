@@ -96,7 +96,14 @@ export class AgendaService {
           },
           { tx }
         );
-        const nuevoRecordatorio = await this.repo.create(newEventData, { tx });
+        const nuevoRecordatorio = await this.repo.create(
+          {
+            ...newEventData,
+            general: recordatorio.general,
+            userId: recordatorio.userId,
+          },
+          { tx }
+        );
 
         const excepcionesADuplicar = excepcionesExistentes.filter(
           (excepcion) => excepcion.fecha >= newEventData.fecha
