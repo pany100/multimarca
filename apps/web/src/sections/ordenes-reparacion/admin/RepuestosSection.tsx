@@ -11,6 +11,7 @@ export interface RepuestoUsado {
   precioCompra: number;
   precioVenta: number;
   unidadesConsumidas: number;
+  ocultoParaCliente?: boolean;
   stock: {
     id: number;
     nombre: string;
@@ -25,6 +26,7 @@ interface RepuestosSectionProps {
     precioCompra: number;
     precioVenta: number;
     unidadesConsumidas: number;
+    ocultoParaCliente?: boolean;
   }) => Promise<boolean>;
   onUpdateRepuesto: (
     id: number,
@@ -33,6 +35,7 @@ interface RepuestosSectionProps {
       precioCompra?: number;
       precioVenta?: number;
       unidadesConsumidas?: number;
+      ocultoParaCliente?: boolean;
     }
   ) => Promise<boolean>;
   onDeleteRepuesto: (repuesto: RepuestoUsado) => void;

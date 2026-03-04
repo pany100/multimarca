@@ -37,6 +37,7 @@ export class UpdateRepuestoUsadoUseCase {
             precioCompra: input.precioCompra,
             precioVenta: input.precioVenta,
             unidadesConsumidas: input.unidadesConsumidas,
+            ocultoParaCliente: input.ocultoParaCliente,
           },
           deps
         );
@@ -77,6 +78,7 @@ export class UpdateRepuestoUsadoUseCase {
           precioCompra: input.precioCompra,
           precioVenta: input.precioVenta,
           unidadesConsumidas: input.unidadesConsumidas,
+          ocultoParaCliente: input.ocultoParaCliente,
         },
         deps
       );

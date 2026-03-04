@@ -10,6 +10,7 @@ interface RepuestoUsado {
   precioCompra: number;
   precioVenta: number;
   unidadesConsumidas: number;
+  ocultoParaCliente?: boolean;
   stock: {
     id: number;
     nombre: string;
@@ -64,6 +65,12 @@ const RepuestosTable = ({
       headerName: "Precio Final",
       flex: 1,
       valueFormatter: (value) => getFormattedPrice(value),
+    },
+    {
+      field: "ocultoParaCliente",
+      headerName: "Oculto",
+      flex: 0.7,
+      valueGetter: (value) => (value ? "Sí" : "No"),
     },
     {
       field: "actions",
@@ -138,7 +145,13 @@ const RepuestosTable = ({
           "& .MuiDataGrid-row": {
             maxHeight: "none !important",
           },
+          "& .oculto-row": {
+            backgroundColor: "rgba(255, 215, 0, 0.15)",
+          },
         }}
+        getRowClassName={(params) =>
+          params.row.ocultoParaCliente ? "oculto-row" : ""
+        }
         getRowHeight={() => "auto"}
       />
     </Box>

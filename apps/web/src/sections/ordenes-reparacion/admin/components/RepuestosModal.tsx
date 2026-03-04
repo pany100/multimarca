@@ -3,11 +3,13 @@ import ORepTextField from "@/components/orden-reparacion/formV2/commons/inputs/O
 import useStockObjectAutocomplete from "@/hooks/orden-reparacion/useStockObjectAutocomplete";
 import {
   Button,
+  Checkbox,
   CircularProgress,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
+  FormControlLabel,
   Grid,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -25,6 +27,7 @@ interface RepuestoUsado {
   precioVenta: number;
   unidadesConsumidas: number;
   stock: Stock;
+  ocultoParaCliente?: boolean;
 }
 
 interface RepuestosModalProps {
@@ -35,6 +38,7 @@ interface RepuestosModalProps {
     precioCompra: number;
     precioVenta: number;
     unidadesConsumidas: number; // entero o decimal si el ítem es fraccionable
+    ocultoParaCliente?: boolean;
   }) => Promise<boolean>;
   loading?: boolean;
   editRepuesto?: RepuestoUsado;
@@ -54,6 +58,7 @@ const RepuestosModal = ({
   const [precioVenta, setPrecioVenta] = useState<string>("");
   const [precioUnitario, setPrecioUnitario] = useState<string>("");
   const [unidadesConsumidas, setUnidadesConsumidas] = useState<string>("");
+  const [ocultoParaCliente, setOcultoParaCliente] = useState<boolean>(false);
 
   useEffect(() => {
     if (open) {
@@ -71,12 +76,14 @@ const RepuestosModal = ({
         const u = Number(editRepuesto.unidadesConsumidas) || 1;
         const unitPrice = (editRepuesto.precioVenta / u).toFixed(2);
         setPrecioUnitario(unitPrice);
+        setOcultoParaCliente(!!editRepuesto.ocultoParaCliente);
       } else {
         setStock(null);
         setPrecioCompra("");
         setPrecioVenta("");
         setPrecioUnitario("");
         setUnidadesConsumidas("");
+        setOcultoParaCliente(false);
       }
     }
   }, [open, editRepuesto]);
@@ -89,6 +96,7 @@ const RepuestosModal = ({
       precioCompra: Number(precioCompra),
       precioVenta: Number(precioVenta),
       unidadesConsumidas: Number(unidadesConsumidas),
+      ocultoParaCliente,
     });
   };
 
@@ -211,6 +219,19 @@ const RepuestosModal = ({
               onChange={(e) => handlePrecioVentaChange(e.target.value)}
               disabled={loading}
               required
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={ocultoParaCliente}
+                  onChange={(e) => setOcultoParaCliente(e.target.checked)}
+                  disabled={loading}
+                />
+              }
+              label="Oculto para el cliente"
             />
           </Grid>
         </Grid>

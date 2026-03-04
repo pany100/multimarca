@@ -283,6 +283,7 @@ export default function generateBudgetHtml(repair: any): string {
           )
           .join("")}
         ${repair.repuestosUsados
+          .filter((el: any) => !el.ocultoParaCliente)
           .map(
             (el: {
               stock: { id: number; name: string; reportName?: string | null };

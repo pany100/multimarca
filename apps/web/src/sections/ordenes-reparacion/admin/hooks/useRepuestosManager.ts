@@ -13,6 +13,7 @@ interface RepuestoUsado {
     id: number;
     nombre: string;
   };
+  ocultoParaCliente?: boolean;
 }
 
 export const useRepuestosManager = () => {
@@ -30,6 +31,7 @@ export const useRepuestosManager = () => {
     precioCompra: number;
     precioVenta: number;
     unidadesConsumidas: number;
+    ocultoParaCliente?: boolean;
   }) => {
     setLoading(true);
     try {
@@ -84,6 +86,7 @@ export const useRepuestosManager = () => {
       precioCompra?: number;
       precioVenta?: number;
       unidadesConsumidas?: number;
+      ocultoParaCliente?: boolean;
     }
   ) => {
     setLoading(true);

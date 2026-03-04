@@ -639,12 +639,14 @@ model RepuestoUsado {
   precioVenta            Decimal               @db.Decimal(10, 2)
   /// Cantidad consumida; decimal para ítems fraccionables (ej. 0.5 litros).
   unidadesConsumidas     Decimal               @db.Decimal(10, 3)
+  ocultoParaCliente      Boolean               @default(false)
   plantillaPresupuestoId Int?
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionRepuestos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoRepuestos", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)
   presupuesto            Presupuesto?          @relation("PresupuestoRepuestos", fields: [presupuestoId], references: [id], onDelete: Cascade)
   stock                  Stock                 @relation(fields: [stockId], references: [id])
   venta                  Venta?                @relation("VentaRepuestos", fields: [ventaId], references: [id], onDelete: Cascade)
+  
 
   @@index([ordenReparacionId])
   @@index([ventaId], map: "RepuestoUsado_ventaId_fkey")

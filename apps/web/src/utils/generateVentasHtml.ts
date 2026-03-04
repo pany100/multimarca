@@ -198,6 +198,7 @@ export default function generateClientOrderHtml(venta: any): string {
             )
             .join("")}
           ${venta.repuestosUsados
+            .filter((el: any) => !el.ocultoParaCliente)
             .map(
               (el: {
                 stock: { id: number; name: string; reportName?: string | null };

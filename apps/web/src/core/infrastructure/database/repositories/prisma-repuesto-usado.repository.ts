@@ -20,6 +20,7 @@ export class PrismaRepuestoUsadoRepository implements RepuestoUsadoRepository {
       precioCompra: number;
       precioVenta: number;
       unidadesConsumidas: number;
+      ocultoParaCliente?: boolean;
     },
     deps?: { tx?: any }
   ) {
@@ -34,6 +35,7 @@ export class PrismaRepuestoUsadoRepository implements RepuestoUsadoRepository {
         precioCompra: data.precioCompra,
         precioVenta: data.precioVenta,
         unidadesConsumidas: data.unidadesConsumidas,
+        ocultoParaCliente: data.ocultoParaCliente ?? false,
       },
       include: {
         stock: true,
@@ -48,6 +50,7 @@ export class PrismaRepuestoUsadoRepository implements RepuestoUsadoRepository {
       precioCompra?: number;
       precioVenta?: number;
       unidadesConsumidas?: number;
+      ocultoParaCliente?: boolean;
     },
     deps?: { tx?: any }
   ) {
@@ -61,6 +64,8 @@ export class PrismaRepuestoUsadoRepository implements RepuestoUsadoRepository {
       dataToUpdate.precioVenta = data.precioVenta;
     if (data.unidadesConsumidas !== undefined)
       dataToUpdate.unidadesConsumidas = data.unidadesConsumidas;
+    if (data.ocultoParaCliente !== undefined)
+      dataToUpdate.ocultoParaCliente = data.ocultoParaCliente;
 
     return db.repuestoUsado.update({
       where: { id },

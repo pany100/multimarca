@@ -50,9 +50,9 @@ export class ComprobanteCalculadoFactory {
       porcentajeRecargo: orden.porcentajeRecargo,
     });
 
-    const repuestos = (orden.repuestosUsados ?? []).map(
-      RepuestoUsado.fromOrderDb
-    );
+    const repuestos = (orden.repuestosUsados ?? [])
+      .filter((r) => !r.ocultoParaCliente)
+      .map(RepuestoUsado.fromOrderDb);
 
     const trabajos = (orden.trabajosRealizados ?? []).map(
       TrabajoRealizado.fromOrderDb
@@ -85,9 +85,9 @@ export class ComprobanteCalculadoFactory {
       porcentajeRecargo: venta.porcentajeRecargo,
     });
 
-    const repuestos = (venta.repuestosUsados ?? []).map(
-      RepuestoUsado.fromOrderDb
-    );
+    const repuestos = (venta.repuestosUsados ?? [])
+      .filter((r) => !r.ocultoParaCliente)
+      .map(RepuestoUsado.fromOrderDb);
 
     const trabajos = (venta.trabajosRealizados ?? []).map(
       TrabajoRealizado.fromOrderDb
@@ -127,14 +127,16 @@ export class ComprobanteCalculadoFactory {
         : new Decimal(0),
     });
 
-    const repuestos = (dto.repuestosUsados ?? []).map((r) =>
-      RepuestoUsado.fromOrderDb({
-        stock: { id: r.stock.id, name: r.stock.name || "" },
-        unidadesConsumidas: r.unidadesConsumidas,
-        precioCompra: r.precioCompra || 0,
-        precioVenta: r.precioVenta || 0,
-      })
-    );
+    const repuestos = (dto.repuestosUsados ?? [])
+      .filter((r) => !r.ocultoParaCliente)
+      .map((r) =>
+        RepuestoUsado.fromOrderDb({
+          stock: { id: r.stock.id, name: r.stock.name || "" },
+          unidadesConsumidas: r.unidadesConsumidas,
+          precioCompra: r.precioCompra || 0,
+          precioVenta: r.precioVenta || 0,
+        })
+      );
 
     const trabajos = (dto.trabajosRealizados ?? []).map((t) =>
       TrabajoRealizado.fromOrderDb({
@@ -180,14 +182,16 @@ export class ComprobanteCalculadoFactory {
         : new Decimal(0),
     });
 
-    const repuestos = (presupuesto.repuestosUsados ?? []).map((r) =>
-      RepuestoUsado.fromOrderDb({
-        stock: { id: r.stock.id, name: r.stock.name || "" },
-        unidadesConsumidas: r.unidadesConsumidas,
-        precioCompra: r.precioCompra || 0,
-        precioVenta: r.precioVenta || 0,
-      })
-    );
+    const repuestos = (presupuesto.repuestosUsados ?? [])
+      .filter((r) => !r.ocultoParaCliente)
+      .map((r) =>
+        RepuestoUsado.fromOrderDb({
+          stock: { id: r.stock.id, name: r.stock.name || "" },
+          unidadesConsumidas: r.unidadesConsumidas,
+          precioCompra: r.precioCompra || 0,
+          precioVenta: r.precioVenta || 0,
+        })
+      );
 
     const trabajos = (presupuesto.trabajosRealizados ?? []).map((t) =>
       TrabajoRealizado.fromOrderDb({
