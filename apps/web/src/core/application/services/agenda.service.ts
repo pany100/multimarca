@@ -48,13 +48,16 @@ export class AgendaService {
       if (recordatorio.recurrence === Recurrence.No) {
         return this.repo.update(id, data);
       }
+      // ESTE: excepción en el base + un solo evento para esa fecha (no otro recurrente)
       return this.uow.run(async (tx) => {
         const newEventData = data as CreateAgendaInput;
-        const { id, ...rest } = recordatorio;
+        const { id: _id, ...rest } = recordatorio;
         const nuevoRecordatorio = await this.repo.create(
           {
             ...rest,
             ...newEventData,
+            recurrence: Recurrence.No,
+            fechaFinRecurrencia: null,
           },
           { tx }
         );
@@ -68,17 +71,21 @@ export class AgendaService {
         return nuevoRecordatorio;
       });
     } else {
-      // this_and_following
+      // Este y los siguientes: base termina el día anterior; nuevo recurrente desde esa fecha
       const newEventData = data as CreateAgendaInput;
 
       return this.uow.run(async (tx) => {
         const excepcionesExistentes =
           await this.repo.findExceptionsByRecordatorioId(id);
 
+        const finRecurrenciaBase = new Date(newEventData.fecha);
+        finRecurrenciaBase.setUTCDate(finRecurrenciaBase.getUTCDate() - 1);
+        finRecurrenciaBase.setUTCHours(23, 59, 59, 999);
+
         await this.repo.update(
           id,
           {
-            fechaFinRecurrencia: newEventData.fecha,
+            fechaFinRecurrencia: finRecurrenciaBase,
           },
           { tx }
         );
