@@ -53,6 +53,7 @@ export const schema = yup.object({
         return !!autoId || !!value;
       },
     ),
+  informacionPatente: yup.string().nullable().optional(),
   clienteNombre: yup.string().nullable().optional(),
   clienteTelefono: yup.string().nullable().optional(),
   vino: yup.boolean().nullable().optional(),
@@ -67,6 +68,7 @@ const TurnosForm = () => {
 
   const autoId = watch("autoId");
   const informacionAuto = watch("informacionAuto");
+  const informacionPatente = watch("informacionPatente");
   const clienteNombre = watch("clienteNombre");
   const clienteTelefono = watch("clienteTelefono");
   const hasClienteInfo = !!(clienteNombre || clienteTelefono);
@@ -74,7 +76,10 @@ const TurnosForm = () => {
   // Inicializar el tab correcto cuando se está editando
   useEffect(() => {
     if (isEditing) {
-      if (!autoId && (informacionAuto || hasClienteInfo)) {
+      if (
+        !autoId &&
+        (informacionAuto || informacionPatente || hasClienteInfo)
+      ) {
         setTabValue(1);
       } else if (autoId) {
         setTabValue(0);
@@ -91,6 +96,7 @@ const TurnosForm = () => {
     if (tabValue === 0 && autoId) {
       if (informacionAuto || hasClienteInfo) {
         setValue("informacionAuto", "");
+        setValue("informacionPatente", "");
         setValue("clienteNombre", "");
         setValue("clienteTelefono", "");
       }
@@ -99,13 +105,22 @@ const TurnosForm = () => {
   }, [autoId, tabValue]);
 
   useEffect(() => {
-    if (tabValue === 1 && (informacionAuto || hasClienteInfo)) {
+    if (
+      tabValue === 1 &&
+      (informacionAuto || informacionPatente || hasClienteInfo)
+    ) {
       if (autoId) {
         setValue("autoId", null);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [informacionAuto, clienteNombre, clienteTelefono, tabValue]);
+  }, [
+    informacionAuto,
+    informacionPatente,
+    clienteNombre,
+    clienteTelefono,
+    tabValue,
+  ]);
 
   return (
     <>
@@ -154,10 +169,10 @@ const TurnosForm = () => {
           // Vehículo nuevo
           <>
             <Grid item xs={12} md={6} sx={{ mb: 2 }}>
-              <CustomInputText
-                name="informacionAuto"
-                label="Patente y modelo"
-              />
+              <CustomInputText name="informacionAuto" label="Modelo" />
+            </Grid>
+            <Grid item xs={12} md={6} sx={{ mb: 2 }}>
+              <CustomInputText name="informacionPatente" label="Patente" />
             </Grid>
             <Grid item xs={12} md={6} sx={{ mb: 2 }}>
               <CustomInputText
@@ -187,7 +202,10 @@ const TurnosForm = () => {
           <Controller
             name="vino"
             control={control}
-            render={({ field: { value, onChange, ...field }, fieldState: { error } }) => {
+            render={({
+              field: { value, onChange, ...field },
+              fieldState: { error },
+            }) => {
               const selectValue =
                 value === null || value === undefined
                   ? ""

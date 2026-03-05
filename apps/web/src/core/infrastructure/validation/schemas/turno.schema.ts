@@ -21,6 +21,7 @@ const turnoBodyBase = z.object({
   problema: z.string().min(1, "La descripción del problema es requerida").max(255),
   autoId: z.number().int().positive().nullable().optional(),
   informacionAuto: z.string().nullable().optional(),
+  informacionPatente: z.string().nullable().optional(),
   clienteNombre: z.string().nullable().optional(),
   clienteTelefono: z.string().nullable().optional(),
   vino: z.boolean().nullable().optional(),

@@ -146,8 +146,10 @@ export async function POST(request: NextRequest) {
               <tr>
                 <th>Cliente</th>
                 <th>Teléfono</th>
+                <th>Patente</th>
                 <th>Auto</th>
                 <th>Problema</th>
+                <th>Presup. ID</th>
                 ${weekDays
                   .map((day) => {
                     const feriado = feriados.find(
@@ -191,10 +193,17 @@ export async function POST(request: NextRequest) {
                       }</td>
                       <td>${
                         turno.auto
+                          ? (turno.auto.patent ?? "—")
+                          : ((turno as { informacionPatente?: string | null })
+                              .informacionPatente ?? "—")
+                      }</td>
+                      <td>${
+                        turno.auto
                           ? `${turno.auto.brand} ${turno.auto.model} - ${turno.auto.patent}`
                           : turno.informacionAuto || "N/A"
                       }</td>
                       <td>${turno.problema || ""}</td>
+                      <td></td>
                       ${weekDays
                         .map((day, index) => {
                           const feriado = feriados.find(
@@ -227,9 +236,9 @@ export async function POST(request: NextRequest) {
     // Set the HTML content
     await page.setContent(htmlContent);
 
-    // Generate PDF
+    // Generate PDF (Legal = hoja oficio 21.59 x 35.56 cm)
     const pdfBuffer = await page.pdf({
-      format: "A4",
+      format: "Legal",
       landscape: true,
       printBackground: true,
       margin: {

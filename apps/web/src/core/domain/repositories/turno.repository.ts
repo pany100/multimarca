@@ -7,6 +7,7 @@ export type CreateTurnoData = {
   problema: string;
   autoId: number | null;
   informacionAuto: string | null;
+  informacionPatente: string | null;
   clienteNombre: string | null;
   clienteTelefono: string | null;
   vino: boolean | null;

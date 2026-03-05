@@ -28,6 +28,7 @@ export class PrismaTurnoRepository implements TurnoRepository {
         ? [
             { problema: { contains: query } },
             { informacionAuto: { contains: query } },
+            { informacionPatente: { contains: query } },
             { clienteNombre: { contains: query } },
             { clienteTelefono: { contains: query } },
             { auto: { patent: { contains: query } } },
@@ -73,6 +74,7 @@ export class PrismaTurnoRepository implements TurnoRepository {
         problema: data.problema,
         autoId: data.autoId,
         informacionAuto: data.informacionAuto,
+        informacionPatente: data.informacionPatente,
         clienteNombre: data.clienteNombre,
         clienteTelefono: data.clienteTelefono,
         vino: data.vino,
@@ -91,6 +93,7 @@ export class PrismaTurnoRepository implements TurnoRepository {
         problema: data.problema,
         autoId: data.autoId,
         informacionAuto: data.informacionAuto,
+        informacionPatente: data.informacionPatente,
         clienteNombre: data.clienteNombre,
         clienteTelefono: data.clienteTelefono,
         vino: data.vino,

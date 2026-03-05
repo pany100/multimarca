@@ -67,6 +67,17 @@ function TurnosTable({
       },
     },
     {
+      field: "patente",
+      headerName: "Patente",
+      flex: 0.6,
+      renderCell: (params: any) => {
+        if (params.row.auto) {
+          return params.row.auto.patent ?? "—";
+        }
+        return params.row.informacionPatente ?? "—";
+      },
+    },
+    {
       field: "problema",
       headerName: "Problema",
       flex: 1.5,
