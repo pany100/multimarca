@@ -1,10 +1,11 @@
+import { PrismaConfiguracionGeneralRepository } from "@/core/infrastructure/database/repositories/prisma-configuracion-general.repository";
 import generateBudgetHtml from "@/utils/generateBudgetHtml";
 import puppeteer from "puppeteer";
 import prisma from "src/lib/prisma";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const id = parseInt(params.id);
@@ -45,12 +46,17 @@ export async function GET(
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
+    // Footer desde ConfiguracionGeneral (id 2 = presupuesto)
+    const configRepo = new PrismaConfiguracionGeneralRepository();
+    const footerConfig = await configRepo.findById(2);
+    const footerTexto = footerConfig?.valor ?? "";
+
     // Generar el PDF base usando puppeteer
-    const pdfBuffer = await generateBasePdf(presupuesto);
+    const pdfBuffer = await generateBasePdf(presupuesto, footerTexto);
 
     // Devolver el PDF como descarga - convert Buffer to Uint8Array for compatibility
     return new Response(new Uint8Array(pdfBuffer), {
@@ -68,12 +74,15 @@ export async function GET(
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   }
 }
 
-async function generateBasePdf(presupuesto: any): Promise<Buffer> {
+async function generateBasePdf(
+  presupuesto: any,
+  footerTexto: string,
+): Promise<Buffer> {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
@@ -94,9 +103,7 @@ async function generateBasePdf(presupuesto: any): Promise<Buffer> {
     footerTemplate: `
       <div style="margin: 0 25px; padding: 0 20px; width: 100%; font-family: Arial, sans-serif;">
         <div style="border-top: 1px solid black; width: 100%;"></div>
-        <div style="text-align: left; font-size: 12px; margin-top: 8px;">
-           Detalle de presupuesto solicitado, valores al día, sujeto a desarme
-        </div>
+        <div style="text-align: left; font-size: 12px; margin-top: 8px;">${footerTexto}</div>
       </div>
     `,
   });

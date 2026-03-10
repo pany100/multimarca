@@ -1,6 +1,6 @@
 import generateClientOrderHtml from "@/utils/generateClientOrderHtml";
+import { PrismaConfiguracionGeneralRepository } from "@/core/infrastructure/database/repositories/prisma-configuracion-general.repository";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { EstadoOrdenReparacion } from "@prisma/client";
 import { PDFDocument, rgb } from "pdf-lib";
 import puppeteer from "puppeteer";
 import prisma from "src/lib/prisma";
@@ -67,8 +67,13 @@ export async function GET(
       );
     }
 
+    // Footer desde ConfiguracionGeneral (id 1 = orden de reparación)
+    const configRepo = new PrismaConfiguracionGeneralRepository();
+    const footerConfig = await configRepo.findById(1);
+    const footerTexto = footerConfig?.valor ?? "";
+
     // 1. Generar el PDF base usando puppeteer
-    const basePdfBuffer = await generateBasePdf(ordenReparacion);
+    const basePdfBuffer = await generateBasePdf(ordenReparacion, footerTexto);
 
     // Inicializar el PDF final con el PDF base
     let finalPdfBuffer = basePdfBuffer;
@@ -80,21 +85,32 @@ export async function GET(
         ordenReparacion.scannerFile?.tempPath;
       const scannerBuffer = await getFileFromS3(scannerPath);
 
-      let scannerPdfBuffer: Buffer;
-      if (isImageUrl(scannerPath)) {
-        scannerPdfBuffer = await imageUrlToSinglePdf(scannerPath);
-      } else if (getImageFormatFromBuffer(scannerBuffer)) {
-        const format = getImageFormatFromBuffer(scannerBuffer)!;
-        scannerPdfBuffer = await imageBufferToSinglePdf(scannerBuffer, format);
-      } else {
-        scannerPdfBuffer = scannerBuffer;
-      }
+      if (scannerBuffer) {
+        let scannerPdfBuffer: Buffer;
+        if (isImageUrl(scannerPath)) {
+          const format = scannerPath.toLowerCase().endsWith(".png")
+            ? "png"
+            : "jpeg";
+          scannerPdfBuffer = await imageBufferToSinglePdf(
+            scannerBuffer,
+            format
+          );
+        } else if (getImageFormatFromBuffer(scannerBuffer)) {
+          const format = getImageFormatFromBuffer(scannerBuffer)!;
+          scannerPdfBuffer = await imageBufferToSinglePdf(
+            scannerBuffer,
+            format
+          );
+        } else {
+          scannerPdfBuffer = scannerBuffer;
+        }
 
-      finalPdfBuffer = await mergePdfs(
-        finalPdfBuffer,
-        scannerPdfBuffer,
-        "scanner"
-      );
+        finalPdfBuffer = await mergePdfs(
+          finalPdfBuffer,
+          scannerPdfBuffer,
+          "scanner"
+        );
+      }
     }
 
     // 3. Verificar si hay recibos para añadir
@@ -138,7 +154,10 @@ export async function GET(
   }
 }
 
-async function generateBasePdf(repair: any): Promise<Buffer> {
+async function generateBasePdf(
+  repair: any,
+  footerTexto: string
+): Promise<Buffer> {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
   const html = generateClientOrderHtml(repair);
@@ -158,14 +177,7 @@ async function generateBasePdf(repair: any): Promise<Buffer> {
     footerTemplate: `
       <div style="margin: 0 25px; padding: 0 20px; width: 100%; font-family: Arial, sans-serif;">
         <div style="border-top: 1px solid black; width: 100%;"></div>
-        <div style="text-align: left; font-size: 12px; margin-top: 8px;">
-          ${
-            repair.estado === EstadoOrdenReparacion.Presupuestado ||
-            repair.estado === EstadoOrdenReparacion.Aceptado
-              ? "Detalle de presupuesto solicitado, valores al día, sujeto a desarme"
-              : "Detalle del trabajo"
-          }
-        </div>
+        <div style="text-align: left; font-size: 12px; margin-top: 8px;">${footerTexto}</div>
       </div>
     `,
   });
@@ -175,7 +187,8 @@ async function generateBasePdf(repair: any): Promise<Buffer> {
   return pdfBuffer;
 }
 
-async function getFileFromS3(fileUrl: string): Promise<Buffer> {
+/** Devuelve null si el objeto no existe en S3 (NoSuchKey). */
+async function getFileFromS3(fileUrl: string): Promise<Buffer | null> {
   try {
     const s3Client = new S3Client({
       region: process.env.AWS_DEFAULT_REGION,
@@ -190,7 +203,6 @@ async function getFileFromS3(fileUrl: string): Promise<Buffer> {
     const bucket = urlParts[0].split(".")[0];
     const key = urlParts.slice(1).join("/");
 
-    // Obtener el archivo de S3
     const command = new GetObjectCommand({
       Bucket: bucket,
       Key: key,
@@ -198,16 +210,22 @@ async function getFileFromS3(fileUrl: string): Promise<Buffer> {
 
     const response = await s3Client.send(command);
 
-    // Convertir el stream a buffer
     const chunks: Uint8Array[] = [];
     const stream = response.Body as any;
 
-    return new Promise<Buffer>((resolve, reject) => {
+    return new Promise<Buffer | null>((resolve, reject) => {
       stream.on("data", (chunk: Uint8Array) => chunks.push(chunk));
       stream.on("error", reject);
       stream.on("end", () => resolve(Buffer.concat(chunks)));
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.Code === "NoSuchKey" || error?.name === "NoSuchKey") {
+      console.warn(
+        "[pdf-completo] Archivo no encontrado en S3, se omite:",
+        fileUrl
+      );
+      return null;
+    }
     console.error("Error obteniendo archivo de S3:", error);
     throw error;
   }
@@ -316,8 +334,9 @@ async function generateRecibosPdf(recibos: string[]): Promise<Buffer> {
       try {
         // Verificar si es una imagen (solo procesamos imágenes)
         if (isImageUrl(reciboUrl)) {
-          // Obtener la imagen desde S3
+          // Obtener la imagen desde S3 (puede ser null si el archivo no existe)
           const imageBuffer = await getFileFromS3(reciboUrl);
+          if (!imageBuffer) continue;
 
           // Determinar el formato de la imagen
           let imageFormat;

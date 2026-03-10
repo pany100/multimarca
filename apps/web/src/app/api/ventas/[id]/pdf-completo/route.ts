@@ -1,3 +1,4 @@
+import { PrismaConfiguracionGeneralRepository } from "@/core/infrastructure/database/repositories/prisma-configuracion-general.repository";
 import generateVentasHtml from "@/utils/generateVentasHtml";
 import puppeteer from "puppeteer";
 import prisma from "src/lib/prisma";
@@ -36,8 +37,13 @@ export async function GET(
       });
     }
 
+    // Footer desde ConfiguracionGeneral (id 3 = venta)
+    const configRepo = new PrismaConfiguracionGeneralRepository();
+    const footerConfig = await configRepo.findById(3);
+    const footerTexto = footerConfig?.valor ?? "";
+
     // 1. Generar el PDF base usando puppeteer
-    const basePdfBuffer = await generateBasePdf(venta);
+    const basePdfBuffer = await generateBasePdf(venta, footerTexto);
 
     // 5. Devolver el PDF base como descarga - convert Buffer to Uint8Array for compatibility
     return new Response(new Uint8Array(basePdfBuffer), {
@@ -60,7 +66,10 @@ export async function GET(
   }
 }
 
-async function generateBasePdf(venta: any): Promise<Buffer> {
+async function generateBasePdf(
+  venta: any,
+  footerTexto: string
+): Promise<Buffer> {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
@@ -79,10 +88,11 @@ async function generateBasePdf(venta: any): Promise<Buffer> {
     displayHeaderFooter: true,
     headerTemplate: "<div></div>",
     footerTemplate: `
-          <div style="margin: 0 25px; padding: 0 20px; width: 100%; font-family: Arial, sans-serif;">
-            <div style="border-top: 1px solid black; width: 100%;"></div>
-          </div>
-        `,
+      <div style="margin: 0 25px; padding: 0 20px; width: 100%; font-family: Arial, sans-serif;">
+        <div style="border-top: 1px solid black; width: 100%;"></div>
+        <div style="text-align: left; font-size: 12px; margin-top: 8px;">${footerTexto}</div>
+      </div>
+    `,
   });
 
   await browser.close();
