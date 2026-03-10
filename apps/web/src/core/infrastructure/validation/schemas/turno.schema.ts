@@ -22,6 +22,7 @@ const turnoBodyBase = z.object({
   autoId: z.number().int().positive().nullable().optional(),
   informacionAuto: z.string().nullable().optional(),
   informacionPatente: z.string().nullable().optional(),
+  presupuestoId: z.string().nullable().optional(),
   clienteNombre: z.string().nullable().optional(),
   clienteTelefono: z.string().nullable().optional(),
   vino: z.boolean().nullable().optional(),

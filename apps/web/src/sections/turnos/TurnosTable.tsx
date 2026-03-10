@@ -83,6 +83,12 @@ function TurnosTable({
       flex: 1.5,
     },
     {
+      field: "presupuestoId",
+      headerName: "Presupuesto",
+      flex: 0.6,
+      renderCell: (params: any) => params.row.presupuestoId ?? "—",
+    },
+    {
       field: "vino",
       headerName: "Vino",
       flex: 1,

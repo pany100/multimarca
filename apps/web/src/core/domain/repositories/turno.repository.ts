@@ -8,6 +8,7 @@ export type CreateTurnoData = {
   autoId: number | null;
   informacionAuto: string | null;
   informacionPatente: string | null;
+  presupuestoId: string | null;
   clienteNombre: string | null;
   clienteTelefono: string | null;
   vino: boolean | null;

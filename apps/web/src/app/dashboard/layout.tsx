@@ -16,6 +16,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import LockIcon from "@mui/icons-material/Lock";
+import SettingsIcon from "@mui/icons-material/Settings";
 import MenuIcon from "@mui/icons-material/Menu";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import MoneyOffIcon from "@mui/icons-material/MoneyOff";
@@ -259,6 +260,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Información Sensible",
             icono: <LockIcon />,
             ruta: "/dashboard/informacion-sensible",
+          },
+          {
+            permiso: "AdministracionGeneral",
+            texto: "Configuración General",
+            icono: <SettingsIcon />,
+            ruta: "/dashboard/configuracion-general",
           },
           {
             permiso: "InformacionGeneral",

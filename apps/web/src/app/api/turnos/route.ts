@@ -24,6 +24,7 @@ function toCreateData(dto: CreateTurnoDto) {
     autoId: dto.autoId ?? null,
     informacionAuto: dto.informacionAuto ?? null,
     informacionPatente: dto.informacionPatente ?? null,
+    presupuestoId: dto.presupuestoId ?? null,
     clienteNombre: dto.clienteNombre ?? null,
     clienteTelefono: dto.clienteTelefono ?? null,
     vino: dto.vino ?? null,

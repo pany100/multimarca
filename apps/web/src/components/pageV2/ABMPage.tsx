@@ -20,6 +20,8 @@ type Props = {
   schema?: yup.ObjectSchema<any>;
   postCallbackFn?: () => void;
   onAddClick?: () => void;
+  /** Método HTTP para edición. Por defecto PUT. */
+  editMethod?: "PUT" | "PATCH";
 };
 
 function ABMPage({
@@ -32,6 +34,7 @@ function ABMPage({
   schema,
   postCallbackFn,
   onAddClick,
+  editMethod = "PUT",
 }: Props) {
   const { authFetch } = useFetch();
 
@@ -103,7 +106,7 @@ function ABMPage({
       const baseUrl = `${url.origin}${url.pathname}`;
 
       const response = await authFetch(`${baseUrl}/${data.id}`, {
-        method: "PUT",
+        method: editMethod,
         body: JSON.stringify(data),
       });
       if (response.ok) {

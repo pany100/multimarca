@@ -203,7 +203,7 @@ export async function POST(request: NextRequest) {
                           : turno.informacionAuto || "N/A"
                       }</td>
                       <td>${turno.problema || ""}</td>
-                      <td></td>
+                      <td>${(turno as { presupuestoId?: string | null }).presupuestoId ?? ""}</td>
                       ${weekDays
                         .map((day, index) => {
                           const feriado = feriados.find(

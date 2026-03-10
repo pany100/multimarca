@@ -953,9 +953,16 @@ model Turno {
   clienteTelefono    String?   @db.VarChar(50)
   vino               Boolean?
   observaciones      String?   @db.Text
+  presupuestoId      String?   @db.VarChar(50)
 
   @@index([fecha])
   @@index([autoId])
+}
+
+model ConfiguracionGeneral {
+  id     Int    @id @default(autoincrement())
+  nombre String @unique @db.VarChar(255)
+  valor  String @db.Text
 }
 
 model RecordatorioAgenda {

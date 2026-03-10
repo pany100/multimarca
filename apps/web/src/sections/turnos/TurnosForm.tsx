@@ -54,6 +54,7 @@ export const schema = yup.object({
       },
     ),
   informacionPatente: yup.string().nullable().optional(),
+  presupuestoId: yup.string().nullable().optional(),
   clienteNombre: yup.string().nullable().optional(),
   clienteTelefono: yup.string().nullable().optional(),
   vino: yup.boolean().nullable().optional(),
@@ -233,6 +234,13 @@ const TurnosForm = () => {
                 </FormControl>
               );
             }}
+          />
+        </Grid>
+
+        <Grid item xs={12} md={6}>
+          <CustomInputText
+            name="presupuestoId"
+            label="Presupuesto"
           />
         </Grid>
 
