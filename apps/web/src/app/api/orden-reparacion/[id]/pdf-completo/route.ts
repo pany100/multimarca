@@ -1,5 +1,5 @@
-import generateClientOrderHtml from "@/utils/generateClientOrderHtml";
 import { PrismaConfiguracionGeneralRepository } from "@/core/infrastructure/database/repositories/prisma-configuracion-general.repository";
+import generateClientOrderHtml from "@/utils/generateClientOrderHtml";
 import { GetObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { PDFDocument, rgb } from "pdf-lib";
 import puppeteer from "puppeteer";
@@ -7,7 +7,7 @@ import prisma from "src/lib/prisma";
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const id = parseInt(params.id);
@@ -63,7 +63,7 @@ export async function GET(
           headers: {
             "Content-Type": "application/json",
           },
-        }
+        },
       );
     }
 
@@ -93,13 +93,13 @@ export async function GET(
             : "jpeg";
           scannerPdfBuffer = await imageBufferToSinglePdf(
             scannerBuffer,
-            format
+            format,
           );
         } else if (getImageFormatFromBuffer(scannerBuffer)) {
           const format = getImageFormatFromBuffer(scannerBuffer)!;
           scannerPdfBuffer = await imageBufferToSinglePdf(
             scannerBuffer,
-            format
+            format,
           );
         } else {
           scannerPdfBuffer = scannerBuffer;
@@ -108,7 +108,7 @@ export async function GET(
         finalPdfBuffer = await mergePdfs(
           finalPdfBuffer,
           scannerPdfBuffer,
-          "scanner"
+          "scanner",
         );
       }
     }
@@ -122,14 +122,14 @@ export async function GET(
       // Generar un PDF con las imágenes de los recibos
       const recibosPdfBuffer = await generateRecibosPdf(
         ordenReparacion.recibosFiles.map(
-          (r) => r.finalPath || r.tempPath
-        ) as string[]
+          (r) => r.finalPath || r.tempPath,
+        ) as string[],
       );
       // Combinar el PDF actual con el PDF de recibos
       finalPdfBuffer = await mergePdfs(
         finalPdfBuffer,
         recibosPdfBuffer,
-        "recibos"
+        "recibos",
       );
     }
 
@@ -149,14 +149,14 @@ export async function GET(
         headers: {
           "Content-Type": "application/json",
         },
-      }
+      },
     );
   }
 }
 
 async function generateBasePdf(
   repair: any,
-  footerTexto: string
+  footerTexto: string,
 ): Promise<Buffer> {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
@@ -222,7 +222,7 @@ async function getFileFromS3(fileUrl: string): Promise<Buffer | null> {
     if (error?.Code === "NoSuchKey" || error?.name === "NoSuchKey") {
       console.warn(
         "[pdf-completo] Archivo no encontrado en S3, se omite:",
-        fileUrl
+        fileUrl,
       );
       return null;
     }
@@ -234,12 +234,12 @@ async function getFileFromS3(fileUrl: string): Promise<Buffer | null> {
 async function mergePdfs(
   pdf1Buffer: Buffer,
   pdf2Buffer: Buffer,
-  label2 = "segundo"
+  label2 = "segundo",
 ): Promise<Buffer> {
   try {
     if (!isPdfBuffer(pdf2Buffer)) {
       console.warn(
-        `[pdf-completo] Se omite el ${label2} documento: no es un PDF válido (cabecera %PDF- no encontrada). Se devuelve el PDF sin ese adjunto.`
+        `[pdf-completo] Se omite el ${label2} documento: no es un PDF válido (cabecera %PDF- no encontrada). Se devuelve el PDF sin ese adjunto.`,
       );
       return pdf1Buffer;
     }
@@ -255,7 +255,7 @@ async function mergePdfs(
     // Devolvemos solo el primero y avisamos.
     if (pdf2Doc.isEncrypted) {
       console.warn(
-        `[pdf-completo] Se omite el ${label2} documento: está cifrado y no se puede incluir el contenido. Se devuelve el PDF sin ese adjunto.`
+        `[pdf-completo] Se omite el ${label2} documento: está cifrado y no se puede incluir el contenido. Se devuelve el PDF sin ese adjunto.`,
       );
       return pdf1Buffer;
     }
@@ -266,7 +266,7 @@ async function mergePdfs(
     // Copiar las páginas del primer PDF
     const pdf1Pages = await mergedPdf.copyPages(
       pdf1Doc,
-      pdf1Doc.getPageIndices()
+      pdf1Doc.getPageIndices(),
     );
     for (const page of pdf1Pages) {
       mergedPdf.addPage(page);
@@ -275,7 +275,7 @@ async function mergePdfs(
     // Copiar las páginas del segundo PDF
     const pdf2Pages = await mergedPdf.copyPages(
       pdf2Doc,
-      pdf2Doc.getPageIndices()
+      pdf2Doc.getPageIndices(),
     );
     for (const page of pdf2Pages) {
       mergedPdf.addPage(page);
@@ -288,7 +288,7 @@ async function mergePdfs(
     if (msg.includes("No PDF header") || msg.includes("Failed to parse PDF")) {
       console.warn(
         `[pdf-completo] Se omite el ${label2} documento: no pudo parsearse como PDF (posible imagen o archivo corrupto). Se devuelve el PDF sin ese adjunto.`,
-        { error: msg }
+        { error: msg },
       );
       return pdf1Buffer;
     }
@@ -323,7 +323,7 @@ async function generateRecibosPdf(recibos: string[]): Promise<Buffer> {
         y: height - 150,
         size: 14,
         color: rgb(0.3, 0.3, 0.3),
-      }
+      },
     );
 
     // Variable para controlar si ya se mostró la primera imagen en la página de título
@@ -445,9 +445,7 @@ function isPdfBuffer(buffer: Buffer): boolean {
 }
 
 /** Detecta si el buffer es JPEG o PNG por magic bytes. */
-function getImageFormatFromBuffer(
-  buffer: Buffer
-): "jpeg" | "png" | null {
+function getImageFormatFromBuffer(buffer: Buffer): "jpeg" | "png" | null {
   if (!buffer || buffer.length < 8) return null;
   // JPEG: FF D8 FF
   if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff)
@@ -467,18 +465,10 @@ function getImageFormatFromBuffer(
   return null;
 }
 
-/** Genera un PDF de una sola página con una imagen desde URL (S3). */
-async function imageUrlToSinglePdf(imageUrl: string): Promise<Buffer> {
-  const imageBuffer = await getFileFromS3(imageUrl);
-  const format =
-    imageUrl.toLowerCase().endsWith(".png") ? "png" : "jpeg";
-  return imageBufferToSinglePdf(imageBuffer, format);
-}
-
 /** Genera un PDF de una sola página con una imagen desde buffer. */
 async function imageBufferToSinglePdf(
   imageBuffer: Buffer,
-  format: "jpeg" | "png"
+  format: "jpeg" | "png",
 ): Promise<Buffer> {
   const pdfDoc = await PDFDocument.create();
   const page = pdfDoc.addPage();
