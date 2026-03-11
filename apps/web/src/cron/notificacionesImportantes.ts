@@ -30,13 +30,14 @@ async function enviarNotificacionesTurnos() {
       endOfDay: endOfDay.toISOString(),
     });
 
-    // Obtener turnos del día
+    // Obtener turnos del día (solo los pendientes de respuesta: vino === null)
     const turnosHoy = await prisma.turno.findMany({
       where: {
         fecha: {
           gte: startOfDay,
           lte: endOfDay,
         },
+        vino: null,
       },
       include: {
         auto: {

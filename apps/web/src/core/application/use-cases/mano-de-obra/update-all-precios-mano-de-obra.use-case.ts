@@ -3,7 +3,7 @@ import { ManoDeObraRepository } from "@/core/domain/repositories/mano-de-obra.re
 export class UpdateAllPreciosManoDeObraUseCase {
   constructor(private readonly repository: ManoDeObraRepository) {}
 
-  async execute(porcentajeAumento: number) {
-    return this.repository.updateAllPrecios(porcentajeAumento);
+  async execute(type: "aumento" | "descuento", porcentaje: number) {
+    return this.repository.updateAllPrecios(type, porcentaje);
   }
 }

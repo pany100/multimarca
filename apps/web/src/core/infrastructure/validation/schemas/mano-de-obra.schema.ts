@@ -24,7 +24,7 @@ export const getManoDeObraByIdSchema = z.object({
 });
 
 export const updateAllManoDeObraSchema = z.object({
-  porcentajeAumento: z
+  porcentaje: z
     .number()
     .min(0, "El porcentaje debe ser mayor o igual a 0")
     .max(100, "El porcentaje debe ser menor o igual a 100"),

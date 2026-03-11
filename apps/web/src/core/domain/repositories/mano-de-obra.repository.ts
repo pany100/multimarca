@@ -20,5 +20,8 @@ export interface ManoDeObraRepository {
   update(data: UpdateManoDeObraData): Promise<ManoDeObra>;
   delete(id: number): Promise<ManoDeObra>;
   exportAll(): Promise<ManoDeObra[]>;
-  updateAllPrecios(porcentajeAumento: number): Promise<number>;
+  updateAllPrecios(
+    type: "aumento" | "descuento",
+    porcentaje: number
+  ): Promise<number>;
 }

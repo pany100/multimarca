@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
                   );
 
                   return `
-                    <tr class="${turno.vino ? "vino" : ""}">
+                    <tr class="${turno.vino !== null && turno.vino !== undefined ? "vino" : ""}">
                       <td>${
                         turno.auto?.owner?.fullName ||
                         turno.clienteNombre ||

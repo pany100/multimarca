@@ -5,10 +5,14 @@ import {
   Button,
   Modal,
   Snackbar,
+  Tab,
+  Tabs,
   TextField,
   Typography,
 } from "@mui/material";
 import { useState } from "react";
+
+type TabType = "aumento" | "descuento";
 
 function PreciosModal({
   setRefreshTrigger,
@@ -16,7 +20,8 @@ function PreciosModal({
   setRefreshTrigger: React.Dispatch<React.SetStateAction<number>>;
 }) {
   const [openModal, setOpenModal] = useState(false);
-  const [porcentajeAumento, setPorcentajeAumento] = useState("");
+  const [tab, setTab] = useState<TabType>("aumento");
+  const [porcentaje, setPorcentaje] = useState("");
   const { authFetch } = useFetch();
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -29,21 +34,22 @@ function PreciosModal({
   ) => {
     const value = event.target.value;
     if (value === "" || (Number(value) >= 0 && Number(value) <= 100)) {
-      setPorcentajeAumento(value);
+      setPorcentaje(value);
     }
   };
 
   const handleUpdatePrices = async () => {
-    if (!porcentajeAumento) return;
+    if (!porcentaje) return;
 
     try {
-      const response = await authFetch("/api/mano-de-obra/update-all", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          porcentajeAumento: parseFloat(porcentajeAumento),
-        }),
-      });
+      const response = await authFetch(
+        `/api/mano-de-obra/update-all?type=${tab}`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ porcentaje: parseFloat(porcentaje) }),
+        }
+      );
 
       if (response.ok) {
         setSnackbar({
@@ -52,6 +58,7 @@ function PreciosModal({
           severity: "success",
         });
         setOpenModal(false);
+        setPorcentaje("");
         setRefreshTrigger && setRefreshTrigger((prev) => prev + 1);
       } else {
         const errorData = await response.json();
@@ -98,10 +105,18 @@ function PreciosModal({
           <Typography variant="h6" component="h2" gutterBottom>
             Remarcar precios
           </Typography>
+          <Tabs
+            value={tab}
+            onChange={(_, v: TabType) => setTab(v)}
+            sx={{ borderBottom: 1, borderColor: "divider", mb: 2 }}
+          >
+            <Tab label="Aumento" value="aumento" />
+            <Tab label="Descuento" value="descuento" />
+          </Tabs>
           <TextField
-            label="Porcentaje de aumento"
+            label={`Porcentaje de ${tab === "aumento" ? "aumento" : "descuento"} (%)`}
             type="text"
-            value={porcentajeAumento}
+            value={porcentaje}
             onChange={handlePorcentajeChange}
             inputProps={{ pattern: "^[0-9]*[.,]?[0-9]*$" }}
             fullWidth
@@ -114,7 +129,7 @@ function PreciosModal({
             <Button
               onClick={handleUpdatePrices}
               variant="contained"
-              disabled={!porcentajeAumento}
+              disabled={!porcentaje}
             >
               Guardar
             </Button>

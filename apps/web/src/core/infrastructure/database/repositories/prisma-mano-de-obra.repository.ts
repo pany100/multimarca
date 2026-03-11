@@ -86,15 +86,21 @@ export class PrismaManoDeObraRepository implements ManoDeObraRepository {
     });
   }
 
-  async updateAllPrecios(porcentajeAumento: number): Promise<number> {
-    const factorAumento = 1 + porcentajeAumento / 100;
+  async updateAllPrecios(
+    type: "aumento" | "descuento",
+    porcentaje: number
+  ): Promise<number> {
+    const factor =
+      type === "aumento"
+        ? 1 + porcentaje / 100
+        : Math.max(0, 1 - porcentaje / 100);
     const result = await prisma.$executeRaw`
       UPDATE ManoDeObra
       SET sellPrice = 
         CASE 
-          WHEN ROUND(sellPrice * ${factorAumento}, 2) % 1000 > 0 
-          THEN CEILING(ROUND(sellPrice * ${factorAumento}, 2) / 1000) * 1000
-          ELSE ROUND(sellPrice * ${factorAumento}, 2)
+          WHEN ROUND(sellPrice * ${factor}, 2) % 1000 > 0 
+          THEN CEILING(ROUND(sellPrice * ${factor}, 2) / 1000) * 1000
+          ELSE ROUND(sellPrice * ${factor}, 2)
         END
     `;
     return result as number;
