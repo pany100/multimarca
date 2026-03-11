@@ -1,5 +1,6 @@
 "use client";
 
+import ConfirmPrintModal from "@/components/ConfirmPrintModal";
 import { useFetch } from "@/contexts/FetchContext";
 import { useGeneratePdf } from "@/hooks/orden-reparacion/useGeneratePdf";
 import { useAuth } from "@/hooks/useAuth";
@@ -32,6 +33,7 @@ interface TabPanelProps {
 // Header component for displaying venta basic info
 const VentaHeader = ({ venta }: { venta: any }) => {
   const [printLoading, setPrintLoading] = useState(false);
+  const [openConfirmPrint, setOpenConfirmPrint] = useState(false);
   const { generatePdf } = useGeneratePdf({
     onError: () => {
       console.error("Error al generar el PDF de la venta");
@@ -47,6 +49,24 @@ const VentaHeader = ({ venta }: { venta: any }) => {
     } finally {
       setPrintLoading(false);
     }
+  };
+
+  const debeConfirmarImpresion = [
+    "Cerrado",
+    "Presupuestado",
+    "Entregado",
+  ].includes(venta?.estado);
+
+  const handlePrintClick = () => {
+    if (debeConfirmarImpresion) {
+      setOpenConfirmPrint(true);
+    } else {
+      handlePrintVenta();
+    }
+  };
+  const handleConfirmPrint = () => {
+    setOpenConfirmPrint(false);
+    handlePrintVenta();
   };
 
   return (
@@ -97,13 +117,19 @@ const VentaHeader = ({ venta }: { venta: any }) => {
             startIcon={
               printLoading ? <CircularProgress size={20} /> : <PrintIcon />
             }
-            onClick={handlePrintVenta}
+            onClick={handlePrintClick}
             disabled={printLoading}
           >
             Imprimir
           </Button>
         </Tooltip>
       </Box>
+      <ConfirmPrintModal
+        open={openConfirmPrint}
+        onClose={() => setOpenConfirmPrint(false)}
+        onConfirm={handleConfirmPrint}
+        message="¿Revisó que toda la información de la venta sea correcta antes de proceder con el envío?"
+      />
     </Box>
   );
 };

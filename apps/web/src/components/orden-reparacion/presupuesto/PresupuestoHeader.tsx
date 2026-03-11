@@ -1,8 +1,10 @@
 "use client";
 
+import ConfirmPrintModal from "@/components/ConfirmPrintModal";
 import { usePresupuesto } from "@/sections/presupuestos/admin/contexts/PresupuestoContext";
 import { usePresupuestoHandlers } from "@/sections/presupuestos/hooks/usePresupuestoHandlers";
 import { Box } from "@mui/material";
+import { useState } from "react";
 import { PresupuestoActions } from "./PresupuestoActions";
 import { PresupuestoInfo } from "./PresupuestoInfo";
 import { PresupuestoSnackbar } from "./PresupuestoSnackbar";
@@ -19,6 +21,7 @@ function PresupuestoHeader({
   const setPresupuesto = context?.setPresupuesto;
 
   const isSticky = usePresupuestoSticky();
+  const [openConfirmPrint, setOpenConfirmPrint] = useState(false);
 
   const {
     handleEnviarPresupuesto,
@@ -31,6 +34,22 @@ function PresupuestoHeader({
     presupuesto,
     onPresupuestoUpdate: setPresupuesto,
   });
+
+  const debeConfirmarImpresion =
+    presupuesto?.estado === "Enviado" || presupuesto?.estado === "Terminado";
+
+  const handlePrintClick = () => {
+    if (debeConfirmarImpresion) {
+      setOpenConfirmPrint(true);
+    } else {
+      handlePrint();
+    }
+  };
+
+  const handleConfirmPrint = () => {
+    setOpenConfirmPrint(false);
+    handlePrint();
+  };
 
   const vehicleInfo = presupuesto.auto
     ? `${presupuesto.auto.brand} ${presupuesto.auto.model} - ${presupuesto.auto.patent}`
@@ -82,10 +101,17 @@ function PresupuestoHeader({
             whatsappLink={whatsappLink}
             isSticky={isSticky}
             onEnviar={handleEnviarPresupuesto}
-            onPrint={handlePrint}
+            onPrint={handlePrintClick}
           />
         </Box>
       </Box>
+
+      <ConfirmPrintModal
+        open={openConfirmPrint}
+        onClose={() => setOpenConfirmPrint(false)}
+        onConfirm={handleConfirmPrint}
+        message="¿Revisó que toda la información del presupuesto sea correcta antes de proceder con el envío?"
+      />
 
       <PresupuestoSnackbar
         open={snackbar.open}

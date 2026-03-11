@@ -1,5 +1,6 @@
 "use client";
 
+import ConfirmPrintModal from "@/components/ConfirmPrintModal";
 import OrdenClienteInterna from "@/components/orden-reparacion/pdf/OrdenClienteInterna";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
 import { getFormattedDateArg } from "@/utils/fieldHelper";
@@ -26,9 +27,12 @@ import { useCerrarOrdenHandler } from "./hooks/useCerrarOrdenHandler";
 import { usePrintHandlers } from "./hooks/usePrintHandlers";
 import { useWhatsAppHandlers } from "./hooks/useWhatsAppHandlers";
 
+const ESTADO_TERMINADO = "Terminado";
+
 function OrdenHeader() {
   const { orden, setOrden } = useOrden();
   const [isSticky, setIsSticky] = useState(false);
+  const [openConfirmPrintModal, setOpenConfirmPrintModal] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -92,6 +96,20 @@ function OrdenHeader() {
     }
   };
 
+  const handleClientOrderPrintClick = () => {
+    handleClosePrintMenu();
+    if (orden.estado === ESTADO_TERMINADO) {
+      setOpenConfirmPrintModal(true);
+    } else {
+      handleClientOrderPrint();
+    }
+  };
+
+  const handleConfirmPrintInforme = () => {
+    setOpenConfirmPrintModal(false);
+    handleClientOrderPrint();
+  };
+
   return (
     <>
       {/* Spacer cuando el header es sticky */}
@@ -125,7 +143,14 @@ function OrdenHeader() {
           }}
         >
           {/* Left side: Title */}
-          <Box sx={{ display: "flex", alignItems: isSticky ? "center" : "flex-start", gap: isSticky ? 2 : 0, flexDirection: isSticky ? "row" : "column" }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: isSticky ? "center" : "flex-start",
+              gap: isSticky ? 2 : 0,
+              flexDirection: isSticky ? "row" : "column",
+            }}
+          >
             <Typography
               variant={isSticky ? "h6" : "h4"}
               component="h1"
@@ -137,7 +162,7 @@ function OrdenHeader() {
             >
               Orden #{orden.id} - {orden.auto?.patent || "N/A"}
             </Typography>
-            
+
             {/* Info adicional - solo visible cuando NO es sticky */}
             {!isSticky && (
               <>
@@ -157,7 +182,11 @@ function OrdenHeader() {
                   </Typography>
                   <Typography variant="body1" fontWeight="medium" color="error">
                     Deuda:{" "}
-                    <Typography component="span" fontWeight="bold" color="error">
+                    <Typography
+                      component="span"
+                      fontWeight="bold"
+                      color="error"
+                    >
                       $
                       {orden.deuda?.toLocaleString("es-AR", {
                         minimumFractionDigits: 2,
@@ -166,7 +195,11 @@ function OrdenHeader() {
                     </Typography>
                   </Typography>
                 </Box>
-                <Link href="/dashboard/ordenes-reparacion" passHref legacyBehavior>
+                <Link
+                  href="/dashboard/ordenes-reparacion"
+                  passHref
+                  legacyBehavior
+                >
                   <MuiLink
                     sx={{
                       display: "inline-flex",
@@ -191,16 +224,42 @@ function OrdenHeader() {
             {/* Info compacta - solo visible cuando ES sticky */}
             {isSticky && (
               <Box sx={{ display: "flex", gap: 2, alignItems: "center" }}>
-                <Typography variant="body2" fontWeight="medium" sx={{ display: "flex", gap: 0.5 }}>
+                <Typography
+                  variant="body2"
+                  fontWeight="medium"
+                  sx={{ display: "flex", gap: 0.5 }}
+                >
                   Total:{" "}
-                  <Typography component="span" fontWeight="bold" variant="body2">
-                    ${orden.total?.toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || "0"}
+                  <Typography
+                    component="span"
+                    fontWeight="bold"
+                    variant="body2"
+                  >
+                    $
+                    {orden.total?.toLocaleString("es-AR", {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }) || "0"}
                   </Typography>
                 </Typography>
-                <Typography variant="body2" fontWeight="medium" color="error" sx={{ display: "flex", gap: 0.5 }}>
+                <Typography
+                  variant="body2"
+                  fontWeight="medium"
+                  color="error"
+                  sx={{ display: "flex", gap: 0.5 }}
+                >
                   Deuda:{" "}
-                  <Typography component="span" fontWeight="bold" color="error" variant="body2">
-                    ${orden.deuda?.toLocaleString("es-AR", { minimumFractionDigits: 0, maximumFractionDigits: 0 }) || "0"}
+                  <Typography
+                    component="span"
+                    fontWeight="bold"
+                    color="error"
+                    variant="body2"
+                  >
+                    $
+                    {orden.deuda?.toLocaleString("es-AR", {
+                      minimumFractionDigits: 0,
+                      maximumFractionDigits: 0,
+                    }) || "0"}
                   </Typography>
                 </Typography>
               </Box>
@@ -236,9 +295,18 @@ function OrdenHeader() {
               startIcon={!isSticky && <CloseIcon />}
               onClick={handleCerrarOrden}
               disabled={cerrandoOrden}
-              sx={{ textTransform: "none", minWidth: isSticky ? "auto" : undefined }}
+              sx={{
+                textTransform: "none",
+                minWidth: isSticky ? "auto" : undefined,
+              }}
             >
-              {cerrandoOrden ? "..." : isSticky ? <CloseIcon fontSize="small" /> : "Cerrar Orden"}
+              {cerrandoOrden ? (
+                "..."
+              ) : isSticky ? (
+                <CloseIcon fontSize="small" />
+              ) : (
+                "Cerrar Orden"
+              )}
             </Button>
 
             <PrintMenu
@@ -251,7 +319,7 @@ function OrdenHeader() {
               handleClosePrintMenu={handleClosePrintMenu}
               handleMechanicOrderPrint={handleMechanicOrderPrint}
               handleInternClientOrderPrint={handleInternClientOrderPrint}
-              handleClientOrderPrint={handleClientOrderPrint}
+              handleClientOrderPrint={handleClientOrderPrintClick}
               handlePdfPrint={handlePdfPrint}
             />
 
@@ -264,9 +332,16 @@ function OrdenHeader() {
                     size={isSticky ? "small" : "medium"}
                     startIcon={!isSticky && <WhatsAppIcon />}
                     disabled
-                    sx={{ textTransform: "none", minWidth: isSticky ? "auto" : undefined }}
+                    sx={{
+                      textTransform: "none",
+                      minWidth: isSticky ? "auto" : undefined,
+                    }}
                   >
-                    {isSticky ? <WhatsAppIcon fontSize="small" /> : "Enviar por WhatsApp"}
+                    {isSticky ? (
+                      <WhatsAppIcon fontSize="small" />
+                    ) : (
+                      "Enviar por WhatsApp"
+                    )}
                   </Button>
                 </span>
               </Tooltip>
@@ -277,9 +352,16 @@ function OrdenHeader() {
                 size={isSticky ? "small" : "medium"}
                 startIcon={!isSticky && <WhatsAppIcon />}
                 onClick={handleOpenConfirmModal}
-                sx={{ textTransform: "none", minWidth: isSticky ? "auto" : undefined }}
+                sx={{
+                  textTransform: "none",
+                  minWidth: isSticky ? "auto" : undefined,
+                }}
               >
-                {isSticky ? <WhatsAppIcon fontSize="small" /> : "Enviar por WhatsApp"}
+                {isSticky ? (
+                  <WhatsAppIcon fontSize="small" />
+                ) : (
+                  "Enviar por WhatsApp"
+                )}
               </Button>
             )}
           </Box>
@@ -291,6 +373,13 @@ function OrdenHeader() {
         orden={orden}
         onClose={handleCloseConfirmModal}
         onConfirm={handleSendNotification}
+      />
+
+      <ConfirmPrintModal
+        open={openConfirmPrintModal}
+        onClose={() => setOpenConfirmPrintModal(false)}
+        onConfirm={handleConfirmPrintInforme}
+        message="La orden está terminada. ¿Revisó que toda la información del informe final sea correcta antes de proceder con el envío?"
       />
 
       {/* Notification snackbar */}

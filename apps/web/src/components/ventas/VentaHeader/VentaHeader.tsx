@@ -1,8 +1,10 @@
 "use client";
 
+import ConfirmPrintModal from "@/components/ConfirmPrintModal";
 import { useVenta } from "@/sections/ventas/admin/contexts/VentaContext";
 import { useVentaHandlers } from "@/sections/ventas/hooks/useVentaHandlers";
 import { Box } from "@mui/material";
+import { useState } from "react";
 import { VentaActions } from "./VentaActions";
 import { VentaInfo } from "./VentaInfo";
 import { VentaSnackbar } from "./VentaSnackbar";
@@ -14,11 +16,31 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
   const venta = ventaProp || context?.venta;
 
   const isSticky = useVentaSticky();
+  const [openConfirmPrint, setOpenConfirmPrint] = useState(false);
 
   const { handlePrint, printLoading, snackbar, closeSnackbar } =
     useVentaHandlers({
       venta,
     });
+
+  const debeConfirmarImpresion = [
+    "Cerrado",
+    "Presupuestado",
+    "Entregado",
+  ].includes(venta?.estado);
+
+  const handlePrintClick = () => {
+    if (debeConfirmarImpresion) {
+      setOpenConfirmPrint(true);
+    } else {
+      handlePrint();
+    }
+  };
+
+  const handleConfirmPrint = () => {
+    setOpenConfirmPrint(false);
+    handlePrint();
+  };
 
   return (
     <>
@@ -57,10 +79,17 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
             venta={venta}
             printLoading={printLoading}
             isSticky={isSticky}
-            onPrint={handlePrint}
+            onPrint={handlePrintClick}
           />
         </Box>
       </Box>
+
+      <ConfirmPrintModal
+        open={openConfirmPrint}
+        onClose={() => setOpenConfirmPrint(false)}
+        onConfirm={handleConfirmPrint}
+        message="¿Revisó que toda la información de la venta sea correcta antes de proceder con el envío?"
+      />
 
       <VentaSnackbar
         open={snackbar.open}
