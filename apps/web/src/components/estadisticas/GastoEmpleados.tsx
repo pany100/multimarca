@@ -44,7 +44,7 @@ const GastoEmpleados = () => {
     setCargando(true);
     const url = new URL(
       "/api/estadisticas/gastos-empleados",
-      window.location.origin
+      window.location.origin,
     );
     url.searchParams.append("moneda", moneda);
     if (mes) url.searchParams.append("mes", mes);
@@ -151,7 +151,7 @@ const GastoEmpleados = () => {
         {
           data: Array.isArray(datos)
             ? datos.map(
-                (empleado: { totalGastos: number }) => empleado.totalGastos
+                (empleado: { totalGastos: number }) => empleado.totalGastos,
               )
             : [],
           backgroundColor: colores.slice(0, datos.length),
@@ -193,7 +193,7 @@ const GastoEmpleados = () => {
     const totalGastos = datos.reduce(
       (sum: number, empleado: { totalGastos: number }) =>
         sum + empleado.totalGastos,
-      0
+      0,
     );
 
     return (
@@ -279,10 +279,10 @@ const GastoEmpleados = () => {
                         fullName: string;
                         totalGastos: number;
                       },
-                      index: number
+                      index: number,
                     ) => {
                       const porcentaje = Math.round(
-                        (empleado.totalGastos * 100) / totalGastos
+                        (empleado.totalGastos * 100) / totalGastos,
                       );
 
                       return (
@@ -314,7 +314,7 @@ const GastoEmpleados = () => {
                           </td>
                         </tr>
                       );
-                    }
+                    },
                   )}
               </tbody>
             </table>
@@ -359,7 +359,7 @@ const GastoEmpleados = () => {
         }}
       >
         <PersonIcon sx={{ mr: 1, color: theme.palette.primary.main }} />
-        Gastos por Empleado
+        Sueldos Colaboradores
       </Typography>
 
       <Box sx={{ p: 3 }}>
