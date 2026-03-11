@@ -429,6 +429,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "Estadisticas",
+            texto: "Proveedores",
+            icono: <LocalShippingIcon />,
+            ruta: "/dashboard/estadisticasProveedores",
+          },
+          {
+            permiso: "Estadisticas",
             texto: "Órdenes Compartidas",
             icono: <GroupWorkIcon />,
             ruta: "/dashboard/estadisticasOrdenesCompartidas",
