@@ -62,6 +62,7 @@ function EstadisticasProveedoresPage() {
   );
 
   const hayDatos = items.length > 0;
+  const chartHeight = Math.max(420, items.length * 40);
 
   const columns: GridColDef[] = useMemo(
     () => [
@@ -203,7 +204,7 @@ function EstadisticasProveedoresPage() {
             data={items}
             title="Total comprado por proveedor"
             currency="ARS"
-            height={420}
+            height={chartHeight}
             maxWidth="100%"
             loading={loading}
           />

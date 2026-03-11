@@ -20,7 +20,7 @@ ChartJS.register(
   BarElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 export type BarGraphicItem = {
@@ -59,8 +59,11 @@ const BarGraphic: React.FC<BarGraphicProps> = ({
   const options = useMemo(() => {
     return {
       responsive: true,
-      maintainAspectRatio: true,
+      maintainAspectRatio: false,
       indexAxis: "y" as const,
+      layout: {
+        padding: { left: 24, right: 8, top: 8, bottom: 8 },
+      },
       plugins: {
         legend: {
           position: "top" as const,
@@ -118,11 +121,16 @@ const BarGraphic: React.FC<BarGraphicProps> = ({
           },
         },
         y: {
-          ticks: { font: { size: 12 } },
+          ticks: {
+            font: { size: 12 },
+            autoSkip: false,
+            maxTicksLimit: Math.max(data.length, 1),
+            padding: 4,
+          },
         },
       },
     };
-  }, [title, formatAsCurrency, currency, compactTicks]);
+  }, [title, formatAsCurrency, currency, compactTicks, data.length]);
 
   const generatedColors = useMemo(() => {
     if (barColors && barColors.length) return barColors;

@@ -15,7 +15,7 @@ type TopProveedorRow = {
 export class EstadisticasProveedoresService {
   async getTotalProveedores(
     from: Date | undefined,
-    to: Date | undefined
+    to: Date | undefined,
   ): Promise<TotalProveedoresRow[]> {
     return await prisma.$queryRaw<TotalProveedoresRow[]>`
       SELECT 
@@ -35,7 +35,7 @@ export class EstadisticasProveedoresService {
 
   async getTopProveedores(
     from: Date | undefined,
-    to: Date | undefined
+    to: Date | undefined,
   ): Promise<TopProveedorRow[]> {
     return await prisma.$queryRaw<TopProveedorRow[]>`
       SELECT 
