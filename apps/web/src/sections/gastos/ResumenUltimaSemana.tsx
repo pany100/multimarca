@@ -48,6 +48,9 @@ function formatFechaUTC(isoDate: string): string {
 function ResumenUltimaSemana() {
   const [data, setData] = useState<MecanicoData[]>([]);
   const [compartida, setCompartida] = useState<ReparacionCompartida[]>([]);
+  const [totalManoObraSemana, setTotalManoObraSemana] = useState<number | null>(
+    null,
+  );
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const { authFetch } = useFetch();
@@ -68,22 +71,34 @@ function ResumenUltimaSemana() {
       const startStr = format(start, "yyyy-MM-dd");
       const endStr = format(addDays(end, 1), "yyyy-MM-dd"); // día siguiente para incluir todo el último día
       try {
-        const response = await authFetch(
-          `/api/gastos/ultima-semana?start=${startStr}&end=${endStr}`,
-        );
-        const response2 = await authFetch(
-          `/api/gastos/ultima-semana-compartida?start=${startStr}&end=${endStr}`,
-        );
-        if (!response.ok || !response2.ok) {
+        const [response, response2, responseTotal] = await Promise.all([
+          authFetch(
+            `/api/gastos/ultima-semana?start=${startStr}&end=${endStr}`,
+          ),
+          authFetch(
+            `/api/gastos/ultima-semana-compartida?start=${startStr}&end=${endStr}`,
+          ),
+          authFetch(
+            `/api/gastos/ultima-semana-total?start=${startStr}&end=${endStr}`,
+          ),
+        ]);
+        if (!response.ok || !response2.ok || !responseTotal.ok) {
           throw new Error("Error al obtener los datos");
         }
         const result = await response.json();
         setData(result);
         const result2 = await response2.json();
         setCompartida(result2);
+        const totalData = await responseTotal.json();
+        setTotalManoObraSemana(
+          typeof totalData.totalManoObraSemana === "number"
+            ? totalData.totalManoObraSemana
+            : null,
+        );
       } catch (err) {
         console.error("Error fetching data:", err);
         setError("Error al cargar los datos");
+        setTotalManoObraSemana(null);
       } finally {
         setLoading(false);
       }
@@ -215,8 +230,7 @@ function ResumenUltimaSemana() {
             }}
           >
             <Link href={`/dashboard/ordenes-reparacion/${params.row.id}/ver`}>
-              *{" "}
-              {`${params.row.auto} - ${formatFechaUTC(params.row.fecha)}`}
+              * {`${params.row.auto} - ${formatFechaUTC(params.row.fecha)}`}
             </Link>
           </Typography>
         );
@@ -287,6 +301,12 @@ function ResumenUltimaSemana() {
           <WeekPicker onWeekChange={handleWeekChange} />
         </Grid>
       </Grid>
+      {!loading && totalManoObraSemana !== null && (
+        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
+          Mano de obra total de la semana:{" "}
+          {getFormattedPrice(totalManoObraSemana)}
+        </Typography>
+      )}
       <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
         Reparaciones por mecánico
       </Typography>
