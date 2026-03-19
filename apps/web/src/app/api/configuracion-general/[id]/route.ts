@@ -4,6 +4,31 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+export async function GET(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+    const idNum = parseInt(id, 10);
+    if (Number.isNaN(idNum)) {
+      return NextResponse.json({ error: "ID inválido" }, { status: 400 });
+    }
+
+    const item = await prisma.configuracionGeneral.findUnique({
+      where: { id: idNum },
+    });
+
+    if (!item) {
+      return NextResponse.json({ error: "No encontrado" }, { status: 404 });
+    }
+
+    return NextResponse.json(item);
+  } catch (error) {
+    return handleApiError(error);
+  }
+}
+
 export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> }

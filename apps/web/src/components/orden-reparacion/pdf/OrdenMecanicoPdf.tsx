@@ -1,5 +1,5 @@
 import { Typography } from "@mui/material";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import CompleteLine from "./CompleteLine";
 import PDFPage from "./PDFPage";
 import TemplateHeader from "./TemplateHeader";
@@ -31,7 +31,10 @@ const GroupContainer = styled("div")(() => ({
 
 type Props = {
   repair: any;
+  avisoCubrevolante?: string;
 };
+
+const DEFAULT_AVISO_CUBREVOLANTE = "Colocar cubrevolante, cubreasiento";
 
 const setPageStyles = () => {
   return `
@@ -62,8 +65,35 @@ function sortControls(a: any, b: any) {
 }
 
 export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
-  ({ repair }, ref) => {
+  ({ repair, avisoCubrevolante }, ref) => {
     const { checkControls, textControls, groupControls } = useControlesFetch();
+    const [avisoDesdeConfig, setAvisoDesdeConfig] = useState<string>("");
+
+    useEffect(() => {
+      if (avisoCubrevolante && avisoCubrevolante.trim()) {
+        setAvisoDesdeConfig(avisoCubrevolante.trim());
+        return;
+      }
+
+      let active = true;
+      const fetchAviso = async () => {
+        try {
+          const response = await fetch("/api/configuracion-general/4");
+          if (!response.ok) return;
+          const data = await response.json();
+          const valor = typeof data?.valor === "string" ? data.valor.trim() : "";
+          if (active && valor) setAvisoDesdeConfig(valor);
+        } catch {
+          // fallback silencioso al valor por defecto
+        }
+      };
+      fetchAviso();
+      return () => {
+        active = false;
+      };
+    }, [avisoCubrevolante]);
+
+    const avisoProteccion = avisoDesdeConfig || DEFAULT_AVISO_CUBREVOLANTE;
     return (
       <div ref={ref}>
         <style>{setPageStyles()}</style>
@@ -378,7 +408,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
             }}
           >
             <TextWithBlackBackground>
-              Colocar cubrevolante, cubreasiento
+              {avisoProteccion}
             </TextWithBlackBackground>
           </div>
           <TextWithFillLine>Realizado Por</TextWithFillLine>

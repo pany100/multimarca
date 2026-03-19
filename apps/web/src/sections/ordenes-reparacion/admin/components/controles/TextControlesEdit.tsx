@@ -25,12 +25,22 @@ function TextControlesEdit({ textControls, isEditing }: Props) {
           editedControl?.valor ?? originalControl?.valor ?? "";
 
         return (
-          <Box key={control.id} sx={{ mb: 2 }}>
-            <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-              <Typography variant="body2" sx={{ mr: 1 }}>
-                {control.name}
-              </Typography>
-            </Box>
+          <Box
+            key={control.id}
+            sx={{
+              mb: 2,
+              display: "grid",
+              gridTemplateColumns: "240px minmax(0, 1fr)",
+              alignItems: "center",
+              gap: 2,
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{ fontWeight: 500 }}
+            >
+              {control.name}
+            </Typography>
             <TextField
               fullWidth
               size="small"
