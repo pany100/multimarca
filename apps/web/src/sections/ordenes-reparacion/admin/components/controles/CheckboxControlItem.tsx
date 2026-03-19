@@ -3,7 +3,6 @@ import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import {
   Checkbox,
   ListItemButton,
-  ListItemIcon,
   ListItemText,
 } from "@mui/material";
 
@@ -33,6 +32,8 @@ function CheckboxControlItem({
         bgcolor: isChecked ? "primary.lighter" : "transparent",
         py: 0.25,
         px: 1,
+        width: "100%",
+        justifyContent: "space-between",
         "&:hover": {
           bgcolor: isChecked ? "primary.lighter" : "action.hover",
         },
@@ -44,19 +45,9 @@ function CheckboxControlItem({
         },
       }}
     >
-      <ListItemIcon sx={{ minWidth: 36 }}>
-        <Checkbox
-          edge="start"
-          checked={isChecked}
-          tabIndex={-1}
-          disableRipple
-          disabled={disabled}
-          icon={<RadioButtonUncheckedIcon />}
-          checkedIcon={<CheckCircleOutlineIcon color="primary" />}
-        />
-      </ListItemIcon>
       <ListItemText
         primary={controlName}
+        sx={{ flex: "0 1 auto", mr: 0.5 }}
         primaryTypographyProps={{
           variant: "body2",
           fontWeight: isChecked ? "medium" : "regular",
@@ -64,6 +55,16 @@ function CheckboxControlItem({
             fontSize: "0.8rem",
           }),
         }}
+      />
+      <Checkbox
+        edge="end"
+        checked={isChecked}
+        tabIndex={-1}
+        disableRipple
+        disabled={disabled}
+        icon={<RadioButtonUncheckedIcon />}
+        checkedIcon={<CheckCircleOutlineIcon color="primary" />}
+        sx={{ ml: 1, mr: 2 }}
       />
     </ListItemButton>
   );

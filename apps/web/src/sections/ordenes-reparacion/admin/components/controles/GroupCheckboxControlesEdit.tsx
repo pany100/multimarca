@@ -20,7 +20,8 @@ function GroupCheckboxControlesEdit({ controls, isEditing }: Props) {
       disablePadding
       sx={{
         display: "grid",
-        gridTemplateColumns: "auto auto",
+        gridTemplateColumns: "1fr 1fr",
+        columnGap: 4,
         mb: 2,
       }}
     >
