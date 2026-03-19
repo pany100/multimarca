@@ -64,6 +64,8 @@ function EstadisticasProveedoresPage() {
   const hayDatos = items.length > 0;
   const chartHeight = Math.max(420, items.length * 40);
 
+  const totalGlobal = total.totalGlobal || 0;
+
   const columns: GridColDef[] = useMemo(
     () => [
       {
@@ -82,6 +84,19 @@ function EstadisticasProveedoresPage() {
         valueFormatter: (value) => currencyFormatter.format(Number(value || 0)),
       },
       {
+        field: "porcentaje",
+        headerName: "% del total",
+        flex: 0.4,
+        minWidth: 100,
+        align: "right",
+        headerAlign: "right",
+        valueGetter: (_value, row) => {
+          if (!totalGlobal || totalGlobal <= 0) return "—";
+          const pct = (Number(row.totalGastado) / totalGlobal) * 100;
+          return `${Number(pct.toFixed(1))}%`;
+        },
+      },
+      {
         field: "cantidadGastos",
         headerName: "Cant. compras",
         type: "number",
@@ -91,7 +106,7 @@ function EstadisticasProveedoresPage() {
         headerAlign: "right",
       },
     ],
-    []
+    [totalGlobal]
   );
 
   const rows = useMemo(
