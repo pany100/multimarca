@@ -57,13 +57,13 @@ const ObservacionModal = ({
   return (
     <Dialog open={open} onClose={handleClose} fullWidth maxWidth="sm">
       <DialogTitle>
-        {isEdit ? "Editar observación" : "Agregar observación"}
+        {isEdit ? "Editar Trabajo Realizado" : "Agregar Trabajo Realizado"}
       </DialogTitle>
       <DialogContent>
         <TextField
           autoFocus
           margin="dense"
-          label="Observación"
+          label="Trabajo Realizado"
           fullWidth
           multiline
           rows={4}
@@ -72,10 +72,10 @@ const ObservacionModal = ({
             setValue(e.target.value);
             if (error) setError("");
           }}
-          placeholder="Describa el estado del vehículo al ingresar al taller"
+          placeholder="Describa los trabajos realizados"
           helperText={
             error ||
-            "Incluya detalles como rasguños, abolladuras o cualquier detalle relevante sobre el estado del vehículo"
+            "Incluya detalles como el tiempo de trabajo, el material utilizado, etc."
           }
           error={!!error}
           disabled={loading}

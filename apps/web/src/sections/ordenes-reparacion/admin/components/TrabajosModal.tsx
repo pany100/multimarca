@@ -66,7 +66,7 @@ const TrabajosModalInner = ({
   return (
     <>
       <DialogTitle>
-        {editTrabajo ? "Editar Trabajo realizado" : "Agregar Trabajo realizado"}
+        {editTrabajo ? "Editar Mano de Obra" : "Agregar Mano de Obra"}
       </DialogTitle>
       <DialogContent>
         <TrabajosModalContent />

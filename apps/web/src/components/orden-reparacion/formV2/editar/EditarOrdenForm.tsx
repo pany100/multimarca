@@ -146,7 +146,7 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
           },
           recibo: reparacion.recibo,
           id: Math.floor(Math.random() * 1000000),
-        })
+        }),
       ),
       observacionesSalida: ordenReparacion.observacionesSalida,
       controlesEnReparacion: ordenReparacion.controlesEnReparacion.map(
@@ -158,7 +158,7 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
           ordenEnPdf: control.controlMecanico.ordenEnPdf,
           pdfName: control.controlMecanico.pdfName,
           parent: control.controlMecanico.parent,
-        })
+        }),
       ),
     },
   });
@@ -196,7 +196,7 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         <FormSection title="Revisión">
           <RevisionSection />
         </FormSection>
-        <FormSection title="Detalle de controles">
+        <FormSection title="Trabajos Realizados">
           <DetalleControlesSection />
         </FormSection>
         <FormSection title="Reparación / Repuestos de terceros">
@@ -208,7 +208,7 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         <FormSection title="Recargo">
           <RecargoSection />
         </FormSection>
-        <FormSection title="Trabajos Realizados">
+        <FormSection title="Mano de Obra">
           <TrabajosRealizadosSection />
         </FormSection>
         <FormSection title="Resumen de Costos">

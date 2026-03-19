@@ -14,7 +14,7 @@ function InputDetallesForm() {
       rows={3}
       onChange={(e) => setNewItem(e.target.value)}
       defaultValue={newItem || ""}
-      placeholder="Ingrese detalle de controles"
+      placeholder="Ingrese trabajos realizados"
       helperText={`${(newItem || "").length}/${maxLength} caracteres`}
     />
   );

@@ -24,7 +24,7 @@ const DetallesSection = () => {
     <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <CardContent sx={{ flex: 1 }}>
         <Typography variant="h6" gutterBottom>
-          Detalles de Controles
+          Trabajos Realizados
         </Typography>
         <JsonStringTable
           jsonString={orden?.detalleControles || "[]"}
@@ -47,7 +47,7 @@ const DetallesSection = () => {
             }}
             sx={{ mt: 1 }}
           >
-            Agregar Detalle
+            Agregar Trabajo Realizado
           </Button>
         </Box>
       </CardContent>

@@ -34,7 +34,7 @@ interface TrabajosSectionProps {
       diasParaRecordatorio?: number[] | null;
       pdfName?: string | null;
       manoDeObra?: { name: string };
-    }
+    },
   ) => Promise<boolean>;
   onDeleteTrabajo: (trabajo: TrabajoRealizado) => void;
   deleteConfirmOpen: boolean;
@@ -92,7 +92,7 @@ const TrabajosSection = ({
     <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
       <CardContent sx={{ flex: 1 }}>
         <Typography variant="h6" gutterBottom>
-          Trabajos Realizados
+          Mano de Obra
         </Typography>
 
         <TrabajosTable
