@@ -65,6 +65,7 @@ function EstadisticasProveedoresPage() {
   const chartHeight = Math.max(420, items.length * 40);
 
   const totalGlobal = total.totalGlobal || 0;
+  const totalMovimientosPeriodo = total.cantidadTotal || 0;
 
   const columns: GridColDef[] = useMemo(
     () => [
@@ -72,22 +73,22 @@ function EstadisticasProveedoresPage() {
         field: "proveedorNombre",
         headerName: "Proveedor",
         flex: 1,
-        minWidth: 220,
+        minWidth: 200,
       },
       {
         field: "totalGastado",
         headerName: "Total comprado",
-        flex: 0.6,
-        minWidth: 180,
+        flex: 0.55,
+        minWidth: 160,
         align: "right",
         headerAlign: "right",
         valueFormatter: (value) => currencyFormatter.format(Number(value || 0)),
       },
       {
-        field: "porcentaje",
-        headerName: "% del total",
+        field: "porcentajeDinero",
+        headerName: "% del dinero total",
         flex: 0.4,
-        minWidth: 100,
+        minWidth: 120,
         align: "right",
         headerAlign: "right",
         valueGetter: (_value, row) => {
@@ -97,26 +98,73 @@ function EstadisticasProveedoresPage() {
         },
       },
       {
-        field: "cantidadGastos",
-        headerName: "Cant. compras",
+        field: "cantidadOrdenesCompra",
+        headerName: "Órdenes de compra",
         type: "number",
-        flex: 0.3,
+        flex: 0.35,
+        minWidth: 130,
+        align: "right",
+        headerAlign: "right",
+      },
+      {
+        field: "cantidadReparacionesTerceroOrden",
+        headerName: "Rep. tercero (órdenes)",
+        type: "number",
+        flex: 0.38,
+        minWidth: 140,
+        align: "right",
+        headerAlign: "right",
+      },
+      {
+        field: "cantidadReparacionesTerceroVenta",
+        headerName: "Rep. tercero (ventas)",
+        type: "number",
+        flex: 0.38,
+        minWidth: 140,
+        align: "right",
+        headerAlign: "right",
+      },
+      {
+        field: "cantidadTotal",
+        headerName: "Total movimientos",
+        type: "number",
+        flex: 0.32,
         minWidth: 120,
         align: "right",
         headerAlign: "right",
       },
+      {
+        field: "porcentajeCompras",
+        headerName: "% del total de movimientos",
+        flex: 0.42,
+        minWidth: 150,
+        align: "right",
+        headerAlign: "right",
+        valueGetter: (_value, row) => {
+          if (!totalMovimientosPeriodo || totalMovimientosPeriodo <= 0)
+            return "—";
+          const pct =
+            (Number(row.cantidadTotal) / totalMovimientosPeriodo) * 100;
+          return `${Number(pct.toFixed(1))}%`;
+        },
+      },
     ],
-    [totalGlobal]
+    [totalGlobal, totalMovimientosPeriodo]
   );
 
   const rows = useMemo(
     () =>
       Array.isArray(proveedores)
         ? proveedores.map((p, idx) => ({
-            id: idx,
+            id: p.proveedorId > 0 ? p.proveedorId : `row-${idx}`,
             proveedorNombre: p.proveedorNombre,
             totalGastado: p.totalGastado,
-            cantidadGastos: p.cantidadGastos,
+            cantidadOrdenesCompra: p.cantidadOrdenesCompra,
+            cantidadReparacionesTerceroOrden:
+              p.cantidadReparacionesTerceroOrden,
+            cantidadReparacionesTerceroVenta:
+              p.cantidadReparacionesTerceroVenta,
+            cantidadTotal: p.cantidadTotal,
           }))
         : [],
     [proveedores]
@@ -207,7 +255,11 @@ function EstadisticasProveedoresPage() {
                 {currencyFormatter.format(total.totalGlobal || 0)}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                Compras registradas: {total.cantidadGastos || 0}
+                Órdenes de compra: {total.cantidadOrdenesCompra || 0} · Rep.
+                tercero en órdenes:{" "}
+                {total.cantidadReparacionesTerceroOrden || 0} · Rep. tercero en
+                ventas: {total.cantidadReparacionesTerceroVenta || 0} · Total
+                movimientos: {total.cantidadTotal || 0}
               </Typography>
             </>
           )}

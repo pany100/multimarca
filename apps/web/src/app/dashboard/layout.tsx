@@ -260,12 +260,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "AdministracionGeneral",
-            texto: "Préstamo De Herramientas",
-            icono: <HandymanIcon />,
-            ruta: "/dashboard/prestamo-herramientas",
-          },
-          {
-            permiso: "AdministracionGeneral",
             texto: "Información Sensible",
             icono: <LockIcon />,
             ruta: "/dashboard/informacion-sensible",
@@ -312,6 +306,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         title: "Gestión de Taller",
         icono: <BuildIcon />,
         items: [
+          {
+            permiso: "AdministracionGeneral",
+            texto: "Préstamo De Herramientas",
+            icono: <HandymanIcon />,
+            ruta: "/dashboard/prestamo-herramientas",
+          },
           {
             permiso: "Controles",
             texto: "Controles",

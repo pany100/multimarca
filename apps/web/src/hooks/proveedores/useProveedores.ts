@@ -2,14 +2,21 @@ import { useFetch } from "@/contexts/FetchContext";
 import { useCallback, useState } from "react";
 
 export interface ProveedorStats {
+  proveedorId: number;
   proveedorNombre: string;
   totalGastado: number;
-  cantidadGastos: number;
+  cantidadOrdenesCompra: number;
+  cantidadReparacionesTerceroOrden: number;
+  cantidadReparacionesTerceroVenta: number;
+  cantidadTotal: number;
 }
 
 export interface ProveedoresResponse {
   totalGlobal: number;
-  cantidadGastos: number;
+  cantidadOrdenesCompra: number;
+  cantidadReparacionesTerceroOrden: number;
+  cantidadReparacionesTerceroVenta: number;
+  cantidadTotal: number;
   proveedores: ProveedorStats[];
 }
 
@@ -18,12 +25,19 @@ function normalizeNumber(v: unknown): number {
   if (typeof v === "number") return v;
   if (typeof v === "bigint") return Number(v);
   if (typeof v === "string") return Number(v);
-  return Number(v);
+  const n = Number(v);
+  return Number.isFinite(n) ? n : 0;
 }
 
 function useProveedores() {
   const { authFetch } = useFetch();
-  const [total, setTotal] = useState({ totalGlobal: 0, cantidadGastos: 0 });
+  const [total, setTotal] = useState({
+    totalGlobal: 0,
+    cantidadOrdenesCompra: 0,
+    cantidadReparacionesTerceroOrden: 0,
+    cantidadReparacionesTerceroVenta: 0,
+    cantidadTotal: 0,
+  });
   const [proveedores, setProveedores] = useState<ProveedorStats[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -42,15 +56,30 @@ function useProveedores() {
 
         setTotal({
           totalGlobal: normalizeNumber(data.totalGlobal),
-          cantidadGastos: normalizeNumber(data.cantidadGastos),
+          cantidadOrdenesCompra: normalizeNumber(data.cantidadOrdenesCompra),
+          cantidadReparacionesTerceroOrden: normalizeNumber(
+            data.cantidadReparacionesTerceroOrden
+          ),
+          cantidadReparacionesTerceroVenta: normalizeNumber(
+            data.cantidadReparacionesTerceroVenta
+          ),
+          cantidadTotal: normalizeNumber(data.cantidadTotal),
         });
 
         const list = Array.isArray(data.proveedores) ? data.proveedores : [];
         setProveedores(
           list.map((p) => ({
+            proveedorId: normalizeNumber(p.proveedorId),
             proveedorNombre: p.proveedorNombre ?? "Sin nombre",
             totalGastado: normalizeNumber(p.totalGastado),
-            cantidadGastos: normalizeNumber(p.cantidadGastos),
+            cantidadOrdenesCompra: normalizeNumber(p.cantidadOrdenesCompra),
+            cantidadReparacionesTerceroOrden: normalizeNumber(
+              p.cantidadReparacionesTerceroOrden
+            ),
+            cantidadReparacionesTerceroVenta: normalizeNumber(
+              p.cantidadReparacionesTerceroVenta
+            ),
+            cantidadTotal: normalizeNumber(p.cantidadTotal),
           }))
         );
 
@@ -63,7 +92,13 @@ function useProveedores() {
   );
 
   const clearProveedores = useCallback(() => {
-    setTotal({ totalGlobal: 0, cantidadGastos: 0 });
+    setTotal({
+      totalGlobal: 0,
+      cantidadOrdenesCompra: 0,
+      cantidadReparacionesTerceroOrden: 0,
+      cantidadReparacionesTerceroVenta: 0,
+      cantidadTotal: 0,
+    });
     setProveedores([]);
   }, []);
 

@@ -5,27 +5,25 @@ export class GetProveedoresUseCase {
   constructor(private readonly service: EstadisticasProveedoresService) {}
 
   async execute(dto: DateRangeDto) {
-    const totalResult = await this.service.getTotalProveedores(
-      dto.from,
-      dto.to
-    );
-    const topResult = await this.service.getTopProveedores(dto.from, dto.to);
+    const total = await this.service.getTotalProveedores(dto.from, dto.to);
+    const top = await this.service.getTopProveedores(dto.from, dto.to);
 
-    const total = totalResult[0];
-    const totalGlobal = Number(total?.totalGlobal ?? 0);
-    const cantidadGastos = Number(total?.cantidadGastos ?? 0);
-
-    const proveedores = Array.isArray(topResult)
-      ? topResult.map((r) => ({
-          proveedorNombre: r.proveedorNombre ?? "Sin nombre",
-          totalGastado: Number(r.totalGastado),
-          cantidadGastos: Number(r.cantidadGastos),
-        }))
-      : [];
+    const proveedores = top.map((r) => ({
+      proveedorId: r.proveedorId,
+      proveedorNombre: r.proveedorNombre,
+      totalGastado: r.totalGastado,
+      cantidadOrdenesCompra: r.cantidadOrdenesCompra,
+      cantidadReparacionesTerceroOrden: r.cantidadReparacionesTerceroOrden,
+      cantidadReparacionesTerceroVenta: r.cantidadReparacionesTerceroVenta,
+      cantidadTotal: r.cantidadTotal,
+    }));
 
     return {
-      totalGlobal,
-      cantidadGastos,
+      totalGlobal: total.totalGlobal,
+      cantidadOrdenesCompra: total.cantidadOrdenesCompra,
+      cantidadReparacionesTerceroOrden: total.cantidadReparacionesTerceroOrden,
+      cantidadReparacionesTerceroVenta: total.cantidadReparacionesTerceroVenta,
+      cantidadTotal: total.cantidadTotal,
       proveedores,
     };
   }
