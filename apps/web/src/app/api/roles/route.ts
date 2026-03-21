@@ -69,23 +69,29 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!Array.isArray(permisos) || permisos.length === 0) {
-      return NextResponse.json(
-        { error: "Permisos inválidos o faltantes" },
-        { status: 400 }
-      );
+    const permisosList = Array.isArray(permisos) ? permisos : [];
+
+    if (permisosList.length === 0) {
+      const nuevoRol = await prisma.rol.create({
+        data: { name },
+        include: { permisos: true },
+      });
+      const rolConPermisosNombres = {
+        ...nuevoRol,
+        permisos: nuevoRol.permisos.map((p) => p.name),
+      };
+      return NextResponse.json(rolConPermisosNombres, { status: 201 });
     }
 
-    // Verificar que todos los permisos existan
     const existingPermissions = await prisma.permiso.findMany({
       where: {
         name: {
-          in: permisos,
+          in: permisosList,
         },
       },
     });
 
-    if (existingPermissions.length !== permisos.length) {
+    if (existingPermissions.length !== permisosList.length) {
       return NextResponse.json(
         { error: "Uno o más permisos no existen" },
         { status: 400 }
