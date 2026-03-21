@@ -93,7 +93,15 @@ function useManoDeObra() {
     [authFetch]
   );
 
-  return { total, top, searchManoDeObra, loading };
+  const clearManoDeObra = useCallback(() => {
+    setTotal({
+      totalManoDeObra: 0,
+      cantidadTotalOrdenesAtendidas: 0,
+    });
+    setTop([]);
+  }, []);
+
+  return { total, top, searchManoDeObra, clearManoDeObra, loading };
 }
 
 export default useManoDeObra;

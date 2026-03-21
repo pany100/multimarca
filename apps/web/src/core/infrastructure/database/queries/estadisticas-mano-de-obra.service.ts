@@ -1,5 +1,7 @@
 import { prisma } from "@/core/infrastructure/database/prisma";
+import { getBuenosAiresDayRangeUtc, TURNOS_TIMEZONE } from "@/lib/turno-fecha-tz";
 import { Prisma } from "@prisma/client";
+import { formatInTimeZone } from "date-fns-tz";
 
 type TotalManoDeObraRow = {
   totalGlobalManoDeObra: number | bigint | string;
@@ -12,6 +14,25 @@ type TopManoDeObraRow = {
   cantidadOrdenes: number | bigint | string;
 };
 
+function fechaCreacionBoundsForQuery(
+  from?: Date,
+  to?: Date
+): { gte?: Date; lte?: Date } {
+  let gte: Date | undefined;
+  let lte: Date | undefined;
+  if (from) {
+    const key = formatInTimeZone(from, TURNOS_TIMEZONE, "yyyy-MM-dd");
+    const r = getBuenosAiresDayRangeUtc(key);
+    if (r) gte = r.gte;
+  }
+  if (to) {
+    const key = formatInTimeZone(to, TURNOS_TIMEZONE, "yyyy-MM-dd");
+    const r = getBuenosAiresDayRangeUtc(key);
+    if (r) lte = r.lte;
+  }
+  return { gte, lte };
+}
+
 export class EstadisticasManoDeObraService {
   constructor() {}
 
@@ -19,6 +40,7 @@ export class EstadisticasManoDeObraService {
     from: Date | undefined,
     to: Date | undefined
   ): Promise<TotalManoDeObraRow[]> {
+    const { gte, lte } = fechaCreacionBoundsForQuery(from, to);
     return await prisma.$queryRaw<TotalManoDeObraRow[]>`
       SELECT 
         SUM(t.precioUnitario) AS totalGlobalManoDeObra,
@@ -29,8 +51,8 @@ export class EstadisticasManoDeObraService {
       WHERE o.estado = 'Terminado'
       AND t.descripcion != 'mo'
       AND t.descripcion != 'Mano de obra'
-      ${from ? Prisma.sql`AND DATE(o.fechaCreacion) >= ${from}` : Prisma.empty}
-      ${to ? Prisma.sql`AND DATE(o.fechaCreacion) <= ${to}` : Prisma.empty};
+      ${gte ? Prisma.sql`AND o.fechaCreacion >= ${gte}` : Prisma.empty}
+      ${lte ? Prisma.sql`AND o.fechaCreacion <= ${lte}` : Prisma.empty};
     `;
   }
 
@@ -38,6 +60,7 @@ export class EstadisticasManoDeObraService {
     from: Date | undefined,
     to: Date | undefined
   ): Promise<TopManoDeObraRow[]> {
+    const { gte, lte } = fechaCreacionBoundsForQuery(from, to);
     return await prisma.$queryRaw<TopManoDeObraRow[]>`
       SELECT 
         t.descripcion,
@@ -49,8 +72,8 @@ export class EstadisticasManoDeObraService {
       WHERE o.estado = 'Terminado'
       AND t.descripcion != 'mo'
       AND t.descripcion != 'Mano de obra'
-      ${from ? Prisma.sql`AND DATE(o.fechaCreacion) >= ${from}` : Prisma.empty}
-      ${to ? Prisma.sql`AND DATE(o.fechaCreacion) <= ${to}` : Prisma.empty}
+      ${gte ? Prisma.sql`AND o.fechaCreacion >= ${gte}` : Prisma.empty}
+      ${lte ? Prisma.sql`AND o.fechaCreacion <= ${lte}` : Prisma.empty}
       GROUP BY t.descripcion
       ORDER BY totalPorTrabajo DESC
       LIMIT 10;

@@ -3,11 +3,15 @@
 import DateRangeSearch from "@/components/dates/DateRangeSearch";
 import BarGraphic from "@/components/estadisticas/BarGraphic";
 import useManoDeObra from "@/hooks/mano-de-obra/useManoDeObra";
+import ClearIcon from "@mui/icons-material/Clear";
+import SearchIcon from "@mui/icons-material/Search";
 import {
   Box,
+  Button,
   Grid,
   Paper,
   Skeleton,
+  Stack,
   Typography,
   useTheme,
 } from "@mui/material";
@@ -18,16 +22,27 @@ function EstadisticasManoDeObra() {
   const [from, setFrom] = useState<Date | null>(null);
   const [to, setTo] = useState<Date | null>(null);
   const theme = useTheme();
-  const { total, top, searchManoDeObra, loading } = useManoDeObra();
+  const { total, top, searchManoDeObra, clearManoDeObra, loading } =
+    useManoDeObra();
   const currencyFormatter = new Intl.NumberFormat("es-AR", {
     style: "currency",
     currency: "ARS",
     minimumFractionDigits: 2,
   });
-  console.log(total);
+
   useEffect(() => {
+    searchManoDeObra(null, null);
+  }, [searchManoDeObra]);
+
+  const handleBuscar = () => {
     searchManoDeObra(from, to);
-  }, [from, to, searchManoDeObra]);
+  };
+
+  const handleLimpiar = () => {
+    setFrom(null);
+    setTo(null);
+    clearManoDeObra();
+  };
 
   const items = useMemo(
     () =>
@@ -111,7 +126,45 @@ function EstadisticasManoDeObra() {
         >
           <Grid container spacing={2} alignItems="center">
             <Grid item xs={12} sm={12} md={12}>
-              <DateRangeSearch setFrom={setFrom} setTo={setTo} />
+              <Stack
+                direction="row"
+                spacing={2}
+                alignItems="center"
+                flexWrap="wrap"
+              >
+                <DateRangeSearch
+                  setFrom={setFrom}
+                  setTo={setTo}
+                  fromValue={from}
+                  toValue={to}
+                />
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={handleBuscar}
+                  startIcon={<SearchIcon />}
+                  sx={{
+                    minWidth: "auto",
+                    px: 2,
+                    height: "40px",
+                    backgroundColor: (t) => t.palette.primary.main,
+                    "&:hover": {
+                      backgroundColor: (t) => t.palette.primary.dark,
+                    },
+                  }}
+                >
+                  Buscar
+                </Button>
+                <Button
+                  variant="contained"
+                  size="small"
+                  onClick={handleLimpiar}
+                  startIcon={<ClearIcon />}
+                  sx={{ minWidth: "auto", px: 2, height: "40px" }}
+                >
+                  Limpiar
+                </Button>
+              </Stack>
             </Grid>
           </Grid>
         </Paper>
