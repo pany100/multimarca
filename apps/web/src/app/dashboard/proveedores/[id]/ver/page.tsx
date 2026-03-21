@@ -29,7 +29,7 @@ function VerPage({ params }: { params: { id: string } }) {
   // Handlers para los cambios de fecha
   const handleFromDateChange = (
     value: Date | null | any,
-    context: PickerChangeHandlerContext<DateValidationError>
+    context: PickerChangeHandlerContext<DateValidationError>,
   ) => {
     if (context.validationError) {
       return; // No actualizar si hay error de validación
@@ -42,7 +42,7 @@ function VerPage({ params }: { params: { id: string } }) {
 
   const handleToDateChange = (
     value: Date | null | any,
-    context: PickerChangeHandlerContext<DateValidationError>
+    context: PickerChangeHandlerContext<DateValidationError>,
   ) => {
     if (context.validationError) {
       return; // No actualizar si hay error de validación
@@ -108,7 +108,7 @@ function VerPage({ params }: { params: { id: string } }) {
     try {
       const url = new URL(
         `/api/proveedores/${params.id}`,
-        window.location.origin
+        window.location.origin,
       );
       url.searchParams.append("page", (page + 1).toString());
       url.searchParams.append("pageSize", pageSize.toString());

@@ -115,7 +115,7 @@ export async function GET(
         monto: Number(rt.precioCompra),
         tipo: "Deuda" as const,
         descripcion: `Reparación de tercero: ${rt.nombre} - Orden #${rt.ordenReparacion?.id}`,
-        ref: `/dashboard/ordenes-reparacion/${rt.ordenReparacion?.id}/ver`,
+        ref: `/dashboard/ordenes-reparacion/${rt.ordenReparacion?.id}`,
       })),
       ...pagos.map((p) => ({
         fecha: p.fecha,

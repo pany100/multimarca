@@ -32,6 +32,7 @@ const permisos = [
   "Ingresos",
   "OrdenesCompra",
   "Ventas",
+  "DatosVarios",
 ];
 
 async function main() {
