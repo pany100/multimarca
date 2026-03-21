@@ -78,6 +78,14 @@ import { Tooltip } from "@mui/material";
 import Image from "next/image";
 import "src/app/globals.css";
 
+/**
+ * Ítem de menú activo: misma URL o subruta (ruta + "/…").
+ * Evita que `/dashboard/agenda` marque también `/dashboard/agenda-individual`.
+ */
+function isMenuPathActive(pathname: string, ruta: string): boolean {
+  return pathname === ruta || pathname.startsWith(`${ruta}/`);
+}
+
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const { userData, logout } = useAuth();
   const permisos = userData?.permisos || [];
@@ -604,7 +612,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   useEffect(() => {
     const newOpenSections = menuSections.reduce((acc, section) => {
       const isOpen = section.items.some((item) =>
-        pathname.startsWith(item.ruta)
+        isMenuPathActive(pathname, item.ruta)
       );
       return { ...acc, [section.title]: isOpen };
     }, {});
@@ -761,10 +769,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                               mb: 0.5,
                               borderRadius: 1,
                               pl: 2,
-                              color: pathname.startsWith(item.ruta)
+                              color: isMenuPathActive(pathname, item.ruta)
                                 ? "primary.main"
                                 : "text.primary",
-                              bgcolor: pathname.startsWith(item.ruta)
+                              bgcolor: isMenuPathActive(pathname, item.ruta)
                                 ? "action.selected"
                                 : "transparent",
                               "&:hover": {
@@ -776,7 +784,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                               sx={{
                                 minWidth:
                                   drawerCompressed && !isMobile ? 0 : 40,
-                                color: pathname.startsWith(item.ruta)
+                                color: isMenuPathActive(pathname, item.ruta)
                                   ? "primary.main"
                                   : "inherit",
                               }}
@@ -788,7 +796,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                                 primary={item.texto}
                                 sx={{
                                   "& .MuiListItemText-primary": {
-                                    fontWeight: pathname.startsWith(item.ruta)
+                                    fontWeight: isMenuPathActive(
+                                      pathname,
+                                      item.ruta
+                                    )
                                       ? 600
                                       : 400,
                                     fontSize: "0.875rem",
@@ -857,7 +868,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                   ? "Dashboard"
                   : menuSections
                       .flatMap((section) => section.items)
-                      .find((item) => pathname.startsWith(item.ruta))?.texto ||
+                      .find((item) => isMenuPathActive(pathname, item.ruta))
+                      ?.texto ||
                     "Dashboard"}
               </Typography>
             </Box>
