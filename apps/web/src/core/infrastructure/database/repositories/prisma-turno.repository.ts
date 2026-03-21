@@ -6,6 +6,7 @@ import type {
   UpdateTurnoData,
 } from "@/core/domain/repositories/turno.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
+import { getBuenosAiresDayRangeUtc } from "@/lib/turno-fecha-tz";
 
 const includeAutoOwner = {
   auto: {
@@ -23,6 +24,8 @@ export class PrismaTurnoRepository implements TurnoRepository {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    const fechaDia = fecha ? getBuenosAiresDayRangeUtc(fecha) : null;
+
     const where = {
       OR: query
         ? [
@@ -35,7 +38,9 @@ export class PrismaTurnoRepository implements TurnoRepository {
             { auto: { owner: { fullName: { contains: query } } } },
           ]
         : undefined,
-      ...(fecha && { fecha: new Date(fecha) }),
+      ...(fechaDia && {
+        fecha: { gte: fechaDia.gte, lte: fechaDia.lte },
+      }),
       ...(future && { fecha: { gte: today } }),
     };
 

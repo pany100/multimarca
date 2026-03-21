@@ -1,7 +1,13 @@
 import prisma from "@/lib/prisma";
 import { sortTurnosByDayAndHora } from "@/lib/sortTurnosForWeekExport";
-import { addDays, format, startOfWeek } from "date-fns";
+import {
+  getTurnosExportWeekBounds,
+  turnoFechaKeyInTz,
+} from "@/lib/turnos-export-week-bounds";
+import { TURNOS_TIMEZONE } from "@/lib/turno-fecha-tz";
+import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { formatInTimeZone } from "date-fns-tz";
 import { NextRequest } from "next/server";
 import puppeteer from "puppeteer";
 
@@ -9,27 +15,19 @@ export async function POST(request: NextRequest) {
   try {
     const { nextWeek } = await request.json();
 
+    const { rangeStart, rangeEnd, weekDaysWall: weekDays } =
+      getTurnosExportWeekBounds(Boolean(nextWeek));
+
     // Launch a browser instance
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-
-    // Get the dates for the week
-    let startDate = startOfWeek(new Date(), {
-      weekStartsOn: 1, // Start on Monday
-    });
-
-    if (nextWeek) {
-      startDate = addDays(startDate, 7);
-    }
-
-    const weekDays = Array.from({ length: 5 }, (_, i) => addDays(startDate, i)); // Monday to Friday
 
     // Fetch feriados for the week
     const feriados = await prisma.feriado.findMany({
       where: {
         fecha: {
-          gte: weekDays[0],
-          lte: weekDays[4],
+          gte: rangeStart,
+          lte: rangeEnd,
         },
       },
     });
@@ -38,8 +36,8 @@ export async function POST(request: NextRequest) {
     const turnosRaw = await prisma.turno.findMany({
       where: {
         fecha: {
-          gte: weekDays[0],
-          lte: weekDays[4],
+          gte: rangeStart,
+          lte: rangeEnd,
         },
       },
       include: {
@@ -134,7 +132,9 @@ export async function POST(request: NextRequest) {
         <body>
           <h1>Agenda Semanal</h1>
           <div class="date">
-            Semana del ${format(weekDays[0], "PPP", { locale: es })}
+            Semana del ${formatInTimeZone(weekDays[0], TURNOS_TIMEZONE, "PPP", {
+              locale: es,
+            })}
           </div>
           <table>
             <thead>
@@ -149,12 +149,14 @@ export async function POST(request: NextRequest) {
                   .map((day) => {
                     const feriado = feriados.find(
                       (f) =>
-                        format(new Date(f.fecha), "yyyy-MM-dd") ===
-                        format(day, "yyyy-MM-dd"),
+                        turnoFechaKeyInTz(new Date(f.fecha)) ===
+                        turnoFechaKeyInTz(day),
                     );
                     return `
                       <th class="day-header ${feriado ? "feriado" : ""}">
-                        ${format(day, "EEEE d", { locale: es })}
+                        ${formatInTimeZone(day, TURNOS_TIMEZONE, "EEEE d", {
+                          locale: es,
+                        })}
                       </th>
                     `;
                   })
@@ -165,10 +167,9 @@ export async function POST(request: NextRequest) {
               ${turnos
                 .map((turno) => {
                   const turnoDate = new Date(turno.fecha);
+                  const turnoKey = turnoFechaKeyInTz(turnoDate);
                   const dayIndex = weekDays.findIndex(
-                    (d) =>
-                      format(d, "yyyy-MM-dd") ===
-                      format(turnoDate, "yyyy-MM-dd"),
+                    (d) => turnoFechaKeyInTz(d) === turnoKey,
                   );
 
                   return `
@@ -198,8 +199,8 @@ export async function POST(request: NextRequest) {
                         .map((day, index) => {
                           const feriado = feriados.find(
                             (f) =>
-                              format(new Date(f.fecha), "yyyy-MM-dd") ===
-                              format(day, "yyyy-MM-dd"),
+                              turnoFechaKeyInTz(new Date(f.fecha)) ===
+                              turnoFechaKeyInTz(day),
                           );
                           return index === dayIndex
                             ? `<td class="${feriado ? "feriado" : ""}">${

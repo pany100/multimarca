@@ -10,6 +10,7 @@ import {
   updateTurnoSchema,
   UpdateTurnoDto,
 } from "@/core/infrastructure/validation/schemas/turno.schema";
+import { normalizeTurnoFechaInputToUtc } from "@/lib/turno-fecha-tz";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
@@ -19,7 +20,7 @@ export const dynamic = "force-dynamic";
 function toUpdateData(dto: UpdateTurnoDto) {
   return {
     hora: dto.hora,
-    fecha: new Date(dto.fecha),
+    fecha: normalizeTurnoFechaInputToUtc(dto.fecha),
     problema: dto.problema,
     autoId: dto.autoId ?? null,
     informacionAuto: dto.informacionAuto ?? null,

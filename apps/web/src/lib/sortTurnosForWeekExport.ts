@@ -1,4 +1,5 @@
-import { startOfDay } from "date-fns";
+import { formatInTimeZone } from "date-fns-tz";
+import { TURNOS_TIMEZONE } from "@/lib/turno-fecha-tz";
 
 /** Convierte "HH:mm" o "H:mm" a minutos desde medianoche para ordenar. */
 function horaToMinutes(hora: string): number {
@@ -18,9 +19,9 @@ export function sortTurnosByDayAndHora<
   T extends { fecha: Date; hora: string },
 >(turnos: T[]): T[] {
   return [...turnos].sort((a, b) => {
-    const dayDiff =
-      startOfDay(a.fecha).getTime() - startOfDay(b.fecha).getTime();
-    if (dayDiff !== 0) return dayDiff;
+    const da = formatInTimeZone(a.fecha, TURNOS_TIMEZONE, "yyyy-MM-dd");
+    const db = formatInTimeZone(b.fecha, TURNOS_TIMEZONE, "yyyy-MM-dd");
+    if (da !== db) return da.localeCompare(db);
     return horaToMinutes(a.hora) - horaToMinutes(b.hora);
   });
 }

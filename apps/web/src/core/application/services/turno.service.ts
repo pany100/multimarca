@@ -6,6 +6,8 @@ import type {
   TurnoRepository,
   UpdateTurnoData,
 } from "@/core/domain/repositories/turno.repository";
+import { TURNOS_TIMEZONE } from "@/lib/turno-fecha-tz";
+import { formatInTimeZone } from "date-fns-tz";
 
 export class TurnoService {
   constructor(
@@ -22,12 +24,14 @@ export class TurnoService {
   }
 
   async create(data: CreateTurnoData): Promise<any> {
-    const requestDate = new Date(data.fecha);
-    requestDate.setHours(0, 0, 0, 0);
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const requestDay = formatInTimeZone(
+      new Date(data.fecha),
+      TURNOS_TIMEZONE,
+      "yyyy-MM-dd",
+    );
+    const todayDay = formatInTimeZone(new Date(), TURNOS_TIMEZONE, "yyyy-MM-dd");
 
-    if (requestDate < today) {
+    if (requestDay < todayDay) {
       throw new Error("No se pueden crear turnos para fechas pasadas");
     }
 
@@ -37,7 +41,7 @@ export class TurnoService {
       );
     }
 
-    const esFeriado = await this.feriadoRepo.existsByFecha(requestDate);
+    const esFeriado = await this.feriadoRepo.existsByFecha(new Date(data.fecha));
     if (esFeriado) {
       throw new Error("No se pueden crear turnos en días feriados");
     }
@@ -51,18 +55,13 @@ export class TurnoService {
       throw new Error("Turno no encontrado");
     }
 
-    const turnoDate = new Date(current.fecha);
-    turnoDate.setHours(0, 0, 0, 0);
-
     if (!data.autoId && !data.informacionAuto) {
       throw new Error(
         "Debe seleccionar un vehículo o ingresar información del vehículo nuevo",
       );
     }
 
-    const requestDate = new Date(data.fecha);
-    requestDate.setHours(0, 0, 0, 0);
-    const esFeriado = await this.feriadoRepo.existsByFecha(requestDate);
+    const esFeriado = await this.feriadoRepo.existsByFecha(new Date(data.fecha));
     if (esFeriado) {
       throw new Error("No se pueden programar turnos en días feriados");
     }
