@@ -54,7 +54,7 @@ const CarInfoDoubleColumn = styled("div")(() => ({
   borderBottom: "1px solid black",
   width: "100%",
   display: "grid",
-  gridTemplateColumns: "460px auto",
+  gridTemplateColumns: "460px minmax(0, 1fr)",
 }));
 
 const KilometerAndDate = styled("div")(() => ({
@@ -134,6 +134,34 @@ function Cell({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** Checkbox nativo; el texto hereda el font-size del contenedor (p. ej. CarInfo 13px). */
+function TinyCheckOption({ id, label }: { id: string; label: string }) {
+  return (
+    <label
+      htmlFor={id}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "4px",
+        cursor: "pointer",
+      }}
+    >
+      <input
+        id={id}
+        type="checkbox"
+        style={{
+          width: "11px",
+          height: "11px",
+          margin: 0,
+          flexShrink: 0,
+          accentColor: "#000",
+        }}
+      />
+      {label}
+    </label>
+  );
+}
+
 const BoschTemplate = React.forwardRef<HTMLDivElement>((_, ref) => {
   return (
     <div ref={ref}>
@@ -198,8 +226,23 @@ const BoschTemplate = React.forwardRef<HTMLDivElement>((_, ref) => {
         </Section>
         <CarInfo>
           <CarInfoDoubleColumn>
-            <div>TUERCA A/R: </div>
-            <div>HECHO EN MT:</div>
+            <div>ADAPTADOR TUERCA A/R: CONSOLA CENTRAL </div>
+            <div
+              style={{
+                display: "flex",
+                width: "100%",
+                boxSizing: "border-box",
+                alignItems: "center",
+                justifyContent: "space-between",
+                minWidth: 0,
+                /* Mismo respiro que DatePart en la columna derecha */
+                paddingRight: "20px",
+              }}
+            >
+              <TinyCheckOption id="bosch-adaptador-baul" label="BAUL" />
+              <TinyCheckOption id="bosch-adaptador-guantera" label="GUANTERA" />
+              <TinyCheckOption id="bosch-adaptador-no-tiene" label="NO TIENE" />
+            </div>
           </CarInfoDoubleColumn>
           <CarInfoDoubleColumn>
             <div>CÉDULA (FOTO F Y D) QUEDA EN:</div>
