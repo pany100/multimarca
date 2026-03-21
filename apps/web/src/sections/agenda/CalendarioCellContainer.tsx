@@ -2,7 +2,6 @@
 
 import { Grid, Paper, useTheme } from "@mui/material";
 import { isSameDay } from "date-fns";
-import { useCalendarContext } from "./contexts/CalendarContext";
 
 type Props = {
   day: Date;
@@ -10,10 +9,8 @@ type Props = {
 };
 
 function CalendarioCellContainer({ day, children }: Props) {
-  const { isFeriado } = useCalendarContext();
   const theme = useTheme();
   const isToday = isSameDay(day, new Date());
-  const esFeriado = isFeriado(day);
   return (
     <Grid
       item
@@ -33,7 +30,7 @@ function CalendarioCellContainer({ day, children }: Props) {
           overflow: "auto",
           position: "relative",
           border: isToday ? `2px solid ${theme.palette.primary.main}` : "none",
-          bgcolor: esFeriado ? "#FAA0A0" : "white",
+          bgcolor: "white",
         }}
       >
         {children}

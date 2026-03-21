@@ -1,10 +1,13 @@
 "use client";
 
-import { Box, Typography, useTheme } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import CalendarioCellContainer from "./CalendarioCellContainer";
 import CalendarioCellHeader from "./CalendarioCellHeader";
 import CalendarioCellReminder from "./CalendarioCellReminder";
 import { useCalendarContext } from "./contexts/CalendarContext";
+
+/** Mismo tono que el fondo anterior de celdas feriado (solo borde ahora) */
+const FERIADO_BORDE = "#FAA0A0";
 
 type Props = {
   day: Date;
@@ -12,7 +15,6 @@ type Props = {
 
 function CalendarioCell({ day }: Props) {
   const { isFeriado, getFeriadoDescripcion } = useCalendarContext();
-  const theme = useTheme();
   const esFeriado = isFeriado(day);
   const feriadoDescripcion = esFeriado ? getFeriadoDescripcion(day) : "";
   return (
@@ -29,17 +31,27 @@ function CalendarioCell({ day }: Props) {
 
         {/* Mostrar descripción del feriado si es un día feriado */}
         {esFeriado && (
-          <Typography
-            variant="caption"
+          <Box
             sx={{
-              display: "block",
+              p: 0.5,
               mb: 1,
-              fontWeight: "bold",
-              color: theme.palette.error.dark,
+              borderRadius: 1,
+              border: `1px solid ${FERIADO_BORDE}`,
             }}
           >
-            {feriadoDescripcion}
-          </Typography>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                overflow: "visible",
+                whiteSpace: "normal",
+                wordBreak: "break-word",
+                cursor: "default",
+              }}
+            >
+              {feriadoDescripcion}
+            </Typography>
+          </Box>
         )}
 
         <CalendarioCellReminder day={day} />
