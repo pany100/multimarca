@@ -1,4 +1,5 @@
 import prisma from "@/lib/prisma";
+import { sortTurnosByDayAndHora } from "@/lib/sortTurnosForWeekExport";
 import { addDays, format, startOfWeek } from "date-fns";
 import { es } from "date-fns/locale";
 import { NextRequest } from "next/server";
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
     });
 
     // Fetch turnos for the week
-    const turnos = await prisma.turno.findMany({
+    const turnosRaw = await prisma.turno.findMany({
       where: {
         fecha: {
           gte: weekDays[0],
@@ -48,10 +49,9 @@ export async function POST(request: NextRequest) {
           },
         },
       },
-      orderBy: {
-        hora: "asc",
-      },
     });
+
+    const turnos = sortTurnosByDayAndHora(turnosRaw);
 
     // Generate HTML content for the PDF
     const htmlContent = `
