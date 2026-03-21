@@ -113,11 +113,6 @@ export async function POST(request: NextRequest) {
               background-color: #ffebee;
               color: #c62828;
             }
-            .feriado-description {
-              font-size: 9px;
-              font-style: italic;
-              color: #c62828;
-            }
             .vino td:first-child {
               position: relative;
             }
@@ -160,11 +155,6 @@ export async function POST(request: NextRequest) {
                     return `
                       <th class="day-header ${feriado ? "feriado" : ""}">
                         ${format(day, "EEEE d", { locale: es })}
-                        ${
-                          feriado
-                            ? `<br><span class="feriado-description">${feriado.descripcion}</span>`
-                            : ""
-                        }
                       </th>
                     `;
                   })
