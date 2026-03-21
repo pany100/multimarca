@@ -17,6 +17,8 @@ interface CommonOrderCardProps {
   loading?: boolean;
   submitButtonText?: string;
   maxWidth?: "xs" | "sm" | "md" | "lg" | "xl";
+  /** Sin altura al 100% ni relleno amplio (p. ej. pantalla de rol). */
+  dense?: boolean;
 }
 
 export const CommonOrderCard = ({
@@ -30,6 +32,7 @@ export const CommonOrderCard = ({
   loading = false,
   submitButtonText = "Guardar",
   maxWidth = "xs",
+  dense = false,
 }: CommonOrderCardProps) => {
   const [openModal, setOpenModal] = useState(false);
 
@@ -52,18 +55,32 @@ export const CommonOrderCard = ({
 
   return (
     <>
-      <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
-        <CardContent sx={{ flex: 1 }}>
+      <Card
+        sx={
+          dense
+            ? { display: "flex", flexDirection: "column" }
+            : { height: "100%", display: "flex", flexDirection: "column" }
+        }
+      >
+        <CardContent
+          sx={
+            dense
+              ? { py: 1.5, px: 2, "&:last-child": { pb: 1.5 } }
+              : { flex: 1 }
+          }
+        >
           {/* Header con título y botón editar */}
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               alignItems: "center",
-              marginBottom: 16,
+              marginBottom: dense ? 12 : 16,
             }}
           >
-            <Typography variant="h6">{title}</Typography>
+            <Typography variant={dense ? "subtitle1" : "h6"} component="div">
+              {title}
+            </Typography>
             <IconButton
               size="small"
               onClick={handleOpenModal}
