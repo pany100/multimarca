@@ -8,7 +8,7 @@ set -euo pipefail
 # =====================================================================
 
 # ========= Config =========
-REMOTE_HOST="ubuntu@ec2-3-22-211-91.us-east-2.compute.amazonaws.com"
+REMOTE_HOST="ubuntu@18.188.190.154"
 
 # Detectar SO y asignar ruta del PEM
 if [[ "$OSTYPE" == "darwin"* ]]; then
