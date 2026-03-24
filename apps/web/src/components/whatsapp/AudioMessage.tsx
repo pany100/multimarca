@@ -24,7 +24,7 @@ const AudioMessage = ({ mensaje }: Props) => {
     >
       <audio controls>
         <source
-          src={`/api/notificaciones-whatsapp/media/${audioId}`}
+          src={`/api/notificaciones-whatsapp-old/media/${audioId}`}
           type="audio/ogg"
         />
         Tu navegador no soporta el elemento de audio.

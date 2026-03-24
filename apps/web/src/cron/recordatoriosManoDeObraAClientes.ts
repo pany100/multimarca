@@ -1,4 +1,4 @@
-import { sendWhatsAppMessage } from "@/services/whatsappService";
+import { sendWhatsAppMessage } from "@/services/notificaciones-whataspp-old";
 import { PrismaClient } from "@prisma/client";
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";

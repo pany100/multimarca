@@ -1,4 +1,7 @@
-import { sendWhatsAppMessage, uploadMedia } from "@/services/whatsappService";
+import {
+  sendWhatsAppMessage,
+  uploadMedia,
+} from "@/services/notificaciones-whataspp-old";
 import generateReciboHtml from "@/utils/generateReciboHtml";
 import { NextResponse } from "next/server";
 import puppeteer from "puppeteer";

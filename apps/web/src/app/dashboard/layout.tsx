@@ -138,7 +138,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const fetchWhatsappNoLeido = useCallback(async () => {
     try {
       const response = await authFetch(
-        "/api/notificaciones-whatsapp/no-leidas"
+        "/api/notificaciones-whatsapp-old/no-leidas"
       );
       if (response.ok) {
         const data = await response.json();
@@ -574,7 +574,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "NotificacionesClientes",
-            texto: "WhatsApp",
+            texto: "Whatsapp OLD",
             icono: (
               <Badge
                 badgeContent={notificacionesWhatsappNoLeidas}
@@ -583,6 +583,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                 <WhatsAppIcon />
               </Badge>
             ),
+            ruta: "/dashboard/whatsapp-old",
+          },
+          {
+            permiso: "NotificacionesClientes",
+            texto: "Whataspp",
+            icono: <WhatsAppIcon />,
             ruta: "/dashboard/whatsapp",
           },
           {
@@ -888,7 +894,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
               <IconButton
                 sx={{ color: boschColors.white }}
-                onClick={() => router.push("/dashboard/whatsapp")}
+                onClick={() => router.push("/dashboard/whatsapp-old")}
               >
                 <Badge
                   badgeContent={notificacionesWhatsappNoLeidas}

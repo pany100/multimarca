@@ -1,5 +1,5 @@
 import { getIO } from "@/lib/socketio";
-import { saveMessage } from "@/services/whatsappService";
+import { saveMessage } from "@/services/notificaciones-whataspp-old";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {

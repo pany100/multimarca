@@ -39,7 +39,7 @@ export async function DELETE(
   }
 }
 
-import { sendWhatsappTextMessage } from "@/services/whatsappService";
+import { sendWhatsappTextMessage } from "@/services/notificaciones-whataspp-old";
 import { NextRequest } from "next/server";
 
 export async function PUT(

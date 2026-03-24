@@ -1,4 +1,4 @@
-import { getMedia } from "@/services/whatsappService";
+import { getMedia } from "@/services/notificaciones-whataspp-old";
 import { NextResponse } from "next/server";
 
 export async function GET(
