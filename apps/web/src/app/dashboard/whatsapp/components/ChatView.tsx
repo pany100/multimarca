@@ -117,6 +117,13 @@ export default function ChatView(props: {
     fetchConversaciones();
   }, [clienteId, fetchConversaciones]);
 
+  useEffect(() => {
+    if (!clienteId) return;
+    authFetch(`/api/whatsapp/clientes/${clienteId}/marcar-leido`, {
+      method: "PUT",
+    }).catch(() => {});
+  }, [authFetch, clienteId]);
+
   const items = useMemo<ChatItem[]>(() => {
     const flat: ChatItem[] = [];
     for (const conversacion of conversaciones) {

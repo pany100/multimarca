@@ -1,6 +1,8 @@
 import { useState } from "react";
+import { useFetch } from "@/contexts/FetchContext";
 
 export const useWhatsAppVentaHandlers = (ventaId: number) => {
+  const { authFetch } = useFetch();
   const [enviandoWhatsApp, setEnviandoWhatsApp] = useState(false);
   const [snackbar, setSnackbar] = useState({
     open: false,
@@ -11,10 +13,9 @@ export const useWhatsAppVentaHandlers = (ventaId: number) => {
   const handleEnviarPorWhatsApp = async () => {
     setEnviandoWhatsApp(true);
     try {
-      const res = await fetch("/api/whatsapp/pdf", {
+      const res = await authFetch("/api/whatsapp/pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ resourceType: "venta", resourceId: ventaId }),
       });
       if (!res.ok) {
