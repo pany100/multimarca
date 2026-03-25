@@ -872,6 +872,9 @@ model MensajeWhatsApp {
   tipo           String               @db.VarChar(20)
   waMessageId    String?              @db.VarChar(100)
   mediaId        String?              @db.VarChar(100)
+  mediaMimeType  String?              @db.VarChar(100)
+  mediaCaption   String?              @db.Text
+  replyToWaId    String?              @db.VarChar(100)
   requiresHuman  Boolean              @default(false)
   status         String?              @db.VarChar(20)
   templateName   String?              @db.VarChar(100)

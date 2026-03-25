@@ -80,6 +80,22 @@ export class SendPdfUseCase {
     };
   }
 
+  private resolveTemplateBody(resourceType: string, resourceData: any): string {
+    if (resourceType === "orden") {
+      const patente = resourceData.auto?.patent ?? "N/A";
+      return `La reparación del auto ${patente} ya está lista. Adjunto encontrarás tu órden para descargar.`;
+    }
+    if (resourceType === "presupuesto") {
+      const vehiculo =
+        resourceData.auto?.patent ?? resourceData.informacionAuto ?? "N/A";
+      return `El presupuesto para el vehículo ${vehiculo} ya está listo. Adjunto encontrarás el informe para descargar.`;
+    }
+    if (resourceType === "venta") {
+      return "Adjuntamos los detalles de la venta realizada.";
+    }
+    return "";
+  }
+
   async execute(input: SendPdfInput) {
     // 1. Resolver clienteId y resourceData
     let clienteId: number | null = null;
@@ -166,7 +182,7 @@ export class SendPdfUseCase {
       conversacionId: conversacion.id,
       from: process.env.WHATSAPP_PHONE_NUMBER_ID ?? "",
       to: cliente.phone,
-      body: filename,
+      body: this.resolveTemplateBody(input.resourceType, resourceData),
       tipo: "outbound",
       waMessageId,
       status: "sent",
