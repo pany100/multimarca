@@ -15,7 +15,7 @@ interface WhatsAppConfirmDialogProps {
   open: boolean;
   orden: any;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
 }
 
 export const WhatsAppConfirmDialog = ({
@@ -39,7 +39,12 @@ export const WhatsAppConfirmDialog = ({
   return (
     <Dialog
       open={open}
-      onClose={loading ? undefined : onClose}
+      disableEscapeKeyDown={loading}
+      onClose={(_, reason) => {
+        if (loading) return;
+        if (reason === "backdropClick") return;
+        onClose();
+      }}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
       PaperProps={{
