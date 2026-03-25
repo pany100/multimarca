@@ -871,6 +871,7 @@ model MensajeWhatsApp {
   body           String               @db.Text
   tipo           String               @db.VarChar(20)
   waMessageId    String?              @db.VarChar(100)
+  mediaId        String?              @db.VarChar(100)
   requiresHuman  Boolean              @default(false)
   status         String?              @db.VarChar(20)
   templateName   String?              @db.VarChar(100)
@@ -883,6 +884,7 @@ model MensajeWhatsApp {
 
   @@index([from])
   @@index([waMessageId])
+  @@index([mediaId])
   @@index([timestamp])
   @@index([conversacionId])
 }

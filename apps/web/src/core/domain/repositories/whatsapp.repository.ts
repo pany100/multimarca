@@ -5,6 +5,7 @@ export type CreateMensajeInput = {
   body: string;
   tipo: string;
   waMessageId?: string;
+  mediaId?: string;
   requiresHuman?: boolean;
   status?: string;
   templateName?: string;

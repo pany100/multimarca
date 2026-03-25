@@ -26,8 +26,9 @@ function PresupuestoHeader({
   const {
     handleEnviarPresupuesto,
     handlePrint,
-    getWhatsAppLink,
+    handleEnviarPorWhatsApp,
     enviandoPresupuesto,
+    enviandoWhatsApp,
     snackbar,
     closeSnackbar,
   } = usePresupuestoHandlers({
@@ -54,8 +55,6 @@ function PresupuestoHeader({
   const vehicleInfo = presupuesto.auto
     ? `${presupuesto.auto.brand} ${presupuesto.auto.model} - ${presupuesto.auto.patent}`
     : presupuesto.informacionAuto || "N/A";
-
-  const whatsappLink = getWhatsAppLink();
 
   return (
     <>
@@ -98,7 +97,8 @@ function PresupuestoHeader({
           <PresupuestoActions
             presupuesto={presupuesto}
             enviandoPresupuesto={enviandoPresupuesto}
-            whatsappLink={whatsappLink}
+            handleEnviarPorWhatsApp={handleEnviarPorWhatsApp}
+            enviandoWhatsApp={enviandoWhatsApp}
             isSticky={isSticky}
             onEnviar={handleEnviarPresupuesto}
             onPrint={handlePrintClick}

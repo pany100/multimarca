@@ -164,6 +164,7 @@ export class SendPdfUseCase {
       waMessageId,
       status: "sent",
       templateName,
+      mediaId,
     });
     await this.service.updateConversacion(conversacion.id, {
       ultimoMensaje: new Date(),

@@ -16,6 +16,7 @@ export const usePresupuestoHandlers = ({
     message: "",
     severity: "success" as "success" | "error",
   });
+  const [enviandoWhatsApp, setEnviandoWhatsApp] = useState(false);
 
   const { updatePresupuesto, loading: enviandoPresupuesto } =
     useUpdatePresupuesto(presupuesto.id);
@@ -62,29 +63,44 @@ export const usePresupuestoHandlers = ({
     await generatePdf(`/api/presupuestos/${presupuesto.id}/pdf-completo`);
   };
 
-  // WhatsApp link
-  const getWhatsAppLink = () => {
-    const phone =
-      presupuesto.auto?.owner?.phone || presupuesto.informacionCliente;
-    if (!phone) return "";
+  const handleEnviarPorWhatsApp = async () => {
+    setEnviandoWhatsApp(true);
+    try {
+      const res = await fetch("/api/whatsapp/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({
+          resourceType: "presupuesto",
+          resourceId: presupuesto.id,
+        }),
+      });
 
-    const total = presupuesto.totalAPagar || presupuesto.total;
-    const vehicleInfo = presupuesto.auto
-      ? `${presupuesto.auto.brand} ${presupuesto.auto.model} (${presupuesto.auto.patent})`
-      : presupuesto.informacionAuto || "su vehículo";
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || "Error al enviar por WhatsApp");
+      }
 
-    const clientName = presupuesto.auto?.owner?.fullName || "Estimado cliente";
+      const presupuestoActualizado = await updatePresupuesto({
+        estado: "Enviado",
+        fechaEnvio: new Date().toISOString(),
+      });
+      if (onPresupuestoUpdate) onPresupuestoUpdate(presupuestoActualizado);
 
-    const message = `Hola ${clientName}, le enviamos el presupuesto para ${vehicleInfo}. El total es de $${
-      total?.toLocaleString("es-AR", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2,
-      }) || "0.00"
-    }.`;
-
-    return `https://wa.me/${phone.replace(/\D/g, "")}?text=${encodeURIComponent(
-      message
-    )}`;
+      setSnackbar({
+        open: true,
+        message: "PDF enviado por WhatsApp correctamente",
+        severity: "success",
+      });
+    } catch (error: any) {
+      setSnackbar({
+        open: true,
+        message: error.message || "Error al enviar por WhatsApp",
+        severity: "error",
+      });
+    } finally {
+      setEnviandoWhatsApp(false);
+    }
   };
 
   const closeSnackbar = () => {
@@ -94,8 +110,9 @@ export const usePresupuestoHandlers = ({
   return {
     handleEnviarPresupuesto,
     handlePrint,
-    getWhatsAppLink,
+    handleEnviarPorWhatsApp,
     enviandoPresupuesto,
+    enviandoWhatsApp,
     snackbar,
     closeSnackbar,
   };

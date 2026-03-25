@@ -3,20 +3,25 @@ import {
   getEstadoVentaLabel,
 } from "@/sections/ordenes-reparacion/admin/helpers/estadoHelpers";
 import PrintIcon from "@mui/icons-material/Print";
+import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { Box, Button, Chip, CircularProgress } from "@mui/material";
 
 interface VentaActionsProps {
   venta: any;
   printLoading: boolean;
+  enviandoWhatsApp: boolean;
   isSticky?: boolean;
   onPrint: () => void;
+  onEnviarWhatsApp: () => void;
 }
 
 export const VentaActions = ({
   venta,
   printLoading,
+  enviandoWhatsApp,
   isSticky = false,
   onPrint,
+  onEnviarWhatsApp,
 }: VentaActionsProps) => {
   return (
     <Box
@@ -48,6 +53,35 @@ export const VentaActions = ({
         sx={{ textTransform: "none", minWidth: isSticky ? "auto" : undefined }}
       >
         {isSticky ? (printLoading ? <CircularProgress size={16} /> : <PrintIcon fontSize="small" />) : "Imprimir"}
+      </Button>
+
+      <Button
+        variant="outlined"
+        color="success"
+        size={isSticky ? "small" : "medium"}
+        startIcon={
+          !isSticky &&
+          (enviandoWhatsApp ? (
+            <CircularProgress size={20} />
+          ) : (
+            <WhatsAppIcon />
+          ))
+        }
+        onClick={onEnviarWhatsApp}
+        disabled={enviandoWhatsApp}
+        sx={{ textTransform: "none", minWidth: isSticky ? "auto" : undefined }}
+      >
+        {isSticky ? (
+          enviandoWhatsApp ? (
+            <CircularProgress size={16} />
+          ) : (
+            <WhatsAppIcon fontSize="small" />
+          )
+        ) : enviandoWhatsApp ? (
+          "Enviando..."
+        ) : (
+          "Enviar por WhatsApp"
+        )}
       </Button>
     </Box>
   );

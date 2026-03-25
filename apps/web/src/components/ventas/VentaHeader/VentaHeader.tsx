@@ -3,7 +3,8 @@
 import ConfirmPrintModal from "@/components/ConfirmPrintModal";
 import { useVenta } from "@/sections/ventas/admin/contexts/VentaContext";
 import { useVentaHandlers } from "@/sections/ventas/hooks/useVentaHandlers";
-import { Box } from "@mui/material";
+import { useWhatsAppVentaHandlers } from "@/sections/ventas/hooks/useWhatsAppVentaHandlers";
+import { Alert, Box, Snackbar } from "@mui/material";
 import { useState } from "react";
 import { VentaActions } from "./VentaActions";
 import { VentaInfo } from "./VentaInfo";
@@ -22,6 +23,9 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
     useVentaHandlers({
       venta,
     });
+
+  const { enviandoWhatsApp, handleEnviarPorWhatsApp, snackbar: waSnackbar, closeSnackbar: closeWaSnackbar } =
+    useWhatsAppVentaHandlers(venta.id);
 
   const debeConfirmarImpresion = [
     "Cerrado",
@@ -78,8 +82,10 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
           <VentaActions
             venta={venta}
             printLoading={printLoading}
+            enviandoWhatsApp={enviandoWhatsApp}
             isSticky={isSticky}
             onPrint={handlePrintClick}
+            onEnviarWhatsApp={handleEnviarPorWhatsApp}
           />
         </Box>
       </Box>
@@ -97,6 +103,20 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
         severity={snackbar.severity}
         onClose={closeSnackbar}
       />
+
+      <Snackbar
+        open={waSnackbar.open}
+        autoHideDuration={6000}
+        onClose={closeWaSnackbar}
+      >
+        <Alert
+          onClose={closeWaSnackbar}
+          severity={waSnackbar.severity}
+          sx={{ width: "100%" }}
+        >
+          {waSnackbar.message}
+        </Alert>
+      </Snackbar>
     </>
   );
 }

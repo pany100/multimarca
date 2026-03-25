@@ -5,12 +5,13 @@ import {
 import PrintIcon from "@mui/icons-material/Print";
 import SendIcon from "@mui/icons-material/Send";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
-import { Box, Button, Chip, Tooltip } from "@mui/material";
+import { Box, Button, Chip, CircularProgress, Tooltip } from "@mui/material";
 
 interface PresupuestoActionsProps {
   presupuesto: any;
   enviandoPresupuesto: boolean;
-  whatsappLink: string;
+  handleEnviarPorWhatsApp: () => void;
+  enviandoWhatsApp: boolean;
   isSticky?: boolean;
   onEnviar: () => void;
   onPrint: () => void;
@@ -19,7 +20,8 @@ interface PresupuestoActionsProps {
 export const PresupuestoActions = ({
   presupuesto,
   enviandoPresupuesto,
-  whatsappLink,
+  handleEnviarPorWhatsApp,
+  enviandoWhatsApp,
   isSticky = false,
   onEnviar,
   onPrint,
@@ -99,25 +101,30 @@ export const PresupuestoActions = ({
       </Button>
 
       {/* WhatsApp button */}
-      {whatsappLink && (
-        <Button
-          variant="outlined"
-          color="success"
-          size={isSticky ? "small" : "medium"}
-          startIcon={!isSticky && <WhatsAppIcon />}
-          component="a"
-          href={whatsappLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          sx={{
-            textTransform: "none",
-            minWidth: isSticky ? "auto" : undefined,
-          }}
-          disabled
-        >
-          {isSticky ? <WhatsAppIcon fontSize="small" /> : "Enviar por WhatsApp"}
-        </Button>
-      )}
+      <Button
+        variant="outlined"
+        color="success"
+        size={isSticky ? "small" : "medium"}
+        startIcon={
+          !isSticky &&
+          (enviandoWhatsApp ? <CircularProgress size={20} /> : <WhatsAppIcon />)
+        }
+        onClick={handleEnviarPorWhatsApp}
+        disabled={enviandoWhatsApp}
+        sx={{ textTransform: "none", minWidth: isSticky ? "auto" : undefined }}
+      >
+        {isSticky ? (
+          enviandoWhatsApp ? (
+            <CircularProgress size={16} />
+          ) : (
+            <WhatsAppIcon fontSize="small" />
+          )
+        ) : enviandoWhatsApp ? (
+          "Enviando..."
+        ) : (
+          "Enviar por WhatsApp"
+        )}
+      </Button>
     </Box>
   );
 };
