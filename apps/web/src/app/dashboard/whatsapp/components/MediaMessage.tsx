@@ -9,7 +9,14 @@ import {
   CircularProgress,
   Typography,
 } from "@mui/material";
-import { type ReactNode, useCallback, useRef, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { useFetch } from "@/contexts/FetchContext";
 
 export type MediaMessageMsg = {
   id: number;
@@ -28,32 +35,57 @@ type MediaMessageProps = {
 };
 
 export default function MediaMessage({ msg }: MediaMessageProps) {
+  const { authFetch } = useFetch();
   const [mediaUrl, setMediaUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [expired, setExpired] = useState(false);
   const loadingLock = useRef(false);
+  const blobUrlRef = useRef<string | null>(null);
+
+  const revokeBlobUrl = useCallback(() => {
+    if (blobUrlRef.current) {
+      URL.revokeObjectURL(blobUrlRef.current);
+      blobUrlRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    revokeBlobUrl();
+    setMediaUrl(null);
+    setExpired(false);
+    loadingLock.current = false;
+  }, [msg.id, msg.mediaId, revokeBlobUrl]);
+
+  useEffect(() => {
+    return () => revokeBlobUrl();
+  }, [revokeBlobUrl]);
 
   const loadMedia = useCallback(async (): Promise<string | null> => {
     if (loadingLock.current || expired || !msg.mediaId) return null;
     loadingLock.current = true;
     setLoading(true);
     try {
-      const res = await fetch(`/api/whatsapp/media/${msg.mediaId}`);
-      const data = await res.json();
-      if (data.expired) {
-        setExpired(true);
+      const res = await authFetch(
+        `/api/whatsapp/media/${msg.mediaId}/content`
+      );
+      const ct = res.headers.get("content-type") ?? "";
+      if (ct.includes("application/json")) {
+        const data = (await res.json()) as { expired?: boolean };
+        if (data.expired) setExpired(true);
         return null;
       }
-      if (data.url) {
-        setMediaUrl(data.url);
-        return data.url as string;
-      }
-      return null;
+      if (!res.ok) return null;
+      const blob = await res.blob();
+      revokeBlobUrl();
+      const objectUrl = URL.createObjectURL(blob);
+      blobUrlRef.current = objectUrl;
+      setMediaUrl(objectUrl);
+      return objectUrl;
     } finally {
       loadingLock.current = false;
       setLoading(false);
     }
-  }, [expired, msg.mediaId]);
+  }, [authFetch, expired, msg.mediaId, revokeBlobUrl]);
 
   const openMediaInNewTab = useCallback(async () => {
     if (expired) return;
