@@ -20,32 +20,30 @@ export const useWhatsAppHandlers = (ordenId: number) => {
 
   const handleSendNotification = async () => {
     try {
-      const response = await authFetch(
-        `/api/orden-reparacion/${ordenId}/send-notification`,
-        {
-          method: "POST",
-        }
-      );
+      const response = await authFetch("/api/whatsapp/pdf", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ resourceType: "orden", resourceId: ordenId }),
+      });
 
       if (response.ok) {
         setSnackbar({
           open: true,
-          message: "Notificación enviada con éxito",
+          message: "PDF enviado por WhatsApp correctamente",
           severity: "success",
         });
       } else {
-        const errorData = await response.json();
+        const err = await response.json();
         setSnackbar({
           open: true,
-          message: errorData.error || "Error al enviar la notificación",
+          message: err.error || "Error al enviar por WhatsApp",
           severity: "error",
         });
       }
     } catch (error) {
-      console.error("Error:", error);
       setSnackbar({
         open: true,
-        message: "Error al enviar la notificación",
+        message: "Error al enviar por WhatsApp",
         severity: "error",
       });
     } finally {
