@@ -7,6 +7,7 @@ import {
   Paper,
   Typography,
 } from "@mui/material";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useFetch } from "@/contexts/FetchContext";
@@ -20,6 +21,8 @@ type MensajeWhatsApp = {
   tipo: string;
   timestamp: string;
   read: boolean;
+  mediaId?: string;
+  sentByAi?: boolean;
 };
 
 type ConversacionWhatsApp = {
@@ -45,6 +48,17 @@ export default function ChatView(props: {
     ConversacionWhatsApp[]
   >([]);
 
+  const [mediaStates, setMediaStates] = useState<
+    Record<
+      number,
+      {
+        loading: boolean;
+        url: string | null;
+        expired: boolean;
+      }
+    >
+  >({});
+
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const fetchConversaciones = useCallback(async () => {
@@ -56,6 +70,47 @@ export default function ChatView(props: {
       setConversaciones(data);
     }
   }, [authFetch, clienteId]);
+
+  const handleOpenPdf = useCallback(
+    async (messageId: number, mediaId: string) => {
+      const current = mediaStates[messageId];
+      if (current?.url) {
+        window.open(current.url, "_blank");
+        return;
+      }
+      if (current?.loading) return;
+
+      setMediaStates((prev) => ({
+        ...prev,
+        [messageId]: { loading: true, url: null, expired: false },
+      }));
+
+      const res = await authFetch(`/api/whatsapp/media/${mediaId}`);
+      const data = await res.json();
+
+      if (data?.expired) {
+        setMediaStates((prev) => ({
+          ...prev,
+          [messageId]: { loading: false, url: null, expired: true },
+        }));
+        return;
+      }
+
+      if (data?.url) {
+        setMediaStates((prev) => ({
+          ...prev,
+          [messageId]: { loading: false, url: data.url, expired: false },
+        }));
+        window.open(data.url, "_blank");
+      } else {
+        setMediaStates((prev) => ({
+          ...prev,
+          [messageId]: { loading: false, url: null, expired: true },
+        }));
+      }
+    },
+    [authFetch, mediaStates]
+  );
 
   useEffect(() => {
     if (!clienteId) return;
@@ -124,6 +179,7 @@ export default function ChatView(props: {
           }
 
           const isOutbound = it.msg.tipo === "outbound";
+          const mediaState = it.msg.mediaId ? mediaStates[it.msg.id] : undefined;
           return (
             <Box
               key={it.msg.id}
@@ -146,7 +202,57 @@ export default function ChatView(props: {
                       : "18px 18px 18px 4px",
                   }}
                 >
-                  <Typography variant="body2">{it.msg.body}</Typography>
+                  {it.msg.mediaId ? (
+                    <>
+                      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                        <PictureAsPdfIcon fontSize="small" />
+                        <Box sx={{ flex: 1 }}>
+                          <Typography variant="body2" fontWeight="medium">
+                            {it.msg.body}
+                          </Typography>
+
+                          {mediaState?.expired ? (
+                            <Typography
+                              variant="caption"
+                              sx={{ opacity: 0.7, color: "warning.light" }}
+                            >
+                              Archivo no disponible — han pasado más de 30 días
+                            </Typography>
+                          ) : (
+                            <Typography
+                              variant="caption"
+                              sx={{
+                                opacity: 0.8,
+                                cursor: "pointer",
+                                textDecoration: "underline",
+                              }}
+                              onClick={() =>
+                                handleOpenPdf(it.msg.id, it.msg.mediaId!)
+                              }
+                            >
+                              {mediaState?.loading
+                                ? "Abriendo..."
+                                : mediaState?.url
+                                  ? "Abrir de nuevo"
+                                  : "Ver archivo"}
+                            </Typography>
+                          )}
+                        </Box>
+                      </Box>
+                    </>
+                  ) : (
+                    <>
+                      <Typography variant="body2">{it.msg.body}</Typography>
+                      {it.msg.sentByAi === true ? (
+                        <Typography
+                          variant="caption"
+                          sx={{ opacity: 0.6, display: "block", fontSize: "0.6rem" }}
+                        >
+                          IA
+                        </Typography>
+                      ) : null}
+                    </>
+                  )}
                   <Typography
                     variant="caption"
                     sx={{
