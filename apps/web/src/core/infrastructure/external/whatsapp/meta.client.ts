@@ -44,6 +44,51 @@ export class MetaClient {
     return { waMessageId: res.messages[0].id };
   }
 
+  async uploadMedia(
+    buffer: Buffer,
+    mimeType: string,
+    filename: string
+  ): Promise<string> {
+    const form = new FormData();
+    form.append("messaging_product", "whatsapp");
+    form.append("type", mimeType);
+    form.append(
+      "file",
+      new Blob([new Uint8Array(buffer)], { type: mimeType }),
+      filename
+    );
+
+    const url = `${BASE_URL}/${process.env.WHATSAPP_PHONE_NUMBER_ID}/media`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${process.env.WHATSAPP_TOKEN}` },
+      body: form,
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.error?.message ?? "Meta API error");
+    }
+
+    const data = await res.json();
+    return data.id;
+  }
+
+  async sendDocument(
+    to: string,
+    mediaId: string,
+    filename: string,
+    caption?: string
+  ): Promise<{ waMessageId: string }> {
+    const res = await this._post("/messages", {
+      messaging_product: "whatsapp",
+      to,
+      type: "document",
+      document: { id: mediaId, filename, caption: caption ?? "" },
+    });
+    return { waMessageId: res.messages[0].id };
+  }
+
   private async _post(path: string, body: object): Promise<any> {
     const url = `${BASE_URL}/${this.phoneNumberId}${path}`;
     const response = await fetch(url, {

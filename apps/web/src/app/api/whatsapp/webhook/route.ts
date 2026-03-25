@@ -1,6 +1,7 @@
 import { WhatsAppService } from "@/core/application/services/whatsapp.service";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { PrismaWhatsAppRepository } from "@/core/infrastructure/database/repositories/prisma-whatsapp.repository";
+import { getIO } from "@/lib/socketio";
 import { NextResponse } from "next/server";
 
 export async function GET(request: Request) {
@@ -66,6 +67,7 @@ export async function POST(request: Request) {
         ultimoMensaje: new Date(),
         ultimoMensajeEntrante: new Date(),
       });
+      getIO()?.emit("newWhatsAppMessage", { conversacionId: conversacion.id });
     }
   } catch (e) {
     console.error(e);
