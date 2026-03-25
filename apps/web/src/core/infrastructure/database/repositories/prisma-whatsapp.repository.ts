@@ -62,6 +62,16 @@ export class PrismaWhatsAppRepository implements WhatsAppRepository {
     });
   }
 
+  listAllConversaciones() {
+    return prisma.conversacionWhatsApp.findMany({
+      orderBy: { ultimoMensaje: "desc" },
+      include: {
+        cliente: { select: { id: true, fullName: true, phone: true } },
+        mensajes: { orderBy: { timestamp: "asc" }, take: 100 },
+      },
+    });
+  }
+
   findConversacionById(id: number) {
     return prisma.conversacionWhatsApp.findUnique({
       where: { id },

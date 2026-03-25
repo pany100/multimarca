@@ -36,6 +36,10 @@ export class WhatsAppService {
     return this.repo.listConversacionesByCliente(clienteId);
   }
 
+  listAllConversaciones() {
+    return this.repo.listAllConversaciones();
+  }
+
   findConversacionById(id: number) {
     return this.repo.findConversacionById(id);
   }

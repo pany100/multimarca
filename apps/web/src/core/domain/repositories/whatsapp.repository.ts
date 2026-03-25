@@ -24,6 +24,7 @@ export interface WhatsAppRepository {
     data: { ultimoMensaje?: Date; ultimoMensajeEntrante?: Date; estado?: string }
   ): Promise<void>;
   listConversacionesByCliente(clienteId: number): Promise<any[]>;
+  listAllConversaciones(): Promise<any[]>;
   findConversacionById(id: number): Promise<any | null>;
   listPendingConversaciones(): Promise<any[]>;
 }
