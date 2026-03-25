@@ -110,7 +110,11 @@ export async function POST(request: Request) {
         ultimoMensaje: new Date(),
         ultimoMensajeEntrante: new Date(),
       });
-      getIO()?.emit("newWhatsAppMessage", { conversacionId: conversacion.id });
+      getIO()?.emit("newWhatsAppMessage", {
+        conversacionId: conversacion.id,
+        clienteId: cliente.id,
+        previewBody: body,
+      });
     }
   } catch (e) {
     console.error(e);

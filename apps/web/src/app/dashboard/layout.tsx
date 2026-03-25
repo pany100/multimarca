@@ -153,6 +153,30 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     fetchWhatsappNoLeido();
   }, [fetchWhatsappNoLeido]);
 
+  const handleNewWhatsAppMessage = useCallback(
+    (data?: {
+      clienteId?: number;
+      conversacionId?: number;
+      previewBody?: string;
+    }) => {
+      void fetchWhatsappNoLeido();
+      if (
+        pathname.startsWith("/dashboard/whatsapp") ||
+        typeof data?.previewBody !== "string" ||
+        data.previewBody.length === 0
+      ) {
+        return;
+      }
+      const t =
+        data.previewBody.length > 120
+          ? `${data.previewBody.slice(0, 117)}…`
+          : data.previewBody;
+      setNotificationMessage(`WhatsApp: ${t}`);
+      setNotificationOpen(true);
+    },
+    [fetchWhatsappNoLeido, pathname],
+  );
+
   useEffect(() => {
     if (socket) {
       socket.on("newNotification", (data?: { texto?: string }) => {
@@ -163,9 +187,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         setNotificationOpen(true);
       });
 
-      socket.on("newWhatsAppMessage", () => {
-        fetchWhatsappNoLeido();
-      });
+      socket.on("newWhatsAppMessage", handleNewWhatsAppMessage);
 
       socket.on("readNotification", () => {
         fetchCantidadNotificaciones();
@@ -182,10 +204,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
       return () => {
         socket.off("newNotification");
         socket.off("deletedNotification");
-        socket.off("newWhatsAppMessage");
+        socket.off("newWhatsAppMessage", handleNewWhatsAppMessage);
       };
     }
-  }, [socket, fetchWhatsappNoLeido, fetchCantidadNotificaciones]);
+  }, [socket, handleNewWhatsAppMessage, fetchCantidadNotificaciones]);
 
   useEffect(() => {
     if (socket) {

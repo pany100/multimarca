@@ -6,6 +6,7 @@ import { useFetch } from "@/contexts/FetchContext";
 import { Box, Divider, Paper, Typography } from "@mui/material";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
+import { useSocket } from "@/hooks/useSocket";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 type MensajeWhatsApp = {
@@ -43,6 +44,7 @@ export default function ChatView(props: {
 }) {
   const { clienteId, clienteNombre, clientePhone } = props;
   const { authFetch } = useFetch();
+  const socket = useSocket();
 
   const [conversaciones, setConversaciones] = useState<
     ConversacionWhatsApp[]
@@ -64,6 +66,29 @@ export default function ChatView(props: {
     if (!clienteId) return;
     fetchConversaciones();
   }, [clienteId, fetchConversaciones]);
+
+  useEffect(() => {
+    if (!socket || !clienteId) return;
+    const handler = (data?: {
+      clienteId?: number;
+      conversacionId?: number;
+    }) => {
+      if (data?.clienteId !== clienteId) return;
+      void (async () => {
+        await fetchConversaciones();
+        // Solo el webhook manda conversacionId: mensaje entrante nuevo → marcar leído si esta conversación está abierta.
+        if (data?.conversacionId != null) {
+          await authFetch(`/api/whatsapp/clientes/${clienteId}/marcar-leido`, {
+            method: "PUT",
+          });
+        }
+      })();
+    };
+    socket.on("newWhatsAppMessage", handler);
+    return () => {
+      socket.off("newWhatsAppMessage", handler);
+    };
+  }, [socket, clienteId, fetchConversaciones, authFetch]);
 
   useEffect(() => {
     if (!clienteId) return;

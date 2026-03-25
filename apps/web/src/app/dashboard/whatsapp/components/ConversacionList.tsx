@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useSocket } from "@/hooks/useSocket";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Avatar,
   Box,
@@ -47,56 +48,62 @@ export default function ConversacionList(props: {
 }) {
   const { onSelect, selectedId } = props;
   const { authFetch } = useFetch();
+  const socket = useSocket();
 
   const [items, setItems] = useState<ConversacionResumen[]>([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let alive = true;
-    const load = async () => {
-      try {
-        setLoading(true);
-        const response = await authFetch(
-          "/api/whatsapp/conversaciones/recientes"
-        );
-        if (!response.ok) return;
-        const data = await response.json();
+  const loadRecientes = useCallback(async () => {
+    try {
+      setLoading(true);
+      const response = await authFetch(
+        "/api/whatsapp/conversaciones/recientes"
+      );
+      if (!response.ok) return;
+      const data = await response.json();
 
-        if (!alive) return;
+      const mapped: ConversacionResumen[] = (data ?? []).map((conv: any) => {
+        const lastMsg: MensajeWhatsApp | undefined =
+          conv.mensajes?.[conv.mensajes.length - 1];
+        const tieneNoLeidos =
+          (conv.mensajes ?? []).some(
+            (m: MensajeWhatsApp) => m.tipo === "inbound" && m.read === false
+          ) ?? false;
 
-        const mapped: ConversacionResumen[] = (data ?? []).map((conv: any) => {
-          const lastMsg: MensajeWhatsApp | undefined =
-            conv.mensajes?.[conv.mensajes.length - 1];
-          const tieneNoLeidos =
-            (conv.mensajes ?? []).some(
-              (m: MensajeWhatsApp) => m.tipo === "inbound" && m.read === false
-            ) ?? false;
+        return {
+          clienteId: conv.clienteId ?? conv.cliente?.id,
+          cliente: {
+            fullName: conv.cliente?.fullName ?? "",
+            phone: conv.cliente?.phone,
+          },
+          ultimoMensaje: conv.ultimoMensaje,
+          ultimoMensajeBody: lastMsg?.body ?? null,
+          tieneNoLeidos,
+        };
+      });
 
-          return {
-            clienteId: conv.clienteId ?? conv.cliente?.id,
-            cliente: {
-              fullName: conv.cliente?.fullName ?? "",
-              phone: conv.cliente?.phone,
-            },
-            ultimoMensaje: conv.ultimoMensaje,
-            ultimoMensajeBody: lastMsg?.body ?? null,
-            tieneNoLeidos,
-          };
-        });
-
-        setItems(mapped);
-      } catch (e) {
-        // Mantener silencioso; la UI muestra "sin conversaciones" si falla.
-      } finally {
-        if (alive) setLoading(false);
-      }
-    };
-
-    load();
-    return () => {
-      alive = false;
-    };
+      setItems(mapped);
+    } catch (e) {
+      // Mantener silencioso; la UI muestra "sin conversaciones" si falla.
+    } finally {
+      setLoading(false);
+    }
   }, [authFetch]);
+
+  useEffect(() => {
+    void loadRecientes();
+  }, [loadRecientes]);
+
+  useEffect(() => {
+    if (!socket) return;
+    const onRefresh = () => {
+      void loadRecientes();
+    };
+    socket.on("newWhatsAppMessage", onRefresh);
+    return () => {
+      socket.off("newWhatsAppMessage", onRefresh);
+    };
+  }, [socket, loadRecientes]);
 
   const rendered = useMemo(() => {
     return items.map((item, idx) => {
