@@ -1,6 +1,7 @@
 import { useGeneratePdf } from "@/hooks/orden-reparacion/useGeneratePdf";
 import { useState } from "react";
 import { useUpdatePresupuesto } from "./useUpdatePresupuesto";
+import { useFetch } from "@/contexts/FetchContext";
 
 interface UsePresupuestoHandlersProps {
   presupuesto: any;
@@ -11,6 +12,7 @@ export const usePresupuestoHandlers = ({
   presupuesto,
   onPresupuestoUpdate,
 }: UsePresupuestoHandlersProps) => {
+  const { authFetch } = useFetch();
   const [snackbar, setSnackbar] = useState({
     open: false,
     message: "",
@@ -66,10 +68,9 @@ export const usePresupuestoHandlers = ({
   const handleEnviarPorWhatsApp = async () => {
     setEnviandoWhatsApp(true);
     try {
-      const res = await fetch("/api/whatsapp/pdf", {
+      const res = await authFetch("/api/whatsapp/pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({
           resourceType: "presupuesto",
           resourceId: presupuesto.id,

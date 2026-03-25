@@ -83,10 +83,11 @@ export async function POST(request: Request) {
     }
 
     const components = dto.templateParams ?? [];
+    const languageCode = dto.languageCode === "es" ? "es_AR" : dto.languageCode;
     const { waMessageId } = await metaClient.sendTemplate(
       recipient,
       dto.templateName,
-      dto.languageCode,
+      languageCode,
       components as object[]
     );
 

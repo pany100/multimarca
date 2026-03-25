@@ -5,8 +5,41 @@ import type {
 import { prisma } from "@/core/infrastructure/database/prisma";
 
 export class PrismaWhatsAppRepository implements WhatsAppRepository {
-  findClienteByPhone(phone: string) {
-    return prisma.cliente.findFirst({ where: { phone }, include: { cars: true } });
+  async findClienteByPhone(phone: string): Promise<any | null> {
+    // 1. Match exacto
+    const exact = await prisma.cliente.findFirst({
+      where: { phone },
+      include: { cars: true },
+    });
+    if (exact) return exact;
+
+    // 2. Generar variantes del número para buscar
+    // Meta siempre manda en formato 549XXXXXXXXXX (sin +)
+    // La base puede tener el número en distintos formatos
+    const variants = new Set<string>();
+
+    // Si viene con prefijo 549 → agregar sin prefijo país y sin 9
+    if (phone.startsWith("549")) {
+      const sinPrefijo = phone.slice(3); // 1112345678
+      variants.add(sinPrefijo);
+      variants.add("0" + sinPrefijo); // 01112345678
+      variants.add("+" + phone); // +5491112345678
+      variants.add(phone.slice(2)); // 91112345678 (raro pero posible)
+    }
+    // Si viene con prefijo 54 sin el 9
+    if (phone.startsWith("54") && !phone.startsWith("549")) {
+      const sinPrefijo = phone.slice(2); // 1112345678
+      variants.add(sinPrefijo);
+      variants.add("0" + sinPrefijo);
+      variants.add("+" + phone);
+    }
+
+    if (variants.size === 0) return null;
+
+    return prisma.cliente.findFirst({
+      where: { phone: { in: Array.from(variants) } },
+      include: { cars: true },
+    });
   }
 
   async findOrCreateConversacion(clienteId: number) {
