@@ -12,32 +12,109 @@ export type SendPdfInput = {
 export class SendPdfUseCase {
   constructor(private readonly service: WhatsAppService) {}
 
-  async execute(input: SendPdfInput) {
-    const id = input.resourceId;
+  private resolveTemplateConfig(
+    resourceType: SendPdfInput["resourceType"],
+    resourceData: any
+  ): { templateName: string; components: object[] } {
+    if (resourceType === "orden") {
+      const patente = resourceData.auto?.patent ?? "N/A";
+      return {
+        templateName: "reparacion_terminada_pdf",
+        components: [
+          {
+            type: "header",
+            parameters: [
+              {
+                type: "document",
+                document: {
+                  id: "MEDIA_ID_PLACEHOLDER",
+                  filename: "orden.pdf",
+                },
+              },
+            ],
+          },
+          { type: "body", parameters: [{ type: "text", text: patente }] },
+        ],
+      };
+    }
 
-    // 1. Resolver clienteId
+    if (resourceType === "presupuesto") {
+      const vehiculo =
+        resourceData.auto?.patent ?? resourceData.informacionAuto ?? "N/A";
+      return {
+        templateName: "presupuesto_entregado",
+        components: [
+          {
+            type: "header",
+            parameters: [
+              {
+                type: "document",
+                document: {
+                  id: "MEDIA_ID_PLACEHOLDER",
+                  filename: "presupuesto.pdf",
+                },
+              },
+            ],
+          },
+          { type: "body", parameters: [{ type: "text", text: vehiculo }] },
+        ],
+      };
+    }
+
+    return {
+      templateName: "venta_realizada",
+      components: [
+        {
+          type: "header",
+          parameters: [
+            {
+              type: "document",
+              document: {
+                id: "MEDIA_ID_PLACEHOLDER",
+                filename: "venta.pdf",
+              },
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  async execute(input: SendPdfInput) {
+    // 1. Resolver clienteId y resourceData
     let clienteId: number | null = null;
+    let resourceData: any = null;
 
     if (input.resourceType === "orden") {
-      const orden = await prisma.ordenReparacion.findUnique({
-        where: { id },
-        include: { auto: true },
+      const recurso = await prisma.ordenReparacion.findUnique({
+        where: { id: input.resourceId },
+        include: { auto: { include: { owner: true } } },
       });
-      clienteId = orden?.auto?.ownerId ?? null;
+      if (!recurso) throw new Error("Orden no encontrada");
+      clienteId = recurso.auto.ownerId;
+      resourceData = recurso;
     }
 
     if (input.resourceType === "venta") {
-      const venta = await prisma.venta.findUnique({ where: { id } });
-      if (venta?.clienteId == null) throw new Error("Recurso no encontrado");
-      clienteId = venta.clienteId;
+      const recurso = await prisma.venta.findUnique({
+        where: { id: input.resourceId },
+        include: { cliente: true },
+      });
+      if (!recurso) throw new Error("Venta no encontrada");
+      if (!recurso.clienteId) throw new Error("La venta no tiene cliente asociado");
+      clienteId = recurso.clienteId;
+      resourceData = recurso;
     }
 
     if (input.resourceType === "presupuesto") {
-      const presupuesto = await prisma.presupuesto.findUnique({
-        where: { id },
-        include: { auto: true },
+      const recurso = await prisma.presupuesto.findUnique({
+        where: { id: input.resourceId },
+        include: { auto: { include: { owner: true } } },
       });
-      clienteId = presupuesto?.auto?.ownerId ?? null;
+      if (!recurso) throw new Error("Presupuesto no encontrado");
+      clienteId = recurso.auto?.ownerId ?? null;
+      if (!clienteId) throw new Error("El presupuesto no tiene cliente asociado");
+      resourceData = recurso;
     }
 
     if (clienteId == null) throw new Error("Recurso no encontrado");
@@ -49,10 +126,8 @@ export class SendPdfUseCase {
     if (!cliente.can_receive_notifications)
       throw new Error("El cliente no acepta notificaciones");
 
-    // 3. Generar PDF
+    // 3. Generar PDF + upload media
     const buffer = await generatePdfBuffer(input.resourceType, input.resourceId);
-
-    // 4. Upload media
     const filename = `${input.resourceType}_${input.resourceId}.pdf`;
     const mediaId = await metaClient.uploadMedia(
       buffer,
@@ -60,12 +135,22 @@ export class SendPdfUseCase {
       filename
     );
 
-    // 5. Enviar documento
+    // 4. Template config + inject mediaId
+    const { templateName, components } = this.resolveTemplateConfig(
+      input.resourceType,
+      resourceData
+    );
+    const finalComponents = JSON.parse(
+      JSON.stringify(components).replace(/MEDIA_ID_PLACEHOLDER/g, mediaId)
+    );
+
+    // 5. Enviar template con documento adjunto
     const recipient = whatsappGuard.resolveRecipient(cliente.phone);
-    const { waMessageId } = await metaClient.sendDocument(
+    const { waMessageId } = await metaClient.sendTemplate(
       recipient,
-      mediaId,
-      filename
+      templateName,
+      "es",
+      finalComponents
     );
 
     // 6. Persistir mensaje y actualizar conversación
@@ -78,12 +163,12 @@ export class SendPdfUseCase {
       tipo: "outbound",
       waMessageId,
       status: "sent",
+      templateName,
     });
     await this.service.updateConversacion(conversacion.id, {
       ultimoMensaje: new Date(),
     });
 
-    // 7. OK
     return { ok: true };
   }
 }
