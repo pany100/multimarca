@@ -855,6 +855,7 @@ model ConversacionWhatsApp {
   clienteId     Int
   iniciada      DateTime           @default(now())
   ultimoMensaje DateTime           @default(now())
+  ultimoMensajeEntrante DateTime?
   estado        EstadoConversacion @default(Activa)
   cliente       Cliente            @relation(fields: [clienteId], references: [id], onDelete: Cascade)
   mensajes      MensajeWhatsApp[]
@@ -869,6 +870,11 @@ model MensajeWhatsApp {
   from           String               @db.VarChar(50)
   body           String               @db.Text
   tipo           String               @db.VarChar(20)
+  waMessageId    String?              @db.VarChar(100)
+  requiresHuman  Boolean              @default(false)
+  status         String?              @db.VarChar(20)
+  templateName   String?              @db.VarChar(100)
+  sentByAi       Boolean              @default(false)
   timestamp      DateTime             @default(now())
   conversacionId Int
   read           Boolean              @default(false)
@@ -876,6 +882,7 @@ model MensajeWhatsApp {
   conversacion   ConversacionWhatsApp @relation(fields: [conversacionId], references: [id], onDelete: Cascade)
 
   @@index([from])
+  @@index([waMessageId])
   @@index([timestamp])
   @@index([conversacionId])
 }
