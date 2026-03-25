@@ -9,6 +9,7 @@ import {
   DialogTitle,
   Typography,
 } from "@mui/material";
+import { useState } from "react";
 
 interface WhatsAppConfirmDialogProps {
   open: boolean;
@@ -23,10 +24,22 @@ export const WhatsAppConfirmDialog = ({
   onClose,
   onConfirm,
 }: WhatsAppConfirmDialogProps) => {
+  const [loading, setLoading] = useState(false);
+
+  const handleConfirmClick = async () => {
+    if (loading) return;
+    setLoading(true);
+    try {
+      await onConfirm();
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <Dialog
       open={open}
-      onClose={onClose}
+      onClose={loading ? undefined : onClose}
       aria-labelledby="alert-dialog-title"
       aria-describedby="alert-dialog-description"
       PaperProps={{
@@ -179,6 +192,7 @@ export const WhatsAppConfirmDialog = ({
           onClick={onClose}
           color="inherit"
           variant="outlined"
+          disabled={loading}
           sx={{
             textTransform: "none",
             fontWeight: 500,
@@ -189,9 +203,10 @@ export const WhatsAppConfirmDialog = ({
           Cancelar
         </Button>
         <Button
-          onClick={onConfirm}
+          onClick={handleConfirmClick}
           color="success"
           variant="contained"
+          disabled={loading}
           sx={{
             textTransform: "none",
             fontWeight: 500,

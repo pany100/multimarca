@@ -26,7 +26,7 @@ export function normalizeArgentinePhone(raw: string): string {
   }
 
   // 5. Validar resultado final
-  if (digits.length !== 12 || !digits.startsWith("549")) {
+  if ((digits.length !== 12 && digits.length !== 13) || !digits.startsWith("549")) {
     throw new Error(`No se pudo normalizar el teléfono: ${raw}`);
   }
 

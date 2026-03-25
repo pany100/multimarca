@@ -14,7 +14,7 @@ export class SendPdfUseCase {
 
   private resolveTemplateConfig(
     resourceType: SendPdfInput["resourceType"],
-    resourceData: any
+    resourceData: any,
   ): { templateName: string; components: object[] } {
     if (resourceType === "orden") {
       const patente = resourceData.auto?.patent ?? "N/A";
@@ -101,7 +101,8 @@ export class SendPdfUseCase {
         include: { cliente: true },
       });
       if (!recurso) throw new Error("Venta no encontrada");
-      if (!recurso.clienteId) throw new Error("La venta no tiene cliente asociado");
+      if (!recurso.clienteId)
+        throw new Error("La venta no tiene cliente asociado");
       clienteId = recurso.clienteId;
       resourceData = recurso;
     }
@@ -113,35 +114,41 @@ export class SendPdfUseCase {
       });
       if (!recurso) throw new Error("Presupuesto no encontrado");
       clienteId = recurso.auto?.ownerId ?? null;
-      if (!clienteId) throw new Error("El presupuesto no tiene cliente asociado");
+      if (!clienteId)
+        throw new Error("El presupuesto no tiene cliente asociado");
       resourceData = recurso;
     }
 
     if (clienteId == null) throw new Error("Recurso no encontrado");
 
     // 2. Validar cliente
-    const cliente = await prisma.cliente.findUnique({ where: { id: clienteId } });
+    const cliente = await prisma.cliente.findUnique({
+      where: { id: clienteId },
+    });
     if (!cliente?.phone)
       throw new Error("El cliente no tiene teléfono registrado");
     if (!cliente.can_receive_notifications)
       throw new Error("El cliente no acepta notificaciones");
 
     // 3. Generar PDF + upload media
-    const buffer = await generatePdfBuffer(input.resourceType, input.resourceId);
+    const buffer = await generatePdfBuffer(
+      input.resourceType,
+      input.resourceId,
+    );
     const filename = `${input.resourceType}_${input.resourceId}.pdf`;
     const mediaId = await metaClient.uploadMedia(
       buffer,
       "application/pdf",
-      filename
+      filename,
     );
 
     // 4. Template config + inject mediaId
     const { templateName, components } = this.resolveTemplateConfig(
       input.resourceType,
-      resourceData
+      resourceData,
     );
     const finalComponents = JSON.parse(
-      JSON.stringify(components).replace(/MEDIA_ID_PLACEHOLDER/g, mediaId)
+      JSON.stringify(components).replace(/MEDIA_ID_PLACEHOLDER/g, mediaId),
     );
 
     // 5. Enviar template con documento adjunto
@@ -149,8 +156,8 @@ export class SendPdfUseCase {
     const { waMessageId } = await metaClient.sendTemplate(
       recipient,
       templateName,
-      "es",
-      finalComponents
+      "es_AR",
+      finalComponents,
     );
 
     // 6. Persistir mensaje y actualizar conversación
@@ -173,4 +180,3 @@ export class SendPdfUseCase {
     return { ok: true };
   }
 }
-
