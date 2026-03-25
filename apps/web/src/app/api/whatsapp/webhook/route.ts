@@ -34,8 +34,46 @@ export async function POST(request: Request) {
     for (const message of messages) {
       const waMessageId = message.id;
       const from = message.from;
-      const messageBody = message.text?.body ?? "";
       const timestamp = new Date(Number(message.timestamp) * 1000);
+
+      const messageType = message.type ?? "text";
+      const isText = messageType === "text";
+
+      // Extraer body según tipo
+      const body = isText
+        ? (message.text?.body ?? "")
+        : `[${messageType}]`;
+
+      // Extraer media_id según tipo
+      const mediaId: string | undefined =
+        message.audio?.id ??
+        message.image?.id ??
+        message.video?.id ??
+        message.document?.id ??
+        message.sticker?.id ??
+        undefined;
+
+      // Extraer mimeType (Meta no siempre lo manda en el webhook, se infiere del tipo)
+      const mimeTypeMap: Record<string, string> = {
+        audio: "audio/ogg",
+        image: "image/jpeg",
+        video: "video/mp4",
+        sticker: "image/webp",
+      };
+      const mediaMimeType: string | undefined =
+        message.document?.mime_type ??
+        mimeTypeMap[messageType] ??
+        undefined;
+
+      // Caption para imagen, video y documento
+      const mediaCaption: string | undefined =
+        message.image?.caption ??
+        message.video?.caption ??
+        message.document?.filename ?? // para documentos usamos filename como caption
+        undefined;
+
+      // Si es un reply, guardar el waMessageId del mensaje original
+      const replyToWaId: string | undefined = message.context?.id ?? undefined;
 
       // 1. Chequear duplicado
       const existing = await prisma.mensajeWhatsApp.findFirst({
@@ -55,9 +93,14 @@ export async function POST(request: Request) {
         conversacionId: conversacion.id,
         from,
         to: process.env.WHATSAPP_PHONE_NUMBER_ID ?? "",
-        body: messageBody,
+        body,
         tipo: "inbound",
         waMessageId,
+        mediaId,
+        mediaMimeType,
+        mediaCaption,
+        replyToWaId,
+        requiresHuman: !isText,
         status: "received",
         timestamp,
       } as any);
