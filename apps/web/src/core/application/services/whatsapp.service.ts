@@ -2,6 +2,7 @@ import type {
   CreateMensajeInput,
   WhatsAppRepository,
 } from "@/core/domain/repositories/whatsapp.repository";
+import type { EstadoConversacion } from "@prisma/client";
 
 export class WhatsAppService {
   constructor(private readonly repo: WhatsAppRepository) {}
@@ -27,7 +28,11 @@ export class WhatsAppService {
 
   updateConversacion(
     id: number,
-    data: { ultimoMensaje?: Date; ultimoMensajeEntrante?: Date; estado?: string }
+    data: {
+      ultimoMensaje?: Date;
+      ultimoMensajeEntrante?: Date;
+      estado?: EstadoConversacion;
+    }
   ) {
     return this.repo.updateConversacion(id, data);
   }

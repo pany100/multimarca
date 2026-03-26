@@ -3,6 +3,7 @@ import type {
   WhatsAppRepository,
 } from "@/core/domain/repositories/whatsapp.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
+import type { EstadoConversacion } from "@prisma/client";
 
 export class PrismaWhatsAppRepository implements WhatsAppRepository {
   async findClienteByPhone(phone: string): Promise<any | null> {
@@ -82,7 +83,11 @@ export class PrismaWhatsAppRepository implements WhatsAppRepository {
 
   async updateConversacion(
     id: number,
-    data: { ultimoMensaje?: Date; ultimoMensajeEntrante?: Date; estado?: string }
+    data: {
+      ultimoMensaje?: Date;
+      ultimoMensajeEntrante?: Date;
+      estado?: EstadoConversacion;
+    }
   ) {
     await prisma.conversacionWhatsApp.update({ where: { id }, data });
   }

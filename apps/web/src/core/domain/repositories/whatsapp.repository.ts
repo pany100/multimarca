@@ -1,3 +1,5 @@
+import type { EstadoConversacion } from "@prisma/client";
+
 export type CreateMensajeInput = {
   conversacionId: number;
   from: string;
@@ -25,7 +27,11 @@ export interface WhatsAppRepository {
   ): Promise<void>;
   updateConversacion(
     id: number,
-    data: { ultimoMensaje?: Date; ultimoMensajeEntrante?: Date; estado?: string }
+    data: {
+      ultimoMensaje?: Date;
+      ultimoMensajeEntrante?: Date;
+      estado?: EstadoConversacion;
+    }
   ): Promise<void>;
   listConversacionesByCliente(clienteId: number): Promise<any[]>;
   listAllConversaciones(): Promise<any[]>;
