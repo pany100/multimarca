@@ -2,6 +2,7 @@
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { io } from "socket.io-client";
+import authFetch from "@/utils/authFetch";
 
 type WhatsAppNotificationsContextType = {
   pendingCount: number;
@@ -25,7 +26,7 @@ export function WhatsAppNotificationsProvider({
 
   const refresh = useCallback(async () => {
     try {
-      const r = await fetch("/api/whatsapp/inbox", { credentials: "include" });
+      const r = await authFetch("/api/whatsapp/inbox");
       const data = await r.json();
       if (Array.isArray(data)) setPendingCount(data.length);
     } catch (e) {
