@@ -214,6 +214,13 @@ async function processWithAI(
   });
 
   // 4. Actuar según el resultado
+  if (result.type === "courtesy") {
+    // Mensaje de cortesía — no hacer nada, no derivar al humano
+    // El mensaje ya está persistido en el historial, alcanza con eso
+    console.log("[AI] Mensaje de cortesía, sin acción necesaria");
+    return;
+  }
+
   if (result.type === "answer") {
     // La IA pudo responder → enviar y resetear estado
     await new SendMessageUseCase(service).execute({

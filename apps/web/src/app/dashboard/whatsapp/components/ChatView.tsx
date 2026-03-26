@@ -3,7 +3,7 @@
 import MediaMessage from "@/app/dashboard/whatsapp/components/MediaMessage";
 import MessageInput from "@/app/dashboard/whatsapp/components/MessageInput";
 import { useFetch } from "@/contexts/FetchContext";
-import { Box, Divider, Paper, Typography } from "@mui/material";
+import { Box, Chip, Divider, Paper, Typography } from "@mui/material";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useSocket } from "@/hooks/useSocket";
@@ -165,6 +165,14 @@ export default function ChatView(props: {
 
           const msg = it.msg;
           const isOutbound = msg.tipo === "outbound";
+          const bgColor =
+            msg.tipo === "inbound"
+              ? "#f0f0f0"
+              : msg.sentByAi
+                ? "#7B1FA2"
+                : "primary.main";
+          const textColor =
+            msg.tipo === "inbound" ? "text.primary" : "white";
           const needsMediaRender =
             !!msg.mediaId || msg.body.startsWith("[");
 
@@ -254,8 +262,8 @@ export default function ChatView(props: {
                   sx={{
                     px: 1.5,
                     py: 1,
-                    bgcolor: isOutbound ? "primary.main" : "#f0f0f0",
-                    color: isOutbound ? "white" : "text.primary",
+                    bgcolor: bgColor,
+                    color: textColor,
                     borderRadius: isOutbound
                       ? "18px 18px 4px 18px"
                       : "18px 18px 18px 4px",
@@ -275,33 +283,35 @@ export default function ChatView(props: {
                       >
                         {format(new Date(msg.timestamp), "HH:mm")}
                       </Typography>
-                      {msg.sentByAi === true ? (
-                        <Typography
-                          variant="caption"
+                      {msg.sentByAi ? (
+                        <Chip
+                          label="IA"
+                          size="small"
                           sx={{
-                            opacity: 0.6,
-                            display: "block",
+                            height: 16,
                             fontSize: "0.6rem",
+                            bgcolor: "rgba(255,255,255,0.2)",
+                            color: "white",
+                            "& .MuiChip-label": { px: 0.75 },
                           }}
-                        >
-                          IA
-                        </Typography>
+                        />
                       ) : null}
                     </>
                   ) : (
                     <>
                       <Typography variant="body2">{msg.body}</Typography>
-                      {msg.sentByAi === true ? (
-                        <Typography
-                          variant="caption"
+                      {msg.sentByAi ? (
+                        <Chip
+                          label="IA"
+                          size="small"
                           sx={{
-                            opacity: 0.6,
-                            display: "block",
+                            height: 16,
                             fontSize: "0.6rem",
+                            bgcolor: "rgba(255,255,255,0.2)",
+                            color: "white",
+                            "& .MuiChip-label": { px: 0.75 },
                           }}
-                        >
-                          IA
-                        </Typography>
+                        />
                       ) : null}
                       <Typography
                         variant="caption"
