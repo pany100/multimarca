@@ -52,6 +52,11 @@ import "src/app/globals.css";
 // Importa los iconos necesarios
 import { useFetch } from "@/contexts/FetchContext";
 import { useSocket } from "@/hooks/useSocket";
+import {
+  WhatsAppNotificationsProvider,
+  useWhatsAppNotifications,
+} from "@/contexts/WhatsAppNotificationsContext";
+import { WhatsAppNotificationSnackbar } from "@/app/dashboard/components/WhatsAppNotificationSnackbar";
 
 import useTareasDiarias from "@/sections/tareas-diarias/hooks/useTareasDiarias";
 import { boschColors } from "@/theme";
@@ -84,6 +89,15 @@ import "src/app/globals.css";
  */
 function isMenuPathActive(pathname: string, ruta: string): boolean {
   return pathname === ruta || pathname.startsWith(`${ruta}/`);
+}
+
+function WhatsAppNavBadgeIcon() {
+  const { pendingCount } = useWhatsAppNotifications();
+  return (
+    <Badge badgeContent={pendingCount} color="error" max={99}>
+      <WhatsAppIcon />
+    </Badge>
+  );
 }
 
 const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
@@ -597,7 +611,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           {
             permiso: "NotificacionesClientes",
             texto: "Whataspp",
-            icono: <WhatsAppIcon />,
+            icono: <WhatsAppNavBadgeIcon />,
             ruta: "/dashboard/whatsapp",
           },
           {
@@ -834,7 +848,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     </Box>
   );
   return (
-    <ProtectedRoute>
+    <WhatsAppNotificationsProvider>
+      <ProtectedRoute>
       {isLoading && (
         <LinearProgress
           sx={{
@@ -1053,7 +1068,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           {notificationMessage}
         </Alert>
       </Snackbar>
-    </ProtectedRoute>
+      <WhatsAppNotificationSnackbar />
+      </ProtectedRoute>
+    </WhatsAppNotificationsProvider>
   );
 };
 
