@@ -2,8 +2,25 @@ import CustomAutocomplete from "@/components/formV2/CustomAutocomplete";
 import CustomInputBoolean from "@/components/formV2/CustomInputBoolean";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import useProveedorAutocomplete from "@/hooks/useProveedorAutocomplete";
-import { Grid, Typography } from "@mui/material";
+import { getFormattedPrice } from "@/utils/fieldHelper";
+import { Box, Grid, Typography } from "@mui/material";
+import { useMemo } from "react";
+import { useWatch } from "react-hook-form";
 import * as yup from "yup";
+
+/** Mismo criterio que al elegir repuesto en RepuestosModal (precio unitario de venta). */
+function precioVentaCalculadoDesdeCompraYMarkup(
+  buyPrice: unknown,
+  markup: unknown
+): number | null {
+  const b =
+    buyPrice === "" || buyPrice == null ? NaN : Number(buyPrice);
+  const m =
+    markup === "" || markup == null ? 0 : Number(markup);
+  if (!Number.isFinite(b) || b < 0) return null;
+  if (!Number.isFinite(m)) return null;
+  return Math.ceil(b * (1 + m / 100) || 0);
+}
 
 export const schema = yup.object({
   name: yup.string().required("El nombre es requerido"),
@@ -36,6 +53,12 @@ export const unitsSchema = yup.object({
 
 const StockForm = () => {
   const { searchProveedores, initialProveedor } = useProveedorAutocomplete();
+  const buyPrice = useWatch({ name: "buyPrice" });
+  const markup = useWatch({ name: "markup" });
+  const precioVentaInformado = useMemo(
+    () => precioVentaCalculadoDesdeCompraYMarkup(buyPrice, markup),
+    [buyPrice, markup]
+  );
 
   return (
     <>
@@ -88,10 +111,26 @@ const StockForm = () => {
           <CustomInputText name="carBrand" label="Marca de Auto" />
         </Grid>
         <Grid item xs={12}>
-          <CustomInputBoolean
-            name="fraccionable"
-            label="Fraccionable (Para litros)"
-          />
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
+              flexWrap: "wrap",
+            }}
+          >
+            <CustomInputBoolean
+              name="fraccionable"
+              label="Fraccionable (Para litros)"
+            />
+            <Typography variant="body2" color="text.secondary">
+              Precio venta calculado:{" "}
+              {precioVentaInformado != null
+                ? getFormattedPrice(precioVentaInformado)
+                : "—"}
+            </Typography>
+          </Box>
         </Grid>
       </Grid>
     </>
