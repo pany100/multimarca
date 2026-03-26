@@ -151,21 +151,35 @@ async function processWithAI(
   const MAX_TURNS = parseInt(process.env.AI_MAX_TURNS ?? "3");
 
   // 1. Obtener contexto del cliente (turnos, órdenes, presupuestos)
+  const unMesAtras = new Date();
+  unMesAtras.setMonth(unMesAtras.getMonth() - 1);
+
   const [turnosFuturos, ultimasOrdenes, ultimosPresupuestos] =
     await Promise.all([
       prisma.turno.findMany({
-        where: { autoId: { in: autoIds }, fecha: { gte: new Date() } },
+        where: {
+          autoId: { in: autoIds },
+          fecha: { gte: new Date() },
+        },
         orderBy: { fecha: "asc" },
         take: 3,
       }),
       prisma.ordenReparacion.findMany({
-        where: { autoId: { in: autoIds } },
+        where: {
+          autoId: { in: autoIds },
+          fechaCreacion: { gte: unMesAtras },
+          estado: { in: ["EnProgreso", "Aceptado", "Terminado", "SeRetira", "Presupuestado"] },
+        },
         orderBy: { fechaCreacion: "desc" },
         take: 3,
         include: { auto: { select: { brand: true, model: true } } },
       }),
       prisma.presupuesto.findMany({
-        where: { autoId: { in: autoIds } },
+        where: {
+          autoId: { in: autoIds },
+          fecha: { gte: unMesAtras },
+          estado: { in: ["EnPreparacion", "Terminado", "Enviado", "ADefinir", "Aceptado"] },
+        },
         orderBy: { fecha: "desc" },
         take: 2,
         include: { auto: { select: { brand: true, model: true } } },

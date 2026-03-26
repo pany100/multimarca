@@ -7,10 +7,14 @@ export function normalizeArgentinePhone(raw: string): string {
 
   // 3. Si empieza con "54"...
   if (digits.startsWith("54")) {
-    if (digits.length === 12) {
-      // 549XXXXXXXXX (ya está bien)
+    // Si ya viene como 549XXXXXXXXXX (con el 9), no tocarlo.
+    if (digits.startsWith("549")) {
+      // Esperado: 12 o 13 dígitos (según si incluís/omitís un dígito de la parte local).
+    } else if (digits.length === 12) {
+      // 54XXXXXXXXX → insertar 9 después del 54
+      digits = `549${digits.slice(2)}`;
     } else if (digits.length === 13) {
-      // 5411XXXXXXXX (BA sin el 9) → insertar 9 después del 54
+      // 54XXXXXXXXXXX (BA sin el 9) → insertar 9 después del 54
       digits = `549${digits.slice(2)}`;
     } else if (digits.length === 11) {
       // 54XXXXXXXXX → insertar 9 después del 54
