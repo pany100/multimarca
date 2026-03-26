@@ -1,3 +1,4 @@
+import type { ConversationMessage } from "@/core/infrastructure/external/whatsapp/ai-filter";
 import type { EstadoConversacion } from "@prisma/client";
 
 export type CreateMensajeInput = {
@@ -33,9 +34,17 @@ export interface WhatsAppRepository {
       estado?: EstadoConversacion;
     }
   ): Promise<void>;
+  updateConversacionAi(
+    id: number,
+    data: { aiOwned: boolean; aiTurns: number }
+  ): Promise<void>;
   listConversacionesByCliente(clienteId: number): Promise<any[]>;
   listAllConversaciones(): Promise<any[]>;
   findConversacionById(id: number): Promise<any | null>;
   listPendingConversaciones(): Promise<any[]>;
+  getConversationHistory(
+    conversacionId: number,
+    limit: number
+  ): Promise<ConversationMessage[]>;
 }
 

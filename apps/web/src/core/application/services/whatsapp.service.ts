@@ -37,6 +37,23 @@ export class WhatsAppService {
     return this.repo.updateConversacion(id, data);
   }
 
+  updateConversacionAi(id: number, data: { aiOwned: boolean; aiTurns: number }) {
+    return this.repo.updateConversacionAi(id, data);
+  }
+
+  // Retorna true si la IA debe procesar este mensaje
+  shouldProcessWithAi(conversacion: { aiOwned: boolean }): boolean {
+    // Siempre intentar si la conversación está en manos de la IA
+    // El webhook decide si es el primer mensaje o no
+    return conversacion.aiOwned;
+  }
+
+  // Retorna true si la IA puede hacer otra pregunta de seguimiento
+  isUnderTurnLimit(conversacion: { aiTurns: number }): boolean {
+    const MAX = parseInt(process.env.AI_MAX_TURNS ?? "3");
+    return conversacion.aiTurns < MAX;
+  }
+
   listConversacionesByCliente(clienteId: number) {
     return this.repo.listConversacionesByCliente(clienteId);
   }
@@ -51,6 +68,10 @@ export class WhatsAppService {
 
   listPendingConversaciones() {
     return this.repo.listPendingConversaciones();
+  }
+
+  getConversationHistory(conversacionId: number, limit: number) {
+    return this.repo.getConversationHistory(conversacionId, limit);
   }
 
   isWithin24hWindow(ultimoMensajeEntrante: Date | null | undefined): boolean {

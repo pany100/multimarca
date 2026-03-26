@@ -857,6 +857,8 @@ model ConversacionWhatsApp {
   ultimoMensaje DateTime           @default(now())
   ultimoMensajeEntrante DateTime?
   estado        EstadoConversacion @default(Activa)
+  aiOwned       Boolean            @default(false)
+  aiTurns       Int                @default(0)
   cliente       Cliente            @relation(fields: [clienteId], references: [id], onDelete: Cascade)
   mensajes      MensajeWhatsApp[]
 

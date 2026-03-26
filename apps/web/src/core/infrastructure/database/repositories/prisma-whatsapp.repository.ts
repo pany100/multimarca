@@ -2,8 +2,9 @@ import type {
   CreateMensajeInput,
   WhatsAppRepository,
 } from "@/core/domain/repositories/whatsapp.repository";
+import type { ConversationMessage } from "@/core/infrastructure/external/whatsapp/ai-filter";
 import { prisma } from "@/core/infrastructure/database/prisma";
-import type { EstadoConversacion } from "@prisma/client";
+import type { EstadoConversacion, Prisma } from "@prisma/client";
 
 export class PrismaWhatsAppRepository implements WhatsAppRepository {
   async findClienteByPhone(phone: string): Promise<any | null> {
@@ -92,6 +93,16 @@ export class PrismaWhatsAppRepository implements WhatsAppRepository {
     await prisma.conversacionWhatsApp.update({ where: { id }, data });
   }
 
+  async updateConversacionAi(
+    id: number,
+    data: { aiOwned: boolean; aiTurns: number }
+  ): Promise<void> {
+    await prisma.conversacionWhatsApp.update({
+      where: { id },
+      data: data as Prisma.ConversacionWhatsAppUpdateInput,
+    });
+  }
+
   listConversacionesByCliente(clienteId: number) {
     return prisma.conversacionWhatsApp.findMany({
       where: { clienteId },
@@ -130,6 +141,26 @@ export class PrismaWhatsAppRepository implements WhatsAppRepository {
       },
       orderBy: { ultimoMensaje: "desc" },
     });
+  }
+
+  async getConversationHistory(
+    conversacionId: number,
+    limit: number
+  ): Promise<ConversationMessage[]> {
+    const mensajes = await prisma.mensajeWhatsApp.findMany({
+      where: {
+        conversacionId,
+        NOT: {
+          body: { in: ["", "[audio]", "[image]", "[document]", "[video]"] },
+        },
+      },
+      orderBy: { timestamp: "desc" },
+      take: limit,
+    });
+    return mensajes.reverse().map((m) => ({
+      role: m.tipo === "inbound" ? "client" : "assistant",
+      body: m.body,
+    }));
   }
 }
 

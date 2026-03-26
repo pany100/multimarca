@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `ConversacionWhatsApp` ADD COLUMN `aiOwned` BOOLEAN NOT NULL DEFAULT false,
+    ADD COLUMN `aiTurns` INTEGER NOT NULL DEFAULT 0;
