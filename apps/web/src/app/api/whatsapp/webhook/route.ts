@@ -28,6 +28,9 @@ export async function POST(request: Request) {
 
     const messages = body?.entry?.[0]?.changes?.[0]?.value?.messages;
     if (!Array.isArray(messages)) {
+      console.log(
+        "[WhatsApp Webhook] POST: sin array messages (status/otro evento) → 200 sin procesar"
+      );
       return NextResponse.json({ ok: true }, { status: 200 });
     }
 
@@ -40,6 +43,13 @@ export async function POST(request: Request) {
 
       const messageType = message.type ?? "text";
       const isText = messageType === "text";
+
+      console.log("[WhatsApp Webhook] mensaje entrante", {
+        waMessageId,
+        from,
+        messageType,
+        isText,
+      });
 
       // Extraer body según tipo
       const body = isText
@@ -81,11 +91,22 @@ export async function POST(request: Request) {
       const existing = await prisma.mensajeWhatsApp.findFirst({
         where: { waMessageId },
       });
-      if (existing) continue;
+      if (existing) {
+        console.log("[WhatsApp Webhook] flujo: omitir duplicado", {
+          waMessageId,
+        });
+        continue;
+      }
 
       // 2. Resolver cliente
       const cliente = await service.findClienteByPhone(from);
-      if (!cliente) continue;
+      if (!cliente) {
+        console.log(
+          "[WhatsApp Webhook] flujo: omitir — cliente no encontrado para from",
+          { from }
+        );
+        continue;
+      }
 
       // 3. Resolver conversación
       const conversacion = await service.findOrCreateConversacion(cliente.id);
@@ -107,6 +128,13 @@ export async function POST(request: Request) {
         timestamp,
       } as any);
 
+      console.log("[WhatsApp Webhook] inbound guardado", {
+        conversacionId: conversacion.id,
+        mensajeId: savedMessage.id,
+        requiresHuman: !isText,
+        messageType,
+      });
+
       // 5. Actualizar conversación
       await service.updateConversacion(conversacion.id, {
         ultimoMensaje: new Date(),
@@ -117,10 +145,24 @@ export async function POST(request: Request) {
       const conversacionActual = await service.findConversacionById(
         conversacion.id
       );
-      if (isText)
+      if (isText) {
+        console.log("[WhatsApp Webhook] flujo: IA — encolar processWithAI", {
+          conversacionId: conversacion.id,
+          mensajeId: savedMessage.id,
+          aiOwned: conversacionActual?.aiOwned,
+          aiTurns: conversacionActual?.aiTurns,
+        });
         processWithAI(savedMessage, cliente, conversacionActual).catch(
-          console.error
+          (err) => {
+            console.error("[WhatsApp Webhook][IA] error en processWithAI", err);
+          }
         );
+      } else {
+        console.log(
+          "[WhatsApp Webhook] flujo: sin IA — no es texto (requiere humano por tipo)",
+          { conversacionId: conversacion.id, messageType }
+        );
+      }
 
       getIO()?.emit("newWhatsAppMessage", {
         conversacionId: conversacion.id,
@@ -149,6 +191,15 @@ async function processWithAI(
   const service = new WhatsAppService(new PrismaWhatsAppRepository());
   const autoIds = cliente.cars.map((c) => c.id);
   const MAX_TURNS = parseInt(process.env.AI_MAX_TURNS ?? "3");
+
+  console.log("[WhatsApp Webhook][IA] inicio", {
+    conversacionId: conversacion.id,
+    mensajeId: savedMessage.id,
+    aiOwned: conversacion.aiOwned,
+    aiTurns: conversacion.aiTurns,
+    maxTurns: MAX_TURNS,
+    autos: autoIds.length,
+  });
 
   // 1. Obtener contexto del cliente (turnos, órdenes, presupuestos)
   const unMesAtras = new Date();
@@ -213,15 +264,25 @@ async function processWithAI(
     },
   });
 
+  console.log("[WhatsApp Webhook][IA] clasificador →", {
+    type: result.type,
+    conversacionId: conversacion.id,
+  });
+
   // 4. Actuar según el resultado
   if (result.type === "courtesy") {
     // Mensaje de cortesía — no hacer nada, no derivar al humano
     // El mensaje ya está persistido en el historial, alcanza con eso
-    console.log("[AI] Mensaje de cortesía, sin acción necesaria");
+    console.log(
+      "[WhatsApp Webhook][IA] flujo: courtesy — sin respuesta automática ni handoff"
+    );
     return;
   }
 
   if (result.type === "answer") {
+    console.log(
+      "[WhatsApp Webhook][IA] flujo: answer — enviar texto + reset aiOwned/aiTurns"
+    );
     // La IA pudo responder → enviar y resetear estado
     await new SendMessageUseCase(service).execute({
       conversacionId: conversacion.id,
@@ -236,6 +297,10 @@ async function processWithAI(
     });
   } else if (result.type === "follow_up") {
     if (conversacion.aiTurns >= MAX_TURNS) {
+      console.log(
+        "[WhatsApp Webhook][IA] flujo: follow_up — límite de turnos alcanzado → handoff humano",
+        { aiTurns: conversacion.aiTurns, max: MAX_TURNS }
+      );
       // Llegó al límite de turnos → derivar al humano
       await service.updateMessage(savedMessage.id, { requiresHuman: true });
       await service.updateConversacionAi(conversacion.id, {
@@ -247,6 +312,9 @@ async function processWithAI(
         requiresHuman: true,
       });
     } else {
+      console.log(
+        "[WhatsApp Webhook][IA] flujo: follow_up — enviar pregunta + aiOwned"
+      );
       // Puede hacer follow_up → enviar pregunta y marcar conversación como aiOwned
       await new SendMessageUseCase(service).execute({
         conversacionId: conversacion.id,
@@ -261,6 +329,9 @@ async function processWithAI(
       });
     }
   } else {
+    console.log(
+      "[WhatsApp Webhook][IA] flujo: handoff — derivar a humano + reset aiOwned/aiTurns"
+    );
     // handoff → derivar al humano y resetear estado
     await service.updateMessage(savedMessage.id, { requiresHuman: true });
     await service.updateConversacionAi(conversacion.id, {
