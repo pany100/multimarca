@@ -237,6 +237,28 @@ async function processWithAI(
       }),
     ]);
 
+  // Rate limit: si el cliente mandó más de 3 mensajes en los últimos 60 segundos,
+  // no procesar con la IA para evitar spam de respuestas
+  const hace60Segundos = new Date(Date.now() - 60 * 1000);
+  const mensajesRecientes = await prisma.mensajeWhatsApp.count({
+    where: {
+      conversacionId: conversacion.id,
+      tipo: "inbound",
+      timestamp: { gte: hace60Segundos },
+    },
+  });
+
+  if (mensajesRecientes > 3) {
+    console.log(
+      "[WhatsApp Webhook][IA] rate limit alcanzado — ignorando mensaje",
+      {
+        conversacionId: conversacion.id,
+        mensajesRecientes,
+      }
+    );
+    return;
+  }
+
   // 2. Obtener historial reciente de la conversación (últimos 10 mensajes)
   const history = await service.getConversationHistory(conversacion.id, 10);
 
@@ -271,19 +293,11 @@ async function processWithAI(
 
   // 4. Actuar según el resultado
   if (result.type === "courtesy") {
-    // Mensaje de cortesía — no hacer nada, no derivar al humano
-    // El mensaje ya está persistido en el historial, alcanza con eso
-    console.log(
-      "[WhatsApp Webhook][IA] flujo: courtesy — sin respuesta automática ni handoff"
-    );
+    console.log("[WhatsApp Webhook][IA] flujo: cortesía — sin acción");
     return;
   }
 
   if (result.type === "answer") {
-    console.log(
-      "[WhatsApp Webhook][IA] flujo: answer — enviar texto + reset aiOwned/aiTurns"
-    );
-    // La IA pudo responder → enviar y resetear estado
     await new SendMessageUseCase(service).execute({
       conversacionId: conversacion.id,
       to: savedMessage.from,
@@ -295,13 +309,19 @@ async function processWithAI(
       aiOwned: false,
       aiTurns: 0,
     });
-  } else if (result.type === "follow_up") {
+    return;
+  }
+
+  if (result.type === "follow_up") {
     if (conversacion.aiTurns >= MAX_TURNS) {
-      console.log(
-        "[WhatsApp Webhook][IA] flujo: follow_up — límite de turnos alcanzado → handoff humano",
-        { aiTurns: conversacion.aiTurns, max: MAX_TURNS }
-      );
-      // Llegó al límite de turnos → derivar al humano
+      // Llegó al límite — enviar mensaje de derivación y pasar a humano
+      await new SendMessageUseCase(service).execute({
+        conversacionId: conversacion.id,
+        to: savedMessage.from,
+        type: "text",
+        body: "Enseguida te comunico con un asesor del taller que puede ayudarte mejor.",
+        sentByAi: true,
+      });
       await service.updateMessage(savedMessage.id, { requiresHuman: true });
       await service.updateConversacionAi(conversacion.id, {
         aiOwned: false,
@@ -312,10 +332,6 @@ async function processWithAI(
         requiresHuman: true,
       });
     } else {
-      console.log(
-        "[WhatsApp Webhook][IA] flujo: follow_up — enviar pregunta + aiOwned"
-      );
-      // Puede hacer follow_up → enviar pregunta y marcar conversación como aiOwned
       await new SendMessageUseCase(service).execute({
         conversacionId: conversacion.id,
         to: savedMessage.from,
@@ -328,11 +344,18 @@ async function processWithAI(
         aiTurns: conversacion.aiTurns + 1,
       });
     }
-  } else {
-    console.log(
-      "[WhatsApp Webhook][IA] flujo: handoff — derivar a humano + reset aiOwned/aiTurns"
-    );
-    // handoff → derivar al humano y resetear estado
+    return;
+  }
+
+  if (result.type === "handoff_with_message") {
+    // Enviar mensaje amigable al cliente antes de derivar
+    await new SendMessageUseCase(service).execute({
+      conversacionId: conversacion.id,
+      to: savedMessage.from,
+      type: "text",
+      body: result.response,
+      sentByAi: true,
+    });
     await service.updateMessage(savedMessage.id, { requiresHuman: true });
     await service.updateConversacionAi(conversacion.id, {
       aiOwned: false,

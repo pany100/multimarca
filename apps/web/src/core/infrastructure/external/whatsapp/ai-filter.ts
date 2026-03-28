@@ -4,7 +4,7 @@ export type AiFilterResult =
   | { type: "answer"; response: string }
   | { type: "follow_up"; question: string }
   | { type: "courtesy" }
-  | { type: "handoff" };
+  | { type: "handoff_with_message"; response: string };
 
 export type ConversationMessage = {
   role: "client" | "assistant";
@@ -76,48 +76,58 @@ function coerceAssistantJsonText(raw: string): string {
   return s.trim();
 }
 
-const SYSTEM_PROMPT = `Sos el asistente de un taller mecánico. Tu trabajo es clasificar mensajes
-entrantes de clientes y responder cuando tenés los datos necesarios.
+const SYSTEM_PROMPT = `Sos el asistente de un taller mecánico. Tu trabajo es clasificar y responder
+mensajes entrantes de clientes.
 
 Podés responder sobre: turnos agendados, estado de reparaciones y estado
 de presupuestos. Usá únicamente el contexto provisto. Nunca inventes datos.
 
 Respondé SOLO con JSON válido sin texto adicional ni backticks.
 
-Tipos de respuesta posibles:
+TIPOS DE RESPUESTA:
 
-{\"type\":\"courtesy\"}
-Usá esto cuando el mensaje del cliente es claramente un cierre de conversación
-o acuse de recibo que no requiere respuesta ni acción. Ejemplos: 'gracias',
-'ok', 'perfecto', 'dale', 'entendido', 'buenísimo', '👍', '🙏', emojis solos,
-mensajes muy cortos sin pregunta implícita. También usalo cuando el cliente
-responde a un PDF o informe que el taller acaba de enviar con un comentario
-positivo o neutro que no contiene ninguna consulta.
+{"type":"courtesy"}
+Mensajes que son claramente cierre de conversación o acuse de recibo sin
+consulta implícita. Ejemplos: 'gracias', 'ok', 'perfecto', 'dale', '👍',
+emojis solos, respuestas positivas a un informe enviado sin pregunta.
 
-{\"type\":\"answer\",\"response\":\"...\"}
-Usá esto cuando podés responder la consulta con los datos del contexto.
-Si los arrays de órdenes y presupuestos están vacíos o no tienen registros
-del último mes, respondé con:
+{"type":"follow_up","question":"..."}
+Usalo en DOS situaciones:
+1. El cliente saluda o abre la conversación sin hacer una consulta concreta
+   ('hola', 'buenas', 'buen día', 'hola cómo están', etc.).
+   En ese caso responder con un saludo + preguntar en qué podés ayudar.
+   Ejemplo: {"type":"follow_up","question":"¡Hola! ¿En qué te podemos ayudar hoy?"}
+2. El cliente hace una consulta sobre tus temas pero necesitás más información
+   para responder (ej: tiene varios autos y no sabés a cuál se refiere).
+Limitá los follow_up: si ya hiciste una pregunta y el cliente respondió
+pero igual no podés resolver, usá handoff_with_message.
+
+{"type":"answer","response":"..."}
+Podés responder con datos concretos del contexto.
+Si la consulta es sobre tus temas pero los arrays están vacíos o no tienen
+registros del último mes, responder con:
 'No encontramos registros recientes para tu vehículo. Un administrativo
 del taller se va a contactar con vos a la brevedad.'
 
-{\"type\":\"follow_up\",\"question\":\"...\"}
-Usá esto SOLO cuando una pregunta concreta al cliente te permitiría resolver
-su consulta. Por ejemplo si tiene varios autos y no sabés a cuál se refiere.
-Limitá los follow_up: si ya hiciste una pregunta y el cliente respondió
-pero igual no podés resolver, usá handoff.
+{"type":"handoff_with_message","response":"..."}
+La consulta está fuera de tus temas o no podés resolverla, pero SIEMPRE
+respondés algo amigable antes de derivar. Nunca dejes al cliente sin respuesta.
+Ejemplos de respuesta:
+- 'Enseguida te comunico con un asesor del taller que puede ayudarte mejor.'
+- 'Esa consulta la vamos a derivar con alguien del equipo. Te contactamos a la brevedad.'
+- 'Para eso mejor te atiendo un asesor directamente. ¡Ya te contactamos!'
+Variá el mensaje para que no suene siempre igual.
 
-{\"type\":\"handoff\"}
-Usá esto cuando la consulta es sobre un tema que no podés resolver (precios,
-horarios, garantías, reclamos, etc.) o cuando después de un follow_up
-sigues sin poder responder.
-
-Reglas adicionales:
+REGLAS:
+- Nunca uses handoff sin mensaje. Siempre usá handoff_with_message.
+- Saludos sin consulta → follow_up con saludo amigable, nunca handoff.
 - No menciones que sos una IA ni que consultás una base de datos.
-- No respondas a mensajes de cortesía con más cortesía — usá courtesy.
-- Si el historial muestra que el taller acaba de enviar un documento y el
-cliente responde algo neutro o positivo sin hacer una pregunta, usá courtesy.
-- Respondé siempre en español, de forma breve y amigable.`;
+- Respondé siempre en español, de forma breve y amigable.
+- Si el historial muestra que ya saludaste al cliente y el cliente sigue
+  mandando saludos sin hacer una consulta concreta, respondé con courtesy.
+  No repitas el saludo más de una vez.
+- Si el cliente lleva más de 2 mensajes sin dar información útil después
+  de que preguntaste en qué podés ayudar, usá handoff_with_message.`;
 
 const DEFAULT_MODEL = "claude-sonnet-4-5-20250929";
 
@@ -135,7 +145,10 @@ export class WhatsAppAiFilter {
     context: AiFilterContext;
   }): Promise<AiFilterResult> {
     if (checkAndResetCircuit()) {
-      return { type: "handoff" };
+      return {
+        type: "handoff_with_message",
+        response: "Enseguida te comunico con un asesor del taller.",
+      };
     }
 
     try {
@@ -162,43 +175,56 @@ export class WhatsAppAiFilter {
         block?.type === "text" ? block.text.trim() : "";
 
       const jsonText = coerceAssistantJsonText(text);
-      let parsed: unknown;
+      let raw: unknown;
       try {
-        parsed = JSON.parse(jsonText);
+        raw = JSON.parse(jsonText);
       } catch {
         console.error("[AI Filter] Respuesta no es JSON válido:", text);
-        return { type: "handoff" };
+        return {
+          type: "handoff_with_message",
+          response: "Enseguida te comunico con un asesor del taller.",
+        };
       }
 
       recordSuccess();
 
-      if (
-        parsed &&
-        typeof parsed === "object" &&
-        parsed !== null &&
-        "type" in parsed
-      ) {
-        const p = parsed as Record<string, unknown>;
-        if (
-          p.type === "answer" &&
-          typeof p.response === "string" &&
-          p.response.length > 0
-        ) {
-          return { type: "answer", response: p.response };
-        }
-        if (
-          p.type === "follow_up" &&
-          typeof p.question === "string" &&
-          p.question.length > 0
-        ) {
-          return { type: "follow_up", question: p.question };
-        }
-        if (p.type === "courtesy") {
-          return { type: "courtesy" };
-        }
+      if (typeof raw !== "object" || raw === null) {
+        return {
+          type: "handoff_with_message",
+          response: "Enseguida te comunico con un asesor del taller.",
+        };
       }
 
-      return { type: "handoff" };
+      const parsed = raw as Record<string, unknown>;
+
+      if (
+        parsed.type === "answer" &&
+        typeof parsed.response === "string" &&
+        parsed.response.length > 0
+      )
+        return { type: "answer", response: parsed.response };
+
+      if (
+        parsed.type === "follow_up" &&
+        typeof parsed.question === "string" &&
+        parsed.question.length > 0
+      )
+        return { type: "follow_up", question: parsed.question };
+
+      if (parsed.type === "courtesy") return { type: "courtesy" };
+
+      if (
+        parsed.type === "handoff_with_message" &&
+        typeof parsed.response === "string" &&
+        parsed.response.length > 0
+      )
+        return { type: "handoff_with_message", response: parsed.response };
+
+      // Fallback: si la IA devuelve algo inesperado, tratar como handoff con mensaje genérico
+      return {
+        type: "handoff_with_message",
+        response: "Enseguida te comunico con un asesor del taller.",
+      };
     } catch (err: unknown) {
       const status = err instanceof APIError ? err.status : undefined;
       const isLimitError = status === 429 || status === 402;
@@ -207,7 +233,10 @@ export class WhatsAppAiFilter {
         "[AI Filter] Error:",
         err instanceof Error ? err.message : err
       );
-      return { type: "handoff" };
+      return {
+        type: "handoff_with_message",
+        response: "Enseguida te comunico con un asesor del taller.",
+      };
     }
   }
 }
