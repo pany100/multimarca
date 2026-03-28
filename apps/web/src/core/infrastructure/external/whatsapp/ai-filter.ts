@@ -76,6 +76,42 @@ function coerceAssistantJsonText(raw: string): string {
   return s.trim();
 }
 
+/** Normaliza texto para detectar saludo sin consulta (solo tokens permitidos). */
+function normalizeForGreetingCheck(s: string): string {
+  return s
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[!?.¡¿,;:]+$/g, "")
+    .replace(/\s+/g, " ");
+}
+
+const SALUDO_SOLO_TOKENS = new Set([
+  "hola",
+  "buenas",
+  "buenos",
+  "buen",
+  "dia",
+  "dias",
+  "tardes",
+  "noches",
+  "hey",
+  "que",
+  "tal",
+  "muy",
+  "todos",
+  "todas",
+]);
+
+function isSaludoSinConsulta(text: string): boolean {
+  const n = normalizeForGreetingCheck(text);
+  if (!n || n.length > 120) return false;
+  const words = n.split(" ").filter(Boolean);
+  if (words.length === 0 || words.length > 10) return false;
+  return words.every((w) => SALUDO_SOLO_TOKENS.has(w));
+}
+
 const SYSTEM_PROMPT = `Sos el asistente de un taller mecánico. Tu trabajo es mantener una conversación
 natural con el cliente y resolver su consulta cuando tenés los datos necesarios.
 
@@ -92,6 +128,10 @@ ninguna consulta implícita ni explícita. Ejemplos: 'gracias', 'ok', 'perfecto'
 '👍', emojis solos, 'buenísimo', respuestas positivas a un informe recibido
 sin pregunta de seguimiento.
 NO uses courtesy para saludos — un saludo siempre abre una conversación.
+Nunca clasifiques como courtesy mensajes que sean solo saludo: 'buenos días',
+'buenas', 'hola', 'buen día', 'qué tal' solos o equivalentes — eso es siempre
+follow_up (salvo el caso explícito más abajo de varios saludos seguidos sin
+contenido después de que ya respondiste).
 
 {"type":"follow_up","question":"..."}
 Usalo para mantener la conversación activa. Hay tres situaciones:
@@ -126,7 +166,8 @@ REGLAS IMPORTANTES:
 - Si el historial muestra que ya saludaste, no saludes de nuevo. Continuá
   la conversación desde donde quedó.
 - Si el cliente manda varios saludos seguidos sin aportar información,
-  después del segundo podés usar courtesy.
+  después del segundo podés usar courtesy — pero el PRIMER mensaje de la charla
+  que sea solo saludo nunca es courtesy: siempre follow_up.
 - Nunca menciones que sos una IA, un bot, o que derivás a alguien.
 - Mantené un tono amigable y natural en todo momento.
 - Respondé siempre en español.`;
@@ -150,6 +191,23 @@ export class WhatsAppAiFilter {
       return {
         type: "handoff_with_message",
         response: "Enseguida te comunico con un asesor del taller.",
+      };
+    }
+
+    const lastClient = [...params.history]
+      .reverse()
+      .find((m) => m.role === "client");
+    const yaHuboRespuestaAsistente = params.history.some(
+      (m) => m.role === "assistant"
+    );
+    if (
+      lastClient &&
+      isSaludoSinConsulta(lastClient.body) &&
+      !yaHuboRespuestaAsistente
+    ) {
+      return {
+        type: "follow_up",
+        question: "¡Hola! ¿En qué te puedo ayudar?",
       };
     }
 
