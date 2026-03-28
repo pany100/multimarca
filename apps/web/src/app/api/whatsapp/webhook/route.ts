@@ -141,34 +141,49 @@ export async function POST(request: Request) {
         ultimoMensajeEntrante: new Date(),
       });
 
-      // Obtener la conversación actualizada para leer aiOwned y aiTurns
-      const conversacionActual = await service.findConversacionById(
-        conversacion.id
-      );
-      if (isText) {
-        console.log("[WhatsApp Webhook] flujo: IA — encolar processWithAI", {
-          conversacionId: conversacion.id,
-          mensajeId: savedMessage.id,
-          aiOwned: conversacionActual?.aiOwned,
-          aiTurns: conversacionActual?.aiTurns,
-        });
-        processWithAI(savedMessage, cliente, conversacionActual).catch(
-          (err) => {
-            console.error("[WhatsApp Webhook][IA] error en processWithAI", err);
-          }
-        );
-      } else {
-        console.log(
-          "[WhatsApp Webhook] flujo: sin IA — no es texto (requiere humano por tipo)",
-          { conversacionId: conversacion.id, messageType }
-        );
-      }
-
       getIO()?.emit("newWhatsAppMessage", {
         conversacionId: conversacion.id,
         clienteId: cliente.id,
         previewBody: body,
       });
+
+      // Si el mensaje no es texto, avisar al cliente y derivar al humano
+      if (!isText) {
+        // Emitir socket para notificar al administrativo
+        getIO()?.emit("newWhatsAppMessage", {
+          conversacionId: conversacion.id,
+          requiresHuman: true,
+        });
+
+        // Responder al cliente con un mensaje automático
+        try {
+          const service2 = new WhatsAppService(new PrismaWhatsAppRepository());
+          await new SendMessageUseCase(service2).execute({
+            conversacionId: conversacion.id,
+            to: from,
+            type: "text",
+            body: "Recibimos tu mensaje. Por el momento solo podemos procesar mensajes de texto de forma automática. Un asesor del taller te va a responder a la brevedad.",
+            sentByAi: true,
+          });
+        } catch (err) {
+          console.error(
+            "[WhatsApp Webhook] error al enviar respuesta automática a media:",
+            err
+          );
+          // No romper el webhook si falla el envío
+        }
+
+        // No llamar a processWithAI para mensajes no-texto
+        continue;
+      }
+
+      // Solo llegar acá si isText === true
+      const conversacionActual = await service.findConversacionById(
+        conversacion.id
+      );
+      processWithAI(savedMessage, cliente, conversacionActual).catch(
+        console.error
+      );
     }
   } catch (e) {
     console.error(e);
@@ -200,6 +215,58 @@ async function processWithAI(
     maxTurns: MAX_TURNS,
     autos: autoIds.length,
   });
+
+  // Rate limit: si el cliente mandó más de 3 mensajes en los últimos 60 segundos,
+  // no procesar con la IA para evitar spam de respuestas
+  const hace60Segundos = new Date(Date.now() - 60 * 1000);
+  const mensajesRecientes = await prisma.mensajeWhatsApp.count({
+    where: {
+      conversacionId: conversacion.id,
+      tipo: "inbound",
+      timestamp: { gte: hace60Segundos },
+    },
+  });
+
+  if (mensajesRecientes > 3) {
+    console.log(
+      "[WhatsApp Webhook][IA] rate limit alcanzado — ignorando mensaje",
+      {
+        conversacionId: conversacion.id,
+        mensajesRecientes,
+      }
+    );
+    return;
+  }
+
+  // Verificar si el último mensaje de la conversación ya fue derivado al humano
+  // y el tiempo transcurrido es menor a 1 hora (conversación activa con humano)
+  const ultimoMensajeDerivado = await prisma.mensajeWhatsApp.findFirst({
+    where: {
+      conversacionId: conversacion.id,
+      requiresHuman: true,
+      read: false,
+    },
+    orderBy: { timestamp: "desc" },
+  });
+
+  const unaHoraAtras = new Date(Date.now() - 60 * 60 * 1000);
+  if (
+    ultimoMensajeDerivado &&
+    ultimoMensajeDerivado.timestamp > unaHoraAtras
+  ) {
+    console.log(
+      "[WhatsApp Webhook][IA] conversación en manos de humano — no procesar",
+      {
+        conversacionId: conversacion.id,
+      }
+    );
+    // Emitir socket para que el administrativo vea el mensaje nuevo
+    getIO()?.emit("newWhatsAppMessage", {
+      conversacionId: conversacion.id,
+      requiresHuman: false, // el mensaje nuevo no es requiresHuman, pero hay que notificar
+    });
+    return;
+  }
 
   // 1. Obtener contexto del cliente (turnos, órdenes, presupuestos)
   const unMesAtras = new Date();
@@ -236,28 +303,6 @@ async function processWithAI(
         include: { auto: { select: { brand: true, model: true } } },
       }),
     ]);
-
-  // Rate limit: si el cliente mandó más de 3 mensajes en los últimos 60 segundos,
-  // no procesar con la IA para evitar spam de respuestas
-  const hace60Segundos = new Date(Date.now() - 60 * 1000);
-  const mensajesRecientes = await prisma.mensajeWhatsApp.count({
-    where: {
-      conversacionId: conversacion.id,
-      tipo: "inbound",
-      timestamp: { gte: hace60Segundos },
-    },
-  });
-
-  if (mensajesRecientes > 3) {
-    console.log(
-      "[WhatsApp Webhook][IA] rate limit alcanzado — ignorando mensaje",
-      {
-        conversacionId: conversacion.id,
-        mensajesRecientes,
-      }
-    );
-    return;
-  }
 
   // 2. Obtener historial reciente de la conversación (últimos 10 mensajes)
   const history = await service.getConversationHistory(conversacion.id, 10);
