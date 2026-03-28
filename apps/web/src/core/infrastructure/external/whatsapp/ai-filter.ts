@@ -80,13 +80,17 @@ function coerceAssistantJsonText(raw: string): string {
 function normalizeForGreetingCheck(s: string): string {
   return s
     .trim()
+    .replace(/\u200b/g, "")
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[!?.¡¿,;:]+$/g, "")
-    .replace(/\s+/g, " ");
+    // Puntuación en medio o al final ("hola!", "hola! hola") → separar o quitar
+    .replace(/[!?.¡¿,;:]+/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
+/** Saludo + vocativos breves (equipo, chicos, etc.) sin consulta. */
 const SALUDO_SOLO_TOKENS = new Set([
   "hola",
   "buenas",
@@ -102,6 +106,17 @@ const SALUDO_SOLO_TOKENS = new Set([
   "muy",
   "todos",
   "todas",
+  "a",
+  "chicos",
+  "chicas",
+  "equipo",
+  "gente",
+  "amigos",
+  "amigas",
+  "muchachos",
+  "muchachas",
+  "genios",
+  "cracks",
 ]);
 
 function isSaludoSinConsulta(text: string): boolean {
@@ -110,6 +125,20 @@ function isSaludoSinConsulta(text: string): boolean {
   const words = n.split(" ").filter(Boolean);
   if (words.length === 0 || words.length > 10) return false;
   return words.every((w) => SALUDO_SOLO_TOKENS.has(w));
+}
+
+/** Texto del mensaje entrante actual: preferir payload explícito al historial (orden/límite). */
+function getTextoClienteParaSaludo(params: {
+  ultimoMensajeInbound?: string;
+  history: ConversationMessage[];
+}): string {
+  const direct = params.ultimoMensajeInbound?.trim();
+  if (direct) return direct;
+  return (
+    [...params.history]
+      .reverse()
+      .find((m) => m.role === "client")?.body ?? ""
+  );
 }
 
 const SYSTEM_PROMPT = `Sos el asistente de un taller mecánico. Tu trabajo es mantener una conversación
@@ -129,9 +158,9 @@ ninguna consulta implícita ni explícita. Ejemplos: 'gracias', 'ok', 'perfecto'
 sin pregunta de seguimiento.
 NO uses courtesy para saludos — un saludo siempre abre una conversación.
 Nunca clasifiques como courtesy mensajes que sean solo saludo: 'buenos días',
-'buenas', 'hola', 'buen día', 'qué tal' solos o equivalentes — eso es siempre
-follow_up (salvo el caso explícito más abajo de varios saludos seguidos sin
-contenido después de que ya respondiste).
+'buenas', 'hola', 'buen día', 'buen día chicos', 'qué tal' solos o equivalentes
+— eso es siempre follow_up (salvo el caso explícito más abajo de varios saludos
+seguidos sin contenido después de que ya respondiste).
 
 {"type":"follow_up","question":"..."}
 Usalo para mantener la conversación activa. Hay tres situaciones:
@@ -186,6 +215,8 @@ export class WhatsAppAiFilter {
     history: ConversationMessage[];
     cliente: { fullName: string };
     context: AiFilterContext;
+    /** Mensaje entrante que se está clasificando (recomendado; evita depender solo del historial). */
+    ultimoMensajeInbound?: string;
   }): Promise<AiFilterResult> {
     if (checkAndResetCircuit()) {
       return {
@@ -194,17 +225,8 @@ export class WhatsAppAiFilter {
       };
     }
 
-    const lastClient = [...params.history]
-      .reverse()
-      .find((m) => m.role === "client");
-    const yaHuboRespuestaAsistente = params.history.some(
-      (m) => m.role === "assistant"
-    );
-    if (
-      lastClient &&
-      isSaludoSinConsulta(lastClient.body) &&
-      !yaHuboRespuestaAsistente
-    ) {
+    const textoSaludo = getTextoClienteParaSaludo(params);
+    if (textoSaludo && isSaludoSinConsulta(textoSaludo)) {
       return {
         type: "follow_up",
         question: "¡Hola! ¿En qué te puedo ayudar?",
@@ -271,7 +293,16 @@ export class WhatsAppAiFilter {
       )
         return { type: "follow_up", question: parsed.question };
 
-      if (parsed.type === "courtesy") return { type: "courtesy" };
+      if (parsed.type === "courtesy") {
+        const texto = getTextoClienteParaSaludo(params);
+        if (texto && isSaludoSinConsulta(texto)) {
+          return {
+            type: "follow_up",
+            question: "¡Hola! ¿En qué te puedo ayudar?",
+          };
+        }
+        return { type: "courtesy" };
+      }
 
       if (
         parsed.type === "handoff_with_message" &&

@@ -311,6 +311,7 @@ async function processWithAI(
   const result = await aiFilter.classify({
     history,
     cliente: { fullName: cliente.fullName },
+    ultimoMensajeInbound: savedMessage.body,
     context: {
       turnosFuturos: turnosFuturos.map((t) => ({
         fecha: t.fecha,
