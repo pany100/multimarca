@@ -2,6 +2,7 @@ import { useGeneratePdf } from "@/hooks/orden-reparacion/useGeneratePdf";
 import { useState } from "react";
 import { useUpdatePresupuesto } from "./useUpdatePresupuesto";
 import { useFetch } from "@/contexts/FetchContext";
+import { resolveWhatsAppErrorMessage } from "@/utils/whatsapp-error-messages";
 
 interface UsePresupuestoHandlersProps {
   presupuesto: any;
@@ -96,7 +97,7 @@ export const usePresupuestoHandlers = ({
     } catch (error: any) {
       setSnackbar({
         open: true,
-        message: error.message || "Error al enviar por WhatsApp",
+        message: resolveWhatsAppErrorMessage(error?.message),
         severity: "error",
       });
     } finally {

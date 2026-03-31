@@ -1,5 +1,6 @@
 import { WhatsAppService } from "@/core/application/services/whatsapp.service";
 import { SendMessageUseCase } from "@/core/application/use-cases/whatsapp/send-message.use-case";
+import { SendPdfUseCase } from "@/core/application/use-cases/whatsapp/send-pdf.use-case";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { PrismaWhatsAppRepository } from "@/core/infrastructure/database/repositories/prisma-whatsapp.repository";
 import { aiFilter } from "@/core/infrastructure/external/whatsapp/ai-filter";
@@ -194,223 +195,242 @@ export async function POST(request: Request) {
 }
 
 async function processWithAI(
-  savedMessage: {
-    id: number;
-    body: string;
-    from: string;
-    conversacionId: number;
-  },
+  savedMessage: { id: number; body: string; from: string; conversacionId: number },
   cliente: { id: number; fullName: string; cars: { id: number }[] },
   conversacion: { id: number; aiOwned: boolean; aiTurns: number }
 ): Promise<void> {
-  const service = new WhatsAppService(new PrismaWhatsAppRepository());
-  const autoIds = cliente.cars.map((c) => c.id);
-  const MAX_TURNS = parseInt(process.env.AI_MAX_TURNS ?? "3");
+  const service = new WhatsAppService(new PrismaWhatsAppRepository())
+  const autoIds = cliente.cars.map(c => c.id)
+  const MAX_TURNS = parseInt(process.env.AI_MAX_TURNS ?? "3")
+  const HUMAN_TAKEOVER_MINUTES = parseInt(process.env.AI_HUMAN_TAKEOVER_MINUTES ?? "60")
 
-  console.log("[WhatsApp Webhook][IA] inicio", {
+  console.log("[AI] inicio processWithAI", {
     conversacionId: conversacion.id,
     mensajeId: savedMessage.id,
+    body: savedMessage.body,
     aiOwned: conversacion.aiOwned,
     aiTurns: conversacion.aiTurns,
     maxTurns: MAX_TURNS,
-    autos: autoIds.length,
-  });
+    clienteId: cliente.id,
+    autos: autoIds
+  })
 
-  // Rate limit: si el cliente mandó más de 3 mensajes en los últimos 60 segundos,
-  // no procesar con la IA para evitar spam de respuestas
-  const hace60Segundos = new Date(Date.now() - 60 * 1000);
+  // 1. Chequear si un humano tomó el control recientemente
+  const humanoReciente = await prisma.mensajeWhatsApp.findFirst({
+    where: {
+      conversacionId: conversacion.id,
+      requiresHuman: true,
+      read: false
+    },
+    orderBy: { timestamp: "desc" }
+  })
+
+  const takoverCutoff = new Date(Date.now() - HUMAN_TAKEOVER_MINUTES * 60 * 1000)
+  if (humanoReciente && humanoReciente.timestamp > takoverCutoff) {
+    console.log("[AI] conversación en manos de humano — omitir IA", {
+      conversacionId: conversacion.id,
+      ultimoRequiresHumanAt: humanoReciente.timestamp,
+      cutoff: takoverCutoff
+    })
+    getIO()?.emit("newWhatsAppMessage", { conversacionId: conversacion.id, requiresHuman: false })
+    return
+  }
+
+  // 2. Rate limit
+  const hace60Seg = new Date(Date.now() - 60 * 1000)
   const mensajesRecientes = await prisma.mensajeWhatsApp.count({
     where: {
       conversacionId: conversacion.id,
       tipo: "inbound",
-      timestamp: { gte: hace60Segundos },
-    },
-  });
-
-  if (mensajesRecientes > 3) {
-    console.log(
-      "[WhatsApp Webhook][IA] rate limit alcanzado — ignorando mensaje",
-      {
-        conversacionId: conversacion.id,
-        mensajesRecientes,
-      }
-    );
-    return;
+      timestamp: { gte: hace60Seg }
+    }
+  })
+  const RATE_LIMIT = parseInt(process.env.AI_RATE_LIMIT_PER_MINUTE ?? "3")
+  if (mensajesRecientes > RATE_LIMIT) {
+    console.log("[AI] rate limit alcanzado — omitir", { conversacionId: conversacion.id, mensajesRecientes })
+    return
   }
 
-  // Verificar si el último mensaje de la conversación ya fue derivado al humano
-  // y el tiempo transcurrido es menor a 1 hora (conversación activa con humano)
-  const ultimoMensajeDerivado = await prisma.mensajeWhatsApp.findFirst({
-    where: {
-      conversacionId: conversacion.id,
-      requiresHuman: true,
-      read: false,
-    },
-    orderBy: { timestamp: "desc" },
-  });
+  // 3. Obtener contexto
+  const quinceDiasAtras = new Date()
+  quinceDiasAtras.setDate(quinceDiasAtras.getDate() - 15)
 
-  const unaHoraAtras = new Date(Date.now() - 60 * 60 * 1000);
-  if (
-    ultimoMensajeDerivado &&
-    ultimoMensajeDerivado.timestamp > unaHoraAtras
-  ) {
-    console.log(
-      "[WhatsApp Webhook][IA] conversación en manos de humano — no procesar",
-      {
-        conversacionId: conversacion.id,
+  const [turnosFuturos, ultimasOrdenes, ultimosPresupuestos, trabajosRealizados] = await Promise.all([
+    prisma.turno.findMany({
+      where: { autoId: { in: autoIds }, fecha: { gte: new Date() } },
+      orderBy: { fecha: "asc" },
+      take: 3
+    }),
+    prisma.ordenReparacion.findMany({
+      where: {
+        autoId: { in: autoIds },
+        fechaCreacion: { gte: quinceDiasAtras },
+        estado: { in: ["EnProgreso", "Aceptado", "Terminado", "SeRetira", "Presupuestado"] }
+      },
+      orderBy: { fechaCreacion: "desc" },
+      take: 3,
+      include: {
+        auto: { select: { brand: true, model: true, patent: true } },
+        trabajosRealizados: { select: { descripcion: true } }
       }
-    );
-    // Emitir socket para que el administrativo vea el mensaje nuevo
-    getIO()?.emit("newWhatsAppMessage", {
-      conversacionId: conversacion.id,
-      requiresHuman: false, // el mensaje nuevo no es requiresHuman, pero hay que notificar
-    });
-    return;
+    }),
+    prisma.presupuesto.findMany({
+      where: {
+        autoId: { in: autoIds },
+        fecha: { gte: quinceDiasAtras },
+        estado: { in: ["EnPreparacion", "Terminado", "Enviado", "ADefinir", "Aceptado"] }
+      },
+      orderBy: { fecha: "desc" },
+      take: 2,
+      include: { auto: { select: { brand: true, model: true, patent: true } } }
+    }),
+    prisma.trabajoRealizado.findMany({
+      where: {
+        ordenReparacion: {
+          autoId: { in: autoIds },
+          fechaCreacion: { gte: quinceDiasAtras }
+        }
+      },
+      select: { descripcion: true, ordenReparacionId: true },
+      take: 10
+    })
+  ])
+
+  console.log("[AI] contexto obtenido", {
+    turnosFuturos: turnosFuturos.map(t => ({ fecha: t.fecha, hora: t.hora, problema: t.problema })),
+    ultimasOrdenes: ultimasOrdenes.map(o => ({
+      id: o.id,
+      estado: o.estado,
+      auto: o.auto.patent,
+      fechaCreacion: o.fechaCreacion,
+      fechaSalida: (o as any).fechaSalidaReparacion ?? null,
+      trabajos: o.trabajosRealizados.map(tr => tr.descripcion)
+    })),
+    ultimosPresupuestos: ultimosPresupuestos.map(p => ({
+      id: p.id,
+      estado: p.estado,
+      auto: p.auto?.patent
+    })),
+    trabajosRealizados: trabajosRealizados.map(tr => tr.descripcion)
+  })
+
+  // 4. Historial
+  const history = await service.getConversationHistory(conversacion.id, 10)
+  console.log("[AI] historial", { mensajes: history.length, ultimo: history[history.length - 1] ?? null })
+
+  // 5. Clasificar
+  const context = {
+    turnosFuturos: turnosFuturos.map(t => ({
+      fecha: t.fecha, hora: t.hora, problema: t.problema, auto: ""
+    })),
+    ultimasOrdenes: ultimasOrdenes.map(o => ({
+      id: o.id,
+      estado: o.estado,
+      auto: [o.auto.brand, o.auto.model, o.auto.patent].filter(Boolean).join(" "),
+      fechaCreacion: o.fechaCreacion,
+      fechaSalidaReparacion: (o as any).fechaSalidaReparacion ?? null,
+      trabajosRealizados: o.trabajosRealizados.map(tr => tr.descripcion)
+    })),
+    ultimosPresupuestos: ultimosPresupuestos.map(p => ({
+      id: p.id,
+      estado: p.estado,
+      auto: [p.auto?.brand, p.auto?.model, p.auto?.patent].filter(Boolean).join(" ")
+    })),
+    trabajosRealizados: trabajosRealizados.map(tr => tr.descripcion)
   }
 
-  // 1. Obtener contexto del cliente (turnos, órdenes, presupuestos)
-  const unMesAtras = new Date();
-  unMesAtras.setMonth(unMesAtras.getMonth() - 1);
+  const result = await aiFilter.classify({ history, cliente: { fullName: cliente.fullName }, context: context as any })
 
-  const [turnosFuturos, ultimasOrdenes, ultimosPresupuestos] =
-    await Promise.all([
-      prisma.turno.findMany({
-        where: {
-          autoId: { in: autoIds },
-          fecha: { gte: new Date() },
-        },
-        orderBy: { fecha: "asc" },
-        take: 3,
-      }),
-      prisma.ordenReparacion.findMany({
-        where: {
-          autoId: { in: autoIds },
-          fechaCreacion: { gte: unMesAtras },
-          estado: { in: ["EnProgreso", "Aceptado", "Terminado", "SeRetira", "Presupuestado"] },
-        },
-        orderBy: { fechaCreacion: "desc" },
-        take: 3,
-        include: { auto: { select: { brand: true, model: true } } },
-      }),
-      prisma.presupuesto.findMany({
-        where: {
-          autoId: { in: autoIds },
-          fecha: { gte: unMesAtras },
-          estado: { in: ["EnPreparacion", "Terminado", "Enviado", "ADefinir", "Aceptado"] },
-        },
-        orderBy: { fecha: "desc" },
-        take: 2,
-        include: { auto: { select: { brand: true, model: true } } },
-      }),
-    ]);
+  console.log("[AI] resultado clasificador", { type: result.type, conversacionId: conversacion.id })
 
-  // 2. Obtener historial reciente de la conversación (últimos 10 mensajes)
-  const history = await service.getConversationHistory(conversacion.id, 10);
-
-  // 3. Llamar al clasificador con el historial completo
-  const result = await aiFilter.classify({
-    history,
-    cliente: { fullName: cliente.fullName },
-    ultimoMensajeInbound: savedMessage.body,
-    context: {
-      turnosFuturos: turnosFuturos.map((t) => ({
-        fecha: t.fecha,
-        hora: t.hora,
-        problema: t.problema,
-        auto: "",
-      })),
-      ultimasOrdenes: ultimasOrdenes.map((o) => ({
-        id: o.id,
-        estado: o.estado,
-        auto: [o.auto.brand, o.auto.model].filter(Boolean).join(" "),
-      })),
-      ultimosPresupuestos: ultimosPresupuestos.map((p) => ({
-        id: p.id,
-        estado: p.estado,
-        auto: [p.auto?.brand, p.auto?.model].filter(Boolean).join(" "),
-      })),
-    },
-  });
-
-  console.log("[WhatsApp Webhook][IA] clasificador →", {
-    type: result.type,
-    conversacionId: conversacion.id,
-  });
-
-  // 4. Actuar según el resultado
+  // 6. Actuar
   if (result.type === "courtesy") {
-    console.log("[WhatsApp Webhook][IA] flujo: cortesía — sin acción");
-    return;
+    console.log("[AI] cortesía — sin acción")
+    return
   }
 
   if (result.type === "answer") {
+    console.log("[AI] answer — enviando respuesta", { preview: (result as any).response?.slice(0, 80) })
     await new SendMessageUseCase(service).execute({
       conversacionId: conversacion.id,
       to: savedMessage.from,
       type: "text",
-      body: result.response,
-      sentByAi: true,
-    });
-    await service.updateConversacionAi(conversacion.id, {
-      aiOwned: false,
-      aiTurns: 0,
-    });
-    return;
+      body: (result as any).response,
+      sentByAi: true
+    })
+    await service.updateConversacionAi(conversacion.id, { aiOwned: false, aiTurns: 0 })
+
+    // Si hay una orden terminada reciente, intentar enviar el PDF
+    const ordenTerminada = ultimasOrdenes.find(o => o.estado === "Terminado" || o.estado === "SeRetira")
+    if (ordenTerminada) {
+      console.log("[AI] orden terminada detectada — intentar enviar PDF", { ordenId: ordenTerminada.id })
+      try {
+        await new SendPdfUseCase(service).execute({ resourceType: "orden", resourceId: ordenTerminada.id })
+        console.log("[AI] PDF de orden enviado", { ordenId: ordenTerminada.id })
+      } catch (err) {
+        console.error("[AI] error al enviar PDF de orden — continuar sin PDF", err)
+      }
+    }
+
+    // Si hay un presupuesto enviado/terminado reciente, intentar enviar el PDF
+    const presupuestoEnviado = ultimosPresupuestos.find(
+      p => p.estado === "Enviado" || p.estado === "Terminado"
+    )
+    if (presupuestoEnviado) {
+      console.log("[AI] presupuesto enviado detectado — intentar enviar PDF", { presupuestoId: presupuestoEnviado.id })
+      try {
+        await new SendPdfUseCase(service).execute({ resourceType: "presupuesto", resourceId: presupuestoEnviado.id })
+        console.log("[AI] PDF de presupuesto enviado", { presupuestoId: presupuestoEnviado.id })
+      } catch (err) {
+        console.error("[AI] error al enviar PDF de presupuesto — continuar sin PDF", err)
+      }
+    }
+
+    return
   }
 
   if (result.type === "follow_up") {
     if (conversacion.aiTurns >= MAX_TURNS) {
-      // Llegó al límite — enviar mensaje de derivación y pasar a humano
+      console.log("[AI] límite de turnos alcanzado — handoff", { aiTurns: conversacion.aiTurns, maxTurns: MAX_TURNS })
       await new SendMessageUseCase(service).execute({
         conversacionId: conversacion.id,
         to: savedMessage.from,
         type: "text",
-        body: "Enseguida te comunico con un asesor del taller que puede ayudarte mejor.",
-        sentByAi: true,
-      });
-      await service.updateMessage(savedMessage.id, { requiresHuman: true });
-      await service.updateConversacionAi(conversacion.id, {
-        aiOwned: false,
-        aiTurns: 0,
-      });
-      getIO()?.emit("newWhatsAppMessage", {
-        conversacionId: conversacion.id,
-        requiresHuman: true,
-      });
+        body: "Aguardanos un momento, ahora nos comunicamos con vos.",
+        sentByAi: true
+      })
+      await service.updateMessage(savedMessage.id, { requiresHuman: true })
+      await service.updateConversacionAi(conversacion.id, { aiOwned: false, aiTurns: 0 })
+      getIO()?.emit("newWhatsAppMessage", { conversacionId: conversacion.id, requiresHuman: true })
     } else {
+      console.log("[AI] follow_up", { aiTurns: conversacion.aiTurns, question: (result as any).question?.slice(0, 80) })
       await new SendMessageUseCase(service).execute({
         conversacionId: conversacion.id,
         to: savedMessage.from,
         type: "text",
-        body: result.question,
-        sentByAi: true,
-      });
+        body: (result as any).question,
+        sentByAi: true
+      })
       await service.updateConversacionAi(conversacion.id, {
         aiOwned: true,
-        aiTurns: conversacion.aiTurns + 1,
-      });
+        aiTurns: conversacion.aiTurns + 1
+      })
     }
-    return;
+    return
   }
 
   if (result.type === "handoff_with_message") {
-    // Enviar mensaje amigable al cliente antes de derivar
+    console.log("[AI] handoff_with_message", { preview: (result as any).response?.slice(0, 80) })
     await new SendMessageUseCase(service).execute({
       conversacionId: conversacion.id,
       to: savedMessage.from,
       type: "text",
-      body: result.response,
-      sentByAi: true,
-    });
-    await service.updateMessage(savedMessage.id, { requiresHuman: true });
-    await service.updateConversacionAi(conversacion.id, {
-      aiOwned: false,
-      aiTurns: 0,
-    });
-    getIO()?.emit("newWhatsAppMessage", {
-      conversacionId: conversacion.id,
-      requiresHuman: true,
-    });
+      body: (result as any).response,
+      sentByAi: true
+    })
+    await service.updateMessage(savedMessage.id, { requiresHuman: true })
+    await service.updateConversacionAi(conversacion.id, { aiOwned: false, aiTurns: 0 })
+    getIO()?.emit("newWhatsAppMessage", { conversacionId: conversacion.id, requiresHuman: true })
   }
 }
 

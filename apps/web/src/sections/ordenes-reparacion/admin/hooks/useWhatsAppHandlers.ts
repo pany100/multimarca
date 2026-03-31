@@ -1,4 +1,5 @@
 import { useFetch } from "@/contexts/FetchContext";
+import { resolveWhatsAppErrorMessage } from "@/utils/whatsapp-error-messages";
 import { useState } from "react";
 
 export const useWhatsAppHandlers = (ordenId: number) => {
@@ -26,24 +27,24 @@ export const useWhatsAppHandlers = (ordenId: number) => {
         body: JSON.stringify({ resourceType: "orden", resourceId: ordenId }),
       });
 
-      if (response.ok) {
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
         setSnackbar({
           open: true,
-          message: "PDF enviado por WhatsApp correctamente",
-          severity: "success",
-        });
-      } else {
-        const err = await response.json();
-        setSnackbar({
-          open: true,
-          message: err.error || "Error al enviar por WhatsApp",
+          message: resolveWhatsAppErrorMessage(errData.error),
           severity: "error",
         });
+      } else {
+        setSnackbar({
+          open: true,
+          message: "PDF enviado por WhatsApp correctamente.",
+          severity: "success",
+        });
       }
-    } catch (error) {
+    } catch (error: any) {
       setSnackbar({
         open: true,
-        message: "Error al enviar por WhatsApp",
+        message: resolveWhatsAppErrorMessage(error?.message),
         severity: "error",
       });
     } finally {
