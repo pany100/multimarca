@@ -330,16 +330,22 @@ export default function generateBudgetHtml(repair: any): string {
         ${
           repair.descuento > 0
             ? `
-              <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold;">
-                Descuento
-                ${
-                  repair.descripcionDescuento !== null
-                    ? `${repair.descripcionDescuento} `
-                    : ""
-                }
-              </div>
-              <div class="TypographyBody1" style="margin-top: 20px; text-align: right; font-weight: bold;">
-                ${"- "}$${Number(repair.descuento).toLocaleString("es-AR")}
+              <div style='
+                display: grid;
+                grid-template-columns: 80% 20%;
+                margin-top: 20px;
+                margin-right: 15px;
+              '>
+                <div class="TypographyBody1" style="font-weight: bold;">
+                  Descuento${
+                    repair.descripcionDescuento !== null
+                      ? ` - ${repair.descripcionDescuento}`
+                      : ""
+                  }
+                </div>
+                <div class="TypographyBody1" style="text-align: right; font-weight: bold;">
+                  ${"- "}$${Number(repair.descuento).toLocaleString("es-AR")}
+                </div>
               </div>
           `
             : ""

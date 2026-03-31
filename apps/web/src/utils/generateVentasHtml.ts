@@ -249,16 +249,22 @@ export default function generateClientOrderHtml(venta: any): string {
           ${
             venta.descuento > 0
               ? `
-                <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold;">
-                  Descuento
-                  ${
-                    venta.descripcionDescuento
-                      ? ` - ${venta.descripcionDescuento}`
-                      : ""
-                  }
-                </div>
-                <div class="TypographyBody1" style="margin-top: 20px; text-align: right; font-weight: bold;">
-                  ${"- "}$${Number(venta.descuento).toLocaleString("es-AR")}
+                <div style='
+                  display: grid;
+                  grid-template-columns: 80% 20%;
+                  margin-top: 20px;
+                  margin-right: 15px;
+                '>
+                  <div class="TypographyBody1" style="font-weight: bold;">
+                    Descuento${
+                      venta.descripcionDescuento
+                        ? ` - ${venta.descripcionDescuento}`
+                        : ""
+                    }
+                  </div>
+                  <div class="TypographyBody1" style="text-align: right; font-weight: bold;">
+                    ${"- "}$${Number(venta.descuento).toLocaleString("es-AR")}
+                  </div>
                 </div>
             `
               : ""
