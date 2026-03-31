@@ -119,6 +119,22 @@ async function enviarRecordatoriosMantenimiento() {
         tr.diasParaRecordatorio IS NOT NULL
       AND 
         JSON_LENGTH(tr.diasParaRecordatorio) > 0
+      AND
+        NOT EXISTS (
+          SELECT 1
+          FROM OrdenReparacion orep2
+          JOIN Auto a2 ON a2.id = orep2.autoId
+          JOIN TrabajoRealizado tr2 ON tr2.ordenReparacionId = orep2.id
+          WHERE
+            orep2.estado = 'Terminado'
+          AND
+            a2.ownerId = c.id
+          AND
+            tr2.descripcion = tr.descripcion
+          AND
+            COALESCE(orep2.fechaSalidaReparacion, orep2.fechaCreacion) >
+            COALESCE(orep.fechaSalidaReparacion, orep.fechaCreacion)
+        )
     `;
 
     const diasToArray = (val: unknown): number[] => {

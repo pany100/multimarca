@@ -109,7 +109,11 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile): Promise<void> {
  */
 async function procesarUnArchivoPending(archivo: CustomFile): Promise<void> {
   try {
-    const folder = archivo.ordenReparacionId ? "scanner" : "recibos";
+    const folder = archivo.ordenReparacionId
+      ? "scanner"
+      : archivo.presupuestoCedulaId || archivo.ventaCedulaId
+        ? "cedula-verde"
+        : "recibos";
     const dev = isDev ? " [SIMULADO]" : "";
 
     // 1. Si ya tiene finalPath, solo marcar como Listo

@@ -1,6 +1,7 @@
 "use client";
 
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
+import ImageWithPreview from "@/components/ImageWithPreview";
 import { CommonOrderCard } from "@/sections/ordenes-reparacion/admin/components/CommonOrderCard";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { Box, Divider, Grid, Typography } from "@mui/material";
@@ -169,19 +170,24 @@ const PresupuestoInformacionGeneral = () => {
                 Cédula
               </Typography>
               <Box
-                component="img"
-                src={(presupuesto as { cedulaPath: string }).cedulaPath}
-                alt="Cédula"
                 sx={{
-                  display: "block",
-                  maxWidth: 200,
-                  width: "100%",
-                  height: "auto",
+                  display: "inline-block",
                   borderRadius: 1,
                   border: "1px solid",
                   borderColor: "divider",
+                  overflow: "hidden",
+                  maxWidth: 200,
+                  width: "100%",
                 }}
-              />
+              >
+                <ImageWithPreview
+                  src={(presupuesto as { cedulaPath: string }).cedulaPath}
+                  alt="Cédula"
+                  title="Cédula"
+                  width={200}
+                  height={140}
+                />
+              </Box>
             </Box>
           )}
         </Grid>
