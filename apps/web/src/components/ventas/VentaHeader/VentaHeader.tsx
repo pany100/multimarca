@@ -4,7 +4,16 @@ import ConfirmPrintModal from "@/components/ConfirmPrintModal";
 import { useVenta } from "@/sections/ventas/admin/contexts/VentaContext";
 import { useVentaHandlers } from "@/sections/ventas/hooks/useVentaHandlers";
 import { useWhatsAppVentaHandlers } from "@/sections/ventas/hooks/useWhatsAppVentaHandlers";
-import { Alert, Box, Snackbar } from "@mui/material";
+import PrintIcon from "@mui/icons-material/Print";
+import {
+  Alert,
+  Box,
+  ListItemIcon,
+  ListItemText,
+  Menu,
+  MenuItem,
+  Snackbar,
+} from "@mui/material";
 import { useState } from "react";
 import { VentaActions } from "./VentaActions";
 import { VentaInfo } from "./VentaInfo";
@@ -18,8 +27,15 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
 
   const isSticky = useVentaSticky();
   const [openConfirmPrint, setOpenConfirmPrint] = useState(false);
+  const [printMenuAnchor, setPrintMenuAnchor] = useState<null | HTMLElement>(
+    null
+  );
+  const openPrintMenu = Boolean(printMenuAnchor);
+  const [pendingPrintType, setPendingPrintType] = useState<
+    "factura" | "remito" | null
+  >(null);
 
-  const { handlePrint, printLoading, snackbar, closeSnackbar } =
+  const { handlePrint, handlePrintRemito, printLoading, snackbar, closeSnackbar } =
     useVentaHandlers({
       venta,
     });
@@ -33,17 +49,37 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
     "Entregado",
   ].includes(venta?.estado);
 
-  const handlePrintClick = () => {
-    if (debeConfirmarImpresion) {
+  const handleOpenPrintMenu = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setPrintMenuAnchor(event.currentTarget);
+  };
+
+  const handleClosePrintMenu = () => {
+    setPrintMenuAnchor(null);
+  };
+
+  const requestPrint = (type: "factura" | "remito") => {
+    setPendingPrintType(type);
+    handleClosePrintMenu();
+    if (type === "factura" && debeConfirmarImpresion) {
       setOpenConfirmPrint(true);
-    } else {
+      return;
+    }
+    if (type === "factura") {
       handlePrint();
+    } else {
+      handlePrintRemito();
     }
   };
 
   const handleConfirmPrint = () => {
     setOpenConfirmPrint(false);
+    if (pendingPrintType === "remito") {
+      handlePrintRemito();
+      setPendingPrintType(null);
+      return;
+    }
     handlePrint();
+    setPendingPrintType(null);
   };
 
   return (
@@ -84,11 +120,30 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
             printLoading={printLoading}
             enviandoWhatsApp={enviandoWhatsApp}
             isSticky={isSticky}
-            onPrint={handlePrintClick}
+            onPrint={handleOpenPrintMenu}
             onEnviarWhatsApp={handleEnviarPorWhatsApp}
           />
         </Box>
       </Box>
+
+      <Menu
+        anchorEl={printMenuAnchor}
+        open={openPrintMenu}
+        onClose={handleClosePrintMenu}
+      >
+        <MenuItem onClick={() => requestPrint("factura")}>
+          <ListItemIcon>
+            <PrintIcon fontSize="small" color="primary" />
+          </ListItemIcon>
+          <ListItemText>Imprimir Factura</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => requestPrint("remito")}>
+          <ListItemIcon>
+            <PrintIcon fontSize="small" color="secondary" />
+          </ListItemIcon>
+          <ListItemText>Imprimir Remito</ListItemText>
+        </MenuItem>
+      </Menu>
 
       <ConfirmPrintModal
         open={openConfirmPrint}

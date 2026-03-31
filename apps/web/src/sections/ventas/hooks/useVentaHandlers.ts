@@ -34,12 +34,22 @@ export const useVentaHandlers = ({ venta }: UseVentaHandlersProps) => {
     }
   };
 
+  const handlePrintRemito = async () => {
+    setPrintLoading(true);
+    try {
+      await generatePdf(`/api/ventas/${venta.id}/remito`);
+    } finally {
+      setPrintLoading(false);
+    }
+  };
+
   const closeSnackbar = () => {
     setSnackbar({ ...snackbar, open: false });
   };
 
   return {
     handlePrint,
+    handlePrintRemito,
     printLoading,
     snackbar,
     closeSnackbar,
