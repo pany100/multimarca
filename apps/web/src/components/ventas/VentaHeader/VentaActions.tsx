@@ -5,13 +5,14 @@ import {
 import PrintIcon from "@mui/icons-material/Print";
 import WhatsAppIcon from "@mui/icons-material/WhatsApp";
 import { Box, Button, Chip, CircularProgress } from "@mui/material";
+import type React from "react";
 
 interface VentaActionsProps {
   venta: any;
   printLoading: boolean;
   enviandoWhatsApp: boolean;
   isSticky?: boolean;
-  onPrint: () => void;
+  onPrint: React.MouseEventHandler<HTMLButtonElement>;
   onEnviarWhatsApp: () => void;
 }
 

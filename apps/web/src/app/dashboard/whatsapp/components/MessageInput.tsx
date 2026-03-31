@@ -11,6 +11,7 @@ import {
 import SendIcon from "@mui/icons-material/Send";
 import { useFetch } from "@/contexts/FetchContext";
 import TemplateConfirmModal from "@/app/dashboard/whatsapp/components/TemplateConfirmModal";
+import { resolveWhatsAppErrorMessage } from "@/utils/whatsapp-error-messages";
 
 type MensajeWhatsApp = {
   id: number;
@@ -57,7 +58,7 @@ export default function MessageInput(props: {
     if (isWindowOpen) {
       setSending(true);
       try {
-        const response = await authFetch("/api/whatsapp/mensajes", {
+        const res = await authFetch("/api/whatsapp/mensajes", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
@@ -68,14 +69,15 @@ export default function MessageInput(props: {
           }),
         });
 
-        if (response.ok) {
-          setText("");
-          onMessageSent();
-        } else {
-          setError("No se pudo enviar el mensaje. Intentá de nuevo.");
+        if (!res.ok) {
+          const errData = await res.json().catch(() => ({}));
+          setError(resolveWhatsAppErrorMessage(errData.error));
+          return;
         }
-      } catch (e) {
-        setError("No se pudo enviar el mensaje. Intentá de nuevo.");
+        setText("");
+        onMessageSent();
+      } catch (err: any) {
+        setError(resolveWhatsAppErrorMessage(err?.message));
       } finally {
         setSending(false);
       }

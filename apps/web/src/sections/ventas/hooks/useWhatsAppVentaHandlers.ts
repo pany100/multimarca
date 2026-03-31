@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useFetch } from "@/contexts/FetchContext";
+import { resolveWhatsAppErrorMessage } from "@/utils/whatsapp-error-messages";
 
 export const useWhatsAppVentaHandlers = (ventaId: number) => {
   const { authFetch } = useFetch();
@@ -30,7 +31,7 @@ export const useWhatsAppVentaHandlers = (ventaId: number) => {
     } catch (error: any) {
       setSnackbar({
         open: true,
-        message: error.message || "Error al enviar por WhatsApp",
+        message: resolveWhatsAppErrorMessage(error?.message),
         severity: "error",
       });
     } finally {
