@@ -9,15 +9,14 @@ import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
 import ChecklistIcon from "@mui/icons-material/Checklist";
 import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
-import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import DateRangeIcon from "@mui/icons-material/DateRange";
+import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import HandymanIcon from "@mui/icons-material/Handyman";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import LockIcon from "@mui/icons-material/Lock";
-import SettingsIcon from "@mui/icons-material/Settings";
 import MenuIcon from "@mui/icons-material/Menu";
 import MonetizationOnIcon from "@mui/icons-material/MonetizationOn";
 import MoneyOffIcon from "@mui/icons-material/MoneyOff";
@@ -25,38 +24,39 @@ import PeopleIcon from "@mui/icons-material/People";
 import QueryStatsIcon from "@mui/icons-material/QueryStats";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import RequestQuoteIcon from "@mui/icons-material/RequestQuote";
+import SettingsIcon from "@mui/icons-material/Settings";
 import {
-    Alert,
-    AppBar,
-    Badge,
-    Box,
-    Collapse,
-    Container,
-    Drawer,
-    IconButton,
-    LinearProgress,
-    List,
-    ListItem,
-    ListItemIcon,
-    ListItemText,
-    Snackbar,
-    Toolbar,
-    Typography,
-    useMediaQuery,
-    useTheme,
+  Alert,
+  AppBar,
+  Badge,
+  Box,
+  Collapse,
+  Container,
+  Drawer,
+  IconButton,
+  LinearProgress,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Snackbar,
+  Toolbar,
+  Typography,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import "src/app/globals.css";
 // Importa los iconos necesarios
+import { WhatsAppNotificationSnackbar } from "@/app/dashboard/components/WhatsAppNotificationSnackbar";
 import { useFetch } from "@/contexts/FetchContext";
-import { useSocket } from "@/hooks/useSocket";
 import {
   WhatsAppNotificationsProvider,
   useWhatsAppNotifications,
 } from "@/contexts/WhatsAppNotificationsContext";
-import { WhatsAppNotificationSnackbar } from "@/app/dashboard/components/WhatsAppNotificationSnackbar";
+import { useSocket } from "@/hooks/useSocket";
 
 import useTareasDiarias from "@/sections/tareas-diarias/hooks/useTareasDiarias";
 import { boschColors } from "@/theme";
@@ -110,7 +110,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>(
-    {}
+    {},
   );
   const [notificationOpen, setNotificationOpen] = useState(false);
   const [notificationMessage, setNotificationMessage] = useState("");
@@ -126,7 +126,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   const fetchCantidadNotificaciones = useCallback(async () => {
     try {
       const response = await authFetch(
-        "/api/notificaciones-internas/cant-no-leidas"
+        "/api/notificaciones-internas/cant-no-leidas",
       );
       if (response.ok) {
         const data = await response.json();
@@ -151,9 +151,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
 
   const fetchWhatsappNoLeido = useCallback(async () => {
     try {
-      const response = await authFetch(
-        "/api/whatsapp/no-leidas"
-      );
+      const response = await authFetch("/api/whatsapp/no-leidas");
       if (response.ok) {
         const data = await response.json();
         setNotificacionesWhatsappNoLeidas(data.cantidadNoLeidas);
@@ -195,9 +193,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     if (socket) {
       socket.on("newNotification", (data?: { texto?: string }) => {
         fetchCantidadNotificaciones();
-        setNotificationMessage(
-          data?.texto ?? "Tienes mensajes sin leer"
-        );
+        setNotificationMessage(data?.texto ?? "Tienes mensajes sin leer");
         setNotificationOpen(true);
       });
 
@@ -569,7 +565,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             ruta: "/dashboard/acreedores",
           },
           {
-            permiso: "Ingresos",
+            permiso: "ResumenTransacciones",
             texto: "Resumen Transacciones",
             icono: <CompareArrowsIcon />,
             ruta: "/dashboard/resumen-transacciones",
@@ -635,13 +631,13 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         ],
       },
     ],
-    [cantidadNotificaciones, notificacionesWhatsappNoLeidas, cantidadTareas]
+    [cantidadNotificaciones, notificacionesWhatsappNoLeidas, cantidadTareas],
   );
 
   useEffect(() => {
     const newOpenSections = menuSections.reduce((acc, section) => {
       const isOpen = section.items.some((item) =>
-        isMenuPathActive(pathname, item.ruta)
+        isMenuPathActive(pathname, item.ruta),
       );
       return { ...acc, [section.title]: isOpen };
     }, {});
@@ -827,7 +823,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                                   "& .MuiListItemText-primary": {
                                     fontWeight: isMenuPathActive(
                                       pathname,
-                                      item.ruta
+                                      item.ruta,
                                     )
                                       ? 600
                                       : 400,
@@ -837,12 +833,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                               />
                             )}
                           </ListItem>
-                        )
+                        ),
                     )}
                   </List>
                 </Collapse>
               </Box>
-            )
+            ),
         )}
       </List>
     </Box>
@@ -850,225 +846,224 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <WhatsAppNotificationsProvider>
       <ProtectedRoute>
-      {isLoading && (
-        <LinearProgress
-          sx={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            right: 0,
-            zIndex: 9999,
-          }}
-        />
-      )}
-      <Box sx={{ display: "flex" }}>
-        <AppBar
-          position="fixed"
-          elevation={1}
-          sx={{
-            zIndex: (theme) => theme.zIndex.drawer + 1,
-            backgroundColor: boschColors.boschBlue[100],
-            borderBottom: 0,
-          }}
-        >
-          <Toolbar sx={{ justifyContent: "space-between", height: 64 }}>
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+        {isLoading && (
+          <LinearProgress
+            sx={{
+              position: "fixed",
+              top: 0,
+              left: 0,
+              right: 0,
+              zIndex: 9999,
+            }}
+          />
+        )}
+        <Box sx={{ display: "flex" }}>
+          <AppBar
+            position="fixed"
+            elevation={1}
+            sx={{
+              zIndex: (theme) => theme.zIndex.drawer + 1,
+              backgroundColor: boschColors.boschBlue[100],
+              borderBottom: 0,
+            }}
+          >
+            <Toolbar sx={{ justifyContent: "space-between", height: 64 }}>
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <IconButton
+                  color="inherit"
+                  aria-label="open drawer"
+                  edge="start"
+                  onClick={handleDrawerToggle}
+                  sx={{
+                    mr: 2,
+                    display: { md: "none" },
+                    color: boschColors.white,
+                  }}
+                >
+                  <MenuIcon />
+                </IconButton>
+                <Typography
+                  variant="h6"
+                  noWrap
+                  sx={{
+                    color: boschColors.white,
+                    fontWeight: 500,
+                  }}
+                >
+                  {pathname === "/dashboard"
+                    ? "Dashboard"
+                    : menuSections
+                        .flatMap((section) => section.items)
+                        .find((item) => isMenuPathActive(pathname, item.ruta))
+                        ?.texto || "Dashboard"}
+                </Typography>
+              </Box>
+
+              <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                <IconButton
+                  sx={{ color: boschColors.white }}
+                  onClick={() =>
+                    router.push("/dashboard/notificaciones-internas")
+                  }
+                >
+                  <Badge badgeContent={cantidadNotificaciones} color="error">
+                    <NotificationsIcon />
+                  </Badge>
+                </IconButton>
+
+                <IconButton
+                  sx={{ color: boschColors.white }}
+                  onClick={() => router.push("/dashboard/whatsapp")}
+                >
+                  <Badge
+                    badgeContent={notificacionesWhatsappNoLeidas}
+                    color="error"
+                  >
+                    <WhatsAppIcon />
+                  </Badge>
+                </IconButton>
+
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 1,
+                    p: 1,
+                    borderRadius: 1,
+                    bgcolor: "action.hover",
+                  }}
+                >
+                  <PersonIcon sx={{ color: boschColors.white }} />
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      color: boschColors.white,
+                      fontWeight: 500,
+                      display: { xs: "none", sm: "block" },
+                    }}
+                  >
+                    {userName}
+                  </Typography>
+                </Box>
+
+                <Tooltip title="Cerrar sesión">
+                  <IconButton
+                    onClick={() => {
+                      logout();
+                      router.push("/login");
+                    }}
+                    sx={{
+                      color: boschColors.white,
+                      "&:hover": { bgcolor: "error.lighter" },
+                    }}
+                  >
+                    <LogoutIcon />
+                  </IconButton>
+                </Tooltip>
+              </Box>
+            </Toolbar>
+          </AppBar>
+          <Drawer
+            variant={isMobile ? "temporary" : "permanent"}
+            open={drawerOpen}
+            onClose={handleDrawerToggle}
+            sx={{
+              width: drawerCompressed && !isMobile ? 60 : 240,
+              flexShrink: 0,
+              "& .MuiDrawer-paper": {
+                width: drawerCompressed && !isMobile ? 60 : 240,
+                boxSizing: "border-box",
+                overflowX: "hidden",
+                transition: theme.transitions.create("width", {
+                  easing: theme.transitions.easing.sharp,
+                  duration: theme.transitions.duration.enteringScreen,
+                }),
+              },
+            }}
+          >
+            <Toolbar />
+            {drawer}
+          </Drawer>
+          <Box
+            component="main"
+            sx={{
+              flexGrow: 1,
+              p: 3,
+              width: "100%", // Cambiado para usar todo el ancho disponible
+              overflowX: "auto", // Permite desplazamiento horizontal si es necesario
+              transition: theme.transitions.create(["margin", "width"], {
+                easing: theme.transitions.easing.sharp,
+                duration: theme.transitions.duration.enteringScreen,
+              }),
+              minHeight: "100vh",
+              backgroundColor: "background.paper",
+            }}
+          >
+            {isMobile && (
               <IconButton
                 color="inherit"
                 aria-label="open drawer"
                 edge="start"
                 onClick={handleDrawerToggle}
-                sx={{
-                  mr: 2,
-                  display: { md: "none" },
-                  color: boschColors.white,
-                }}
+                sx={{ mr: 2, ...(drawerOpen && { display: "none" }) }}
               >
                 <MenuIcon />
               </IconButton>
-              <Typography
-                variant="h6"
-                noWrap
-                sx={{
-                  color: boschColors.white,
-                  fontWeight: 500,
-                }}
-              >
-                {pathname === "/dashboard"
-                  ? "Dashboard"
-                  : menuSections
-                      .flatMap((section) => section.items)
-                      .find((item) => isMenuPathActive(pathname, item.ruta))
-                      ?.texto ||
-                    "Dashboard"}
-              </Typography>
-            </Box>
-
-            <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-              <IconButton
-                sx={{ color: boschColors.white }}
-                onClick={() =>
-                  router.push("/dashboard/notificaciones-internas")
-                }
-              >
-                <Badge badgeContent={cantidadNotificaciones} color="error">
-                  <NotificationsIcon />
-                </Badge>
-              </IconButton>
-
-              <IconButton
-                sx={{ color: boschColors.white }}
-                onClick={() => router.push("/dashboard/whatsapp")}
-              >
-                <Badge
-                  badgeContent={notificacionesWhatsappNoLeidas}
-                  color="error"
-                >
-                  <WhatsAppIcon />
-                </Badge>
-              </IconButton>
-
+            )}
+            <Toolbar />
+            <Container maxWidth={false} sx={{ m: 0 }}>
               <Box
                 sx={{
+                  mb: 3,
                   display: "flex",
                   alignItems: "center",
-                  gap: 1,
-                  p: 1,
-                  borderRadius: 1,
-                  bgcolor: "action.hover",
                 }}
               >
-                <PersonIcon sx={{ color: boschColors.white }} />
                 <Typography
                   variant="body2"
+                  component="a"
+                  onClick={handleBackNavigation}
                   sx={{
-                    color: boschColors.white,
+                    cursor: "pointer",
+                    color: "text.secondary",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 0.5,
+                    textDecoration: "none",
+                    "&:hover": {
+                      color: "primary.main",
+                      textDecoration: "none",
+                    },
                     fontWeight: 500,
-                    display: { xs: "none", sm: "block" },
+                    fontSize: "0.875rem",
                   }}
                 >
-                  {userName}
+                  <Box component="span" sx={{ fontSize: "1.2rem" }}>
+                    ←
+                  </Box>
+                  Volver
                 </Typography>
               </Box>
-
-              <Tooltip title="Cerrar sesión">
-                <IconButton
-                  onClick={() => {
-                    logout();
-                    router.push("/login");
-                  }}
-                  sx={{
-                    color: boschColors.white,
-                    "&:hover": { bgcolor: "error.lighter" },
-                  }}
-                >
-                  <LogoutIcon />
-                </IconButton>
-              </Tooltip>
-            </Box>
-          </Toolbar>
-        </AppBar>
-        <Drawer
-          variant={isMobile ? "temporary" : "permanent"}
-          open={drawerOpen}
-          onClose={handleDrawerToggle}
-          sx={{
-            width: drawerCompressed && !isMobile ? 60 : 240,
-            flexShrink: 0,
-            "& .MuiDrawer-paper": {
-              width: drawerCompressed && !isMobile ? 60 : 240,
-              boxSizing: "border-box",
-              overflowX: "hidden",
-              transition: theme.transitions.create("width", {
-                easing: theme.transitions.easing.sharp,
-                duration: theme.transitions.duration.enteringScreen,
-              }),
-            },
-          }}
-        >
-          <Toolbar />
-          {drawer}
-        </Drawer>
-        <Box
-          component="main"
-          sx={{
-            flexGrow: 1,
-            p: 3,
-            width: "100%", // Cambiado para usar todo el ancho disponible
-            overflowX: "auto", // Permite desplazamiento horizontal si es necesario
-            transition: theme.transitions.create(["margin", "width"], {
-              easing: theme.transitions.easing.sharp,
-              duration: theme.transitions.duration.enteringScreen,
-            }),
-            minHeight: "100vh",
-            backgroundColor: "background.paper",
-          }}
-        >
-          {isMobile && (
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              edge="start"
-              onClick={handleDrawerToggle}
-              sx={{ mr: 2, ...(drawerOpen && { display: "none" }) }}
-            >
-              <MenuIcon />
-            </IconButton>
-          )}
-          <Toolbar />
-          <Container maxWidth={false} sx={{ m: 0 }}>
-            <Box
-              sx={{
-                mb: 3,
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              <Typography
-                variant="body2"
-                component="a"
-                onClick={handleBackNavigation}
-                sx={{
-                  cursor: "pointer",
-                  color: "text.secondary",
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.5,
-                  textDecoration: "none",
-                  "&:hover": {
-                    color: "primary.main",
-                    textDecoration: "none",
-                  },
-                  fontWeight: 500,
-                  fontSize: "0.875rem",
-                }}
-              >
-                <Box component="span" sx={{ fontSize: "1.2rem" }}>
-                  ←
-                </Box>
-                Volver
-              </Typography>
-            </Box>
-            {children}
-          </Container>
+              {children}
+            </Container>
+          </Box>
         </Box>
-      </Box>
-      <Snackbar
-        open={notificationOpen}
-        autoHideDuration={5000}
-        onClose={() => setNotificationOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "right" }}
-        sx={{ mt: "40px" }}
-      >
-        <Alert
+        <Snackbar
+          open={notificationOpen}
+          autoHideDuration={5000}
           onClose={() => setNotificationOpen(false)}
-          severity="error"
-          sx={{ width: "100%" }}
+          anchorOrigin={{ vertical: "top", horizontal: "right" }}
+          sx={{ mt: "40px" }}
         >
-          {notificationMessage}
-        </Alert>
-      </Snackbar>
-      <WhatsAppNotificationSnackbar />
+          <Alert
+            onClose={() => setNotificationOpen(false)}
+            severity="error"
+            sx={{ width: "100%" }}
+          >
+            {notificationMessage}
+          </Alert>
+        </Snackbar>
+        <WhatsAppNotificationSnackbar />
       </ProtectedRoute>
     </WhatsAppNotificationsProvider>
   );

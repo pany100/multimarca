@@ -19,6 +19,24 @@ export async function GET(request: NextRequest) {
     const año = url.searchParams.get("año");
     const limit = url.searchParams.get("limit") || "10";
 
+    // Auth: necesitamos rol del usuario para filtrar categorías con roles
+    const authHeader = request.headers.get("authorization");
+    if (!authHeader) {
+      return NextResponse.json({ error: "No autorizado" }, { status: 401 });
+    }
+    const token = authHeader.split(" ")[1];
+    const decodedToken = JSON.parse(atob(token.split(".")[1]));
+    const user = await prisma.usuario.findUnique({
+      where: { id: decodedToken.userId },
+      include: { rol: true },
+    });
+    if (!user?.rol) {
+      return NextResponse.json(
+        { error: "Usuario no tiene rol asignado" },
+        { status: 403 }
+      );
+    }
+
     if (moneda !== "ARS" && moneda !== "USD") {
       return NextResponse.json(
         { error: "La moneda debe ser ARS o USD" },
@@ -47,9 +65,17 @@ export async function GET(request: NextRequest) {
     FROM CategoriaGasto cg
     JOIN Gasto g ON cg.id = g.categoriaId
     WHERE 1=1
+    AND (
+      NOT EXISTS (
+        SELECT 1 FROM \`_CategoriaGastoToRol\` cgr WHERE cgr.A = cg.id
+      )
+      OR EXISTS (
+        SELECT 1 FROM \`_CategoriaGastoToRol\` cgr WHERE cgr.A = cg.id AND cgr.B = ?
+      )
+    )
     `;
 
-    const queryParams: any[] = [moneda];
+    const queryParams: any[] = [moneda, user.rol.id];
 
     if (año && mes) {
       sqlQuery += ` AND g.fecha >= ? AND g.fecha < ?`;
