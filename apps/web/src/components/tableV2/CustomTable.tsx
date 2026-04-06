@@ -498,9 +498,8 @@ function CustomTable<T extends { id: string }>({
         >
           <Stack
             direction="row"
-            spacing={2}
             alignItems="center"
-            sx={{ flexWrap: "wrap", gap: 1, rowGap: 1.5 }}
+            sx={{ flexWrap: "wrap", gap: 2, rowGap: 1.5 }}
           >
             <TextField
               placeholder="Buscar..."
