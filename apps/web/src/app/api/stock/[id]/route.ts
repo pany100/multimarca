@@ -1,43 +1,27 @@
+import { DeleteStockUseCase } from "@/core/application/use-cases/stock/delete-stock.use-case";
+import { GetStockUseCase } from "@/core/application/use-cases/stock/get-stock.use-case";
+import { UpdateStockUseCase } from "@/core/application/use-cases/stock/update-stock.use-case";
+import { PrismaStockRepository } from "@/core/infrastructure/database/repositories/prisma-stock.repository";
+import {
+  getStockParamsSchema,
+  updateStockSchema,
+} from "@/core/infrastructure/validation/schemas/stock.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import { NextResponse } from "next/server";
-import prisma from "src/lib/prisma";
 
 export async function GET(
   request: Request,
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
-
-    const stock = await prisma.stock.findUnique({
-      where: { id },
-      select: {
-        label: true,
-        name: true,
-        brand: true,
-        buyPrice: true,
-        markup: true,
-        id: true,
-        reportName: true,
-        sector: true,
-        carBrand: true,
-        fraccionable: true,
-      },
-    });
-
-    if (!stock) {
-      return NextResponse.json(
-        { error: "Stock no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json(stock);
-  } catch (error) {
-    console.error("Error al obtener el stock:", error);
-    return NextResponse.json(
-      { error: "Error al obtener el stock" },
-      { status: 500 }
+    const { id } = await validateRequest(params, getStockParamsSchema);
+    const stock = await new GetStockUseCase(new PrismaStockRepository()).execute(
+      id
     );
+    return NextResponse.json(stock, { status: 200 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }
 
@@ -46,63 +30,15 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
     const body = await request.json();
-    const {
-      name,
-      brand,
-      buyPrice,
-      units,
-      restockValue,
-      label,
-      markup,
-      proveedorId,
-      reportName,
-      sector,
-      carBrand,
-      fraccionable,
-    } = body;
-
-    if (
-      !name ||
-      typeof name !== "string" ||
-      !brand ||
-      typeof brand !== "string"
-    ) {
-      return NextResponse.json(
-        { error: "Nombre o marca del stock inválido o faltante" },
-        { status: 400 }
-      );
-    }
-
-    const stockActualizado = await prisma.stock.update({
-      where: { id },
-      data: {
-        name,
-        brand,
-        buyPrice,
-        units,
-        restockValue: restockValue ? parseInt(restockValue, 10) : null,
-        label,
-        markup: markup ? parseFloat(markup) : null,
-        proveedorId,
-        reportName: reportName || null,
-        sector: sector || null,
-        carBrand: carBrand || null,
-        fraccionable: fraccionable !== undefined ? Boolean(fraccionable) : undefined,
-      } as any,
-      include: {
-        proveedor: true,
-      },
-    });
-
-    return NextResponse.json(stockActualizado);
-  } catch (error) {
-    console.error("Error al actualizar stock:", error);
-    return NextResponse.json(
-      { error: "Error al actualizar el stock" },
-      { status: 500 }
-    );
+    const { id } = await validateRequest(params, getStockParamsSchema);
+    const dto = await validateRequest(body, updateStockSchema);
+    const updated = await new UpdateStockUseCase(
+      new PrismaStockRepository()
+    ).execute(id, dto);
+    return NextResponse.json(updated, { status: 200 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }
 
@@ -111,27 +47,12 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = parseInt(params.id);
-
-    const stockEliminado = await prisma.stock.delete({
-      where: { id },
-    });
-
-    if (!stockEliminado) {
-      return NextResponse.json(
-        { error: "Stock no encontrado" },
-        { status: 404 }
-      );
-    }
-
-    return NextResponse.json({
-      message: "Stock eliminado con éxito",
-    });
-  } catch (error) {
-    console.error("Error al eliminar stock:", error);
-    return NextResponse.json(
-      { error: "Error al eliminar el stock" },
-      { status: 500 }
-    );
+    const { id } = await validateRequest(params, getStockParamsSchema);
+    const result = await new DeleteStockUseCase(
+      new PrismaStockRepository()
+    ).execute(id);
+    return NextResponse.json(result, { status: 200 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }

@@ -1,20 +1,15 @@
+import { ListAllStockUseCase } from "@/core/application/use-cases/stock/list-all-stock.use-case";
+import { PrismaStockRepository } from "@/core/infrastructure/database/repositories/prisma-stock.repository";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { NextResponse } from "next/server";
-import prisma from "src/lib/prisma";
 
 export async function GET() {
   try {
-    // Fetch all stock items without pagination
-    const stocks = await prisma.stock.findMany({
-      orderBy: { name: "asc" },
-      include: { proveedor: true },
-    });
-
-    return NextResponse.json(stocks);
-  } catch (error) {
-    console.error("Error al obtener todos los items de stock:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+    const stocks = await new ListAllStockUseCase(
+      new PrismaStockRepository()
+    ).execute();
+    return NextResponse.json(stocks, { status: 200 });
+  } catch (e) {
+    return handleApiError(e);
   }
 }
