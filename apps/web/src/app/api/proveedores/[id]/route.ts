@@ -4,7 +4,7 @@ import { PrismaProveedorRepository } from "@/core/infrastructure/database/reposi
 import { updateProveedorRevisadoSchema } from "@/core/infrastructure/validation/schemas/resumen-transaccion.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { validateRequest } from "@/shared/middleware/validation.middleware";
-import { Moneda } from "@prisma/client";
+import { EstadoVenta, Moneda } from "@prisma/client";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
 export async function GET(
@@ -55,7 +55,7 @@ export async function GET(
       },
     });
 
-    // Obtener reparaciones de terceros del proveedor
+    // Obtener reparaciones de terceros del proveedor (en órdenes de reparación)
     const reparacionesTercero = await prisma.reparacionDeTercero.findMany({
       where: {
         proveedorId: id,
@@ -76,6 +76,35 @@ export async function GET(
           select: {
             fechaCreacion: true,
             dolar: true,
+            id: true,
+          },
+        },
+      },
+    });
+
+    // Obtener reparaciones de terceros del proveedor (en ventas Cerradas o Entregadas)
+    const reparacionesTerceroVenta = await prisma.reparacionDeTercero.findMany({
+      where: {
+        proveedorId: id,
+        ventaId: {
+          not: null,
+        },
+        venta: {
+          estado: {
+            in: [EstadoVenta.Cerrado, EstadoVenta.Entregado],
+          },
+          fecha: {
+            gte: fromDate,
+            lte: toDate,
+          },
+        },
+      },
+      select: {
+        precioCompra: true,
+        nombre: true,
+        venta: {
+          select: {
+            fecha: true,
             id: true,
           },
         },
@@ -116,6 +145,13 @@ export async function GET(
         tipo: "Deuda" as const,
         descripcion: `Reparación de tercero: ${rt.nombre} - Orden #${rt.ordenReparacion?.id}`,
         ref: `/dashboard/ordenes-reparacion/${rt.ordenReparacion?.id}`,
+      })),
+      ...reparacionesTerceroVenta.map((rt) => ({
+        fecha: rt.venta?.fecha || new Date(),
+        monto: Number(rt.precioCompra),
+        tipo: "Deuda" as const,
+        descripcion: `Reparación de tercero: ${rt.nombre} - Venta #${rt.venta?.id}`,
+        ref: `/dashboard/ventas/${rt.venta?.id}`,
       })),
       ...pagos.map((p) => ({
         fecha: p.fecha,
