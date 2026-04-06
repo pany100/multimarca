@@ -8,6 +8,9 @@ export async function GET(request: Request) {
     const size = parseInt(searchParams.get("size") || "10");
     const query = searchParams.get("query") || "";
     const needsRestock = searchParams.get("needsRestock") === "true";
+    const proveedorId = searchParams.get("proveedorId")
+      ? parseInt(searchParams.get("proveedorId")!)
+      : null;
 
     const skip = page * size;
 
@@ -22,6 +25,10 @@ export async function GET(request: Request) {
         { carBrand: { contains: query } },
       ],
     };
+
+    if (proveedorId) {
+      whereClause = { AND: [whereClause, { proveedorId }] };
+    }
 
     if (needsRestock) {
       whereClause = {

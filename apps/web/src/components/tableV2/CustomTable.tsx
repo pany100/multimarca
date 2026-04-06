@@ -41,6 +41,12 @@ export interface CustomTableProps {
   fetchOnMount?: boolean;
   /** Si es true, solo muestra el filtro \"Desde\" (sin \"Hasta\") */
   onlyFromDate?: boolean;
+  /** Slot para agregar filtros adicionales junto a la barra de búsqueda */
+  filterSlot?: React.ReactNode;
+  /** Callback llamado cuando se hace click en Buscar (además de la búsqueda interna) */
+  onSearchClick?: () => void;
+  /** Callback llamado cuando se hace click en Limpiar (además de limpiar filtros internos) */
+  onClearClick?: () => void;
 }
 
 export type InheritedTableProps = {
@@ -65,6 +71,9 @@ function CustomTable<T extends { id: string }>({
   defaultFromDate = null,
   fetchOnMount = true,
   onlyFromDate = false,
+  filterSlot,
+  onSearchClick,
+  onClearClick,
 }: CustomTableProps) {
   const searchParams = useSearchParams();
   const isInitialMount = useRef(true);
@@ -400,6 +409,7 @@ function CustomTable<T extends { id: string }>({
   };
 
   const handleSearchSubmit = () => {
+    onSearchClick?.();
     setSearchTerm(searchInput);
     if (searchByDate) {
       setFromDate(fromDateInput);
@@ -421,6 +431,7 @@ function CustomTable<T extends { id: string }>({
   };
 
   const handleClearFilters = () => {
+    onClearClick?.();
     setSearchInput("");
     setSearchTerm("");
     if (searchByDate) {
@@ -480,15 +491,16 @@ function CustomTable<T extends { id: string }>({
           sx={{
             display: "flex",
             justifyContent: "space-between",
-            alignItems: "center",
+            alignItems: "flex-start",
             gap: 2,
+            flexWrap: "wrap",
           }}
         >
           <Stack
             direction="row"
             spacing={2}
             alignItems="center"
-            sx={{ flexWrap: "wrap" }}
+            sx={{ flexWrap: "wrap", gap: 1, rowGap: 1.5 }}
           >
             <TextField
               placeholder="Buscar..."
@@ -498,7 +510,7 @@ function CustomTable<T extends { id: string }>({
               onChange={handleSearchInputChange}
               onKeyPress={handleSearchKeyPress}
               sx={{
-                width: 300,
+                width: { xs: "100%", sm: 300 },
                 "& .MuiOutlinedInput-root": {
                   backgroundColor: "background.paper",
                   "&:hover fieldset": {
@@ -598,6 +610,9 @@ function CustomTable<T extends { id: string }>({
                   </>
                 )}
               </LocalizationProvider>
+            )}
+            {filterSlot && (
+              <Box sx={{ width: { xs: "100%", sm: "auto" } }}>{filterSlot}</Box>
             )}
             <Button
               variant="contained"

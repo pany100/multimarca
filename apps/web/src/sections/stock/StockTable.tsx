@@ -1,8 +1,10 @@
+import useProveedorAutocomplete from "@/hooks/useProveedorAutocomplete";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
-import { Alert, Box, MenuItem, Snackbar, Tab, Tabs } from "@mui/material";
+import { Alert, Autocomplete, Box, MenuItem, Snackbar, Tab, Tabs, TextField } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
-import { useState } from "react";
+import debounce from "lodash/debounce";
+import { useMemo, useState } from "react";
 import CustomTable, {
   InheritedTableProps,
 } from "../../components/tableV2/CustomTable";
@@ -17,6 +19,28 @@ function StockTable({
   const [tabValue, setTabValue] = useState(0);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState<any | null>(null);
+  // pending = lo que el usuario selecciona en el Autocomplete (no dispara fetch)
+  // committed = lo que efectivamente filtra la tabla (se actualiza al clickear Buscar)
+  const [proveedorPending, setProveedorPending] = useState<{ label: string; value: number } | null>(null);
+  const [proveedorCommitted, setProveedorCommitted] = useState<{ label: string; value: number } | null>(null);
+  const [proveedorOptions, setProveedorOptions] = useState<{ label: string; value: number }[]>([]);
+  const [proveedorLoading, setProveedorLoading] = useState(false);
+
+  const { searchProveedores } = useProveedorAutocomplete();
+
+  const fetchProveedores = useMemo(
+    () =>
+      debounce(async (query: string) => {
+        setProveedorLoading(true);
+        try {
+          const results = await searchProveedores(query);
+          setProveedorOptions(results as { label: string; value: number }[]);
+        } finally {
+          setProveedorLoading(false);
+        }
+      }, 300),
+    [searchProveedores]
+  );
 
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
@@ -100,9 +124,46 @@ function StockTable({
     return customActions.concat(defaultActions);
   };
 
+  const proveedorQuery = proveedorCommitted ? `&proveedorId=${proveedorCommitted.value}` : "";
+
+  const handleSearchClick = () => {
+    setProveedorCommitted(proveedorPending);
+  };
+
+  const handleClearClick = () => {
+    setProveedorPending(null);
+    setProveedorCommitted(null);
+    setProveedorOptions([]);
+  };
+
+  const proveedorFilterSlot = (
+    <Autocomplete
+      size="small"
+      options={proveedorOptions}
+      loading={proveedorLoading}
+      value={proveedorPending}
+      onChange={(_, newValue) => setProveedorPending(newValue)}
+      onInputChange={(_, newInputValue, reason) => {
+        if (newInputValue.length >= 2 && reason !== "reset") {
+          fetchProveedores(newInputValue);
+        }
+        if (newInputValue.length < 2) {
+          setProveedorOptions([]);
+        }
+      }}
+      isOptionEqualToValue={(option, value) => option.value === value.value}
+      getOptionLabel={(option) => option.label}
+      noOptionsText="No hay opciones"
+      sx={{ width: { xs: "100%", sm: 260 } }}
+      renderInput={(params) => (
+        <TextField {...params} label="Filtrar por proveedor" variant="outlined" size="small" />
+      )}
+    />
+  );
+
   return (
     <Box>
-      <Tabs value={tabValue} onChange={handleTabChange}>
+      <Tabs value={tabValue} onChange={handleTabChange} sx={{ mb: 2 }}>
         <Tab label="Todos" />
         <Tab label="Stock Bajo" />
       </Tabs>
@@ -110,21 +171,27 @@ function StockTable({
         {tabValue === 1 ? (
           <CustomTable
             title="Stock Bajo"
-            apiEndpoint="/api/stock?needsRestock=true"
+            apiEndpoint={`/api/stock?needsRestock=true${proveedorQuery}`}
             extraActions={customActions}
             ctaCb={ctaCb}
             columns={columns}
             getRowClassName={getRowClassName}
+            filterSlot={proveedorFilterSlot}
+            onSearchClick={handleSearchClick}
+            onClearClick={handleClearClick}
             {...rest}
           />
         ) : (
           <CustomTable
             title="Stock"
-            apiEndpoint="/api/stock"
+            apiEndpoint={`/api/stock${proveedorCommitted ? `?proveedorId=${proveedorCommitted.value}` : ""}`}
             extraActions={customActions}
             ctaCb={ctaCb}
             columns={columns}
             getRowClassName={getRowClassName}
+            filterSlot={proveedorFilterSlot}
+            onSearchClick={handleSearchClick}
+            onClearClick={handleClearClick}
             {...rest}
           />
         )}
