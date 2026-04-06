@@ -70,6 +70,7 @@ export async function GET(
         },
       },
       select: {
+        id: true,
         precioCompra: true,
         nombre: true,
         ordenReparacion: {
@@ -100,6 +101,7 @@ export async function GET(
         },
       },
       select: {
+        id: true,
         precioCompra: true,
         nombre: true,
         venta: {
@@ -111,8 +113,8 @@ export async function GET(
       },
     });
 
-    // Obtener pagos a proveedores
-    const pagos = await prisma.gasto.findMany({
+    // Obtener pagos a proveedores (deduplicados por id)
+    const pagosRaw = await prisma.gasto.findMany({
       where: {
         proveedorId: id,
         categoria: {
@@ -123,6 +125,7 @@ export async function GET(
           lte: toDate,
         },
       },
+      distinct: ["id"],
       include: {
         dolar: true,
       },
@@ -131,16 +134,18 @@ export async function GET(
     // Combinar y formatear todos los movimientos
     const movimientos = [
       ...ordenesDeCompra.map((oc) => ({
+        rowId: `oc-${oc.id}`,
+        sortId: oc.id,
         fecha: oc.fecha,
         monto: Number(oc.precioTotal),
         tipo: "Deuda" as const,
         operacion: "Orden de Compra" as const,
-        descripcion: `Orden de compra del ${new Date(
-          oc.fecha
-        ).toLocaleDateString()}`,
+        descripcion: `Orden de compra del ${new Date(oc.fecha).toLocaleDateString()}`,
         ref: `/dashboard/orden-de-compra/${oc.id}/ver`,
       })),
       ...reparacionesTercero.map((rt) => ({
+        rowId: `rto-${rt.id}`,
+        sortId: rt.id,
         fecha: rt.ordenReparacion?.fechaCreacion || new Date(),
         monto: Number(rt.precioCompra),
         tipo: "Deuda" as const,
@@ -149,6 +154,8 @@ export async function GET(
         ref: `/dashboard/ordenes-reparacion/${rt.ordenReparacion?.id}`,
       })),
       ...reparacionesTerceroVenta.map((rt) => ({
+        rowId: `rtv-${rt.id}`,
+        sortId: rt.id,
         fecha: rt.venta?.fecha || new Date(),
         monto: Number(rt.precioCompra),
         tipo: "Deuda" as const,
@@ -156,7 +163,9 @@ export async function GET(
         descripcion: `${rt.nombre} - Venta #${rt.venta?.id}`,
         ref: `/dashboard/ventas/${rt.venta?.id}`,
       })),
-      ...pagos.map((p) => ({
+      ...pagosRaw.map((p) => ({
+        rowId: `gasto-${p.id}`,
+        sortId: p.id,
         fecha: p.fecha,
         monto:
           p.moneda === Moneda.Dolar && p.dolar
@@ -165,9 +174,13 @@ export async function GET(
         tipo: "Pago" as const,
         operacion: "Pago a Proveedor" as const,
         descripcion: p.detalle || "Pago a proveedor",
-        ref: `/dashboard/gastos/${p.id}`,
+        ref: `/dashboard/gastos/${p.id}/ver`,
       })),
-    ].sort((a, b) => b.fecha.getTime() - a.fecha.getTime());
+    ].sort((a, b) => {
+      const fechaDiff = b.fecha.getTime() - a.fecha.getTime();
+      if (fechaDiff !== 0) return fechaDiff;
+      return b.sortId - a.sortId;
+    });
 
     // Calcular saldo total (positivo = a favor, negativo = deuda)
     const saldoTotal = movimientos.reduce((acc, mov) => {

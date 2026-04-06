@@ -3,6 +3,7 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import ClearIcon from "@mui/icons-material/Clear";
+import SearchIcon from "@mui/icons-material/Search";
 import { Box, Button, Chip, Stack, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
@@ -35,6 +36,8 @@ function VerPage({ params }: { params: { id: string } }) {
   const [nombreProveedor, setNombreProveedor] = useState("");
   const [fromDate, setFromDate] = useState<Date | null>(null);
   const [toDate, setToDate] = useState<Date | null>(null);
+  const [appliedFromDate, setAppliedFromDate] = useState<Date | null>(null);
+  const [appliedToDate, setAppliedToDate] = useState<Date | null>(null);
   const { authFetch } = useFetch();
 
   const handleFromDateChange = (
@@ -168,11 +171,11 @@ function VerPage({ params }: { params: { id: string } }) {
       url.searchParams.append("page", (page + 1).toString());
       url.searchParams.append("pageSize", pageSize.toString());
 
-      if (fromDate) {
-        url.searchParams.append("from", fromDate.toISOString().split("T")[0]);
+      if (appliedFromDate) {
+        url.searchParams.append("from", appliedFromDate.toISOString().split("T")[0]);
       }
-      if (toDate) {
-        url.searchParams.append("to", toDate.toISOString().split("T")[0]);
+      if (appliedToDate) {
+        url.searchParams.append("to", appliedToDate.toISOString().split("T")[0]);
       }
 
       const respuesta = await authFetch(url.toString());
@@ -187,15 +190,23 @@ function VerPage({ params }: { params: { id: string } }) {
     } finally {
       setCargando(false);
     }
-  }, [authFetch, params.id, page, pageSize, fromDate, toDate]);
+  }, [authFetch, params.id, page, pageSize, appliedFromDate, appliedToDate]);
 
   useEffect(() => {
     obtenerDatos();
   }, [obtenerDatos]);
 
+  const handleBuscar = () => {
+    setPage(0);
+    setAppliedFromDate(fromDate);
+    setAppliedToDate(toDate);
+  };
+
   const handleClearFilters = () => {
     setFromDate(null);
     setToDate(null);
+    setAppliedFromDate(null);
+    setAppliedToDate(null);
   };
 
   const saldoPositivo = estadoDeuda >= 0;
@@ -262,6 +273,14 @@ function VerPage({ params }: { params: { id: string } }) {
               }}
             />
             <Button
+              variant="contained"
+              startIcon={<SearchIcon />}
+              onClick={handleBuscar}
+              size="medium"
+            >
+              Buscar
+            </Button>
+            <Button
               variant="outlined"
               startIcon={<ClearIcon />}
               onClick={handleClearFilters}
@@ -286,7 +305,7 @@ function VerPage({ params }: { params: { id: string } }) {
           setPageSize(model.pageSize);
         }}
         disableRowSelectionOnClick
-        getRowId={(row) => row.fecha + row.tipo + row.monto}
+        getRowId={(row) => row.rowId}
         sx={{ "& .MuiDataGrid-cell": { alignItems: "center" } }}
       />
     </Box>
