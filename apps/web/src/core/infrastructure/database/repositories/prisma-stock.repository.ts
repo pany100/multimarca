@@ -89,7 +89,7 @@ export class PrismaStockRepository implements StockRepository {
           ${whereSql}
         `
       );
-      const total = Number(countRows[0]?.count ?? 0n);
+      const total = Number(countRows[0]?.count ?? BigInt(0));
 
       const idList = ids.map((r) => r.id);
       const items =
