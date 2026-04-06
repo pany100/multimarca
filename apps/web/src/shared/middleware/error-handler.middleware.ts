@@ -1,4 +1,5 @@
 import logger from "@/lib/logger";
+import { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
@@ -11,6 +12,27 @@ export function handleApiError(err: unknown) {
       { error: "Error interno del servidor" },
       { status: 500 }
     );
+  }
+
+  if (err instanceof Prisma.PrismaClientKnownRequestError) {
+    // Prisma: unique constraint violation
+    if (err.code === "P2002") {
+      const target = (err.meta as any)?.target;
+      const targetText = Array.isArray(target) ? target.join(",") : String(target ?? "");
+
+      // Caso específico: Stock.label es unique
+      if (targetText.includes("label") || targetText.includes("Stock_label_key")) {
+        return NextResponse.json(
+          { error: "Ya existe un stock con ese rótulo" },
+          { status: 409 }
+        );
+      }
+
+      return NextResponse.json(
+        { error: "Ya existe un registro con esos datos únicos" },
+        { status: 409 }
+      );
+    }
   }
 
   if (err instanceof ZodError) {

@@ -42,7 +42,15 @@ export class PrismaStockRepository implements StockRepository {
       const sortDir = (sortOrder || "desc").toLowerCase() === "asc" ? "ASC" : "DESC";
 
       const whereParts: Prisma.Sql[] = [
-        Prisma.sql`(s.units IS NULL OR s.units <= s.restockValue)`,
+        // needsRestock:
+        // - si units es NULL => considerar para reposición
+        // - si units = 0 => considerar para reposición (aunque restockValue sea NULL)
+        // - si hay restockValue => units <= restockValue
+        Prisma.sql`(
+          s.units IS NULL
+          OR s.units = 0
+          OR (s.restockValue IS NOT NULL AND s.units <= s.restockValue)
+        )`,
       ];
       if (proveedorId) {
         whereParts.push(Prisma.sql`s.proveedorId = ${proveedorId}`);

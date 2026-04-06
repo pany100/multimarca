@@ -6,16 +6,21 @@ export class CreateStockUseCase {
   constructor(private readonly repo: StockRepository) {}
 
   async execute(dto: CreateStockDto) {
+    // En DB: brand y buyPrice son obligatorios. En UI (alta rápida) pedimos solo
+    // nombre, rótulo y proveedor, así que seteamos defaults seguros.
+    const brand = (dto.brand ?? "").trim() || "Sin marca";
+    const buyPrice = Number.isFinite(Number(dto.buyPrice)) ? Number(dto.buyPrice) : 0;
+
     const data: Prisma.StockCreateArgs = {
       data: {
         name: dto.name,
-        brand: dto.brand,
-        buyPrice: dto.buyPrice,
+        label: dto.label,
+        proveedorId: dto.proveedorId,
+        brand,
+        buyPrice,
         units: 0,
         restockValue: dto.restockValue ?? null,
-        label: dto.label ?? null,
         markup: dto.markup ?? null,
-        proveedorId: dto.proveedorId ?? undefined,
         reportName: dto.reportName ?? null,
         sector: dto.sector ?? null,
         carBrand: dto.carBrand ?? null,

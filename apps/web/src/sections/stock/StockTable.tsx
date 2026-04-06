@@ -1,9 +1,11 @@
 import useProveedorAutocomplete from "@/hooks/useProveedorAutocomplete";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
+import SettingsIcon from "@mui/icons-material/Settings";
 import { Alert, Autocomplete, Box, MenuItem, Snackbar, Tab, Tabs, TextField } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import debounce from "lodash/debounce";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import CustomTable, {
   InheritedTableProps,
@@ -16,6 +18,7 @@ function StockTable({
   setRefreshTrigger,
   ...rest
 }: InheritedTableProps) {
+  const router = useRouter();
   const [tabValue, setTabValue] = useState(0);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedStock, setSelectedStock] = useState<any | null>(null);
@@ -119,6 +122,17 @@ function StockTable({
       >
         <Inventory2Icon sx={{ mr: 1 }} />
         Actualizar Stock
+      </MenuItem>,
+      <MenuItem
+        key="manage-stock"
+        onClick={() => {
+          const id = params?.id ?? params?.row?.id;
+          if (!id) return;
+          router.push(`/dashboard/stock/${id}`);
+        }}
+      >
+        <SettingsIcon sx={{ mr: 1 }} />
+        Administrar stock
       </MenuItem>,
     ];
     return customActions.concat(defaultActions);

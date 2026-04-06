@@ -24,12 +24,12 @@ function precioVentaCalculadoDesdeCompraYMarkup(
 
 export const schema = yup.object({
   name: yup.string().required("El nombre es requerido"),
-  brand: yup.string().required("La marca es requerida"),
+  label: yup.string().required("El rótulo es requerido"),
+  proveedorId: yup.number().required("El proveedor es requerido"),
+  brand: yup.string().nullable(),
   buyPrice: yup.number().nullable(),
   restockValue: yup.number().nullable(),
-  label: yup.string().nullable(),
   markup: yup.number().nullable(),
-  proveedorId: yup.number().required("El proveedor es requerido"),
   reportName: yup.string().nullable(),
   sector: yup.string().nullable(),
   carBrand: yup.string().nullable(),
