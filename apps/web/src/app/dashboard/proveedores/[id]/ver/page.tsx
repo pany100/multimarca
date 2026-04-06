@@ -2,9 +2,20 @@
 
 import { useFetch } from "@/contexts/FetchContext";
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import BookmarkIcon from "@mui/icons-material/Bookmark";
+import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, Chip, Stack, Typography } from "@mui/material";
+import {
+  Alert,
+  Box,
+  Button,
+  Chip,
+  IconButton,
+  Stack,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import {
   DateValidationError,
@@ -15,7 +26,6 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useCallback, useEffect, useState } from "react";
 
-// Colores custom por operación (sx-based, no limitados a la paleta MUI)
 const OPERACION_STYLES: Record<
   string,
   { label: string; bg: string; color: string }
@@ -24,6 +34,14 @@ const OPERACION_STYLES: Record<
   "Rep. Tercero Orden": { label: "Rep. Tercero Orden", bg: "#FCE4EC", color: "#B71C1C" },
   "Rep. Tercero Venta": { label: "Rep. Tercero Venta", bg: "#EDE7F6", color: "#4527A0" },
   "Pago a Proveedor": { label: "Pago a Proveedor", bg: "#E8F5E9", color: "#1B5E20" },
+};
+
+type Origen = {
+  rowId: string;
+  descripcion: string;
+  fecha: string;
+  // saldoHastaAqui justo ANTES de esta fila (para offset del cálculo)
+  offset: number;
 };
 
 function VerPage({ params }: { params: { id: string } }) {
@@ -38,6 +56,7 @@ function VerPage({ params }: { params: { id: string } }) {
   const [toDate, setToDate] = useState<Date | null>(null);
   const [appliedFromDate, setAppliedFromDate] = useState<Date | null>(null);
   const [appliedToDate, setAppliedToDate] = useState<Date | null>(null);
+  const [origen, setOrigen] = useState<Origen | null>(null);
   const { authFetch } = useFetch();
 
   const handleFromDateChange = (
@@ -58,6 +77,31 @@ function VerPage({ params }: { params: { id: string } }) {
     const dateValue =
       value instanceof Date ? value : value && new Date(value.toString());
     setToDate(dateValue);
+  };
+
+  const handleSetOrigen = (row: any) => {
+    if (origen?.rowId === row.rowId) {
+      setOrigen(null);
+      return;
+    }
+    // El offset es el saldo ANTES de esta fila: saldoHastaAqui - contribución propia
+    const contribucion = row.tipo === "Pago" ? row.monto : -row.monto;
+    const offset = row.saldoHastaAqui - contribucion;
+    setOrigen({
+      rowId: row.rowId,
+      descripcion: row.descripcion,
+      fecha: new Date(row.fecha).toLocaleDateString(),
+      offset,
+    });
+  };
+
+  const calcularSaldoRelativo = (row: any): number | null => {
+    if (!origen) return row.saldoHastaAqui;
+    // Filas más antiguas que el origen (saldoHastaAqui <= offset) → no mostrar
+    if (row.saldoHastaAqui <= origen.offset && row.rowId !== origen.rowId) {
+      return null;
+    }
+    return row.saldoHastaAqui - origen.offset;
   };
 
   const columns: GridColDef[] = [
@@ -166,7 +210,24 @@ function VerPage({ params }: { params: { id: string } }) {
       align: "right",
       headerAlign: "right",
       renderCell: (params) => {
-        const saldo: number = params.value ?? 0;
+        const saldo = calcularSaldoRelativo(params.row);
+        if (saldo === null) {
+          return (
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                height: "100%",
+                width: "100%",
+              }}
+            >
+              <Typography variant="body2" sx={{ color: "text.disabled", fontSize: "0.75rem" }}>
+                —
+              </Typography>
+            </Box>
+          );
+        }
         const positivo = saldo >= 0;
         const color = positivo ? "#1B5E20" : "#B71C1C";
         const signo = positivo ? "+" : "-";
@@ -196,6 +257,36 @@ function VerPage({ params }: { params: { id: string } }) {
             >
               {signo}${montoStr}
             </Typography>
+          </Box>
+        );
+      },
+    },
+    {
+      field: "_origen",
+      headerName: "",
+      width: 40,
+      sortable: false,
+      disableColumnMenu: true,
+      renderCell: (params) => {
+        const esOrigen = origen?.rowId === params.row.rowId;
+        return (
+          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <Tooltip
+              title={esOrigen ? "Quitar punto de inicio" : "Calcular saldo desde aquí"}
+              placement="right"
+            >
+              <IconButton
+                size="small"
+                onClick={() => handleSetOrigen(params.row)}
+                sx={{ color: esOrigen ? "#F57C00" : "text.disabled", p: 0.5 }}
+              >
+                {esOrigen ? (
+                  <BookmarkIcon fontSize="small" />
+                ) : (
+                  <BookmarkBorderIcon fontSize="small" />
+                )}
+              </IconButton>
+            </Tooltip>
           </Box>
         );
       },
@@ -237,6 +328,11 @@ function VerPage({ params }: { params: { id: string } }) {
     obtenerDatos();
   }, [obtenerDatos]);
 
+  // Resetear origen al cambiar de página o filtros
+  useEffect(() => {
+    setOrigen(null);
+  }, [page, appliedFromDate, appliedToDate]);
+
   const handleBuscar = () => {
     setPage(0);
     setAppliedFromDate(fromDate);
@@ -251,6 +347,12 @@ function VerPage({ params }: { params: { id: string } }) {
   };
 
   const saldoPositivo = estadoDeuda >= 0;
+
+  // Saldo desde el origen (última fila visible en datos, que es la más reciente de la página)
+  const saldoDesdeOrigen =
+    origen && datos.length > 0
+      ? datos[0].saldoHastaAqui - origen.offset
+      : null;
 
   return (
     <Box sx={{ width: "100%", p: 2 }}>
@@ -279,7 +381,7 @@ function VerPage({ params }: { params: { id: string } }) {
 
       <Box
         sx={{
-          mb: 3,
+          mb: 2,
           display: "flex",
           flexDirection: { xs: "column", md: "row" },
           gap: 2,
@@ -333,6 +435,44 @@ function VerPage({ params }: { params: { id: string } }) {
         </LocalizationProvider>
       </Box>
 
+      {origen && saldoDesdeOrigen !== null && (
+        <Alert
+          severity="info"
+          icon={<BookmarkIcon fontSize="inherit" sx={{ color: "#F57C00" }} />}
+          onClose={() => setOrigen(null)}
+          sx={{ mb: 2, alignItems: "center" }}
+          action={
+            <Button color="inherit" size="small" onClick={() => setOrigen(null)}>
+              Quitar
+            </Button>
+          }
+        >
+          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1, flexWrap: "wrap" }}>
+            <Typography variant="body2">
+              Saldo desde <strong>{origen.fecha}</strong> — {origen.descripcion}:
+            </Typography>
+            <Typography
+              variant="body1"
+              sx={{
+                fontWeight: 700,
+                color: saldoDesdeOrigen >= 0 ? "#1B5E20" : "#B71C1C",
+              }}
+            >
+              {saldoDesdeOrigen >= 0 ? "+" : "-"}$
+              {Math.abs(saldoDesdeOrigen).toLocaleString("es-AR", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2,
+              })}
+            </Typography>
+            {page > 0 && (
+              <Typography variant="caption" color="text.secondary">
+                (calculado sobre esta página)
+              </Typography>
+            )}
+          </Box>
+        </Alert>
+      )}
+
       <DataGrid
         rows={datos}
         columns={columns}
@@ -347,7 +487,16 @@ function VerPage({ params }: { params: { id: string } }) {
         }}
         disableRowSelectionOnClick
         getRowId={(row) => row.rowId}
-        sx={{ "& .MuiDataGrid-cell": { alignItems: "center" } }}
+        getRowClassName={(params) =>
+          origen?.rowId === params.row.rowId ? "origen-row" : ""
+        }
+        sx={{
+          "& .MuiDataGrid-cell": { alignItems: "center" },
+          "& .origen-row": {
+            borderLeft: "3px solid #F57C00",
+            bgcolor: "#FFF8F0",
+          },
+        }}
       />
     </Box>
   );
