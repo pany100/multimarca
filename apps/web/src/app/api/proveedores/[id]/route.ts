@@ -134,6 +134,7 @@ export async function GET(
         fecha: oc.fecha,
         monto: Number(oc.precioTotal),
         tipo: "Deuda" as const,
+        operacion: "Orden de Compra" as const,
         descripcion: `Orden de compra del ${new Date(
           oc.fecha
         ).toLocaleDateString()}`,
@@ -143,14 +144,16 @@ export async function GET(
         fecha: rt.ordenReparacion?.fechaCreacion || new Date(),
         monto: Number(rt.precioCompra),
         tipo: "Deuda" as const,
-        descripcion: `Reparación de tercero: ${rt.nombre} - Orden #${rt.ordenReparacion?.id}`,
+        operacion: "Rep. Tercero Orden" as const,
+        descripcion: `${rt.nombre} - Orden #${rt.ordenReparacion?.id}`,
         ref: `/dashboard/ordenes-reparacion/${rt.ordenReparacion?.id}`,
       })),
       ...reparacionesTerceroVenta.map((rt) => ({
         fecha: rt.venta?.fecha || new Date(),
         monto: Number(rt.precioCompra),
         tipo: "Deuda" as const,
-        descripcion: `Reparación de tercero: ${rt.nombre} - Venta #${rt.venta?.id}`,
+        operacion: "Rep. Tercero Venta" as const,
+        descripcion: `${rt.nombre} - Venta #${rt.venta?.id}`,
         ref: `/dashboard/ventas/${rt.venta?.id}`,
       })),
       ...pagos.map((p) => ({
@@ -160,6 +163,7 @@ export async function GET(
             ? Number(p.precio) * Number(p.dolar.blue)
             : Number(p.precio),
         tipo: "Pago" as const,
+        operacion: "Pago a Proveedor" as const,
         descripcion: p.detalle || "Pago a proveedor",
         ref: `/dashboard/gastos/${p.id}`,
       })),

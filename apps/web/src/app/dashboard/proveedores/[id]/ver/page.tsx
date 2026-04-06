@@ -14,6 +14,17 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { useCallback, useEffect, useState } from "react";
 
+// Colores custom por operación (sx-based, no limitados a la paleta MUI)
+const OPERACION_STYLES: Record<
+  string,
+  { label: string; bg: string; color: string }
+> = {
+  "Orden de Compra": { label: "Orden de Compra", bg: "#FFF3CD", color: "#7A5200" },
+  "Rep. Tercero Orden": { label: "Rep. Tercero Orden", bg: "#FCE4EC", color: "#B71C1C" },
+  "Rep. Tercero Venta": { label: "Rep. Tercero Venta", bg: "#EDE7F6", color: "#4527A0" },
+  "Pago a Proveedor": { label: "Pago a Proveedor", bg: "#E8F5E9", color: "#1B5E20" },
+};
+
 function VerPage({ params }: { params: { id: string } }) {
   const [datos, setDatos] = useState<any[]>([]);
   const [cargando, setCargando] = useState(true);
@@ -26,15 +37,11 @@ function VerPage({ params }: { params: { id: string } }) {
   const [toDate, setToDate] = useState<Date | null>(null);
   const { authFetch } = useFetch();
 
-  // Handlers para los cambios de fecha
   const handleFromDateChange = (
     value: Date | null | any,
     context: PickerChangeHandlerContext<DateValidationError>,
   ) => {
-    if (context.validationError) {
-      return; // No actualizar si hay error de validación
-    }
-    // Convertir el valor a Date si es necesario
+    if (context.validationError) return;
     const dateValue =
       value instanceof Date ? value : value && new Date(value.toString());
     setFromDate(dateValue);
@@ -44,10 +51,7 @@ function VerPage({ params }: { params: { id: string } }) {
     value: Date | null | any,
     context: PickerChangeHandlerContext<DateValidationError>,
   ) => {
-    if (context.validationError) {
-      return; // No actualizar si hay error de validación
-    }
-    // Convertir el valor a Date si es necesario
+    if (context.validationError) return;
     const dateValue =
       value instanceof Date ? value : value && new Date(value.toString());
     setToDate(dateValue);
@@ -57,20 +61,39 @@ function VerPage({ params }: { params: { id: string } }) {
     {
       field: "fecha",
       headerName: "Fecha",
-      flex: 1,
-      renderCell: (params) => new Date(params.value).toLocaleDateString(),
+      flex: 0.9,
+      renderCell: (params) => (
+        <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+          {new Date(params.value).toLocaleDateString()}
+        </Box>
+      ),
     },
     {
-      field: "tipo",
-      headerName: "Tipo",
-      flex: 1,
-      renderCell: (params) => (
-        <Chip
-          label={params.value}
-          color={params.value === "Deuda" ? "error" : "success"}
-          size="small"
-        />
-      ),
+      field: "operacion",
+      headerName: "Operación",
+      flex: 1.5,
+      renderCell: (params) => {
+        const style = OPERACION_STYLES[params.value] ?? {
+          label: params.value,
+          bg: "#F5F5F5",
+          color: "#333",
+        };
+        return (
+          <Box sx={{ display: "flex", alignItems: "center", height: "100%" }}>
+            <Chip
+              label={style.label}
+              size="small"
+              sx={{
+                bgcolor: style.bg,
+                color: style.color,
+                fontWeight: 600,
+                fontSize: "0.72rem",
+                border: `1px solid ${style.color}33`,
+              }}
+            />
+          </Box>
+        );
+      },
     },
     {
       field: "descripcion",
@@ -79,10 +102,13 @@ function VerPage({ params }: { params: { id: string } }) {
       renderCell: (params) => (
         <Box
           sx={{
+            display: "flex",
+            alignItems: "center",
+            height: "100%",
             whiteSpace: "normal",
             wordWrap: "break-word",
-            lineHeight: "1.2",
-            py: 1,
+            lineHeight: "1.3",
+            py: 0.5,
           }}
         >
           <a href={params.row.ref} style={{ textDecoration: "underline" }}>
@@ -94,12 +120,41 @@ function VerPage({ params }: { params: { id: string } }) {
     {
       field: "monto",
       headerName: "Monto",
-      flex: 1,
-      renderCell: (params) =>
-        `$${params.value.toLocaleString("es-AR", {
+      flex: 1.1,
+      align: "right",
+      headerAlign: "right",
+      renderCell: (params) => {
+        const esPago = params.row.tipo === "Pago";
+        const signo = esPago ? "+" : "-";
+        const color = esPago ? "#1B5E20" : "#B71C1C";
+        const monto = params.value.toLocaleString("es-AR", {
           minimumFractionDigits: 2,
           maximumFractionDigits: 2,
-        })}`,
+        });
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              height: "100%",
+              width: "100%",
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 700,
+                color,
+                fontVariantNumeric: "tabular-nums",
+                letterSpacing: "-0.2px",
+              }}
+            >
+              {signo}${monto}
+            </Typography>
+          </Box>
+        );
+      },
     },
   ];
 
@@ -113,15 +168,11 @@ function VerPage({ params }: { params: { id: string } }) {
       url.searchParams.append("page", (page + 1).toString());
       url.searchParams.append("pageSize", pageSize.toString());
 
-      // Agregar parámetros de fecha si están definidos
       if (fromDate) {
-        const formattedFromDate = fromDate.toISOString().split("T")[0];
-        url.searchParams.append("from", formattedFromDate);
+        url.searchParams.append("from", fromDate.toISOString().split("T")[0]);
       }
-
       if (toDate) {
-        const formattedToDate = toDate.toISOString().split("T")[0];
-        url.searchParams.append("to", formattedToDate);
+        url.searchParams.append("to", toDate.toISOString().split("T")[0]);
       }
 
       const respuesta = await authFetch(url.toString());
@@ -147,18 +198,31 @@ function VerPage({ params }: { params: { id: string } }) {
     setToDate(null);
   };
 
+  const saldoPositivo = estadoDeuda >= 0;
+
   return (
     <Box sx={{ width: "100%", p: 2 }}>
       {nombreProveedor && (
-        <>
+        <Box sx={{ mb: 3 }}>
           <Typography variant="h5" gutterBottom>
             Estado de cuenta de: {nombreProveedor}
           </Typography>
-          <Typography variant="h6" gutterBottom>
-            {estadoDeuda > 0 ? "Crédito: " : "Deuda: "}
-            {estadoDeuda && getFormattedPrice(estadoDeuda)}
-          </Typography>
-        </>
+          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
+            <Typography variant="subtitle1" color="text.secondary">
+              Saldo en el período:
+            </Typography>
+            <Typography
+              variant="h5"
+              sx={{
+                fontWeight: 700,
+                color: saldoPositivo ? "#1B5E20" : "#B71C1C",
+              }}
+            >
+              {saldoPositivo ? "+" : "-"}
+              {getFormattedPrice(Math.abs(estadoDeuda))}
+            </Typography>
+          </Box>
+        </Box>
       )}
 
       <Box
@@ -216,17 +280,14 @@ function VerPage({ params }: { params: { id: string } }) {
         rowCount={totalRows}
         pageSizeOptions={[5, 10, 25]}
         paginationMode="server"
-        paginationModel={{
-          page,
-          pageSize,
-        }}
+        paginationModel={{ page, pageSize }}
         onPaginationModelChange={(model) => {
           setPage(model.page);
           setPageSize(model.pageSize);
         }}
         disableRowSelectionOnClick
         getRowId={(row) => row.fecha + row.tipo + row.monto}
-        autoHeight
+        sx={{ "& .MuiDataGrid-cell": { alignItems: "center" } }}
       />
     </Box>
   );
