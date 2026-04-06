@@ -159,6 +159,47 @@ function VerPage({ params }: { params: { id: string } }) {
         );
       },
     },
+    {
+      field: "saldoHastaAqui",
+      headerName: "Saldo",
+      flex: 1.1,
+      align: "right",
+      headerAlign: "right",
+      renderCell: (params) => {
+        const saldo: number = params.value ?? 0;
+        const positivo = saldo >= 0;
+        const color = positivo ? "#1B5E20" : "#B71C1C";
+        const signo = positivo ? "+" : "-";
+        const montoStr = Math.abs(saldo).toLocaleString("es-AR", {
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2,
+        });
+        return (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "flex-end",
+              height: "100%",
+              width: "100%",
+            }}
+          >
+            <Typography
+              variant="body2"
+              sx={{
+                fontWeight: 500,
+                color,
+                fontVariantNumeric: "tabular-nums",
+                letterSpacing: "-0.2px",
+                opacity: 0.85,
+              }}
+            >
+              {signo}${montoStr}
+            </Typography>
+          </Box>
+        );
+      },
+    },
   ];
 
   const obtenerDatos = useCallback(async () => {

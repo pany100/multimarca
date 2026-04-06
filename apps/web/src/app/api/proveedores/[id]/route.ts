@@ -187,9 +187,17 @@ export async function GET(
       return acc + (mov.tipo === "Deuda" ? -mov.monto : mov.monto);
     }, 0);
 
+    // Calcular saldo acumulado corriente para cada fila (de más antiguo a más reciente)
+    // Los movimientos están ordenados desc, así que acumulamos de atrás hacia adelante
+    let saldoCorriente = 0;
+    const movimientosConSaldo = [...movimientos].reverse().map((mov) => {
+      saldoCorriente += mov.tipo === "Deuda" ? -mov.monto : mov.monto;
+      return { ...mov, saldoHastaAqui: saldoCorriente };
+    }).reverse();
+
     // Paginar resultados
-    const total = movimientos.length;
-    const paginatedMovimientos = movimientos.slice(skip, skip + pageSize);
+    const total = movimientosConSaldo.length;
+    const paginatedMovimientos = movimientosConSaldo.slice(skip, skip + pageSize);
 
     return NextResponse.json({
       items: paginatedMovimientos,
