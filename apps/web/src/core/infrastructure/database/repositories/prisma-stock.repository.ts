@@ -160,6 +160,7 @@ export class PrismaStockRepository implements StockRepository {
   async findById(id: number) {
     return prisma.stock.findUnique({
       where: { id },
+      include: { proveedor: true },
     });
   }
 
