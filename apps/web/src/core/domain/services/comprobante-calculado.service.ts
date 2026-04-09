@@ -140,6 +140,10 @@ export class ComprobanteCalculado {
     return this.ajustes.ajustesDesglosados;
   }
 
+  get ajustesConMontoEfectivo() {
+    return this.ajustes.getAjustesConMontoEfectivo(this.totalBase);
+  }
+
   get descuentoManoDeObraAPagar() {
     const totalDesc = this.ajustes.totalDescuento;
     if (totalDesc === 0) {

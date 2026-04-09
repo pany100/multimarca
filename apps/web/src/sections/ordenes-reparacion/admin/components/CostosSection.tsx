@@ -120,6 +120,14 @@ function CostosSection() {
 
   const ajustesPrecio = orden.ajustesPrecio ?? [];
 
+  const precioFinalLocal =
+    Number(orden.totalReparacionesDeTerceros ?? 0) +
+    Number(orden.totalRepuestos ?? 0) +
+    Number(orden.totalManoDeObra ?? 0) +
+    Number(orden.incrementoInterno ?? 0) -
+    Number(orden.descuento ?? 0) +
+    Number(orden.incremento ?? 0);
+
   const methods = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -213,6 +221,35 @@ function CostosSection() {
           </>
         )}
 
+        {/* --- Precio Final Local (base + legacy, antes de ajustes nuevos) --- */}
+        {(ajustesPrecio.length > 0 || hasLegacy) && (
+          <>
+            <Divider sx={{ my: 0.5 }} />
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                py: 0.3,
+              }}
+            >
+              <Typography variant="body2" fontWeight="bold" color="text.secondary">
+                Precio Final Local
+              </Typography>
+              <Typography
+                variant="body2"
+                sx={{
+                  fontFamily: "monospace",
+                  fontWeight: 700,
+                  color: "text.primary",
+                }}
+              >
+                $ {fmt(precioFinalLocal)}
+              </Typography>
+            </Box>
+          </>
+        )}
+
         {/* --- New ajustes --- */}
         {ajustesPrecio.length > 0 && (
           <>
@@ -227,15 +264,18 @@ function CostosSection() {
             </Typography>
             {ajustesPrecio.map((a: any) => {
               const isDiscount = a.esDescuento;
+              const isPorcentual = a.tipo === "porcentual";
+              const montoEfectivo = isPorcentual
+                ? (Number(a.monto) / 100) * precioFinalLocal
+                : Number(a.monto);
+              const label = isPorcentual
+                ? `${a.descripcion} (${Number(a.monto)}%)`
+                : a.descripcion;
               return (
                 <LineItem
                   key={a.id}
-                  label={a.descripcion}
-                  amount={
-                    a.tipo === "porcentual"
-                      ? `${Number(a.monto)}%`
-                      : fmt(a.monto)
-                  }
+                  label={label}
+                  amount={fmt(montoEfectivo)}
                   sign={isDiscount ? "-" : "+"}
                   color={isDiscount ? "error.main" : "success.main"}
                   badge={a.esInterno ? "Interno" : undefined}

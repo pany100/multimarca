@@ -1,6 +1,7 @@
 import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 import { EstadoOrdenReparacion } from "@prisma/client";
 import { getFormattedPrice } from "./fieldHelper";
+import { generateAjustesRowsHtml } from "./generateAjustesHtml";
 
 export default function generateClientOrderHtml(repair: any): string {
   const calculoVO = ComprobanteCalculadoFactory.fromOrden(repair);
@@ -385,55 +386,7 @@ export default function generateClientOrderHtml(repair: any): string {
           grid-template-columns: 80% 20%;
           margin-right: 15px;
         '>
-        ${
-          repair.ajustesPrecio && repair.ajustesPrecio.length > 0
-            ? repair.ajustesPrecio
-                .filter((a: any) => !a.esInterno)
-                .map(
-                  (a: any) => `
-              <div class="TypographyBody1" style="margin-top: 20px; font-weight: ${a.esDescuento ? "bold" : "normal"};">
-                ${a.esDescuento ? "Descuento" : "Otros"}${a.descripcion ? ` - ${a.descripcion}` : ""}
-                ${a.tipo === "porcentual" ? ` (${Number(a.monto)}%)` : ""}
-              </div>
-              <div class="TypographyBody1" style="margin-top: 20px; text-align: right; font-weight: ${a.esDescuento ? "bold" : "normal"};">
-                ${a.esDescuento ? "- " : ""}$${Number(a.monto).toLocaleString("es-AR")}${a.tipo === "porcentual" ? "%" : ""}
-              </div>
-            `,
-                )
-                .join("")
-            : `${
-                repair.incremento > 0
-                  ? `
-              <div class="TypographyBody1" style="margin-top: 20px;">
-                Otros ${
-                  repair.descripcionIncremento
-                    ? `- ${repair.descripcionIncremento}`
-                    : ""
-                }
-              </div>
-              <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
-                $${Number(repair.incremento).toLocaleString("es-AR")}
-              </div>
-          `
-                  : ""
-              }${
-                repair.descuento > 0
-                  ? `
-              <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold;">
-                Descuento
-                ${
-                  repair.descripcionDescuento
-                    ? ` - ${repair.descripcionDescuento}`
-                    : ""
-                }
-              </div>
-              <div class="TypographyBody1" style="margin-top: 20px; text-align: right; font-weight: bold;">
-                ${"- "}$${Number(repair.descuento).toLocaleString("es-AR")}
-              </div>
-          `
-                  : ""
-              }`
-        }
+        ${generateAjustesRowsHtml(repair, calculoVO)}
         <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; margin-bottom: 20px;">
           Importe Total:
         </div>

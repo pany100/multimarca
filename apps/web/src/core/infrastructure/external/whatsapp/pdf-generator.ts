@@ -20,6 +20,7 @@ export async function generatePdfBuffer(
         reparacionesDeTercero: { include: { proveedor: true } },
         revisadoPor: true,
         trabajosRealizados: true,
+        ajustesPrecio: { orderBy: { orden: "asc" } },
         controlesEnReparacion: {
           include: { controlMecanico: { include: { parent: true } } },
         },
@@ -38,6 +39,7 @@ export async function generatePdfBuffer(
         repuestosUsados: { include: { stock: true } },
         reparacionesDeTercero: { include: { proveedor: true } },
         trabajosRealizados: true,
+        ajustesPrecio: { orderBy: { orden: "asc" } },
         ingresos: true,
       },
     });
@@ -53,6 +55,7 @@ export async function generatePdfBuffer(
         repuestosUsados: { include: { stock: true } },
         reparacionesDeTercero: true,
         trabajosRealizados: true,
+        ajustesPrecio: { orderBy: { orden: "asc" } },
         tareasAdministrativas: { include: { usuario: true } },
         dolar: true,
       },

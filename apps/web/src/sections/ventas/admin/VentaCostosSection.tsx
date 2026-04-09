@@ -3,7 +3,7 @@
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import { yupResolver } from "@hookform/resolvers/yup";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import { Box, Chip, Paper, Stack, Typography } from "@mui/material";
+import { Box, Chip, Divider, Paper, Stack, Typography } from "@mui/material";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { CommonOrderCard } from "../../ordenes-reparacion/admin/components/CommonOrderCard";
@@ -46,6 +46,17 @@ function VentaCostosSection() {
 
   const ajustesPrecio = venta.ajustesPrecio ?? [];
   const usesNewAjustes = ajustesPrecio.length > 0;
+
+  const hasLegacy =
+    Number(venta.descuento ?? 0) > 0 ||
+    Number(venta.incremento ?? 0) > 0;
+
+  const precioFinalLocal =
+    Number(venta.totalReparacionesDeTerceros ?? 0) +
+    Number(venta.totalRepuestos ?? 0) +
+    Number(venta.totalManoDeObra ?? 0) -
+    Number(venta.descuento ?? 0) +
+    Number(venta.incremento ?? 0);
 
   const methods = useForm<FormData>({
     resolver: yupResolver(schema),
@@ -140,8 +151,33 @@ function VentaCostosSection() {
             </Typography>
           </Box>
 
+          {/* --- Precio Final Local --- */}
+          {(usesNewAjustes || hasLegacy) && (
+            <>
+              <Divider sx={{ my: 0.5 }} />
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                }}
+              >
+                <Typography variant="body2" fontWeight="bold" color="text.secondary">
+                  Precio Final Local
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{ fontFamily: "monospace", fontWeight: 700, color: "text.primary" }}
+                >
+                  $ {formatPrecio(precioFinalLocal)}
+                </Typography>
+              </Box>
+            </>
+          )}
+
           {usesNewAjustes ? (
             <>
+              <Divider sx={{ my: 0.5 }} />
               <Typography
                 variant="body2"
                 color="text.secondary"
@@ -149,35 +185,42 @@ function VentaCostosSection() {
               >
                 <strong>Ajustes de precio:</strong>
               </Typography>
-              {ajustesPrecio.map((a: any, idx: number) => (
-                <Box
-                  key={idx}
-                  sx={{ display: "flex", alignItems: "center", gap: 1, pl: 1 }}
-                >
-                  <Typography variant="body2" color="text.secondary">
-                    {a.descripcion}
-                  </Typography>
-                  <Chip
-                    size="small"
-                    label={a.esDescuento ? "Descuento" : "Incremento"}
-                    color={a.esDescuento ? "error" : "success"}
-                    variant="outlined"
-                  />
-                  <Typography variant="body2" color="text.secondary">
-                    {a.tipo === "porcentual"
-                      ? `${Number(a.monto)}%`
-                      : `$${formatPrecio(a.monto)}`}
-                  </Typography>
-                  {a.esInterno && (
+              {ajustesPrecio.map((a: any, idx: number) => {
+                const isPorcentual = a.tipo === "porcentual";
+                const montoEfectivo = isPorcentual
+                  ? (Number(a.monto) / 100) * precioFinalLocal
+                  : Number(a.monto);
+                const label = isPorcentual
+                  ? `${a.descripcion} (${Number(a.monto)}%)`
+                  : a.descripcion;
+                return (
+                  <Box
+                    key={idx}
+                    sx={{ display: "flex", alignItems: "center", gap: 1, pl: 1 }}
+                  >
+                    <Typography variant="body2" color="text.secondary">
+                      {label}
+                    </Typography>
                     <Chip
                       size="small"
-                      label="Interno"
-                      color="warning"
+                      label={a.esDescuento ? "Descuento" : "Incremento"}
+                      color={a.esDescuento ? "error" : "success"}
                       variant="outlined"
                     />
-                  )}
-                </Box>
-              ))}
+                    <Typography variant="body2" color="text.secondary">
+                      {a.esDescuento ? "-" : "+"} ${formatPrecio(montoEfectivo)}
+                    </Typography>
+                    {a.esInterno && (
+                      <Chip
+                        size="small"
+                        label="Interno"
+                        color="warning"
+                        variant="outlined"
+                      />
+                    )}
+                  </Box>
+                );
+              })}
             </>
           ) : (
             <>

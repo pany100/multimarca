@@ -36,6 +36,7 @@ export async function GET(
         },
         revisadoPor: true,
         trabajosRealizados: true,
+        ajustesPrecio: { orderBy: { orden: "asc" } },
         controlesEnReparacion: {
           include: {
             controlMecanico: {

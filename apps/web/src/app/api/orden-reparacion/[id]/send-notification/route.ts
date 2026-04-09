@@ -37,6 +37,7 @@ export async function POST(
           },
         },
         trabajosRealizados: true,
+        ajustesPrecio: { orderBy: { orden: "asc" } },
         controlesEnReparacion: {
           include: {
             controlMecanico: true,

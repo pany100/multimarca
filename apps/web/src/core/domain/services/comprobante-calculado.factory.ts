@@ -53,6 +53,11 @@ function buildPriceAdjustments(
       ajustes,
       modoAjustes ?? "sobreTotalBase",
       Number(legacy.porcentajeRecargo),
+      {
+        descuento: Number(legacy.descuento),
+        incremento: Number(legacy.incremento),
+        incrementoInterno: Number(legacy.incrementoInterno),
+      },
     );
   }
   return PriceAdjustments.normalizeFromDB({
@@ -201,6 +206,11 @@ export class ComprobanteCalculadoFactory {
             ajustes,
             (dto.modoAjustes as ModoAjustes) ?? "sobreTotalBase",
             dto.porcentajeRecargo ?? 0,
+            {
+              descuento: dto.descuento ?? 0,
+              incremento: dto.incremento ?? 0,
+              incrementoInterno: dto.incrementoInterno ?? 0,
+            },
           )
         : PriceAdjustments.normalizeFromDB({
             descuento: dto.descuento
