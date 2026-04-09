@@ -76,7 +76,20 @@ echo "🚀 Iniciando despliegue (rsync optimizado)"
 nvm install "$NODE_VER" || true
 nvm use "$NODE_VER" || handle_error "Falló NVM"
 echo "📦 Build local (apps/web)"
-yarn --cwd apps/web build || handle_error "Falló el build local"
+BUILD_LOG=$(mktemp /tmp/deploy_build_XXXXXX.log)
+echo "   → Log de build: ${BUILD_LOG}"
+if ! yarn --cwd apps/web build 2>&1 | tee "$BUILD_LOG"; then
+  echo ""
+  echo "❌ ════════════════════════════════════════════"
+  echo "❌  BUILD FALLÓ — últimas 40 líneas del log:"
+  echo "❌ ════════════════════════════════════════════"
+  echo ""
+  tail -40 "$BUILD_LOG"
+  echo ""
+  echo "❌ Log completo en: ${BUILD_LOG}"
+  exit 1
+fi
+echo "✅ Build exitoso"
 
 # ========= Túnel SSH (local 2222 -> remoto 22) =========
 echo "🛣️  Abriendo túnel SSH en localhost:${TUNNEL_PORT} → ${REMOTE_HOST}:22 ..."
