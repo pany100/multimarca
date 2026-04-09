@@ -1,6 +1,5 @@
 import FormActions from "@/components/orden-reparacion/formV2/commons/FormActions";
 import FormSection from "@/components/orden-reparacion/formV2/commons/FormSection";
-import RecargoSection from "@/components/orden-reparacion/formV2/sections/recargo-section/RecargoSection";
 import ReparacionTercerosSection from "@/components/orden-reparacion/formV2/sections/reparacion-terceros/ReparacionTercerosSection";
 import RepuestosUsadosSection from "@/components/orden-reparacion/formV2/sections/repuestos-usados/RepuestosUsadosSection";
 import ResumenCostosSection from "@/components/orden-reparacion/formV2/sections/resumen-costos/ResumenCostosSection";
@@ -121,9 +120,6 @@ function EditarVentaForm({ venta }: { venta: Venta }) {
         </FormSection>
         <FormSection title="Repuestos Usados">
           <RepuestosUsadosSection />
-        </FormSection>
-        <FormSection title="Recargo">
-          <RecargoSection />
         </FormSection>
         <FormSection title="Trabajos Realizados">
           <TrabajosRealizadosSection />

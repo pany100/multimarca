@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { VentaProvider } from "@/sections/ventas/admin/contexts/VentaContext";
 import VentaCostosSection from "@/sections/ventas/admin/VentaCostosSection";
 import VentaInformacionGeneral from "@/sections/ventas/admin/VentaInformacionGeneral";
-import VentaRecargoSection from "@/sections/ventas/admin/VentaRecargoSection";
 import VentaRepuestosSection from "@/sections/ventas/admin/VentaRepuestosSection";
 import VentaTercerosSection from "@/sections/ventas/admin/VentaTercerosSection";
 import VentaTrabajosSection from "@/sections/ventas/admin/VentaTrabajosSection";
@@ -74,9 +73,6 @@ const VentaAdminPage = ({ params }: { params: { id: string } }) => {
             </Grid>
             <Grid item xs={12}>
               <VentaTercerosSection />
-            </Grid>
-            <Grid item xs={12}>
-              <VentaRecargoSection />
             </Grid>
             <Grid item xs={12}>
               <VentaTrabajosSection />

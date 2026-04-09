@@ -15,7 +15,6 @@ import HiddenObservationSection from "../sections/hidden-observations/HiddenObse
 import InputObservationSection from "../sections/input-observations/InputObservationsSection";
 import MechanicsSection from "../sections/mechanics/MechanicsSection";
 import OutputObservationsSection from "../sections/output-observations/OutputObservationsSection";
-import RecargoSection from "../sections/recargo-section/RecargoSection";
 import ReparacionTercerosSection from "../sections/reparacion-terceros/ReparacionTercerosSection";
 import RepuestosUsadosSection from "../sections/repuestos-usados/RepuestosUsadosSection";
 import ResumenCostosSection from "../sections/resumen-costos/ResumenCostosSection";
@@ -204,9 +203,6 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
         </FormSection>
         <FormSection title="Repuestos Usados">
           <RepuestosUsadosSection />
-        </FormSection>
-        <FormSection title="Recargo">
-          <RecargoSection />
         </FormSection>
         <FormSection title="Mano de Obra">
           <TrabajosRealizadosSection />
