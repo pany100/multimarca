@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { ajustePrecioItemSchema, modoAjustesSchema } from "./ajuste-precio.schema";
 
 export const repuestoSchema = z.object({
   stock: z.object({ id: z.coerce.number(), name: z.string().optional() }),
@@ -58,6 +59,8 @@ export const createOrdenSchema = z.object({
   descripcionIncremento: z.string().nullable().optional(),
   incrementoInterno: z.coerce.number().optional(),
   porcentajeRecargo: z.coerce.number().optional(),
+  ajustesPrecio: z.array(ajustePrecioItemSchema).optional(),
+  modoAjustes: modoAjustesSchema.optional(),
 });
 
 export const listOrdenesQuerySchema = z.object({
@@ -111,6 +114,8 @@ export const updateOrdenSchema = z.object({
   descripcionIncremento: z.string().nullable().optional(),
   incrementoInterno: z.coerce.number().optional(),
   porcentajeRecargo: z.coerce.number().optional(),
+  ajustesPrecio: z.array(ajustePrecioItemSchema).optional(),
+  modoAjustes: modoAjustesSchema.optional(),
 });
 
 export const createDraftOrdenSchema = z.object({
@@ -141,6 +146,8 @@ export const patchOrdenV2Schema = z.object({
   descripcionDescuento: z.string().nullable().optional(),
   incremento: z.coerce.number().nullable().optional(),
   descripcionIncremento: z.string().nullable().optional(),
+  ajustesPrecio: z.array(ajustePrecioItemSchema).optional(),
+  modoAjustes: modoAjustesSchema.optional(),
 });
 
 export const addMecanicoToOrdenSchema = z.object({

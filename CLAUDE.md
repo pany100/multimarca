@@ -68,6 +68,10 @@ npx prisma db seed       # seed script: tsx prisma/seed.ts
 | `apps/web/prisma` | `schema.prisma`, migrations, seed |
 | `apps/web/tests` | Jest tests, mirrors `src/app/api/` structure |
 
+### Key entry points
+
+- **Ordenes de reparación — editing/admin:** The primary page for viewing and editing an order is `apps/web/src/app/dashboard/ordenes-reparacion/[id]/page.tsx`. This page uses inline-editable sections (via `CommonOrderCard` + PATCH endpoints) and an `OrdenContext`. Always start here when working on OdR features — trace imports to find the relevant section component under `src/sections/ordenes-reparacion/admin/`.
+
 ### Domain layer patterns
 
 - **Value Objects:** `Money` (wraps `Prisma.Decimal`), `DateRange`, `OrdenReparacion`, `Presupuesto`, `Pago`, `EstadosOrden`, etc.

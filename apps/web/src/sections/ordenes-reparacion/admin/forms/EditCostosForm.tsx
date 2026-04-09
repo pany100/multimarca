@@ -6,6 +6,13 @@ import { Box, Grid, Typography } from "@mui/material";
 function EditCostosForm() {
   return (
     <Grid container spacing={2}>
+      <Grid item xs={12}>
+        <Typography variant="caption" color="text.secondary">
+          Estos campos son deprecados. Para nuevos ajustes, usa la seccion
+          &quot;Incrementos y Descuentos&quot;.
+        </Typography>
+      </Grid>
+
       <Grid item xs={4}>
         <CustomInputText
           name="incrementoInterno"
@@ -28,7 +35,7 @@ function EditCostosForm() {
       <Grid item xs={8}>
         <CustomInputText
           name="descripcionDescuento"
-          label="Descripción del descuento"
+          label="Descripcion del descuento"
         />
       </Grid>
 
@@ -38,7 +45,7 @@ function EditCostosForm() {
       <Grid item xs={8}>
         <CustomInputText
           name="descripcionIncremento"
-          label="Descripción del incremento"
+          label="Descripcion del incremento"
         />
       </Grid>
     </Grid>

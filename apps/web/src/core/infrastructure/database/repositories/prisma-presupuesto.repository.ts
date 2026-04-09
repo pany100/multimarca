@@ -88,6 +88,7 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
             },
           },
           trabajosRealizados: true,
+          ajustesPrecio: { orderBy: { orden: "asc" } },
         },
       },
       page,

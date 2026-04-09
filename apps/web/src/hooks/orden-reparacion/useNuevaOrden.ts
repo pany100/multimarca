@@ -38,6 +38,8 @@ function useNuevaOrden({ control }: Props) {
     useWatch({ control, name: "incrementoInterno" }) || 0;
   const porcentajeRecargo =
     useWatch({ control, name: "porcentajeRecargo" }) || 0;
+  const ajustesPrecio = useWatch({ control, name: "ajustesPrecio" });
+  const modoAjustes = useWatch({ control, name: "modoAjustes" }) || "sobreTotalBase";
 
   // Use refs to track previous values and prevent unnecessary calculations
   const timeoutRef = useRef<NodeJS.Timeout>();
@@ -64,6 +66,14 @@ function useNuevaOrden({ control }: Props) {
       incremento,
       incrementoInterno,
       porcentajeRecargo,
+      ajustesPrecio: (ajustesPrecio ?? []).map((a: any) => ({
+        descripcion: a.descripcion,
+        monto: a.monto,
+        tipo: a.tipo,
+        esDescuento: a.esDescuento,
+        esInterno: a.esInterno,
+      })),
+      modoAjustes,
       // Add array lengths to ensure deletion detection
       lengths: {
         repuestos: (repuestosUsados ?? []).length,
@@ -94,6 +104,8 @@ function useNuevaOrden({ control }: Props) {
           incremento,
           incrementoInterno,
           porcentajeRecargo,
+          ajustesPrecio: ajustesPrecio ?? [],
+          modoAjustes,
         });
         setPrecios(preciosCalculados);
 
@@ -127,6 +139,8 @@ function useNuevaOrden({ control }: Props) {
     incremento,
     incrementoInterno,
     porcentajeRecargo,
+    ajustesPrecio,
+    modoAjustes,
     calculatePrecios,
   ]);
 

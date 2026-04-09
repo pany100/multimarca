@@ -74,6 +74,7 @@ export class PrismaOrdenReparacionRepository
               dolar: true,
             },
           },
+          ajustesPrecio: { orderBy: { orden: "asc" } },
         },
       },
       page,
@@ -132,6 +133,7 @@ export class PrismaOrdenReparacionRepository
           },
         },
         trabajosRealizados: true,
+        ajustesPrecio: { orderBy: { orden: "asc" } },
         revisadoPor: true,
         controlesEnReparacion: {
           include: {
@@ -198,6 +200,7 @@ export class PrismaOrdenReparacionRepository
             dolar: true,
           },
         },
+        ajustesPrecio: { orderBy: { orden: "asc" } },
       },
     });
   }
@@ -225,6 +228,15 @@ export class PrismaOrdenReparacionRepository
       descripcionDescuento?: string | null;
       incremento?: number | null;
       descripcionIncremento?: string | null;
+      ajustesPrecio?: Array<{
+        descripcion: string;
+        monto: number;
+        tipo: string;
+        esDescuento: boolean;
+        esInterno?: boolean;
+        orden?: number;
+      }>;
+      modoAjustes?: string;
     }
   ) {
     const dataToUpdate: any = {};
@@ -260,6 +272,25 @@ export class PrismaOrdenReparacionRepository
     if (dto.incremento !== undefined) dataToUpdate.incremento = dto.incremento;
     if (dto.descripcionIncremento !== undefined)
       dataToUpdate.descripcionIncremento = dto.descripcionIncremento;
+
+    if (dto.modoAjustes !== undefined)
+      dataToUpdate.modoAjustes = dto.modoAjustes;
+
+    if (dto.ajustesPrecio !== undefined) {
+      dataToUpdate.ajustesPrecio = {
+        deleteMany: {},
+        createMany: {
+          data: dto.ajustesPrecio.map((a, idx) => ({
+            descripcion: a.descripcion,
+            monto: a.monto,
+            tipo: a.tipo,
+            esDescuento: a.esDescuento,
+            esInterno: a.esInterno ?? false,
+            orden: a.orden ?? idx,
+          })),
+        },
+      };
+    }
 
     if (dto.controlesEnReparacion !== undefined) {
       const controlIds = dto.controlesEnReparacion.map((c) => c.id);
@@ -330,6 +361,7 @@ export class PrismaOrdenReparacionRepository
           },
         },
         trabajosRealizados: true,
+        ajustesPrecio: { orderBy: { orden: "asc" } },
         revisadoPor: true,
         controlesEnReparacion: {
           include: {
@@ -422,6 +454,7 @@ export class PrismaOrdenReparacionRepository
             },
           },
           trabajosRealizados: true,
+          ajustesPrecio: { orderBy: { orden: "asc" } },
           revisadoPor: true,
           controlesEnReparacion: {
             include: {

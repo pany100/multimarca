@@ -37,6 +37,10 @@ export class PatchVentaUseCase {
     if (dto.estado !== undefined) updateData.estado = dto.estado;
     if (dto.cedulaFilePath !== undefined)
       updateData.cedulaFilePath = dto.cedulaFilePath;
+    if (dto.ajustesPrecio !== undefined)
+      updateData.ajustesPrecio = dto.ajustesPrecio;
+    if (dto.modoAjustes !== undefined)
+      updateData.modoAjustes = dto.modoAjustes;
 
     // Delegar al repositorio la lógica de mapeo y actualización
     const venta = await this.ventaRepository.patchVenta(ventaId, updateData);

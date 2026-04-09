@@ -386,24 +386,39 @@ export default function generateClientOrderHtml(repair: any): string {
           margin-right: 15px;
         '>
         ${
-          repair.incremento > 0
-            ? `
-            <div class="TypographyBody1" style="margin-top: 20px;">
-              Otros ${
-                repair.descripcionIncremento
-                  ? `- ${repair.descripcionIncremento}`
+          repair.ajustesPrecio && repair.ajustesPrecio.length > 0
+            ? repair.ajustesPrecio
+                .filter((a: any) => !a.esInterno)
+                .map(
+                  (a: any) => `
+              <div class="TypographyBody1" style="margin-top: 20px; font-weight: ${a.esDescuento ? "bold" : "normal"};">
+                ${a.esDescuento ? "Descuento" : "Otros"}${a.descripcion ? ` - ${a.descripcion}` : ""}
+                ${a.tipo === "porcentual" ? ` (${Number(a.monto)}%)` : ""}
+              </div>
+              <div class="TypographyBody1" style="margin-top: 20px; text-align: right; font-weight: ${a.esDescuento ? "bold" : "normal"};">
+                ${a.esDescuento ? "- " : ""}$${Number(a.monto).toLocaleString("es-AR")}${a.tipo === "porcentual" ? "%" : ""}
+              </div>
+            `,
+                )
+                .join("")
+            : `${
+                repair.incremento > 0
+                  ? `
+              <div class="TypographyBody1" style="margin-top: 20px;">
+                Otros ${
+                  repair.descripcionIncremento
+                    ? `- ${repair.descripcionIncremento}`
+                    : ""
+                }
+              </div>
+              <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
+                $${Number(repair.incremento).toLocaleString("es-AR")}
+              </div>
+          `
                   : ""
-              }
-            </div>
-            <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
-              $${Number(repair.incremento).toLocaleString("es-AR")}
-            </div>
-        `
-            : ""
-        }
-        ${
-          repair.descuento > 0
-            ? `
+              }${
+                repair.descuento > 0
+                  ? `
               <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold;">
                 Descuento
                 ${
@@ -416,7 +431,8 @@ export default function generateClientOrderHtml(repair: any): string {
                 ${"- "}$${Number(repair.descuento).toLocaleString("es-AR")}
               </div>
           `
-            : ""
+                  : ""
+              }`
         }
         <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; margin-bottom: 20px;">
           Importe Total:

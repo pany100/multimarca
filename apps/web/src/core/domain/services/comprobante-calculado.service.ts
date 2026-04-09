@@ -41,7 +41,7 @@ export class ComprobanteCalculado {
   }
 
   get manoDeObraForRecibos() {
-    return this.totalManoDeObra + this.ajustes.incrementoInterno;
+    return this.totalManoDeObra + this.ajustes.incrementoInternoTotal;
   }
 
   get totalRepuestos() {
@@ -72,14 +72,13 @@ export class ComprobanteCalculado {
   }
 
   private getIncrementoDistribuido() {
-    const incrementoDistribuido =
-      this.ajustes.incrementoInterno / this.trabajos.length;
+    const incrementoTotal = this.ajustes.incrementoInternoTotal;
+    const incrementoDistribuido = incrementoTotal / this.trabajos.length;
     const incrementoParcial = this.roundToNearestThousandOrFiveHundred(
       incrementoDistribuido,
     );
     const incrementoFinal =
-      this.ajustes.incrementoInterno -
-      incrementoParcial * (this.trabajos.length - 1);
+      incrementoTotal - incrementoParcial * (this.trabajos.length - 1);
     return {
       incrementoParcial,
       incrementoFinal,
@@ -134,11 +133,16 @@ export class ComprobanteCalculado {
   }
 
   get descuento() {
-    return this.ajustes.descuento;
+    return this.ajustes.totalDescuento;
+  }
+
+  get ajustesDesglosados() {
+    return this.ajustes.ajustesDesglosados;
   }
 
   get descuentoManoDeObraAPagar() {
-    if (this.ajustes.descuento === 0) {
+    const totalDesc = this.ajustes.totalDescuento;
+    if (totalDesc === 0) {
       return 0;
     }
 
@@ -149,7 +153,7 @@ export class ComprobanteCalculado {
 
     // Calcular el porcentaje de descuento
     const porcentajeDescuento =
-      (this.ajustes.descuento / this.totalSinDescuentos) * 100;
+      (totalDesc / this.totalSinDescuentos) * 100;
     // Aplicar ese porcentaje a la mano de obra
     const descuentoManoDeObra =
       (this.totalManoDeObra * porcentajeDescuento) / 100;

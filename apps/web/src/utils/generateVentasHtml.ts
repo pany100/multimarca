@@ -231,43 +231,59 @@ export default function generateClientOrderHtml(venta: any): string {
           </div>
           </div>
           ${
-            venta.incremento > 0
-              ? `
-              <div class="TypographyBody1" style="margin-top: 20px;">
-                Otros ${
-                  venta.descripcionIncremento
-                    ? `- ${venta.descripcionIncremento}`
-                    : ""
-                }
-              </div>
-              <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
-                $${Number(venta.incremento).toLocaleString("es-AR")}
-              </div>
-          `
-              : ""
-          }
-          ${
-            venta.descuento > 0
-              ? `
-                <div style='
-                  display: grid;
-                  grid-template-columns: 80% 20%;
-                  margin-top: 20px;
-                  margin-right: 15px;
-                '>
-                  <div class="TypographyBody1" style="font-weight: bold;">
-                    Descuento${
-                      venta.descripcionDescuento
-                        ? ` - ${venta.descripcionDescuento}`
-                        : ""
-                    }
-                  </div>
-                  <div class="TypographyBody1" style="text-align: right; font-weight: bold;">
-                    ${"- "}$${Number(venta.descuento).toLocaleString("es-AR")}
-                  </div>
+            venta.ajustesPrecio && venta.ajustesPrecio.length > 0
+              ? venta.ajustesPrecio
+                  .filter((a: any) => !a.esInterno)
+                  .map(
+                    (a: any) => `
+                <div class="TypographyBody1" style="margin-top: 20px; font-weight: ${a.esDescuento ? "bold" : "normal"};">
+                  ${a.esDescuento ? "Descuento" : "Otros"}${a.descripcion ? ` - ${a.descripcion}` : ""}
+                  ${a.tipo === "porcentual" ? ` (${Number(a.monto)}%)` : ""}
+                </div>
+                <div class="TypographyBody1" style="margin-top: 20px; text-align: right; font-weight: ${a.esDescuento ? "bold" : "normal"};">
+                  ${a.esDescuento ? "- " : ""}$${Number(a.monto).toLocaleString("es-AR")}${a.tipo === "porcentual" ? "%" : ""}
+                </div>
+              `,
+                  )
+                  .join("")
+              : `${
+                  venta.incremento > 0
+                    ? `
+                <div class="TypographyBody1" style="margin-top: 20px;">
+                  Otros ${
+                    venta.descripcionIncremento
+                      ? `- ${venta.descripcionIncremento}`
+                      : ""
+                  }
+                </div>
+                <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
+                  $${Number(venta.incremento).toLocaleString("es-AR")}
                 </div>
             `
-              : ""
+                    : ""
+                }${
+                  venta.descuento > 0
+                    ? `
+                  <div style='
+                    display: grid;
+                    grid-template-columns: 80% 20%;
+                    margin-top: 20px;
+                    margin-right: 15px;
+                  '>
+                    <div class="TypographyBody1" style="font-weight: bold;">
+                      Descuento${
+                        venta.descripcionDescuento
+                          ? ` - ${venta.descripcionDescuento}`
+                          : ""
+                      }
+                    </div>
+                    <div class="TypographyBody1" style="text-align: right; font-weight: bold;">
+                      ${"- "}$${Number(venta.descuento).toLocaleString("es-AR")}
+                    </div>
+                  </div>
+              `
+                    : ""
+                }`
           }
           <div style='
             display: grid;

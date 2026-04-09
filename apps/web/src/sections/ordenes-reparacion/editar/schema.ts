@@ -118,6 +118,17 @@ const schema = yup.object().shape({
   incrementoInterno: yup.number().nullable().min(0),
   observacionesEntrada: yup.string(),
   recibos: yup.array().of(yup.string()).nullable(),
+  ajustesPrecio: yup.array().of(
+    yup.object().shape({
+      descripcion: yup.string().required("La descripcion es requerida"),
+      monto: yup.number().positive("El monto debe ser positivo").required("El monto es requerido"),
+      tipo: yup.string().oneOf(["porcentual", "fijo"]).required(),
+      esDescuento: yup.boolean().required(),
+      esInterno: yup.boolean().default(false),
+      orden: yup.number().integer().default(0),
+    })
+  ),
+  modoAjustes: yup.string().oneOf(["acumulativo", "sobreTotalBase"]).default("sobreTotalBase"),
 });
 
 export default schema;

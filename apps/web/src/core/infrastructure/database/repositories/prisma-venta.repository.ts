@@ -47,6 +47,7 @@ export class PrismaVentaRepository implements VentaRepository {
             },
           },
           trabajosRealizados: true,
+          ajustesPrecio: { orderBy: { orden: "asc" } },
           ingresos: {
             include: {
               dolar: true,
@@ -117,6 +118,7 @@ export class PrismaVentaRepository implements VentaRepository {
           },
         },
         trabajosRealizados: true,
+        ajustesPrecio: { orderBy: { orden: "asc" } },
         ingresos: true,
       },
     });
@@ -135,6 +137,15 @@ export class PrismaVentaRepository implements VentaRepository {
       descripcionIncremento?: string | null;
       porcentajeRecargo?: number | null;
       estado?: string;
+      ajustesPrecio?: Array<{
+        descripcion: string;
+        monto: number;
+        tipo: string;
+        esDescuento: boolean;
+        esInterno: boolean;
+        orden: number;
+      }>;
+      modoAjustes?: string;
     }
   ): Promise<VentaWithRelations> {
     const currentVenta = await prisma.venta.findUnique({
@@ -217,6 +228,26 @@ export class PrismaVentaRepository implements VentaRepository {
           ? new Prisma.Decimal(dto.porcentajeRecargo)
           : null
       ) as any;
+    }
+
+    if (dto.modoAjustes !== undefined) {
+      updateData.modoAjustes = dto.modoAjustes as any;
+    }
+
+    if (dto.ajustesPrecio !== undefined) {
+      updateData.ajustesPrecio = {
+        deleteMany: {},
+        createMany: {
+          data: dto.ajustesPrecio.map((a, idx) => ({
+            descripcion: a.descripcion,
+            monto: a.monto,
+            tipo: a.tipo as any,
+            esDescuento: a.esDescuento,
+            esInterno: a.esInterno ?? false,
+            orden: a.orden ?? idx,
+          })),
+        },
+      };
     }
 
     return prisma.venta.update({

@@ -147,6 +147,18 @@ function EditarOrdenForm({ ordenReparacion }: Props) {
           id: Math.floor(Math.random() * 1000000),
         }),
       ),
+      ajustesPrecio: ((ordenReparacion as any).ajustesPrecio ?? []).map(
+        (a: any) => ({
+          descripcion: a.descripcion,
+          monto: Number(a.monto),
+          tipo: a.tipo,
+          esDescuento: a.esDescuento,
+          esInterno: a.esInterno,
+          orden: a.orden,
+          id: Math.floor(Math.random() * 1000000),
+        }),
+      ),
+      modoAjustes: (ordenReparacion as any).modoAjustes || "sobreTotalBase",
       observacionesSalida: ordenReparacion.observacionesSalida,
       controlesEnReparacion: ordenReparacion.controlesEnReparacion.map(
         (control) => ({

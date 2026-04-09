@@ -16,6 +16,7 @@ import OrdenTercerosSection from "@/sections/ordenes-reparacion/admin/OrdenTerce
 import OrdenTrabajosSection from "@/sections/ordenes-reparacion/admin/OrdenTrabajosSection";
 import RecibosSection from "@/sections/ordenes-reparacion/admin/RecibosSection";
 import RevisionSection from "@/sections/ordenes-reparacion/admin/RevisionSection";
+import AjustesPrecioAdminSection from "@/sections/ordenes-reparacion/admin/AjustesPrecioSection";
 import CostosSection from "@/sections/ordenes-reparacion/admin/components/CostosSection";
 import ScannerSection from "@/sections/ordenes-reparacion/admin/components/ScannerSection";
 import { ControlesProvider } from "@/sections/ordenes-reparacion/admin/contexts/ControlesContext";
@@ -124,6 +125,11 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
             <Grid item xs={12} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <OrdenTrabajosSection />
+              </Box>
+            </Grid>
+            <Grid item xs={12} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <AjustesPrecioAdminSection />
               </Box>
             </Grid>
             <Grid item xs={12} xl={6} sx={{ display: "flex" }}>

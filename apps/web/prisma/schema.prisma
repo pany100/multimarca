@@ -510,6 +510,8 @@ model Venta {
   trabajosRealizados    TrabajoRealizado[]    @relation("VentaTrabajosRealizados")
   cliente               Cliente?              @relation(fields: [clienteId], references: [id])
   dolar                 Dolar?                @relation(fields: [dolarId], references: [id])
+  ajustesPrecio         AjustePrecio[]        @relation("VentaAjustesPrecio")
+  modoAjustes           ModoAjustes           @default(sobreTotalBase)
 
   @@index([clienteId])
   @@index([fecha])
@@ -565,6 +567,8 @@ model OrdenReparacion {
   reparacionesDeTercero  ReparacionDeTercero[]     @relation("OrdenReparacionReparacionTercero")
   repuestosUsados        RepuestoUsado[]           @relation("OrdenReparacionRepuestos")
   trabajosRealizados     TrabajoRealizado[]        @relation("OrdenReparacionTrabajosRealizados")
+  ajustesPrecio          AjustePrecio[]            @relation("OrdenReparacionAjustesPrecio")
+  modoAjustes            ModoAjustes               @default(sobreTotalBase)
 
   @@index([autoId])
   @@index([fechaCreacion])
@@ -639,6 +643,8 @@ model Presupuesto {
   repuestosUsados       RepuestoUsado[]       @relation("PresupuestoRepuestos")
   tareasAdministrativas TareaAdministrativa[] @relation("PresupuestoTareas")
   trabajosRealizados    TrabajoRealizado[]    @relation("PresupuestoTrabajosRealizados")
+  ajustesPrecio         AjustePrecio[]        @relation("PresupuestoAjustesPrecio")
+  modoAjustes           ModoAjustes           @default(sobreTotalBase)
 
   @@index([autoId])
   @@index([fecha])
@@ -1152,4 +1158,33 @@ enum TipoAusencia {
   Vacaciones
   Licencia
 }
-  
+
+enum TipoAjuste {
+  porcentual
+  fijo
+}
+
+enum ModoAjustes {
+  acumulativo
+  sobreTotalBase
+}
+
+model AjustePrecio {
+  id                Int              @id @default(autoincrement())
+  descripcion       String           @db.VarChar(255)
+  monto             Decimal          @db.Decimal(10, 2)
+  tipo              TipoAjuste
+  esDescuento       Boolean          @default(false)
+  esInterno         Boolean          @default(false)
+  orden             Int              @default(0)
+  ordenReparacionId Int?
+  ventaId           Int?
+  presupuestoId     Int?
+  ordenReparacion   OrdenReparacion? @relation("OrdenReparacionAjustesPrecio", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
+  venta             Venta?           @relation("VentaAjustesPrecio", fields: [ventaId], references: [id], onDelete: Cascade)
+  presupuesto       Presupuesto?     @relation("PresupuestoAjustesPrecio", fields: [presupuestoId], references: [id], onDelete: Cascade)
+
+  @@index([ordenReparacionId])
+  @@index([ventaId])
+  @@index([presupuestoId])
+}

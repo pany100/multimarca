@@ -1,5 +1,6 @@
 import { EstadoVenta } from "@prisma/client";
 import { z } from "zod";
+import { ajustePrecioItemSchema, modoAjustesSchema } from "./ajuste-precio.schema";
 
 export const ventaEstadoEnum = z.enum([
   EstadoVenta.Borrador,
@@ -79,4 +80,6 @@ export const patchVentaSchema = z.object({
   descripcionIncremento: z.string().nullable().optional(),
   porcentajeRecargo: z.coerce.number().optional(),
   estado: ventaEstadoEnum.optional(),
+  ajustesPrecio: z.array(ajustePrecioItemSchema).optional(),
+  modoAjustes: modoAjustesSchema.optional(),
 });

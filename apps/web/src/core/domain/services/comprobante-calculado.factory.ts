@@ -3,12 +3,65 @@
 import { PrecioDto } from "@/core/infrastructure/validation/schemas/precio.schema";
 import { Decimal } from "@prisma/client/runtime/library";
 import { OrdenReparacionWithRelationsForClient } from "../repositories/orden-reparacion.repository";
+import { AjustePrecioItem, ModoAjustes } from "../value-objects/ajuste-precio.vo";
 import { Pago } from "../value-objects/pago.vo";
 import { PriceAdjustments } from "../value-objects/price-adjustments.vo";
 import { ReparacionTercero } from "../value-objects/reparacion-tercero.vo";
 import { RepuestoUsado } from "../value-objects/repuesto-usado.vo";
 import { TrabajoRealizado } from "../value-objects/trabajo-realizado.vo";
 import { ComprobanteCalculado } from "./comprobante-calculado.service";
+
+type AjustePrecioDB = {
+  descripcion: string;
+  monto: Decimal | number;
+  tipo: string;
+  esDescuento: boolean;
+  esInterno: boolean;
+  orden: number;
+};
+
+function ajustesFromDB(
+  items: AjustePrecioDB[] | undefined,
+): AjustePrecioItem[] {
+  if (!items?.length) return [];
+  return items.map(
+    (a) =>
+      new AjustePrecioItem(
+        a.descripcion,
+        Number(a.monto),
+        a.tipo as "porcentual" | "fijo",
+        a.esDescuento,
+        a.esInterno,
+        a.orden,
+      ),
+  );
+}
+
+function buildPriceAdjustments(
+  legacy: {
+    descuento: Decimal | number;
+    incremento: Decimal | number;
+    incrementoInterno: Decimal | number;
+    porcentajeRecargo: Decimal | number;
+  },
+  ajustesPrecio?: AjustePrecioDB[],
+  modoAjustes?: ModoAjustes,
+): PriceAdjustments {
+  const ajustes = ajustesFromDB(ajustesPrecio);
+  if (ajustes.length > 0) {
+    return PriceAdjustments.fromAjustesList(
+      ajustes,
+      modoAjustes ?? "sobreTotalBase",
+      Number(legacy.porcentajeRecargo),
+    );
+  }
+  return PriceAdjustments.normalizeFromDB({
+    descuento: legacy.descuento,
+    incremento: legacy.incremento,
+    incrementoInterno: legacy.incrementoInterno,
+    porcentajeRecargo: legacy.porcentajeRecargo,
+  });
+}
 
 export type OrdenForCalculo = {
   descuento: Decimal;
@@ -19,6 +72,8 @@ export type OrdenForCalculo = {
   reparacionesDeTercero: OrdenReparacionWithRelationsForClient["reparacionesDeTercero"];
   trabajosRealizados: OrdenReparacionWithRelationsForClient["trabajosRealizados"];
   ingresos: OrdenReparacionWithRelationsForClient["ingresos"];
+  ajustesPrecio?: AjustePrecioDB[];
+  modoAjustes?: ModoAjustes;
 };
 
 export type PresupuestoForCalculo = {
@@ -29,6 +84,8 @@ export type PresupuestoForCalculo = {
   repuestosUsados: any[];
   reparacionesDeTercero: any[];
   trabajosRealizados: any[];
+  ajustesPrecio?: AjustePrecioDB[];
+  modoAjustes?: ModoAjustes;
 };
 
 export type VentaForCalculo = {
@@ -39,16 +96,22 @@ export type VentaForCalculo = {
   reparacionesDeTercero: any[];
   trabajosRealizados: any[];
   ingresos: any[];
+  ajustesPrecio?: AjustePrecioDB[];
+  modoAjustes?: ModoAjustes;
 };
 
 export class ComprobanteCalculadoFactory {
   static fromOrden(orden: OrdenForCalculo) {
-    const priceAdjustments = PriceAdjustments.normalizeFromDB({
-      descuento: orden.descuento,
-      incremento: orden.incremento,
-      incrementoInterno: orden.incrementoInterno,
-      porcentajeRecargo: orden.porcentajeRecargo,
-    });
+    const priceAdjustments = buildPriceAdjustments(
+      {
+        descuento: orden.descuento,
+        incremento: orden.incremento,
+        incrementoInterno: orden.incrementoInterno,
+        porcentajeRecargo: orden.porcentajeRecargo,
+      },
+      orden.ajustesPrecio,
+      orden.modoAjustes,
+    );
 
     const repuestos = (orden.repuestosUsados ?? [])
       .filter((r) => !r.ocultoParaCliente)
@@ -78,12 +141,16 @@ export class ComprobanteCalculadoFactory {
   }
 
   static fromVenta(venta: VentaForCalculo) {
-    const priceAdjustments = PriceAdjustments.normalizeFromDB({
-      descuento: venta.descuento,
-      incremento: venta.incremento,
-      incrementoInterno: new Decimal(0),
-      porcentajeRecargo: venta.porcentajeRecargo,
-    });
+    const priceAdjustments = buildPriceAdjustments(
+      {
+        descuento: venta.descuento,
+        incremento: venta.incremento,
+        incrementoInterno: new Decimal(0),
+        porcentajeRecargo: venta.porcentajeRecargo,
+      },
+      venta.ajustesPrecio,
+      venta.modoAjustes,
+    );
 
     const repuestos = (venta.repuestosUsados ?? [])
       .filter((r) => !r.ocultoParaCliente)
@@ -116,16 +183,39 @@ export class ComprobanteCalculadoFactory {
   }
 
   static fromPrecioDto(dto: PrecioDto) {
-    const priceAdjustments = PriceAdjustments.normalizeFromDB({
-      descuento: dto.descuento ? new Decimal(dto.descuento) : new Decimal(0),
-      incremento: dto.incremento ? new Decimal(dto.incremento) : new Decimal(0),
-      incrementoInterno: dto.incrementoInterno
-        ? new Decimal(dto.incrementoInterno)
-        : new Decimal(0),
-      porcentajeRecargo: dto.porcentajeRecargo
-        ? new Decimal(dto.porcentajeRecargo)
-        : new Decimal(0),
-    });
+    const ajustes = (dto.ajustesPrecio ?? []).map(
+      (a) =>
+        new AjustePrecioItem(
+          a.descripcion,
+          a.monto,
+          a.tipo as "porcentual" | "fijo",
+          a.esDescuento,
+          a.esInterno ?? false,
+          a.orden ?? 0,
+        ),
+    );
+
+    const priceAdjustments =
+      ajustes.length > 0
+        ? PriceAdjustments.fromAjustesList(
+            ajustes,
+            (dto.modoAjustes as ModoAjustes) ?? "sobreTotalBase",
+            dto.porcentajeRecargo ?? 0,
+          )
+        : PriceAdjustments.normalizeFromDB({
+            descuento: dto.descuento
+              ? new Decimal(dto.descuento)
+              : new Decimal(0),
+            incremento: dto.incremento
+              ? new Decimal(dto.incremento)
+              : new Decimal(0),
+            incrementoInterno: dto.incrementoInterno
+              ? new Decimal(dto.incrementoInterno)
+              : new Decimal(0),
+            porcentajeRecargo: dto.porcentajeRecargo
+              ? new Decimal(dto.porcentajeRecargo)
+              : new Decimal(0),
+          });
 
     const repuestos = (dto.repuestosUsados ?? [])
       .filter((r) => !r.ocultoParaCliente)
@@ -168,20 +258,24 @@ export class ComprobanteCalculadoFactory {
   }
 
   static fromPresupuesto(presupuesto: PresupuestoForCalculo) {
-    const priceAdjustments = PriceAdjustments.normalizeFromDB({
-      descuento: presupuesto.descuento
-        ? new Decimal(presupuesto.descuento)
-        : new Decimal(0),
-      incremento: presupuesto.incremento
-        ? new Decimal(presupuesto.incremento)
-        : new Decimal(0),
-      incrementoInterno: presupuesto.incrementoInterno
-        ? new Decimal(presupuesto.incrementoInterno)
-        : new Decimal(0),
-      porcentajeRecargo: presupuesto.porcentajeRecargo
-        ? new Decimal(presupuesto.porcentajeRecargo)
-        : new Decimal(0),
-    });
+    const priceAdjustments = buildPriceAdjustments(
+      {
+        descuento: presupuesto.descuento
+          ? new Decimal(presupuesto.descuento)
+          : new Decimal(0),
+        incremento: presupuesto.incremento
+          ? new Decimal(presupuesto.incremento)
+          : new Decimal(0),
+        incrementoInterno: presupuesto.incrementoInterno
+          ? new Decimal(presupuesto.incrementoInterno)
+          : new Decimal(0),
+        porcentajeRecargo: presupuesto.porcentajeRecargo
+          ? new Decimal(presupuesto.porcentajeRecargo)
+          : new Decimal(0),
+      },
+      presupuesto.ajustesPrecio,
+      presupuesto.modoAjustes,
+    );
 
     const repuestos = (presupuesto.repuestosUsados ?? [])
       .filter((r) => !r.ocultoParaCliente)

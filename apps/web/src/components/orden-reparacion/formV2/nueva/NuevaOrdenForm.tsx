@@ -18,6 +18,10 @@ import TrabajosRealizadosSection from "../sections/trabajos-realizados/TrabajosR
 function NuevaOrdenForm() {
   const methods = useForm({
     resolver: yupResolver(schema),
+    defaultValues: {
+      ajustesPrecio: [],
+      modoAjustes: "sobreTotalBase",
+    },
   });
   const { handleSubmit, control } = methods;
   const { onSubmit } = useNuevaOrden({ control });

@@ -4,6 +4,7 @@ import useNuevaOrden from "@/hooks/orden-reparacion/useNuevaOrden";
 import useScrollToError from "@/hooks/useScrollToError";
 import { Box, Grid, Paper, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
+import AjustesPrecioSection from "../ajustes-precio/AjustesPrecioSection";
 
 type Props = {
   isVenta?: boolean;
@@ -19,55 +20,48 @@ function ResumenCostosSection({ isVenta = false }: Props) {
 
   return (
     <Grid container spacing={2}>
-      {!isVenta && (
+      {isVenta ? (
         <>
-          <Grid
-            item
-            xs={4}
-            ref={(el) => registerFieldRef("incrementoInterno", el)}
-          >
+          <Grid item xs={4} ref={(el) => registerFieldRef("descuento", el)}>
             <CustomInputText
-              name="incrementoInterno"
-              label="Incremento Interno"
+              name="descuento"
+              label="Descuento"
               type="number"
             />
           </Grid>
-          <Grid item xs={8}>
-            <Typography variant="body1">
-              Este incremento va a mostrarse como parte de la mano de obra
-              cuando se imprima el informe al cliente
-            </Typography>
+          <Grid
+            item
+            xs={8}
+            ref={(el) => registerFieldRef("descripcionDescuento", el)}
+          >
+            <CustomInputText
+              name="descripcionDescuento"
+              label="Descripcion del descuento"
+            />
+          </Grid>
+          <Grid item xs={4} ref={(el) => registerFieldRef("incremento", el)}>
+            <CustomInputText
+              name="incremento"
+              label="Incremento"
+              type="number"
+            />
+          </Grid>
+          <Grid
+            item
+            xs={8}
+            ref={(el) => registerFieldRef("descripcionIncremento", el)}
+          >
+            <CustomInputText
+              name="descripcionIncremento"
+              label="Descripcion del incremento"
+            />
           </Grid>
         </>
+      ) : (
+        <Grid item xs={12}>
+          <AjustesPrecioSection />
+        </Grid>
       )}
-      <Grid item xs={4} ref={(el) => registerFieldRef("descuento", el)}>
-        <CustomInputText name="descuento" label="Descuento" type="number" />
-      </Grid>
-
-      <Grid
-        item
-        xs={8}
-        ref={(el) => registerFieldRef("descripcionDescuento", el)}
-      >
-        <CustomInputText
-          name="descripcionDescuento"
-          label="Descripción del descuento"
-        />
-      </Grid>
-      <Grid item xs={4} ref={(el) => registerFieldRef("incremento", el)}>
-        <CustomInputText name="incremento" label="Incremento" type="number" />
-      </Grid>
-
-      <Grid
-        item
-        xs={8}
-        ref={(el) => registerFieldRef("descripcionIncremento", el)}
-      >
-        <CustomInputText
-          name="descripcionIncremento"
-          label="Descripción del incremento"
-        />
-      </Grid>
       <Grid item xs={12}>
         <Paper
           elevation={0}
@@ -84,7 +78,7 @@ function ResumenCostosSection({ isVenta = false }: Props) {
             alignItems="center"
           >
             <Typography variant="h6" fontWeight="bold" color="primary.dark">
-              Total Orden de Reparación
+              Total Orden de Reparacion
             </Typography>
             <Typography
               variant="h5"
