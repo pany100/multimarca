@@ -6,11 +6,20 @@ function useStockItemData({ onClose }: { onClose: () => void }) {
   const [stock, setStock] = useState<{
     stockId: string;
     name: string;
+    label?: string;
   } | null>(null);
   const [cantidad, setCantidad] = useState<number | null>(null);
+  const [precioUnitario, setPrecioUnitario] = useState<number | null>(null);
+  const [iva, setIva] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const submitDisabled = stock === null || cantidad === null || cantidad === 0;
+  const submitDisabled =
+    stock === null ||
+    cantidad === null ||
+    cantidad === 0 ||
+    precioUnitario === null ||
+    precioUnitario === 0;
+
   const onSubmit = () => {
     setError(null);
     const items = watch("items") || [];
@@ -21,17 +30,24 @@ function useStockItemData({ onClose }: { onClose: () => void }) {
     const newItem = {
       ...stock,
       cantidad: Number(cantidad),
+      precioUnitario: Number(precioUnitario),
+      iva: Number(iva) || 0,
+      label: stock?.label || "",
     };
     const updatedItems = [...items, newItem];
     setValue("items", updatedItems);
     setStock(null);
     setCantidad(null);
+    setPrecioUnitario(null);
+    setIva(null);
     onClose();
   };
 
   const onCancel = () => {
     setStock(null);
     setCantidad(null);
+    setPrecioUnitario(null);
+    setIva(null);
     setError(null);
     onClose();
   };
@@ -41,6 +57,10 @@ function useStockItemData({ onClose }: { onClose: () => void }) {
     onCancel,
     setStock,
     setCantidad,
+    setPrecioUnitario,
+    setIva,
+    precioUnitario,
+    iva,
     error,
     submitDisabled,
   };

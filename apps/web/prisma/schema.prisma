@@ -412,6 +412,8 @@ model OrdenDeCompra {
 model OrdenDeCompraItem {
   id              Int           @id @default(autoincrement())
   cantidad        Int
+  precioUnitario  Decimal?      @db.Decimal(10, 2)
+  iva             Float?
   stockId         Int
   ordenDeCompraId Int
   ordenDeCompra   OrdenDeCompra @relation(fields: [ordenDeCompraId], references: [id], onDelete: Cascade)

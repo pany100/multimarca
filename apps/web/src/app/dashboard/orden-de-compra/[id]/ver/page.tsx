@@ -39,7 +39,7 @@ const OrdenDeCompraDetallePage = ({ params }: { params: { id: string } }) => {
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(
-          errorData.error || "Error al cargar la orden de compra"
+          errorData.error || "Error al cargar la orden de compra",
         );
       }
 
@@ -48,7 +48,7 @@ const OrdenDeCompraDetallePage = ({ params }: { params: { id: string } }) => {
     } catch (err: any) {
       console.error("Error fetching orden de compra:", err);
       setError(
-        err.message || "Ha ocurrido un error al cargar la orden de compra"
+        err.message || "Ha ocurrido un error al cargar la orden de compra",
       );
     } finally {
       setLoading(false);
@@ -133,23 +133,17 @@ const OrdenDeCompraDetallePage = ({ params }: { params: { id: string } }) => {
     });
   };
 
-  // Calcular el precio total de los items si no está disponible
-  const calcularPrecioTotal = () => {
-    if (!orden.items || orden.items.length === 0) {
-      return 0;
-    }
+  const hasPrecios = orden.items?.some(
+    (item: any) => item.precioUnitario != null,
+  );
 
-    // Si ya tenemos el precio total, lo usamos
-    if (orden.precioTotal) {
-      return orden.precioTotal;
-    }
-
-    // Si no, calculamos el total de los items
-    return orden.items.reduce((total: number, item: any) => {
-      const itemPrice = item.precio || 0;
-      return total + itemPrice * item.cantidad;
-    }, 0);
-  };
+  const precioTotalCalculado = hasPrecios
+    ? orden.items.reduce((total: number, item: any) => {
+        const precio = Number(item.precioUnitario) || 0;
+        const iva = Number(item.iva) || 0;
+        return total + precio * (1 + iva / 100) * Number(item.cantidad);
+      }, 0)
+    : orden.precioTotal;
 
   return (
     <Box sx={{ p: 3 }}>
@@ -214,7 +208,7 @@ const OrdenDeCompraDetallePage = ({ params }: { params: { id: string } }) => {
                     fontWeight="bold"
                     color="primary.main"
                   >
-                    {getFormattedPrice(calcularPrecioTotal())}
+                    {getFormattedPrice(precioTotalCalculado)}
                   </Typography>
                 </Box>
               </Stack>
@@ -234,17 +228,68 @@ const OrdenDeCompraDetallePage = ({ params }: { params: { id: string } }) => {
                   <TableRow>
                     <TableCell>ID</TableCell>
                     <TableCell>Producto</TableCell>
+                    {hasPrecios && <TableCell>Rótulo</TableCell>}
                     <TableCell align="right">Cantidad</TableCell>
+                    {hasPrecios && (
+                      <TableCell align="right">Precio Unit.</TableCell>
+                    )}
+                    {hasPrecios && (
+                      <TableCell align="right">IVA %</TableCell>
+                    )}
+                    {hasPrecios && (
+                      <TableCell align="right">Precio c/IVA</TableCell>
+                    )}
+                    {hasPrecios && (
+                      <TableCell align="right">Subtotal</TableCell>
+                    )}
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {orden.items.map((item: any) => (
-                    <TableRow key={item.id}>
-                      <TableCell>{item.id}</TableCell>
-                      <TableCell>{item.name || item.stock?.name}</TableCell>
-                      <TableCell align="right">{item.cantidad}</TableCell>
-                    </TableRow>
-                  ))}
+                  {orden.items.map((item: any) => {
+                    const precioUnit = Number(item.precioUnitario) || 0;
+                    const ivaPercent = Number(item.iva) || 0;
+                    const precioConIva = precioUnit * (1 + ivaPercent / 100);
+                    const subtotal = precioConIva * Number(item.cantidad);
+
+                    return (
+                      <TableRow key={item.id}>
+                        <TableCell>{item.id}</TableCell>
+                        <TableCell>{item.name || item.stock?.name}</TableCell>
+                        {hasPrecios && (
+                          <TableCell>
+                            {item.label || item.stock?.label || "—"}
+                          </TableCell>
+                        )}
+                        <TableCell align="right">{item.cantidad}</TableCell>
+                        {hasPrecios && (
+                          <TableCell align="right">
+                            {item.precioUnitario != null
+                              ? getFormattedPrice(precioUnit)
+                              : "—"}
+                          </TableCell>
+                        )}
+                        {hasPrecios && (
+                          <TableCell align="right">
+                            {item.iva != null ? `${ivaPercent}%` : "—"}
+                          </TableCell>
+                        )}
+                        {hasPrecios && (
+                          <TableCell align="right">
+                            {item.precioUnitario != null
+                              ? getFormattedPrice(precioConIva)
+                              : "—"}
+                          </TableCell>
+                        )}
+                        {hasPrecios && (
+                          <TableCell align="right">
+                            {item.precioUnitario != null
+                              ? getFormattedPrice(subtotal)
+                              : "—"}
+                          </TableCell>
+                        )}
+                      </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </TableContainer>

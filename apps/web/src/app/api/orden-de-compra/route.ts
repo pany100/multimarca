@@ -42,6 +42,7 @@ export async function GET(request: Request) {
       items: orden.items.map((item) => ({
         ...item,
         name: item.stock.name,
+        label: item.stock.label,
         stockId: item.stock.id,
       })),
     }));
@@ -74,16 +75,25 @@ export async function POST(request: Request) {
       );
     }
 
+    // Calcular precioTotal a partir de los items
+    const precioTotalCalculado = items.reduce((total: number, item: any) => {
+      const precio = Number(item.precioUnitario) || 0;
+      const iva = Number(item.iva) || 0;
+      return total + precio * (1 + iva / 100) * Number(item.cantidad);
+    }, 0);
+
     const nuevaOrdenDeCompra = await prisma.$transaction(async (prisma) => {
       const ordenCreada = await prisma.ordenDeCompra.create({
         data: {
           fecha: fecha ? new Date(fecha) : new Date(),
           proveedorId,
-          precioTotal,
+          precioTotal: precioTotalCalculado,
           items: {
-            create: items.map((item) => ({
+            create: items.map((item: any) => ({
               cantidad: item.cantidad,
               stockId: item.stockId,
+              precioUnitario: item.precioUnitario ?? null,
+              iva: item.iva ?? null,
             })),
           },
         },
@@ -124,6 +134,7 @@ export async function POST(request: Request) {
       items: nuevaOrdenDeCompra.items.map((item) => ({
         ...item,
         name: item.stock.name,
+        label: item.stock.label,
         stockId: item.stock.id,
       })),
     };

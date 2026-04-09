@@ -1,5 +1,6 @@
 import useStockItemData from "@/hooks/useStockItemData";
 import useStockProveedores from "@/hooks/useStockProveedores";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import {
   Box,
   Button,
@@ -7,6 +8,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  TextField,
   Typography,
 } from "@mui/material";
 import NonFormInput from "../commons/NonFormInput";
@@ -20,17 +22,33 @@ type Props = {
 
 function ItemsModal({ open, onClose, proveedorId }: Props) {
   const { stockOptions } = useStockProveedores({ proveedorId });
-  const { onSubmit, setStock, setCantidad, error, submitDisabled, onCancel } =
-    useStockItemData({
-      onClose,
-    });
+  const {
+    onSubmit,
+    setStock,
+    setCantidad,
+    setPrecioUnitario,
+    setIva,
+    precioUnitario,
+    iva,
+    error,
+    submitDisabled,
+    onCancel,
+  } = useStockItemData({
+    onClose,
+  });
+
+  const precioConIva =
+    precioUnitario != null
+      ? precioUnitario * (1 + (Number(iva) || 0) / 100)
+      : 0;
+
   return (
     <Dialog
       open={open}
       onClose={onClose}
       PaperProps={{
         sx: {
-          width: "400px",
+          width: "450px",
           maxWidth: "100%",
         },
       }}
@@ -44,6 +62,7 @@ function ItemsModal({ open, onClose, proveedorId }: Props) {
               setStock({
                 stockId: value,
                 name: stockOptions.find((s) => s.value === value)?.name || "",
+                label: stockOptions.find((s) => s.value === value)?.label || "",
               })
             }
             label="Stock"
@@ -54,6 +73,34 @@ function ItemsModal({ open, onClose, proveedorId }: Props) {
             label="Cantidad"
             type="number"
             onChange={(value) => setCantidad(Number(value))}
+          />
+        </Box>
+        <Box sx={{ mb: 3 }}>
+          <NonFormInput
+            label="Precio Unitario (neto)"
+            type="number"
+            onChange={(value) => setPrecioUnitario(Number(value))}
+          />
+        </Box>
+        <Box sx={{ mb: 3 }}>
+          <NonFormInput
+            label="IVA %"
+            type="number"
+            onChange={(value) => setIva(Number(value))}
+          />
+        </Box>
+        <Box sx={{ mb: 2 }}>
+          <TextField
+            label="Precio con IVA"
+            value={precioConIva ? getFormattedPrice(precioConIva) : ""}
+            fullWidth
+            disabled
+            sx={{
+              "& .MuiInputBase-root.Mui-disabled": {
+                backgroundColor: "#f5f5f5",
+              },
+            }}
+            helperText="Precio con IVA = Precio Unitario × (1 + IVA / 100)"
           />
         </Box>
         {error && <Typography color="error">{error}</Typography>}

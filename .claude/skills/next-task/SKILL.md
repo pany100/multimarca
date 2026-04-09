@@ -55,8 +55,16 @@ A task has **sufficient information** when ALL of these are true:
 
 If **any** of these are missing or too vague to act on:
 
-1. Tell the user exactly what information is missing and why you can't plan without it.
-2. Stop here — do NOT create a plan. Do NOT enter plan mode.
+1. **Hacé preguntas concretas al usuario** usando `AskUserQuestion`. Por cada dato faltante o ambiguo, formulá una pregunta específica que ayude a completar la información. Ejemplos:
+   - Si no hay sección: "¿En qué parte de la app ocurre esto? (ej: ordenes de reparación, stock, presupuestos)"
+   - Si la descripción es vaga: "¿Podrías detallar qué debería cambiar exactamente?"
+   - Si no hay resultado esperado: "¿Cuál sería el comportamiento correcto después del cambio?"
+2. **Evaluá las respuestas** del usuario e intentá completar los datos faltantes con lo que respondió.
+3. **Si después de las respuestas sigue faltando información crítica** para armar un plan:
+   - Informá claramente: "**No hay suficiente información para armar un plan.** Falta: [lista de lo que sigue sin estar claro]."
+   - Sugerí que se actualice la fila en la planilla con los datos faltantes.
+   - Stop here — do NOT create a plan. Do NOT enter plan mode.
+4. **Si las respuestas del usuario completan la información**, continuá al paso 5.
 
 ### 5. Create an implementation plan (DO NOT IMPLEMENT)
 
