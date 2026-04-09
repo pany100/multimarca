@@ -11,9 +11,21 @@ import {
 } from "@/contexts/SnackbarContext";
 import { CommonOrderCard } from "@/sections/ordenes-reparacion/admin/components/CommonOrderCard";
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import { calcularPrecioNeto, calcularPrecioVenta } from "@/utils/stock-pricing";
 import { yupResolver } from "@hookform/resolvers/yup";
+import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
+import CalculateOutlinedIcon from "@mui/icons-material/CalculateOutlined";
+import CategoryIcon from "@mui/icons-material/Category";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import LocalOfferIcon from "@mui/icons-material/LocalOffer";
+import PercentIcon from "@mui/icons-material/Percent";
+import StorefrontIcon from "@mui/icons-material/Storefront";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
   Box,
+  Chip,
   CircularProgress,
   Divider,
   Grid,
@@ -24,6 +36,33 @@ import { useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 
+/** Small helper: label + value with optional icon */
+function InfoField({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: React.ReactNode;
+  icon?: React.ReactNode;
+}) {
+  return (
+    <Box>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 0.25 }}>
+        {icon && (
+          <Box sx={{ color: "text.disabled", display: "flex", fontSize: 16 }}>
+            {icon}
+          </Box>
+        )}
+        <Typography variant="subtitle2" color="text.secondary">
+          {label}
+        </Typography>
+      </Box>
+      <Typography>{value || "-"}</Typography>
+    </Box>
+  );
+}
+
 function AdminStockPageContent({ params }: { params: { id: string } }) {
   const { authFetch } = useFetch();
   const { setSnackbar } = useSnackbarContext();
@@ -32,19 +71,15 @@ function AdminStockPageContent({ params }: { params: { id: string } }) {
 
   const stockId = useMemo(() => Number(params.id), [params.id]);
 
-  const precioVentaCalculado = useMemo(() => {
-    const buyPrice =
-      stock?.buyPrice === "" || stock?.buyPrice == null
-        ? NaN
-        : Number(stock.buyPrice);
-    const markup =
-      stock?.markup === "" || stock?.markup == null
-        ? NaN
-        : Number(stock.markup);
-    if (!Number.isFinite(buyPrice) || buyPrice < 0) return null;
-    if (!Number.isFinite(markup)) return null;
-    return Math.ceil(buyPrice * (1 + markup / 100) || 0);
-  }, [stock?.buyPrice, stock?.markup]);
+  const precioNeto = useMemo(
+    () => calcularPrecioNeto(stock?.buyPrice, stock?.markup),
+    [stock?.buyPrice, stock?.markup]
+  );
+
+  const precioVentaCalculado = useMemo(
+    () => calcularPrecioVenta(stock?.buyPrice, stock?.markup, stock?.sellIva),
+    [stock?.buyPrice, stock?.markup, stock?.sellIva]
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -83,6 +118,8 @@ function AdminStockPageContent({ params }: { params: { id: string } }) {
       restockValue: stock.restockValue,
       label: stock.label,
       markup: stock.markup,
+      buyIva: stock.buyIva,
+      sellIva: stock.sellIva,
       proveedorId: stock.proveedorId,
       reportName: stock.reportName,
       sector: stock.sector,
@@ -143,6 +180,8 @@ function AdminStockPageContent({ params }: { params: { id: string } }) {
       yup.object({
         buyPrice: yup.number().required("El precio de compra es requerido"),
         markup: yup.number().nullable(),
+        buyIva: yup.number().nullable(),
+        sellIva: yup.number().nullable(),
         restockValue: yup.number().nullable(),
       }),
     [],
@@ -176,6 +215,8 @@ function AdminStockPageContent({ params }: { params: { id: string } }) {
     preciosMethods.reset({
       buyPrice: stock.buyPrice ?? 0,
       markup: stock.markup ?? null,
+      buyIva: stock.buyIva ?? null,
+      sellIva: stock.sellIva ?? null,
       restockValue: stock.restockValue ?? null,
     });
   };
@@ -222,20 +263,23 @@ function AdminStockPageContent({ params }: { params: { id: string } }) {
               }}
             >
               <Box>
-                <Typography
-                  variant="h4"
-                  component="h1"
-                  sx={{
-                    fontWeight: 700,
-                    fontSize: { xs: "1.5rem", md: "2rem" },
-                  }}
-                >
-                  {stock.name || "Stock"}
-                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  <InventoryIcon sx={{ color: "primary.main", fontSize: 28 }} />
+                  <Typography
+                    variant="h4"
+                    component="h1"
+                    sx={{
+                      fontWeight: 700,
+                      fontSize: { xs: "1.5rem", md: "2rem" },
+                    }}
+                  >
+                    {stock.name || "Stock"}
+                  </Typography>
+                </Box>
                 <Typography
                   variant="body2"
                   color="text.secondary"
-                  sx={{ mt: 0.5 }}
+                  sx={{ mt: 0.5, ml: 4.5 }}
                 >
                   Rótulo: <b>{stock.label || "-"}</b> · Sector:{" "}
                   <b>{stock.sector || "-"}</b>
@@ -244,19 +288,29 @@ function AdminStockPageContent({ params }: { params: { id: string } }) {
 
               <Box
                 sx={{
-                  px: 2,
-                  py: 1.25,
+                  px: 2.5,
+                  py: 1.5,
                   borderRadius: 2,
                   border: "1px solid",
-                  borderColor: "divider",
-                  backgroundColor: "background.paper",
+                  borderColor: "success.light",
+                  backgroundColor: "success.50",
+                  background: (theme) =>
+                    `linear-gradient(135deg, ${theme.palette.success.main}08, ${theme.palette.success.main}15)`,
                   minWidth: { xs: "100%", sm: 320 },
                 }}
               >
-                <Typography variant="subtitle2" color="text.secondary">
-                  Precio de venta calculado
-                </Typography>
-                <Typography variant="h5" sx={{ fontWeight: 800, mt: 0.25 }}>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+                  <StorefrontIcon
+                    sx={{ color: "success.main", fontSize: 18 }}
+                  />
+                  <Typography variant="subtitle2" color="text.secondary">
+                    Precio de venta calculado
+                  </Typography>
+                </Box>
+                <Typography
+                  variant="h5"
+                  sx={{ fontWeight: 800, mt: 0.25, color: "success.dark" }}
+                >
                   {precioVentaCalculado != null
                     ? getFormattedPrice(precioVentaCalculado)
                     : "-"}
@@ -266,6 +320,7 @@ function AdminStockPageContent({ params }: { params: { id: string } }) {
           </Box>
 
           <Grid container spacing={3} alignItems="stretch">
+            {/* ───── Información general ───── */}
             <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <CommonOrderCard
@@ -316,54 +371,65 @@ function AdminStockPageContent({ params }: { params: { id: string } }) {
                 >
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Nombre
-                      </Typography>
-                      <Typography>{stock.name || "-"}</Typography>
+                      <InfoField
+                        icon={<InventoryIcon sx={{ fontSize: 16 }} />}
+                        label="Nombre"
+                        value={stock.name}
+                      />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Marca
-                      </Typography>
-                      <Typography>{stock.brand || "-"}</Typography>
+                      <InfoField
+                        icon={<LocalOfferIcon sx={{ fontSize: 16 }} />}
+                        label="Marca"
+                        value={stock.brand}
+                      />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Rótulo
-                      </Typography>
-                      <Typography>{stock.label || "-"}</Typography>
+                      <InfoField
+                        icon={<LocalOfferIcon sx={{ fontSize: 16 }} />}
+                        label="Rótulo"
+                        value={stock.label}
+                      />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Sector
-                      </Typography>
-                      <Typography>{stock.sector || "-"}</Typography>
+                      <InfoField
+                        icon={<CategoryIcon sx={{ fontSize: 16 }} />}
+                        label="Sector"
+                        value={stock.sector}
+                      />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Marca de auto
-                      </Typography>
-                      <Typography>{stock.carBrand || "-"}</Typography>
+                      <InfoField
+                        icon={<DirectionsCarIcon sx={{ fontSize: 16 }} />}
+                        label="Marca de auto"
+                        value={stock.carBrand}
+                      />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Nombre de reporte
-                      </Typography>
-                      <Typography>{stock.reportName || "-"}</Typography>
+                      <InfoField
+                        label="Nombre de reporte"
+                        value={stock.reportName}
+                      />
                     </Grid>
                     <Grid item xs={12}>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Fraccionable
-                      </Typography>
-                      <Typography>
-                        {stock.fraccionable ? "Sí" : "No"}
-                      </Typography>
+                      <InfoField
+                        label="Fraccionable"
+                        value={
+                          <Chip
+                            label={stock.fraccionable ? "Sí" : "No"}
+                            size="small"
+                            color={stock.fraccionable ? "info" : "default"}
+                            variant="outlined"
+                          />
+                        }
+                      />
                     </Grid>
                   </Grid>
                 </CommonOrderCard>
               </Box>
             </Grid>
 
+            {/* ───── Precios y reposición ───── */}
             <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <CommonOrderCard
@@ -388,7 +454,7 @@ function AdminStockPageContent({ params }: { params: { id: string } }) {
                         <Grid item xs={12} md={4}>
                           <CustomInputText
                             name="markup"
-                            label="Margen"
+                            label="Margen (%)"
                             type="number"
                           />
                         </Grid>
@@ -399,65 +465,313 @@ function AdminStockPageContent({ params }: { params: { id: string } }) {
                             type="number"
                           />
                         </Grid>
+                        <Grid item xs={12} md={6}>
+                          <CustomInputText
+                            name="buyIva"
+                            label="IVA de compra (%)"
+                            type="number"
+                          />
+                        </Grid>
+                        <Grid item xs={12} md={6}>
+                          <CustomInputText
+                            name="sellIva"
+                            label="IVA de venta (%)"
+                            type="number"
+                          />
+                        </Grid>
                       </Grid>
                     </FormInfoProvider>
                   }
                 >
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={4}>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Precio de compra
-                      </Typography>
-                      <Typography>
-                        {stock.buyPrice != null
-                          ? getFormattedPrice(stock.buyPrice)
-                          : "-"}
-                      </Typography>
+                      <InfoField
+                        icon={<AttachMoneyIcon sx={{ fontSize: 16 }} />}
+                        label="Precio de compra"
+                        value={
+                          stock.buyPrice != null
+                            ? getFormattedPrice(stock.buyPrice)
+                            : undefined
+                        }
+                      />
                     </Grid>
                     <Grid item xs={12} md={4}>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Margen
-                      </Typography>
-                      <Typography>
-                        {stock.markup != null && stock.markup !== ""
-                          ? `${Number(stock.markup)}%`
-                          : "-"}
-                      </Typography>
+                      <InfoField
+                        icon={<TrendingUpIcon sx={{ fontSize: 16 }} />}
+                        label="Margen"
+                        value={
+                          stock.markup != null && stock.markup !== ""
+                            ? `${Number(stock.markup)}%`
+                            : undefined
+                        }
+                      />
                     </Grid>
                     <Grid item xs={12} md={4}>
-                      <Typography variant="subtitle2" color="text.secondary">
-                        Valor de reposición
-                      </Typography>
-                      <Typography>
-                        {stock.restockValue != null && stock.restockValue !== ""
-                          ? stock.restockValue
-                          : "-"}
-                      </Typography>
+                      <InfoField
+                        icon={<WarningAmberIcon sx={{ fontSize: 16 }} />}
+                        label="Valor de reposición"
+                        value={
+                          stock.restockValue != null &&
+                          stock.restockValue !== ""
+                            ? stock.restockValue
+                            : undefined
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <InfoField
+                        icon={<PercentIcon sx={{ fontSize: 16 }} />}
+                        label="IVA de compra"
+                        value={
+                          stock.buyIva != null && stock.buyIva !== ""
+                            ? `${Number(stock.buyIva)}%`
+                            : undefined
+                        }
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <InfoField
+                        icon={<PercentIcon sx={{ fontSize: 16 }} />}
+                        label="IVA de venta"
+                        value={
+                          stock.sellIva != null && stock.sellIva !== ""
+                            ? `${Number(stock.sellIva)}%`
+                            : undefined
+                        }
+                      />
                     </Grid>
                   </Grid>
 
                   <Divider sx={{ my: 2 }} />
 
+                  {/* Precio de venta destacado */}
                   <Box
                     sx={{
                       display: "flex",
-                      alignItems: "baseline",
-                      gap: 1,
+                      alignItems: "center",
+                      justifyContent: "space-between",
                       flexWrap: "wrap",
+                      gap: 1,
+                      mb: 2,
+                      p: 1.5,
+                      borderRadius: 1,
+                      background: (theme) =>
+                        `linear-gradient(135deg, ${theme.palette.success.main}08, ${theme.palette.success.main}15)`,
+                      border: "1px solid",
+                      borderColor: "success.light",
                     }}
                   >
-                    <Typography variant="subtitle2" color="text.secondary">
-                      Precio de venta calculado
-                    </Typography>
-                    <Typography sx={{ fontWeight: 800 }}>
+                    <Box
+                      sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+                    >
+                      <StorefrontIcon
+                        sx={{ color: "success.main", fontSize: 20 }}
+                      />
+                      <Typography variant="subtitle2" color="text.secondary">
+                        Precio de venta calculado
+                      </Typography>
+                    </Box>
+                    <Typography
+                      variant="h5"
+                      sx={{ fontWeight: 800, color: "success.dark" }}
+                    >
                       {precioVentaCalculado != null
                         ? getFormattedPrice(precioVentaCalculado)
                         : "-"}
                     </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      * Calculado como Precio de compra x (1 + Margen/100). Si
-                      no hay margen se asume 0%. Se redondea hacia arriba.
-                    </Typography>
+                  </Box>
+
+                  {/* Desglose: fórmula + ejemplo numérico */}
+                  <Box
+                    sx={{
+                      bgcolor: "grey.50",
+                      border: "1px solid",
+                      borderColor: "divider",
+                      borderRadius: 1,
+                      p: 2,
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: 0.5,
+                        mb: 1,
+                      }}
+                    >
+                      <CalculateOutlinedIcon
+                        sx={{ color: "info.main", fontSize: 18 }}
+                      />
+                      <Typography
+                        variant="caption"
+                        color="text.secondary"
+                        sx={{
+                          fontWeight: 600,
+                          textTransform: "uppercase",
+                          letterSpacing: 0.5,
+                        }}
+                      >
+                        Cómo se calcula
+                      </Typography>
+                    </Box>
+
+                    {/* Paso 1: Precio neto */}
+                    <Box sx={{ mb: 1.5 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Precio neto = Precio de compra x (1 + Margen / 100)
+                      </Typography>
+                      {stock.buyPrice != null && precioNeto != null && (
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            sx={{ fontWeight: 800 }}
+                          >
+                            {getFormattedPrice(precioNeto)}
+                          </Typography>
+                          {` = ${getFormattedPrice(stock.buyPrice)} x (1 + ${Number(stock.markup ?? 0)} / 100)`}
+                        </Typography>
+                      )}
+                    </Box>
+
+                    {/* Paso 2: Precio de venta */}
+                    <Box sx={{ mb: 0.5 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Precio de venta = Precio neto x (1 + IVA venta / 100),
+                        redondeado hacia arriba
+                      </Typography>
+                      {precioNeto != null && precioVentaCalculado != null && (
+                        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                          <Typography
+                            component="span"
+                            variant="body2"
+                            sx={{ fontWeight: 800 }}
+                          >
+                            {getFormattedPrice(precioVentaCalculado)}
+                          </Typography>
+                          {` = ${getFormattedPrice(precioNeto)} x (1 + ${Number(stock.sellIva ?? 0)} / 100)`}
+                        </Typography>
+                      )}
+                    </Box>
+
+                    {/* Ganancia IVA (solo si hay buyIva) */}
+                    {stock.buyIva != null &&
+                      Number(stock.buyIva) > 0 &&
+                      (() => {
+                        const buyPriceNum = Number(stock.buyPrice ?? 0);
+                        const markupNum = Number(stock.markup ?? 0);
+                        const buyIvaNum = Number(stock.buyIva);
+                        const sellIvaNum = Number(stock.sellIva ?? 0);
+                        const precioNetoNum =
+                          buyPriceNum * (1 + markupNum / 100);
+                        const ivaCompra = buyPriceNum * (buyIvaNum / 100);
+                        const ivaVenta = precioNetoNum * (sellIvaNum / 100);
+                        const ganancia = ivaVenta - ivaCompra;
+
+                        return (
+                          <>
+                            <Divider sx={{ my: 1.5 }} />
+                            <Box>
+                              <Box
+                                sx={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: 0.5,
+                                  mb: 0.5,
+                                }}
+                              >
+                                <TrendingUpIcon
+                                  sx={{
+                                    color: "warning.main",
+                                    fontSize: 16,
+                                  }}
+                                />
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                  sx={{
+                                    fontWeight: 600,
+                                    textTransform: "uppercase",
+                                    letterSpacing: 0.5,
+                                  }}
+                                >
+                                  Ganancia por IVA (informativo)
+                                </Typography>
+                              </Box>
+
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                IVA compra = Precio de compra x IVA compra / 100
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{ fontWeight: 600, mb: 0.5 }}
+                              >
+                                {getFormattedPrice(ivaCompra)} ={" "}
+                                {getFormattedPrice(buyPriceNum)} x {buyIvaNum} /
+                                100
+                              </Typography>
+
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                IVA venta = Precio neto x IVA venta / 100
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                sx={{ fontWeight: 600, mb: 0.5 }}
+                              >
+                                {getFormattedPrice(ivaVenta)} ={" "}
+                                {getFormattedPrice(precioNetoNum)} x{" "}
+                                {sellIvaNum} / 100
+                              </Typography>
+
+                              <Box
+                                sx={{
+                                  mt: 1,
+                                  p: 1,
+                                  borderRadius: 1,
+                                  bgcolor:
+                                    ganancia >= 0
+                                      ? "success.main"
+                                      : "error.main",
+                                  background: (theme) =>
+                                    `linear-gradient(135deg, ${ganancia >= 0 ? theme.palette.success.main : theme.palette.error.main}10, ${ganancia >= 0 ? theme.palette.success.main : theme.palette.error.main}20)`,
+                                  border: "1px solid",
+                                  borderColor:
+                                    ganancia >= 0
+                                      ? "success.light"
+                                      : "error.light",
+                                }}
+                              >
+                                <Typography
+                                  variant="body2"
+                                  sx={{ fontWeight: 700 }}
+                                >
+                                  Ganancia = {getFormattedPrice(ivaVenta)} -{" "}
+                                  {getFormattedPrice(ivaCompra)} ={" "}
+                                  <Typography
+                                    component="span"
+                                    variant="body2"
+                                    sx={{
+                                      fontWeight: 800,
+                                      color:
+                                        ganancia >= 0
+                                          ? "success.dark"
+                                          : "error.dark",
+                                    }}
+                                  >
+                                    {getFormattedPrice(ganancia)}
+                                  </Typography>
+                                </Typography>
+                              </Box>
+                            </Box>
+                          </>
+                        );
+                      })()}
                   </Box>
                 </CommonOrderCard>
               </Box>

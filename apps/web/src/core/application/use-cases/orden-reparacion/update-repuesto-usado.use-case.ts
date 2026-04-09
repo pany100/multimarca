@@ -39,6 +39,9 @@ export class UpdateRepuestoUsadoUseCase {
           precioVenta: input.precioVenta,
           unidadesConsumidas: input.unidadesConsumidas,
           ocultoParaCliente: input.ocultoParaCliente,
+          iva: input.iva,
+          buyIva: input.buyIva,
+          markup: input.markup,
         };
         const result = await this.repo.update(input.id, updateData, deps);
 
@@ -76,6 +79,9 @@ export class UpdateRepuestoUsadoUseCase {
         precioVenta: input.precioVenta,
         unidadesConsumidas: input.unidadesConsumidas,
         ocultoParaCliente: input.ocultoParaCliente,
+        iva: input.iva,
+        buyIva: input.buyIva,
+        markup: input.markup,
       };
       const result = await this.repo.update(input.id, updateData, deps);
 

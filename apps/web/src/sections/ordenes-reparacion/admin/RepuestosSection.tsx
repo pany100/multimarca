@@ -1,3 +1,5 @@
+import ResumenCostosFooter from "@/components/orden-reparacion/formV2/sections/resumen-costos/ResumenCostosFooter";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import AddIcon from "@mui/icons-material/Add";
 import { Box, Button, Card, CardContent, Typography } from "@mui/material";
 import { useState } from "react";
@@ -20,6 +22,7 @@ export interface RepuestoUsado {
 
 interface RepuestosSectionProps {
   repuestos: RepuestoUsado[];
+  totalRepuestos: number;
   loading: boolean;
   onAddRepuesto: (data: {
     stockId: number;
@@ -46,6 +49,7 @@ interface RepuestosSectionProps {
 
 const RepuestosSection = ({
   repuestos,
+  totalRepuestos,
   loading,
   onAddRepuesto,
   onUpdateRepuesto,
@@ -100,6 +104,12 @@ const RepuestosSection = ({
           onDelete={onDeleteRepuesto}
           loading={loading}
         />
+        <Box sx={{ my: 2 }}>
+          <ResumenCostosFooter
+            descripcion="Total de Repuestos"
+            total={getFormattedPrice(totalRepuestos)}
+          />
+        </Box>
 
         <Box display="flex" justifyContent="flex-end" sx={{ mt: 1 }}>
           <Button

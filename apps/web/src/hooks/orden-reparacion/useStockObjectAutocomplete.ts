@@ -6,6 +6,8 @@ export interface StockObject {
   label: string;
   buyPrice: number;
   markup: number;
+  buyIva: number;
+  sellIva: number;
 }
 
 function useStockObjectAutocomplete() {
@@ -23,6 +25,8 @@ function useStockObjectAutocomplete() {
         id: number;
         buyPrice: number;
         markup: number;
+        buyIva: number;
+        sellIva: number;
       }) => ({
         value: repuesto.id,
         label: `${repuesto.name} - ${repuesto.label}`,

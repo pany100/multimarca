@@ -28,6 +28,9 @@ export class PrismaRepuestoUsadoRepository implements RepuestoUsadoRepository {
         precioVenta: data.precioVenta,
         unidadesConsumidas: data.unidadesConsumidas,
         ocultoParaCliente: data.ocultoParaCliente ?? false,
+        iva: data.iva ?? null,
+        buyIva: data.buyIva ?? null,
+        markup: data.markup ?? null,
       },
       include: {
         stock: true,
@@ -48,6 +51,9 @@ export class PrismaRepuestoUsadoRepository implements RepuestoUsadoRepository {
       dataToUpdate.unidadesConsumidas = data.unidadesConsumidas;
     if (data.ocultoParaCliente !== undefined)
       dataToUpdate.ocultoParaCliente = data.ocultoParaCliente;
+    if (data.iva !== undefined) dataToUpdate.iva = data.iva;
+    if (data.buyIva !== undefined) dataToUpdate.buyIva = data.buyIva;
+    if (data.markup !== undefined) dataToUpdate.markup = data.markup;
 
     return db.repuestoUsado.update({
       where: { id },

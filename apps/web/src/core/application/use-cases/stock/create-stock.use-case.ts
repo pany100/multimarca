@@ -21,6 +21,8 @@ export class CreateStockUseCase {
         units: 0,
         restockValue: dto.restockValue ?? null,
         markup: dto.markup ?? null,
+        buyIva: dto.buyIva ?? null,
+        sellIva: dto.sellIva ?? null,
         reportName: dto.reportName ?? null,
         sector: dto.sector ?? null,
         carBrand: dto.carBrand ?? null,

@@ -11,6 +11,9 @@ interface RepuestoUsado {
   precioVenta: number;
   unidadesConsumidas: number;
   ocultoParaCliente?: boolean;
+  iva?: number | null;
+  buyIva?: number | null;
+  markup?: number | null;
   stock: {
     id: number;
     nombre: string;
@@ -34,7 +37,7 @@ const RepuestosTable = ({
     {
       field: "stock",
       headerName: "Repuesto",
-      flex: 3,
+      flex: 2,
       valueFormatter: (value: { name: string }) => value?.name,
     },
     {
@@ -46,36 +49,54 @@ const RepuestosTable = ({
     {
       field: "label",
       headerName: "Rótulo",
-      flex: 1,
+      flex: 0.8,
       renderCell: (params) => params.row.stock?.label,
     },
     {
       field: "precioCompra",
-      headerName: "Precio Compra",
-      flex: 1,
-      valueGetter: (value) => getFormattedPrice(value),
+      headerName: "P. Compra",
+      flex: 0.8,
+      renderCell: (params) => getFormattedPrice(params.row.precioCompra),
+    },
+    {
+      field: "markup",
+      headerName: "Margen",
+      flex: 0.5,
+      renderCell: (params) =>
+        params.row.markup != null ? `${params.row.markup}%` : "-",
+    },
+    {
+      field: "iva",
+      headerName: "IVA Venta",
+      flex: 0.6,
+      renderCell: (params) =>
+        params.row.iva != null ? `${params.row.iva}%` : "-",
     },
     {
       field: "unidadesConsumidas",
-      headerName: "Unidades Consumidas",
-      flex: 1,
+      headerName: "Uds.",
+      flex: 0.4,
     },
     {
       field: "precioVenta",
-      headerName: "Precio Final",
-      flex: 1,
-      valueFormatter: (value) => getFormattedPrice(value),
+      headerName: "P. Venta",
+      flex: 0.8,
+      renderCell: (params) => (
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {getFormattedPrice(params.row.precioVenta)}
+        </Typography>
+      ),
     },
     {
       field: "ocultoParaCliente",
       headerName: "Oculto",
-      flex: 0.7,
+      flex: 0.4,
       valueGetter: (value) => (value ? "Sí" : "No"),
     },
     {
       field: "actions",
       headerName: "Acciones",
-      width: 120,
+      width: 100,
       sortable: false,
       renderCell: (params) => (
         <Box>

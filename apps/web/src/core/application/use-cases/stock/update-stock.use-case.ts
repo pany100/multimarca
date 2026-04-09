@@ -16,6 +16,8 @@ export class UpdateStockUseCase {
         restockValue: dto.restockValue ?? null,
         label: dto.label ?? null,
         markup: dto.markup ?? null,
+        buyIva: dto.buyIva ?? null,
+        sellIva: dto.sellIva ?? null,
         proveedorId: dto.proveedorId ?? undefined,
         reportName: dto.reportName ?? null,
         sector: dto.sector ?? null,

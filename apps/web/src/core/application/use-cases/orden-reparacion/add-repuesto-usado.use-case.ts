@@ -45,6 +45,9 @@ export class AddRepuestoUsadoUseCase {
             precioVenta: input.precioVenta,
             unidadesConsumidas: input.unidadesConsumidas,
             ocultoParaCliente: input.ocultoParaCliente,
+        iva: input.iva ?? null,
+        buyIva: input.buyIva ?? null,
+        markup: input.markup ?? null,
           };
       const result = await this.repo.add(addData, deps);
 
@@ -75,6 +78,9 @@ export class AddRepuestoUsadoUseCase {
         precioVenta: input.precioVenta,
         unidadesConsumidas: input.unidadesConsumidas,
         ocultoParaCliente: input.ocultoParaCliente,
+        iva: input.iva ?? null,
+        buyIva: input.buyIva ?? null,
+        markup: input.markup ?? null,
       };
       const result = await this.repo.add(addData, deps);
 

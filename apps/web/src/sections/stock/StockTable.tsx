@@ -1,5 +1,6 @@
 import useProveedorAutocomplete from "@/hooks/useProveedorAutocomplete";
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import { calcularPrecioVenta } from "@/utils/stock-pricing";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { Alert, Autocomplete, Box, MenuItem, Snackbar, Tab, Tabs, TextField } from "@mui/material";
@@ -55,50 +56,69 @@ function StockTable({
 
   const columns = [
     { field: "id", headerName: "ID", flex: 0.2 },
-    { field: "name", headerName: "Nombre", flex: 0.6 },
-    { field: "brand", headerName: "Marca", flex: 0.5 },
+    { field: "name", headerName: "Nombre", flex: 0.7 },
+    { field: "brand", headerName: "Marca", flex: 0.4 },
+    { field: "label", headerName: "Rótulo", flex: 0.4 },
+    {
+      field: "proveedor",
+      headerName: "Proveedor",
+      flex: 0.6,
+      renderCell: (params: any) => params.row.proveedor?.name || "",
+    },
     {
       field: "buyPrice",
-      headerName: "Precio de compra",
-      flex: 0.8,
+      headerName: "P. Compra",
+      flex: 0.5,
       valueGetter: (buyPrice: any) => getFormattedPrice(buyPrice),
     },
-    { field: "reportName", headerName: "Nombre de Reporte", flex: 0.5 },
-    { field: "sector", headerName: "Sector", flex: 0.5 },
-    { field: "carBrand", headerName: "Marca de Auto", flex: 0.5 },
+    {
+      field: "markup",
+      headerName: "Margen",
+      flex: 0.35,
+      renderCell: (params: any) =>
+        params.row.markup != null ? `${params.row.markup}%` : "-",
+    },
+    {
+      field: "buyIva",
+      headerName: "IVA Compra",
+      flex: 0.4,
+      renderCell: (params: any) =>
+        params.row.buyIva != null ? `${params.row.buyIva}%` : "-",
+    },
+    {
+      field: "sellIva",
+      headerName: "IVA Venta",
+      flex: 0.4,
+      renderCell: (params: any) =>
+        params.row.sellIva != null ? `${params.row.sellIva}%` : "-",
+    },
     {
       field: "sellPrice",
-      headerName: "Precio de venta sugerido",
-      flex: 0.8,
+      headerName: "P. Venta",
+      flex: 0.5,
       renderCell: (params: any) =>
-        getFormattedPrice(params.row.buyPrice * (1 + params.row.markup / 100)),
+        getFormattedPrice(calcularPrecioVenta(params.row.buyPrice, params.row.markup, params.row.sellIva) ?? 0),
     },
     {
       field: "units",
-      headerName: "Unidades",
-      width: 100,
+      headerName: "Uds.",
+      flex: 0.3,
       valueGetter: (units: any) => {
         if (units === null || units === undefined) return 0;
         return Number(units);
       },
-      flex: 0.5,
     },
+    { field: "restockValue", headerName: "Reposición", flex: 0.35 },
     {
       field: "fraccionable",
-      headerName: "Fraccionable (Para litros)",
-      flex: 0.5,
+      headerName: "Fracc.",
+      flex: 0.25,
       valueGetter: (fraccionable: any) =>
         fraccionable === true ? "Sí" : "No",
     },
-    { field: "restockValue", headerName: "Valor de reposición", flex: 0.5 },
-    { field: "label", headerName: "Rótulo", flex: 0.5 },
-    { field: "markup", headerName: "Margen", flex: 0.5 },
-    {
-      field: "proveedor",
-      headerName: "Proveedor",
-      flex: 1.5,
-      renderCell: (params: any) => params.row.proveedor?.name || "",
-    },
+    { field: "sector", headerName: "Sector", flex: 0.35 },
+    { field: "reportName", headerName: "Reporte", flex: 0.4 },
+    { field: "carBrand", headerName: "Marca Auto", flex: 0.4 },
   ];
 
   const getRowClassName = (params: GridRowParams) => {

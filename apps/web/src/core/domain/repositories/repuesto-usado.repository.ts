@@ -4,6 +4,9 @@ export type UpdateRepuestoUsadoData = {
   precioVenta?: number;
   unidadesConsumidas?: number;
   ocultoParaCliente?: boolean;
+  iva?: number | null;
+  buyIva?: number | null;
+  markup?: number | null;
 };
 
 export type AddRepuestoUsadoData = {
@@ -15,6 +18,9 @@ export type AddRepuestoUsadoData = {
   precioVenta: number;
   unidadesConsumidas: number;
   ocultoParaCliente?: boolean;
+  iva?: number | null;
+  buyIva?: number | null;
+  markup?: number | null;
 };
 
 export interface RepuestoUsadoRepository {

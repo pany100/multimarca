@@ -1,7 +1,10 @@
 import ORepObjectAutocomplete from "@/components/orden-reparacion/formV2/commons/inputs/ORepObjectAutocomplete";
 import ORepTextField from "@/components/orden-reparacion/formV2/commons/inputs/ORepTextField";
 import useStockObjectAutocomplete from "@/hooks/orden-reparacion/useStockObjectAutocomplete";
+import { getFormattedPrice } from "@/utils/fieldHelper";
+import { calcularPrecioVenta } from "@/utils/stock-pricing";
 import {
+  Box,
   Button,
   Checkbox,
   CircularProgress,
@@ -9,8 +12,10 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Divider,
   FormControlLabel,
   Grid,
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 
@@ -18,6 +23,10 @@ interface Stock {
   id: number;
   nombre: string;
   fraccionable?: boolean;
+  buyPrice?: number;
+  markup?: number;
+  buyIva?: number;
+  sellIva?: number;
 }
 
 interface RepuestoUsado {
@@ -28,6 +37,9 @@ interface RepuestoUsado {
   unidadesConsumidas: number;
   stock: Stock;
   ocultoParaCliente?: boolean;
+  iva?: number | null;
+  buyIva?: number | null;
+  markup?: number | null;
 }
 
 interface RepuestosModalProps {
@@ -37,8 +49,11 @@ interface RepuestosModalProps {
     stockId: number;
     precioCompra: number;
     precioVenta: number;
-    unidadesConsumidas: number; // entero o decimal si el ítem es fraccionable
+    unidadesConsumidas: number;
     ocultoParaCliente?: boolean;
+    iva?: number | null;
+    buyIva?: number | null;
+    markup?: number | null;
   }) => Promise<boolean>;
   loading?: boolean;
   editRepuesto?: RepuestoUsado;
@@ -55,6 +70,9 @@ const RepuestosModal = ({
 
   const [stock, setStock] = useState<Stock | null>(null);
   const [precioCompra, setPrecioCompra] = useState<string>("");
+  const [buyIva, setBuyIva] = useState<string>("");
+  const [markup, setMarkup] = useState<string>("");
+  const [sellIva, setSellIva] = useState<string>("");
   const [precioVenta, setPrecioVenta] = useState<string>("");
   const [precioUnitario, setPrecioUnitario] = useState<string>("");
   const [unidadesConsumidas, setUnidadesConsumidas] = useState<string>("");
@@ -77,9 +95,19 @@ const RepuestosModal = ({
         const unitPrice = (editRepuesto.precioVenta / u).toFixed(2);
         setPrecioUnitario(unitPrice);
         setOcultoParaCliente(!!editRepuesto.ocultoParaCliente);
+        setBuyIva(
+          editRepuesto.buyIva != null ? editRepuesto.buyIva.toString() : "",
+        );
+        setMarkup(
+          editRepuesto.markup != null ? editRepuesto.markup.toString() : "",
+        );
+        setSellIva(editRepuesto.iva != null ? editRepuesto.iva.toString() : "");
       } else {
         setStock(null);
         setPrecioCompra("");
+        setBuyIva("");
+        setMarkup("");
+        setSellIva("");
         setPrecioVenta("");
         setPrecioUnitario("");
         setUnidadesConsumidas("");
@@ -97,7 +125,58 @@ const RepuestosModal = ({
       precioVenta: Number(precioVenta),
       unidadesConsumidas: Number(unidadesConsumidas),
       ocultoParaCliente,
+      iva: sellIva !== "" ? Number(sellIva) : null,
+      buyIva: buyIva !== "" ? Number(buyIva) : null,
+      markup: markup !== "" ? Number(markup) : null,
     });
+  };
+
+  /** Recalculate unit price and total from current field values */
+  const recalcFromFields = (
+    pc: string,
+    mk: string,
+    si: string,
+    uds: string,
+  ) => {
+    const newUnitario =
+      calcularPrecioVenta(
+        pc === "" ? 0 : Number(pc),
+        mk === "" ? 0 : Number(mk),
+        si === "" ? 0 : Number(si),
+      ) ?? 0;
+    setPrecioUnitario(newUnitario.toString());
+    const units = Number(uds) || 1;
+    setPrecioVenta((newUnitario * units).toString());
+  };
+
+  const handlePrecioCompraChange = (value: string) => {
+    setPrecioCompra(value);
+    recalcFromFields(value, markup, sellIva, unidadesConsumidas);
+  };
+
+  const handleMarkupChange = (value: string) => {
+    setMarkup(value);
+    recalcFromFields(precioCompra, value, sellIva, unidadesConsumidas);
+  };
+
+  const handleSellIvaChange = (value: string) => {
+    setSellIva(value);
+    recalcFromFields(
+      precioCompra,
+      value === "" ? "0" : markup,
+      value,
+      unidadesConsumidas,
+    );
+    // Recalc with correct markup
+    const newUnitario =
+      calcularPrecioVenta(
+        precioCompra === "" ? 0 : Number(precioCompra),
+        markup === "" ? 0 : Number(markup),
+        value === "" ? 0 : Number(value),
+      ) ?? 0;
+    setPrecioUnitario(newUnitario.toString());
+    const units = Number(unidadesConsumidas) || 1;
+    setPrecioVenta((newUnitario * units).toString());
   };
 
   const handlePrecioUnitarioChange = (value: string) => {
@@ -116,10 +195,9 @@ const RepuestosModal = ({
     if (value === "") {
       setUnidadesConsumidas("");
     } else {
-      const units = Number(value);
       setUnidadesConsumidas(value);
       const unitPrice = Number(precioUnitario) || 0;
-      setPrecioVenta((unitPrice * units).toString());
+      setPrecioVenta((unitPrice * Number(value)).toString());
     }
   };
 
@@ -134,6 +212,18 @@ const RepuestosModal = ({
       setPrecioUnitario(Math.ceil(salePrice / units).toString());
     }
   };
+
+  // Computed values for the explanation box
+  const precioCompraNum = precioCompra !== "" ? Number(precioCompra) : null;
+  const markupNum = markup !== "" ? Number(markup) : 0;
+  const sellIvaNum = sellIva !== "" ? Number(sellIva) : 0;
+  const precioNetoCalc =
+    precioCompraNum != null ? precioCompraNum * (1 + markupNum / 100) : null;
+  const precioUnitarioNum =
+    precioUnitario !== "" ? Number(precioUnitario) : null;
+  const precioVentaNum = precioVenta !== "" ? Number(precioVenta) : null;
+  const unidadesNum =
+    unidadesConsumidas !== "" ? Number(unidadesConsumidas) : null;
 
   const isValid =
     stock &&
@@ -157,34 +247,73 @@ const RepuestosModal = ({
               searchOptions={searchStockObject}
               initialOptions={initialStock}
               selectOption={(option) => {
-                const precioVentaCalculado = Math.ceil(
-                  option?.object?.buyPrice *
-                    (1 + (option?.object?.markup || 0) / 100) || 0,
-                );
-                setStock(option?.object || null);
-                setPrecioCompra(option?.object?.buyPrice?.toString() ?? "");
-                setPrecioUnitario(precioVentaCalculado.toString());
+                const obj = option?.object;
+                const si = obj?.sellIva ?? 0;
+                const bi = obj?.buyIva ?? 0;
+                const mk = obj?.markup ?? 0;
+                const pv = calcularPrecioVenta(obj?.buyPrice, mk, si) ?? 0;
+                setStock(obj || null);
+                setPrecioCompra(obj?.buyPrice?.toString() ?? "");
+                setBuyIva(bi ? bi.toString() : "");
+                setMarkup(mk ? mk.toString() : "");
+                setSellIva(si ? si.toString() : "");
+                setPrecioUnitario(pv.toString());
                 setUnidadesConsumidas("1");
-                setPrecioVenta(precioVentaCalculado.toString());
+                setPrecioVenta(pv.toString());
               }}
               initialValue={editRepuesto?.stock?.id.toString()}
             />
           </Grid>
 
-          <Grid item xs={12}>
+          {/* Row 1: Precio compra + IVA compra */}
+          <Grid item xs={6}>
             <ORepTextField
-              label="Precio Compra"
+              label="Precio de compra"
               type="number"
               value={precioCompra}
-              onChange={(e) => setPrecioCompra(e.target.value)}
+              onChange={(e) => handlePrecioCompraChange(e.target.value)}
               disabled={loading}
               required
             />
           </Grid>
+          <Grid item xs={6}>
+            <ORepTextField
+              label="IVA compra informativo (%)"
+              type="number"
+              value={buyIva}
+              onChange={(e) => setBuyIva(e.target.value)}
+              disabled={loading}
+            />
+          </Grid>
+
+          {/* Row 2: Margen + IVA venta */}
+          <Grid item xs={6}>
+            <ORepTextField
+              label="Margen (%)"
+              type="number"
+              value={markup}
+              onChange={(e) => handleMarkupChange(e.target.value)}
+              disabled={loading}
+            />
+          </Grid>
+          <Grid item xs={6}>
+            <ORepTextField
+              label="IVA venta (%)"
+              type="number"
+              value={sellIva}
+              onChange={(e) => handleSellIvaChange(e.target.value)}
+              disabled={loading}
+            />
+          </Grid>
 
           <Grid item xs={12}>
+            <Divider sx={{ my: 0.5 }} />
+          </Grid>
+
+          {/* Row 3: Precio unitario */}
+          <Grid item xs={12}>
             <ORepTextField
-              label="Precio Unitario"
+              label="Precio unitario (con IVA)"
               type="number"
               value={precioUnitario}
               onChange={(e) => handlePrecioUnitarioChange(e.target.value)}
@@ -192,6 +321,7 @@ const RepuestosModal = ({
             />
           </Grid>
 
+          {/* Row 4: Unidades */}
           <Grid item xs={12}>
             <ORepTextField
               label={
@@ -211,9 +341,10 @@ const RepuestosModal = ({
             />
           </Grid>
 
+          {/* Row 5: Precio venta total */}
           <Grid item xs={12}>
             <ORepTextField
-              label="Precio Venta"
+              label="Precio venta total"
               type="number"
               value={precioVenta}
               onChange={(e) => handlePrecioVentaChange(e.target.value)}
@@ -221,6 +352,79 @@ const RepuestosModal = ({
               required
             />
           </Grid>
+
+          {/* Explanation box */}
+          {stock && precioCompraNum != null && (
+            <Grid item xs={12}>
+              <Box
+                sx={{
+                  p: 1.5,
+                  bgcolor: "grey.50",
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderRadius: 1,
+                }}
+              >
+                {/* Precio unitario breakdown */}
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  Precio unitario = Precio compra x (1 + Margen/100) x (1 + IVA
+                  venta/100)
+                </Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, mb: 1 }}>
+                  {precioUnitarioNum != null ? (
+                    <>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{ fontWeight: 800 }}
+                      >
+                        {getFormattedPrice(precioUnitarioNum)}
+                      </Typography>
+                      {` = ${getFormattedPrice(precioCompraNum)} x (1 + ${markupNum}/100) x (1 + ${sellIvaNum}/100)`}
+                    </>
+                  ) : (
+                    "-"
+                  )}
+                </Typography>
+
+                {/* Precio venta total (only if >1 unit) */}
+                {unidadesNum != null && unidadesNum > 1 && (
+                  <>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      gutterBottom
+                    >
+                      Precio venta total = Precio unitario x Unidades
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 600 }}>
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        sx={{ fontWeight: 800 }}
+                      >
+                        {precioVentaNum != null
+                          ? getFormattedPrice(precioVentaNum)
+                          : "-"}
+                      </Typography>
+                      {precioUnitarioNum != null
+                        ? ` = ${getFormattedPrice(precioUnitarioNum)} x ${unidadesNum}`
+                        : ""}
+                    </Typography>
+                  </>
+                )}
+
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  component="div"
+                  sx={{ mt: 1, fontStyle: "italic" }}
+                >
+                  Valores pre-cargados del stock. Editables para esta operación.
+                </Typography>
+              </Box>
+            </Grid>
+          )}
 
           <Grid item xs={12}>
             <FormControlLabel

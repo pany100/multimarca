@@ -378,6 +378,8 @@ model Stock {
   units                  Decimal?              @db.Decimal(10, 3)
   restockValue           Int?
   markup                 Float?
+  buyIva                 Float?
+  sellIva                Float?
   proveedorId            Int
   label                  String                 @unique @db.VarChar(250)
   reportName             String?                @db.Text
@@ -655,6 +657,9 @@ model RepuestoUsado {
   /// Cantidad consumida; decimal para ítems fraccionables (ej. 0.5 litros).
   unidadesConsumidas     Decimal               @db.Decimal(10, 3)
   ocultoParaCliente      Boolean               @default(false)
+  iva                    Float?
+  buyIva                 Float?
+  markup                 Float?
   plantillaPresupuestoId Int?
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionRepuestos", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoRepuestos", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)

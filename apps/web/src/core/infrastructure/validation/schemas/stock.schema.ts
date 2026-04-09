@@ -18,6 +18,8 @@ export const createStockSchema = z.object({
   buyPrice: z.coerce.number().optional(),
   restockValue: z.coerce.number().int().nullable().optional(),
   markup: z.coerce.number().nullable().optional(),
+  buyIva: z.coerce.number().nullable().optional(),
+  sellIva: z.coerce.number().nullable().optional(),
   reportName: z.string().nullable().optional(),
   sector: z.string().nullable().optional(),
   carBrand: z.string().nullable().optional(),

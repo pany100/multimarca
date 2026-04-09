@@ -17,6 +17,7 @@ const OrdenRepuestosSection = () => {
   return (
     <RepuestosSection
       repuestos={orden?.repuestosUsados || []}
+      totalRepuestos={orden?.totalRepuestos || 0}
       loading={loading}
       onAddRepuesto={handleAddRepuesto}
       onUpdateRepuesto={handleUpdateRepuesto}

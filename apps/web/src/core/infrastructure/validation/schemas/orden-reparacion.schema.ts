@@ -203,6 +203,9 @@ export const addRepuestoUsadoSchema = z
     precioVenta: z.number().nonnegative(),
     unidadesConsumidas: z.number().positive(),
     ocultoParaCliente: z.boolean().optional(),
+    iva: z.coerce.number().nullable().optional(),
+    buyIva: z.coerce.number().nullable().optional(),
+    markup: z.coerce.number().nullable().optional(),
   })
   .refine(
     (data) => {
@@ -226,6 +229,9 @@ export const updateRepuestoUsadoSchema = z.object({
   precioVenta: z.number().nonnegative().optional(),
   unidadesConsumidas: z.number().positive().optional(),
   ocultoParaCliente: z.boolean().optional(),
+  iva: z.coerce.number().nullable().optional(),
+  buyIva: z.coerce.number().nullable().optional(),
+  markup: z.coerce.number().nullable().optional(),
 });
 
 export const deleteRepuestoUsadoSchema = z.object({

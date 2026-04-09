@@ -17,6 +17,7 @@ const VentaRepuestosSection = () => {
   return (
     <RepuestosSection
       repuestos={venta?.repuestosUsados || []}
+      totalRepuestos={venta?.totalRepuestos || 0}
       loading={loading}
       onAddRepuesto={handleAddRepuesto}
       onUpdateRepuesto={handleUpdateRepuesto}

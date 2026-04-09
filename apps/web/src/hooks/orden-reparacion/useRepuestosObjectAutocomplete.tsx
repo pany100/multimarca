@@ -1,5 +1,6 @@
 import { useFormDataWithModalContext } from "@/contexts/FormDataWithModalContext";
 import { ObjectAutocomplete } from "@/sections/commons/NonFormObjectAutocomplete";
+import { calcularPrecioVenta } from "@/utils/stock-pricing";
 
 function useRepuestosObjectAutocomplete() {
   const { newItem, setNewItem, currentItem, setCurrentItem } =
@@ -10,7 +11,7 @@ function useRepuestosObjectAutocomplete() {
   ) => {
     if (option) {
       const precioVentaCalculado =
-        option.object.buyPrice * (1 + (option.object.markup || 0) / 100);
+        calcularPrecioVenta(option.object.buyPrice, option.object.markup, option.object.sellIva) ?? 0;
       if (!initialRender) {
         setNewItem({
           id: option.value,

@@ -12,7 +12,7 @@ export class EstadisticasEvolucionStockService {
     return await prisma.$queryRaw<EvolucionStockRow[]>`
       SELECT 
         SUM(s.buyPrice * s.units) as costoStock,
-        SUM((s.buyPrice * (1 + COALESCE(s.markup, 0) / 100)) * s.units) as plataEnStock
+        SUM((s.buyPrice * (1 + COALESCE(s.markup, 0) / 100) * (1 + COALESCE(s.sellIva, 0) / 100)) * s.units) as plataEnStock
       FROM Stock s
       WHERE s.units > 0;
     `;

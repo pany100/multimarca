@@ -43,6 +43,8 @@ export class GenerateStockPdfUseCase {
                 <th>Valor de reposición</th>
                 <th>Rótulo</th>
                 <th>Margen</th>
+                <th>IVA compra</th>
+                <th>IVA venta</th>
                 <th>Proveedor</th>
               </tr>
             </thead>
@@ -59,6 +61,8 @@ export class GenerateStockPdfUseCase {
                   <td>${item.restockValue || ""}</td>
                   <td>${item.label || ""}</td>
                   <td>${item.markup || ""}</td>
+                  <td>${item.buyIva != null ? `${item.buyIva}%` : ""}</td>
+                  <td>${item.sellIva != null ? `${item.sellIva}%` : ""}</td>
                   <td>${item.proveedor?.name || ""}</td>
                 </tr>
               `

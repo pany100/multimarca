@@ -112,22 +112,22 @@ const OrdenReparacionDetailPage = ({ params }: { params: { id: string } }) => {
                 <DetallesSection />
               </Box>
             </Grid>
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+            <Grid item xs={12} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <OrdenTercerosSection />
               </Box>
             </Grid>
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+            <Grid item xs={12} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <OrdenRepuestosSection />
               </Box>
             </Grid>
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+            <Grid item xs={12} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <RecargoSection />
               </Box>
             </Grid>
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+            <Grid item xs={12} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <OrdenTrabajosSection />
               </Box>

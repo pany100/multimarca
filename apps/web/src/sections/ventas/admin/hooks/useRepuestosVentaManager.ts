@@ -13,6 +13,9 @@ interface RepuestoUsado {
     id: number;
     nombre: string;
   };
+  iva?: number | null;
+  buyIva?: number | null;
+  markup?: number | null;
 }
 
 export const useRepuestosVentaManager = () => {
@@ -30,6 +33,9 @@ export const useRepuestosVentaManager = () => {
     precioCompra: number;
     precioVenta: number;
     unidadesConsumidas: number;
+    iva?: number | null;
+    buyIva?: number | null;
+    markup?: number | null;
   }) => {
     setLoading(true);
     try {
@@ -82,6 +88,9 @@ export const useRepuestosVentaManager = () => {
       precioCompra?: number;
       precioVenta?: number;
       unidadesConsumidas?: number;
+      iva?: number | null;
+      buyIva?: number | null;
+      markup?: number | null;
     }
   ) => {
     setLoading(true);
