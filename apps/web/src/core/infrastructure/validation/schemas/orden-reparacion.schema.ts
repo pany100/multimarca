@@ -13,6 +13,9 @@ export const terceroSchema = z.object({
   proveedor: z.object({ id: z.coerce.number() }),
   precioCompra: z.coerce.number().optional(),
   precioVenta: z.coerce.number().optional(),
+  iva: z.coerce.number().nullable().optional(),
+  buyIva: z.coerce.number().nullable().optional(),
+  markup: z.coerce.number().nullable().optional(),
   recibo: z.string().nullable().optional(),
 });
 
@@ -164,6 +167,9 @@ export const addReparacionTerceroSchema = z
     proveedorId: z.coerce.number(),
     precioCompra: z.coerce.number(),
     precioVenta: z.coerce.number(),
+    iva: z.coerce.number().nullable().optional(),
+    buyIva: z.coerce.number().nullable().optional(),
+    markup: z.coerce.number().nullable().optional(),
     recibo: z.string().nullable().optional(),
   })
   .refine(
@@ -187,6 +193,9 @@ export const updateReparacionTerceroSchema = z.object({
   proveedorId: z.coerce.number().optional(),
   precioCompra: z.coerce.number().optional(),
   precioVenta: z.coerce.number().optional(),
+  iva: z.coerce.number().nullable().optional(),
+  buyIva: z.coerce.number().nullable().optional(),
+  markup: z.coerce.number().nullable().optional(),
   recibo: z.string().nullable().optional(),
 });
 

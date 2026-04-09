@@ -685,6 +685,9 @@ model ReparacionDeTercero {
   ventaId                Int?
   presupuestoId          Int?
   plantillaPresupuestoId Int?
+  iva                    Float?                // IVA de venta (%), para calcular precio final
+  buyIva                 Float?                // IVA de compra (%), informativo para estadísticas
+  markup                 Float?                // Margen en pesos ($)
   recibo                 String?               @db.VarChar(255)
   reciboFile             CustomFile?           @relation("ReparacionDeTerceroRecibos")
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionReparacionTercero", fields: [ordenReparacionId], references: [id], onDelete: Cascade)

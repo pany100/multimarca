@@ -17,6 +17,9 @@ interface ReparacionTercero {
   nombre: string;
   precioCompra: number;
   precioVenta: number;
+  iva?: number | null;
+  buyIva?: number | null;
+  markup?: number | null;
   proveedor: {
     id: number;
     name: string;
@@ -56,6 +59,22 @@ const TercerosTable = ({
       headerName: "Precio Compra",
       width: 130,
       renderCell: (params) => getFormattedPrice(params.row.precioCompra),
+    },
+    {
+      field: "markup",
+      headerName: "Margen",
+      width: 100,
+      renderCell: (params) =>
+        params.row.markup != null
+          ? getFormattedPrice(params.row.markup)
+          : "-",
+    },
+    {
+      field: "iva",
+      headerName: "IVA Venta %",
+      width: 100,
+      renderCell: (params) =>
+        params.row.iva != null ? `${params.row.iva}%` : "-",
     },
     {
       field: "precioVenta",

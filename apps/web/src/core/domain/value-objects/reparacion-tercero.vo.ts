@@ -7,6 +7,9 @@ export interface ReparacionTerceroProps {
   proveedorId: number;
   precioCompra?: number;
   precioVenta?: number;
+  iva?: number | null;
+  buyIva?: number | null;
+  markup?: number | null;
   recibo?: string | null;
 }
 
@@ -17,6 +20,9 @@ export interface ReparacionTerceroHTTPInput {
   };
   precioCompra?: number | undefined;
   precioVenta?: number | undefined;
+  iva?: number | null | undefined;
+  buyIva?: number | null | undefined;
+  markup?: number | null | undefined;
   recibo?: string | null | undefined;
 }
 
@@ -26,16 +32,33 @@ export class ReparacionTercero {
     public readonly proveedorId: number,
     public readonly precioCompra: Money,
     public readonly precioVenta: Money,
+    public readonly iva: number | null,
+    public readonly buyIva: number | null,
+    public readonly markup: number | null,
     public readonly recibo: string | null
   ) {
     if (!nombre?.trim()) throw new Error("Nombre requerido");
   }
+
+  static calcularPrecioVenta(
+    precioCompra: number,
+    markup: number,
+    iva: number
+  ): number {
+    return Math.ceil(
+      precioCompra * (1 + markup / 100) * (1 + iva / 100) || 0
+    );
+  }
+
   static from(p: ReparacionTerceroProps, files: FileStoragePort) {
     return new ReparacionTercero(
       p.nombre.trim(),
       Number(p.proveedorId),
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
+      p.iva ?? null,
+      p.buyIva ?? null,
+      p.markup ?? null,
       p.recibo ?? null
     );
   }
@@ -46,6 +69,9 @@ export class ReparacionTercero {
       Number(p.proveedor.id),
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
+      p.iva ?? null,
+      p.buyIva ?? null,
+      p.markup ?? null,
       p.recibo ?? null
     );
   }
@@ -60,6 +86,9 @@ export class ReparacionTercero {
       0,
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
+      null,
+      null,
+      null,
       null
     );
   }

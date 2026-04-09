@@ -25,6 +25,9 @@ export class PrismaReparacionTerceroRepository
       proveedorId: number;
       precioCompra: number;
       precioVenta: number;
+      iva?: number | null;
+      buyIva?: number | null;
+      markup?: number | null;
       recibo?: string | null;
     },
     deps?: { tx?: any }
@@ -41,6 +44,9 @@ export class PrismaReparacionTerceroRepository
         proveedorId: data.proveedorId,
         precioCompra: data.precioCompra,
         precioVenta: data.precioVenta,
+        iva: data.iva,
+        buyIva: data.buyIva,
+        markup: data.markup,
         recibo: data.recibo,
       },
       include: {
@@ -78,6 +84,9 @@ export class PrismaReparacionTerceroRepository
       proveedorId?: number;
       precioCompra?: number;
       precioVenta?: number;
+      iva?: number | null;
+      buyIva?: number | null;
+      markup?: number | null;
       recibo?: string | null;
     },
     deps?: { tx?: any }
@@ -92,6 +101,9 @@ export class PrismaReparacionTerceroRepository
       dataToUpdate.precioCompra = data.precioCompra;
     if (data.precioVenta !== undefined)
       dataToUpdate.precioVenta = data.precioVenta;
+    if (data.iva !== undefined) dataToUpdate.iva = data.iva;
+    if (data.buyIva !== undefined) dataToUpdate.buyIva = data.buyIva;
+    if (data.markup !== undefined) dataToUpdate.markup = data.markup;
     if (data.recibo !== undefined) dataToUpdate.recibo = data.recibo;
 
     // Get the current reparacion to compare recibo value

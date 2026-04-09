@@ -179,18 +179,6 @@ const RepuestosModal = ({
     setPrecioVenta((newUnitario * units).toString());
   };
 
-  const handlePrecioUnitarioChange = (value: string) => {
-    if (value === "") {
-      setPrecioUnitario("");
-      setPrecioVenta("");
-    } else {
-      const unitPrice = Number(value);
-      setPrecioUnitario(value);
-      const units = Number(unidadesConsumidas) || 1;
-      setPrecioVenta((unitPrice * units).toString());
-    }
-  };
-
   const handleUnidadesChange = (value: string) => {
     if (value === "") {
       setUnidadesConsumidas("");
@@ -201,24 +189,10 @@ const RepuestosModal = ({
     }
   };
 
-  const handlePrecioVentaChange = (value: string) => {
-    if (value === "") {
-      setPrecioVenta("");
-      setPrecioUnitario("");
-    } else {
-      const salePrice = Number(value);
-      setPrecioVenta(value);
-      const units = Number(unidadesConsumidas) || 1;
-      setPrecioUnitario(Math.ceil(salePrice / units).toString());
-    }
-  };
-
   // Computed values for the explanation box
   const precioCompraNum = precioCompra !== "" ? Number(precioCompra) : null;
   const markupNum = markup !== "" ? Number(markup) : 0;
   const sellIvaNum = sellIva !== "" ? Number(sellIva) : 0;
-  const precioNetoCalc =
-    precioCompraNum != null ? precioCompraNum * (1 + markupNum / 100) : null;
   const precioUnitarioNum =
     precioUnitario !== "" ? Number(precioUnitario) : null;
   const precioVentaNum = precioVenta !== "" ? Number(precioVenta) : null;
@@ -310,14 +284,23 @@ const RepuestosModal = ({
             <Divider sx={{ my: 0.5 }} />
           </Grid>
 
-          {/* Row 3: Precio unitario */}
+          {/* Row 3: Precio unitario (read-only, calculado) */}
           <Grid item xs={12}>
             <ORepTextField
               label="Precio unitario (con IVA)"
               type="number"
               value={precioUnitario}
-              onChange={(e) => handlePrecioUnitarioChange(e.target.value)}
+              InputProps={{ readOnly: true }}
               disabled={loading}
+              sx={{
+                "& .MuiInputBase-root": {
+                  bgcolor: "grey.100",
+                  cursor: "default",
+                },
+                "& .MuiInputBase-input": {
+                  cursor: "default",
+                },
+              }}
             />
           </Grid>
 
@@ -341,15 +324,23 @@ const RepuestosModal = ({
             />
           </Grid>
 
-          {/* Row 5: Precio venta total */}
+          {/* Row 5: Precio venta total (read-only, calculado) */}
           <Grid item xs={12}>
             <ORepTextField
               label="Precio venta total"
               type="number"
               value={precioVenta}
-              onChange={(e) => handlePrecioVentaChange(e.target.value)}
+              InputProps={{ readOnly: true }}
               disabled={loading}
-              required
+              sx={{
+                "& .MuiInputBase-root": {
+                  bgcolor: "grey.100",
+                  cursor: "default",
+                },
+                "& .MuiInputBase-input": {
+                  cursor: "default",
+                },
+              }}
             />
           </Grid>
 

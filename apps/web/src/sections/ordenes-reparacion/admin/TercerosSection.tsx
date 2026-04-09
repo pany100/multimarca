@@ -10,6 +10,9 @@ export interface ReparacionTercero {
   nombre: string;
   precioCompra: number;
   precioVenta: number;
+  iva?: number | null;
+  buyIva?: number | null;
+  markup?: number | null;
   proveedor: {
     id: number;
     name: string;
@@ -26,6 +29,9 @@ interface TercerosSectionProps {
     proveedorId: number;
     precioCompra: number;
     precioVenta: number;
+    iva?: number | null;
+    buyIva?: number | null;
+    markup?: number | null;
     recibo?: string | null;
   }) => Promise<boolean>;
   onUpdateTercero: (
@@ -35,6 +41,9 @@ interface TercerosSectionProps {
       proveedorId?: number;
       precioCompra?: number;
       precioVenta?: number;
+      iva?: number | null;
+      buyIva?: number | null;
+      markup?: number | null;
       recibo?: string | null;
     }
   ) => Promise<boolean>;
@@ -65,6 +74,9 @@ const TercerosSection = ({
     proveedorId: number;
     precioCompra: number;
     precioVenta: number;
+    iva?: number | null;
+    buyIva?: number | null;
+    markup?: number | null;
     recibo?: string | null;
   }) => {
     let success = false;

@@ -8,6 +8,9 @@ interface ReparacionTercero {
   nombre: string;
   precioCompra: number;
   precioVenta: number;
+  iva?: number | null;
+  buyIva?: number | null;
+  markup?: number | null;
   proveedor: {
     id: number;
     name: string;
@@ -30,6 +33,9 @@ export const useTercerosManager = () => {
     proveedorId: number;
     precioCompra: number;
     precioVenta: number;
+    iva?: number | null;
+    buyIva?: number | null;
+    markup?: number | null;
     recibo?: string | null;
   }) => {
     setLoading(true);
@@ -83,6 +89,9 @@ export const useTercerosManager = () => {
       proveedorId?: number;
       precioCompra?: number;
       precioVenta?: number;
+      iva?: number | null;
+      buyIva?: number | null;
+      markup?: number | null;
       recibo?: string | null;
     }
   ) => {

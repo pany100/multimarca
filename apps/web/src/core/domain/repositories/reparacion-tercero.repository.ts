@@ -8,6 +8,9 @@ export interface ReparacionTerceroRepository {
       proveedorId: number;
       precioCompra: number;
       precioVenta: number;
+      iva?: number | null;
+      buyIva?: number | null;
+      markup?: number | null;
       recibo?: string | null;
     },
     deps?: { tx?: any }
@@ -20,6 +23,9 @@ export interface ReparacionTerceroRepository {
       proveedorId?: number;
       precioCompra?: number;
       precioVenta?: number;
+      iva?: number | null;
+      buyIva?: number | null;
+      markup?: number | null;
       recibo?: string | null;
     },
     deps?: { tx?: any }
