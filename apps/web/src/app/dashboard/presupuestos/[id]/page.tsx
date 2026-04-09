@@ -77,42 +77,42 @@ const PresupuestoAdminPage = ({ params }: { params: { id: string } }) => {
             </Grid>
 
             {/* Trabajos a Realizar */}
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+            <Grid item xs={12} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <PresupuestoTrabajosARealizar />
               </Box>
             </Grid>
 
             {/* Reparaciones de Terceros */}
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+            <Grid item xs={12} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <PresupuestoTercerosSection />
               </Box>
             </Grid>
 
             {/* Repuestos */}
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+            <Grid item xs={12} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <PresupuestoRepuestosSection />
               </Box>
             </Grid>
 
             {/* Recargo */}
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+            <Grid item xs={12} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <PresupuestoRecargoSection />
               </Box>
             </Grid>
 
             {/* Trabajos Realizados */}
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+            <Grid item xs={12} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <PresupuestoTrabajosSection />
               </Box>
             </Grid>
 
             {/* Costos */}
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+            <Grid item xs={12} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <PresupuestoCostosSection />
               </Box>

@@ -710,6 +710,7 @@ model TrabajoRealizado {
   descripcion            String                @db.Text
   pdfName                String?
   diasParaRecordatorio   Json?                 // array de días, ej: [30, 60, 90]. En app usar como number[].
+  iva                    Float?                // IVA de venta (%), se usa para calcular precio final con IVA
   plantillaPresupuestoId Int?
   ordenReparacion        OrdenReparacion?      @relation("OrdenReparacionTrabajosRealizados", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   plantillaPresupuesto   PlantillaPresupuesto? @relation("PlantillaPresupuestoTrabajosRealizados", fields: [plantillaPresupuestoId], references: [id], onDelete: Cascade)

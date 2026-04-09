@@ -13,6 +13,7 @@ export interface TrabajoRealizado {
   descripcion: string;
   diasParaRecordatorio?: number[] | null;
   pdfName?: string | null;
+  iva?: number | null;
 }
 
 interface TrabajosSectionProps {
@@ -25,6 +26,7 @@ interface TrabajosSectionProps {
     diasParaRecordatorio?: number[] | null;
     pdfName?: string | null;
     manoDeObra?: { name: string };
+    iva?: number | null;
   }) => Promise<boolean>;
   onUpdateTrabajo: (
     id: number,
@@ -34,6 +36,7 @@ interface TrabajosSectionProps {
       diasParaRecordatorio?: number[] | null;
       pdfName?: string | null;
       manoDeObra?: { name: string };
+      iva?: number | null;
     },
   ) => Promise<boolean>;
   onDeleteTrabajo: (trabajo: TrabajoRealizado) => void;
@@ -63,6 +66,7 @@ const TrabajosSection = ({
     descripcion: string;
     diasParaRecordatorio?: number[] | null;
     pdfName?: string | null;
+    iva?: number | null;
   }) => {
     let success = false;
 

@@ -21,6 +21,7 @@ export const trabajoSchema = z.object({
   descripcion: z.string().optional(),
   precioUnitario: z.coerce.number(),
   diasParaRecordatorio: z.coerce.number().int().nullable().optional(),
+  iva: z.coerce.number().nullable().optional(),
 });
 
 export const createOrdenSchema = z.object({

@@ -143,6 +143,7 @@ export class ComprobanteCalculadoFactory {
         precioUnitario: new Decimal(t.precioUnitario),
         descripcion: t.descripcion || t.manoDeObra?.name || "",
         diasParaRecordatorio: t.diasParaRecordatorio || null,
+        iva: t.iva ?? null,
       })
     );
 
@@ -198,6 +199,7 @@ export class ComprobanteCalculadoFactory {
         precioUnitario: new Decimal(t.precioUnitario),
         descripcion: t.descripcion || t.manoDeObra?.name || "",
         diasParaRecordatorio: t.diasParaRecordatorio || null,
+        iva: t.iva ?? null,
       })
     );
 

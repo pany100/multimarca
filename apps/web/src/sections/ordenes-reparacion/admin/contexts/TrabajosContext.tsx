@@ -9,6 +9,8 @@ interface TrabajosContextType {
   setDiasParaRecordatorio: (dias: number[] | null) => void;
   pdfName: string;
   setPdfName: (pdfName: string) => void;
+  iva: number | null;
+  setIva: (iva: number | null) => void;
   resetForm: () => void;
 }
 
@@ -40,6 +42,7 @@ interface TrabajosProviderProps {
   initialPrecioUnitario?: number | null;
   initialDiasParaRecordatorio?: number | number[] | null;
   initialPdfName?: string | null;
+  initialIva?: number | null;
 }
 
 export const TrabajosProvider = ({
@@ -48,6 +51,7 @@ export const TrabajosProvider = ({
   initialPrecioUnitario = null,
   initialDiasParaRecordatorio,
   initialPdfName = "",
+  initialIva = null,
 }: TrabajosProviderProps) => {
   const [descripcion, setDescripcion] = useState<string>(initialDescripcion);
   const [precioUnitario, setPrecioUnitario] = useState<number | null>(
@@ -61,12 +65,14 @@ export const TrabajosProvider = ({
     setDiasParaRecordatorioState(dias ?? []);
   };
   const [pdfName, setPdfName] = useState<string>(initialPdfName ?? "");
+  const [iva, setIva] = useState<number | null>(initialIva);
 
   const resetForm = () => {
     setDescripcion("");
     setPrecioUnitario(null);
     setDiasParaRecordatorio([]);
     setPdfName("");
+    setIva(null);
   };
 
   return (
@@ -80,6 +86,8 @@ export const TrabajosProvider = ({
         setDiasParaRecordatorio,
         pdfName,
         setPdfName,
+        iva,
+        setIva,
         resetForm,
       }}
     >

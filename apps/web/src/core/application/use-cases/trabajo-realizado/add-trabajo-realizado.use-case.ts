@@ -32,6 +32,7 @@ export class AddTrabajoRealizadoUseCase {
           descripcion: input.descripcion,
           diasParaRecordatorio: input.diasParaRecordatorio,
           pdfName: input.pdfName,
+          iva: input.iva,
         },
         deps
       );

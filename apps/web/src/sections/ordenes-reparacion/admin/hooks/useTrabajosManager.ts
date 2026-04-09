@@ -9,6 +9,7 @@ interface TrabajoRealizado {
   descripcion: string;
   diasParaRecordatorio?: number[] | null;
   pdfName?: string | null;
+  iva?: number | null;
 }
 
 export const useTrabajosManager = () => {
@@ -27,6 +28,7 @@ export const useTrabajosManager = () => {
     diasParaRecordatorio?: number[] | null;
     pdfName?: string | null;
     manoDeObra?: { name: string };
+    iva?: number | null;
   }) => {
     setLoading(true);
     try {
@@ -82,6 +84,7 @@ export const useTrabajosManager = () => {
       diasParaRecordatorio?: number[] | null;
       pdfName?: string | null;
       manoDeObra?: { name: string };
+      iva?: number | null;
     }
   ) => {
     setLoading(true);

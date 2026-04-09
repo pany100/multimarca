@@ -13,6 +13,7 @@ export interface TrabajoRealizadoProps {
   precioUnitario: number;
   diasParaRecordatorio?: number[] | null;
   pdfName?: string | null;
+  iva?: number | null;
 }
 
 export interface TrabajosRealizadosHTTPInput {
@@ -26,6 +27,7 @@ export interface TrabajosRealizadosHTTPInput {
   pdfName?: string | null | undefined;
   /** Acepta número único (legacy) o array de días; fromHttpInput normaliza a number[] */
   diasParaRecordatorio?: number | number[] | null | undefined;
+  iva?: number | null | undefined;
 }
 
 export class TrabajoRealizado {
@@ -34,15 +36,26 @@ export class TrabajoRealizado {
     public readonly precioUnitario: Money,
     public readonly diasParaRecordatorio: number[],
     public readonly pdfName?: string | null,
+    public readonly iva?: number | null,
   ) {
     if (!descripcion?.trim()) throw new Error("Descripción requerida");
   }
+
+  /** Precio final con IVA incluido. Si iva es null o 0, retorna precioUnitario. */
+  get precioConIva(): number {
+    const precio = this.precioUnitario.toNumber();
+    const ivaVal = this.iva ?? 0;
+    if (ivaVal === 0) return precio;
+    return Math.ceil(precio * (1 + ivaVal / 100));
+  }
+
   static from(p: TrabajoRealizadoProps) {
     return new TrabajoRealizado(
       p.descripcion.trim(),
       Money.from(p.precioUnitario),
       normalizeDiasParaRecordatorio(p.diasParaRecordatorio),
       p.pdfName ?? null,
+      p.iva ?? null,
     );
   }
 
@@ -52,6 +65,7 @@ export class TrabajoRealizado {
       Money.from(p.precioUnitario),
       normalizeDiasParaRecordatorio(p.diasParaRecordatorio),
       p.pdfName ?? null,
+      p.iva ?? null,
     );
   }
 
@@ -60,12 +74,14 @@ export class TrabajoRealizado {
     descripcion: string;
     /** Prisma devuelve JsonValue (number | number[] | null); se normaliza a number[] */
     diasParaRecordatorio?: unknown;
+    iva?: number | null;
   }) {
     return new TrabajoRealizado(
       p.descripcion.trim(),
       Money.from(p.precioUnitario),
       normalizeDiasParaRecordatorio(p.diasParaRecordatorio),
       (p as any).pdfName ?? null,
+      p.iva ?? null,
     );
   }
 }

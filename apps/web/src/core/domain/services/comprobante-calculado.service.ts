@@ -66,7 +66,7 @@ export class ComprobanteCalculado {
   get totalManoDeObra() {
     return this.trabajos.reduce(
       (acc, t) =>
-        acc + this.calcularPrecioFinal(t.precioUnitario.toNumber(), 0),
+        acc + this.calcularPrecioFinal(t.precioConIva, 0),
       0,
     );
   }
@@ -99,8 +99,10 @@ export class ComprobanteCalculado {
           : 0;
       return {
         descripcion: t.descripcion,
-        precioUnitario:
-          this.calcularPrecioFinal(t.precioUnitario.toNumber(), 0) + incremento,
+        precioUnitario: t.precioUnitario.toNumber(),
+        precioConIva:
+          this.calcularPrecioFinal(t.precioConIva, 0) + incremento,
+        iva: t.iva ?? null,
         pdfName: t.pdfName ?? null,
       };
     });

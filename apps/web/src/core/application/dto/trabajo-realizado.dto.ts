@@ -6,6 +6,7 @@ export interface AddTrabajoRealizadoDto {
   descripcion: string;
   diasParaRecordatorio?: number[] | null;
   pdfName?: string | null;
+  iva?: number | null;
 }
 
 export interface UpdateTrabajoRealizadoDto {
@@ -14,6 +15,7 @@ export interface UpdateTrabajoRealizadoDto {
   descripcion?: string;
   diasParaRecordatorio?: number[] | null;
   pdfName?: string | null;
+  iva?: number | null;
 }
 
 export interface DeleteTrabajoRealizadoDto {

@@ -12,6 +12,7 @@ export const addTrabajoRealizadoSchema = z
       .nullable()
       .optional(),
     pdfName: z.string().nullable().optional(),
+    iva: z.coerce.number().nullable().optional(),
   })
   .refine(
     (data) => {
@@ -37,6 +38,7 @@ export const updateTrabajoRealizadoSchema = z.object({
     .nullable()
     .optional(),
   pdfName: z.string().nullable().optional(),
+  iva: z.coerce.number().nullable().optional(),
 });
 
 export const deleteTrabajoRealizadoSchema = z.object({
