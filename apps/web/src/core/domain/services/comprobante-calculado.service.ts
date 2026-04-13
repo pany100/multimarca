@@ -71,31 +71,10 @@ export class ComprobanteCalculado {
     );
   }
 
-  private getIncrementoDistribuido() {
-    const incrementoTotal = this.ajustes.incrementoInternoTotal;
-    const incrementoDistribuido = incrementoTotal / this.trabajos.length;
-    const incrementoParcial = this.roundToNearestThousandOrFiveHundred(
-      incrementoDistribuido,
-    );
-    const incrementoFinal =
-      incrementoTotal - incrementoParcial * (this.trabajos.length - 1);
-    return {
-      incrementoParcial,
-      incrementoFinal,
-    };
-  }
-
   get manoDeObraForRecibosDiscriminado() {
-    const { incrementoParcial, incrementoFinal } =
-      this.getIncrementoDistribuido();
+    const incrementoTotal = this.ajustes.incrementoInternoTotal;
     return this.trabajos.map((t, idx) => {
-      const isLast = idx === this.trabajos.length - 1;
-      const incremento =
-        this.trabajos.length > 0
-          ? isLast
-            ? incrementoFinal
-            : incrementoParcial
-          : 0;
+      const incremento = idx === 0 ? incrementoTotal : 0;
       return {
         descripcion: t.descripcion,
         precioUnitario: t.precioUnitario.toNumber(),
@@ -105,6 +84,11 @@ export class ComprobanteCalculado {
         pdfName: t.pdfName ?? null,
       };
     });
+  }
+
+  get incrementoInternoSinAbsorber() {
+    if (this.trabajos.length > 0) return 0;
+    return this.ajustes.incrementoInternoTotal;
   }
 
   get totalBase() {

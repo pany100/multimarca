@@ -5,6 +5,7 @@ import PresupuestoHeader from "@/components/orden-reparacion/presupuesto/Presupu
 import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
 import { PresupuestoProvider } from "@/sections/presupuestos/admin/contexts/PresupuestoContext";
+import PresupuestoAjustesPrecioSection from "@/sections/presupuestos/admin/PresupuestoAjustesPrecioSection";
 import PresupuestoCostosSection from "@/sections/presupuestos/admin/PresupuestoCostosSection";
 import PresupuestoInformacionGeneral from "@/sections/presupuestos/admin/PresupuestoInformacionGeneral";
 import PresupuestoRecargoSection from "@/sections/presupuestos/admin/PresupuestoRecargoSection";
@@ -108,6 +109,13 @@ const PresupuestoAdminPage = ({ params }: { params: { id: string } }) => {
             <Grid item xs={12} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <PresupuestoTrabajosSection />
+              </Box>
+            </Grid>
+
+            {/* Incrementos y Descuentos */}
+            <Grid item xs={12} sx={{ display: "flex" }}>
+              <Box sx={{ width: "100%" }}>
+                <PresupuestoAjustesPrecioSection />
               </Box>
             </Grid>
 

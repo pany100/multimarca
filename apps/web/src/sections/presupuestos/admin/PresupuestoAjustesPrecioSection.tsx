@@ -1,17 +1,17 @@
+import AjustesPrecioModal from "@/sections/ordenes-reparacion/admin/components/AjustesPrecioModal";
+import AjustesPrecioTable from "@/sections/ordenes-reparacion/admin/components/AjustesPrecioTable";
+import DeleteConfirmDialog from "@/sections/ordenes-reparacion/admin/components/DeleteConfirmDialog";
 import AddIcon from "@mui/icons-material/Add";
 import { Box, Button, Card, CardContent, Typography } from "@mui/material";
 import { useState } from "react";
-import AjustesPrecioModal from "./components/AjustesPrecioModal";
-import AjustesPrecioTable from "./components/AjustesPrecioTable";
-import DeleteConfirmDialog from "./components/DeleteConfirmDialog";
-import { useOrden } from "./contexts/OrdenContext";
+import { usePresupuestoRequired } from "./contexts/PresupuestoContext";
 import {
   AjustePrecio,
-  useAjustesPrecioManager,
-} from "./hooks/useAjustesPrecioManager";
+  useAjustesPrecioPresupuestoManager,
+} from "./hooks/useAjustesPrecioPresupuestoManager";
 
-const AjustesPrecioAdminSection = () => {
-  const { orden } = useOrden();
+const PresupuestoAjustesPrecioSection = () => {
+  const { presupuesto } = usePresupuestoRequired();
   const {
     loading,
     handleAdd,
@@ -20,12 +20,12 @@ const AjustesPrecioAdminSection = () => {
     deleteConfirmOpen,
     handleDeleteConfirm,
     handleDeleteCancel,
-  } = useAjustesPrecioManager();
+  } = useAjustesPrecioPresupuestoManager();
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editAjuste, setEditAjuste] = useState<AjustePrecio | undefined>();
 
-  const ajustes: AjustePrecio[] = (orden.ajustesPrecio ?? []).map(
+  const ajustes: AjustePrecio[] = (presupuesto.ajustesPrecio ?? []).map(
     (a: any) => ({
       ...a,
       monto: Number(a.monto),
@@ -110,4 +110,4 @@ const AjustesPrecioAdminSection = () => {
   );
 };
 
-export default AjustesPrecioAdminSection;
+export default PresupuestoAjustesPrecioSection;

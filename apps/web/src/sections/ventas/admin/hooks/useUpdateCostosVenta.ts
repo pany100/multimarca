@@ -1,18 +1,11 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { useState } from "react";
 
-interface AjustePrecioDto {
-  descripcion: string;
-  monto: number;
-  tipo: "porcentual" | "fijo";
-  esDescuento: boolean;
-  esInterno: boolean;
-  orden: number;
-}
-
 interface UpdateCostosDto {
-  ajustesPrecio?: AjustePrecioDto[];
-  modoAjustes?: "acumulativo" | "sobreTotalBase";
+  descuento?: number | null;
+  descripcionDescuento?: string | null;
+  incremento?: number | null;
+  descripcionIncremento?: string | null;
 }
 
 export const useUpdateCostosVenta = () => {

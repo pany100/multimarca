@@ -35,6 +35,7 @@ export async function GET(
           },
         },
         dolar: true,
+        ajustesPrecio: { orderBy: { orden: "asc" } },
       },
     });
 

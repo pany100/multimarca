@@ -1,55 +1,122 @@
 "use client";
 
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
+import EditCostosForm from "@/sections/ordenes-reparacion/admin/forms/EditCostosForm";
+import { CommonOrderCard } from "@/sections/ordenes-reparacion/admin/components/CommonOrderCard";
 import { yupResolver } from "@hookform/resolvers/yup";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import { Box, Chip, Divider, Paper, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Chip,
+  Divider,
+  Paper,
+  Typography,
+} from "@mui/material";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { CommonOrderCard } from "../../ordenes-reparacion/admin/components/CommonOrderCard";
 import { useVentaRequired } from "./contexts/VentaContext";
-import EditCostosVentaForm from "./forms/EditCostosVentaForm";
 import { useUpdateCostosVenta } from "./hooks/useUpdateCostosVenta";
 
-const formatPrecio = (value: number | string | null | undefined) =>
+const fmt = (value: number | string | null | undefined) =>
   Number(value ?? 0).toLocaleString("es-AR", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
 
-const ajusteItemSchema = yup.object({
-  descripcion: yup.string().required("La descripcion es requerida"),
-  monto: yup
-    .number()
-    .positive("El monto debe ser positivo")
-    .required("El monto es requerido"),
-  tipo: yup.string().oneOf(["porcentual", "fijo"]).required(),
-  esDescuento: yup.boolean().required(),
-  esInterno: yup.boolean().default(false),
-  orden: yup.number().integer().default(0),
-});
-
 const schema = yup.object({
-  ajustesPrecio: yup.array().of(ajusteItemSchema).default([]),
-  modoAjustes: yup
-    .string()
-    .oneOf(["acumulativo", "sobreTotalBase"])
-    .default("sobreTotalBase"),
+  incrementoInterno: yup
+    .number()
+    .nullable()
+    .min(0)
+    .typeError("Debe ser un numero")
+    .optional(),
+  descuento: yup
+    .number()
+    .nullable()
+    .min(0)
+    .typeError("Debe ser un numero")
+    .optional(),
+  descripcionDescuento: yup.string().nullable().optional(),
+  incremento: yup
+    .number()
+    .nullable()
+    .min(0)
+    .typeError("Debe ser un numero")
+    .optional(),
+  descripcionIncremento: yup.string().nullable().optional(),
 });
 
 type FormData = yup.InferType<typeof schema>;
+
+function LineItem({
+  label,
+  amount,
+  sign,
+  color,
+  sub,
+  badge,
+}: {
+  label: string;
+  amount: string;
+  sign?: "+" | "-";
+  color?: string;
+  sub?: string;
+  badge?: string;
+}) {
+  return (
+    <Box>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          py: 0.3,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Typography variant="body2" color="text.secondary">
+            {label}
+          </Typography>
+          {badge && (
+            <Chip
+              size="small"
+              label={badge}
+              color="warning"
+              variant="outlined"
+              sx={{ height: 20, fontSize: "0.65rem" }}
+            />
+          )}
+        </Box>
+        <Typography
+          variant="body2"
+          sx={{
+            fontFamily: "monospace",
+            fontWeight: 500,
+            color: color ?? "text.secondary",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {sign ? `${sign} ` : ""}$ {amount}
+        </Typography>
+      </Box>
+      {sub && (
+        <Typography variant="caption" color="text.disabled" sx={{ pl: 1 }}>
+          {sub}
+        </Typography>
+      )}
+    </Box>
+  );
+}
 
 function VentaCostosSection() {
   const { venta, setVenta } = useVentaRequired();
   const { setSnackbar } = useSnackbarContext();
   const { updateCostos, loading } = useUpdateCostosVenta();
 
-  const ajustesPrecio = venta.ajustesPrecio ?? [];
-  const usesNewAjustes = ajustesPrecio.length > 0;
-
   const hasLegacy =
     Number(venta.descuento ?? 0) > 0 ||
     Number(venta.incremento ?? 0) > 0;
+
+  const ajustesPrecio = venta.ajustesPrecio ?? [];
 
   const precioFinalLocal =
     Number(venta.totalReparacionesDeTerceros ?? 0) +
@@ -61,48 +128,26 @@ function VentaCostosSection() {
   const methods = useForm<FormData>({
     resolver: yupResolver(schema),
     defaultValues: {
-      ajustesPrecio: ajustesPrecio.map((a: any) => ({
-        descripcion: a.descripcion,
-        monto: Number(a.monto),
-        tipo: a.tipo,
-        esDescuento: a.esDescuento,
-        esInterno: a.esInterno ?? false,
-        orden: a.orden ?? 0,
-      })),
-      modoAjustes: venta.modoAjustes || "sobreTotalBase",
+      descuento: venta.descuento ?? null,
+      descripcionDescuento: venta.descripcionDescuento ?? null,
+      incremento: venta.incremento ?? null,
+      descripcionIncremento: venta.descripcionIncremento ?? null,
     },
   });
 
   const handleOpenModal = () => {
     methods.reset({
-      ajustesPrecio: (venta.ajustesPrecio ?? []).map((a: any) => ({
-        descripcion: a.descripcion,
-        monto: Number(a.monto),
-        tipo: a.tipo,
-        esDescuento: a.esDescuento,
-        esInterno: a.esInterno ?? false,
-        orden: a.orden ?? 0,
-      })),
-      modoAjustes: venta.modoAjustes || "sobreTotalBase",
+      descuento: venta.descuento ?? null,
+      descripcionDescuento: venta.descripcionDescuento ?? null,
+      incremento: venta.incremento ?? null,
+      descripcionIncremento: venta.descripcionIncremento ?? null,
     });
   };
 
   const handleSubmit = async (data: FormData) => {
     try {
-      const ventaActualizada = await updateCostos(venta.id, {
-        ajustesPrecio: (data.ajustesPrecio ?? []).map((a, idx) => ({
-          descripcion: a.descripcion!,
-          monto: a.monto!,
-          tipo: a.tipo! as "porcentual" | "fijo",
-          esDescuento: a.esDescuento!,
-          esInterno: a.esInterno ?? false,
-          orden: a.orden ?? idx,
-        })),
-        modoAjustes: data.modoAjustes as "acumulativo" | "sobreTotalBase",
-      });
-
+      const ventaActualizada = await updateCostos(venta.id, data);
       setVenta(ventaActualizada);
-
       setSnackbar({
         open: true,
         message: "Costos actualizados correctamente",
@@ -119,180 +164,141 @@ function VentaCostosSection() {
 
   return (
     <CommonOrderCard
-      title="Costos"
+      title="Resumen de Costos"
       formMethods={methods}
       onSubmit={handleSubmit}
       onOpen={handleOpenModal}
       loading={loading}
-      formContent={<EditCostosVentaForm />}
+      formContent={<EditCostosForm />}
       maxWidth="md"
     >
-      <Box display="flex" alignItems="flex-start" gap={2}>
-        <AttachMoneyIcon sx={{ color: "text.secondary", mt: 0.5 }} />
-        <Stack spacing={1} flex={1}>
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Total Reparaciones de terceros:</strong> $
-              {formatPrecio(venta.totalReparacionesDeTerceros)}
-            </Typography>
-          </Box>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+        {/* --- Base items --- */}
+        <LineItem
+          label="Reparaciones de terceros"
+          amount={fmt(venta.totalReparacionesDeTerceros)}
+        />
+        <LineItem label="Repuestos" amount={fmt(venta.totalRepuestos)} />
+        <LineItem label="Mano de obra" amount={fmt(venta.totalManoDeObra)} />
 
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Total Repuestos:</strong> $
-              {formatPrecio(venta.totalRepuestos)}
-            </Typography>
-          </Box>
+        {/* --- Legacy (deprecado) --- */}
+        {hasLegacy && (
+          <>
+            {Number(venta.descuento ?? 0) > 0 && (
+              <LineItem
+                label="Descuento"
+                amount={fmt(venta.descuento)}
+                sign="-"
+                color="error.main"
+                sub={venta.descripcionDescuento || undefined}
+                badge="Deprecado"
+              />
+            )}
+            {Number(venta.incremento ?? 0) > 0 && (
+              <LineItem
+                label="Incremento"
+                amount={fmt(venta.incremento)}
+                sign="+"
+                color="success.main"
+                sub={venta.descripcionIncremento || undefined}
+                badge="Deprecado"
+              />
+            )}
+          </>
+        )}
 
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Total Mano de obra:</strong> $
-              {formatPrecio(venta.totalManoDeObra)}
-            </Typography>
-          </Box>
-
-          {/* --- Precio Final Local --- */}
-          {(usesNewAjustes || hasLegacy) && (
-            <>
-              <Divider sx={{ my: 0.5 }} />
-              <Box
-                sx={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                }}
-              >
-                <Typography variant="body2" fontWeight="bold" color="text.secondary">
-                  Precio Final Local
-                </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{ fontFamily: "monospace", fontWeight: 700, color: "text.primary" }}
-                >
-                  $ {formatPrecio(precioFinalLocal)}
-                </Typography>
-              </Box>
-            </>
-          )}
-
-          {usesNewAjustes ? (
-            <>
-              <Divider sx={{ my: 0.5 }} />
+        {/* --- Precio Final Local (base + legacy, antes de ajustes nuevos) --- */}
+        {(ajustesPrecio.length > 0 || hasLegacy) && (
+          <>
+            <Divider sx={{ my: 0.5 }} />
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                py: 0.3,
+              }}
+            >
+              <Typography variant="body2" fontWeight="bold" color="text.secondary">
+                Precio Final Local
+              </Typography>
               <Typography
                 variant="body2"
-                color="text.secondary"
-                sx={{ mt: 1 }}
-              >
-                <strong>Ajustes de precio:</strong>
-              </Typography>
-              {ajustesPrecio.map((a: any, idx: number) => {
-                const isPorcentual = a.tipo === "porcentual";
-                const montoEfectivo = isPorcentual
-                  ? (Number(a.monto) / 100) * precioFinalLocal
-                  : Number(a.monto);
-                const label = isPorcentual
-                  ? `${a.descripcion} (${Number(a.monto)}%)`
-                  : a.descripcion;
-                return (
-                  <Box
-                    key={idx}
-                    sx={{ display: "flex", alignItems: "center", gap: 1, pl: 1 }}
-                  >
-                    <Typography variant="body2" color="text.secondary">
-                      {label}
-                    </Typography>
-                    <Chip
-                      size="small"
-                      label={a.esDescuento ? "Descuento" : "Incremento"}
-                      color={a.esDescuento ? "error" : "success"}
-                      variant="outlined"
-                    />
-                    <Typography variant="body2" color="text.secondary">
-                      {a.esDescuento ? "-" : "+"} ${formatPrecio(montoEfectivo)}
-                    </Typography>
-                    {a.esInterno && (
-                      <Chip
-                        size="small"
-                        label="Interno"
-                        color="warning"
-                        variant="outlined"
-                      />
-                    )}
-                  </Box>
-                );
-              })}
-            </>
-          ) : (
-            <>
-              {Number(venta.descuento ?? 0) > 0 && (
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>Descuento:</strong> ${" "}
-                    {formatPrecio(venta.descuento)}
-                  </Typography>
-                  {venta.descripcionDescuento && (
-                    <Typography variant="caption" color="text.disabled">
-                      {venta.descripcionDescuento}
-                    </Typography>
-                  )}
-                </Box>
-              )}
-              {Number(venta.incremento ?? 0) > 0 && (
-                <Box>
-                  <Typography variant="body2" color="text.secondary">
-                    <strong>Incremento:</strong> ${" "}
-                    {formatPrecio(venta.incremento)}
-                  </Typography>
-                  {venta.descripcionIncremento && (
-                    <Typography variant="caption" color="text.disabled">
-                      {venta.descripcionIncremento}
-                    </Typography>
-                  )}
-                </Box>
-              )}
-              {Number(venta.descuento ?? 0) === 0 &&
-                Number(venta.incremento ?? 0) === 0 && (
-                  <Typography
-                    variant="body2"
-                    color="text.disabled"
-                    fontStyle="italic"
-                  >
-                    No hay costos adicionales configurados
-                  </Typography>
-                )}
-            </>
-          )}
-
-          <Paper
-            elevation={0}
-            sx={{
-              mt: 2,
-              backgroundColor: "primary.lighter",
-              borderRadius: 1,
-            }}
-          >
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-            >
-              <Typography variant="h6" fontWeight="bold" color="primary.dark">
-                Total Venta
-              </Typography>
-              <Typography
-                variant="h5"
-                fontWeight="bold"
-                color="primary.dark"
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
+                  fontFamily: "monospace",
+                  fontWeight: 700,
+                  color: "text.primary",
                 }}
               >
-                $ {formatPrecio(venta.total)}
+                $ {fmt(precioFinalLocal)}
               </Typography>
             </Box>
-          </Paper>
-        </Stack>
+          </>
+        )}
+
+        {/* --- New ajustes --- */}
+        {ajustesPrecio.length > 0 && (
+          <>
+            <Divider sx={{ my: 0.5 }} />
+            <Typography
+              variant="caption"
+              fontWeight="bold"
+              color="text.secondary"
+              sx={{ mb: 0.25 }}
+            >
+              Ajustes
+            </Typography>
+            {ajustesPrecio.map((a: any) => {
+              const isDiscount = a.esDescuento;
+              const isPorcentual = a.tipo === "porcentual";
+              const montoEfectivo = isPorcentual
+                ? (Number(a.monto) / 100) * precioFinalLocal
+                : Number(a.monto);
+              const label = isPorcentual
+                ? `${a.descripcion} (${Number(a.monto)}%)`
+                : a.descripcion;
+              return (
+                <LineItem
+                  key={a.id}
+                  label={label}
+                  amount={fmt(montoEfectivo)}
+                  sign={isDiscount ? "-" : "+"}
+                  color={isDiscount ? "error.main" : "success.main"}
+                  badge={a.esInterno ? "Oculto" : undefined}
+                />
+              );
+            })}
+          </>
+        )}
+
+        {/* --- Total --- */}
+        <Paper
+          elevation={0}
+          sx={{
+            mt: 1,
+            p: 1.5,
+            backgroundColor: "primary.lighter",
+            borderRadius: 1,
+          }}
+        >
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h6" fontWeight="bold" color="primary.dark">
+              Total
+            </Typography>
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              color="primary.dark"
+              sx={{ fontFamily: "monospace" }}
+            >
+              $ {fmt(venta.total)}
+            </Typography>
+          </Box>
+        </Paper>
       </Box>
     </CommonOrderCard>
   );

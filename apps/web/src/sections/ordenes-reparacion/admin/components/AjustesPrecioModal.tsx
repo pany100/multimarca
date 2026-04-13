@@ -99,9 +99,11 @@ const AjustesPrecioModal = ({
               variant="outlined"
               InputLabelProps={{ shrink: true }}
               value={efecto}
-              onChange={(e) =>
-                setEfecto(e.target.value as "incremento" | "descuento")
-              }
+              onChange={(e) => {
+                const newEfecto = e.target.value as "incremento" | "descuento";
+                setEfecto(newEfecto);
+                if (newEfecto === "descuento") setEsInterno(false);
+              }}
               disabled={loading}
             >
               <MenuItem value="incremento">Incremento</MenuItem>
@@ -149,7 +151,7 @@ const AjustesPrecioModal = ({
                 <Switch
                   checked={esInterno}
                   onChange={(e) => setEsInterno(e.target.checked)}
-                  disabled={loading}
+                  disabled={loading || efecto === "descuento"}
                 />
               }
               label="Oculto para el cliente"
@@ -159,10 +161,9 @@ const AjustesPrecioModal = ({
               color="text.secondary"
               sx={{ pl: 4, display: "block" }}
             >
-              Si está oculto, este incremento va a mostrarse como parte del
-              primer item de la mano de obra cuando se imprima el presupuesto
-              para el cliente. Si no hay mano de obra, se suma al primer
-              repuesto o reparación de terceros. Ejemplo: redondeo.
+              {efecto === "descuento"
+                ? "Los descuentos no pueden ocultarse."
+                : "Si está oculto, este incremento va a mostrarse como parte del primer item de la mano de obra cuando se imprima el presupuesto para el cliente. Si no hay mano de obra, se suma al primer repuesto o reparación de terceros. Ejemplo: redondeo."}
             </Typography>
           </Grid>
         </Grid>

@@ -4,6 +4,7 @@ import VentaHeader from "@/components/ventas/VentaHeader/VentaHeader";
 import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
 import { VentaProvider } from "@/sections/ventas/admin/contexts/VentaContext";
+import VentaAjustesPrecioSection from "@/sections/ventas/admin/VentaAjustesPrecioSection";
 import VentaCostosSection from "@/sections/ventas/admin/VentaCostosSection";
 import VentaInformacionGeneral from "@/sections/ventas/admin/VentaInformacionGeneral";
 import VentaRepuestosSection from "@/sections/ventas/admin/VentaRepuestosSection";
@@ -76,6 +77,9 @@ const VentaAdminPage = ({ params }: { params: { id: string } }) => {
             </Grid>
             <Grid item xs={12}>
               <VentaTrabajosSection />
+            </Grid>
+            <Grid item xs={12}>
+              <VentaAjustesPrecioSection />
             </Grid>
             <Grid item xs={12}>
               <VentaCostosSection />

@@ -134,6 +134,7 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
             usuario: true,
           },
         },
+        ajustesPrecio: { orderBy: { orden: "asc" } },
       },
     });
   }
@@ -180,6 +181,7 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
             usuario: true,
           },
         },
+        ajustesPrecio: { orderBy: { orden: "asc" } },
       },
     });
   }
@@ -322,6 +324,7 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
             usuario: true,
           },
         },
+        ajustesPrecio: { orderBy: { orden: "asc" } },
       },
     });
   }

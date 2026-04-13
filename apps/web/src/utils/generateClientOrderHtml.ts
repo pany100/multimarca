@@ -333,53 +333,75 @@ export default function generateClientOrderHtml(repair: any): string {
         <div class="TypographyBody1" style="text-align: right;font-weight: bold;">
           Importe
         </div>
-        ${repair.reparacionesDeTercero
-          .map(
-            (el: { nombre: string; precioVenta: number }) => `
+        ${(() => {
+          const incrementoSinAbsorber = calculoVO.incrementoInternoSinAbsorber;
+          let incrementoAplicado = false;
+          return repair.reparacionesDeTercero
+            .map(
+              (el: { nombre: string; precioVenta: number }) => {
+                let precio = calculoVO.getPrecioFinalForReparaciones(el.precioVenta);
+                if (!incrementoAplicado && incrementoSinAbsorber > 0) {
+                  precio += incrementoSinAbsorber;
+                  incrementoAplicado = true;
+                }
+                return `
                 <div class="TypographyBody1">
                   ${el.nombre}
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(
-                    calculoVO.getPrecioFinalForReparaciones(el.precioVenta),
-                  ).toLocaleString("es-AR")}
+                  $${Number(precio).toLocaleString("es-AR")}
                 </div>
-              `,
-          )
-          .join("")}
-        ${repair.repuestosUsados
-          .filter((el: any) => !el.ocultoParaCliente)
-          .map(
-            (el: {
-              stock: { id: number; name: string; reportName?: string | null };
-              precioVenta: number;
-              unidadesConsumidas: number;
-            }) => `
+              `;
+              },
+            )
+            .join("") +
+          repair.repuestosUsados
+            .filter((el: any) => !el.ocultoParaCliente)
+            .map(
+              (el: {
+                stock: { id: number; name: string; reportName?: string | null };
+                precioVenta: number;
+                unidadesConsumidas: number;
+              }) => {
+                let precio = calculoVO.getPrecioFinalForRepuestos(el.precioVenta);
+                if (!incrementoAplicado && incrementoSinAbsorber > 0) {
+                  precio += incrementoSinAbsorber;
+                  incrementoAplicado = true;
+                }
+                return `
                 <div class="TypographyBody1">
                   ${el.unidadesConsumidas} - ${el.stock.reportName || el.stock.name}
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(
-                    calculoVO.getPrecioFinalForRepuestos(el.precioVenta),
-                  ).toLocaleString("es-AR")}
+                  $${Number(precio).toLocaleString("es-AR")}
                 </div>
-            `,
-          )
-          .join("")}
+            `;
+              },
+            )
+            .join("");
+        })()}
         </div>
+        ${calculoVO.manoDeObraForRecibosDiscriminado.length > 0 ? `
         <hr class="divider" style="border-color: rgba(0, 0, 0, 0.12);"/>
         <div style='
           display: grid;
           grid-template-columns: 80% 20%;
           margin-right: 15px;
         '>
-        <div class="TypographyBody1" style="font-weight: bold;">
-          Mano de Obra
+        ${calculoVO.manoDeObraForRecibosDiscriminado
+          .map(
+            (t: { pdfName: string | null; descripcion: string; precioConIva: number }) => `
+            <div class="TypographyBody1">
+              ${t.pdfName || t.descripcion}
+            </div>
+            <div class="TypographyBody1" style="text-align: right;">
+              $${Number(t.precioConIva).toLocaleString("es-AR")}
+            </div>
+          `,
+          )
+          .join("")}
         </div>
-        <div class="TypographyBody1" style="text-align: right;">
-          $${calculoVO.manoDeObraForRecibos.toLocaleString("es-AR")}
-        </div>
-        </div>
+        ` : ""}
         <hr class="divider" style="border-color: rgba(0, 0, 0, 0.12);"/>
         <div style='
           display: grid;

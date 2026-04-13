@@ -9,7 +9,7 @@ function EditCostosForm() {
       <Grid item xs={12}>
         <Typography variant="caption" color="text.secondary">
           Estos campos son deprecados. Para nuevos ajustes, usa la seccion
-          &quot;Incrementos y Descuentos&quot;.
+          &quot;Ajustes de Precios&quot;.
         </Typography>
       </Grid>
 

@@ -1,7 +1,8 @@
 import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
+import { generateAjustesRowsHtml } from "./generateAjustesHtml";
 
 export default function generateBudgetHtml(repair: any): string {
-  const calculoVO = ComprobanteCalculadoFactory.fromOrden(repair);
+  const calculoVO = ComprobanteCalculadoFactory.fromPresupuesto(repair);
   return `
   <!DOCTYPE html>
 
@@ -268,101 +269,88 @@ export default function generateBudgetHtml(repair: any): string {
         <div class="TypographyBody1" style="text-align: right;font-weight: bold;">
           Importe
         </div>
-        ${repair.reparacionesDeTercero
-          .map(
-            (el: { nombre: string; precioVenta: number }) => `
+        ${(() => {
+          const incrementoSinAbsorber = calculoVO.incrementoInternoSinAbsorber;
+          let incrementoAplicado = false;
+          return repair.reparacionesDeTercero
+            .map(
+              (el: { nombre: string; precioVenta: number }) => {
+                let precio = calculoVO.getPrecioFinalForReparaciones(el.precioVenta);
+                if (!incrementoAplicado && incrementoSinAbsorber > 0) {
+                  precio += incrementoSinAbsorber;
+                  incrementoAplicado = true;
+                }
+                return `
                 <div class="TypographyBody1">
                   ${el.nombre}
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(
-                    calculoVO.getPrecioFinalForReparaciones(el.precioVenta),
-                  ).toLocaleString("es-AR")}
+                  $${Number(precio).toLocaleString("es-AR")}
                 </div>
-              `,
-          )
-          .join("")}
-        ${repair.repuestosUsados
-          .filter((el: any) => !el.ocultoParaCliente)
-          .map(
-            (el: {
-              stock: { id: number; name: string; reportName?: string | null };
-              precioVenta: number;
-              unidadesConsumidas: number;
-            }) => `
+              `;
+              },
+            )
+            .join("") +
+          repair.repuestosUsados
+            .filter((el: any) => !el.ocultoParaCliente)
+            .map(
+              (el: {
+                stock: { id: number; name: string; reportName?: string | null };
+                precioVenta: number;
+                unidadesConsumidas: number;
+              }) => {
+                let precio = calculoVO.getPrecioFinalForRepuestos(el.precioVenta);
+                if (!incrementoAplicado && incrementoSinAbsorber > 0) {
+                  precio += incrementoSinAbsorber;
+                  incrementoAplicado = true;
+                }
+                return `
                 <div class="TypographyBody1">
                   ${el.unidadesConsumidas} - ${el.stock.reportName || el.stock.name}
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(
-                    calculoVO.getPrecioFinalForRepuestos(el.precioVenta),
-                  ).toLocaleString("es-AR")}
+                  $${Number(precio).toLocaleString("es-AR")}
                 </div>
-            `,
-          )
-          .join("")}
+            `;
+              },
+            )
+            .join("");
+        })()}
         </div>
+        ${calculoVO.manoDeObraForRecibosDiscriminado.length > 0 ? `
         <hr class="divider" style="border-color: rgba(0, 0, 0, 0.12);"/>
         <div style='
           display: grid;
           grid-template-columns: 80% 20%;
           margin-right: 15px;
         '>
-        <div class="TypographyBody1" style="font-weight: bold;">
-          Mano de Obra
-        </div>
-        <div class="TypographyBody1" style="text-align: right;">
-          $${calculoVO.manoDeObraForRecibos.toLocaleString("es-AR")}
-        </div>
-        </div>
-        ${
-          repair.incremento > 0
-            ? `
-            <div class="TypographyBody1" style="margin-top: 20px;">
-              Otros
+        ${calculoVO.manoDeObraForRecibosDiscriminado
+          .map(
+            (t: { pdfName: string | null; descripcion: string; precioConIva: number }) => `
+            <div class="TypographyBody1">
+              ${t.pdfName || t.descripcion}
             </div>
-            <div class="TypographyBody1" style="margin-top: 20px; text-align: right;">
-              $${Number(repair.incremento).toLocaleString("es-AR")}
+            <div class="TypographyBody1" style="text-align: right;">
+              $${Number(t.precioConIva).toLocaleString("es-AR")}
             </div>
-        `
-            : ""
-        }
-        ${
-          repair.descuento > 0
-            ? `
-              <div style='
-                display: grid;
-                grid-template-columns: 80% 20%;
-                margin-top: 20px;
-                margin-right: 15px;
-              '>
-                <div class="TypographyBody1" style="font-weight: bold;">
-                  Descuento${
-                    repair.descripcionDescuento !== null
-                      ? ` - ${repair.descripcionDescuento}`
-                      : ""
-                  }
-                </div>
-                <div class="TypographyBody1" style="text-align: right; font-weight: bold;">
-                  ${"- "}$${Number(repair.descuento).toLocaleString("es-AR")}
-                </div>
-              </div>
-          `
-            : ""
-        }
+          `,
+          )
+          .join("")}
+        </div>
+        ` : ""}
+        <hr class="divider" style="border-color: rgba(0, 0, 0, 0.12);"/>
         <div style='
           display: grid;
           grid-template-columns: 80% 20%;
-          margin-top: 20px;
           margin-right: 15px;
-          margin-bottom: 20px;
         '>
-          <div class="TypographyBody1" style="font-weight: bold;">
-            Importe Total:
-          </div>
-          <div class="TypographyBody1" style="font-weight: bold; text-align: right;">
-            $${Number(calculoVO.total).toLocaleString("es-AR")}
-          </div>
+        ${generateAjustesRowsHtml(repair, calculoVO)}
+        <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; margin-bottom: 20px;">
+          Importe Total:
+        </div>
+        <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; text-align: right;">
+          $${Number(calculoVO.total).toLocaleString("es-AR")}
+        </div>
         </div>
       </div>
       <div class="TypographyBody1" style="margin-top: 5px;">

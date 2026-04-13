@@ -93,6 +93,7 @@ export class PrismaVentaRepository implements VentaRepository {
             dolar: true,
           },
         },
+        ajustesPrecio: { orderBy: { orden: "asc" } },
       },
     });
   }

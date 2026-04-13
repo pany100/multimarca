@@ -13,46 +13,41 @@ export function generateAjustesRowsHtml(
 ): string {
   const ajustes = entity.ajustesPrecio ?? [];
 
+  let html = "";
+  let hasContent = false;
+
+  // New ajustes (non-internal only)
   if (ajustes.length > 0) {
     const efectivos = calculoVO.ajustesConMontoEfectivo.filter(
       (a) => !a.esInterno,
     );
-    if (efectivos.length === 0) return "";
+    if (efectivos.length > 0) {
+      hasContent = true;
+      html += efectivos
+        .map((a) => {
+          const sign = a.esDescuento ? "-" : "+";
+          const montoAbsoluto = Math.abs(a.montoEfectivo);
+          const label =
+            a.tipo === "porcentual"
+              ? `${a.descripcion} (${a.montoOriginal}%)`
+              : a.descripcion;
 
-    const header = `
-      <div class="TypographyBody1" style="margin-top: 15px; font-weight: bold;">
-        Ajustes
-      </div>
-      <div></div>
-    `;
-
-    const rows = efectivos
-      .map((a) => {
-        const sign = a.esDescuento ? "-" : "+";
-        const montoAbsoluto = Math.abs(a.montoEfectivo);
-        const label =
-          a.tipo === "porcentual"
-            ? `${a.descripcion} (${a.montoOriginal}%)`
-            : a.descripcion;
-
-        return `
-        <div class="TypographyBody1" style="margin-top: 5px; padding-left: 10px;">
-          ${label}
-        </div>
-        <div class="TypographyBody1" style="margin-top: 5px; text-align: right;">
-          ${sign} $${fmtAR(montoAbsoluto)}
-        </div>
-      `;
-      })
-      .join("");
-
-    return header + rows;
+          return `
+          <div class="TypographyBody1" style="margin-top: 5px; padding-left: 10px;">
+            ${label}
+          </div>
+          <div class="TypographyBody1" style="margin-top: 5px; text-align: right;">
+            ${sign} $${fmtAR(montoAbsoluto)}
+          </div>
+        `;
+        })
+        .join("");
+    }
   }
 
-  // Legacy: no ajustesPrecio
-  let html = "";
-
+  // Legacy fields (always shown if they have value)
   if (Number(entity.incremento ?? 0) > 0) {
+    hasContent = true;
     const label = entity.descripcionIncremento
       ? `Otros - ${entity.descripcionIncremento}`
       : "Otros";
@@ -67,6 +62,7 @@ export function generateAjustesRowsHtml(
   }
 
   if (Number(entity.descuento ?? 0) > 0) {
+    hasContent = true;
     const label = entity.descripcionDescuento
       ? `Descuento - ${entity.descripcionDescuento}`
       : "Descuento";
@@ -80,5 +76,14 @@ export function generateAjustesRowsHtml(
     `;
   }
 
-  return html;
+  if (!hasContent) return "";
+
+  const header = `
+    <div class="TypographyBody1" style="margin-top: 15px; font-weight: bold;">
+      Ajustes
+    </div>
+    <div></div>
+  `;
+
+  return header + html;
 }

@@ -2,16 +2,21 @@
 
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import EditCostosForm from "@/sections/ordenes-reparacion/admin/forms/EditCostosForm";
+import { CommonOrderCard } from "@/sections/ordenes-reparacion/admin/components/CommonOrderCard";
 import { yupResolver } from "@hookform/resolvers/yup";
-import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
-import { Box, Paper, Stack, Typography } from "@mui/material";
+import {
+  Box,
+  Chip,
+  Divider,
+  Paper,
+  Typography,
+} from "@mui/material";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
-import { CommonOrderCard } from "../../ordenes-reparacion/admin/components/CommonOrderCard";
 import { usePresupuestoRequired } from "./contexts/PresupuestoContext";
 import { useUpdateCostosPresupuesto } from "./hooks/useUpdateCostosPresupuesto";
 
-const formatPrecio = (value: number | string | null | undefined) =>
+const fmt = (value: number | string | null | undefined) =>
   Number(value ?? 0).toLocaleString("es-AR", {
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
@@ -21,31 +26,106 @@ const schema = yup.object({
   incrementoInterno: yup
     .number()
     .nullable()
-    .min(0, "El incremento interno no puede ser negativo")
-    .typeError("El incremento interno debe ser un número")
+    .min(0)
+    .typeError("Debe ser un numero")
     .optional(),
   descuento: yup
     .number()
     .nullable()
-    .min(0, "El descuento no puede ser negativo")
-    .typeError("El descuento debe ser un número")
+    .min(0)
+    .typeError("Debe ser un numero")
     .optional(),
   descripcionDescuento: yup.string().nullable().optional(),
   incremento: yup
     .number()
     .nullable()
-    .min(0, "El incremento no puede ser negativo")
-    .typeError("El incremento debe ser un número")
+    .min(0)
+    .typeError("Debe ser un numero")
     .optional(),
   descripcionIncremento: yup.string().nullable().optional(),
 });
 
 type FormData = yup.InferType<typeof schema>;
 
+function LineItem({
+  label,
+  amount,
+  sign,
+  color,
+  sub,
+  badge,
+}: {
+  label: string;
+  amount: string;
+  sign?: "+" | "-";
+  color?: string;
+  sub?: string;
+  badge?: string;
+}) {
+  return (
+    <Box>
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          py: 0.3,
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Typography variant="body2" color="text.secondary">
+            {label}
+          </Typography>
+          {badge && (
+            <Chip
+              size="small"
+              label={badge}
+              color="warning"
+              variant="outlined"
+              sx={{ height: 20, fontSize: "0.65rem" }}
+            />
+          )}
+        </Box>
+        <Typography
+          variant="body2"
+          sx={{
+            fontFamily: "monospace",
+            fontWeight: 500,
+            color: color ?? "text.secondary",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {sign ? `${sign} ` : ""}$ {amount}
+        </Typography>
+      </Box>
+      {sub && (
+        <Typography variant="caption" color="text.disabled" sx={{ pl: 1 }}>
+          {sub}
+        </Typography>
+      )}
+    </Box>
+  );
+}
+
 function PresupuestoCostosSection() {
   const { presupuesto, setPresupuesto } = usePresupuestoRequired();
   const { setSnackbar } = useSnackbarContext();
   const { updateCostos, loading } = useUpdateCostosPresupuesto();
+
+  const hasLegacy =
+    Number(presupuesto.incrementoInterno ?? 0) > 0 ||
+    Number(presupuesto.descuento ?? 0) > 0 ||
+    Number(presupuesto.incremento ?? 0) > 0;
+
+  const ajustesPrecio = presupuesto.ajustesPrecio ?? [];
+
+  const precioFinalLocal =
+    Number(presupuesto.totalReparacionesDeTerceros ?? 0) +
+    Number(presupuesto.totalRepuestos ?? 0) +
+    Number(presupuesto.totalManoDeObra ?? 0) +
+    Number(presupuesto.incrementoInterno ?? 0) -
+    Number(presupuesto.descuento ?? 0) +
+    Number(presupuesto.incremento ?? 0);
 
   const methods = useForm<FormData>({
     resolver: yupResolver(schema),
@@ -71,9 +151,7 @@ function PresupuestoCostosSection() {
   const handleSubmit = async (data: FormData) => {
     try {
       const presupuestoActualizado = await updateCostos(presupuesto.id, data);
-
       setPresupuesto(presupuestoActualizado);
-
       setSnackbar({
         open: true,
         message: "Costos actualizados correctamente",
@@ -90,7 +168,7 @@ function PresupuestoCostosSection() {
 
   return (
     <CommonOrderCard
-      title="Costos"
+      title="Resumen de Costos"
       formMethods={methods}
       onSubmit={handleSubmit}
       onOpen={handleOpenModal}
@@ -98,131 +176,142 @@ function PresupuestoCostosSection() {
       formContent={<EditCostosForm />}
       maxWidth="md"
     >
-      <Box display="flex" alignItems="flex-start" gap={2}>
-        <AttachMoneyIcon sx={{ color: "text.secondary", mt: 0.5 }} />
-        <Stack spacing={1} flex={1}>
-          {/* Total Reparaciones de terceros */}
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Total Reparaciones de terceros:</strong> $
-              {formatPrecio(presupuesto.totalReparacionesDeTerceros)}
-            </Typography>
-          </Box>
+      <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
+        {/* --- Base items --- */}
+        <LineItem
+          label="Reparaciones de terceros"
+          amount={fmt(presupuesto.totalReparacionesDeTerceros)}
+        />
+        <LineItem label="Repuestos" amount={fmt(presupuesto.totalRepuestos)} />
+        <LineItem label="Mano de obra" amount={fmt(presupuesto.totalManoDeObra)} />
 
-          {/* Total Repuestos */}
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Total Repuestos:</strong> $
-              {formatPrecio(presupuesto.totalRepuestos)}
-            </Typography>
-          </Box>
-
-          {/* Total Mano de obra */}
-          <Box>
-            <Typography variant="body2" color="text.secondary">
-              <strong>Total Mano de obra:</strong> $
-              {formatPrecio(presupuesto.totalManoDeObra)}
-            </Typography>
-          </Box>
-
-          {/* Incremento Interno */}
-          {presupuesto.incrementoInterno !== null &&
-            presupuesto.incrementoInterno !== undefined && (
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  <strong>Incremento Interno:</strong> $
-                  {formatPrecio(presupuesto.incrementoInterno)}
-                </Typography>
-                <Typography
-                  variant="caption"
-                  color="text.disabled"
-                  fontStyle="italic"
-                >
-                  Este incremento va a mostrarse como parte del primer item de
-                  la mano de obra cuando se imprima el presupuesto al cliente
-                </Typography>
-              </Box>
+        {/* --- Legacy (deprecado) --- */}
+        {hasLegacy && (
+          <>
+            {Number(presupuesto.incrementoInterno ?? 0) > 0 && (
+              <LineItem
+                label="Incremento Interno"
+                amount={fmt(presupuesto.incrementoInterno)}
+                sign="+"
+                color="success.main"
+                badge="Deprecado"
+              />
             )}
-
-          {/* Descuento */}
-          {presupuesto.descuento !== null &&
-            presupuesto.descuento !== undefined && (
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  <strong>Descuento:</strong> ${" "}
-                  {formatPrecio(presupuesto.descuento)}
-                </Typography>
-                {presupuesto.descripcionDescuento && (
-                  <Typography variant="caption" color="text.disabled">
-                    {presupuesto.descripcionDescuento}
-                  </Typography>
-                )}
-              </Box>
+            {Number(presupuesto.descuento ?? 0) > 0 && (
+              <LineItem
+                label="Descuento"
+                amount={fmt(presupuesto.descuento)}
+                sign="-"
+                color="error.main"
+                sub={presupuesto.descripcionDescuento || undefined}
+                badge="Deprecado"
+              />
             )}
-
-          {/* Incremento */}
-          {presupuesto.incremento !== null &&
-            presupuesto.incremento !== undefined && (
-              <Box>
-                <Typography variant="body2" color="text.secondary">
-                  <strong>Incremento:</strong> ${" "}
-                  {formatPrecio(presupuesto.incremento)}
-                </Typography>
-                {presupuesto.descripcionIncremento && (
-                  <Typography variant="caption" color="text.disabled">
-                    {presupuesto.descripcionIncremento}
-                  </Typography>
-                )}
-              </Box>
+            {Number(presupuesto.incremento ?? 0) > 0 && (
+              <LineItem
+                label="Incremento"
+                amount={fmt(presupuesto.incremento)}
+                sign="+"
+                color="success.main"
+                sub={presupuesto.descripcionIncremento || undefined}
+                badge="Deprecado"
+              />
             )}
+          </>
+        )}
 
-          {/* Mensaje cuando no hay datos */}
-          {(presupuesto.incrementoInterno === null ||
-            presupuesto.incrementoInterno === undefined) &&
-            (presupuesto.descuento === null ||
-              presupuesto.descuento === undefined) &&
-            (presupuesto.incremento === null ||
-              presupuesto.incremento === undefined) && (
+        {/* --- Precio Final Local (base + legacy, antes de ajustes nuevos) --- */}
+        {(ajustesPrecio.length > 0 || hasLegacy) && (
+          <>
+            <Divider sx={{ my: 0.5 }} />
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                py: 0.3,
+              }}
+            >
+              <Typography variant="body2" fontWeight="bold" color="text.secondary">
+                Precio Final Local
+              </Typography>
               <Typography
                 variant="body2"
-                color="text.disabled"
-                fontStyle="italic"
-              >
-                No hay costos adicionales configurados
-              </Typography>
-            )}
-
-          {/* Total del presupuesto */}
-          <Paper
-            elevation={0}
-            sx={{
-              mt: 2,
-              backgroundColor: "primary.lighter",
-              borderRadius: 1,
-            }}
-          >
-            <Box
-              display="flex"
-              justifyContent="space-between"
-              alignItems="center"
-            >
-              <Typography variant="h6" fontWeight="bold" color="primary.dark">
-                Total Presupuesto
-              </Typography>
-              <Typography
-                variant="h5"
-                fontWeight="bold"
-                color="primary.dark"
                 sx={{
-                  display: "flex",
-                  alignItems: "center",
+                  fontFamily: "monospace",
+                  fontWeight: 700,
+                  color: "text.primary",
                 }}
               >
-                $ {formatPrecio(presupuesto.total)}
+                $ {fmt(precioFinalLocal)}
               </Typography>
             </Box>
-          </Paper>
-        </Stack>
+          </>
+        )}
+
+        {/* --- New ajustes --- */}
+        {ajustesPrecio.length > 0 && (
+          <>
+            <Divider sx={{ my: 0.5 }} />
+            <Typography
+              variant="caption"
+              fontWeight="bold"
+              color="text.secondary"
+              sx={{ mb: 0.25 }}
+            >
+              Ajustes
+            </Typography>
+            {ajustesPrecio.map((a: any) => {
+              const isDiscount = a.esDescuento;
+              const isPorcentual = a.tipo === "porcentual";
+              const montoEfectivo = isPorcentual
+                ? (Number(a.monto) / 100) * precioFinalLocal
+                : Number(a.monto);
+              const label = isPorcentual
+                ? `${a.descripcion} (${Number(a.monto)}%)`
+                : a.descripcion;
+              return (
+                <LineItem
+                  key={a.id}
+                  label={label}
+                  amount={fmt(montoEfectivo)}
+                  sign={isDiscount ? "-" : "+"}
+                  color={isDiscount ? "error.main" : "success.main"}
+                  badge={a.esInterno ? "Oculto" : undefined}
+                />
+              );
+            })}
+          </>
+        )}
+
+        {/* --- Total --- */}
+        <Paper
+          elevation={0}
+          sx={{
+            mt: 1,
+            p: 1.5,
+            backgroundColor: "primary.lighter",
+            borderRadius: 1,
+          }}
+        >
+          <Box
+            display="flex"
+            justifyContent="space-between"
+            alignItems="center"
+          >
+            <Typography variant="h6" fontWeight="bold" color="primary.dark">
+              Total
+            </Typography>
+            <Typography
+              variant="h5"
+              fontWeight="bold"
+              color="primary.dark"
+              sx={{ fontFamily: "monospace" }}
+            >
+              $ {fmt(presupuesto.total)}
+            </Typography>
+          </Box>
+        </Paper>
       </Box>
     </CommonOrderCard>
   );
