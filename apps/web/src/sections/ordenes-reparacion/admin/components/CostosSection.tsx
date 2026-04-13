@@ -278,7 +278,7 @@ function CostosSection() {
                   amount={fmt(montoEfectivo)}
                   sign={isDiscount ? "-" : "+"}
                   color={isDiscount ? "error.main" : "success.main"}
-                  badge={a.esInterno ? "Interno" : undefined}
+                  badge={a.esInterno ? "Oculto" : undefined}
                 />
               );
             })}

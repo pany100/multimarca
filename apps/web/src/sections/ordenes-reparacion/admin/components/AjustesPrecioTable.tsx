@@ -49,9 +49,9 @@ const AjustesPrecioTable = ({
     },
     {
       field: "esInterno",
-      headerName: "Interno",
+      headerName: "Oculto",
       width: 80,
-      renderCell: (params) => (params.row.esInterno ? "Si" : "No"),
+      renderCell: (params) => (params.row.esInterno ? "Sí" : "No"),
     },
     {
       field: "actions",

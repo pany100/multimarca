@@ -138,8 +138,8 @@ function PresupuestoCostosSection() {
                   color="text.disabled"
                   fontStyle="italic"
                 >
-                  Este incremento va a mostrarse como parte de la mano de obra
-                  cuando se imprima el informe al cliente
+                  Este incremento va a mostrarse como parte del primer item de
+                  la mano de obra cuando se imprima el presupuesto al cliente
                 </Typography>
               </Box>
             )}

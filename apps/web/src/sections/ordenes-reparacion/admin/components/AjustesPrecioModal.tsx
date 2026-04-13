@@ -11,6 +11,7 @@ import {
   MenuItem,
   Switch,
   TextField,
+  Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { AjustePrecio } from "../hooks/useAjustesPrecioManager";
@@ -135,9 +136,7 @@ const AjustesPrecioModal = ({
               margin="normal"
               InputLabelProps={{ shrink: true }}
               value={tipo}
-              onChange={(e) =>
-                setTipo(e.target.value as "porcentual" | "fijo")
-              }
+              onChange={(e) => setTipo(e.target.value as "porcentual" | "fijo")}
               disabled={loading}
             >
               <MenuItem value="fijo">Fijo ($)</MenuItem>
@@ -153,8 +152,18 @@ const AjustesPrecioModal = ({
                   disabled={loading}
                 />
               }
-              label="Interno (se muestra como parte de la mano de obra en el informe al cliente)"
+              label="Oculto para el cliente"
             />
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ pl: 4, display: "block" }}
+            >
+              Si está oculto, este incremento va a mostrarse como parte del
+              primer item de la mano de obra cuando se imprima el presupuesto
+              para el cliente. Si no hay mano de obra, se suma al primer
+              repuesto o reparación de terceros. Ejemplo: redondeo.
+            </Typography>
           </Grid>
         </Grid>
       </DialogContent>
