@@ -1,16 +1,17 @@
 "use client";
 
 import CustomInputText from "@/components/formV2/CustomInputText";
-import { Box, Grid, Typography } from "@mui/material";
+import { Alert, Box, Grid, Typography } from "@mui/material";
 
 function EditCostosForm() {
   return (
     <Grid container spacing={2}>
       <Grid item xs={12}>
-        <Typography variant="caption" color="text.secondary">
-          Estos campos son deprecados. Para nuevos ajustes, usa la seccion
-          &quot;Ajustes de Precios&quot;.
-        </Typography>
+        <Alert severity="warning" variant="filled">
+          Esta seccion existe unicamente por compatibilidad con registros
+          anteriores. Para cargar descuentos, incrementos o ajustes de precio,
+          utiliza la seccion <strong>&quot;Ajustes de Precios&quot;</strong>.
+        </Alert>
       </Grid>
 
       <Grid item xs={4}>
