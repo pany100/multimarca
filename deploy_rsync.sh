@@ -76,7 +76,7 @@ echo "🚀 Iniciando despliegue (rsync optimizado)"
 nvm install "$NODE_VER" || true
 nvm use "$NODE_VER" || handle_error "Falló NVM"
 echo "📦 Build local (apps/web)"
-BUILD_LOG=$(mktemp /tmp/deploy_build_XXXXXX.log)
+BUILD_LOG=$(mktemp /tmp/deploy_build_XXXXXX)
 echo "   → Log de build: ${BUILD_LOG}"
 if ! yarn --cwd apps/web build 2>&1 | tee "$BUILD_LOG"; then
   echo ""
