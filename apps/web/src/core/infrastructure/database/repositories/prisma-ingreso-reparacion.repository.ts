@@ -22,6 +22,7 @@ export type IngresoPorReparacionWithRelations =
               dolar: true;
             };
           };
+          ajustesPrecio: true;
         };
       };
     };
@@ -52,6 +53,7 @@ export class PrismaIngresoReparacionRepository
                 dolar: true,
               },
             },
+            ajustesPrecio: { orderBy: { orden: "asc" } },
           },
         },
       },
