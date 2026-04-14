@@ -25,12 +25,16 @@ type EmpleadoWithAusencias = Omit<
   | "recategorizacionMonotributoPath"
   | "curriculumPath"
   | "credencialPagoPath"
+  | "dniFrentePath"
+  | "dniDorsoPath"
 > & {
   licenciaConducirPath?: string | null;
   inscripcionMonotributoPath?: string | null;
   recategorizacionMonotributoPath?: string | null;
   curriculumPath?: string | null;
   credencialPagoPath?: string | null;
+  dniFrentePath?: string | null;
+  dniDorsoPath?: string | null;
 } & {
   ausenciasProgramadas?: AusenciaProgramada[];
   inasistencias?: Inasistencia[];

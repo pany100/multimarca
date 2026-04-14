@@ -18,10 +18,26 @@ function MecanicosPerfilHeader() {
             {empleado.name}
           </Typography>
         )}
-        <MecanicosImagenData
-          filePath={empleado?.dniImagePath || null}
-          alt="DNI"
-        />
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            Frente:
+          </Typography>
+          <MecanicosImagenData
+            filePath={
+              empleado?.dniFrentePath || empleado?.dniImagePath || null
+            }
+            alt="DNI frente"
+          />
+        </Box>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            Dorso:
+          </Typography>
+          <MecanicosImagenData
+            filePath={empleado?.dniDorsoPath || null}
+            alt="DNI dorso"
+          />
+        </Box>
       </Box>
     </Grid>
   );

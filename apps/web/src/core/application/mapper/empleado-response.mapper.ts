@@ -24,6 +24,8 @@ type EmpleadoWithDocRelations = {
   } | null;
   curriculumPath?: { finalPath?: string | null; tempPath: string } | null;
   credencialPagoPath?: { finalPath?: string | null; tempPath: string } | null;
+  dniFrentePath?: { finalPath?: string | null; tempPath: string } | null;
+  dniDorsoPath?: { finalPath?: string | null; tempPath: string } | null;
 };
 
 /**
@@ -40,12 +42,16 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
   | "recategorizacionMonotributoPath"
   | "curriculumPath"
   | "credencialPagoPath"
+  | "dniFrentePath"
+  | "dniDorsoPath"
 > & {
   licenciaConducirPath: string | null;
   inscripcionMonotributoPath: string | null;
   recategorizacionMonotributoPath: string | null;
   curriculumPath: string | null;
   credencialPagoPath: string | null;
+  dniFrentePath: string | null;
+  dniDorsoPath: string | null;
 } {
   const {
     licenciaConducirPath: lc,
@@ -53,6 +59,8 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
     recategorizacionMonotributoPath: rm,
     curriculumPath: cv,
     credencialPagoPath: cpago,
+    dniFrentePath: dfr,
+    dniDorsoPath: ddo,
     ...rest
   } = empleado;
   type MappedReturn = Omit<
@@ -62,12 +70,16 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
     | "recategorizacionMonotributoPath"
     | "curriculumPath"
     | "credencialPagoPath"
+    | "dniFrentePath"
+    | "dniDorsoPath"
   > & {
     licenciaConducirPath: string | null;
     inscripcionMonotributoPath: string | null;
     recategorizacionMonotributoPath: string | null;
     curriculumPath: string | null;
     credencialPagoPath: string | null;
+    dniFrentePath: string | null;
+    dniDorsoPath: string | null;
   };
   const mapped: MappedReturn = {
     ...rest,
@@ -76,6 +88,8 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
     recategorizacionMonotributoPath: getDocPath(rm ?? null),
     curriculumPath: getDocPath(cv ?? null),
     credencialPagoPath: getDocPath(cpago ?? null),
+    dniFrentePath: getDocPath(dfr ?? null),
+    dniDorsoPath: getDocPath(ddo ?? null),
   };
   const out = mapped as MappedReturn & {
     certificadosEstudio?: unknown[];

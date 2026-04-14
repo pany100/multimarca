@@ -197,6 +197,8 @@ model Empleado {
   recategorizacionMonotributoPath CustomFile?   @relation("EmpleadoRecategorizacionMonotributo")
   curriculumPath                CustomFile?   @relation("EmpleadoCurriculum")
   credencialPagoPath            CustomFile?   @relation("EmpleadoCredencialPago")
+  dniFrentePath                 CustomFile?   @relation("EmpleadoDniFrente")
+  dniDorsoPath                  CustomFile?   @relation("EmpleadoDniDorso")
   fechaBaja                   DateTime?
   ausenciasProgramadas        AusenciaProgramada[]
   certificadosEstudio         CertificadoEstudio[]
@@ -593,6 +595,8 @@ model CustomFile {
   empleadoRecategorizacionMonotributoId Int?  @unique
   empleadoCurriculumId  Int?                 @unique
   empleadoCredencialPagoId Int?              @unique
+  empleadoDniFrenteId   Int?                 @unique
+  empleadoDniDorsoId    Int?                 @unique
   llegadaTardeCertificadoId Int?             @unique
   inasistenciaCertificadoId Int?            @unique
   certificadoEstudioRutaId Int?              @unique
@@ -606,6 +610,8 @@ model CustomFile {
   empleadoRecategorizacionMonotributo Empleado? @relation("EmpleadoRecategorizacionMonotributo", fields: [empleadoRecategorizacionMonotributoId], references: [id])
   empleadoCurriculum   Empleado?            @relation("EmpleadoCurriculum", fields: [empleadoCurriculumId], references: [id])
   empleadoCredencialPago Empleado?          @relation("EmpleadoCredencialPago", fields: [empleadoCredencialPagoId], references: [id])
+  empleadoDniFrente     Empleado?           @relation("EmpleadoDniFrente", fields: [empleadoDniFrenteId], references: [id])
+  empleadoDniDorso      Empleado?           @relation("EmpleadoDniDorso", fields: [empleadoDniDorsoId], references: [id])
   llegadaTardeCertificado LlegadaTarde?      @relation("LlegadaTardeCertificado", fields: [llegadaTardeCertificadoId], references: [id])
   inasistenciaCertificado Inasistencia?      @relation("InasistenciaCertificado", fields: [inasistenciaCertificadoId], references: [id])
   certificadoEstudioRuta CertificadoEstudio? @relation("CertificadoEstudioRuta", fields: [certificadoEstudioRutaId], references: [id])

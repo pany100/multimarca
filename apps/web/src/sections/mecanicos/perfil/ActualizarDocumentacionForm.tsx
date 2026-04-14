@@ -23,6 +23,8 @@ const schema = yup.object({
   inscripcionMonotributoPath: yup.string().nullable(),
   curriculumPath: yup.string().nullable(),
   credencialPagoPath: yup.string().nullable(),
+  dniFrentePath: yup.string().nullable(),
+  dniDorsoPath: yup.string().nullable(),
 });
 
 function ActualizarDocumentacionForm() {
@@ -40,6 +42,8 @@ function ActualizarDocumentacionForm() {
       inscripcionMonotributoPath: empleado?.inscripcionMonotributoPath ?? null,
       curriculumPath: empleado?.curriculumPath ?? null,
       credencialPagoPath: empleado?.credencialPagoPath ?? null,
+      dniFrentePath: empleado?.dniFrentePath ?? null,
+      dniDorsoPath: empleado?.dniDorsoPath ?? null,
     },
   });
 
@@ -51,6 +55,8 @@ function ActualizarDocumentacionForm() {
         inscripcionMonotributoPath: empleado.inscripcionMonotributoPath ?? null,
         curriculumPath: empleado.curriculumPath ?? null,
         credencialPagoPath: empleado.credencialPagoPath ?? null,
+        dniFrentePath: empleado.dniFrentePath ?? null,
+        dniDorsoPath: empleado.dniDorsoPath ?? null,
       });
     }
   }, [empleado, methods]);
@@ -105,6 +111,42 @@ function ActualizarDocumentacionForm() {
               </Typography>
 
               <Grid container spacing={3} sx={{ mt: 2 }}>
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  sx={{
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 1,
+                    p: 2,
+                    mb: 2,
+                  }}
+                >
+                  <CustomFileInput
+                    name="dniFrentePath"
+                    label="DNI - Frente"
+                  />
+                </Grid>
+
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  sx={{
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 1,
+                    p: 2,
+                    mb: 2,
+                  }}
+                >
+                  <CustomFileInput
+                    name="dniDorsoPath"
+                    label="DNI - Dorso"
+                  />
+                </Grid>
+
                 <Grid
                   item
                   xs={12}

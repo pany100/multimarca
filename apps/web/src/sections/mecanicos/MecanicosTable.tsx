@@ -82,20 +82,18 @@ function MecanicosTable({
     { field: "tipo", headerName: "Tipo", flex: 1 },
     { field: "phone", headerName: "Teléfono", flex: 1 },
     {
-      field: "dniImagePath",
+      field: "dniFrentePath",
       headerName: "Foto DNI",
       flex: 0.7,
-      renderCell: (params: GridRenderCellParams) =>
-        params.row.dniImagePath ? (
-          <Image
-            src={params.row.dniImagePath}
-            alt="DNI"
-            width={100}
-            height={50}
-          />
+      renderCell: (params: GridRenderCellParams) => {
+        const src =
+          params.row.dniFrentePath ?? params.row.dniImagePath ?? null;
+        return src ? (
+          <Image src={src} alt="DNI" width={100} height={50} />
         ) : (
           "-"
-        ),
+        );
+      },
     },
   ];
   const customActions = (params: any) => {

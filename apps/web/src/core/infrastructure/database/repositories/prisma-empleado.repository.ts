@@ -66,6 +66,8 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         recategorizacionMonotributoPath: true,
         curriculumPath: true,
         credencialPagoPath: true,
+        dniFrentePath: true,
+        dniDorsoPath: true,
       },
     });
   }
@@ -181,6 +183,8 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         | "empleadoRecategorizacionMonotributoId"
         | "empleadoCurriculumId"
         | "empleadoCredencialPagoId"
+        | "empleadoDniFrenteId"
+        | "empleadoDniDorsoId"
     ) => {
       const hasPath = path != null && path !== "";
       const existing = await prisma.customFile.findFirst({
@@ -235,6 +239,8 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
     );
     await processDoc(dto.curriculumPath, "empleadoCurriculumId");
     await processDoc(dto.credencialPagoPath, "empleadoCredencialPagoId");
+    await processDoc(dto.dniFrentePath, "empleadoDniFrenteId");
+    await processDoc(dto.dniDorsoPath, "empleadoDniDorsoId");
 
     const empleado = await prisma.empleado.findUnique({
       where: { id: empleadoId },
@@ -244,6 +250,8 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         recategorizacionMonotributoPath: true,
         curriculumPath: true,
         credencialPagoPath: true,
+        dniFrentePath: true,
+        dniDorsoPath: true,
       },
     });
     if (!empleado) throw new Error("Empleado no encontrado");

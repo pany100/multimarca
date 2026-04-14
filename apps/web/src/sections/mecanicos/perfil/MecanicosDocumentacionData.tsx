@@ -16,6 +16,15 @@ function MecanicosDocumentacionData() {
   };
   const documentos = [
     {
+      label: "DNI - Frente",
+      filePath:
+        empleado?.dniFrentePath ?? empleado?.dniImagePath ?? null,
+    },
+    {
+      label: "DNI - Dorso",
+      filePath: empleado?.dniDorsoPath ?? null,
+    },
+    {
       label: "Licencia de Conducir",
       filePath: empleado?.licenciaConducirPath ?? null,
     },

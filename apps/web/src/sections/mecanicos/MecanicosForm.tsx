@@ -4,7 +4,6 @@ import { Box, Button, Container, Paper } from "@mui/material";
 import { FormProvider, UseFormReturn } from "react-hook-form";
 import AddressSection from "./form/AdressSection";
 import DatosLaboralesSection from "./form/DatosLaboralesSection";
-import DocumentosSection from "./form/DocumentosSection";
 import PersonalDataSection from "./form/PersonalDataSection";
 
 type Props = {
@@ -28,8 +27,6 @@ function MecanicosForm({ onSubmit, methods, onCancel }: Props) {
               <DatosLaboralesSection />
 
               <AddressSection />
-
-              <DocumentosSection />
             </Paper>
           </Container>
         </Box>
