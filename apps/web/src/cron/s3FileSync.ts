@@ -1,28 +1,170 @@
 import { S3FileStorageAdapter } from "@/core/infrastructure/external/s3-file-storage.adapter";
 import logger from "@/lib/logger";
 import { CustomFile, EstadoArchivo, PrismaClient } from "@prisma/client";
+import { createWriteStream, WriteStream } from "fs";
+import { mkdir, readdir, stat, unlink } from "fs/promises";
+import os from "os";
+import path from "path";
 import cron from "node-cron";
 
 const prisma = new PrismaClient();
 const fileStorage = new S3FileStorageAdapter();
 const isDev = process.env.NODE_ENV !== "production";
 
+const LOG_DIR = path.join(process.cwd(), "logs", "s3-sync");
+const LOG_RETENTION_DAYS = 30;
+
+// ============================================================================
+// LOG POR CORRIDA (archivo .log dedicado)
+// ============================================================================
+
+type RunAction =
+  | "Promovido"
+  | "Saltado"
+  | "Borrado"
+  | "ErrorAlSubir"
+  | "ErrorAlBorrar"
+  | "Error";
+
+interface RunCounters {
+  procesados: number;
+  promovidos: number;
+  fallidos: number;
+  borrados: number;
+}
+
+interface RunContext {
+  stream: WriteStream | null;
+  filePath: string | null;
+  startedAt: number;
+  counters: RunCounters;
+}
+
+function nowStamp(): string {
+  const d = new Date();
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+}
+
+function fileStamp(): string {
+  const d = new Date();
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-${pad(d.getHours())}${pad(d.getMinutes())}${pad(d.getSeconds())}`;
+}
+
+async function openRunLog(): Promise<RunContext> {
+  const ctx: RunContext = {
+    stream: null,
+    filePath: null,
+    startedAt: Date.now(),
+    counters: { procesados: 0, promovidos: 0, fallidos: 0, borrados: 0 },
+  };
+
+  try {
+    await mkdir(LOG_DIR, { recursive: true });
+    const filePath = path.join(LOG_DIR, `s3FileSync-${fileStamp()}.log`);
+    const stream = createWriteStream(filePath, { flags: "a" });
+    stream.write(
+      `=== INICIO s3FileSync [${nowStamp()}] host=${os.hostname()} pid=${process.pid}${isDev ? " (DEV SIMULADO)" : ""} ===\n`
+    );
+    ctx.stream = stream;
+    ctx.filePath = filePath;
+  } catch (error: any) {
+    logger.error("[S3FileSync] No se pudo abrir el log de la corrida", {
+      message: error?.message,
+    });
+  }
+
+  return ctx;
+}
+
+function closeRunLog(ctx: RunContext, success: boolean): Promise<void> {
+  return new Promise((resolve) => {
+    if (!ctx.stream) {
+      resolve();
+      return;
+    }
+    const durationMs = Date.now() - ctx.startedAt;
+    ctx.stream.write(
+      `=== FIN [${nowStamp()}] | procesados=${ctx.counters.procesados} promovidos=${ctx.counters.promovidos} fallidos=${ctx.counters.fallidos} borrados=${ctx.counters.borrados} duración=${(durationMs / 1000).toFixed(1)}s success=${success} ===\n`
+    );
+    ctx.stream.end(() => resolve());
+  });
+}
+
+function writeItem(
+  ctx: RunContext,
+  file: CustomFile,
+  action: RunAction,
+  message: string,
+  durationMs?: number
+) {
+  const line = `[${nowStamp()}] CustomFile #${file.id} (OdR ${file.ordenReparacionId ?? file.reciboORepId ?? "null"}) action=${action} | ${message}${durationMs != null ? ` (${durationMs}ms)` : ""}\n`;
+
+  if (ctx.stream) {
+    ctx.stream.write(line);
+  }
+
+  ctx.counters.procesados += 1;
+  if (action === "Promovido") ctx.counters.promovidos += 1;
+  if (action === "Borrado") ctx.counters.borrados += 1;
+  if (action === "ErrorAlSubir" || action === "ErrorAlBorrar" || action === "Error") {
+    ctx.counters.fallidos += 1;
+  }
+}
+
+async function limpiarLogsAntiguos(): Promise<void> {
+  try {
+    const entries = await readdir(LOG_DIR);
+    const cutoff = Date.now() - LOG_RETENTION_DAYS * 24 * 60 * 60 * 1000;
+    let borrados = 0;
+
+    for (const entry of entries) {
+      const fullPath = path.join(LOG_DIR, entry);
+      try {
+        const st = await stat(fullPath);
+        if (st.isFile() && st.mtimeMs < cutoff) {
+          await unlink(fullPath);
+          borrados += 1;
+        }
+      } catch {
+        // ignorar un archivo roto aislado
+      }
+    }
+
+    if (borrados > 0) {
+      logger.info(`[S3FileSync] Limpieza de logs viejos: ${borrados} archivos borrados (>${LOG_RETENTION_DAYS}d)`);
+    }
+  } catch (error: any) {
+    // Primera corrida: la carpeta puede no existir aún, no es error.
+    if (error?.code !== "ENOENT") {
+      logger.warn("[S3FileSync] Falló la limpieza de logs viejos", {
+        message: error?.message,
+      });
+    }
+  }
+}
+
+function classifyAwsError(error: any): { code: string; message: string; isNoSuchKey: boolean } {
+  const message = error?.message ?? "Error desconocido";
+  const code = error?.Code ?? error?.name ?? "Unknown";
+  const isNoSuchKey =
+    code === "NoSuchKey" ||
+    error?.name === "NoSuchKey" ||
+    (typeof message === "string" && message.includes("does not exist"));
+  return { code, message, isNoSuchKey };
+}
+
 // ============================================================================
 // FUNCIONES DE PROCESAMIENTO INDIVIDUAL
 // ============================================================================
 
-/**
- * Procesa un archivo individual para borrar.
- * - Si finalPath está en /tmp, solo marca como Borrado (no elimina de S3)
- * - Si finalPath NO está en /tmp, elimina de S3 y marca como Borrado
- * - En caso de error, marca como ErrorAlBorrar
- */
-async function procesarUnArchivoParaBorrar(archivo: CustomFile): Promise<void> {
+async function procesarUnArchivoParaBorrar(archivo: CustomFile, ctx: RunContext): Promise<void> {
+  const itemStart = Date.now();
   try {
     const pathToCheck = archivo.finalPath;
     const isInTmp = pathToCheck?.includes("/tmp/") || false;
 
-    // Determinar el motivo (todas las FKs nulas = desreferenciado)
     const esDesreferenciado =
       archivo.ordenReparacionId === null &&
       archivo.reciboORepId === null &&
@@ -37,9 +179,9 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile): Promise<void> {
       archivo.llegadaTardeCertificadoId === null &&
       archivo.inasistenciaCertificadoId === null &&
       archivo.certificadoEstudioRutaId === null;
-    const motivo = esDesreferenciado ? "desref" : "ListoParaBorrar";
+    const motivo = esDesreferenciado ? "desreferenciado" : "ListoParaBorrar";
 
-    let accion = "";
+    let msg = "";
 
     if (!pathToCheck) {
       if (!isDev) {
@@ -48,7 +190,7 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile): Promise<void> {
           data: { status: EstadoArchivo.Borrado },
         });
       }
-      accion = "sin path → Borrado";
+      msg = `${motivo} sin path → Borrado`;
     } else if (isInTmp) {
       if (!isDev) {
         await prisma.customFile.update({
@@ -56,19 +198,15 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile): Promise<void> {
           data: { status: EstadoArchivo.Borrado },
         });
       }
-      accion = "en /tmp → Borrado (S3 intacto)";
+      msg = `${motivo} en tmp/ → Borrado (S3 intacto, caducará por TTL)`;
     } else {
       let s3Nota = "";
       if (!isDev) {
         try {
           await fileStorage.removeFile(pathToCheck);
-        } catch (s3Error) {
-          const errorMsg =
-            s3Error instanceof Error ? s3Error.message : "Error desconocido";
-          if (
-            errorMsg.includes("does not exist") ||
-            errorMsg.includes("NoSuchKey")
-          ) {
+        } catch (s3Error: any) {
+          const { code, message } = classifyAwsError(s3Error);
+          if (code === "NoSuchKey" || message.includes("does not exist")) {
             s3Nota = " (no existía en S3)";
           } else {
             throw s3Error;
@@ -79,35 +217,46 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile): Promise<void> {
           data: { status: EstadoArchivo.Borrado },
         });
       }
-      accion = `S3 eliminado${s3Nota} → Borrado`;
+      msg = `${motivo} → S3 eliminado${s3Nota} → Borrado`;
     }
 
     const dev = isDev ? " [SIMULADO]" : "";
-    logger.info(`[S3FileSync] ID ${archivo.id} | ${motivo} | ${accion}${dev}`);
-  } catch (error) {
-    const errorMsg =
-      error instanceof Error ? error.message : "Error desconocido";
-
+    writeItem(ctx, archivo, "Borrado", `${msg}${dev}`, Date.now() - itemStart);
+    logger.info("[S3FileSync] borrado", {
+      fileId: archivo.id,
+      ordenReparacionId: archivo.ordenReparacionId,
+      reciboORepId: archivo.reciboORepId,
+      finalPath: archivo.finalPath,
+      motivo,
+      simulado: isDev,
+    });
+  } catch (error: any) {
+    const { code, message } = classifyAwsError(error);
     if (!isDev) {
       await prisma.customFile.update({
         where: { id: archivo.id },
         data: { status: EstadoArchivo.ErrorAlBorrar },
       });
     }
-
-    logger.error(
-      `[S3FileSync] ID ${archivo.id} | ERROR: ${errorMsg} → ErrorAlBorrar`
+    writeItem(
+      ctx,
+      archivo,
+      "ErrorAlBorrar",
+      `ERROR ${code}: ${message} → ErrorAlBorrar`,
+      Date.now() - itemStart
     );
+    logger.error("[S3FileSync] error al borrar", {
+      fileId: archivo.id,
+      finalPath: archivo.finalPath,
+      errorCode: code,
+      errorMessage: message,
+    });
   }
 }
 
-/**
- * Procesa un archivo individual pendiente (subir de /tmp a carpeta final).
- * - Si tiene finalPath → marca como Listo
- * - Si no tiene finalPath → mueve de /tmp a carpeta destino y marca como Listo
- * - En caso de error, marca como ErrorAlSubir
- */
-async function procesarUnArchivoPending(archivo: CustomFile): Promise<void> {
+async function procesarUnArchivoPending(archivo: CustomFile, ctx: RunContext): Promise<void> {
+  const itemStart = Date.now();
+
   try {
     const folder = archivo.ordenReparacionId
       ? "scanner"
@@ -116,7 +265,6 @@ async function procesarUnArchivoPending(archivo: CustomFile): Promise<void> {
         : "recibos";
     const dev = isDev ? " [SIMULADO]" : "";
 
-    // 1. Si ya tiene finalPath, solo marcar como Listo
     if (archivo.finalPath) {
       if (!isDev) {
         await prisma.customFile.update({
@@ -127,30 +275,36 @@ async function procesarUnArchivoPending(archivo: CustomFile): Promise<void> {
           },
         });
       }
-      logger.info(
-        `[S3FileSync] ID ${archivo.id} | ya tiene finalPath → Listo${dev}`
+      writeItem(
+        ctx,
+        archivo,
+        "Saltado",
+        `ya tenía finalPath → Listo${dev}`,
+        Date.now() - itemStart
       );
       return;
     }
 
-    // 2. Si no tiene tempPath ni finalPath, es un error
     if (!archivo.tempPath) {
       if (!isDev) {
         await prisma.customFile.update({
           where: { id: archivo.id },
-          data: {
-            status: EstadoArchivo.ErrorAlSubir,
-            promotedAt: new Date(),
-          },
+          data: { status: EstadoArchivo.Error },
         });
       }
-      logger.warn(
-        `[S3FileSync] ID ${archivo.id} | sin tempPath ni finalPath → ErrorAlSubir`
+      writeItem(
+        ctx,
+        archivo,
+        "Error",
+        `sin tempPath ni finalPath → Error (terminal)${dev}`,
+        Date.now() - itemStart
       );
+      logger.warn("[S3FileSync] archivo sin tempPath ni finalPath", {
+        fileId: archivo.id,
+      });
       return;
     }
 
-    // 3. Mover archivo de /tmp a carpeta destino
     if (!isDev) {
       const finalPath = await fileStorage.moveTempTo(archivo.tempPath, folder);
 
@@ -164,26 +318,48 @@ async function procesarUnArchivoPending(archivo: CustomFile): Promise<void> {
       });
     }
 
-    logger.info(
-      `[S3FileSync] ID ${archivo.id} | movido de /tmp a /${folder} → Listo${dev}`
+    writeItem(
+      ctx,
+      archivo,
+      "Promovido",
+      `movido tmp → ${folder}/${dev}`,
+      Date.now() - itemStart
     );
-  } catch (error) {
-    const errorMsg =
-      error instanceof Error ? error.message : "Error desconocido";
+    logger.info("[S3FileSync] promovido", {
+      fileId: archivo.id,
+      ordenReparacionId: archivo.ordenReparacionId,
+      reciboORepId: archivo.reciboORepId,
+      tempPath: archivo.tempPath,
+      folder,
+      simulado: isDev,
+    });
+  } catch (error: any) {
+    const { code, message, isNoSuchKey } = classifyAwsError(error);
+
+    const nextStatus = isNoSuchKey ? EstadoArchivo.Error : EstadoArchivo.ErrorAlSubir;
+    const action: RunAction = isNoSuchKey ? "Error" : "ErrorAlSubir";
+    const explicacion = isNoSuchKey
+      ? `NoSuchKey: source tmp ya no existe en S3 (caducó o nunca se subió) → Error (terminal, no se reintenta)`
+      : `${code}: ${message} → ErrorAlSubir (se reintentará en la próxima corrida)`;
 
     if (!isDev) {
       await prisma.customFile.update({
         where: { id: archivo.id },
-        data: {
-          status: EstadoArchivo.ErrorAlSubir,
-          promotedAt: new Date(),
-        },
+        data: { status: nextStatus },
       });
     }
 
-    logger.error(
-      `[S3FileSync] ID ${archivo.id} | ERROR: ${errorMsg} → ErrorAlSubir`
-    );
+    writeItem(ctx, archivo, action, explicacion, Date.now() - itemStart);
+    logger.error("[S3FileSync] error al promover", {
+      fileId: archivo.id,
+      ordenReparacionId: archivo.ordenReparacionId,
+      reciboORepId: archivo.reciboORepId,
+      tempPath: archivo.tempPath,
+      errorCode: code,
+      errorMessage: message,
+      isNoSuchKey,
+      nextStatus,
+    });
   }
 }
 
@@ -191,13 +367,8 @@ async function procesarUnArchivoPending(archivo: CustomFile): Promise<void> {
 // FUNCIONES DE PROCESAMIENTO EN LOTE
 // ============================================================================
 
-/**
- * Procesa archivos desreferenciados o marcados como ListoParaBorrar.
- */
-async function procesarArchivosParaBorrar() {
-  logger.info(
-    "[S3FileSync] Iniciando procesamiento de archivos para borrar (desreferenciados o ListoParaBorrar)"
-  );
+async function procesarArchivosParaBorrar(ctx: RunContext) {
+  logger.info("[S3FileSync] Iniciando procesamiento de archivos para borrar");
 
   const archivosParaBorrar = await prisma.customFile.findMany({
     where: {
@@ -218,88 +389,57 @@ async function procesarArchivosParaBorrar() {
           certificadoEstudioRutaId: null,
           status: { not: EstadoArchivo.Borrado },
         },
-        {
-          status: EstadoArchivo.ListoParaBorrar,
-        },
+        { status: EstadoArchivo.ListoParaBorrar },
       ],
     },
   });
 
-  logger.info(
-    `[S3FileSync] Archivos para borrar encontrados: ${archivosParaBorrar.length}`
-  );
+  logger.info(`[S3FileSync] Archivos para borrar: ${archivosParaBorrar.length}`);
 
   for (const archivo of archivosParaBorrar) {
-    await procesarUnArchivoParaBorrar(archivo);
+    await procesarUnArchivoParaBorrar(archivo, ctx);
   }
 }
 
-/**
- * Procesa archivos con estado Pending.
- */
-async function procesarArchivosPending() {
-  logger.info(
-    "[S3FileSync] Iniciando procesamiento de archivos con estado Pending"
-  );
+async function procesarArchivosPending(ctx: RunContext) {
+  logger.info("[S3FileSync] Iniciando procesamiento de Pendientes");
 
   const archivosPending = await prisma.customFile.findMany({
-    where: {
-      status: EstadoArchivo.Pendiente,
-    },
+    where: { status: EstadoArchivo.Pendiente },
   });
 
-  logger.info(
-    `[S3FileSync] Archivos Pending encontrados: ${archivosPending.length}`
-  );
+  logger.info(`[S3FileSync] Pendientes: ${archivosPending.length}`);
 
   for (const archivo of archivosPending) {
-    await procesarUnArchivoPending(archivo);
+    await procesarUnArchivoPending(archivo, ctx);
   }
 }
 
-/**
- * Reintenta subir archivos que fallaron anteriormente (estado ErrorAlSubir).
- */
-async function procesarErroresAlSubir() {
-  logger.info(
-    "[S3FileSync] Iniciando reprocesamiento de archivos con estado ErrorAlSubir"
-  );
+async function procesarErroresAlBorrar(ctx: RunContext) {
+  logger.info("[S3FileSync] Reintentando ErrorAlBorrar");
 
   const archivosConError = await prisma.customFile.findMany({
-    where: {
-      status: EstadoArchivo.ErrorAlSubir,
-    },
+    where: { status: EstadoArchivo.ErrorAlBorrar },
   });
 
-  logger.info(
-    `[S3FileSync] Archivos ErrorAlSubir encontrados: ${archivosConError.length}`
-  );
+  logger.info(`[S3FileSync] ErrorAlBorrar: ${archivosConError.length}`);
 
   for (const archivo of archivosConError) {
-    await procesarUnArchivoPending(archivo);
+    await procesarUnArchivoParaBorrar(archivo, ctx);
   }
 }
 
-/**
- * Reintenta borrar archivos que fallaron anteriormente (estado ErrorAlBorrar).
- */
-async function procesarErroresAlBorrar() {
-  logger.info(
-    "[S3FileSync] Iniciando reprocesamiento de archivos con estado ErrorAlBorrar"
-  );
+async function procesarErroresAlSubir(ctx: RunContext) {
+  logger.info("[S3FileSync] Reintentando ErrorAlSubir");
 
   const archivosConError = await prisma.customFile.findMany({
-    where: {
-      status: EstadoArchivo.ErrorAlBorrar,
-    },
+    where: { status: EstadoArchivo.ErrorAlSubir },
   });
 
-  logger.info(
-    `[S3FileSync] Archivos ErrorAlBorrar encontrados: ${archivosConError.length}`
-  );
+  logger.info(`[S3FileSync] ErrorAlSubir: ${archivosConError.length}`);
 
   for (const archivo of archivosConError) {
-    await procesarUnArchivoParaBorrar(archivo);
+    await procesarUnArchivoPending(archivo, ctx);
   }
 }
 
@@ -307,45 +447,67 @@ async function procesarErroresAlBorrar() {
 // ORQUESTACIÓN Y CRON
 // ============================================================================
 
-/**
- * Ejecuta todas las tareas de sincronización de archivos
- */
+let lastRunAt: number | null = null;
+let running = false;
+
 async function sincronizarArchivos() {
-  logger.info(
-    "[S3FileSync] ========== INICIANDO SINCRONIZACIÓN DE ARCHIVOS S3 =========="
-  );
+  if (running) {
+    logger.warn("[S3FileSync] Ya hay una corrida en ejecución, se saltea este tick");
+    return;
+  }
+  running = true;
+
+  await limpiarLogsAntiguos();
+
+  const ctx = await openRunLog();
+  let success = false;
+
+  logger.info("[S3FileSync] ========== INICIO sincronización ==========");
 
   try {
-    await procesarArchivosParaBorrar();
-    await procesarArchivosPending();
-    await procesarErroresAlSubir();
-    await procesarErroresAlBorrar();
+    await procesarArchivosParaBorrar(ctx);
+    await procesarArchivosPending(ctx);
+    await procesarErroresAlSubir(ctx);
+    await procesarErroresAlBorrar(ctx);
 
-    logger.info(
-      "[S3FileSync] ========== SINCRONIZACIÓN DE ARCHIVOS S3 COMPLETADA =========="
-    );
-  } catch (error) {
-    logger.error(
-      `[S3FileSync] Error crítico durante la sincronización: ${
-        error instanceof Error ? error.message : "Error desconocido"
-      }`
-    );
+    success = true;
+    logger.info("[S3FileSync] ========== FIN sincronización OK ==========", {
+      ...ctx.counters,
+      logFile: ctx.filePath,
+    });
+  } catch (error: any) {
+    logger.error("[S3FileSync] Error crítico durante la sincronización", {
+      message: error?.message,
+      logFile: ctx.filePath,
+    });
+  } finally {
+    await closeRunLog(ctx, success);
+    lastRunAt = Date.now();
+    running = false;
   }
 }
 
-/**
- * Inicializa el cron job para sincronización de archivos S3
- */
 export function initS3FileSyncCron() {
-  cron.schedule("0 3 * * *", sincronizarArchivos, {
+  cron.schedule("0 */6 * * *", sincronizarArchivos, {
     scheduled: true,
     timezone: "America/Argentina/Buenos_Aires",
   });
 
   logger.info(
-    "[S3FileSync] Cron job para sincronización de archivos S3 iniciado - Ejecuta diariamente a las 3:00 AM"
+    "[S3FileSync] Cron S3 programado cada 6 horas (America/Argentina/Buenos_Aires)"
   );
-}
 
-// Ejecutar inmediatamente al iniciar la aplicación (opcional)
-// sincronizarArchivos();
+  // Boot-time catchup: si al levantar el proceso no corrimos aún en esta instancia,
+  // disparar una sincronización 60s después del startup. Cubre reinicios que caen
+  // fuera de la ventana de ejecución del cron.
+  setTimeout(() => {
+    if (lastRunAt === null) {
+      logger.info("[S3FileSync] Boot-time catchup: disparando sincronización inicial");
+      sincronizarArchivos().catch((err) => {
+        logger.error("[S3FileSync] Error en boot-time catchup", {
+          message: err?.message,
+        });
+      });
+    }
+  }, 60 * 1000);
+}

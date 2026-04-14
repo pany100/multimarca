@@ -1,3 +1,4 @@
+import logger from "@/lib/logger";
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
@@ -63,9 +64,21 @@ export async function POST(request: NextRequest) {
     const region = process.env.AWS_DEFAULT_REGION!;
     const permanentUrl = `https://${bucketName}.s3.${region}.amazonaws.com/${s3ObjectKey}`;
 
+    logger.info("[upload-tmp-file] tmp upload ok", {
+      key: s3ObjectKey,
+      size: file.size,
+      contentType,
+      userId: request.headers.get("x-user-id"),
+    });
+
     return NextResponse.json({ url: permanentUrl }, { status: 200 });
-  } catch (error) {
-    console.error("Error al subir imagen temporal:", error);
+  } catch (error: any) {
+    logger.error("[upload-tmp-file] Error al subir imagen temporal", {
+      message: error?.message,
+      awsCode: error?.Code,
+      awsName: error?.name,
+      userId: request.headers.get("x-user-id"),
+    });
     return NextResponse.json(
       { mensaje: "Error interno del servidor" },
       { status: 500 }
