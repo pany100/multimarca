@@ -29,10 +29,19 @@ export class PrismaRecordatorioManoDeObraRepository
         orep.estado = 'Terminado'
       AND 
         c.can_receive_notifications = true
-      AND 
+      AND
         tr.diasParaRecordatorio IS NOT NULL
-      AND 
+      AND
         JSON_LENGTH(tr.diasParaRecordatorio) > 0
+      AND NOT EXISTS (
+        SELECT 1
+        FROM OrdenReparacion newer
+        JOIN TrabajoRealizado newer_tr ON newer_tr.ordenReparacionId = newer.id
+        WHERE newer.autoId = orep.autoId
+          AND newer.estado = 'Terminado'
+          AND LOWER(TRIM(newer_tr.descripcion)) = LOWER(TRIM(tr.descripcion))
+          AND newer.fechaSalidaReparacion > orep.fechaSalidaReparacion
+      )
     `;
     return rows;
   }
