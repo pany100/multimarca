@@ -6,6 +6,8 @@ export type ListOrdenesParams = {
   size: number;
   query?: string;
   estado?: EstadoOrdenReparacion | string;
+  from?: string | null;
+  to?: string | null;
 };
 
 export type CreateOrdenPersist = {

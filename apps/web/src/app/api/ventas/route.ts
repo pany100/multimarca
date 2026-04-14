@@ -26,6 +26,8 @@ export async function GET(request: Request) {
         size: searchParams.get("pageSize") || searchParams.get("size") || "10",
         query: searchParams.get("query") || "",
         estado: searchParams.get("estado") as EstadoVenta | null,
+        from: searchParams.get("from"),
+        to: searchParams.get("to"),
       },
       listVentasQuerySchema
     );

@@ -222,6 +222,7 @@ function VentasTable({
             ctaCb={ctaCb || (() => router.push("/dashboard/ventas/nueva"))}
             columns={columns}
             getRowClassName={getRowClassName}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -233,6 +234,7 @@ function VentasTable({
             ctaCb={ctaCb || (() => router.push("/dashboard/ventas/nueva"))}
             columns={columns}
             getRowClassName={getRowClassName}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -244,6 +246,7 @@ function VentasTable({
             ctaCb={ctaCb || (() => router.push("/dashboard/ventas/nueva"))}
             columns={columns}
             getRowClassName={getRowClassName}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -255,6 +258,7 @@ function VentasTable({
             ctaCb={ctaCb || (() => router.push("/dashboard/ventas/nueva"))}
             columns={columns}
             getRowClassName={getRowClassName}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -266,6 +270,7 @@ function VentasTable({
             ctaCb={ctaCb || (() => router.push("/dashboard/ventas/nueva"))}
             columns={columns}
             getRowClassName={getRowClassName}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -277,6 +282,7 @@ function VentasTable({
             ctaCb={ctaCb || (() => router.push("/dashboard/ventas/nueva"))}
             columns={columns}
             getRowClassName={getRowClassName}
+            searchByDate={true}
             {...rest}
           />
         )}

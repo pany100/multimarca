@@ -16,7 +16,7 @@ export class PrismaVentaRepository implements VentaRepository {
   }
 
   listPaged(args: ListVentasParams): Promise<PageResult<VentaWithRelations>> {
-    const { page, size, query, estado } = args;
+    const { page, size, query, estado, from, to } = args;
     const where: Prisma.VentaWhereInput = {
       OR: [
         { cliente: { fullName: { contains: query } } },
@@ -28,6 +28,16 @@ export class PrismaVentaRepository implements VentaRepository {
     // Add estado filter if provided
     if (estado) {
       where.estado = estado as EstadoVenta;
+    }
+
+    if (from || to) {
+      where.fecha = {};
+      if (from) where.fecha.gte = new Date(from);
+      if (to) {
+        const endDate = new Date(to);
+        endDate.setHours(23, 59, 59, 999);
+        where.fecha.lte = endDate;
+      }
     }
     return prismaPaged<VentaWithRelations>(
       prisma.venta,

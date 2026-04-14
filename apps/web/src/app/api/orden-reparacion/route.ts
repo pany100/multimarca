@@ -29,6 +29,8 @@ export async function GET(request: Request) {
         size: searchParams.get("size"),
         query: searchParams.get("query"),
         estado: searchParams.get("estado"),
+        from: searchParams.get("from"),
+        to: searchParams.get("to"),
       },
       listOrdenesQuerySchema,
     );

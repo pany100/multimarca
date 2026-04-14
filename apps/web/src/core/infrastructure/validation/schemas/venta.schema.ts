@@ -57,6 +57,8 @@ export const listVentasQuerySchema = z.object({
   size: z.coerce.number().min(1).max(200).optional(),
   query: z.string(),
   estado: z.string().nullable().optional(),
+  from: z.string().nullable().optional(),
+  to: z.string().nullable().optional(),
 });
 
 export const getVentaQuerySchema = z.object({

@@ -10,6 +10,8 @@ export class ListOrdenesUseCase {
     size?: number | string | null;
     query?: string | null;
     estado?: string | null;
+    from?: string | null;
+    to?: string | null;
   }) {
     const { page, size } = normalizePageSize(params.page, params.size, {
       defaultSize: 10,
@@ -19,6 +21,8 @@ export class ListOrdenesUseCase {
       size,
       query: params.query ?? "",
       estado: params.estado ?? undefined,
+      from: params.from ?? undefined,
+      to: params.to ?? undefined,
     });
     const items = result.items.map((item) => {
       const comprobanteCalculado = ComprobanteCalculadoFactory.fromOrden(item);

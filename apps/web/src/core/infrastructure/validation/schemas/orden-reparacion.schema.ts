@@ -68,6 +68,8 @@ export const listOrdenesQuerySchema = z.object({
   size: z.coerce.number().min(1).max(200).default(10),
   query: z.string().nullable().optional(),
   estado: z.string().nullable().optional(),
+  from: z.string().nullable().optional(),
+  to: z.string().nullable().optional(),
 });
 
 export const getOrdenQuerySchema = z.object({

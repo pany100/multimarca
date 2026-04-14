@@ -186,6 +186,7 @@ const OrdenesReparacionTable = ({
             extraActions={customActions}
             ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -196,6 +197,7 @@ const OrdenesReparacionTable = ({
             extraActions={customActions}
             ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -206,6 +208,7 @@ const OrdenesReparacionTable = ({
             extraActions={customActions}
             ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -216,6 +219,7 @@ const OrdenesReparacionTable = ({
             extraActions={customActions}
             ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -226,6 +230,7 @@ const OrdenesReparacionTable = ({
             extraActions={customActions}
             ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -236,6 +241,7 @@ const OrdenesReparacionTable = ({
             extraActions={customActions}
             ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}
@@ -246,6 +252,7 @@ const OrdenesReparacionTable = ({
             extraActions={customActions}
             ctaCb={ctaCb || (() => router.push("/dashboard/ordenes-reparacion/nueva"))}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}

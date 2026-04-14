@@ -28,6 +28,8 @@ export class PrismaOrdenReparacionRepository
     size,
     query = "",
     estado,
+    from,
+    to,
   }: ListOrdenesParams): Promise<PageResult<T>> {
     const where: any = {
       OR: [
@@ -38,6 +40,16 @@ export class PrismaOrdenReparacionRepository
       ],
     };
     if (estado) where.estado = estado;
+
+    if (from || to) {
+      where.fechaCreacion = {};
+      if (from) where.fechaCreacion.gte = new Date(from);
+      if (to) {
+        const endDate = new Date(to);
+        endDate.setHours(23, 59, 59, 999);
+        where.fechaCreacion.lte = endDate;
+      }
+    }
 
     if (query?.trim()) {
       const rows = await prisma.$queryRaw<{ id: number }[]>`
