@@ -18,7 +18,7 @@ export class UltimaSemanaCompartidaUseCase {
     // Process and format the repairs data
     const result = reparacionesMultiplesMecanicos.map((reparacion) => {
       const calculoVO = ComprobanteCalculadoFactory.fromOrden(reparacion);
-      const manoDeObraTotal = calculoVO.manoDeObraAPagar;
+      const manoDeObraTotal = calculoVO.manoDeObraAPagarSinIva;
 
       // Check if the repair order has been paid
       const pagado = reparacion.pagos.length > 0;

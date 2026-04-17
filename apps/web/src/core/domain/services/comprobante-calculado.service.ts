@@ -151,4 +151,27 @@ export class ComprobanteCalculado {
   get manoDeObraAPagar() {
     return Math.max(this.totalManoDeObra - this.descuentoManoDeObraAPagar, 0);
   }
+
+  get totalManoDeObraSinIva() {
+    return this.trabajos.reduce(
+      (acc, t) =>
+        acc + this.calcularPrecioFinal(t.precioUnitario.toNumber(), 0),
+      0,
+    );
+  }
+
+  get descuentoManoDeObraAPagarSinIva() {
+    const totalDesc = this.ajustes.totalDescuento;
+    if (totalDesc === 0 || this.totalSinDescuentos === 0) return 0;
+    const porcentajeDescuento = (totalDesc / this.totalSinDescuentos) * 100;
+    const descuento = (this.totalManoDeObraSinIva * porcentajeDescuento) / 100;
+    return this.roundToNearestThousandOrFiveHundred(descuento);
+  }
+
+  get manoDeObraAPagarSinIva() {
+    return Math.max(
+      this.totalManoDeObraSinIva - this.descuentoManoDeObraAPagarSinIva,
+      0,
+    );
+  }
 }

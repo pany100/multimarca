@@ -178,7 +178,7 @@ function ResumenUltimaSemana() {
                   },
                 }}
               >
-                <Link href={`/dashboard/ordenes-reparacion/${rep.idOrep}/ver`}>
+                <Link href={`/dashboard/ordenes-reparacion/${rep.idOrep}`}>
                   *{" "}
                   {`${rep.auto} - ${formatFechaUTC(rep.fecha)}: ${getFormattedPrice(rep.manoDeObra)}`}
                 </Link>
@@ -229,7 +229,7 @@ function ResumenUltimaSemana() {
               },
             }}
           >
-            <Link href={`/dashboard/ordenes-reparacion/${params.row.id}/ver`}>
+            <Link href={`/dashboard/ordenes-reparacion/${params.row.id}`}>
               * {`${params.row.auto} - ${formatFechaUTC(params.row.fecha)}`}
             </Link>
           </Typography>
