@@ -59,6 +59,7 @@ export const config = {
     "/api/tipo-operacion/:path*",
     "/api/turnos/:path*",
     "/api/feriados/:path*",
+    "/api/documentos-generales/:path*",
     // Agrega aquí más rutas segn sea necesario
   ],
 };

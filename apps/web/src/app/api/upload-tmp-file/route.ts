@@ -3,7 +3,7 @@ import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 
-const allowedExtensions = ["jpg", "jpeg", "png", "pdf"];
+const allowedExtensions = ["jpg", "jpeg", "png", "pdf", "doc", "docx"];
 const maxFileSize = 10 * 1024 * 1024; // 10MB
 
 export async function POST(request: NextRequest) {

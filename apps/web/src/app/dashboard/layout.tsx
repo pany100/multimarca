@@ -10,6 +10,7 @@ import ChecklistIcon from "@mui/icons-material/Checklist";
 import CompareArrowsIcon from "@mui/icons-material/CompareArrows";
 import ContentPasteIcon from "@mui/icons-material/ContentPaste";
 import DateRangeIcon from "@mui/icons-material/DateRange";
+import DescriptionIcon from "@mui/icons-material/Description";
 import DescriptionOutlinedIcon from "@mui/icons-material/DescriptionOutlined";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import ExpandLess from "@mui/icons-material/ExpandLess";
@@ -313,6 +314,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Datos varios",
             icono: <DescriptionOutlinedIcon />,
             ruta: "/dashboard/datos-varios",
+          },
+          {
+            permiso: "AdministracionGeneral",
+            texto: "Documentación General",
+            icono: <DescriptionIcon />,
+            ruta: "/dashboard/documentacion-general",
           },
         ],
       },

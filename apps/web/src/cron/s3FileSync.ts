@@ -176,9 +176,12 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile, ctx: RunContext)
       archivo.empleadoRecategorizacionMonotributoId === null &&
       archivo.empleadoCurriculumId === null &&
       archivo.empleadoCredencialPagoId === null &&
+      archivo.empleadoDniFrenteId === null &&
+      archivo.empleadoDniDorsoId === null &&
       archivo.llegadaTardeCertificadoId === null &&
       archivo.inasistenciaCertificadoId === null &&
-      archivo.certificadoEstudioRutaId === null;
+      archivo.certificadoEstudioRutaId === null &&
+      archivo.documentoGeneralId === null;
     const motivo = esDesreferenciado ? "desreferenciado" : "ListoParaBorrar";
 
     let msg = "";
@@ -260,9 +263,32 @@ async function procesarUnArchivoPending(archivo: CustomFile, ctx: RunContext): P
   try {
     const folder = archivo.ordenReparacionId
       ? "scanner"
-      : archivo.presupuestoCedulaId || archivo.ventaCedulaId
-        ? "cedula-verde"
-        : "recibos";
+      : archivo.reciboORepId
+        ? "recibos"
+        : archivo.reparacionDeTerceroId
+          ? "recibos-terceros"
+          : archivo.presupuestoCedulaId || archivo.ventaCedulaId
+            ? "cedula-verde"
+            : archivo.empleadoLicenciaConducirId
+              ? "licencias-conducir"
+              : archivo.empleadoInscripcionMonotributoId ||
+                  archivo.empleadoRecategorizacionMonotributoId
+                ? "monotributo"
+                : archivo.empleadoCurriculumId
+                  ? "curriculum"
+                  : archivo.empleadoCredencialPagoId
+                    ? "credenciales-pago"
+                    : archivo.empleadoDniFrenteId || archivo.empleadoDniDorsoId
+                      ? "dni"
+                      : archivo.llegadaTardeCertificadoId
+                        ? "certificados-llegada-tarde"
+                        : archivo.inasistenciaCertificadoId
+                          ? "certificados-inasistencia"
+                          : archivo.certificadoEstudioRutaId
+                            ? "certificados-estudio"
+                            : archivo.documentoGeneralId
+                              ? "documentacion"
+                              : "otros";
     const dev = isDev ? " [SIMULADO]" : "";
 
     if (archivo.finalPath) {
@@ -384,9 +410,12 @@ async function procesarArchivosParaBorrar(ctx: RunContext) {
           empleadoRecategorizacionMonotributoId: null,
           empleadoCurriculumId: null,
           empleadoCredencialPagoId: null,
+          empleadoDniFrenteId: null,
+          empleadoDniDorsoId: null,
           llegadaTardeCertificadoId: null,
           inasistenciaCertificadoId: null,
           certificadoEstudioRutaId: null,
+          documentoGeneralId: null,
           status: { not: EstadoArchivo.Borrado },
         },
         { status: EstadoArchivo.ListoParaBorrar },

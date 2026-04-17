@@ -616,6 +616,8 @@ model CustomFile {
   llegadaTardeCertificado LlegadaTarde?      @relation("LlegadaTardeCertificado", fields: [llegadaTardeCertificadoId], references: [id])
   inasistenciaCertificado Inasistencia?      @relation("InasistenciaCertificado", fields: [inasistenciaCertificadoId], references: [id])
   certificadoEstudioRuta CertificadoEstudio? @relation("CertificadoEstudioRuta", fields: [certificadoEstudioRutaId], references: [id])
+  documentoGeneralId    Int?                 @unique
+  documentoGeneral      DocumentoGeneral?    @relation("DocumentoGeneralArchivo", fields: [documentoGeneralId], references: [id])
 
   @@index([status])
   @@index([reciboORepId], map: "CustomFile_reciboORepId_fkey")
@@ -1194,4 +1196,12 @@ model AjustePrecio {
   @@index([ordenReparacionId])
   @@index([ventaId])
   @@index([presupuestoId])
+}
+
+model DocumentoGeneral {
+  id        Int         @id @default(autoincrement())
+  titulo    String      @db.VarChar(255)
+  archivo   CustomFile? @relation("DocumentoGeneralArchivo")
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 }

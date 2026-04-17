@@ -5,9 +5,11 @@ import FilesInput from "./files/FilesInput";
 type Props = {
   name: string;
   label: string;
+  /** Override the accept attribute on the file input (e.g. ".pdf,.doc,.docx") */
+  accept?: string;
 };
 
-function CustomFileInput({ name, label }: Props) {
+function CustomFileInput({ name, label, accept }: Props) {
   const {
     control,
     formState: { errors },
@@ -24,6 +26,7 @@ function CustomFileInput({ name, label }: Props) {
             label={label}
             filePath={value || null}
             setFilePath={(fileUrl) => onChange(fileUrl)}
+            accept={accept}
           />
           {errors[name] && (
             <FormHelperText error sx={{ mt: 1 }}>

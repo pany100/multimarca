@@ -16,6 +16,8 @@ type Props = {
   filePath: string | null;
   setFilePath: (file: string | null) => void;
   acceptedTypes?: "images" | "pdfs" | "both";
+  /** Override the accept attribute on the file input (e.g. ".pdf,.doc,.docx") */
+  accept?: string;
   onErrorUploading?: (error: string) => void;
 };
 
@@ -24,6 +26,7 @@ function FilesInput({
   label,
   setFilePath,
   acceptedTypes = "both",
+  accept: acceptOverride,
   onErrorUploading,
 }: Props) {
   const [loading, setLoading] = useState(false);
@@ -249,7 +252,7 @@ function FilesInput({
                   Cambiar archivo
                   <input
                     type="file"
-                    accept={getAcceptAttribute()}
+                    accept={acceptOverride || getAcceptAttribute()}
                     onChange={handleFileChange}
                     hidden
                   />
@@ -266,7 +269,7 @@ function FilesInput({
               {getButtonText()}
               <input
                 type="file"
-                accept={getAcceptAttribute()}
+                accept={acceptOverride || getAcceptAttribute()}
                 onChange={handleFileChange}
                 hidden
               />
