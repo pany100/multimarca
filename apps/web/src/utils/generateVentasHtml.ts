@@ -234,6 +234,9 @@ export default function generateClientOrderHtml(venta: any): string {
           </div>
           ${calculoVO.manoDeObraForRecibosDiscriminado.length > 0 ? `
           <hr class="divider" style="border-color: rgba(0, 0, 0, 0.12);"/>
+          <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
+            Mano de obra
+          </div>
           <div style='
             display: grid;
             grid-template-columns: 80% 20%;

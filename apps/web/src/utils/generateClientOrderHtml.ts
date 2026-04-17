@@ -336,10 +336,12 @@ export default function generateClientOrderHtml(repair: any): string {
         ${(() => {
           const incrementoSinAbsorber = calculoVO.incrementoInternoSinAbsorber;
           let incrementoAplicado = false;
-          return repair.reparacionesDeTercero
-            .map(
-              (el: { nombre: string; precioVenta: number }) => {
-                let precio = calculoVO.getPrecioFinalForReparaciones(el.precioVenta);
+          return (
+            repair.reparacionesDeTercero
+              .map((el: { nombre: string; precioVenta: number }) => {
+                let precio = calculoVO.getPrecioFinalForReparaciones(
+                  el.precioVenta,
+                );
                 if (!incrementoAplicado && incrementoSinAbsorber > 0) {
                   precio += incrementoSinAbsorber;
                   incrementoAplicado = true;
@@ -352,23 +354,28 @@ export default function generateClientOrderHtml(repair: any): string {
                   $${Number(precio).toLocaleString("es-AR")}
                 </div>
               `;
-              },
-            )
-            .join("") +
-          repair.repuestosUsados
-            .filter((el: any) => !el.ocultoParaCliente)
-            .map(
-              (el: {
-                stock: { id: number; name: string; reportName?: string | null };
-                precioVenta: number;
-                unidadesConsumidas: number;
-              }) => {
-                let precio = calculoVO.getPrecioFinalForRepuestos(el.precioVenta);
-                if (!incrementoAplicado && incrementoSinAbsorber > 0) {
-                  precio += incrementoSinAbsorber;
-                  incrementoAplicado = true;
-                }
-                return `
+              })
+              .join("") +
+            repair.repuestosUsados
+              .filter((el: any) => !el.ocultoParaCliente)
+              .map(
+                (el: {
+                  stock: {
+                    id: number;
+                    name: string;
+                    reportName?: string | null;
+                  };
+                  precioVenta: number;
+                  unidadesConsumidas: number;
+                }) => {
+                  let precio = calculoVO.getPrecioFinalForRepuestos(
+                    el.precioVenta,
+                  );
+                  if (!incrementoAplicado && incrementoSinAbsorber > 0) {
+                    precio += incrementoSinAbsorber;
+                    incrementoAplicado = true;
+                  }
+                  return `
                 <div class="TypographyBody1">
                   ${el.unidadesConsumidas} - ${el.stock.reportName || el.stock.name}
                 </div>
@@ -376,13 +383,19 @@ export default function generateClientOrderHtml(repair: any): string {
                   $${Number(precio).toLocaleString("es-AR")}
                 </div>
             `;
-              },
-            )
-            .join("");
+                },
+              )
+              .join("")
+          );
         })()}
         </div>
-        ${calculoVO.manoDeObraForRecibosDiscriminado.length > 0 ? `
+        ${
+          calculoVO.manoDeObraForRecibosDiscriminado.length > 0
+            ? `
         <hr class="divider" style="border-color: rgba(0, 0, 0, 0.12);"/>
+        <div class="TypographyBody1" style="font-weight: bold; margin-top: 1px; margin-bottom: 4px;">
+          Mano de obra
+        </div>
         <div style='
           display: grid;
           grid-template-columns: 80% 20%;
@@ -390,7 +403,11 @@ export default function generateClientOrderHtml(repair: any): string {
         '>
         ${calculoVO.manoDeObraForRecibosDiscriminado
           .map(
-            (t: { pdfName: string | null; descripcion: string; precioConIva: number }) => `
+            (t: {
+              pdfName: string | null;
+              descripcion: string;
+              precioConIva: number;
+            }) => `
             <div class="TypographyBody1">
               ${t.pdfName || t.descripcion}
             </div>
@@ -401,7 +418,9 @@ export default function generateClientOrderHtml(repair: any): string {
           )
           .join("")}
         </div>
-        ` : ""}
+        `
+            : ""
+        }
         <hr class="divider" style="border-color: rgba(0, 0, 0, 0.12);"/>
         <div style='
           display: grid;
