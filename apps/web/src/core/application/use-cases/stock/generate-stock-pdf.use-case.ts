@@ -1,5 +1,6 @@
 import { GenerateStockPdfDto } from "@/core/application/dto/stock.dto";
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import { calcularPrecioVenta } from "@/utils/stock-pricing";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import puppeteer from "puppeteer";
@@ -16,15 +17,21 @@ export class GenerateStockPdfUseCase {
           <meta charset="utf-8">
           <title>Lista de Stock</title>
           <style>
-            body { font-family: Arial, sans-serif; margin: 20px; color: #333; }
-            h1 { color: #1976d2; text-align: center; margin-bottom: 20px; }
-            .date { text-align: right; margin-bottom: 20px; font-style: italic; }
-            table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-            th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-            th { background-color: #f2f2f2; font-weight: bold; }
+            body { font-family: Arial, sans-serif; margin: 10px; color: #333; font-size: 11px; }
+            h1 { color: #1976d2; text-align: center; margin-bottom: 10px; font-size: 18px; }
+            .date { text-align: right; margin-bottom: 10px; font-style: italic; }
+            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
+            th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; word-wrap: break-word; overflow-wrap: break-word; }
+            th { background-color: #f2f2f2; font-weight: bold; white-space: nowrap; }
+            td:nth-child(1) { width: 6%; }
+            td:nth-child(2) { width: 34%; }
+            td:nth-child(3) { width: 18%; }
+            td:nth-child(4) { width: 14%; white-space: nowrap; }
+            td:nth-child(5) { width: 14%; white-space: nowrap; }
+            td:nth-child(6) { width: 14%; white-space: nowrap; }
             tr:nth-child(even) { background-color: #f9f9f9; }
             .low-stock { background-color: #ffcccc !important; }
-            .footer { text-align: center; font-size: 12px; margin-top: 30px; color: #666; }
+            .footer { text-align: center; font-size: 10px; margin-top: 20px; color: #666; }
           </style>
         </head>
         <body>
@@ -37,15 +44,10 @@ export class GenerateStockPdfUseCase {
               <tr>
                 <th>ID</th>
                 <th>Nombre</th>
-                <th>Marca</th>
-                <th>Precio de compra</th>
-                <th>Unidades</th>
-                <th>Valor de reposición</th>
-                <th>Rótulo</th>
-                <th>Margen</th>
-                <th>IVA compra</th>
-                <th>IVA venta</th>
                 <th>Proveedor</th>
+                <th>Precio Compra</th>
+                <th>Precio Venta</th>
+                <th>Unidades en stock</th>
               </tr>
             </thead>
             <tbody>
@@ -55,15 +57,10 @@ export class GenerateStockPdfUseCase {
                 <tr class="${item.units < item.restockValue ? "low-stock" : ""}">
                   <td>${item.id}</td>
                   <td>${item.name}</td>
-                  <td>${item.brand}</td>
-                  <td>${getFormattedPrice(item.buyPrice)}</td>
-                  <td>${item.units === null ? 0 : item.units}</td>
-                  <td>${item.restockValue || ""}</td>
-                  <td>${item.label || ""}</td>
-                  <td>${item.markup || ""}</td>
-                  <td>${item.buyIva != null ? `${item.buyIva}%` : ""}</td>
-                  <td>${item.sellIva != null ? `${item.sellIva}%` : ""}</td>
                   <td>${item.proveedor?.name || ""}</td>
+                  <td>${getFormattedPrice(item.buyPrice)}</td>
+                  <td>${getFormattedPrice(calcularPrecioVenta(item.buyPrice, item.markup, item.sellIva))}</td>
+                  <td>${item.units === null ? 0 : item.units}</td>
                 </tr>
               `
                 )
@@ -81,8 +78,8 @@ export class GenerateStockPdfUseCase {
 
     await page.setContent(htmlContent);
     const pdfBuffer = await page.pdf({
-      format: "A4",
-      landscape: true,
+      format: "Legal",
+      landscape: false,
       printBackground: true,
       margin: { top: "20px", right: "20px", bottom: "20px", left: "20px" },
     });
