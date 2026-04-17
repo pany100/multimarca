@@ -59,7 +59,7 @@ export class GenerateStockPdfUseCase {
                   <td>${item.name}</td>
                   <td>${item.proveedor?.name || ""}</td>
                   <td>${getFormattedPrice(item.buyPrice)}</td>
-                  <td>${getFormattedPrice(calcularPrecioVenta(item.buyPrice, item.markup, item.sellIva))}</td>
+                  <td>${getFormattedPrice(calcularPrecioVenta(item.buyPrice, item.markup, item.sellIva) ?? 0)}</td>
                   <td>${item.units === null ? 0 : item.units}</td>
                 </tr>
               `
