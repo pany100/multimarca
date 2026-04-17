@@ -1,5 +1,6 @@
 "use client";
 
+import SensitiveField from "@/components/SensitiveField";
 import { getFormattedDate } from "@/utils/fieldHelper";
 import { Box, Button, CardContent, Grid, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
@@ -41,6 +42,12 @@ function MecanicosPersonalData() {
               CUIT/CUIL
             </Typography>
             <Typography>{empleado?.dni || "No especificado"}</Typography>
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <Typography variant="body2" color="text.secondary">
+              Clave Fiscal
+            </Typography>
+            <SensitiveField value={empleado?.claveFiscal} />
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">

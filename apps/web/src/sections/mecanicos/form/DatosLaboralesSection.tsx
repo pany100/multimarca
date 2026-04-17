@@ -1,3 +1,4 @@
+import CustomInputPassword from "@/components/formV2/CustomInputPassword";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import { Box, Grid, Typography } from "@mui/material";
@@ -13,10 +14,13 @@ function DatosLaboralesSection() {
       </Box>
 
       <Grid container spacing={3}>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={4}>
           <CustomInputText name="dni" label="CUIT/CUIL" />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={4}>
+          <CustomInputPassword name="claveFiscal" label="Clave Fiscal" />
+        </Grid>
+        <Grid item xs={12} sm={4}>
           <CustomSelect
             options={[
               { value: "Mecanico", label: "Mecanico" },

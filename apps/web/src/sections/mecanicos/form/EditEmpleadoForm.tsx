@@ -17,6 +17,7 @@ function EditEmpleadoForm({ empleado }: Props) {
     defaultValues: {
       name: empleado.name,
       dni: empleado.dni,
+      claveFiscal: empleado.claveFiscal,
       email: empleado.email,
       phone: empleado.phone,
       city: empleado.city,

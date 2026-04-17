@@ -6,6 +6,7 @@ export class EmpleadoVO {
     public readonly name: string,
     public readonly startDate: Date | null,
     public readonly dni: string | null,
+    public readonly claveFiscal: string | null,
     public readonly address: string | null,
     public readonly city: string | null,
     public readonly state: string | null,

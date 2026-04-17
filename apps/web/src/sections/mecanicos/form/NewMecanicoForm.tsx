@@ -15,6 +15,7 @@ export const schema = yup.object({
       "El CUIT/CUIL debe tener formato 00-00000000-0 o solo números"
     )
     .nullable(),
+  claveFiscal: yup.string().nullable(),
   email: yup.string().email("El email es inválido").nullable(),
   phone: yup.string().nullable(),
   city: yup.string().nullable(),

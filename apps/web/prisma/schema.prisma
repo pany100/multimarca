@@ -182,6 +182,7 @@ model Empleado {
   name              String                    @unique @db.VarChar(150)
   start_date        DateTime?
   dni               String?
+  claveFiscal       String?                   @db.VarChar(50)
   address           String?                   @db.VarChar(150)
   city              String?                   @db.VarChar(150)
   state             String?                   @db.VarChar(150)

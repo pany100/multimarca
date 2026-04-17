@@ -20,6 +20,7 @@ const baseMecanicoSchema = z.object({
     )
     .nullable()
     .optional(),
+  claveFiscal: z.string().nullable().optional(),
   email: z.string().email("El email es inválido").nullable().optional(),
   phone: z.string().nullable().optional(),
   city: z.string().nullable().optional(),
