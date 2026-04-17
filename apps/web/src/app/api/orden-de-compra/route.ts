@@ -68,15 +68,17 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { fecha, precioTotal, proveedorId, items } = body;
 
-    if (!fecha || !proveedorId || !Array.isArray(items) || items.length === 0) {
+    if (!fecha || !proveedorId) {
       return NextResponse.json(
-        { error: "Datos de orden de compra inválidos o faltantes" },
+        { error: "Fecha y proveedor son requeridos" },
         { status: 400 }
       );
     }
 
+    const itemsArray = Array.isArray(items) ? items : [];
+
     // Calcular precioTotal a partir de los items
-    const precioTotalCalculado = items.reduce((total: number, item: any) => {
+    const precioTotalCalculado = itemsArray.reduce((total: number, item: any) => {
       const precio = Number(item.precioUnitario) || 0;
       const iva = Number(item.iva) || 0;
       return total + precio * (1 + iva / 100) * Number(item.cantidad);
@@ -88,14 +90,16 @@ export async function POST(request: Request) {
           fecha: fecha ? new Date(fecha) : new Date(),
           proveedorId,
           precioTotal: precioTotalCalculado,
-          items: {
-            create: items.map((item: any) => ({
-              cantidad: item.cantidad,
-              stockId: item.stockId,
-              precioUnitario: item.precioUnitario ?? null,
-              iva: item.iva ?? null,
-            })),
-          },
+          ...(itemsArray.length > 0 && {
+            items: {
+              create: itemsArray.map((item: any) => ({
+                cantidad: item.cantidad,
+                stockId: item.stockId,
+                precioUnitario: item.precioUnitario ?? null,
+                iva: item.iva ?? null,
+              })),
+            },
+          }),
         },
         include: {
           proveedor: true,
@@ -107,7 +111,7 @@ export async function POST(request: Request) {
         },
       });
 
-      for (const item of items) {
+      for (const item of itemsArray) {
         const stock = await prisma.stock.findUnique({
           where: { id: item.stockId },
           select: { units: true },

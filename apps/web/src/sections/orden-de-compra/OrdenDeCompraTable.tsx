@@ -4,7 +4,7 @@ import CustomTable, {
   InheritedTableProps,
 } from "@/components/tableV2/CustomTable";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import VisibilityIcon from "@mui/icons-material/Visibility";
+import EditIcon from "@mui/icons-material/Edit";
 import { MenuItem, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 
@@ -73,13 +73,13 @@ function OrdenDeCompraTable({
     const defaultActions = extraActions ? extraActions(params) : [];
     const customActions: React.ReactNode[] = [
       <MenuItem
-        key="view"
+        key="admin"
         onClick={() =>
-          router.push(`/dashboard/orden-de-compra/${params.id}/ver`)
+          router.push(`/dashboard/orden-de-compra/${params.id}`)
         }
       >
-        <VisibilityIcon sx={{ mr: 1 }} />
-        Ver
+        <EditIcon sx={{ mr: 1 }} />
+        Administrar
       </MenuItem>,
     ];
     return customActions.concat(defaultActions);
@@ -88,7 +88,7 @@ function OrdenDeCompraTable({
     <CustomTable
       title="Órdenes de Compra"
       apiEndpoint="/api/orden-de-compra"
-      extraActions={extraActions}
+      extraActions={customActions}
       ctaCb={ctaCb}
       columns={columns}
       {...rest}

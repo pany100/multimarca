@@ -194,6 +194,67 @@ export async function DELETE(
   }
 }
 
+export async function PATCH(
+  request: Request,
+  { params }: { params: { id: string } },
+) {
+  try {
+    const id = parseInt(params.id);
+
+    if (isNaN(id)) {
+      return NextResponse.json(
+        { error: "ID de orden de compra inválido" },
+        { status: 400 },
+      );
+    }
+
+    const body = await request.json();
+    const { fecha, proveedorId } = body;
+
+    const data: any = {};
+    if (fecha !== undefined) data.fecha = new Date(fecha);
+    if (proveedorId !== undefined) data.proveedorId = proveedorId;
+
+    if (Object.keys(data).length === 0) {
+      return NextResponse.json(
+        { error: "No se proporcionaron datos para actualizar" },
+        { status: 400 },
+      );
+    }
+
+    const ordenActualizada = await prisma.ordenDeCompra.update({
+      where: { id },
+      data,
+      include: {
+        proveedor: true,
+        items: {
+          include: {
+            stock: true,
+          },
+        },
+      },
+    });
+
+    const ordenConLabel = {
+      ...ordenActualizada,
+      items: ordenActualizada.items.map((item) => ({
+        ...item,
+        name: item.stock.name,
+        label: item.stock.label,
+        stockId: item.stock.id,
+      })),
+    };
+
+    return NextResponse.json(ordenConLabel);
+  } catch (error) {
+    console.error("Error al actualizar orden de compra:", error);
+    return NextResponse.json(
+      { error: "Error al actualizar la orden de compra" },
+      { status: 500 },
+    );
+  }
+}
+
 export async function GET(
   request: Request,
   { params }: { params: { id: string } },
