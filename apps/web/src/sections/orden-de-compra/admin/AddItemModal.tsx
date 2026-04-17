@@ -253,20 +253,54 @@ function AddItemModal({
             onChange={(e) => setIva(e.target.value)}
           />
         </Box>
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{ mb: 3 }}>
           <TextField
-            label="Precio con IVA"
-            value={precioConIva ? getFormattedPrice(precioConIva) : ""}
+            label="Subtotal item"
+            type="number"
+            value={
+              precioUnitarioNum != null && precioUnitarioNum > 0
+                ? precioConIva * cantidadNum
+                : ""
+            }
             fullWidth
-            disabled
+            InputProps={{ readOnly: true }}
             sx={{
-              "& .MuiInputBase-root.Mui-disabled": {
-                backgroundColor: "#f5f5f5",
+              "& .MuiInputBase-root": {
+                bgcolor: "grey.100",
+                cursor: "default",
+              },
+              "& .MuiInputBase-input": {
+                cursor: "default",
               },
             }}
-            helperText="Precio con IVA = Precio Unitario × (1 + IVA / 100)"
           />
         </Box>
+        {precioUnitarioNum != null && precioUnitarioNum > 0 && (
+          <Box
+            sx={{
+              p: 1.5,
+              bgcolor: "grey.50",
+              border: "1px solid",
+              borderColor: "divider",
+              borderRadius: 1,
+              mb: 2,
+            }}
+          >
+            <Typography variant="body2" color="text.secondary" gutterBottom>
+              Subtotal item = Precio Unitario × (1 + IVA / 100) × Cantidad
+            </Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              <Typography
+                component="span"
+                variant="body2"
+                sx={{ fontWeight: 800 }}
+              >
+                {getFormattedPrice(precioConIva * cantidadNum)}
+              </Typography>
+              {` = ${getFormattedPrice(precioUnitarioNum)} × (1 + ${ivaNum || 0}/100) × ${cantidadNum}`}
+            </Typography>
+          </Box>
+        )}
         {error && <Typography color="error">{error}</Typography>}
       </DialogContent>
       <DialogActions sx={{ mr: 2, mb: 2 }}>

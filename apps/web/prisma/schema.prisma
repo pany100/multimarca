@@ -404,6 +404,7 @@ model OrdenDeCompra {
   id          Int                 @id @default(autoincrement())
   fecha       DateTime            @default(now())
   precioTotal Decimal             @db.Decimal(10, 2)
+  percepcion  Decimal             @default(0) @db.Decimal(10, 2)
   proveedorId Int
   proveedor   Proveedor           @relation(fields: [proveedorId], references: [id])
   items       OrdenDeCompraItem[]

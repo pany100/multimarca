@@ -5,6 +5,8 @@ import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { OrdenDeCompraProvider } from "@/sections/orden-de-compra/admin/contexts/OrdenDeCompraContext";
 import OrdenDeCompraInfoSection from "@/sections/orden-de-compra/admin/OrdenDeCompraInfoSection";
 import OrdenDeCompraItemsSection from "@/sections/orden-de-compra/admin/OrdenDeCompraItemsSection";
+import PercepcionSection from "@/sections/orden-de-compra/admin/PercepcionSection";
+import ResumenOrdenCompraSection from "@/sections/orden-de-compra/admin/ResumenOrdenCompraSection";
 import { useOrdenDeCompra } from "@/sections/orden-de-compra/hooks/useOrdenDeCompra";
 import { Box, CircularProgress, Grid } from "@mui/material";
 
@@ -41,16 +43,17 @@ const OrdenDeCompraAdminPage = ({ params }: { params: { id: string } }) => {
           <OrdenDeCompraHeader />
 
           <Grid container spacing={3} alignItems="stretch">
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
-              <Box sx={{ width: "100%" }}>
-                <OrdenDeCompraInfoSection />
-              </Box>
+            <Grid item xs={12}>
+              <OrdenDeCompraInfoSection />
             </Grid>
-          </Grid>
-
-          <Grid container spacing={3} sx={{ mt: 1 }}>
             <Grid item xs={12}>
               <OrdenDeCompraItemsSection />
+            </Grid>
+            <Grid item xs={12}>
+              <PercepcionSection />
+            </Grid>
+            <Grid item xs={12}>
+              <ResumenOrdenCompraSection />
             </Grid>
           </Grid>
         </Box>

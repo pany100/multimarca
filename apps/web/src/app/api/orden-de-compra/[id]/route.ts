@@ -8,7 +8,7 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { fecha, precioTotal, proveedorId, items } = body;
+    const { fecha, precioTotal, proveedorId, items, percepcion } = body;
 
     if (!proveedorId || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -59,7 +59,8 @@ export async function PUT(
           }
         }
 
-        // Calcular precioTotal a partir de los items
+        // Calcular precioTotal a partir de los items + percepcion
+        const percepcionNum = Number(percepcion) || 0;
         const precioTotalCalculado = items.reduce(
           (total: number, item: any) => {
             const precio = Number(item.precioUnitario) || 0;
@@ -67,7 +68,7 @@ export async function PUT(
             return total + precio * (1 + iva / 100) * Number(item.cantidad);
           },
           0,
-        );
+        ) + percepcionNum;
 
         // Actualizar la orden de compra
         const ordenActualizada = await prisma.ordenDeCompra.update({
@@ -76,6 +77,7 @@ export async function PUT(
             fecha: fecha ? new Date(fecha) : new Date(),
             proveedorId,
             precioTotal: precioTotalCalculado,
+            percepcion: percepcionNum,
             items: {
               deleteMany: {},
               create: items.map((item: any) => ({
@@ -209,17 +211,31 @@ export async function PATCH(
     }
 
     const body = await request.json();
-    const { fecha, proveedorId } = body;
+    const { fecha, proveedorId, percepcion } = body;
 
     const data: any = {};
     if (fecha !== undefined) data.fecha = new Date(fecha);
     if (proveedorId !== undefined) data.proveedorId = proveedorId;
+    if (percepcion !== undefined) data.percepcion = Number(percepcion) || 0;
 
     if (Object.keys(data).length === 0) {
       return NextResponse.json(
         { error: "No se proporcionaron datos para actualizar" },
         { status: 400 },
       );
+    }
+
+    // Si cambió la percepción, recalcular precioTotal
+    if (percepcion !== undefined) {
+      const items = await prisma.ordenDeCompraItem.findMany({
+        where: { ordenDeCompraId: id },
+      });
+      const totalItems = items.reduce((total, item) => {
+        const precio = Number(item.precioUnitario) || 0;
+        const iva = Number(item.iva) || 0;
+        return total + precio * (1 + iva / 100) * item.cantidad;
+      }, 0);
+      data.precioTotal = totalItems + (Number(percepcion) || 0);
     }
 
     const ordenActualizada = await prisma.ordenDeCompra.update({

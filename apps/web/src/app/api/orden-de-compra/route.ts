@@ -66,7 +66,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { fecha, precioTotal, proveedorId, items } = body;
+    const { fecha, precioTotal, proveedorId, items, percepcion } = body;
 
     if (!fecha || !proveedorId) {
       return NextResponse.json(
@@ -76,13 +76,14 @@ export async function POST(request: Request) {
     }
 
     const itemsArray = Array.isArray(items) ? items : [];
+    const percepcionNum = Number(percepcion) || 0;
 
-    // Calcular precioTotal a partir de los items
+    // Calcular precioTotal a partir de los items + percepcion
     const precioTotalCalculado = itemsArray.reduce((total: number, item: any) => {
       const precio = Number(item.precioUnitario) || 0;
       const iva = Number(item.iva) || 0;
       return total + precio * (1 + iva / 100) * Number(item.cantidad);
-    }, 0);
+    }, 0) + percepcionNum;
 
     const nuevaOrdenDeCompra = await prisma.$transaction(async (prisma) => {
       const ordenCreada = await prisma.ordenDeCompra.create({
@@ -90,6 +91,7 @@ export async function POST(request: Request) {
           fecha: fecha ? new Date(fecha) : new Date(),
           proveedorId,
           precioTotal: precioTotalCalculado,
+          percepcion: percepcionNum,
           ...(itemsArray.length > 0 && {
             items: {
               create: itemsArray.map((item: any) => ({

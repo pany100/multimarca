@@ -5,14 +5,19 @@ async function recalcularPrecioTotal(
   tx: Parameters<Parameters<typeof prisma.$transaction>[0]>[0],
   ordenDeCompraId: number,
 ) {
-  const items = await tx.ordenDeCompraItem.findMany({
-    where: { ordenDeCompraId },
-  });
-  const precioTotal = items.reduce((total, item) => {
+  const [items, orden] = await Promise.all([
+    tx.ordenDeCompraItem.findMany({ where: { ordenDeCompraId } }),
+    tx.ordenDeCompra.findUnique({
+      where: { id: ordenDeCompraId },
+      select: { percepcion: true },
+    }),
+  ]);
+  const totalItems = items.reduce((total, item) => {
     const precio = Number(item.precioUnitario) || 0;
     const iva = Number(item.iva) || 0;
     return total + precio * (1 + iva / 100) * item.cantidad;
   }, 0);
+  const precioTotal = totalItems + Number(orden?.percepcion ?? 0);
   await tx.ordenDeCompra.update({
     where: { id: ordenDeCompraId },
     data: { precioTotal },

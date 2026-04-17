@@ -137,13 +137,15 @@ const OrdenDeCompraDetallePage = ({ params }: { params: { id: string } }) => {
     (item: any) => item.precioUnitario != null,
   );
 
-  const precioTotalCalculado = hasPrecios
+  const percepcion = Number(orden.percepcion ?? 0);
+  const subtotalItems = hasPrecios
     ? orden.items.reduce((total: number, item: any) => {
         const precio = Number(item.precioUnitario) || 0;
         const iva = Number(item.iva) || 0;
         return total + precio * (1 + iva / 100) * Number(item.cantidad);
       }, 0)
-    : orden.precioTotal;
+    : Number(orden.precioTotal) - percepcion;
+  const precioTotalCalculado = subtotalItems + percepcion;
 
   return (
     <Box sx={{ p: 3 }}>
@@ -302,6 +304,25 @@ const OrdenDeCompraDetallePage = ({ params }: { params: { id: string } }) => {
             >
               No hay items en esta orden de compra
             </Typography>
+          )}
+
+          {percepcion > 0 && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                mt: 2,
+                gap: 1,
+                alignItems: "center",
+              }}
+            >
+              <Typography variant="body1" color="text.secondary">
+                Percepción:
+              </Typography>
+              <Typography variant="body1" fontWeight="medium">
+                {getFormattedPrice(percepcion)}
+              </Typography>
+            </Box>
           )}
         </CardContent>
       </Card>
