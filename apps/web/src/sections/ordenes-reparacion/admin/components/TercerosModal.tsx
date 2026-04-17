@@ -230,6 +230,26 @@ const TercerosModal = ({
             <Divider sx={{ my: 0.5 }} />
           </Grid>
 
+          {/* Precio de venta calculado — read-only, same pattern as RepuestosModal */}
+          <Grid item xs={12}>
+            <ORepTextField
+              label="Precio de venta (con IVA)"
+              type="number"
+              value={precioVenta}
+              InputProps={{ readOnly: true }}
+              disabled={loading}
+              sx={{
+                "& .MuiInputBase-root": {
+                  bgcolor: "grey.100",
+                  cursor: "default",
+                },
+                "& .MuiInputBase-input": {
+                  cursor: "default",
+                },
+              }}
+            />
+          </Grid>
+
           {/* Explanation box — same style as RepuestosModal */}
           {precioCompraNum != null && (
             <Grid item xs={12}>
