@@ -124,21 +124,63 @@ export async function PATCH(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { revisado, reciboEnviado } = body;
-    const dto = await validateRequest(
-      {
-        id,
-        revisado,
-        reciboEnviado,
+
+    // Si solo viene revisado/reciboEnviado, usar el flujo existente
+    const isStatusUpdate =
+      ("revisado" in body || "reciboEnviado" in body) &&
+      !("monto" in body) &&
+      !("fecha" in body);
+
+    if (isStatusUpdate) {
+      const { revisado, reciboEnviado } = body;
+      const dto = await validateRequest(
+        { id, revisado, reciboEnviado },
+        updateRevisadoYEnviadoSchema
+      );
+
+      const transaccionActualizada = await new UpdateRevisadoUseCase(
+        new TransaccionService(new PrismaIngresoVentaRepository())
+      ).execute(dto);
+
+      return NextResponse.json(transaccionActualizada);
+    }
+
+    // Actualización parcial de campos del ingreso
+    const updateData: any = {};
+
+    if ("fecha" in body) updateData.fecha = body.fecha;
+    if ("monto" in body) updateData.monto = body.monto;
+    if ("moneda" in body) updateData.moneda = body.moneda;
+    if ("cotizacionDolar" in body)
+      updateData.cotizacionDolar = body.cotizacionDolar;
+    if ("descripcion" in body) updateData.descripcion = body.descripcion;
+    if ("tipoOperacionId" in body)
+      updateData.tipoOperacionId = body.tipoOperacionId;
+    if ("gastosBancarios" in body)
+      updateData.gastosBancarios = body.gastosBancarios;
+    if ("gastosArba" in body) updateData.gastosArba = body.gastosArba;
+
+    // Si se cambia la fecha, actualizar dolarId
+    if (updateData.fecha) {
+      const dolar = await prisma.dolar.findFirst({
+        where: { fecha: { lte: new Date(updateData.fecha) } },
+        orderBy: { fecha: "desc" },
+      });
+      updateData.dolarId = dolar?.id ?? null;
+    }
+
+    const ingresoActualizado = await prisma.ingresoPorVenta.update({
+      where: { id },
+      data: updateData,
+      include: {
+        cliente: true,
+        venta: true,
+        cheque: chequeQueryData,
+        tipoOperacion: true,
       },
-      updateRevisadoYEnviadoSchema
-    );
+    });
 
-    const transaccionActualizada = await new UpdateRevisadoUseCase(
-      new TransaccionService(new PrismaIngresoVentaRepository())
-    ).execute(dto);
-
-    return NextResponse.json(transaccionActualizada);
+    return NextResponse.json(returnModelWithChequeData(ingresoActualizado));
   } catch (error) {
     return handleApiError(error);
   }

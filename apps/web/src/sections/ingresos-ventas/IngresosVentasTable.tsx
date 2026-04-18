@@ -162,7 +162,7 @@ function IngresosVentasTable({
       <MenuItem
         key="edit"
         onClick={() =>
-          router.push(`/dashboard/ingresos-ventas/${params.id}/ver`)
+          router.push(`/dashboard/ingresos-ventas/${params.id}`)
         }
       >
         <VisibilityIcon sx={{ mr: 1 }} />
