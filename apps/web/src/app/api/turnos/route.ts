@@ -42,6 +42,8 @@ export async function GET(request: Request) {
       query: searchParams.get("query") ?? "",
       fecha: searchParams.get("fecha") ?? undefined,
       future: searchParams.get("future") ?? undefined,
+      from: searchParams.get("from") ?? undefined,
+      to: searchParams.get("to") ?? undefined,
     };
     const dto = await validateRequest(
       raw as unknown,
@@ -57,6 +59,8 @@ export async function GET(request: Request) {
       query: dto.query,
       fecha: dto.fecha,
       future: dto.future,
+      from: dto.from,
+      to: dto.to,
     });
 
     return NextResponse.json(result);

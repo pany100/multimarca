@@ -124,6 +124,7 @@ function TurnosTable({
             extraActions={extraActions}
             ctaCb={ctaCb}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         ) : (
@@ -133,6 +134,7 @@ function TurnosTable({
             extraActions={extraActions}
             ctaCb={ctaCb}
             columns={columns}
+            searchByDate={true}
             {...rest}
           />
         )}

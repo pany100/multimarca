@@ -26,6 +26,8 @@ export type ListTurnosParams = {
   query: string;
   fecha?: string;
   future?: boolean;
+  from?: string;
+  to?: string;
 };
 
 export type ListTurnosResult = {

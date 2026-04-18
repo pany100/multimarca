@@ -18,13 +18,21 @@ const includeAutoOwner = {
 
 export class PrismaTurnoRepository implements TurnoRepository {
   async findMany(params: ListTurnosParams): Promise<ListTurnosResult> {
-    const { page, size, query, fecha, future } = params;
+    const { page, size, query, fecha, future, from, to } = params;
     const skip = page * size;
 
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     const fechaDia = fecha ? getBuenosAiresDayRangeUtc(fecha) : null;
+
+    const fechaFilter: Record<string, Date> = {};
+    if (from) fechaFilter.gte = new Date(from);
+    if (to) {
+      const endDate = new Date(to);
+      endDate.setHours(23, 59, 59, 999);
+      fechaFilter.lte = endDate;
+    }
 
     const where = {
       OR: query
@@ -42,6 +50,9 @@ export class PrismaTurnoRepository implements TurnoRepository {
         fecha: { gte: fechaDia.gte, lte: fechaDia.lte },
       }),
       ...(future && { fecha: { gte: today } }),
+      ...(Object.keys(fechaFilter).length > 0 &&
+        !fechaDia &&
+        !future && { fecha: fechaFilter }),
     };
 
     const [items, total] = await Promise.all([

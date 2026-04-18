@@ -11,6 +11,8 @@ export const listTurnosQuerySchema = z.object({
     .transform((v): boolean | undefined =>
       v === undefined ? undefined : v === "true"
     ),
+  from: z.string().optional(),
+  to: z.string().optional(),
 });
 
 export type ListTurnosQueryDto = z.infer<typeof listTurnosQuerySchema>;
