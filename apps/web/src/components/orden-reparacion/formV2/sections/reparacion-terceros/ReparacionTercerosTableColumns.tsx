@@ -5,7 +5,7 @@ import { GridColDef } from "@mui/x-data-grid";
 import Link from "next/link";
 
 export const getReparacionTercerosTableColumns = (
-  porcentajeRecargo?: number | string
+  porcentajeRecargo?: number | string,
 ): GridColDef[] => [
   {
     field: "proveedor",
@@ -32,7 +32,7 @@ export const getReparacionTercerosTableColumns = (
   },
   {
     field: "precioConRecargo",
-    headerName: `Precio con recargo (${porcentajeRecargo || 0}%)`,
+    headerName: `Precio con recargo (${porcentajeRecargo || 0}%) (Obsoleto)`,
     flex: 1,
     valueFormatter: (value: number) => getFormattedPrice(value || 0),
   },

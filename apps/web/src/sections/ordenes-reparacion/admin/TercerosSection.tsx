@@ -1,3 +1,5 @@
+import ResumenCostosFooter from "@/components/orden-reparacion/formV2/sections/resumen-costos/ResumenCostosFooter";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import AddIcon from "@mui/icons-material/Add";
 import { Box, Button, Card, CardContent, Typography } from "@mui/material";
 import { useState } from "react";
@@ -22,6 +24,7 @@ export interface ReparacionTercero {
 
 interface TercerosSectionProps {
   terceros: ReparacionTercero[];
+  totalReparacionesDeTerceros: number;
   porcentajeRecargo?: number;
   loading: boolean;
   onAddTercero: (data: {
@@ -55,6 +58,7 @@ interface TercerosSectionProps {
 
 const TercerosSection = ({
   terceros,
+  totalReparacionesDeTerceros,
   porcentajeRecargo,
   loading,
   onAddTercero,
@@ -114,6 +118,12 @@ const TercerosSection = ({
           onDelete={onDeleteTercero}
           loading={loading}
         />
+        <Box sx={{ my: 2 }}>
+          <ResumenCostosFooter
+            descripcion="Total de Reparaciones de terceros"
+            total={getFormattedPrice(totalReparacionesDeTerceros)}
+          />
+        </Box>
 
         <Box display="flex" justifyContent="flex-end" sx={{ mt: 1 }}>
           <Button

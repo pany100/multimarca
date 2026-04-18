@@ -16,6 +16,7 @@ const VentaTercerosSection = () => {
   return (
     <TercerosSection
       terceros={venta?.reparacionesDeTercero || []}
+      totalReparacionesDeTerceros={venta?.totalReparacionesDeTerceros || 0}
       porcentajeRecargo={venta?.porcentajeRecargo}
       loading={loading}
       onAddTercero={handleAddTercero}

@@ -17,6 +17,7 @@ const PresupuestoTercerosSection = () => {
   return (
     <TercerosSection
       terceros={presupuesto?.reparacionesDeTercero || []}
+      totalReparacionesDeTerceros={presupuesto?.totalReparacionesDeTerceros || 0}
       porcentajeRecargo={presupuesto?.porcentajeRecargo}
       loading={loading}
       onAddTercero={handleAddTercero}

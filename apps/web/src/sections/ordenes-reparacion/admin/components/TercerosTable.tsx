@@ -65,9 +65,7 @@ const TercerosTable = ({
       headerName: "Margen",
       width: 100,
       renderCell: (params) =>
-        params.row.markup != null
-          ? getFormattedPrice(params.row.markup)
-          : "-",
+        params.row.markup != null ? getFormattedPrice(params.row.markup) : "-",
     },
     {
       field: "iva",
@@ -81,12 +79,6 @@ const TercerosTable = ({
       headerName: "Precio Venta",
       width: 130,
       renderCell: (params) => getFormattedPrice(params.row.precioVenta),
-    },
-    {
-      field: "precioConRecargo",
-      headerName: `Precio con recargo (${porcentajeRecargo}%)`,
-      flex: 1,
-      valueFormatter: (value: number) => getFormattedPrice(value || 0),
     },
     {
       field: "recibo",
