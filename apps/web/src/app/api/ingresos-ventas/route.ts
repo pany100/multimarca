@@ -83,13 +83,6 @@ export async function POST(request: Request) {
       );
     }
 
-    if (!clienteId && !informacionCliente) {
-      return NextResponse.json(
-        { error: "Datos de ingreso por venta inválidos o faltantes" },
-        { status: 400 }
-      );
-    }
-
     if (
       !monto ||
       !fecha ||
@@ -102,6 +95,24 @@ export async function POST(request: Request) {
         { error: "Datos de ingreso por venta inválidos o faltantes" },
         { status: 400 }
       );
+    }
+
+    // Inferir clienteId/informacionCliente de la venta si no se proporcionan
+    let finalClienteId = clienteId;
+    let finalInformacionCliente = informacionCliente;
+    if (!finalClienteId && !finalInformacionCliente) {
+      const venta = await prisma.venta.findUnique({
+        where: { id: ventaId },
+        select: { clienteId: true, informacionCliente: true },
+      });
+      if (!venta) {
+        return NextResponse.json(
+          { error: "Venta no encontrada" },
+          { status: 404 }
+        );
+      }
+      finalClienteId = venta.clienteId;
+      finalInformacionCliente = venta.informacionCliente;
     }
 
     const dolar = await prisma.dolar.findFirst({
@@ -135,8 +146,8 @@ export async function POST(request: Request) {
     }
     const nuevoIngreso = await prisma.ingresoPorVenta.create({
       data: {
-        clienteId,
-        informacionCliente,
+        clienteId: finalClienteId,
+        informacionCliente: finalInformacionCliente,
         monto,
         moneda,
         descripcion,

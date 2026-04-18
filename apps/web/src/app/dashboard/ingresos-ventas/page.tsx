@@ -6,8 +6,11 @@ import IngresosVentasForm, {
   schema,
 } from "@/sections/ingresos-ventas/IngresosVentasForm";
 import IngresosVentasTable from "@/sections/ingresos-ventas/IngresosVentasTable";
+import { useRouter } from "next/navigation";
 
 const IngresosPorVentasPage = () => {
+  const router = useRouter();
+
   return (
     <ABMPage
       apiEndpoint="/api/ingresos-ventas"
@@ -15,6 +18,7 @@ const IngresosPorVentasPage = () => {
       form={IngresosVentasForm}
       schema={schema}
       crudActions={[CrudAction.ADD, CrudAction.EDIT, CrudAction.DELETE]}
+      onAddClick={() => router.push("/dashboard/ingresos-ventas/nueva")}
     />
   );
 };
