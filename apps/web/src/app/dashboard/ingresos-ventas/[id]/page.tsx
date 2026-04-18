@@ -5,12 +5,12 @@ import { useFetch } from "@/contexts/FetchContext";
 import { SnackbarProvider } from "@/contexts/SnackbarContext";
 import { useAuth } from "@/hooks/useAuth";
 import { IngresoVentaProvider } from "@/sections/ingresos-ventas/admin/contexts/IngresoVentaContext";
-import IngresoVentaEstadoSection from "@/sections/ingresos-ventas/admin/IngresoVentaEstadoSection";
+import IngresoVentaDetalleVentaSection from "@/sections/ingresos-ventas/admin/IngresoVentaDetalleVentaSection";
 import IngresoVentaGastosSection from "@/sections/ingresos-ventas/admin/IngresoVentaGastosSection";
+import IngresoVentaHeader from "@/sections/ingresos-ventas/admin/IngresoVentaHeader";
 import IngresoVentaInfoSection from "@/sections/ingresos-ventas/admin/IngresoVentaInfoSection";
 import IngresoVentaVentaSection from "@/sections/ingresos-ventas/admin/IngresoVentaVentaSection";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { Box, Button, CircularProgress, Grid, Typography } from "@mui/material";
+import { Box, CircularProgress, Grid, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -76,51 +76,31 @@ const IngresoVentaAdminPage = ({ params }: { params: { id: string } }) => {
     <SnackbarProvider>
       <IngresoVentaProvider ingreso={ingreso}>
         <Box sx={{ px: 3 }}>
-          {/* Header */}
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              mb: 3,
-            }}
-          >
-            <Button
-              variant="outlined"
-              startIcon={<ArrowBackIcon />}
-              sx={{ mr: 2 }}
-              onClick={() => router.push("/dashboard/ingresos-ventas")}
-            >
-              Volver
-            </Button>
-            <Typography variant="h5" component="h1">
-              Ingreso por Venta #{ingreso.id}
-            </Typography>
-          </Box>
+          <IngresoVentaHeader />
 
-          {/* Secciones */}
-          <Grid container spacing={3}>
-            {/* Info del pago + Venta asociada */}
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
+          {/* Fila 1: Información del pago + Gastos */}
+          <Grid container spacing={3} alignItems="stretch">
+            <Grid item xs={12} md={8} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <IngresoVentaInfoSection />
               </Box>
             </Grid>
-            <Grid item xs={12} xl={6} sx={{ display: "flex" }}>
-              <Box sx={{ width: "100%" }}>
-                <IngresoVentaVentaSection />
-              </Box>
-            </Grid>
-
-            {/* Gastos + Estado */}
-            <Grid item xs={12} md={6} sx={{ display: "flex" }}>
+            <Grid item xs={12} md={4} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
                 <IngresoVentaGastosSection />
               </Box>
             </Grid>
-            <Grid item xs={12} md={6} sx={{ display: "flex" }}>
+          </Grid>
+
+          {/* Fila 2: Venta asociada + Detalle de la venta */}
+          <Grid container spacing={3} sx={{ mt: 1 }}>
+            <Grid item xs={12} md={4} sx={{ display: "flex" }}>
               <Box sx={{ width: "100%" }}>
-                <IngresoVentaEstadoSection />
+                <IngresoVentaVentaSection />
               </Box>
+            </Grid>
+            <Grid item xs={12} md={8}>
+              <IngresoVentaDetalleVentaSection />
             </Grid>
           </Grid>
         </Box>

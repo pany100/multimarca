@@ -1,5 +1,6 @@
 import { TransaccionService } from "@/core/application/services/transaccion.service";
 import { UpdateRevisadoUseCase } from "@/core/application/use-cases/transacciones/update-revisado.use-case";
+import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
 import { PrismaIngresoVentaRepository } from "@/core/infrastructure/database/repositories/prisma-ingreso-venta.repository";
 import { updateRevisadoYEnviadoSchema } from "@/core/infrastructure/validation/schemas/resumen-transaccion.schema";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
@@ -159,6 +160,20 @@ export async function PATCH(
     if ("gastosBancarios" in body)
       updateData.gastosBancarios = body.gastosBancarios;
     if ("gastosArba" in body) updateData.gastosArba = body.gastosArba;
+    if ("chequeId" in body) updateData.chequeId = body.chequeId;
+
+    // Si se cambia la venta, actualizar clienteId/informacionCliente
+    if ("ventaId" in body) {
+      updateData.ventaId = body.ventaId;
+      const venta = await prisma.venta.findUnique({
+        where: { id: body.ventaId },
+        select: { clienteId: true, informacionCliente: true },
+      });
+      if (venta) {
+        updateData.clienteId = venta.clienteId;
+        updateData.informacionCliente = venta.informacionCliente;
+      }
+    }
 
     // Si se cambia la fecha, actualizar dolarId
     if (updateData.fecha) {
@@ -174,13 +189,52 @@ export async function PATCH(
       data: updateData,
       include: {
         cliente: true,
-        venta: true,
+        venta: {
+          include: {
+            repuestosUsados: { include: { stock: true } },
+            reparacionesDeTercero: {
+              include: { proveedor: true, reciboFile: true },
+            },
+            trabajosRealizados: true,
+            ingresos: {
+              include: { dolar: true, tipoOperacion: true },
+            },
+            ajustesPrecio: true,
+            cliente: true,
+          },
+        },
         cheque: chequeQueryData,
         tipoOperacion: true,
       },
     });
 
-    return NextResponse.json(returnModelWithChequeData(ingresoActualizado));
+    // Enriquecer datos de la venta
+    const result: any = returnModelWithChequeData(ingresoActualizado);
+    if (ingresoActualizado.venta) {
+      const calculo = ComprobanteCalculadoFactory.fromVenta(
+        ingresoActualizado.venta
+      );
+      result.venta = {
+        ...ingresoActualizado.venta,
+        totalAPagar: calculo.total,
+        totalPagado: calculo.totalPagado,
+        deuda: calculo.deuda,
+        totalRepuestos: calculo.totalRepuestos,
+        totalTerceros: calculo.totalTerceros,
+        totalManoDeObra: calculo.totalManoDeObra,
+        otrosPagos: ingresoActualizado.venta.ingresos
+          .filter((i) => i.id !== id)
+          .map((i) => ({
+            id: i.id,
+            fecha: i.fecha,
+            monto: i.monto,
+            moneda: i.moneda,
+            tipoOperacion: i.tipoOperacion?.label || "N/A",
+          })),
+      };
+    }
+
+    return NextResponse.json(result);
   } catch (error) {
     return handleApiError(error);
   }
@@ -228,7 +282,20 @@ export async function GET(
       where: { id },
       include: {
         cliente: true,
-        venta: true,
+        venta: {
+          include: {
+            repuestosUsados: { include: { stock: true } },
+            reparacionesDeTercero: {
+              include: { proveedor: true, reciboFile: true },
+            },
+            trabajosRealizados: true,
+            ingresos: {
+              include: { dolar: true, tipoOperacion: true },
+            },
+            ajustesPrecio: true,
+            cliente: true,
+          },
+        },
         cheque: chequeQueryData,
         tipoOperacion: true,
       },
@@ -241,7 +308,35 @@ export async function GET(
       );
     }
 
-    return NextResponse.json(returnModelWithChequeData(ingreso));
+    // Calcular datos de la venta
+    let ventaCalculada = null;
+    if (ingreso.venta) {
+      const calculo = ComprobanteCalculadoFactory.fromVenta(ingreso.venta);
+      ventaCalculada = {
+        ...ingreso.venta,
+        totalAPagar: calculo.total,
+        totalPagado: calculo.totalPagado,
+        deuda: calculo.deuda,
+        totalRepuestos: calculo.totalRepuestos,
+        totalTerceros: calculo.totalTerceros,
+        totalManoDeObra: calculo.totalManoDeObra,
+        otrosPagos: ingreso.venta.ingresos
+          .filter((i) => i.id !== ingreso.id)
+          .map((i) => ({
+            id: i.id,
+            fecha: i.fecha,
+            monto: i.monto,
+            moneda: i.moneda,
+            tipoOperacion: i.tipoOperacion?.label || "N/A",
+          })),
+      };
+    }
+
+    const result = returnModelWithChequeData(ingreso);
+    return NextResponse.json({
+      ...result,
+      venta: ventaCalculada,
+    });
   } catch (error) {
     console.error("Error al obtener ingreso por venta:", error);
     return NextResponse.json(

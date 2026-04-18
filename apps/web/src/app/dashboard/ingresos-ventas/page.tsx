@@ -17,7 +17,7 @@ const IngresosPorVentasPage = () => {
       table={IngresosVentasTable}
       form={IngresosVentasForm}
       schema={schema}
-      crudActions={[CrudAction.ADD, CrudAction.EDIT, CrudAction.DELETE]}
+      crudActions={[CrudAction.ADD, CrudAction.DELETE]}
       onAddClick={() => router.push("/dashboard/ingresos-ventas/nueva")}
     />
   );

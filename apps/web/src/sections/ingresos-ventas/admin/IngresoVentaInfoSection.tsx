@@ -1,14 +1,21 @@
 "use client";
 
+import ChequeData from "@/components/formV2/ChequeData";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import { useSnackbarContext } from "@/contexts/SnackbarContext";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import useTipoOperacion from "@/hooks/useTipoOperacion";
 import { CommonOrderCard } from "@/sections/ordenes-reparacion/admin/components/CommonOrderCard";
+import {
+  CHEQUE_OPERACION_IDS,
+  getChequeIdAndValidate,
+  getSchemaPropsForCheque,
+} from "@/utils/chequeUtils";
 import { getFormattedDate, getFormattedPrice } from "@/utils/fieldHelper";
 import { Chip, Grid, Typography } from "@mui/material";
 import { yupResolver } from "@hookform/resolvers/yup";
+import Link from "next/link";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { useIngresoVenta } from "./contexts/IngresoVentaContext";
@@ -28,6 +35,7 @@ const schema = yup.object({
   }),
   tipoOperacionId: yup.number().required("El tipo de operación es requerido"),
   descripcion: yup.string().required("La descripción es requerida"),
+  ...getSchemaPropsForCheque("tipoOperacionId"),
 });
 
 type FormData = yup.InferType<typeof schema>;
@@ -84,8 +92,15 @@ const IngresoVentaInfoSection = () => {
     });
   };
 
-  const handleSubmit = async (data: FormData) => {
+  const handleSubmit = async (data: any) => {
     try {
+      const isCheque = CHEQUE_OPERACION_IDS.includes(data.tipoOperacionId);
+
+      let chequeId = null;
+      if (isCheque) {
+        chequeId = await getChequeIdAndValidate(data, data.tipoOperacionId);
+      }
+
       const updated = await updateIngresoVenta(ingreso.id, {
         fecha: data.fecha,
         monto: data.monto,
@@ -93,6 +108,7 @@ const IngresoVentaInfoSection = () => {
         cotizacionDolar: data.moneda === "Dolar" ? data.cotizacionDolar : null,
         tipoOperacionId: data.tipoOperacionId,
         descripcion: data.descripcion,
+        ...(isCheque && chequeId ? { chequeId } : {}),
       });
       setIngreso(updated);
       setSnackbar({
@@ -110,6 +126,11 @@ const IngresoVentaInfoSection = () => {
   };
 
   const monedaWatch = methods.watch("moneda");
+  const tipoOpWatch = methods.watch("tipoOperacionId");
+  const isChequeForm = CHEQUE_OPERACION_IDS.includes(tipoOpWatch);
+  const isChequeDisplay = CHEQUE_OPERACION_IDS.includes(
+    ingreso.tipoOperacionId
+  );
 
   return (
     <CommonOrderCard
@@ -118,7 +139,7 @@ const IngresoVentaInfoSection = () => {
       onSubmit={handleSubmit}
       onOpen={handleOpenModal}
       loading={loading}
-      maxWidth="sm"
+      maxWidth="md"
       formContent={
         <Grid container spacing={2}>
           <Grid item xs={12} md={6}>
@@ -146,6 +167,11 @@ const IngresoVentaInfoSection = () => {
               options={tiposOperacion}
             />
           </Grid>
+          {isChequeForm && (
+            <Grid item xs={12}>
+              <ChequeData />
+            </Grid>
+          )}
           <Grid item xs={12}>
             <CustomInputText
               name="descripcion"
@@ -174,7 +200,17 @@ const IngresoVentaInfoSection = () => {
         </Grid>
         <Grid item xs={6} md={4}>
           <InfoField label="Tipo de Operación">
-            {ingreso.tipoOperacion?.label || "No especificado"}
+            {isChequeDisplay && ingreso.chequeId ? (
+              <Link
+                href={`/dashboard/cheques/${ingreso.chequeId}`}
+                style={{ textDecoration: "underline" }}
+              >
+                {ingreso.tipoOperacion?.label || "Cheque"}{" "}
+                {ingreso.cheque?.rechazado && "(Rechazado)"}
+              </Link>
+            ) : (
+              ingreso.tipoOperacion?.label || "No especificado"
+            )}
           </InfoField>
         </Grid>
         {ingreso.moneda === "Dolar" && ingreso.cotizacionDolar && (
