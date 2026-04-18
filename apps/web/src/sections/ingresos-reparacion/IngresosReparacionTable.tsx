@@ -6,8 +6,8 @@ import CustomTable, {
 import useRecibo from "@/hooks/useRecibo";
 import authFetch from "@/utils/authFetch";
 import { getFormattedPrice } from "@/utils/fieldHelper";
+import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import SendIcon from "@mui/icons-material/Send";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Alert, Checkbox, Chip, MenuItem, Snackbar } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import Link from "next/link";
@@ -162,13 +162,13 @@ function IngresosReparacionTable({
     const defaultActions = extraActions ? extraActions(params) : [];
     const customActions: React.ReactNode[] = [
       <MenuItem
-        key="edit"
+        key="admin"
         onClick={() =>
-          router.push(`/dashboard/ingresos-reparacion/${params.id}/ver`)
+          router.push(`/dashboard/ingresos-reparacion/${params.id}`)
         }
       >
-        <VisibilityIcon sx={{ mr: 1 }} />
-        Ver
+        <ManageAccountsIcon sx={{ mr: 1 }} />
+        Administrar
       </MenuItem>,
       <MenuItem key="recibo" onClick={() => handleExtraAction(params.id)}>
         <SendIcon sx={{ mr: 1 }} />

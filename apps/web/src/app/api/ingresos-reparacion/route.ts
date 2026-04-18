@@ -90,7 +90,6 @@ export async function POST(request: Request) {
     }
 
     if (
-      !clienteId ||
       !monto ||
       !fecha ||
       !moneda ||
@@ -99,9 +98,31 @@ export async function POST(request: Request) {
       !tipoOperacionId
     ) {
       return NextResponse.json(
-        { error: "Datos de ingreso por reparación inválidos o faltantes" },
+        { error: "Datos de ingreso por reparacion invalidos o faltantes" },
         { status: 400 }
       );
+    }
+
+    // Inferir clienteId del auto owner de la orden si no se proporciona
+    let finalClienteId = clienteId;
+    if (!finalClienteId) {
+      const orden = await prisma.ordenReparacion.findUnique({
+        where: { id: ordenReparacionId },
+        include: { auto: { select: { ownerId: true } } },
+      });
+      if (!orden) {
+        return NextResponse.json(
+          { error: "Orden de reparacion no encontrada" },
+          { status: 404 }
+        );
+      }
+      finalClienteId = orden.auto?.ownerId;
+      if (!finalClienteId) {
+        return NextResponse.json(
+          { error: "No se pudo determinar el cliente de la orden" },
+          { status: 400 }
+        );
+      }
     }
 
     const dolar = await prisma.dolar.findFirst({
@@ -135,7 +156,7 @@ export async function POST(request: Request) {
     }
     const nuevoIngreso = await prisma.ingresoPorReparacion.create({
       data: {
-        clienteId,
+        clienteId: finalClienteId,
         monto,
         moneda,
         descripcion,
