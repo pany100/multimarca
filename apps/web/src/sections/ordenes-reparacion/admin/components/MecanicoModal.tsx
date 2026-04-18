@@ -87,6 +87,7 @@ const MecanicoModal = ({
             onChange={(e) => setDetalle(e.target.value)}
             disabled={loading}
             fullWidth
+            spellCheck
           />
         </Box>
       </DialogContent>

@@ -23,6 +23,7 @@ function ORepTextField(props: TextFieldProps) {
           (e.target as HTMLElement).blur();
         }
       }}
+      spellCheck={!props.type || props.type === "text" ? true : undefined}
       {...props}
     />
   );

@@ -427,6 +427,7 @@ function DynamicForm<T extends FieldValues>({
             onChange={(e) =>
               handleFieldChange(field.name as keyof T, e.target.value)
             }
+            spellCheck
           />
         );
       case "cheque":
@@ -458,6 +459,7 @@ function DynamicForm<T extends FieldValues>({
             onChange={(e) =>
               handleFieldChange(field.name as keyof T, e.target.value)
             }
+            spellCheck={field.type === "text" || field.type === "email" ? true : undefined}
           />
         );
     }

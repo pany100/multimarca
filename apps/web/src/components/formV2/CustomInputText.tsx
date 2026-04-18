@@ -38,7 +38,7 @@ const CustomInputText = (props: TextFieldProps) => {
             autoCorrect: props.type === "text" ? "on" : undefined,
             autoCapitalize: props.type === "text" ? "on" : undefined,
           }}
-          spellCheck={props.type === "text" ? true : undefined}
+          spellCheck={!props.type || props.type === "text" ? true : undefined}
           sx={{
             "& input[type=number]::-webkit-outer-spin-button, & input[type=number]::-webkit-inner-spin-button":
               {

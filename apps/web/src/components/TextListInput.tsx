@@ -301,6 +301,7 @@ function TextListInput({
                   variant="outlined"
                   margin="dense"
                   onKeyDown={handleKeyDown}
+                  spellCheck
                   inputProps={{
                     maxLength: maxLength,
                     "aria-label": label,

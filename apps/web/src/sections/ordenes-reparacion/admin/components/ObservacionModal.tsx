@@ -72,6 +72,7 @@ const ObservacionModal = ({
             setValue(e.target.value);
             if (error) setError("");
           }}
+          spellCheck
           placeholder="Describa los trabajos realizados"
           helperText={
             error ||

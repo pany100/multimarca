@@ -52,6 +52,7 @@ const CrearTareaDialog = ({ open, onClose, onCrear }: CrearTareaDialogProps) => 
           fullWidth
           value={descripcion}
           onChange={(e) => setDescripcion(e.target.value)}
+          spellCheck
         />
       </DialogContent>
       <DialogActions>

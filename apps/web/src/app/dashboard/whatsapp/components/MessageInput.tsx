@@ -127,6 +127,7 @@ export default function MessageInput(props: {
             }
           }}
           disabled={sending}
+          spellCheck
         />
         <IconButton
           onClick={handleSubmit}

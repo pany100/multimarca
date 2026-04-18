@@ -89,6 +89,7 @@ const TareaAdministrativaModal = ({
             disabled={loading}
             fullWidth
             required
+            spellCheck
           />
         </Box>
       </DialogContent>

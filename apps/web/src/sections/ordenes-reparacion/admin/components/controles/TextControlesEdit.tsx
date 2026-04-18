@@ -47,6 +47,7 @@ function TextControlesEdit({ textControls, isEditing }: Props) {
               value={currentValue}
               placeholder={`Ingrese información sobre ${control.name.toLowerCase()}`}
               onChange={(e) => updateControl(control, e.target.value)}
+              spellCheck
               disabled={!isEditing}
               sx={{
                 "& .MuiOutlinedInput-root": {

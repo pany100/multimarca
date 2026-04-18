@@ -35,6 +35,7 @@ function GroupTextControlesEdit({ controls, onChange }: Props) {
               defaultValue={control.valor}
               placeholder={`Ingrese información sobre ${control.name.toLowerCase()}`}
               onBlur={(e) => onChange(control.id, e.target.value)}
+              spellCheck
               sx={{
                 "& .MuiOutlinedInput-root": {
                   borderRadius: 1,

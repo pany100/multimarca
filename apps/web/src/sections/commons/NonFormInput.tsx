@@ -13,6 +13,7 @@ const NonFormInput = ({ label, type, onChange }: Props) => {
       type={type}
       fullWidth
       onChange={(e) => onChange(e.target.value)}
+      spellCheck={type === "text" ? true : undefined}
     />
   );
 };

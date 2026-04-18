@@ -123,6 +123,7 @@ function ChequeForm({
             type="text"
             value={item?.["numeroCheque"] || ""}
             onChange={(e) => handleFieldChange("numeroCheque", e.target.value)}
+            spellCheck
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -136,6 +137,7 @@ function ChequeForm({
             type="text"
             value={item?.["banco"] || ""}
             onChange={(e) => handleFieldChange("banco", e.target.value)}
+            spellCheck
           />
         </Grid>
         <Grid item xs={12} md={6}>
@@ -162,6 +164,7 @@ function ChequeForm({
             type="text"
             value={item?.["emisor"] || ""}
             onChange={(e) => handleFieldChange("emisor", e.target.value)}
+            spellCheck
           />
         </Grid>
         <Grid item xs={12} md={12}>
