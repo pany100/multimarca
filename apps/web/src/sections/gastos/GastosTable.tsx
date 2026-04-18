@@ -121,6 +121,7 @@ function GastosTable({
       ctaCb={ctaCb}
       columns={columns}
       getRowClassName={getRowClassName}
+      searchByDate={true}
       {...rest}
     />
   );

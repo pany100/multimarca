@@ -1,3 +1,8 @@
+import { ListGastosUseCase } from "@/core/application/use-cases/gasto/list-gastos.use-case";
+import { PrismaGastoRepository } from "@/core/infrastructure/database/repositories/prisma-gasto.repository";
+import { listGastosQuerySchema } from "@/core/infrastructure/validation/schemas/gasto.schema";
+import { handleApiError } from "@/shared/middleware/error-handler.middleware";
+import { validateRequest } from "@/shared/middleware/validation.middleware";
 import {
   chequeQueryData,
   getChequeIdAndValidate,
@@ -11,11 +16,17 @@ import prisma from "src/lib/prisma";
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
-    const page = parseInt(searchParams.get("page") || "0");
-    const size = parseInt(searchParams.get("size") || "10");
-    const query = searchParams.get("query") || "";
+    const dto = await validateRequest(
+      {
+        page: searchParams.get("page") || "0",
+        size: searchParams.get("pageSize") || searchParams.get("size") || "10",
+        query: searchParams.get("query") || "",
+        from: searchParams.get("from"),
+        to: searchParams.get("to"),
+      },
+      listGastosQuerySchema
+    );
 
-    // Obtener el token de la cabecera de autorización
     const authHeader = request.headers.get("authorization");
     if (!authHeader) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
@@ -23,12 +34,9 @@ export async function GET(request: Request) {
 
     const token = authHeader.split(" ")[1];
     const decodedToken = JSON.parse(atob(token.split(".")[1]));
-    // Obtener el rol del usuario desde la base de datos
     const user = await prisma.usuario.findUnique({
       where: { id: decodedToken.userId },
-      include: {
-        rol: true,
-      },
+      include: { rol: true },
     });
 
     if (!user || !user.rol) {
@@ -37,85 +45,17 @@ export async function GET(request: Request) {
         { status: 403 }
       );
     }
-    const skip = page * size;
 
-    const whereClause: any = {
-      OR: [
-        { id: { equals: parseInt(query) || undefined } },
-        { nombre: { contains: query } },
-        { categoria: { nombre: { contains: query } } },
-        { mecanico: { name: { contains: query } } },
-        { detalle: { contains: query } },
-        { proveedor: { name: { contains: query } } },
-      ],
-      AND: [
-        {
-          categoria: {
-            OR: [
-              { roles: { none: {} } },
-              { roles: { some: { name: user.rol.name } } },
-            ],
-          },
-        },
-      ],
-    };
-
-    // If there's a query, add formatted date search
-    if (query && query.trim() !== "") {
-      // Use raw query to find gastos where the formatted date contains the query
-      const formattedDateMatches = await prisma.$queryRaw<{ id: number }[]>`
-        SELECT id FROM Gasto 
-        WHERE DATE_FORMAT(fecha, '%e/%c/%Y') LIKE ${`%${query}%`}
-      `;
-
-      // Only add to OR clause if we found matches
-      if (formattedDateMatches.length > 0) {
-        const matchingIds = formattedDateMatches.map((match) => match.id);
-        whereClause.OR.push({ id: { in: matchingIds } });
-      }
-    }
-
-    const [gastos, total] = await Promise.all([
-      prisma.gasto.findMany({
-        where: whereClause,
-        skip,
-        take: size,
-        orderBy: [
-          { fecha: "desc" },
-          { categoriaId: "asc" },
-          { proveedorId: "asc" },
-          { mecanicoId: "asc" },
-        ],
-        include: {
-          categoria: {
-            include: {
-              roles: true,
-            },
-          },
-          tipoOperacion: true,
-          mecanico: true,
-          proveedor: true,
-          cheque: chequeQueryData,
-        },
-      }),
-      prisma.gasto.count({
-        where: whereClause,
-      }),
-    ]);
+    const result = await new ListGastosUseCase(
+      new PrismaGastoRepository()
+    ).execute({ ...dto, userRoleName: user.rol.name });
 
     return NextResponse.json({
-      items: returnAllModelsWithChequeData(gastos),
-      total,
-      page,
-      size,
-      totalPages: Math.ceil(total / size),
+      ...result,
+      items: returnAllModelsWithChequeData(result.items),
     });
-  } catch (error) {
-    console.error("Error al obtener gastos:", error);
-    return NextResponse.json(
-      { error: "Error interno del servidor" },
-      { status: 500 }
-    );
+  } catch (e) {
+    return handleApiError(e);
   }
 }
 export async function POST(request: Request) {

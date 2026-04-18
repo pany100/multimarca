@@ -1,11 +1,89 @@
 import { UpdateRevisadoYEnviadoDto } from "@/core/application/dto/resumen.dto";
-import { GastoRepository } from "@/core/domain/repositories/gasto.repository";
+import {
+  GastoRepository,
+  ListGastosParams,
+} from "@/core/domain/repositories/gasto.repository";
 import { TransaccionRepository } from "@/core/domain/repositories/transaccion.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
+import { PageResult, prismaPaged } from "@/shared/utils/pagination";
+import { chequeQueryData } from "@/utils/chequeUtils";
 
 export class PrismaGastoRepository
   implements TransaccionRepository, GastoRepository
 {
+  async listPaged(args: ListGastosParams): Promise<PageResult<any>> {
+    const { page, size, query, from, to, userRoleName } = args;
+
+    const whereClause: any = {
+      OR: [
+        { id: { equals: parseInt(query) || undefined } },
+        { nombre: { contains: query } },
+        { categoria: { nombre: { contains: query } } },
+        { mecanico: { name: { contains: query } } },
+        { detalle: { contains: query } },
+        { proveedor: { name: { contains: query } } },
+      ],
+      AND: [
+        {
+          categoria: {
+            OR: [
+              { roles: { none: {} } },
+              { roles: { some: { name: userRoleName } } },
+            ],
+          },
+        },
+      ],
+    };
+
+    if (query && query.trim() !== "") {
+      const formattedDateMatches = await prisma.$queryRaw<{ id: number }[]>`
+        SELECT id FROM Gasto
+        WHERE DATE_FORMAT(fecha, '%e/%c/%Y') LIKE ${`%${query}%`}
+      `;
+      if (formattedDateMatches.length > 0) {
+        const matchingIds = formattedDateMatches.map((match) => match.id);
+        whereClause.OR.push({ id: { in: matchingIds } });
+      }
+    }
+
+    if (from || to) {
+      const fechaFilter: any = {};
+      if (from) fechaFilter.gte = new Date(from);
+      if (to) {
+        const endDate = new Date(to);
+        endDate.setHours(23, 59, 59, 999);
+        fechaFilter.lte = endDate;
+      }
+      whereClause.AND.push({ fecha: fechaFilter });
+    }
+
+    return prismaPaged(
+      prisma.gasto,
+      {
+        where: whereClause,
+        include: {
+          categoria: {
+            include: {
+              roles: true,
+            },
+          },
+          tipoOperacion: true,
+          mecanico: true,
+          proveedor: true,
+          cheque: chequeQueryData,
+        },
+        orderBy: [
+          { fecha: "desc" },
+          { categoriaId: "asc" },
+          { proveedorId: "asc" },
+          { mecanicoId: "asc" },
+        ],
+      },
+      page,
+      size
+    );
+  }
+
   async update(dto: UpdateRevisadoYEnviadoDto) {
     return prisma.gasto.update({
       where: { id: dto.id },
