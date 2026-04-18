@@ -32,6 +32,7 @@ export async function GET(
                 dolar: true,
               },
             },
+            ajustesPrecio: true,
           },
         },
       },

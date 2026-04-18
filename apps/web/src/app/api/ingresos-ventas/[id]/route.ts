@@ -216,12 +216,14 @@ export async function PATCH(
       );
       result.venta = {
         ...ingresoActualizado.venta,
+        totalBase: calculo.totalBase,
         totalAPagar: calculo.total,
         totalPagado: calculo.totalPagado,
         deuda: calculo.deuda,
         totalRepuestos: calculo.totalRepuestos,
         totalTerceros: calculo.totalTerceros,
         totalManoDeObra: calculo.totalManoDeObra,
+        ajustesConMontoEfectivo: calculo.ajustesConMontoEfectivo,
         otrosPagos: ingresoActualizado.venta.ingresos
           .filter((i) => i.id !== id)
           .map((i) => ({
@@ -314,12 +316,14 @@ export async function GET(
       const calculo = ComprobanteCalculadoFactory.fromVenta(ingreso.venta);
       ventaCalculada = {
         ...ingreso.venta,
+        totalBase: calculo.totalBase,
         totalAPagar: calculo.total,
         totalPagado: calculo.totalPagado,
         deuda: calculo.deuda,
         totalRepuestos: calculo.totalRepuestos,
         totalTerceros: calculo.totalTerceros,
         totalManoDeObra: calculo.totalManoDeObra,
+        ajustesConMontoEfectivo: calculo.ajustesConMontoEfectivo,
         otrosPagos: ingreso.venta.ingresos
           .filter((i) => i.id !== ingreso.id)
           .map((i) => ({

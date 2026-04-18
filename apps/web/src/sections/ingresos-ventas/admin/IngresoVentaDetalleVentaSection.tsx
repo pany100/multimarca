@@ -30,35 +30,57 @@ function LineItem({
   amount,
   sign,
   color,
+  sub,
+  badge,
 }: {
   label: string;
   amount: string;
   sign?: "+" | "-";
   color?: string;
+  sub?: string;
+  badge?: string;
 }) {
   return (
-    <Box
-      sx={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        py: 0.3,
-      }}
-    >
-      <Typography variant="body2" color="text.secondary">
-        {label}
-      </Typography>
-      <Typography
-        variant="body2"
+    <Box>
+      <Box
         sx={{
-          fontFamily: "monospace",
-          fontWeight: 500,
-          color: color ?? "text.secondary",
-          whiteSpace: "nowrap",
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          py: 0.3,
         }}
       >
-        {sign ? `${sign} ` : ""}$ {amount}
-      </Typography>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Typography variant="body2" color="text.secondary">
+            {label}
+          </Typography>
+          {badge && (
+            <Chip
+              size="small"
+              label={badge}
+              color="warning"
+              variant="outlined"
+              sx={{ height: 20, fontSize: "0.65rem" }}
+            />
+          )}
+        </Box>
+        <Typography
+          variant="body2"
+          sx={{
+            fontFamily: "monospace",
+            fontWeight: 500,
+            color: color ?? "text.secondary",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {sign ? `${sign} ` : ""}$ {amount}
+        </Typography>
+      </Box>
+      {sub && (
+        <Typography variant="caption" color="text.disabled" sx={{ pl: 1 }}>
+          {sub}
+        </Typography>
+      )}
     </Box>
   );
 }
@@ -75,7 +97,19 @@ const IngresoVentaDetalleVentaSection = () => {
       : 0;
 
   const otrosPagos = venta.otrosPagos ?? [];
-  const montoActual = Number(ingreso.monto);
+
+  const hasLegacy =
+    Number(venta.descuento ?? 0) > 0 || Number(venta.incremento ?? 0) > 0;
+
+  const ajustesEfectivos = venta.ajustesConMontoEfectivo ?? [];
+  const ajustesPrecio = venta.ajustesPrecio ?? [];
+
+  const precioFinalLocal =
+    Number(venta.totalTerceros ?? 0) +
+    Number(venta.totalRepuestos ?? 0) +
+    Number(venta.totalManoDeObra ?? 0) -
+    Number(venta.descuento ?? 0) +
+    Number(venta.incremento ?? 0);
 
   return (
     <Card>
@@ -84,7 +118,7 @@ const IngresoVentaDetalleVentaSection = () => {
           Detalle de la Venta #{venta.id}
         </Typography>
 
-        {/* Desglose de precios */}
+        {/* Desglose de costos */}
         <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, mb: 2 }}>
           <LineItem label="Repuestos" amount={fmt(venta.totalRepuestos)} />
           <LineItem
@@ -93,8 +127,96 @@ const IngresoVentaDetalleVentaSection = () => {
           />
           <LineItem label="Mano de obra" amount={fmt(venta.totalManoDeObra)} />
 
-          <Divider sx={{ my: 0.5 }} />
+          {/* Legacy: descuento/incremento */}
+          {hasLegacy && (
+            <>
+              {Number(venta.descuento ?? 0) > 0 && (
+                <LineItem
+                  label="Descuento"
+                  amount={fmt(venta.descuento)}
+                  sign="-"
+                  color="error.main"
+                  sub={venta.descripcionDescuento || undefined}
+                  badge="Deprecado"
+                />
+              )}
+              {Number(venta.incremento ?? 0) > 0 && (
+                <LineItem
+                  label="Incremento"
+                  amount={fmt(venta.incremento)}
+                  sign="+"
+                  color="success.main"
+                  sub={venta.descripcionIncremento || undefined}
+                  badge="Deprecado"
+                />
+              )}
+            </>
+          )}
 
+          {/* Precio Final Local (base + legacy, antes de ajustes nuevos) */}
+          {(ajustesPrecio.length > 0 || hasLegacy) && (
+            <>
+              <Divider sx={{ my: 0.5 }} />
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  py: 0.3,
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  fontWeight="bold"
+                  color="text.secondary"
+                >
+                  Precio Final Local
+                </Typography>
+                <Typography
+                  variant="body2"
+                  sx={{
+                    fontFamily: "monospace",
+                    fontWeight: 700,
+                    color: "text.primary",
+                  }}
+                >
+                  $ {fmt(precioFinalLocal)}
+                </Typography>
+              </Box>
+            </>
+          )}
+
+          {/* Ajustes nuevos */}
+          {ajustesEfectivos.length > 0 && (
+            <>
+              <Divider sx={{ my: 0.5 }} />
+              <Typography
+                variant="caption"
+                fontWeight="bold"
+                color="text.secondary"
+                sx={{ mb: 0.25 }}
+              >
+                Ajustes
+              </Typography>
+              {ajustesEfectivos.map((a: any, idx: number) => (
+                <LineItem
+                  key={idx}
+                  label={
+                    a.tipo === "porcentual"
+                      ? `${a.descripcion} (${Number(a.montoOriginal)}%)`
+                      : a.descripcion
+                  }
+                  amount={fmt(Math.abs(a.montoEfectivo))}
+                  sign={a.esDescuento ? "-" : "+"}
+                  color={a.esDescuento ? "error.main" : "success.main"}
+                  badge={a.esInterno ? "Oculto" : undefined}
+                />
+              ))}
+            </>
+          )}
+
+          {/* Total */}
+          <Divider sx={{ my: 0.5 }} />
           <Paper
             elevation={0}
             sx={{
@@ -108,7 +230,11 @@ const IngresoVentaDetalleVentaSection = () => {
               justifyContent="space-between"
               alignItems="center"
             >
-              <Typography variant="subtitle1" fontWeight="bold" color="primary.dark">
+              <Typography
+                variant="subtitle1"
+                fontWeight="bold"
+                color="primary.dark"
+              >
                 Total Venta
               </Typography>
               <Typography
@@ -148,9 +274,7 @@ const IngresoVentaDetalleVentaSection = () => {
                 </Typography>
               </TableCell>
               <TableCell>{getFormattedDate(ingreso.fecha)}</TableCell>
-              <TableCell>
-                {ingreso.tipoOperacion?.label || "N/A"}
-              </TableCell>
+              <TableCell>{ingreso.tipoOperacion?.label || "N/A"}</TableCell>
               <TableCell align="right">
                 <Typography variant="body2" fontWeight="bold">
                   {getFormattedPrice(ingreso.monto)}
@@ -210,13 +334,7 @@ const IngresoVentaDetalleVentaSection = () => {
         </Table>
 
         {/* Balance */}
-        <Box
-          sx={{
-            display: "flex",
-            flexDirection: "column",
-            gap: 0.5,
-          }}
-        >
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5 }}>
           <Box
             sx={{
               display: "flex",
