@@ -43,7 +43,7 @@ export async function GET(request: Request) {
         where: whereClause,
         skip,
         take: size,
-        orderBy: { fechaCobro: "asc" },
+        orderBy: { fechaCobro: "desc" },
       }),
       prisma.cheque.count({
         where: whereClause,
