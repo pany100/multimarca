@@ -75,12 +75,13 @@ export class TrabajoRealizado {
     /** Prisma devuelve JsonValue (number | number[] | null); se normaliza a number[] */
     diasParaRecordatorio?: unknown;
     iva?: number | null;
+    pdfName?: string | null;
   }) {
     return new TrabajoRealizado(
       p.descripcion.trim(),
       Money.from(p.precioUnitario),
       normalizeDiasParaRecordatorio(p.diasParaRecordatorio),
-      (p as any).pdfName ?? null,
+      p.pdfName ?? null,
       p.iva ?? null,
     );
   }
