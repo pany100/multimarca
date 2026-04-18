@@ -145,6 +145,7 @@ export class PrismaGastoRepository
                 incrementoInterno: true,
                 incremento: true,
                 porcentajeRecargo: true,
+                descuentoParaManoDeObra: true,
                 pagos: {
                   select: {
                     fechaPago: true,
@@ -185,6 +186,7 @@ export class PrismaGastoRepository
         incrementoInterno: true,
         incremento: true,
         porcentajeRecargo: true,
+        descuentoParaManoDeObra: true,
         auto: {
           select: {
             brand: true,

@@ -150,6 +150,7 @@ export const patchOrdenV2Schema = z.object({
   descripcionIncremento: z.string().nullable().optional(),
   ajustesPrecio: z.array(ajustePrecioItemSchema).optional(),
   modoAjustes: modoAjustesSchema.optional(),
+  descuentoParaManoDeObra: z.coerce.number().nullable().optional(),
 });
 
 export const addMecanicoToOrdenSchema = z.object({

@@ -157,6 +157,7 @@ export class PrismaVentaRepository implements VentaRepository {
         orden: number;
       }>;
       modoAjustes?: string;
+      descuentoParaManoDeObra?: number | null;
     }
   ): Promise<VentaWithRelations> {
     const currentVenta = await prisma.venta.findUnique({
@@ -239,6 +240,12 @@ export class PrismaVentaRepository implements VentaRepository {
           ? new Prisma.Decimal(dto.porcentajeRecargo)
           : null
       ) as any;
+    }
+
+    if (dto.descuentoParaManoDeObra !== undefined) {
+      updateData.descuentoParaManoDeObra = new Prisma.Decimal(
+        dto.descuentoParaManoDeObra ?? 0,
+      );
     }
 
     if (dto.modoAjustes !== undefined) {

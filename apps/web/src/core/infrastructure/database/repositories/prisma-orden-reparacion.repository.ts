@@ -249,6 +249,7 @@ export class PrismaOrdenReparacionRepository
         orden?: number;
       }>;
       modoAjustes?: string;
+      descuentoParaManoDeObra?: number | null;
     }
   ) {
     const dataToUpdate: any = {};
@@ -284,6 +285,8 @@ export class PrismaOrdenReparacionRepository
     if (dto.incremento !== undefined) dataToUpdate.incremento = dto.incremento;
     if (dto.descripcionIncremento !== undefined)
       dataToUpdate.descripcionIncremento = dto.descripcionIncremento;
+    if (dto.descuentoParaManoDeObra !== undefined)
+      dataToUpdate.descuentoParaManoDeObra = dto.descuentoParaManoDeObra ?? 0;
 
     if (dto.modoAjustes !== undefined)
       dataToUpdate.modoAjustes = dto.modoAjustes;

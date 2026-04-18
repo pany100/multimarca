@@ -11,6 +11,7 @@ export class ComprobanteCalculado {
     private readonly trabajos: TrabajoRealizado[],
     private readonly pagos: Pago[],
     private readonly ajustes: PriceAdjustments,
+    private readonly descuentoParaManoDeObraValue: number = 0,
   ) {}
 
   private roundToNearestThousandOrFiveHundred(value: number): number {
@@ -149,7 +150,7 @@ export class ComprobanteCalculado {
   }
 
   get manoDeObraAPagar() {
-    return Math.max(this.totalManoDeObra - this.descuentoManoDeObraAPagar, 0);
+    return Math.max(this.totalManoDeObra - this.descuentoManoDeObraAPagar - this.descuentoParaManoDeObraValue, 0);
   }
 
   get totalManoDeObraSinIva() {
@@ -170,7 +171,7 @@ export class ComprobanteCalculado {
 
   get manoDeObraAPagarSinIva() {
     return Math.max(
-      this.totalManoDeObraSinIva - this.descuentoManoDeObraAPagarSinIva,
+      this.totalManoDeObraSinIva - this.descuentoManoDeObraAPagarSinIva - this.descuentoParaManoDeObraValue,
       0,
     );
   }

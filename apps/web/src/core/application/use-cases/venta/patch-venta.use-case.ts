@@ -41,6 +41,8 @@ export class PatchVentaUseCase {
       updateData.ajustesPrecio = dto.ajustesPrecio;
     if (dto.modoAjustes !== undefined)
       updateData.modoAjustes = dto.modoAjustes;
+    if (dto.descuentoParaManoDeObra !== undefined)
+      updateData.descuentoParaManoDeObra = dto.descuentoParaManoDeObra;
 
     // Delegar al repositorio la lógica de mapeo y actualización
     const venta = await this.ventaRepository.patchVenta(ventaId, updateData);

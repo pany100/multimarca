@@ -73,6 +73,7 @@ export type OrdenForCalculo = {
   incremento: Decimal;
   incrementoInterno: Decimal;
   porcentajeRecargo: Decimal;
+  descuentoParaManoDeObra?: Decimal | number;
   repuestosUsados: OrdenReparacionWithRelationsForClient["repuestosUsados"];
   reparacionesDeTercero: OrdenReparacionWithRelationsForClient["reparacionesDeTercero"];
   trabajosRealizados: OrdenReparacionWithRelationsForClient["trabajosRealizados"];
@@ -97,6 +98,7 @@ export type VentaForCalculo = {
   descuento: Decimal;
   incremento: Decimal;
   porcentajeRecargo: Decimal;
+  descuentoParaManoDeObra?: Decimal | number;
   repuestosUsados: any[];
   reparacionesDeTercero: any[];
   trabajosRealizados: any[];
@@ -141,7 +143,8 @@ export class ComprobanteCalculadoFactory {
       terceros,
       trabajos,
       pagos,
-      priceAdjustments
+      priceAdjustments,
+      Number(orden.descuentoParaManoDeObra ?? 0),
     );
   }
 
@@ -183,7 +186,8 @@ export class ComprobanteCalculadoFactory {
       terceros,
       trabajos,
       pagos,
-      priceAdjustments
+      priceAdjustments,
+      Number(venta.descuentoParaManoDeObra ?? 0),
     );
   }
 

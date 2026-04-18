@@ -84,4 +84,5 @@ export const patchVentaSchema = z.object({
   estado: ventaEstadoEnum.optional(),
   ajustesPrecio: z.array(ajustePrecioItemSchema).optional(),
   modoAjustes: modoAjustesSchema.optional(),
+  descuentoParaManoDeObra: z.coerce.number().nullable().optional(),
 });
