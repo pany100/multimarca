@@ -6,4 +6,5 @@ export type ConfiguracionGeneral = {
 
 export interface ConfiguracionGeneralRepository {
   findById(id: number): Promise<ConfiguracionGeneral | null>;
+  findByNombre(nombre: string): Promise<ConfiguracionGeneral | null>;
 }

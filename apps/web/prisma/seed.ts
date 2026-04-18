@@ -376,6 +376,15 @@ async function main() {
     });
   }
   console.log("Carga de datos de Dólar completada.");
+
+  // Configuración General
+  console.log("Iniciando carga de configuración general...");
+  await prismaClient.configuracionGeneral.upsert({
+    where: { nombre: "Encabezado PDF" },
+    update: {},
+    create: { nombre: "Encabezado PDF", valor: "MT SERVICE MULTIMARCA" },
+  });
+  console.log("Carga de configuración general completada.");
 }
 
 main()

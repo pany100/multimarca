@@ -3,7 +3,7 @@ import { EstadoOrdenReparacion } from "@prisma/client";
 import { getFormattedPrice } from "./fieldHelper";
 import { generateAjustesRowsHtml } from "./generateAjustesHtml";
 
-export default function generateClientOrderHtml(repair: any): string {
+export default function generateClientOrderHtml(repair: any, encabezadoPdf?: string): string {
   const calculoVO = ComprobanteCalculadoFactory.fromOrden(repair);
   return `
   <!DOCTYPE html>
@@ -121,7 +121,7 @@ export default function generateClientOrderHtml(repair: any): string {
         </svg>
         <div>
           <div class="TypographyH5">
-            BOSCH CAR SERVICE MT MULTIMARCA
+            ${encabezadoPdf ?? "MT SERVICE MULTIMARCA"}
           </div>
           <div variant="TypographyBody2">
             Guemes 1798 entre José María Paz y Blois

@@ -244,6 +244,7 @@ export class ComprobanteCalculadoFactory {
         descripcion: t.descripcion || t.manoDeObra?.name || "",
         diasParaRecordatorio: t.diasParaRecordatorio || null,
         iva: t.iva ?? null,
+        pdfName: t.pdfName ?? null,
       })
     );
 
@@ -304,6 +305,7 @@ export class ComprobanteCalculadoFactory {
         descripcion: t.descripcion || t.manoDeObra?.name || "",
         diasParaRecordatorio: t.diasParaRecordatorio || null,
         iva: t.iva ?? null,
+        pdfName: t.pdfName ?? null,
       })
     );
 

@@ -32,6 +32,7 @@ const GroupContainer = styled("div")(() => ({
 type Props = {
   repair: any;
   avisoCubrevolante?: string;
+  encabezadoPdf?: string;
 };
 
 const DEFAULT_AVISO_CUBREVOLANTE = "Colocar cubrevolante, cubreasiento";
@@ -65,7 +66,7 @@ function sortControls(a: any, b: any) {
 }
 
 export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
-  ({ repair, avisoCubrevolante }, ref) => {
+  ({ repair, avisoCubrevolante, encabezadoPdf }, ref) => {
     const { checkControls, textControls, groupControls } = useControlesFetch();
     const [avisoDesdeConfig, setAvisoDesdeConfig] = useState<string>("");
 
@@ -98,7 +99,7 @@ export const OrdenMecanicoPdf = React.forwardRef<any, Props>(
       <div ref={ref}>
         <style>{setPageStyles()}</style>
         <PDFPage style={{ height: "auto" }}>
-          <TemplateHeader />
+          <TemplateHeader encabezadoPdf={encabezadoPdf} />
           <div style={{ marginBottom: 30 }}>
             <Typography
               variant="h6"

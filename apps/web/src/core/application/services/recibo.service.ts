@@ -7,10 +7,11 @@ export class ReciboService {
   constructor(private readonly pdf: PdfGeneratorPort) {}
 
   async generarReciboPdf(
-    ingreso: IngresoPorReparacionWithRelations
+    ingreso: IngresoPorReparacionWithRelations,
+    encabezadoPdf?: string,
   ): Promise<Buffer> {
     const reciboTemplate = new ReciboHtmlTemplate();
-    const html = reciboTemplate.generate(ingreso);
+    const html = reciboTemplate.generate(ingreso, encabezadoPdf);
     return this.pdf.generate(html, {
       format: "letter",
     });

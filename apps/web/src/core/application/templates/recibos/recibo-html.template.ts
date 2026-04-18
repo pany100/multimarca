@@ -3,7 +3,7 @@ import { IngresoPorReparacionWithRelations } from "@/core/infrastructure/databas
 import { getFormattedPrice } from "@/utils/fieldHelper";
 
 export class ReciboHtmlTemplate {
-  generate(ingresoPorReparacion: IngresoPorReparacionWithRelations): string {
+  generate(ingresoPorReparacion: IngresoPorReparacionWithRelations, encabezadoPdf?: string): string {
     const calculoVO = ComprobanteCalculadoFactory.fromOrden(
       ingresoPorReparacion.ordenReparacion
     );
@@ -114,7 +114,7 @@ export class ReciboHtmlTemplate {
         </svg>
         <div>
           <div class="TypographyH5">
-            BOSCH CAR SERVICE MT MULTIMARCA
+            ${encabezadoPdf ?? "MT SERVICE MULTIMARCA"}
           </div>
           <div variant="TypographyBody2">
             Guemes 1798 entre José María Paz y Blois

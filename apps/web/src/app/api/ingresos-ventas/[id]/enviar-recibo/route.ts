@@ -1,3 +1,4 @@
+import { PrismaConfiguracionGeneralRepository } from "@/core/infrastructure/database/repositories/prisma-configuracion-general.repository";
 import {
   sendWhatsAppMessage,
   uploadMedia,
@@ -40,8 +41,13 @@ export async function POST(
       );
     }
 
+    // Encabezado desde ConfiguracionGeneral
+    const configRepo = new PrismaConfiguracionGeneralRepository();
+    const headerConfig = await configRepo.findByNombre("Encabezado PDF");
+    const encabezadoPdf = headerConfig?.valor;
+
     // Genera el PDF
-    const pdfBuffer = await generarPdfRecibo(ingresoPorVenta);
+    const pdfBuffer = await generarPdfRecibo(ingresoPorVenta, encabezadoPdf);
 
     // Envía el PDF por WhatsApp
     const response = await enviarReciboViaWhatsApp(ingresoPorVenta, pdfBuffer);
@@ -83,11 +89,11 @@ async function enviarReciboViaWhatsApp(
   return message;
 }
 
-async function generarPdfRecibo(ingresoPorVenta: any): Promise<Buffer> {
+async function generarPdfRecibo(ingresoPorVenta: any, encabezadoPdf?: string): Promise<Buffer> {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  const html = generarReciboVentas(ingresoPorVenta);
+  const html = generarReciboVentas(ingresoPorVenta, encabezadoPdf);
   await page.setContent(html);
 
   const pdfBuffer = await page.pdf({

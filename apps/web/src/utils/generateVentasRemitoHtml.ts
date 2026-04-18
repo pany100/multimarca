@@ -3,6 +3,7 @@ import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-
 export default function generateVentasRemitoHtml(
   venta: any,
   tipo: "original" | "duplicado" = "original",
+  encabezadoPdf?: string,
 ): string {
   // Se mantiene el VO por compatibilidad (y para futuro), pero NO se usa para precios.
   ComprobanteCalculadoFactory.fromVenta(venta);
@@ -211,7 +212,7 @@ export default function generateVentasRemitoHtml(
             </svg>
             <div>
               <div class="TypographyH5">
-                BOSCH CAR SERVICE MT MULTIMARCA
+                ${encabezadoPdf ?? "MT SERVICE MULTIMARCA"}
               </div>
               <div class="TypographyBody2">
                 Guemes 1798 entre José María Paz y Blois

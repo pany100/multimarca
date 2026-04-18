@@ -11,6 +11,7 @@ import WorkDescription from "./WorkDescription";
 
 type Props = {
   repair: any;
+  encabezadoPdf?: string;
 };
 
 const setPageStyles = () => {
@@ -28,12 +29,12 @@ const setPageStyles = () => {
 };
 
 export const OrdenClientePdf = React.forwardRef<any, Props>(
-  ({ repair }, ref) => {
+  ({ repair, encabezadoPdf }, ref) => {
     return (
       <div ref={ref}>
         <style>{setPageStyles()}</style>
         <PDFPage>
-          <TemplateHeader />
+          <TemplateHeader encabezadoPdf={encabezadoPdf} />
           <Divider sx={{ borderColor: "common.black" }} />
           <CarHeader
             car={repair.auto}

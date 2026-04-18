@@ -3,6 +3,7 @@
 import ConfirmPrintModal from "@/components/ConfirmPrintModal";
 import OrdenClienteInterna from "@/components/orden-reparacion/pdf/OrdenClienteInterna";
 import { OrdenMecanicoPdf } from "@/components/orden-reparacion/pdf/OrdenMecanicoPdf";
+import authFetch from "@/utils/authFetch";
 import { getFormattedDateArg } from "@/utils/fieldHelper";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import CloseIcon from "@mui/icons-material/Close";
@@ -33,6 +34,17 @@ function OrdenHeader() {
   const { orden, setOrden } = useOrden();
   const [isSticky, setIsSticky] = useState(false);
   const [openConfirmPrintModal, setOpenConfirmPrintModal] = useState(false);
+  const [encabezadoPdf, setEncabezadoPdf] = useState<string | undefined>();
+
+  useEffect(() => {
+    authFetch("/api/configuracion-general?query=Encabezado+PDF&size=1")
+      .then((res) => res.json())
+      .then((data) => {
+        const item = data.items?.[0];
+        if (item) setEncabezadoPdf(item.valor);
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -400,10 +412,10 @@ function OrdenHeader() {
       {/* Hidden PDF components for printing */}
       <div style={{ display: "none" }}>
         {orden !== null && (
-          <OrdenMecanicoPdf ref={mechanicOrderRef} repair={orden} />
+          <OrdenMecanicoPdf ref={mechanicOrderRef} repair={orden} encabezadoPdf={encabezadoPdf} />
         )}
         {orden !== null && (
-          <OrdenClienteInterna ref={internClientOrderRef} repair={orden} />
+          <OrdenClienteInterna ref={internClientOrderRef} repair={orden} encabezadoPdf={encabezadoPdf} />
         )}
       </div>
     </>

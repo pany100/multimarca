@@ -68,13 +68,17 @@ export async function GET(
       );
     }
 
-    // Footer desde ConfiguracionGeneral (id 1 = orden de reparación)
+    // Footer y encabezado desde ConfiguracionGeneral
     const configRepo = new PrismaConfiguracionGeneralRepository();
-    const footerConfig = await configRepo.findById(1);
+    const [footerConfig, headerConfig] = await Promise.all([
+      configRepo.findById(1),
+      configRepo.findByNombre("Encabezado PDF"),
+    ]);
     const footerTexto = footerConfig?.valor ?? "";
+    const encabezadoPdf = headerConfig?.valor;
 
     // 1. Generar el PDF base usando puppeteer
-    const basePdfBuffer = await generateBasePdf(ordenReparacion, footerTexto);
+    const basePdfBuffer = await generateBasePdf(ordenReparacion, footerTexto, encabezadoPdf);
 
     // Inicializar el PDF final con el PDF base
     let finalPdfBuffer = basePdfBuffer;
@@ -158,10 +162,11 @@ export async function GET(
 async function generateBasePdf(
   repair: any,
   footerTexto: string,
+  encabezadoPdf?: string,
 ): Promise<Buffer> {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
-  const html = generateClientOrderHtml(repair);
+  const html = generateClientOrderHtml(repair, encabezadoPdf);
   await page.setContent(html);
 
   const pdfBuffer = await page.pdf({

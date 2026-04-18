@@ -8,6 +8,7 @@ import OrdenInternaTotal from "./OrdenInternaTotal";
 
 type Props = {
   repair: any;
+  encabezadoPdf?: string;
 };
 
 const setPageStyles = () => {
@@ -23,12 +24,12 @@ const setPageStyles = () => {
 };
 
 export const OrdenClienteInterna = React.forwardRef<any, Props>(
-  ({ repair }, ref) => {
+  ({ repair, encabezadoPdf }, ref) => {
     return (
       <div ref={ref}>
         <style>{setPageStyles()}</style>
         <PDFPage style={{ height: "auto" }}>
-          <TemplateHeader />
+          <TemplateHeader encabezadoPdf={encabezadoPdf} />
           <Divider sx={{ mt: 2, mb: 2, borderColor: "common.gray" }} />
           <CarHeader
             car={repair.auto}

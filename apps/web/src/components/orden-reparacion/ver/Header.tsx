@@ -24,7 +24,7 @@ import {
   useTheme,
 } from "@mui/material";
 import Link from "next/link";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 
 // Icons
@@ -41,6 +41,18 @@ function Header({ ordenReparacion }: { ordenReparacion: any }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { authFetch } = useFetch();
+
+  // Encabezado PDF desde configuración
+  const [encabezadoPdf, setEncabezadoPdf] = useState<string | undefined>();
+  useEffect(() => {
+    authFetch("/api/configuracion-general?query=Encabezado+PDF&size=1")
+      .then((res: any) => res.json())
+      .then((data: any) => {
+        const item = data.items?.[0];
+        if (item) setEncabezadoPdf(item.valor);
+      })
+      .catch(() => {});
+  }, [authFetch]);
 
   // Refs for printing
   const mechanicOrderRef = useRef(null);
@@ -592,12 +604,13 @@ function Header({ ordenReparacion }: { ordenReparacion: any }) {
       {/* Hidden PDF components for printing */}
       <div style={{ display: "none" }}>
         {ordenReparacion !== null && (
-          <OrdenMecanicoPdf ref={mechanicOrderRef} repair={ordenReparacion} />
+          <OrdenMecanicoPdf ref={mechanicOrderRef} repair={ordenReparacion} encabezadoPdf={encabezadoPdf} />
         )}
         {ordenReparacion !== null && (
           <OrdenClienteInterna
             ref={internClientOrderRef}
             repair={ordenReparacion}
+            encabezadoPdf={encabezadoPdf}
           />
         )}
       </div>

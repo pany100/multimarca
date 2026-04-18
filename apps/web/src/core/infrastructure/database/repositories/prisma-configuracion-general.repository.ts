@@ -18,4 +18,16 @@ export class PrismaConfiguracionGeneralRepository
       valor: row.valor,
     };
   }
+
+  async findByNombre(nombre: string): Promise<ConfiguracionGeneral | null> {
+    const row = await prisma.configuracionGeneral.findFirst({
+      where: { nombre },
+    });
+    if (!row) return null;
+    return {
+      id: row.id,
+      nombre: row.nombre,
+      valor: row.valor,
+    };
+  }
 }

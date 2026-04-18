@@ -51,13 +51,17 @@ export async function GET(
       );
     }
 
-    // Footer desde ConfiguracionGeneral (id 2 = presupuesto)
+    // Footer y encabezado desde ConfiguracionGeneral
     const configRepo = new PrismaConfiguracionGeneralRepository();
-    const footerConfig = await configRepo.findById(2);
+    const [footerConfig, headerConfig] = await Promise.all([
+      configRepo.findById(2),
+      configRepo.findByNombre("Encabezado PDF"),
+    ]);
     const footerTexto = footerConfig?.valor ?? "";
+    const encabezadoPdf = headerConfig?.valor;
 
     // Generar el PDF base usando puppeteer
-    const pdfBuffer = await generateBasePdf(presupuesto, footerTexto);
+    const pdfBuffer = await generateBasePdf(presupuesto, footerTexto, encabezadoPdf);
 
     // Devolver el PDF como descarga - convert Buffer to Uint8Array for compatibility
     return new Response(new Uint8Array(pdfBuffer), {
@@ -83,11 +87,12 @@ export async function GET(
 async function generateBasePdf(
   presupuesto: any,
   footerTexto: string,
+  encabezadoPdf?: string,
 ): Promise<Buffer> {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  const html = generateBudgetHtml(presupuesto);
+  const html = generateBudgetHtml(presupuesto, encabezadoPdf);
   await page.setContent(html);
 
   const pdfBuffer = await page.pdf({

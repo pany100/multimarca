@@ -8,7 +8,7 @@ const Header = styled("div")(() => ({
   marginBottom: 10,
 }));
 
-function TemplateHeader() {
+function TemplateHeader({ encabezadoPdf }: { encabezadoPdf?: string }) {
   return (
     <Header>
       <img
@@ -27,7 +27,7 @@ function TemplateHeader() {
             color: "common.black",
           }}
         >
-          BOSCH CAR SERVICE MT MULTIMARCA
+          {encabezadoPdf ?? "MT SERVICE MULTIMARCA"}
         </Typography>
         <Typography variant="body2" sx={{ color: "common.black" }}>
           Guemes 1798 entre José María Paz y Blois

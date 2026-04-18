@@ -1,3 +1,4 @@
+import { PrismaConfiguracionGeneralRepository } from "@/core/infrastructure/database/repositories/prisma-configuracion-general.repository";
 import generarReciboVentas from "@/utils/generarReciboVentas";
 import puppeteer from "puppeteer";
 import prisma from "src/lib/prisma";
@@ -50,7 +51,11 @@ export async function GET(
       );
     }
 
-    const pdfBuffer = await generarPdfRecibo(ingresoPorVenta);
+    const configRepo = new PrismaConfiguracionGeneralRepository();
+    const headerConfig = await configRepo.findByNombre("Encabezado PDF");
+    const encabezadoPdf = headerConfig?.valor;
+
+    const pdfBuffer = await generarPdfRecibo(ingresoPorVenta, encabezadoPdf);
 
     // Convert Buffer to Uint8Array which is compatible with Response
     return new Response(new Uint8Array(pdfBuffer), {
@@ -74,11 +79,11 @@ export async function GET(
   }
 }
 
-async function generarPdfRecibo(ingresoPorVenta: any): Promise<Buffer> {
+async function generarPdfRecibo(ingresoPorVenta: any, encabezadoPdf?: string): Promise<Buffer> {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  const html = generarReciboVentas(ingresoPorVenta);
+  const html = generarReciboVentas(ingresoPorVenta, encabezadoPdf);
   await page.setContent(html);
 
   const pdfBuffer = await page.pdf({
