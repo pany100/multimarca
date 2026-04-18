@@ -8,6 +8,8 @@ export async function GET(
 ) {
   try {
     const id = parseInt(params.id);
+    const url = new URL(request.url);
+    const tipo = url.searchParams.get("tipo") === "duplicado" ? "duplicado" : "original";
     const venta = await prisma.venta.findUnique({
       where: { id },
       include: {
@@ -35,7 +37,7 @@ export async function GET(
       });
     }
 
-    const basePdfBuffer = await generateBasePdf(venta);
+    const basePdfBuffer = await generateBasePdf(venta, tipo);
 
     return new Response(new Uint8Array(basePdfBuffer), {
       headers: {
@@ -58,12 +60,13 @@ export async function GET(
 }
 
 async function generateBasePdf(
-  venta: any
+  venta: any,
+  tipo: "original" | "duplicado",
 ): Promise<Buffer> {
   const browser = await puppeteer.launch();
   const page = await browser.newPage();
 
-  const html = generateVentasRemitoHtml(venta);
+  const html = generateVentasRemitoHtml(venta, tipo);
   await page.setContent(html);
 
   const pdfBuffer = await page.pdf({

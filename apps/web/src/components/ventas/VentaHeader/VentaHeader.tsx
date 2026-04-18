@@ -32,7 +32,7 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
   );
   const openPrintMenu = Boolean(printMenuAnchor);
   const [pendingPrintType, setPendingPrintType] = useState<
-    "factura" | "remito" | null
+    "factura" | "remito-original" | "remito-duplicado" | null
   >(null);
 
   const { handlePrint, handlePrintRemito, printLoading, snackbar, closeSnackbar } =
@@ -57,7 +57,7 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
     setPrintMenuAnchor(null);
   };
 
-  const requestPrint = (type: "factura" | "remito") => {
+  const requestPrint = (type: "factura" | "remito-original" | "remito-duplicado") => {
     setPendingPrintType(type);
     handleClosePrintMenu();
     if (type === "factura" && debeConfirmarImpresion) {
@@ -67,14 +67,14 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
     if (type === "factura") {
       handlePrint();
     } else {
-      handlePrintRemito();
+      handlePrintRemito(type === "remito-original" ? "original" : "duplicado");
     }
   };
 
   const handleConfirmPrint = () => {
     setOpenConfirmPrint(false);
-    if (pendingPrintType === "remito") {
-      handlePrintRemito();
+    if (pendingPrintType === "remito-original" || pendingPrintType === "remito-duplicado") {
+      handlePrintRemito(pendingPrintType === "remito-original" ? "original" : "duplicado");
       setPendingPrintType(null);
       return;
     }
@@ -137,11 +137,17 @@ function VentaHeader({ venta: ventaProp }: { venta?: any }) {
           </ListItemIcon>
           <ListItemText>Imprimir Factura</ListItemText>
         </MenuItem>
-        <MenuItem onClick={() => requestPrint("remito")}>
+        <MenuItem onClick={() => requestPrint("remito-original")}>
           <ListItemIcon>
             <PrintIcon fontSize="small" color="secondary" />
           </ListItemIcon>
-          <ListItemText>Imprimir Remito</ListItemText>
+          <ListItemText>Remito para Cliente (Original)</ListItemText>
+        </MenuItem>
+        <MenuItem onClick={() => requestPrint("remito-duplicado")}>
+          <ListItemIcon>
+            <PrintIcon fontSize="small" color="secondary" />
+          </ListItemIcon>
+          <ListItemText>Remito para Taller (Duplicado)</ListItemText>
         </MenuItem>
       </Menu>
 

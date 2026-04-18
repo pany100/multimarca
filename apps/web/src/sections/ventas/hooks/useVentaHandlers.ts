@@ -34,10 +34,10 @@ export const useVentaHandlers = ({ venta }: UseVentaHandlersProps) => {
     }
   };
 
-  const handlePrintRemito = async () => {
+  const handlePrintRemito = async (tipo: "original" | "duplicado" = "original") => {
     setPrintLoading(true);
     try {
-      await generatePdf(`/api/ventas/${venta.id}/remito`);
+      await generatePdf(`/api/ventas/${venta.id}/remito?tipo=${tipo}`);
     } finally {
       setPrintLoading(false);
     }
