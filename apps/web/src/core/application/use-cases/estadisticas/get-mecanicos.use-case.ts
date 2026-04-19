@@ -9,14 +9,10 @@ import {
 import { MecanicosDto } from "../../dto/estadisticas.dto";
 import { EstadisticasVOMapper } from "../../mapper/estadisticas-vo.mapper";
 import { EstadisticaService } from "../../services/estadistica.service";
-
-type Row = {
-  mecanicoId: number;
-  mecanicoNombre: string;
-  semanaInicio: string;
-  semanaFin: string;
-  ganancia: number;
-};
+import type {
+  MecanicoRow,
+  OrdenCompartida,
+} from "@/core/infrastructure/database/queries/estadisticas-mecanicos-query.service";
 
 type SemanaConRango = {
   canonicalWeekStart: string;
@@ -24,15 +20,20 @@ type SemanaConRango = {
   weekEnd: string;
 };
 
+type GananciaSemanal = {
+  weekStart: string;
+  weekEnd: string;
+  ganancia: number;
+  cantidadOrdenes: number;
+};
+
 type ResultadoMecanico = {
   mecanicoId: number;
   mecanicoNombre: string;
-  gananciasSemanales: {
-    weekStart: string;
-    weekEnd: string;
-    ganancia: number;
-  }[];
+  gananciasSemanales: GananciaSemanal[];
   gananciaTotal: number;
+  ordenesTotal: number;
+  ticketPromedio: number;
 };
 
 export class GetMecanicosUseCase {
@@ -62,10 +63,7 @@ export class GetMecanicosUseCase {
   }
 
   /** Semanas que tocan [from, to], con semanas cortas recortadas por from/to. */
-  private getSemanasEntre(
-    from: Date,
-    to: Date
-  ): SemanaConRango[] {
+  private getSemanasEntre(from: Date, to: Date): SemanaConRango[] {
     const start = startOfWeek(from, { weekStartsOn: 1 });
     const end = endOfWeek(to, { weekStartsOn: 1 });
     const semanas: SemanaConRango[] = [];
@@ -87,10 +85,10 @@ export class GetMecanicosUseCase {
   }
 
   private groupByWeek(
-    rows: Row[],
+    rows: MecanicoRow[],
     semanas: { weekStart: string; weekEnd: string }[],
     byCanonicalStart?: boolean
-  ) {
+  ): ResultadoMecanico[] {
     const canonicalToIndex = new Map<string, number>();
     semanas.forEach((s, i) => {
       const key =
@@ -117,8 +115,11 @@ export class GetMecanicosUseCase {
             weekStart: s.weekStart,
             weekEnd: s.weekEnd,
             ganancia: 0,
+            cantidadOrdenes: 0,
           })),
           gananciaTotal: 0,
+          ordenesTotal: 0,
+          ticketPromedio: 0,
         });
       }
 
@@ -127,12 +128,19 @@ export class GetMecanicosUseCase {
 
       if (weekIndex !== undefined) {
         mec.gananciasSemanales[weekIndex].ganancia += Number(row.ganancia);
+        mec.gananciasSemanales[weekIndex].cantidadOrdenes += Number(
+          row.cantidadOrdenes
+        );
       }
 
       mec.gananciaTotal += Number(row.ganancia);
+      mec.ordenesTotal += Number(row.cantidadOrdenes);
     }
 
     const resultados = Array.from(mecanicosMap.values());
+    for (const r of resultados) {
+      r.ticketPromedio = r.ordenesTotal > 0 ? r.gananciaTotal / r.ordenesTotal : 0;
+    }
     resultados.sort((a, b) => b.gananciaTotal - a.gananciaTotal);
 
     return resultados;
@@ -140,30 +148,43 @@ export class GetMecanicosUseCase {
 
   async execute(dto: MecanicosDto) {
     const dtoVO = EstadisticasVOMapper.getMecanicosToVo(dto);
-    const rows: Row[] = (await this.estadisticaService.getMecanicos(
-      dtoVO
-    )) as Row[];
+
+    const [rows, ordenesCompartidas] = await Promise.all([
+      this.estadisticaService.getMecanicos(dtoVO) as Promise<MecanicoRow[]>,
+      this.estadisticaService.getOrdenesCompartidas(dtoVO),
+    ]);
 
     const from = dtoVO.from ?? null;
     const to = dtoVO.to ?? null;
-    let semanas: { weekStart: string; weekEnd: string }[];
+
+    let data: ResultadoMecanico[];
 
     if (from && to) {
       const semanasConRango = this.getSemanasEntre(from, to);
-      semanas = semanasConRango.map((s) => ({
-        weekStart: s.weekStart,
-        weekEnd: s.weekEnd,
-      }));
-      const groupedRows = this.groupByWeek(
-        rows,
-        semanasConRango,
-        true
-      );
-      return { data: groupedRows, moneda: dtoVO.moneda };
+      data = this.groupByWeek(rows, semanasConRango, true);
+    } else {
+      const semanas = this.getUltimasSemanas(10);
+      data = this.groupByWeek(rows, semanas);
     }
 
-    semanas = this.getUltimasSemanas(10);
-    const groupedRows = this.groupByWeek(rows, semanas);
-    return { data: groupedRows, moneda: dtoVO.moneda };
+    const totalGeneral = data.reduce((acc, m) => acc + m.gananciaTotal, 0);
+    const ordenesTotales = data.reduce((acc, m) => acc + m.ordenesTotal, 0);
+
+    return {
+      data,
+      moneda: dtoVO.moneda,
+      kpis: {
+        totalManoDeObra: totalGeneral,
+        ordenesTerminadas: ordenesTotales,
+        ticketPromedio: ordenesTotales > 0 ? totalGeneral / ordenesTotales : 0,
+        cantidadMecanicos: data.length,
+      },
+      ordenesCompartidas: (ordenesCompartidas as OrdenCompartida[]).map((o) => ({
+        ordenId: Number(o.ordenId),
+        fechaSalida: o.fechaSalida,
+        manoDeObraConIva: Number(o.manoDeObraConIva),
+        mecanicos: o.mecanicos,
+      })),
+    };
   }
 }

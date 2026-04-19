@@ -95,6 +95,13 @@ export class EstadisticaService {
     }
   }
 
+  async getOrdenesCompartidas(dto: EstadisticasMonedaVO) {
+    return await this.estadisticasMecanicosQueriesService.getOrdenesCompartidas(
+      dto.from ?? null,
+      dto.to ?? null
+    );
+  }
+
   async getTransacciones(dto: EstadisticasBaseVO) {
     const { fechaInicio, fechaFin } = dto.toObjectWithStrings();
     return await this.estadisticasTransaccionesQueriesService.getTransacciones(
