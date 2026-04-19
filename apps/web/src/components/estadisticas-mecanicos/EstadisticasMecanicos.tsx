@@ -58,6 +58,7 @@ interface GananciaSemanal {
   weekEnd: string;
   ganancia: number;
   cantidadOrdenes: number;
+  cantidadVentas: number;
 }
 
 interface MecanicoGanancias {
@@ -66,12 +67,14 @@ interface MecanicoGanancias {
   gananciasSemanales: GananciaSemanal[];
   gananciaTotal: number;
   ordenesTotal: number;
+  ventasTotal: number;
   ticketPromedio: number;
 }
 
 interface KPIs {
   totalManoDeObra: number;
   ordenesTerminadas: number;
+  ventasTerminadas: number;
   ticketPromedio: number;
   cantidadMecanicos: number;
 }
@@ -81,6 +84,7 @@ interface OrdenCompartida {
   fechaSalida: string;
   manoDeObraConIva: number;
   mecanicos: string;
+  tipo?: "odr" | "venta";
 }
 
 interface MecanicosResponse {
@@ -121,6 +125,13 @@ function formatDateShort(dateString: string) {
   const [year, month, day] = dateString.split("-");
   const date = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
   return date.toLocaleDateString("es-AR", { day: "2-digit", month: "2-digit" });
+}
+
+function formatTrabajos(ordenes: number, ventas: number) {
+  const parts: string[] = [];
+  if (ordenes > 0) parts.push(`${ordenes} ${ordenes === 1 ? "orden" : "órdenes"}`);
+  if (ventas > 0) parts.push(`${ventas} ${ventas === 1 ? "venta" : "ventas"}`);
+  return parts.length > 0 ? parts.join(" · ") : "0 trabajos";
 }
 
 function InfoTooltip({ title }: { title: string }) {
@@ -219,7 +230,7 @@ export default function EstadisticasMecanicos() {
           <Grid container spacing={2} sx={{ mb: 3 }}>
             <Grid item xs={12} sm={6} md={3}>
               <Tooltip
-                title="Suma de la mano de obra con IVA de todas las órdenes terminadas en el período. Si una orden tiene más de un mecánico, el monto se atribuye completo a cada uno (ver disclaimer abajo)."
+                title="Suma de la mano de obra con IVA de todas las órdenes terminadas y ventas entregadas/cerradas en el período. Si un trabajo tiene más de un mecánico, el monto se atribuye completo a cada uno."
                 arrow
                 placement="top"
               >
@@ -234,23 +245,24 @@ export default function EstadisticasMecanicos() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Tooltip
-                title="Cantidad total de órdenes con estado 'Terminado' en el período. Si una orden tiene más de un mecánico, se cuenta una vez por cada mecánico asignado."
+                title="Cantidad total de órdenes terminadas y ventas entregadas/cerradas en el período. Si un trabajo tiene más de un mecánico, se cuenta una vez por cada mecánico asignado."
                 arrow
                 placement="top"
               >
                 <Box>
                   <KPICard
-                    label="Órdenes terminadas"
-                    value={kpis?.ordenesTerminadas ?? null}
+                    label="Trabajos terminados"
+                    value={(kpis?.ordenesTerminadas ?? 0) + (kpis?.ventasTerminadas ?? 0)}
                     format="number"
                     loading={loading}
+                    subtitle={formatTrabajos(kpis?.ordenesTerminadas ?? 0, kpis?.ventasTerminadas ?? 0)}
                   />
                 </Box>
               </Tooltip>
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Tooltip
-                title="Mano de obra total con IVA dividido la cantidad de órdenes terminadas. Representa el ingreso promedio de mano de obra por orden."
+                title="Mano de obra total con IVA dividido la cantidad de trabajos. Representa el ingreso promedio de mano de obra por orden/venta."
                 arrow
                 placement="top"
               >
@@ -265,7 +277,7 @@ export default function EstadisticasMecanicos() {
             </Grid>
             <Grid item xs={12} sm={6} md={3}>
               <Tooltip
-                title="Cantidad de mecánicos distintos con al menos una orden terminada en el período."
+                title="Cantidad de mecánicos distintos con al menos un trabajo en el período."
                 arrow
                 placement="top"
               >
@@ -297,11 +309,10 @@ export default function EstadisticasMecanicos() {
             <InfoOutlinedIcon sx={{ fontSize: 18, mt: 0.3, color: "text.secondary" }} />
             <Typography variant="caption" color="text.secondary">
               Los montos representan la <strong>mano de obra con IVA</strong> de
-              órdenes terminadas, sin descontar el descuento de mano de obra.
-              En reparaciones compartidas (más de un mecánico), el 100% de la
+              órdenes terminadas y ventas entregadas/cerradas, sin descontar el descuento de mano de obra.
+              En trabajos compartidos (más de un mecánico), el 100% de la
               mano de obra se atribuye a cada mecánico asignado, por lo que la
               suma individual puede ser mayor al total real.
-              Solo se consideran órdenes con estado &quot;Terminado&quot;.
             </Typography>
           </Paper>
 
@@ -389,9 +400,9 @@ export default function EstadisticasMecanicos() {
                           Total: {formatCurrency(mec.gananciaTotal)}
                         </Typography>
                       </Tooltip>
-                      <Tooltip title="Cantidad de órdenes terminadas y ticket promedio (mano de obra c/IVA por orden)." arrow>
+                      <Tooltip title="Cantidad de trabajos y ticket promedio (mano de obra c/IVA por trabajo)." arrow>
                         <Typography variant="caption" color="text.secondary">
-                          {mec.ordenesTotal} órdenes &middot; Ticket prom:{" "}
+                          {formatTrabajos(mec.ordenesTotal, mec.ventasTotal)} &middot; Ticket prom:{" "}
                           {formatCurrency(mec.ticketPromedio)}
                         </Typography>
                       </Tooltip>
@@ -471,8 +482,7 @@ export default function EstadisticasMecanicos() {
                                 display="block"
                                 color="text.secondary"
                               >
-                                {w.cantidadOrdenes}{" "}
-                                {w.cantidadOrdenes === 1 ? "orden" : "órdenes"}
+                                {formatTrabajos(w.cantidadOrdenes, w.cantidadVentas)}
                               </Typography>
                             </Box>
                           </TableCell>
@@ -496,7 +506,7 @@ export default function EstadisticasMecanicos() {
                             display="block"
                             color="text.secondary"
                           >
-                            {mec.ordenesTotal} órdenes
+                            {formatTrabajos(mec.ordenesTotal, mec.ventasTotal)}
                           </Typography>
                         </Box>
                       </TableCell>
@@ -525,31 +535,41 @@ export default function EstadisticasMecanicos() {
                 }}
               >
                 <GroupIcon color="primary" />
-                Reparaciones Compartidas
+                Trabajos Compartidos
                 <Chip
                   label={ordenesCompartidas.length}
                   size="small"
                   color="warning"
                   sx={{ ml: 1 }}
                 />
-                <InfoTooltip title="Órdenes terminadas donde participaron 2 o más mecánicos. La mano de obra de estas órdenes se atribuye al 100% a cada mecánico en los gráficos y KPIs de arriba." />
+                <InfoTooltip title="Órdenes y ventas donde participaron 2 o más mecánicos. La mano de obra se atribuye al 100% a cada mecánico en los gráficos y KPIs de arriba." />
               </Typography>
               <TableContainer sx={{ maxHeight: 300 }}>
                 <Table size="small" stickyHeader>
                   <TableHead>
                     <TableRow>
-                      <TableCell>Orden #</TableCell>
-                      <TableCell>Fecha salida</TableCell>
+                      <TableCell>Tipo</TableCell>
+                      <TableCell>#</TableCell>
+                      <TableCell>Fecha</TableCell>
                       <TableCell align="right">
                         MdO c/IVA
-                        <InfoTooltip title="Mano de obra con IVA total de la orden. Este monto se contabiliza completo para cada mecánico listado." />
+                        <InfoTooltip title="Mano de obra con IVA total. Este monto se contabiliza completo para cada mecánico listado." />
                       </TableCell>
                       <TableCell>Mecánicos</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {ordenesCompartidas.map((o) => (
-                      <TableRow key={o.ordenId} hover>
+                      <TableRow key={`${o.tipo}-${o.ordenId}`} hover>
+                        <TableCell>
+                          <Chip
+                            label={o.tipo === "venta" ? "Venta" : "OdR"}
+                            size="small"
+                            color={o.tipo === "venta" ? "secondary" : "primary"}
+                            variant="outlined"
+                            sx={{ fontSize: "0.7rem" }}
+                          />
+                        </TableCell>
                         <TableCell>{o.ordenId}</TableCell>
                         <TableCell>{formatDateShort(o.fechaSalida)}</TableCell>
                         <TableCell align="right">

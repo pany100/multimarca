@@ -10,6 +10,7 @@ interface KPICardProps {
   previousValue?: number | null;
   format?: "currency" | "percent" | "number";
   loading?: boolean;
+  subtitle?: string;
 }
 
 function formatValue(value: number, format: "currency" | "percent" | "number") {
@@ -38,6 +39,7 @@ export default function KPICard({
   previousValue,
   format = "currency",
   loading = false,
+  subtitle,
 }: KPICardProps) {
   const variation =
     value != null && previousValue != null
@@ -72,6 +74,11 @@ export default function KPICard({
       ) : (
         <Typography variant="h5" sx={{ fontWeight: 700 }}>
           {value != null ? formatValue(value, format) : "-"}
+        </Typography>
+      )}
+      {!loading && subtitle && (
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
+          {subtitle}
         </Typography>
       )}
       {!loading && variation != null && (

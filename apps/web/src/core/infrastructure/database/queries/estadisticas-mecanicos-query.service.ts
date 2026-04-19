@@ -73,6 +73,82 @@ export class EstadisticasMecanicosQueriesService {
     `);
   }
 
+  /** Mano de obra con IVA de ventas cerradas/entregadas, 100% a cada mecánico. */
+  async getVentasMecanicosArs(from: Date | null, to: Date | null): Promise<MecanicoRow[]> {
+    const dateFilter = from != null && to != null
+      ? `AND v.fecha >= '${dateToSql(from)}' AND v.fecha <= '${dateToSql(to)}'`
+      : `AND v.fecha >= DATE_SUB(CURDATE(), INTERVAL 70 DAY)`;
+
+    return await prisma.$queryRawUnsafe<MecanicoRow[]>(`
+      SELECT
+        vm.mecanicoId,
+        e.name AS mecanicoNombre,
+        YEARWEEK(v.fecha, 1) AS semana,
+        DATE_FORMAT(MIN(v.fecha), '%Y-%m-%d') AS semanaInicio,
+        DATE_FORMAT(MAX(v.fecha), '%Y-%m-%d') AS semanaFin,
+        SUM(CEIL(tr.precioUnitario * (1 + COALESCE(tr.iva, 0) / 100))) AS ganancia,
+        COUNT(DISTINCT v.id) AS cantidadOrdenes
+      FROM Venta v
+      JOIN VentaMecanico vm ON vm.ventaId = v.id
+      JOIN Empleado e ON e.id = vm.mecanicoId
+      JOIN TrabajoRealizado tr ON tr.ventaId = v.id
+      WHERE v.estado IN ('Entregado', 'Cerrado')
+        ${dateFilter}
+      GROUP BY vm.mecanicoId, e.name, YEARWEEK(v.fecha, 1)
+      ORDER BY mecanicoId, semana;
+    `);
+  }
+
+  async getVentasMecanicosUsd(from: Date | null, to: Date | null): Promise<MecanicoRow[]> {
+    const dateFilter = from != null && to != null
+      ? `AND v.fecha >= '${dateToSql(from)}' AND v.fecha <= '${dateToSql(to)}'`
+      : `AND v.fecha >= DATE_SUB(CURDATE(), INTERVAL 70 DAY)`;
+
+    return await prisma.$queryRawUnsafe<MecanicoRow[]>(`
+      SELECT
+        vm.mecanicoId,
+        e.name AS mecanicoNombre,
+        YEARWEEK(v.fecha, 1) AS semana,
+        DATE_FORMAT(MIN(v.fecha), '%Y-%m-%d') AS semanaInicio,
+        DATE_FORMAT(MAX(v.fecha), '%Y-%m-%d') AS semanaFin,
+        SUM(CEIL(tr.precioUnitario * (1 + COALESCE(tr.iva, 0) / 100)) / COALESCE(d.blue, 1)) AS ganancia,
+        COUNT(DISTINCT v.id) AS cantidadOrdenes
+      FROM Venta v
+      JOIN VentaMecanico vm ON vm.ventaId = v.id
+      JOIN Empleado e ON e.id = vm.mecanicoId
+      LEFT JOIN Dolar d ON d.id = v.dolarId
+      JOIN TrabajoRealizado tr ON tr.ventaId = v.id
+      WHERE v.estado IN ('Entregado', 'Cerrado')
+        ${dateFilter}
+      GROUP BY vm.mecanicoId, e.name, YEARWEEK(v.fecha, 1)
+      ORDER BY mecanicoId, semana;
+    `);
+  }
+
+  /** Ventas con más de un mecánico asignado en el período. */
+  async getVentasCompartidas(from: Date | null, to: Date | null): Promise<OrdenCompartida[]> {
+    const dateFilter = from != null && to != null
+      ? `AND v.fecha >= '${dateToSql(from)}' AND v.fecha <= '${dateToSql(to)}'`
+      : `AND v.fecha >= DATE_SUB(CURDATE(), INTERVAL 70 DAY)`;
+
+    return await prisma.$queryRawUnsafe<OrdenCompartida[]>(`
+      SELECT
+        v.id AS ordenId,
+        DATE_FORMAT(v.fecha, '%Y-%m-%d') AS fechaSalida,
+        SUM(CEIL(tr.precioUnitario * (1 + COALESCE(tr.iva, 0) / 100))) AS manoDeObraConIva,
+        GROUP_CONCAT(DISTINCT e.name ORDER BY e.name SEPARATOR ', ') AS mecanicos
+      FROM Venta v
+      JOIN VentaMecanico vm ON vm.ventaId = v.id
+      JOIN Empleado e ON e.id = vm.mecanicoId
+      JOIN TrabajoRealizado tr ON tr.ventaId = v.id
+      WHERE v.estado IN ('Entregado', 'Cerrado')
+        ${dateFilter}
+      GROUP BY v.id, v.fecha
+      HAVING COUNT(DISTINCT vm.mecanicoId) > 1
+      ORDER BY v.fecha DESC;
+    `);
+  }
+
   /** Órdenes con más de un mecánico asignado en el período. */
   async getOrdenesCompartidas(from: Date | null, to: Date | null): Promise<OrdenCompartida[]> {
     const dateFilter = from != null && to != null

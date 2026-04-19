@@ -9,6 +9,7 @@ import VentaCostosSection from "@/sections/ventas/admin/VentaCostosSection";
 import VentaInformacionGeneral from "@/sections/ventas/admin/VentaInformacionGeneral";
 import VentaRepuestosSection from "@/sections/ventas/admin/VentaRepuestosSection";
 import VentaTercerosSection from "@/sections/ventas/admin/VentaTercerosSection";
+import VentaMecanicosSection from "@/sections/ventas/admin/VentaMecanicosSection";
 import VentaTrabajosSection from "@/sections/ventas/admin/VentaTrabajosSection";
 import { useVenta } from "@/sections/ventas/hooks/useVenta";
 import { Box, CircularProgress, Grid } from "@mui/material";
@@ -77,6 +78,9 @@ const VentaAdminPage = ({ params }: { params: { id: string } }) => {
             </Grid>
             <Grid item xs={12}>
               <VentaTrabajosSection />
+            </Grid>
+            <Grid item xs={12}>
+              <VentaMecanicosSection />
             </Grid>
             <Grid item xs={12}>
               <VentaAjustesPrecioSection />

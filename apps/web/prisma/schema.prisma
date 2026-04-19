@@ -208,6 +208,7 @@ model Empleado {
 
   gastosRealizados  Gasto[]
   ordenesReparacion OrdenReparacionMecanico[]
+  ventas            VentaMecanico[]
   inasistencias     Inasistencia[]
   llegadasTarde     LlegadaTarde[]
   horasExtra        HoraExtra[]
@@ -516,11 +517,24 @@ model Venta {
   cliente               Cliente?              @relation(fields: [clienteId], references: [id])
   dolar                 Dolar?                @relation(fields: [dolarId], references: [id])
   ajustesPrecio         AjustePrecio[]        @relation("VentaAjustesPrecio")
+  mecanicos             VentaMecanico[]
   modoAjustes           ModoAjustes           @default(sobreTotalBase)
 
   @@index([clienteId])
   @@index([fecha])
   @@index([dolarId], map: "Venta_dolarId_fkey")
+}
+
+model VentaMecanico {
+  id         Int      @id @default(autoincrement())
+  ventaId    Int
+  mecanicoId Int
+  detalle    String?  @db.Text
+  mecanico   Empleado @relation(fields: [mecanicoId], references: [id], onDelete: Restrict)
+  venta      Venta    @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+
+  @@unique([ventaId, mecanicoId])
+  @@index([mecanicoId], map: "VentaMecanico_mecanicoId_fkey")
 }
 
 model NotificacionWhatsapp {

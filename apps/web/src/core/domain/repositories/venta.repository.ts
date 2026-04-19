@@ -28,6 +28,11 @@ export type VentaWithRelations = Prisma.VentaGetPayload<{
         dolar: true;
       };
     };
+    mecanicos: {
+      include: {
+        mecanico: true;
+      };
+    };
   };
 }>;
 
@@ -55,4 +60,14 @@ export interface VentaRepository {
       estado?: string;
     }
   ): Promise<VentaWithRelations>;
+
+  addMecanicoToVenta(
+    ventaId: number,
+    mecanicoId: number,
+    detalle?: string | null
+  ): Promise<any>;
+
+  updateMecanicoInVenta(id: number, detalle?: string | null): Promise<any>;
+
+  deleteMecanicoFromVenta(id: number): Promise<any>;
 }

@@ -11,4 +11,6 @@ export interface GastoRepository {
   listPaged(args: ListGastosParams): Promise<PageResult<any>>;
   getGastoMecanicosUltimaSemana(from: Date, to: Date): Promise<any>;
   getGastoMecanicosUltimaSemanaCompartida(from: Date, to: Date): Promise<any>;
+  getVentasMecanicosUltimaSemana(from: Date, to: Date): Promise<any>;
+  getVentasMecanicosUltimaSemanaCompartida(from: Date, to: Date): Promise<any>;
 }

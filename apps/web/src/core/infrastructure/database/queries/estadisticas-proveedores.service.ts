@@ -271,4 +271,86 @@ export class EstadisticasProveedoresService {
       .sort((a, b) => b.totalGastado - a.totalGastado)
       .slice(0, limit);
   }
+
+  /** Composición del gasto: cuánto viene de OC vs Rep. tercero (orden) vs Rep. tercero (venta). */
+  async getComposicion(
+    from: Date | undefined,
+    to: Date | undefined,
+  ): Promise<{ label: string; total: number }[]> {
+    const [ocRow] = await prisma.$queryRaw<SumCountRow[]>`
+      SELECT COALESCE(SUM(oc.precioTotal), 0) AS suma, 0 AS cnt
+      FROM OrdenDeCompra oc
+      WHERE 1 = 1
+      ${from ? Prisma.sql`AND DATE(oc.fecha) >= DATE(${from})` : Prisma.empty}
+      ${to ? Prisma.sql`AND DATE(oc.fecha) <= DATE(${to})` : Prisma.empty}
+    `;
+    const [rtOrdenRow] = await prisma.$queryRaw<SumCountRow[]>`
+      SELECT COALESCE(SUM(rt.precioCompra), 0) AS suma, 0 AS cnt
+      FROM ReparacionDeTercero rt
+      INNER JOIN OrdenReparacion o ON o.id = rt.ordenReparacionId
+      WHERE rt.ordenReparacionId IS NOT NULL
+      ${from ? Prisma.sql`AND DATE(o.fechaCreacion) >= DATE(${from})` : Prisma.empty}
+      ${to ? Prisma.sql`AND DATE(o.fechaCreacion) <= DATE(${to})` : Prisma.empty}
+    `;
+    const [rtVentaRow] = await prisma.$queryRaw<SumCountRow[]>`
+      SELECT COALESCE(SUM(rt.precioCompra), 0) AS suma, 0 AS cnt
+      FROM ReparacionDeTercero rt
+      INNER JOIN Venta v ON v.id = rt.ventaId
+      WHERE rt.ventaId IS NOT NULL AND rt.ordenReparacionId IS NULL
+      ${from ? Prisma.sql`AND DATE(v.fecha) >= DATE(${from})` : Prisma.empty}
+      ${to ? Prisma.sql`AND DATE(v.fecha) <= DATE(${to})` : Prisma.empty}
+    `;
+
+    return [
+      { label: "Órdenes de compra", total: parseSumCount(ocRow).suma },
+      { label: "Rep. tercero (OdR)", total: parseSumCount(rtOrdenRow).suma },
+      { label: "Rep. tercero (Ventas)", total: parseSumCount(rtVentaRow).suma },
+    ].filter((c) => c.total > 0);
+  }
+
+  /** Evolución mensual de los últimos 6 meses. Usa una sola query agrupando por mes. */
+  async getEvolucion(
+    to: Date | undefined,
+  ): Promise<{ label: string; ordenesCompra: number; reparacionesTercero: number; total: number }[]> {
+    const refDate = to ?? new Date();
+    const sixMonthsAgo = new Date(refDate.getFullYear(), refDate.getMonth() - 5, 1);
+
+    type MonthRow = { mes: string; suma: number | bigint | string | null };
+
+    const [ocRows, rtRows] = await Promise.all([
+      prisma.$queryRaw<MonthRow[]>`
+        SELECT DATE_FORMAT(oc.fecha, '%Y-%m') AS mes,
+               COALESCE(SUM(oc.precioTotal), 0) AS suma
+        FROM OrdenDeCompra oc
+        WHERE DATE(oc.fecha) >= DATE(${sixMonthsAgo})
+          AND DATE(oc.fecha) <= DATE(${refDate})
+        GROUP BY mes ORDER BY mes
+      `,
+      prisma.$queryRaw<MonthRow[]>`
+        SELECT DATE_FORMAT(COALESCE(o.fechaCreacion, v.fecha), '%Y-%m') AS mes,
+               COALESCE(SUM(rt.precioCompra), 0) AS suma
+        FROM ReparacionDeTercero rt
+        LEFT JOIN OrdenReparacion o ON o.id = rt.ordenReparacionId
+        LEFT JOIN Venta v ON v.id = rt.ventaId
+        WHERE (rt.ordenReparacionId IS NOT NULL OR rt.ventaId IS NOT NULL)
+          AND DATE(COALESCE(o.fechaCreacion, v.fecha)) >= DATE(${sixMonthsAgo})
+          AND DATE(COALESCE(o.fechaCreacion, v.fecha)) <= DATE(${refDate})
+        GROUP BY mes ORDER BY mes
+      `,
+    ]);
+
+    const ocMap = new Map(ocRows.map((r) => [r.mes, num(r.suma)]));
+    const rtMap = new Map(rtRows.map((r) => [r.mes, num(r.suma)]));
+
+    const results: { label: string; ordenesCompra: number; reparacionesTercero: number; total: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(refDate.getFullYear(), refDate.getMonth() - i, 1);
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+      const label = d.toLocaleDateString("es-AR", { month: "short", year: "2-digit" });
+      const oc = ocMap.get(key) ?? 0;
+      const rt = rtMap.get(key) ?? 0;
+      results.push({ label, ordenesCompra: oc, reparacionesTercero: rt, total: oc + rt });
+    }
+    return results;
+  }
 }

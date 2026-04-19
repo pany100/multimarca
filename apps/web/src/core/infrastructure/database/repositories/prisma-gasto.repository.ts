@@ -146,20 +146,122 @@ export class PrismaGastoRepository
                 incremento: true,
                 porcentajeRecargo: true,
                 descuentoParaManoDeObra: true,
-                pagos: {
-                  select: {
-                    fechaPago: true,
-                    monto: true,
-                  },
-                  where: {
-                    AND: [
-                      { fechaPago: { not: null } },
-                      { monto: { not: null } },
-                    ],
-                  },
-                },
               },
             },
+          },
+        },
+      },
+    });
+  }
+
+  async getVentasMecanicosUltimaSemana(from: Date, to: Date) {
+    return prisma.empleado.findMany({
+      where: {
+        tipo: "Mecanico",
+        fechaBaja: null,
+      },
+      select: {
+        id: true,
+        name: true,
+        ventas: {
+          where: {
+            venta: {
+              estado: { in: ["Entregado", "Cerrado"] },
+              fecha: {
+                gte: from,
+                lte: to,
+              },
+            },
+          },
+          select: {
+            venta: {
+              select: {
+                id: true,
+                fecha: true,
+                informacionCliente: true,
+                cliente: {
+                  select: {
+                    fullName: true,
+                  },
+                },
+                mecanicos: {
+                  where: {
+                    mecanico: {
+                      is: {
+                        fechaBaja: null,
+                      },
+                    },
+                  },
+                  select: {
+                    mecanicoId: true,
+                  },
+                },
+                trabajosRealizados: true,
+                reparacionesDeTercero: true,
+                repuestosUsados: {
+                  include: {
+                    stock: true,
+                  },
+                },
+                descuento: true,
+                incremento: true,
+                porcentajeRecargo: true,
+                descuentoParaManoDeObra: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  async getVentasMecanicosUltimaSemanaCompartida(from: Date, to: Date) {
+    return prisma.venta.findMany({
+      where: {
+        estado: { in: ["Entregado", "Cerrado"] },
+        fecha: {
+          gte: from,
+          lte: to,
+        },
+        mecanicos: {
+          some: {},
+        },
+      },
+      select: {
+        id: true,
+        fecha: true,
+        informacionCliente: true,
+        cliente: {
+          select: {
+            fullName: true,
+          },
+        },
+        descuento: true,
+        incremento: true,
+        porcentajeRecargo: true,
+        descuentoParaManoDeObra: true,
+        mecanicos: {
+          where: {
+            mecanico: {
+              is: {
+                fechaBaja: null,
+              },
+            },
+          },
+          select: {
+            mecanico: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+        },
+        trabajosRealizados: true,
+        reparacionesDeTercero: true,
+        repuestosUsados: {
+          include: {
+            stock: true,
           },
         },
       },
@@ -216,15 +318,6 @@ export class PrismaGastoRepository
         repuestosUsados: {
           include: {
             stock: true,
-          },
-        },
-        pagos: {
-          select: {
-            fechaPago: true,
-            monto: true,
-          },
-          where: {
-            AND: [{ fechaPago: { not: null } }, { monto: { not: null } }],
           },
         },
       },

@@ -1,42 +1,39 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { Box, Grid, Typography } from "@mui/material";
+import { Box, Chip, Grid, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { addDays, format } from "date-fns";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import WeekPicker from "./WeekPicker";
 import useWeek from "./hooks/useWeek";
 
-type Reparacion = {
+type Trabajo = {
   idOrep: number;
   fecha: string;
   auto: string;
   manoDeObra: number;
-  pagado: boolean;
+  tipo?: "odr" | "venta";
+  compartida?: boolean;
+  otrosMecanicos?: string[];
 };
 
 type MecanicoData = {
   mecanicoId: number;
   mecanicoNombre: string;
-  reparaciones: Reparacion[];
+  reparaciones: Trabajo[];
   manoDeObraTotal: number;
-  manoDeObraPagada: number;
 };
 
 type ReparacionCompartida = {
   id: number;
   fecha: string;
   auto: string;
-  mechanics: {
-    id: number;
-    name: string;
-  }[];
+  mechanics: { id: number; name: string }[];
   manoDeObraTotal: number;
-  manoDeObraPagada: number;
+  tipo?: "odr" | "venta";
 };
 
-/** Formatea una fecha ISO en dd/MM/yyyy usando UTC (evita que se muestre el día anterior por timezone). */
 function formatFechaUTC(isoDate: string): string {
   const d = new Date(isoDate);
   const day = String(d.getUTCDate()).padStart(2, "0");
@@ -44,6 +41,47 @@ function formatFechaUTC(isoDate: string): string {
   const year = d.getUTCFullYear();
   return `${day}/${month}/${year}`;
 }
+
+function TipoChip({ tipo }: { tipo?: "odr" | "venta" }) {
+  if (tipo === "venta") {
+    return (
+      <Chip
+        label="Venta"
+        size="small"
+        color="secondary"
+        variant="outlined"
+        sx={{ fontSize: "0.7rem", height: 20, mr: 0.5 }}
+      />
+    );
+  }
+  return (
+    <Chip
+      label="OdR"
+      size="small"
+      color="primary"
+      variant="outlined"
+      sx={{ fontSize: "0.7rem", height: 20, mr: 0.5 }}
+    />
+  );
+}
+
+function getTrabajoLink(item: { idOrep: number; tipo?: "odr" | "venta" }) {
+  if (item.tipo === "venta") {
+    return `/dashboard/ventas/${item.idOrep}`;
+  }
+  return `/dashboard/ordenes-reparacion/${item.idOrep}`;
+}
+
+const linkSx = {
+  "& a": {
+    textDecoration: "none",
+    color: "inherit",
+    "&:hover": {
+      textDecoration: "underline",
+      color: "primary.main",
+    },
+  },
+};
 
 function ResumenUltimaSemana() {
   const [data, setData] = useState<MecanicoData[]>([]);
@@ -66,10 +104,8 @@ function ResumenUltimaSemana() {
   useEffect(() => {
     const fetchData = async (start: Date, end: Date) => {
       setLoading(true);
-      // Enviar solo YYYY-MM-DD para que el backend use medianoche UTC y no excluya
-      // órdenes por diferencia de timezone (ej. 00:00 local → 03:00 UTC en Argentina).
       const startStr = format(start, "yyyy-MM-dd");
-      const endStr = format(addDays(end, 1), "yyyy-MM-dd"); // día siguiente para incluir todo el último día
+      const endStr = format(addDays(end, 1), "yyyy-MM-dd");
       try {
         const [response, response2, responseTotal] = await Promise.all([
           authFetch(
@@ -85,10 +121,8 @@ function ResumenUltimaSemana() {
         if (!response.ok || !response2.ok || !responseTotal.ok) {
           throw new Error("Error al obtener los datos");
         }
-        const result = await response.json();
-        setData(result);
-        const result2 = await response2.json();
-        setCompartida(result2);
+        setData(await response.json());
+        setCompartida(await response2.json());
         const totalData = await responseTotal.json();
         setTotalManoObraSemana(
           typeof totalData.totalManoObraSemana === "number"
@@ -113,175 +147,138 @@ function ResumenUltimaSemana() {
     setDateRange(week);
   };
 
-  // Prepare rows for DataGrid
-  const rows = data.map((mecanico) => ({
-    id: mecanico.mecanicoId,
-    mecanicoNombre: mecanico.mecanicoNombre,
-    mecanicoId: mecanico.mecanicoId,
-    cantidadReparaciones: mecanico.reparaciones.length,
-    manoDeObraTotal: mecanico.manoDeObraTotal,
-    manoDeObraPagada: mecanico.manoDeObraPagada,
-    pendientePago: mecanico.manoDeObraTotal - mecanico.manoDeObraPagada,
-    reparaciones: mecanico.reparaciones,
-  }));
+  // Merge individual + shared data into a single per-mechanic list
+  const rows = useMemo(() => {
+    const mecanicoMap = new Map<
+      number,
+      { mecanicoId: number; mecanicoNombre: string; trabajos: Trabajo[] }
+    >();
 
-  // Define columns for DataGrid
+    // Seed with individual data
+    for (const m of data) {
+      mecanicoMap.set(m.mecanicoId, {
+        mecanicoId: m.mecanicoId,
+        mecanicoNombre: m.mecanicoNombre,
+        trabajos: m.reparaciones.map((r) => ({ ...r, compartida: false })),
+      });
+    }
+
+    // Distribute shared items to each mechanic involved
+    for (const rep of compartida) {
+      for (const mec of rep.mechanics) {
+        const otrosMecanicos = rep.mechanics
+          .filter((m) => m.id !== mec.id)
+          .map((m) => m.name);
+
+        const trabajo: Trabajo = {
+          idOrep: rep.id,
+          fecha: rep.fecha,
+          auto: rep.auto,
+          manoDeObra: rep.manoDeObraTotal,
+          tipo: rep.tipo,
+          compartida: true,
+          otrosMecanicos,
+        };
+
+        const existing = mecanicoMap.get(mec.id);
+        if (existing) {
+          existing.trabajos.push(trabajo);
+        } else {
+          mecanicoMap.set(mec.id, {
+            mecanicoId: mec.id,
+            mecanicoNombre: mec.name,
+            trabajos: [trabajo],
+          });
+        }
+      }
+    }
+
+    return Array.from(mecanicoMap.values())
+      .map((m) => ({
+        id: m.mecanicoId,
+        mecanicoId: m.mecanicoId,
+        mecanicoNombre: m.mecanicoNombre,
+        trabajos: m.trabajos,
+        manoDeObraTotal: m.trabajos.reduce((s, t) => s + t.manoDeObra, 0),
+      }))
+      .sort((a, b) => b.manoDeObraTotal - a.manoDeObraTotal);
+  }, [data, compartida]);
+
+  const hayDatos = rows.some((r) => r.trabajos.length > 0);
+
   const columns: GridColDef[] = [
     {
       field: "mecanicoNombre",
       headerName: "Mecánico",
       flex: 1,
-      renderCell: (params) => {
-        return (
-          <Typography
-            key={params.row.id}
-            variant="body2"
-            sx={{
-              "& a": {
-                textDecoration: "none",
-                color: "inherit",
-                "&:hover": {
-                  textDecoration: "underline",
-                  color: "primary.main",
-                },
-              },
-            }}
-          >
-            <Link href={`/dashboard/mecanicos/${params.row.mecanicoId}/ver`}>
-              {params.row.mecanicoNombre}
-            </Link>
-          </Typography>
-        );
-      },
+      renderCell: (params) => (
+        <Typography variant="body2" sx={linkSx}>
+          <Link href={`/dashboard/mecanicos/${params.row.mecanicoId}/ver`}>
+            {params.row.mecanicoNombre}
+          </Link>
+        </Typography>
+      ),
     },
     {
-      field: "reparaciones",
-      headerName: "Reparaciones",
-      flex: 1.2,
-      align: "left",
-      headerAlign: "center",
-      renderCell: (params) => {
-        return params.row.reparaciones ? (
-          <Box>
-            {params.row.reparaciones.map((rep: Reparacion) => (
-              <Typography
-                key={rep.idOrep}
-                variant="body2"
-                sx={{
-                  "& a": {
-                    textDecoration: "none",
-                    color: "inherit",
-                    "&:hover": {
-                      textDecoration: "underline",
-                      color: "primary.main",
-                    },
-                  },
-                }}
-              >
-                <Link href={`/dashboard/ordenes-reparacion/${rep.idOrep}`}>
-                  *{" "}
-                  {`${rep.auto} - ${formatFechaUTC(rep.fecha)}: ${getFormattedPrice(rep.manoDeObra)}`}
-                </Link>
-              </Typography>
-            ))}
-          </Box>
-        ) : (
-          <Typography variant="body2">-</Typography>
-        );
-      },
-    },
-    {
-      field: "manoDeObraTotal",
-      headerName: "Mano de Obra Total",
-      flex: 1,
-      align: "right",
-      headerAlign: "right",
-      valueGetter: (value) => getFormattedPrice(value),
-    },
-    {
-      field: "manoDeObraPagada",
-      headerName: "Mano de Obra Pagada",
-      flex: 1,
-      align: "right",
-      headerAlign: "right",
-      valueGetter: (value) => getFormattedPrice(value),
-    },
-  ];
-
-  const columnsCompartida: GridColDef[] = [
-    {
-      field: "reparación",
-      headerName: "Reparación",
-      flex: 1.5,
-      renderCell: (params) => {
-        return (
-          <Typography
-            key={params.row.id}
-            variant="body2"
-            sx={{
-              "& a": {
-                textDecoration: "none",
-                color: "inherit",
-                "&:hover": {
-                  textDecoration: "underline",
-                  color: "primary.main",
-                },
-              },
-            }}
-          >
-            <Link href={`/dashboard/ordenes-reparacion/${params.row.id}`}>
-              * {`${params.row.auto} - ${formatFechaUTC(params.row.fecha)}`}
-            </Link>
-          </Typography>
-        );
-      },
-    },
-    {
-      field: "mechanics",
-      headerName: "Mecánicos",
+      field: "trabajos",
+      headerName: "Trabajos",
       flex: 2,
       align: "left",
       headerAlign: "center",
       renderCell: (params) => {
-        return params.row.mechanics ? (
+        const trabajos: Trabajo[] = params.row.trabajos;
+        if (!trabajos || trabajos.length === 0) {
+          return (
+            <Typography variant="body2" color="text.secondary">
+              -
+            </Typography>
+          );
+        }
+        return (
           <Box>
-            {params.row.mechanics.map((mechanic: any) => (
+            {trabajos.map((t) => (
               <Typography
-                key={mechanic.id}
+                key={`${t.tipo}-${t.idOrep}-${t.compartida}`}
                 variant="body2"
-                sx={{
-                  "& a": {
-                    textDecoration: "none",
-                    color: "inherit",
-                    "&:hover": {
-                      textDecoration: "underline",
-                      color: "primary.main",
-                    },
-                  },
-                }}
+                sx={linkSx}
               >
-                <Link href={`/dashboard/mecanicos/${mechanic.id}/ver`}>
-                  * {mechanic.name}
+                <Link href={getTrabajoLink(t)}>
+                  <TipoChip tipo={t.tipo} />
+                  {t.compartida && (
+                    <Chip
+                      label="Compartida"
+                      size="small"
+                      variant="outlined"
+                      sx={{
+                        fontSize: "0.7rem",
+                        height: 20,
+                        mr: 0.5,
+                        borderColor: "warning.main",
+                        color: "warning.main",
+                      }}
+                    />
+                  )}
+                  {`${t.auto} - ${formatFechaUTC(t.fecha)}: ${getFormattedPrice(t.manoDeObra)}`}
                 </Link>
+                {t.compartida && t.otrosMecanicos && t.otrosMecanicos.length > 0 && (
+                  <Typography
+                    component="span"
+                    variant="caption"
+                    color="text.secondary"
+                    sx={{ ml: 0.5 }}
+                  >
+                    (con {t.otrosMecanicos.join(", ")})
+                  </Typography>
+                )}
               </Typography>
             ))}
           </Box>
-        ) : (
-          <Typography variant="body2">-</Typography>
         );
       },
     },
     {
       field: "manoDeObraTotal",
       headerName: "Mano de Obra Total",
-      flex: 1,
-      align: "right",
-      headerAlign: "right",
-      valueGetter: (value) => getFormattedPrice(value),
-    },
-    {
-      field: "manoDeObraPagada",
-      headerName: "Mano de Obra Pagada",
       flex: 1,
       align: "right",
       headerAlign: "right",
@@ -301,74 +298,53 @@ function ResumenUltimaSemana() {
           <WeekPicker onWeekChange={handleWeekChange} />
         </Grid>
       </Grid>
+
       {!loading && totalManoObraSemana !== null && (
         <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
           Mano de obra total de la semana:{" "}
           {getFormattedPrice(totalManoObraSemana)}
         </Typography>
       )}
-      <Typography variant="h5" sx={{ fontWeight: 600, mb: 1 }}>
-        Reparaciones por mecánico
-      </Typography>
-      <Box sx={{ width: "100%", mt: 2 }}>
-        <DataGrid
-          rows={rows}
-          columns={columns}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 10 },
-            },
-          }}
-          pageSizeOptions={[5, 10, 25]}
-          disableRowSelectionOnClick
-          autoHeight
-          getRowHeight={() => "auto"}
-          sx={{
-            "& .MuiDataGrid-cell": {
-              fontSize: "0.875rem",
-              whiteSpace: "normal",
-              padding: "8px",
-            },
-            "& .MuiDataGrid-row": {
-              alignItems: "flex-start",
-            },
-            backgroundColor: "background.paper",
-            borderRadius: 1,
-            boxShadow: 1,
-          }}
-        />
-      </Box>
-      <Typography variant="h5" sx={{ fontWeight: 600, mb: 1, mt: 4 }}>
-        Reparaciones compartidas entre varios mecánicos
-      </Typography>
-      <Box sx={{ width: "100%", mt: 2 }}>
-        <DataGrid
-          rows={compartida}
-          columns={columnsCompartida}
-          initialState={{
-            pagination: {
-              paginationModel: { page: 0, pageSize: 10 },
-            },
-          }}
-          pageSizeOptions={[5, 10, 25]}
-          disableRowSelectionOnClick
-          autoHeight
-          getRowHeight={() => "auto"}
-          sx={{
-            "& .MuiDataGrid-cell": {
-              fontSize: "0.875rem",
-              whiteSpace: "normal",
-              padding: "8px",
-            },
-            "& .MuiDataGrid-row": {
-              alignItems: "flex-start",
-            },
-            backgroundColor: "background.paper",
-            borderRadius: 1,
-            boxShadow: 1,
-          }}
-        />
-      </Box>
+
+      {!loading && !hayDatos ? (
+        <Typography
+          variant="body1"
+          color="text.secondary"
+          sx={{ mt: 2 }}
+        >
+          No hay órdenes registradas en este período.
+        </Typography>
+      ) : (
+        <Box sx={{ width: "100%", mt: 2 }}>
+          <DataGrid
+            rows={rows}
+            columns={columns}
+            loading={loading}
+            initialState={{
+              pagination: {
+                paginationModel: { page: 0, pageSize: 10 },
+              },
+            }}
+            pageSizeOptions={[5, 10, 25]}
+            disableRowSelectionOnClick
+            autoHeight
+            getRowHeight={() => "auto"}
+            sx={{
+              "& .MuiDataGrid-cell": {
+                fontSize: "0.875rem",
+                whiteSpace: "normal",
+                padding: "8px",
+              },
+              "& .MuiDataGrid-row": {
+                alignItems: "flex-start",
+              },
+              backgroundColor: "background.paper",
+              borderRadius: 1,
+              boxShadow: 1,
+            }}
+          />
+        </Box>
+      )}
     </Box>
   );
 }

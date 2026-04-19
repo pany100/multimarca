@@ -86,3 +86,18 @@ export const patchVentaSchema = z.object({
   modoAjustes: modoAjustesSchema.optional(),
   descuentoParaManoDeObra: z.coerce.number().nullable().optional(),
 });
+
+export const addMecanicoToVentaSchema = z.object({
+  ventaId: z.coerce.number(),
+  mecanicoId: z.coerce.number(),
+  detalle: z.string().nullable().optional(),
+});
+
+export const updateMecanicoInVentaSchema = z.object({
+  id: z.coerce.number(),
+  detalle: z.string().nullable().optional(),
+});
+
+export const deleteMecanicoFromVentaSchema = z.object({
+  id: z.coerce.number(),
+});

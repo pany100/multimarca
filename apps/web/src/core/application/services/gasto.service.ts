@@ -20,4 +20,20 @@ export class GastoService {
       dateRangeVO.to
     );
   }
+
+  async getVentasMecanicosUltimaSemana(dto: GastoDto) {
+    const dateRangeVO = new DateRangeVO(dto.from, dto.to).toMandatoryDate();
+    return await this.gastoRepository.getVentasMecanicosUltimaSemana(
+      dateRangeVO.from,
+      dateRangeVO.to
+    );
+  }
+
+  async getVentasMecanicosUltimaSemanaCompartida(dto: GastoDto) {
+    const dateRangeVO = new DateRangeVO(dto.from, dto.to).toMandatoryDate();
+    return await this.gastoRepository.getVentasMecanicosUltimaSemanaCompartida(
+      dateRangeVO.from,
+      dateRangeVO.to
+    );
+  }
 }

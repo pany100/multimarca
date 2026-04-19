@@ -9,65 +9,111 @@ export class UltimaSemanaUseCase {
     private readonly gastoService: GastoService
   ) {}
 
-  async processGastos(mecanicosConReparaciones: any[]) {
+  processGastosOdR(mecanicosConReparaciones: any[]) {
     return mecanicosConReparaciones.map((mecanico) => {
-      // Extraer las órdenes de reparación desde la relación intermedia
       const ordenesReparacion = mecanico.ordenesReparacion.map(
         (relacion: any) => relacion.ordenReparacion
       );
 
-      // Filtrar solo las reparaciones donde este mecánico es el único
       const reparacionesUnicoMecanico = ordenesReparacion.filter(
         (orden: any) => orden.mecanicos.length === 1
       );
 
-      // Procesar cada reparación
       const reparaciones = reparacionesUnicoMecanico.map((orden: any) => {
         const calculoVO = ComprobanteCalculadoFactory.fromOrden(orden);
         const manoDeObra = calculoVO.manoDeObraAPagarSinIva;
-
-        // Verificar si está pagado (si tiene al menos un pago válido)
-        const pagado = orden.pagos.length > 0;
 
         return {
           idOrep: orden.id,
           fecha: orden.fechaSalidaReparacion,
           auto: orden.auto.patent,
           manoDeObra,
-          descuento: orden.descuento,
-          pagado,
+          tipo: "odr" as const,
         };
       });
-      // Calcular totales
-      const manoDeObraTotal = reparaciones.reduce(
-        (total: number, reparacion: any) => total + reparacion.manoDeObra,
-        0
-      );
-
-      const manoDeObraPagada = reparaciones.reduce(
-        (total: number, reparacion: any) =>
-          total + (reparacion.pagado ? reparacion.manoDeObra : 0),
-        0
-      );
 
       return {
         mecanicoId: mecanico.id,
         mecanicoNombre: mecanico.name,
         reparaciones,
-        manoDeObraTotal,
-        manoDeObraPagada,
       };
     });
   }
 
+  processGastosVentas(mecanicosConVentas: any[]) {
+    return mecanicosConVentas.map((mecanico) => {
+      const ventas = mecanico.ventas.map(
+        (relacion: any) => relacion.venta
+      );
+
+      const ventasUnicoMecanico = ventas.filter(
+        (venta: any) => venta.mecanicos.length === 1
+      );
+
+      const items = ventasUnicoMecanico.map((venta: any) => {
+        const calculoVO = ComprobanteCalculadoFactory.fromVenta(venta);
+        const manoDeObra = calculoVO.manoDeObraAPagarSinIva;
+
+        const clienteLabel =
+          venta.cliente?.fullName || venta.informacionCliente || `Venta #${venta.id}`;
+
+        return {
+          idOrep: venta.id,
+          fecha: venta.fecha,
+          auto: clienteLabel,
+          manoDeObra,
+          tipo: "venta" as const,
+        };
+      });
+
+      return {
+        mecanicoId: mecanico.id,
+        mecanicoNombre: mecanico.name,
+        reparaciones: items,
+      };
+    });
+  }
+
+  async processGastos(mecanicosConReparaciones: any[]) {
+    return this.processGastosOdR(mecanicosConReparaciones);
+  }
+
   async execute(dto: GastoDto) {
-    const { from, to, decodedToken } = dto;
     const user = await this.usuarioRepository.findById(dto.decodedToken.userId);
     if (!user || !user.rol) {
       throw new Error("Usuario no tiene rol asignado");
     }
 
-    const gastos = await this.gastoService.getGastoMecanicosUltimaSemana(dto);
-    return this.processGastos(gastos);
+    const [gastosOdR, gastosVentas] = await Promise.all([
+      this.gastoService.getGastoMecanicosUltimaSemana(dto),
+      this.gastoService.getVentasMecanicosUltimaSemana(dto),
+    ]);
+
+    const dataOdR = this.processGastosOdR(gastosOdR);
+    const dataVentas = this.processGastosVentas(gastosVentas);
+
+    // Merge by mechanic
+    const mecanicoMap = new Map<number, any>();
+
+    for (const m of dataOdR) {
+      mecanicoMap.set(m.mecanicoId, { ...m });
+    }
+
+    for (const m of dataVentas) {
+      const existing = mecanicoMap.get(m.mecanicoId);
+      if (existing) {
+        existing.reparaciones = [...existing.reparaciones, ...m.reparaciones];
+      } else {
+        mecanicoMap.set(m.mecanicoId, { ...m });
+      }
+    }
+
+    return Array.from(mecanicoMap.values()).map((m) => ({
+      ...m,
+      manoDeObraTotal: m.reparaciones.reduce(
+        (total: number, r: any) => total + r.manoDeObra,
+        0
+      ),
+    }));
   }
 }

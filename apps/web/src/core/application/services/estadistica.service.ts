@@ -102,6 +102,24 @@ export class EstadisticaService {
     );
   }
 
+  async getVentasMecanicos(dto: EstadisticasMonedaVO) {
+    const moneda = dto.moneda ?? "ARS";
+    const from = dto.from ?? null;
+    const to = dto.to ?? null;
+    if (moneda === "USD") {
+      return await this.estadisticasMecanicosQueriesService.getVentasMecanicosUsd(from, to);
+    } else {
+      return await this.estadisticasMecanicosQueriesService.getVentasMecanicosArs(from, to);
+    }
+  }
+
+  async getVentasCompartidas(dto: EstadisticasMonedaVO) {
+    return await this.estadisticasMecanicosQueriesService.getVentasCompartidas(
+      dto.from ?? null,
+      dto.to ?? null
+    );
+  }
+
   async getTransacciones(dto: EstadisticasBaseVO) {
     const { fechaInicio, fechaFin } = dto.toObjectWithStrings();
     return await this.estadisticasTransaccionesQueriesService.getTransacciones(

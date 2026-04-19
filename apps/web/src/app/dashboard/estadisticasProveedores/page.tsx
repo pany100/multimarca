@@ -1,313 +1,479 @@
 "use client";
 
-import DateRangeSearch from "@/components/dates/DateRangeSearch";
-import BarGraphic from "@/components/estadisticas/BarGraphic";
-import useProveedores from "@/hooks/proveedores/useProveedores";
-import ClearIcon from "@mui/icons-material/Clear";
-import SearchIcon from "@mui/icons-material/Search";
+import ChartWithDetail, {
+  formatCurrency,
+  TableColumn,
+} from "@/components/estadisticas-v2/ChartWithDetail";
+import GlobalFilters, {
+  FiltroEstadisticas,
+} from "@/components/estadisticas-v2/GlobalFilters";
+import KPICard from "@/components/estadisticas-v2/KPICard";
+import { useFetch } from "@/contexts/FetchContext";
+import LocalShippingIcon from "@mui/icons-material/LocalShipping";
+import PieChartIcon from "@mui/icons-material/PieChart";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import { Box, Grid, Typography, useTheme } from "@mui/material";
 import {
-  Box,
-  Button,
-  Grid,
-  Paper,
-  Skeleton,
-  Stack,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { useEffect, useMemo, useState } from "react";
+  ArcElement,
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Filler,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+} from "chart.js";
+import { useCallback, useEffect, useState } from "react";
+import { Bar, Doughnut } from "react-chartjs-2";
 
-const currencyFormatter = new Intl.NumberFormat("es-AR", {
-  style: "currency",
-  currency: "ARS",
-  minimumFractionDigits: 2,
-});
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  ArcElement,
+  Filler,
+  Title,
+  Tooltip,
+  Legend
+);
 
-function EstadisticasProveedoresPage() {
-  const [from, setFrom] = useState<Date | null>(null);
-  const [to, setTo] = useState<Date | null>(null);
+// ─── Types ───────────────────────────────────────────────────────────────────
+
+interface Kpis {
+  totalComprado: number;
+  ordenesCompra: number;
+  reparacionesTercero: number;
+  promedioPorProveedor: number;
+}
+
+interface ProveedorRow {
+  proveedorId: number;
+  proveedorNombre: string;
+  totalGastado: number;
+  cantidadOrdenesCompra: number;
+  cantidadReparacionesTerceroOrden: number;
+  cantidadReparacionesTerceroVenta: number;
+  cantidadTotal: number;
+}
+
+interface ComposicionItem {
+  label: string;
+  total: number;
+}
+
+interface EvolucionItem {
+  label: string;
+  ordenesCompra: number;
+  reparacionesTercero: number;
+  total: number;
+}
+
+interface ProveedoresData {
+  kpis: Kpis;
+  kpisPrev: Kpis | null;
+  topProveedores: ProveedorRow[];
+  composicion: ComposicionItem[];
+  evolucion: EvolucionItem[];
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+function getDefaultFrom(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth(), 1);
+}
+
+function getDefaultTo(): Date {
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() + 1, 0);
+}
+
+const CHART_COLORS = {
+  blue: "rgba(66, 165, 245, 1)",
+  blueBg: "rgba(66, 165, 245, 0.7)",
+  green: "rgba(102, 187, 106, 1)",
+  greenBg: "rgba(102, 187, 106, 0.7)",
+  red: "rgba(239, 83, 80, 1)",
+  redBg: "rgba(239, 83, 80, 0.7)",
+  orange: "rgba(255, 167, 38, 1)",
+  orangeBg: "rgba(255, 167, 38, 0.8)",
+  purple: "rgba(171, 71, 188, 1)",
+  purpleBg: "rgba(171, 71, 188, 0.7)",
+};
+
+const DOUGHNUT_COLORS = [
+  CHART_COLORS.blueBg,
+  CHART_COLORS.orangeBg,
+  CHART_COLORS.greenBg,
+  CHART_COLORS.purpleBg,
+  CHART_COLORS.redBg,
+];
+
+// ─── Component ───────────────────────────────────────────────────────────────
+
+export default function EstadisticasProveedoresPage() {
+  const { authFetch } = useFetch();
   const theme = useTheme();
-  const {
-    total,
-    proveedores,
-    searchProveedores,
-    clearProveedores,
-    loading,
-  } = useProveedores();
+  const [data, setData] = useState<ProveedoresData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = useCallback(
+    async (from?: string | null, to?: string | null) => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams();
+        if (from) params.set("from", from);
+        if (to) params.set("to", to);
+        const res = await authFetch(
+          `/api/estadisticas/v2/proveedores?${params.toString()}`
+        );
+        if (res.ok) setData(await res.json());
+      } finally {
+        setLoading(false);
+      }
+    },
+    [authFetch]
+  );
 
   useEffect(() => {
-    searchProveedores(null, null);
-  }, [searchProveedores]);
+    const from = getDefaultFrom().toISOString().split("T")[0];
+    const to = getDefaultTo().toISOString().split("T")[0];
+    fetchData(from, to);
+  }, [fetchData]);
 
-  const handleBuscar = () => {
-    searchProveedores(from, to);
+  const handleApply = (filtro: FiltroEstadisticas) => {
+    fetchData(filtro.from, filtro.to);
   };
 
-  const handleLimpiar = () => {
-    setFrom(null);
-    setTo(null);
-    clearProveedores();
-  };
+  const kpis = data?.kpis;
+  const kpisPrev = data?.kpisPrev;
+  const topProveedores = data?.topProveedores ?? [];
+  const composicion = data?.composicion ?? [];
+  const evolucion = data?.evolucion ?? [];
 
-  const items = useMemo(
-    () =>
-      Array.isArray(proveedores)
-        ? proveedores.map((p) => ({
-            label: p.proveedorNombre || "Proveedor",
-            value: p.totalGastado || 0,
-          }))
-        : [],
-    [proveedores]
-  );
+  // ─── Top proveedores chart ──────────────────────────────────────────
 
-  const hayDatos = items.length > 0;
-  const chartHeight = Math.max(420, items.length * 40);
+  const top10 = topProveedores.slice(0, 10);
+  const topChart = top10.length ? (
+    <Box sx={{ height: Math.max(250, top10.length * 40) }}>
+      <Bar
+        data={{
+          labels: top10.map((p) => p.proveedorNombre),
+          datasets: [
+            {
+              data: top10.map((p) => p.totalGastado),
+              backgroundColor: CHART_COLORS.blueBg,
+              borderColor: CHART_COLORS.blue,
+              borderWidth: 1,
+            },
+          ],
+        }}
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: "y",
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => formatCurrency(ctx.parsed.x ?? 0),
+              },
+            },
+          },
+          scales: {
+            x: {
+              ticks: {
+                callback: (v) =>
+                  new Intl.NumberFormat("es-AR", {
+                    style: "currency",
+                    currency: "ARS",
+                    notation: "compact",
+                  }).format(v as number),
+              },
+            },
+          },
+        }}
+      />
+    </Box>
+  ) : null;
 
-  const totalGlobal = total.totalGlobal || 0;
-  const totalMovimientosPeriodo = total.cantidadTotal || 0;
+  const topColumns: TableColumn[] = [
+    { key: "proveedorNombre", label: "Proveedor" },
+    {
+      key: "totalGastado",
+      label: "Total comprado",
+      align: "right",
+      format: (v: number) => formatCurrency(v),
+    },
+    {
+      key: "porcentaje",
+      label: "% del total",
+      align: "right",
+      render: (_v: unknown, row: Record<string, unknown>) => {
+        const total = kpis?.totalComprado ?? 0;
+        if (!total) return "-";
+        const pct = ((row.totalGastado as number) / total) * 100;
+        return `${pct.toFixed(1)}%`;
+      },
+    },
+    { key: "cantidadOrdenesCompra", label: "OC", align: "right" },
+    {
+      key: "cantidadReparacionesTerceroOrden",
+      label: "Rep. tercero (OdR)",
+      align: "right",
+    },
+    {
+      key: "cantidadReparacionesTerceroVenta",
+      label: "Rep. tercero (Ventas)",
+      align: "right",
+    },
+    { key: "cantidadTotal", label: "Total mov.", align: "right" },
+  ];
 
-  const columns: GridColDef[] = useMemo(
-    () => [
-      {
-        field: "proveedorNombre",
-        headerName: "Proveedor",
-        flex: 1,
-        minWidth: 200,
-      },
-      {
-        field: "totalGastado",
-        headerName: "Total comprado",
-        flex: 0.55,
-        minWidth: 160,
-        align: "right",
-        headerAlign: "right",
-        valueFormatter: (value) => currencyFormatter.format(Number(value || 0)),
-      },
-      {
-        field: "porcentajeDinero",
-        headerName: "% del dinero total",
-        flex: 0.4,
-        minWidth: 120,
-        align: "right",
-        headerAlign: "right",
-        valueGetter: (_value, row) => {
-          if (!totalGlobal || totalGlobal <= 0) return "—";
-          const pct = (Number(row.totalGastado) / totalGlobal) * 100;
-          return `${Number(pct.toFixed(1))}%`;
-        },
-      },
-      {
-        field: "cantidadOrdenesCompra",
-        headerName: "Órdenes de compra",
-        type: "number",
-        flex: 0.35,
-        minWidth: 130,
-        align: "right",
-        headerAlign: "right",
-      },
-      {
-        field: "cantidadReparacionesTerceroOrden",
-        headerName: "Rep. tercero (órdenes)",
-        type: "number",
-        flex: 0.38,
-        minWidth: 140,
-        align: "right",
-        headerAlign: "right",
-      },
-      {
-        field: "cantidadReparacionesTerceroVenta",
-        headerName: "Rep. tercero (ventas)",
-        type: "number",
-        flex: 0.38,
-        minWidth: 140,
-        align: "right",
-        headerAlign: "right",
-      },
-      {
-        field: "cantidadTotal",
-        headerName: "Total movimientos",
-        type: "number",
-        flex: 0.32,
-        minWidth: 120,
-        align: "right",
-        headerAlign: "right",
-      },
-      {
-        field: "porcentajeCompras",
-        headerName: "% del total de movimientos",
-        flex: 0.42,
-        minWidth: 150,
-        align: "right",
-        headerAlign: "right",
-        valueGetter: (_value, row) => {
-          if (!totalMovimientosPeriodo || totalMovimientosPeriodo <= 0)
-            return "—";
-          const pct =
-            (Number(row.cantidadTotal) / totalMovimientosPeriodo) * 100;
-          return `${Number(pct.toFixed(1))}%`;
-        },
-      },
-    ],
-    [totalGlobal, totalMovimientosPeriodo]
-  );
+  const topRows = topProveedores.map((p) => ({
+    proveedorNombre: p.proveedorNombre,
+    totalGastado: p.totalGastado,
+    cantidadOrdenesCompra: p.cantidadOrdenesCompra,
+    cantidadReparacionesTerceroOrden: p.cantidadReparacionesTerceroOrden,
+    cantidadReparacionesTerceroVenta: p.cantidadReparacionesTerceroVenta,
+    cantidadTotal: p.cantidadTotal,
+  }));
 
-  const rows = useMemo(
-    () =>
-      Array.isArray(proveedores)
-        ? proveedores.map((p, idx) => ({
-            id: p.proveedorId > 0 ? p.proveedorId : `row-${idx}`,
-            proveedorNombre: p.proveedorNombre,
-            totalGastado: p.totalGastado,
-            cantidadOrdenesCompra: p.cantidadOrdenesCompra,
-            cantidadReparacionesTerceroOrden:
-              p.cantidadReparacionesTerceroOrden,
-            cantidadReparacionesTerceroVenta:
-              p.cantidadReparacionesTerceroVenta,
-            cantidadTotal: p.cantidadTotal,
-          }))
-        : [],
-    [proveedores]
-  );
+  // ─── Composición chart ──────────────────────────────────────────────
+
+  const composicionChart = composicion.length ? (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        height: 280,
+      }}
+    >
+      <Doughnut
+        data={{
+          labels: composicion.map((c) => c.label),
+          datasets: [
+            {
+              data: composicion.map((c) => c.total),
+              backgroundColor: DOUGHNUT_COLORS.slice(0, composicion.length),
+              borderWidth: 1,
+            },
+          ],
+        }}
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  const total = composicion.reduce((s, c) => s + c.total, 0);
+                  const pct = total ? ((ctx.parsed / total) * 100).toFixed(1) : "0";
+                  return `${ctx.label}: ${formatCurrency(ctx.parsed)} (${pct}%)`;
+                },
+              },
+            },
+          },
+        }}
+      />
+    </Box>
+  ) : null;
+
+  const composicionColumns: TableColumn[] = [
+    { key: "label", label: "Tipo" },
+    { key: "total", label: "Monto", align: "right", format: (v: number) => formatCurrency(v) },
+    {
+      key: "porcentaje",
+      label: "%",
+      align: "right",
+      render: (_v: unknown, row: Record<string, unknown>) => {
+        const total = composicion.reduce((s, c) => s + c.total, 0);
+        if (!total) return "-";
+        return `${(((row.total as number) / total) * 100).toFixed(1)}%`;
+      },
+    },
+  ];
+
+  // ─── Evolución chart ────────────────────────────────────────────────
+
+  const evolucionChart = evolucion.length ? (
+    <Box sx={{ height: 300 }}>
+      <Bar
+        data={{
+          labels: evolucion.map((e) => e.label),
+          datasets: [
+            {
+              label: "Órdenes de compra",
+              data: evolucion.map((e) => e.ordenesCompra),
+              backgroundColor: CHART_COLORS.blueBg,
+              borderColor: CHART_COLORS.blue,
+              borderWidth: 1,
+            },
+            {
+              label: "Rep. tercero",
+              data: evolucion.map((e) => e.reparacionesTercero),
+              backgroundColor: CHART_COLORS.orangeBg,
+              borderColor: CHART_COLORS.orange,
+              borderWidth: 1,
+            },
+          ],
+        }}
+        options={{
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            tooltip: {
+              callbacks: {
+                label: (ctx) =>
+                  `${ctx.dataset.label}: ${formatCurrency(ctx.parsed.y ?? 0)}`,
+              },
+            },
+          },
+          scales: {
+            x: { stacked: true },
+            y: {
+              stacked: true,
+              ticks: {
+                callback: (v) =>
+                  new Intl.NumberFormat("es-AR", {
+                    style: "currency",
+                    currency: "ARS",
+                    notation: "compact",
+                  }).format(v as number),
+              },
+            },
+          },
+        }}
+      />
+    </Box>
+  ) : null;
+
+  const evolucionColumns: TableColumn[] = [
+    { key: "label", label: "Mes" },
+    {
+      key: "ordenesCompra",
+      label: "Órdenes de compra",
+      align: "right",
+      format: (v: number) => formatCurrency(v),
+    },
+    {
+      key: "reparacionesTercero",
+      label: "Rep. tercero",
+      align: "right",
+      format: (v: number) => formatCurrency(v),
+    },
+    {
+      key: "total",
+      label: "Total",
+      align: "right",
+      render: (v: number) => (
+        <Typography variant="body2" sx={{ fontWeight: 600 }}>
+          {formatCurrency(v)}
+        </Typography>
+      ),
+    },
+  ];
+
+  // ─── Render ─────────────────────────────────────────────────────────
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-        }}
-      >
-        <Typography variant="h5" component="h1" sx={{ fontWeight: "bold" }}>
-          Estadísticas de Proveedores
-        </Typography>
-      </Box>
-      <Box sx={{ p: 3 }}>
-        <Paper
-          elevation={0}
-          sx={{
-            p: 2,
-            mb: 3,
-            backgroundColor: theme.palette.background.default,
-            borderRadius: 2,
-          }}
-        >
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={12} md={12}>
-              <Stack direction="row" spacing={2} alignItems="center" flexWrap="wrap">
-                <DateRangeSearch
-                  setFrom={setFrom}
-                  setTo={setTo}
-                  fromValue={from}
-                  toValue={to}
-                />
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={handleBuscar}
-                  startIcon={<SearchIcon />}
-                  sx={{
-                    minWidth: "auto",
-                    px: 2,
-                    height: "40px",
-                    backgroundColor: (t) => t.palette.primary.main,
-                    "&:hover": {
-                      backgroundColor: (t) => t.palette.primary.dark,
-                    },
-                  }}
-                >
-                  Buscar
-                </Button>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={handleLimpiar}
-                  startIcon={<ClearIcon />}
-                  sx={{ minWidth: "auto", px: 2, height: "40px" }}
-                >
-                  Limpiar
-                </Button>
-              </Stack>
-            </Grid>
-          </Grid>
-        </Paper>
-        <Box
-          sx={{
-            mt: 2,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
-            gap: 0.5,
-          }}
-        >
-          {loading ? (
-            <>
-              <Skeleton variant="text" width={320} height={28} />
-              <Skeleton variant="text" width={220} height={22} />
-            </>
-          ) : (
-            <>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                Total comprado en el período:{" "}
-                {currencyFormatter.format(total.totalGlobal || 0)}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Órdenes de compra: {total.cantidadOrdenesCompra || 0} · Rep.
-                tercero en órdenes:{" "}
-                {total.cantidadReparacionesTerceroOrden || 0} · Rep. tercero en
-                ventas: {total.cantidadReparacionesTerceroVenta || 0} · Total
-                movimientos: {total.cantidadTotal || 0}
-              </Typography>
-            </>
-          )}
-        </Box>
-      </Box>
-      <Paper elevation={0} sx={{ borderRadius: 2, p: 2 }}>
-        {hayDatos || loading ? (
-          <BarGraphic
-            data={items}
-            title="Total comprado por proveedor"
-            currency="ARS"
-            height={chartHeight}
-            maxWidth="100%"
+      <Typography variant="h5" sx={{ fontWeight: "bold", mb: 3 }}>
+        Estadísticas de Proveedores
+      </Typography>
+
+      <GlobalFilters
+        onApply={handleApply}
+        defaultFrom={getDefaultFrom()}
+        defaultTo={getDefaultTo()}
+      />
+
+      {/* KPI Cards */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <KPICard
+            label="Total comprado"
+            value={kpis?.totalComprado ?? null}
+            previousValue={kpisPrev?.totalComprado}
+            format="currency"
             loading={loading}
           />
-        ) : (
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            height="200px"
-          >
-            <Typography color="text.secondary">
-              Sin datos disponibles
-            </Typography>
-          </Box>
-        )}
-      </Paper>
-      <Paper elevation={0} sx={{ borderRadius: 2, p: 2, mt: 2 }}>
-        <Typography variant="h6" sx={{ mb: 1 }}>
-          Detalle por proveedor
-        </Typography>
-        <div style={{ width: "100%" }}>
-          <DataGrid
-            autoHeight
-            rows={rows}
-            columns={columns}
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <KPICard
+            label="Órdenes de compra"
+            value={kpis?.ordenesCompra ?? null}
+            previousValue={kpisPrev?.ordenesCompra}
+            format="number"
             loading={loading}
-            disableRowSelectionOnClick
-            initialState={{
-              pagination: { paginationModel: { pageSize: 10, page: 0 } },
-            }}
-            pageSizeOptions={[5, 10, 25]}
           />
-        </div>
-      </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <KPICard
+            label="Reparaciones terceros"
+            value={kpis?.reparacionesTercero ?? null}
+            previousValue={kpisPrev?.reparacionesTercero}
+            format="number"
+            loading={loading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <KPICard
+            label="Promedio por proveedor"
+            value={kpis?.promedioPorProveedor ?? null}
+            previousValue={kpisPrev?.promedioPorProveedor}
+            format="currency"
+            loading={loading}
+          />
+        </Grid>
+      </Grid>
+
+      {/* Top proveedores + Composición */}
+      <Grid container spacing={2} sx={{ mb: 2 }}>
+        <Grid item xs={12} md={8}>
+          <ChartWithDetail
+            title="Top proveedores por monto"
+            icon={
+              <LocalShippingIcon
+                sx={{ color: theme.palette.primary.main }}
+              />
+            }
+            chart={topChart}
+            columns={topColumns}
+            rows={topRows}
+            loading={loading}
+          />
+        </Grid>
+        <Grid item xs={12} md={4}>
+          <ChartWithDetail
+            title="Composición del gasto"
+            icon={
+              <PieChartIcon
+                sx={{ color: theme.palette.warning.main }}
+              />
+            }
+            chart={composicionChart}
+            columns={composicionColumns}
+            rows={composicion}
+            loading={loading}
+          />
+        </Grid>
+      </Grid>
+
+      {/* Evolución */}
+      <ChartWithDetail
+        title="Evolución mensual (6 meses)"
+        icon={
+          <TrendingUpIcon
+            sx={{ color: theme.palette.success.main }}
+          />
+        }
+        chart={evolucionChart}
+        columns={evolucionColumns}
+        rows={evolucion}
+        loading={loading}
+      />
     </Box>
   );
 }
-
-export default EstadisticasProveedoresPage;

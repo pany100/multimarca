@@ -18,7 +18,17 @@ export class PatchVentaUseCase {
     }
 
     // Validaciones de negocio
-    // Aquí puedes agregar validaciones específicas según las reglas de negocio
+    if (dto.estado === "Cerrado" && ventaExistente.estado !== "Cerrado") {
+      const tieneTrabajosRealizados =
+        ventaExistente.trabajosRealizados.length > 0;
+      const tieneMecanicos = ventaExistente.mecanicos.length > 0;
+
+      if (tieneTrabajosRealizados && !tieneMecanicos) {
+        throw new Error(
+          "No se puede cerrar la venta: debe asignar al menos un mecánico cuando hay trabajos de mano de obra"
+        );
+      }
+    }
 
     // Preparar datos de actualización
     const updateData: any = {};
@@ -66,10 +76,25 @@ export class PatchVentaUseCase {
     const cedulaPath =
       venta.cedulaFile?.finalPath || venta.cedulaFile?.tempPath || null;
 
+    const mecanicos = venta.mecanicos.map(
+      (el: {
+        id: number;
+        mecanicoId: number;
+        mecanico: { id: number; name: string };
+        detalle: string | null;
+      }) => ({
+        id: el.mecanico.id,
+        mecanicoVentaId: el.id,
+        name: el.mecanico.name,
+        detalle: el.detalle,
+      })
+    );
+
     return {
       ...venta,
       cedulaPath,
       reparacionesDeTercero,
+      mecanicos,
       precioTotal: comprobanteCalculado.total,
       total: comprobanteCalculado.total,
       totalManoDeObra: comprobanteCalculado.totalManoDeObra,

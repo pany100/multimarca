@@ -1,244 +1,330 @@
 "use client";
 
-import DateRangeSearch from "@/components/dates/DateRangeSearch";
-import BarGraphic from "@/components/estadisticas/BarGraphic";
-import useManoDeObra from "@/hooks/mano-de-obra/useManoDeObra";
-import ClearIcon from "@mui/icons-material/Clear";
-import SearchIcon from "@mui/icons-material/Search";
+import ChartWithDetail, {
+  TableColumn,
+  formatCurrency,
+} from "@/components/estadisticas-v2/ChartWithDetail";
+import GlobalFilters, {
+  FiltroEstadisticas,
+} from "@/components/estadisticas-v2/GlobalFilters";
+import KPICard from "@/components/estadisticas-v2/KPICard";
+import { useFetch } from "@/contexts/FetchContext";
+import BuildIcon from "@mui/icons-material/Build";
+import FormatListNumberedIcon from "@mui/icons-material/FormatListNumbered";
+import TimelineIcon from "@mui/icons-material/Timeline";
+import { Box, Grid, Typography } from "@mui/material";
 import {
-  Box,
-  Button,
-  Grid,
-  Paper,
-  Skeleton,
-  Stack,
-  Typography,
-  useTheme,
-} from "@mui/material";
-import { DataGrid, GridColDef } from "@mui/x-data-grid";
-import { useEffect, useMemo, useState } from "react";
+  BarElement,
+  CategoryScale,
+  Chart as ChartJS,
+  Legend,
+  LinearScale,
+  Title,
+  Tooltip,
+} from "chart.js";
+import { useCallback, useEffect, useState } from "react";
+import { Bar } from "react-chartjs-2";
 
-function EstadisticasManoDeObra() {
-  const [from, setFrom] = useState<Date | null>(null);
-  const [to, setTo] = useState<Date | null>(null);
-  const theme = useTheme();
-  const { total, top, searchManoDeObra, clearManoDeObra, loading } =
-    useManoDeObra();
-  const currencyFormatter = new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    minimumFractionDigits: 2,
-  });
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend
+);
+
+interface ManoDeObraData {
+  kpis: {
+    totalMdO: number;
+    promedioOrden: number;
+    cantidadOrdenes: number;
+    trabajoMasFrecuente: string | null;
+  };
+  kpisPrev: {
+    totalMdO: number;
+    promedioOrden: number;
+    cantidadOrdenes: number;
+  };
+  topPorMonto: {
+    descripcion: string;
+    total: number;
+    cantidadOrdenes: number;
+  }[];
+  topPorFrecuencia: {
+    descripcion: string;
+    total: number;
+    cantidadOrdenes: number;
+  }[];
+  evolucion: { label: string; total: number; ordenes: number }[];
+}
+
+const currencyOpts = {
+  style: "currency" as const,
+  currency: "ARS",
+  notation: "compact" as const,
+  compactDisplay: "short" as const,
+};
+
+export default function EstadisticasManoDeObra() {
+  const { authFetch } = useFetch();
+  const [data, setData] = useState<ManoDeObraData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  const fetchData = useCallback(
+    async (filtro?: FiltroEstadisticas) => {
+      setLoading(true);
+      try {
+        const params = new URLSearchParams();
+        if (filtro?.from) params.set("from", filtro.from);
+        if (filtro?.to) params.set("to", filtro.to);
+        const qs = params.toString();
+        const res = await authFetch(
+          `/api/estadisticas/v2/mano-de-obra${qs ? `?${qs}` : ""}`
+        );
+        if (res.ok) setData(await res.json());
+      } finally {
+        setLoading(false);
+      }
+    },
+    [authFetch]
+  );
 
   useEffect(() => {
-    searchManoDeObra(null, null);
-  }, [searchManoDeObra]);
+    fetchData();
+  }, [fetchData]);
 
-  const handleBuscar = () => {
-    searchManoDeObra(from, to);
-  };
+  const kpis = data?.kpis;
+  const kpisPrev = data?.kpisPrev;
 
-  const handleLimpiar = () => {
-    setFrom(null);
-    setTo(null);
-    clearManoDeObra();
-  };
-
-  const items = useMemo(
-    () =>
-      Array.isArray(top)
-        ? top.map((t) => ({
-            label: t.descripcion || "Trabajo",
-            value: t.totalPorTrabajo || 0,
-          }))
-        : [],
-    [top]
-  );
-
-  const hayDatos = items.length > 0;
-
-  const columns: GridColDef[] = useMemo(
-    () => [
+  // ── Evolución mensual ────────────────────────────────────────────────
+  const evoChartData = {
+    labels: data?.evolucion.map((e) => e.label) ?? [],
+    datasets: [
       {
-        field: "descripcion",
-        headerName: "Trabajo",
-        flex: 1,
-        minWidth: 220,
-      },
-      {
-        field: "totalPorTrabajo",
-        headerName: "Total en Mano de Obra",
-        flex: 0.6,
-        minWidth: 180,
-        align: "right",
-        headerAlign: "right",
-        valueFormatter: (value) => currencyFormatter.format(Number(value || 0)),
-      },
-      {
-        field: "cantidadOrdenes",
-        headerName: "Órdenes atentidas",
-        type: "number",
-        flex: 0.3,
-        minWidth: 120,
-        align: "right",
-        headerAlign: "right",
+        label: "Mano de obra",
+        data: data?.evolucion.map((e) => e.total) ?? [],
+        backgroundColor: "rgba(66, 165, 245, 0.7)",
+        borderColor: "rgba(66, 165, 245, 1)",
+        borderWidth: 1,
       },
     ],
-    []
-  );
+  };
+  const evoOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: any) => formatCurrency(ctx.parsed?.y ?? 0),
+        },
+      },
+    },
+    scales: {
+      y: {
+        beginAtZero: true,
+        ticks: {
+          callback: (v: any) =>
+            new Intl.NumberFormat("es-AR", currencyOpts).format(v),
+        },
+      },
+    },
+  };
+  const evoColumns: TableColumn[] = [
+    { key: "label", label: "Mes" },
+    { key: "total", label: "Total MdO", align: "right", format: formatCurrency },
+    { key: "ordenes", label: "Órdenes", align: "right" },
+  ];
 
-  const rows = useMemo(
-    () =>
-      Array.isArray(top)
-        ? top.map((t, idx) => ({
-            id: idx,
-            descripcion: t.descripcion,
-            totalPorTrabajo: t.totalPorTrabajo,
-            cantidadOrdenes: t.cantidadOrdenes,
-          }))
-        : [],
-    [top]
-  );
+  // ── Top por monto ────────────────────────────────────────────────────
+  const montoChartData = {
+    labels: data?.topPorMonto.map((t) => t.descripcion) ?? [],
+    datasets: [
+      {
+        label: "Total",
+        data: data?.topPorMonto.map((t) => t.total) ?? [],
+        backgroundColor:
+          data?.topPorMonto.map(
+            (_, i) => `hsla(${(i * 37) % 360}, 65%, 55%, 0.7)`
+          ) ?? [],
+        borderWidth: 1,
+      },
+    ],
+  };
+  const montoOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: "y" as const,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: any) => formatCurrency(ctx.parsed?.x ?? 0),
+        },
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        ticks: {
+          callback: (v: any) =>
+            new Intl.NumberFormat("es-AR", currencyOpts).format(v),
+        },
+      },
+    },
+  };
+  const montoColumns: TableColumn[] = [
+    { key: "descripcion", label: "Trabajo" },
+    { key: "total", label: "Total MdO", align: "right", format: formatCurrency },
+    { key: "cantidadOrdenes", label: "Órdenes", align: "right" },
+  ];
+
+  // ── Top por frecuencia ───────────────────────────────────────────────
+  const freqChartData = {
+    labels: data?.topPorFrecuencia.map((t) => t.descripcion) ?? [],
+    datasets: [
+      {
+        label: "Órdenes",
+        data: data?.topPorFrecuencia.map((t) => t.cantidadOrdenes) ?? [],
+        backgroundColor: "rgba(102, 187, 106, 0.7)",
+        borderColor: "rgba(102, 187, 106, 1)",
+        borderWidth: 1,
+      },
+    ],
+  };
+  const freqOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    indexAxis: "y" as const,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx: any) =>
+            `${ctx.parsed?.x ?? 0} órdenes`,
+        },
+      },
+    },
+    scales: {
+      x: {
+        beginAtZero: true,
+        ticks: { precision: 0 },
+      },
+    },
+  };
+  const freqColumns: TableColumn[] = [
+    { key: "descripcion", label: "Trabajo" },
+    { key: "cantidadOrdenes", label: "Órdenes", align: "right" },
+    { key: "total", label: "Total MdO", align: "right", format: formatCurrency },
+  ];
 
   return (
     <Box sx={{ p: 3 }}>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 3,
-        }}
-      >
-        <Typography variant="h5" component="h1" sx={{ fontWeight: "bold" }}>
-          Estadísticas de Mano De Obra
-        </Typography>
+      <Typography variant="h4" component="h1" sx={{ mb: 2 }}>
+        Estadísticas de Mano de Obra
+      </Typography>
+
+      <GlobalFilters onApply={(f) => fetchData(f)} />
+
+      {/* KPI Cards */}
+      <Grid container spacing={2} sx={{ mb: 3 }}>
+        <Grid item xs={12} sm={6} md={3}>
+          <KPICard
+            label="Total mano de obra"
+            value={kpis?.totalMdO ?? null}
+            previousValue={kpisPrev?.totalMdO}
+            loading={loading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <KPICard
+            label="Promedio por orden"
+            value={kpis?.promedioOrden ?? null}
+            previousValue={kpisPrev?.promedioOrden}
+            loading={loading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <KPICard
+            label="Órdenes atendidas"
+            value={kpis?.cantidadOrdenes ?? null}
+            previousValue={kpisPrev?.cantidadOrdenes}
+            format="number"
+            loading={loading}
+          />
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <KPICard
+            label="Trabajo más frecuente"
+            value={null}
+            loading={loading}
+            subtitle={kpis?.trabajoMasFrecuente ?? "-"}
+          />
+        </Grid>
+      </Grid>
+
+      {/* Evolución mensual */}
+      <Box sx={{ mb: 3 }}>
+        <ChartWithDetail
+          title="Evolución mensual (últimos 6 meses)"
+          icon={<TimelineIcon color="primary" />}
+          loading={loading}
+          columns={evoColumns}
+          rows={data?.evolucion ?? []}
+          chart={
+            <Box sx={{ height: 300 }}>
+              <Bar data={evoChartData} options={evoOptions as any} />
+            </Box>
+          }
+        />
       </Box>
-      <Box sx={{ p: 3 }}>
-        <Paper
-          elevation={0}
-          sx={{
-            p: 2,
-            mb: 3,
-            backgroundColor: theme.palette.background.default,
-            borderRadius: 2,
-          }}
-        >
-          <Grid container spacing={2} alignItems="center">
-            <Grid item xs={12} sm={12} md={12}>
-              <Stack
-                direction="row"
-                spacing={2}
-                alignItems="center"
-                flexWrap="wrap"
+
+      {/* Top por monto + Top por frecuencia */}
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <ChartWithDetail
+            title="Top 10 — por monto"
+            icon={<BuildIcon color="primary" />}
+            loading={loading}
+            columns={montoColumns}
+            rows={data?.topPorMonto ?? []}
+            chart={
+              <Box
+                sx={{
+                  height: Math.max(
+                    200,
+                    (data?.topPorMonto.length ?? 5) * 40
+                  ),
+                }}
               >
-                <DateRangeSearch
-                  setFrom={setFrom}
-                  setTo={setTo}
-                  fromValue={from}
-                  toValue={to}
-                />
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={handleBuscar}
-                  startIcon={<SearchIcon />}
-                  sx={{
-                    minWidth: "auto",
-                    px: 2,
-                    height: "40px",
-                    backgroundColor: (t) => t.palette.primary.main,
-                    "&:hover": {
-                      backgroundColor: (t) => t.palette.primary.dark,
-                    },
-                  }}
-                >
-                  Buscar
-                </Button>
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={handleLimpiar}
-                  startIcon={<ClearIcon />}
-                  sx={{ minWidth: "auto", px: 2, height: "40px" }}
-                >
-                  Limpiar
-                </Button>
-              </Stack>
-            </Grid>
-          </Grid>
-        </Paper>
-        <Box
-          sx={{
-            mt: 2,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            textAlign: "center",
-            gap: 0.5,
-          }}
-        >
-          {loading ? (
-            <>
-              <Skeleton variant="text" width={320} height={28} />
-              <Skeleton variant="text" width={220} height={22} />
-            </>
-          ) : (
-            <>
-              <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
-                Total global del período:{" "}
-                {currencyFormatter.format(total.totalManoDeObra || 0)}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Órdenes atendidas: {total.cantidadTotalOrdenesAtendidas || 0}
-              </Typography>
-            </>
-          )}
-        </Box>
-      </Box>
-      <Paper elevation={0} sx={{ borderRadius: 2, p: 2 }}>
-        {hayDatos || loading ? (
-          <BarGraphic
-            data={items}
-            title="Total de mano de obra por trabajo"
-            currency="ARS"
-            height={420}
-            maxWidth="100%"
-            loading={loading}
+                <Bar data={montoChartData} options={montoOptions as any} />
+              </Box>
+            }
           />
-        ) : (
-          <Box
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            height="200px"
-          >
-            <Typography color="text.secondary">
-              Sin datos disponibles
-            </Typography>
-          </Box>
-        )}
-      </Paper>
-      <Paper elevation={0} sx={{ borderRadius: 2, p: 2, mt: 2 }}>
-        <Typography variant="h6" sx={{ mb: 1 }}>
-          Detalle por trabajo
-        </Typography>
-        <div style={{ width: "100%" }}>
-          <DataGrid
-            autoHeight
-            rows={rows}
-            columns={columns}
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <ChartWithDetail
+            title="Top 10 — por frecuencia"
+            icon={<FormatListNumberedIcon color="primary" />}
             loading={loading}
-            disableRowSelectionOnClick
-            initialState={{
-              pagination: { paginationModel: { pageSize: 10, page: 0 } },
-            }}
-            pageSizeOptions={[5, 10, 25]}
+            columns={freqColumns}
+            rows={data?.topPorFrecuencia ?? []}
+            chart={
+              <Box
+                sx={{
+                  height: Math.max(
+                    200,
+                    (data?.topPorFrecuencia.length ?? 5) * 40
+                  ),
+                }}
+              >
+                <Bar data={freqChartData} options={freqOptions as any} />
+              </Box>
+            }
           />
-        </div>
-      </Paper>
+        </Grid>
+      </Grid>
     </Box>
   );
 }
-
-export default EstadisticasManoDeObra;

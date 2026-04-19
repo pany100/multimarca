@@ -9,30 +9,20 @@ export class UltimaSemanaCompartidaUseCase {
     private readonly gastoService: GastoService
   ) {}
 
-  async processGastos(reparaciones: any[]) {
-    // Filter repairs that actually have multiple mechanics
+  processGastosOdR(reparaciones: any[]) {
     const reparacionesMultiplesMecanicos = reparaciones.filter(
       (reparacion) => reparacion.mecanicos.length > 1
     );
 
-    // Process and format the repairs data
-    const result = reparacionesMultiplesMecanicos.map((reparacion) => {
+    return reparacionesMultiplesMecanicos.map((reparacion) => {
       const calculoVO = ComprobanteCalculadoFactory.fromOrden(reparacion);
       const manoDeObraTotal = calculoVO.manoDeObraAPagarSinIva;
 
-      // Check if the repair order has been paid
-      const pagado = reparacion.pagos.length > 0;
-
-      // Calculate total manoDeObra for paid repair orders
-      const manoDeObraPagada = pagado ? manoDeObraTotal : 0;
-
-      // Format mechanics list
       const mechanics = reparacion.mecanicos.map((rm: any) => ({
         id: rm.mecanico.id,
         name: rm.mecanico.name,
       }));
 
-      // Format auto info (handle null values)
       const autoInfo = [
         reparacion.auto.brand,
         reparacion.auto.model,
@@ -47,21 +37,57 @@ export class UltimaSemanaCompartidaUseCase {
         auto: autoInfo,
         mechanics,
         manoDeObraTotal,
-        manoDeObraPagada,
+        tipo: "odr" as const,
       };
     });
-    return result;
+  }
+
+  processGastosVentas(ventas: any[]) {
+    const ventasMultiplesMecanicos = ventas.filter(
+      (venta) => venta.mecanicos.length > 1
+    );
+
+    return ventasMultiplesMecanicos.map((venta) => {
+      const calculoVO = ComprobanteCalculadoFactory.fromVenta(venta);
+      const manoDeObraTotal = calculoVO.manoDeObraAPagarSinIva;
+
+      const mechanics = venta.mecanicos.map((rm: any) => ({
+        id: rm.mecanico.id,
+        name: rm.mecanico.name,
+      }));
+
+      const clienteLabel =
+        venta.cliente?.fullName || venta.informacionCliente || `Venta #${venta.id}`;
+
+      return {
+        id: venta.id,
+        fecha: venta.fecha,
+        auto: clienteLabel,
+        mechanics,
+        manoDeObraTotal,
+        tipo: "venta" as const,
+      };
+    });
+  }
+
+  async processGastos(reparaciones: any[]) {
+    return this.processGastosOdR(reparaciones);
   }
 
   async execute(dto: GastoDto) {
-    const { from, to, decodedToken } = dto;
     const user = await this.usuarioRepository.findById(dto.decodedToken.userId);
     if (!user || !user.rol) {
       throw new Error("Usuario no tiene rol asignado");
     }
 
-    const gastos =
-      await this.gastoService.getGastoMecanicosUltimaSemanaCompartida(dto);
-    return this.processGastos(gastos);
+    const [gastosOdR, gastosVentas] = await Promise.all([
+      this.gastoService.getGastoMecanicosUltimaSemanaCompartida(dto),
+      this.gastoService.getVentasMecanicosUltimaSemanaCompartida(dto),
+    ]);
+
+    const dataOdR = this.processGastosOdR(gastosOdR);
+    const dataVentas = this.processGastosVentas(gastosVentas);
+
+    return [...dataOdR, ...dataVentas];
   }
 }

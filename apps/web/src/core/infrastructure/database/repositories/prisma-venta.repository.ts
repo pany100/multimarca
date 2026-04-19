@@ -63,6 +63,11 @@ export class PrismaVentaRepository implements VentaRepository {
               dolar: true,
             },
           },
+          mecanicos: {
+            include: {
+              mecanico: true,
+            },
+          },
         },
         orderBy: { id: "desc" },
       },
@@ -104,6 +109,11 @@ export class PrismaVentaRepository implements VentaRepository {
           },
         },
         ajustesPrecio: { orderBy: { orden: "asc" } },
+        mecanicos: {
+          include: {
+            mecanico: true,
+          },
+        },
       },
     });
   }
@@ -131,6 +141,11 @@ export class PrismaVentaRepository implements VentaRepository {
         trabajosRealizados: true,
         ajustesPrecio: { orderBy: { orden: "asc" } },
         ingresos: true,
+        mecanicos: {
+          include: {
+            mecanico: true,
+          },
+        },
       },
     });
   }
@@ -295,7 +310,35 @@ export class PrismaVentaRepository implements VentaRepository {
             dolar: true,
           },
         },
+        mecanicos: {
+          include: {
+            mecanico: true,
+          },
+        },
       },
     });
+  }
+
+  async addMecanicoToVenta(
+    ventaId: number,
+    mecanicoId: number,
+    detalle?: string | null
+  ) {
+    return prisma.ventaMecanico.create({
+      data: { ventaId, mecanicoId, detalle },
+      include: { mecanico: true, venta: true },
+    });
+  }
+
+  async updateMecanicoInVenta(id: number, detalle?: string | null) {
+    return prisma.ventaMecanico.update({
+      where: { id },
+      data: { detalle },
+      include: { mecanico: true, venta: true },
+    });
+  }
+
+  async deleteMecanicoFromVenta(id: number) {
+    return prisma.ventaMecanico.delete({ where: { id } });
   }
 }

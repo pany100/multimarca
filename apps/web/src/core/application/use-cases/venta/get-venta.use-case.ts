@@ -28,11 +28,26 @@ export class GetVentaUseCase {
     const cedulaPath =
       venta.cedulaFile?.finalPath || venta.cedulaFile?.tempPath || null;
 
+    const mecanicos = venta.mecanicos.map(
+      (el: {
+        id: number;
+        mecanicoId: number;
+        mecanico: { id: number; name: string };
+        detalle: string | null;
+      }) => ({
+        id: el.mecanico.id,
+        mecanicoVentaId: el.id,
+        name: el.mecanico.name,
+        detalle: el.detalle,
+      })
+    );
+
     return {
       ...venta,
       cedulaPath,
       reparacionesDeTercero,
       repuestosUsados,
+      mecanicos,
       totalBase: comprobante.totalBase,
       total: comprobante.total,
       totalPagos: comprobante.totalPagado,
