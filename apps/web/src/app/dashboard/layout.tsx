@@ -453,9 +453,9 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         items: [
           {
             permiso: "Estadisticas",
-            texto: "Estadísticas Generales",
-            icono: <BarChartIcon />,
-            ruta: "/dashboard/estadisticas",
+            texto: "Resumen General",
+            icono: <AssessmentIcon />,
+            ruta: "/dashboard/estadisticas-v2",
           },
           {
             permiso: "EstadisticasBalance",
