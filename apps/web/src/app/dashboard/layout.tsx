@@ -69,7 +69,6 @@ import CategoryIcon from "@mui/icons-material/Category";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import GroupIcon from "@mui/icons-material/Group";
-import GroupWorkIcon from "@mui/icons-material/GroupWork";
 import HolidayVillageIcon from "@mui/icons-material/HolidayVillage";
 import LocalShippingIcon from "@mui/icons-material/LocalShipping";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -486,12 +485,6 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Proveedores",
             icono: <LocalShippingIcon />,
             ruta: "/dashboard/estadisticasProveedores",
-          },
-          {
-            permiso: "Estadisticas",
-            texto: "Órdenes Compartidas",
-            icono: <GroupWorkIcon />,
-            ruta: "/dashboard/estadisticasOrdenesCompartidas",
           },
         ],
       },
