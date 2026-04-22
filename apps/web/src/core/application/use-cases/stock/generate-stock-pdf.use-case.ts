@@ -23,12 +23,14 @@ export class GenerateStockPdfUseCase {
             table { width: 100%; border-collapse: collapse; margin-bottom: 20px; table-layout: fixed; }
             th, td { border: 1px solid #ddd; padding: 6px 8px; text-align: left; word-wrap: break-word; overflow-wrap: break-word; }
             th { background-color: #f2f2f2; font-weight: bold; white-space: nowrap; }
-            td:nth-child(1) { width: 6%; }
-            td:nth-child(2) { width: 34%; }
-            td:nth-child(3) { width: 18%; }
-            td:nth-child(4) { width: 14%; white-space: nowrap; }
-            td:nth-child(5) { width: 14%; white-space: nowrap; }
-            td:nth-child(6) { width: 14%; white-space: nowrap; }
+            td:nth-child(1) { width: 5%; }
+            td:nth-child(2) { width: 24%; }
+            td:nth-child(3) { width: 10%; }
+            td:nth-child(4) { width: 10%; }
+            td:nth-child(5) { width: 14%; }
+            td:nth-child(6) { width: 12%; white-space: nowrap; }
+            td:nth-child(7) { width: 12%; white-space: nowrap; }
+            td:nth-child(8) { width: 13%; white-space: nowrap; }
             tr:nth-child(even) { background-color: #f9f9f9; }
             .low-stock { background-color: #ffcccc !important; }
             .footer { text-align: center; font-size: 10px; margin-top: 20px; color: #666; }
@@ -44,6 +46,8 @@ export class GenerateStockPdfUseCase {
               <tr>
                 <th>ID</th>
                 <th>Nombre</th>
+                <th>Rótulo</th>
+                <th>Sector</th>
                 <th>Proveedor</th>
                 <th>Precio Compra</th>
                 <th>Precio Venta</th>
@@ -57,6 +61,8 @@ export class GenerateStockPdfUseCase {
                 <tr class="${item.units < item.restockValue ? "low-stock" : ""}">
                   <td>${item.id}</td>
                   <td>${item.name}</td>
+                  <td>${item.label || ""}</td>
+                  <td>${item.sector || ""}</td>
                   <td>${item.proveedor?.name || ""}</td>
                   <td>${getFormattedPrice(item.buyPrice)}</td>
                   <td>${getFormattedPrice(calcularPrecioVenta(item.buyPrice, item.markup, item.sellIva) ?? 0)}</td>
