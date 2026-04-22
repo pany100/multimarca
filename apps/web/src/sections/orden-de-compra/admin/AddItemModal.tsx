@@ -64,7 +64,11 @@ function AddItemModal({
   editingItem,
 }: AddItemModalProps) {
   const isEditing = !!editingItem;
-  const { stockOptions } = useStockProveedores({ proveedorId });
+  const [inputValue, setInputValue] = useState("");
+  const { stockOptions, loading: stockLoading } = useStockProveedores({
+    proveedorId,
+    searchTerm: inputValue,
+  });
   const [selectedStock, setSelectedStock] = useState<StockOption | null>(null);
   const [cantidad, setCantidad] = useState<string>("");
   const [precioUnitario, setPrecioUnitario] = useState<string>("");
@@ -196,6 +200,8 @@ function AddItemModal({
             options={stockOptions}
             value={selectedStock}
             onChange={(_, newValue) => setSelectedStock(newValue)}
+            inputValue={inputValue}
+            onInputChange={(_, newInput) => setInputValue(newInput)}
             getOptionLabel={(option) => option.name}
             renderOption={(props, option) => (
               <li {...props} key={option.value}>
@@ -209,21 +215,33 @@ function AddItemModal({
                 </Box>
               </li>
             )}
-            filterOptions={(options, { inputValue }) => {
-              const search = inputValue.toLowerCase();
-              return options.filter(
-                (opt) =>
-                  opt.name.toLowerCase().includes(search) ||
-                  opt.label.toLowerCase().includes(search),
-              );
-            }}
+            filterOptions={(options) => options}
             isOptionEqualToValue={(option, value) =>
               String(option.value) === String(value.value)
             }
+            loading={stockLoading}
             renderInput={(params) => (
-              <TextField {...params} label="Producto" />
+              <TextField
+                {...params}
+                label="Producto"
+                InputProps={{
+                  ...params.InputProps,
+                  endAdornment: (
+                    <>
+                      {stockLoading ? (
+                        <CircularProgress color="inherit" size={20} />
+                      ) : null}
+                      {params.InputProps.endAdornment}
+                    </>
+                  ),
+                }}
+              />
             )}
-            noOptionsText="No hay productos para este proveedor"
+            noOptionsText={
+              stockLoading
+                ? "Buscando..."
+                : "No hay productos para este proveedor"
+            }
           />
         </Box>
         <Box sx={{ mb: 3 }}>

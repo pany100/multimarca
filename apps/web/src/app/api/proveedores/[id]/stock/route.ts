@@ -18,7 +18,11 @@ export async function GET(
       AND: [
         { proveedorId: proveedorId },
         {
-          OR: [{ name: { contains: query } }, { brand: { contains: query } }],
+          OR: [
+            { name: { contains: query } },
+            { brand: { contains: query } },
+            { label: { contains: query } },
+          ],
         },
       ],
     };
