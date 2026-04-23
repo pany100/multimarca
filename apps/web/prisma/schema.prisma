@@ -89,6 +89,7 @@ model Auto {
   transmission_type String?           @db.VarChar(20)
   tipoCombustible   TipoCombustible?
   cedulaVerdePath   String?           @db.VarChar(1000)
+  cedulaVerdeFile   CustomFile?       @relation("AutoCedulaVerde")
   owner             Cliente           @relation(fields: [ownerId], references: [id])
   ordenesReparacion OrdenReparacion[] @relation("AutoOrdenReparacion")
   presupuestos      Presupuesto[]     @relation("AutoPresupuesto")
@@ -602,7 +603,10 @@ model CustomFile {
   tempPath              String               @db.VarChar(255)
   finalPath             String?              @db.VarChar(255)
   status                EstadoArchivo        @default(Pendiente)
+  createdAt             DateTime?            @default(now())
   promotedAt            DateTime?
+  errorMessage          String?              @db.Text
+  lastErrorAt           DateTime?
   ordenReparacionId     Int?                 @unique
   reciboORepId          Int?
   reparacionDeTerceroId Int?                 @unique
@@ -635,6 +639,8 @@ model CustomFile {
   certificadoEstudioRuta CertificadoEstudio? @relation("CertificadoEstudioRuta", fields: [certificadoEstudioRutaId], references: [id])
   documentoGeneralId    Int?                 @unique
   documentoGeneral      DocumentoGeneral?    @relation("DocumentoGeneralArchivo", fields: [documentoGeneralId], references: [id])
+  autoCedulaVerdeId     Int?                 @unique
+  autoCedulaVerde       Auto?                @relation("AutoCedulaVerde", fields: [autoCedulaVerdeId], references: [id])
 
   @@index([status])
   @@index([reciboORepId], map: "CustomFile_reciboORepId_fkey")

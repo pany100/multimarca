@@ -4,6 +4,7 @@ import {
   CreateLlegadaTardeData,
   UpdateLlegadaTardeData,
 } from "@/core/infrastructure/validation/schemas/llegada-tarde.schema";
+import { assertTempPathInTmp } from "@/shared/utils/custom-file.helper";
 import { EstadoArchivo, LlegadaTarde } from "@prisma/client";
 
 export class PrismaLlegadaTardeRepository implements LlegadaTardeRepository {
@@ -18,6 +19,7 @@ export class PrismaLlegadaTardeRepository implements LlegadaTardeRepository {
       },
     });
     if (data.certificadoPath != null && data.certificadoPath !== "") {
+      assertTempPathInTmp(data.certificadoPath);
       await prisma.customFile.create({
         data: {
           tempPath: data.certificadoPath,
@@ -42,25 +44,33 @@ export class PrismaLlegadaTardeRepository implements LlegadaTardeRepository {
     const id = data.id;
     const existingFile = await prisma.customFile.findFirst({
       where: { llegadaTardeCertificadoId: id },
-      select: { id: true },
+      select: { id: true, tempPath: true, finalPath: true },
     });
     const hasPath = data.certificadoPath != null && data.certificadoPath !== "";
-    if (existingFile) {
-      await prisma.customFile.update({
-        where: { id: existingFile.id },
-        data: {
-          llegadaTardeCertificadoId: null,
-          status: EstadoArchivo.ListoParaBorrar,
-        },
-      });
-    }
-    if (hasPath) {
-      await prisma.customFile.create({
-        data: {
-          tempPath: data.certificadoPath!,
-          llegadaTardeCertificadoId: id,
-        },
-      });
+    const currentPath = existingFile
+      ? existingFile.finalPath ?? existingFile.tempPath
+      : null;
+    const sameFile = hasPath && data.certificadoPath === currentPath;
+
+    if (!sameFile) {
+      if (existingFile) {
+        await prisma.customFile.update({
+          where: { id: existingFile.id },
+          data: {
+            llegadaTardeCertificadoId: null,
+            status: EstadoArchivo.ListoParaBorrar,
+          },
+        });
+      }
+      if (hasPath) {
+        assertTempPathInTmp(data.certificadoPath!);
+        await prisma.customFile.create({
+          data: {
+            tempPath: data.certificadoPath!,
+            llegadaTardeCertificadoId: id,
+          },
+        });
+      }
     }
     await prisma.llegadaTarde.update({
       where: { id },

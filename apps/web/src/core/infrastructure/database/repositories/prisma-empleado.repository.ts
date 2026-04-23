@@ -2,6 +2,7 @@ import { EmpleadoRepository } from "@/core/domain/repositories/empleado.reposito
 import { OrdenReparacionWithRelations } from "@/core/domain/repositories/orden-reparacion.repository";
 import { EmpleadoVO } from "@/core/domain/value-objects/empleado-vo";
 import { prisma } from "@/core/infrastructure/database/prisma";
+import { assertTempPathInTmp } from "@/shared/utils/custom-file.helper";
 import {
   ListMecanicosQueryData,
   UpdateMecanicoDocsData,
@@ -213,6 +214,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
             },
           });
         }
+        assertTempPathInTmp(path!);
         await prisma.customFile.create({
           data: {
             tempPath: path,

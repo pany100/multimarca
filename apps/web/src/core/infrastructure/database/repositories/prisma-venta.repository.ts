@@ -4,6 +4,7 @@ import {
   VentaWithRelations,
 } from "@/core/domain/repositories/venta.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
+import { assertTempPathInTmp } from "@/shared/utils/custom-file.helper";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
 import { EstadoArchivo, EstadoVenta, Prisma, Venta } from "@prisma/client";
 
@@ -193,7 +194,11 @@ export class PrismaVentaRepository implements VentaRepository {
       }
     } else if (dto.cedulaFilePath !== undefined) {
       const existingCedula = currentVenta?.cedulaFile;
-      if (dto.cedulaFilePath) {
+      const currentPath = existingCedula
+        ? existingCedula.finalPath ?? existingCedula.tempPath
+        : null;
+
+      if (dto.cedulaFilePath && dto.cedulaFilePath !== currentPath) {
         if (existingCedula) {
           await prisma.customFile.update({
             where: { id: existingCedula.id },
@@ -203,13 +208,14 @@ export class PrismaVentaRepository implements VentaRepository {
             },
           });
         }
+        assertTempPathInTmp(dto.cedulaFilePath);
         await prisma.customFile.create({
           data: {
             tempPath: dto.cedulaFilePath,
             ventaCedulaId: id,
           },
         });
-      } else if (existingCedula) {
+      } else if (!dto.cedulaFilePath && existingCedula) {
         await prisma.customFile.update({
           where: { id: existingCedula.id },
           data: {

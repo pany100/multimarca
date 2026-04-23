@@ -92,10 +92,14 @@ function AutosTable({
       field: "cedulaVerdePath",
       headerName: "Cédula Verde",
       flex: 0.7,
-      renderCell: (params: any) =>
-        params.row.cedulaVerdePath ? (
+      renderCell: (params: any) => {
+        const src =
+          params.row.cedulaVerdeFile?.finalPath ??
+          params.row.cedulaVerdeFile?.tempPath ??
+          params.row.cedulaVerdePath;
+        return src ? (
           <ImageWithPreview
-            src={params.row.cedulaVerdePath}
+            src={src}
             alt="Cédula Verde"
             title="Cédula Verde"
             width={100}
@@ -103,7 +107,8 @@ function AutosTable({
           />
         ) : (
           "-"
-        ),
+        );
+      },
     },
   ];
 

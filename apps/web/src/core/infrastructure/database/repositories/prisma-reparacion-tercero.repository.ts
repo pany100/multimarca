@@ -1,5 +1,6 @@
 import { ReparacionTerceroRepository } from "@/core/domain/repositories/reparacion-tercero.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
+import { assertTempPathInTmp } from "@/shared/utils/custom-file.helper";
 import { EstadoArchivo } from "@prisma/client";
 
 // Filtro para excluir archivos marcados para borrar
@@ -57,6 +58,7 @@ export class PrismaReparacionTerceroRepository
 
     // If recibo is provided, create CustomFile (archivo en /tmp de S3, estado Pendiente)
     if (data.recibo) {
+      assertTempPathInTmp(data.recibo);
       await db.customFile.create({
         data: {
           tempPath: data.recibo,
@@ -146,6 +148,7 @@ export class PrismaReparacionTerceroRepository
         }
 
         // Create a new CustomFile for the new recibo (archivo en /tmp de S3, estado Pendiente)
+        assertTempPathInTmp(data.recibo);
         await db.customFile.create({
           data: {
             tempPath: data.recibo,

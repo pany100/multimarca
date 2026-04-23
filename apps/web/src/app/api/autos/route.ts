@@ -22,6 +22,7 @@ export async function GET(request: Request) {
         },
         include: {
           owner: true,
+          cedulaVerdeFile: true,
         },
         skip,
         take: size,

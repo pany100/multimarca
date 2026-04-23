@@ -181,7 +181,8 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile, ctx: RunContext)
       archivo.llegadaTardeCertificadoId === null &&
       archivo.inasistenciaCertificadoId === null &&
       archivo.certificadoEstudioRutaId === null &&
-      archivo.documentoGeneralId === null;
+      archivo.documentoGeneralId === null &&
+      archivo.autoCedulaVerdeId === null;
     const motivo = esDesreferenciado ? "desreferenciado" : "ListoParaBorrar";
 
     let msg = "";
@@ -190,7 +191,11 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile, ctx: RunContext)
       if (!isDev) {
         await prisma.customFile.update({
           where: { id: archivo.id },
-          data: { status: EstadoArchivo.Borrado },
+          data: {
+            status: EstadoArchivo.Borrado,
+            errorMessage: null,
+            lastErrorAt: null,
+          },
         });
       }
       msg = `${motivo} sin path → Borrado`;
@@ -198,7 +203,11 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile, ctx: RunContext)
       if (!isDev) {
         await prisma.customFile.update({
           where: { id: archivo.id },
-          data: { status: EstadoArchivo.Borrado },
+          data: {
+            status: EstadoArchivo.Borrado,
+            errorMessage: null,
+            lastErrorAt: null,
+          },
         });
       }
       msg = `${motivo} en tmp/ → Borrado (S3 intacto, caducará por TTL)`;
@@ -217,7 +226,11 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile, ctx: RunContext)
         }
         await prisma.customFile.update({
           where: { id: archivo.id },
-          data: { status: EstadoArchivo.Borrado },
+          data: {
+            status: EstadoArchivo.Borrado,
+            errorMessage: null,
+            lastErrorAt: null,
+          },
         });
       }
       msg = `${motivo} → S3 eliminado${s3Nota} → Borrado`;
@@ -238,7 +251,11 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile, ctx: RunContext)
     if (!isDev) {
       await prisma.customFile.update({
         where: { id: archivo.id },
-        data: { status: EstadoArchivo.ErrorAlBorrar },
+        data: {
+          status: EstadoArchivo.ErrorAlBorrar,
+          errorMessage: `${code}: ${message}`,
+          lastErrorAt: new Date(),
+        },
       });
     }
     writeItem(
@@ -267,7 +284,9 @@ async function procesarUnArchivoPending(archivo: CustomFile, ctx: RunContext): P
         ? "recibos"
         : archivo.reparacionDeTerceroId
           ? "recibos-terceros"
-          : archivo.presupuestoCedulaId || archivo.ventaCedulaId
+          : archivo.presupuestoCedulaId ||
+              archivo.ventaCedulaId ||
+              archivo.autoCedulaVerdeId
             ? "cedula-verde"
             : archivo.empleadoLicenciaConducirId
               ? "licencias-conducir"
@@ -298,6 +317,8 @@ async function procesarUnArchivoPending(archivo: CustomFile, ctx: RunContext): P
           data: {
             status: EstadoArchivo.Listo,
             promotedAt: new Date(),
+            errorMessage: null,
+            lastErrorAt: null,
           },
         });
       }
@@ -315,7 +336,11 @@ async function procesarUnArchivoPending(archivo: CustomFile, ctx: RunContext): P
       if (!isDev) {
         await prisma.customFile.update({
           where: { id: archivo.id },
-          data: { status: EstadoArchivo.Error },
+          data: {
+            status: EstadoArchivo.Error,
+            errorMessage: "sin tempPath ni finalPath",
+            lastErrorAt: new Date(),
+          },
         });
       }
       writeItem(
@@ -340,6 +365,8 @@ async function procesarUnArchivoPending(archivo: CustomFile, ctx: RunContext): P
           finalPath,
           status: EstadoArchivo.Listo,
           promotedAt: new Date(),
+          errorMessage: null,
+          lastErrorAt: null,
         },
       });
     }
@@ -371,7 +398,11 @@ async function procesarUnArchivoPending(archivo: CustomFile, ctx: RunContext): P
     if (!isDev) {
       await prisma.customFile.update({
         where: { id: archivo.id },
-        data: { status: nextStatus },
+        data: {
+          status: nextStatus,
+          errorMessage: `${code}: ${message}`,
+          lastErrorAt: new Date(),
+        },
       });
     }
 
@@ -416,6 +447,7 @@ async function procesarArchivosParaBorrar(ctx: RunContext) {
           inasistenciaCertificadoId: null,
           certificadoEstudioRutaId: null,
           documentoGeneralId: null,
+          autoCedulaVerdeId: null,
           status: { not: EstadoArchivo.Borrado },
         },
         { status: EstadoArchivo.ListoParaBorrar },

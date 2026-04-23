@@ -6,6 +6,7 @@ import type {
 } from "@/core/domain/repositories/orden-reparacion.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import logger from "@/lib/logger";
+import { assertTempPathInTmp } from "@/shared/utils/custom-file.helper";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
 import { EstadoArchivo, EstadoOrdenReparacion } from "@prisma/client";
 
@@ -417,6 +418,7 @@ export class PrismaOrdenReparacionRepository
         }
 
         // Create a new CustomFile for the new scannerFile (archivo en /tmp de S3, estado Pendiente)
+        assertTempPathInTmp(dto.scannerFile);
         await prisma.customFile.create({
           data: {
             tempPath: dto.scannerFile,
@@ -551,6 +553,7 @@ export class PrismaOrdenReparacionRepository
     }
 
     // Crear el CustomFile para el recibo (archivo en /tmp de S3, estado Pendiente)
+    assertTempPathInTmp(reciboPath);
     const customFile = await prisma.customFile.create({
       data: {
         tempPath: reciboPath,

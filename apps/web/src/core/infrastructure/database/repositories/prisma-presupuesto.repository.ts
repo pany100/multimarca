@@ -4,6 +4,7 @@ import {
   PresupuestoWithRelations,
 } from "@/core/domain/repositories/presupuesto.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
+import { assertTempPathInTmp } from "@/shared/utils/custom-file.helper";
 import { PageResult, prismaPaged } from "@/shared/utils/pagination";
 import { EstadoArchivo, Presupuesto, Prisma } from "@prisma/client";
 
@@ -225,7 +226,11 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
       }
     } else if (dto.cedulaFilePath !== undefined) {
       const existingCedula = currentPresupuesto?.cedulaFile;
-      if (dto.cedulaFilePath) {
+      const currentPath = existingCedula
+        ? existingCedula.finalPath ?? existingCedula.tempPath
+        : null;
+
+      if (dto.cedulaFilePath && dto.cedulaFilePath !== currentPath) {
         if (existingCedula) {
           await prisma.customFile.update({
             where: { id: existingCedula.id },
@@ -235,13 +240,14 @@ export class PrismaPresupuestoRepository implements PresupuestoRepository {
             },
           });
         }
+        assertTempPathInTmp(dto.cedulaFilePath);
         await prisma.customFile.create({
           data: {
             tempPath: dto.cedulaFilePath,
             presupuestoCedulaId: id,
           },
         });
-      } else if (existingCedula) {
+      } else if (!dto.cedulaFilePath && existingCedula) {
         await prisma.customFile.update({
           where: { id: existingCedula.id },
           data: {

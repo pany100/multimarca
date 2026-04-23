@@ -1,10 +1,17 @@
 import { PresupuestoVO } from "@/core/domain/value-objects/presupuesto.vo";
+import { assertTempPathInTmp } from "@/shared/utils/custom-file.helper";
 import { EstadoArchivo, Prisma } from "@prisma/client";
 
 export class PresupuestoDBMapper {
   static transformToCreateData(
     presupuesto: PresupuestoVO
   ): Prisma.PresupuestoCreateArgs {
+    if (presupuesto.cedulaTempPath && presupuesto.autoId == null) {
+      assertTempPathInTmp(presupuesto.cedulaTempPath);
+    }
+    for (const t of presupuesto.tercerosVO) {
+      if (t.recibo) assertTempPathInTmp(t.recibo);
+    }
     return {
       data: {
         autoId: presupuesto.autoId,
@@ -95,6 +102,9 @@ export class PresupuestoDBMapper {
   ): Prisma.PresupuestoUpdateArgs {
     if (!presupuesto.id) {
       throw new Error("No se proporciono un id");
+    }
+    for (const t of presupuesto.tercerosVO) {
+      if (t.recibo) assertTempPathInTmp(t.recibo);
     }
     return {
       where: {

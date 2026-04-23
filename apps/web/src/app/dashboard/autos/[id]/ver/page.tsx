@@ -147,20 +147,27 @@ const VerAutoPage = ({ params }: { params: { id: string } }) => {
             </Typography>
           </Grid>
           <Grid item xs={12}>
-            {auto.cedulaVerdePath && (
-              <Box>
-                <Typography variant="h6" gutterBottom>
-                  Cédula de identificación automotor
-                </Typography>
-                <Image
-                  src={auto.cedulaVerdePath}
-                  alt="Cédula Verde"
-                  width={300}
-                  height={200}
-                  style={{ width: "300px", height: "auto" }}
-                />
-              </Box>
-            )}
+            {(() => {
+              const cedulaSrc =
+                auto.cedulaVerdeFile?.finalPath ??
+                auto.cedulaVerdeFile?.tempPath ??
+                auto.cedulaVerdePath;
+              if (!cedulaSrc) return null;
+              return (
+                <Box>
+                  <Typography variant="h6" gutterBottom>
+                    Cédula de identificación automotor
+                  </Typography>
+                  <Image
+                    src={cedulaSrc}
+                    alt="Cédula Verde"
+                    width={300}
+                    height={200}
+                    style={{ width: "300px", height: "auto" }}
+                  />
+                </Box>
+              );
+            })()}
           </Grid>
         </Grid>
         <Divider sx={{ mb: 2 }} />

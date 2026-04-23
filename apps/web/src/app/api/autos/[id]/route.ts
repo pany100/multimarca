@@ -103,6 +103,7 @@ export async function GET(
       where: { id },
       include: {
         owner: true,
+        cedulaVerdeFile: true,
         ordenesReparacion: {
           orderBy: {
             fechaCreacion: "desc",

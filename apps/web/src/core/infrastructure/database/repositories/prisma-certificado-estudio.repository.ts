@@ -5,6 +5,7 @@ import {
   ListCertificadoEstudioQuery,
   UpdateCertificadoEstudioData,
 } from "@/core/infrastructure/validation/schemas/certificado-estudio.schema";
+import { assertTempPathInTmp } from "@/shared/utils/custom-file.helper";
 import { EstadoArchivo } from "@prisma/client";
 
 export class PrismaCertificadoEstudioRepository
@@ -52,6 +53,7 @@ export class PrismaCertificadoEstudioRepository
       },
     });
     if (data.ruta != null && data.ruta !== "") {
+      assertTempPathInTmp(data.ruta);
       await prisma.customFile.create({
         data: {
           tempPath: data.ruta,
@@ -68,25 +70,33 @@ export class PrismaCertificadoEstudioRepository
     const id = data.id;
     const existingFile = await prisma.customFile.findFirst({
       where: { certificadoEstudioRutaId: id },
-      select: { id: true },
+      select: { id: true, tempPath: true, finalPath: true },
     });
     const hasPath = data.ruta != null && data.ruta !== "";
-    if (existingFile) {
-      await prisma.customFile.update({
-        where: { id: existingFile.id },
-        data: {
-          certificadoEstudioRutaId: null,
-          status: EstadoArchivo.ListoParaBorrar,
-        },
-      });
-    }
-    if (hasPath) {
-      await prisma.customFile.create({
-        data: {
-          tempPath: data.ruta!,
-          certificadoEstudioRutaId: id,
-        },
-      });
+    const currentPath = existingFile
+      ? existingFile.finalPath ?? existingFile.tempPath
+      : null;
+    const sameFile = hasPath && data.ruta === currentPath;
+
+    if (!sameFile) {
+      if (existingFile) {
+        await prisma.customFile.update({
+          where: { id: existingFile.id },
+          data: {
+            certificadoEstudioRutaId: null,
+            status: EstadoArchivo.ListoParaBorrar,
+          },
+        });
+      }
+      if (hasPath) {
+        assertTempPathInTmp(data.ruta!);
+        await prisma.customFile.create({
+          data: {
+            tempPath: data.ruta!,
+            certificadoEstudioRutaId: id,
+          },
+        });
+      }
     }
     await prisma.certificadoEstudio.update({
       where: { id },

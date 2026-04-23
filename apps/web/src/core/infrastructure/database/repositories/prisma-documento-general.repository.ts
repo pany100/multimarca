@@ -1,5 +1,6 @@
 import { DocumentoGeneralRepository } from "@/core/domain/repositories/documento-general.repository";
 import { prisma } from "@/core/infrastructure/database/prisma";
+import { assertTempPathInTmp } from "@/shared/utils/custom-file.helper";
 import {
   CreateDocumentoGeneralData,
   ListDocumentoGeneralQuery,
@@ -58,6 +59,7 @@ export class PrismaDocumentoGeneralRepository
     });
 
     if (data.archivoPath) {
+      assertTempPathInTmp(data.archivoPath);
       await prisma.customFile.create({
         data: {
           tempPath: data.archivoPath,
@@ -97,6 +99,7 @@ export class PrismaDocumentoGeneralRepository
             },
           });
         }
+        assertTempPathInTmp(data.archivoPath);
         await prisma.customFile.create({
           data: {
             tempPath: data.archivoPath,

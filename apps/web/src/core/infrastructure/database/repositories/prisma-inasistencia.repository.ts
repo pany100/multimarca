@@ -4,6 +4,7 @@ import {
   CreateInasistenciaData,
   UpdateInasistenciaData,
 } from "@/core/infrastructure/validation/schemas/inasistencia.schema";
+import { assertTempPathInTmp } from "@/shared/utils/custom-file.helper";
 import { EstadoArchivo, Inasistencia } from "@prisma/client";
 
 export class PrismaInasistenciaRepository implements InasistenciaRepository {
@@ -17,6 +18,7 @@ export class PrismaInasistenciaRepository implements InasistenciaRepository {
       },
     });
     if (data.certificadoMedicoPath != null && data.certificadoMedicoPath !== "") {
+      assertTempPathInTmp(data.certificadoMedicoPath);
       await prisma.customFile.create({
         data: {
           tempPath: data.certificadoMedicoPath,
@@ -41,26 +43,34 @@ export class PrismaInasistenciaRepository implements InasistenciaRepository {
     const id = data.id;
     const existingFile = await prisma.customFile.findFirst({
       where: { inasistenciaCertificadoId: id },
-      select: { id: true },
+      select: { id: true, tempPath: true, finalPath: true },
     });
     const hasPath =
       data.certificadoMedicoPath != null && data.certificadoMedicoPath !== "";
-    if (existingFile) {
-      await prisma.customFile.update({
-        where: { id: existingFile.id },
-        data: {
-          inasistenciaCertificadoId: null,
-          status: EstadoArchivo.ListoParaBorrar,
-        },
-      });
-    }
-    if (hasPath) {
-      await prisma.customFile.create({
-        data: {
-          tempPath: data.certificadoMedicoPath!,
-          inasistenciaCertificadoId: id,
-        },
-      });
+    const currentPath = existingFile
+      ? existingFile.finalPath ?? existingFile.tempPath
+      : null;
+    const sameFile = hasPath && data.certificadoMedicoPath === currentPath;
+
+    if (!sameFile) {
+      if (existingFile) {
+        await prisma.customFile.update({
+          where: { id: existingFile.id },
+          data: {
+            inasistenciaCertificadoId: null,
+            status: EstadoArchivo.ListoParaBorrar,
+          },
+        });
+      }
+      if (hasPath) {
+        assertTempPathInTmp(data.certificadoMedicoPath!);
+        await prisma.customFile.create({
+          data: {
+            tempPath: data.certificadoMedicoPath!,
+            inasistenciaCertificadoId: id,
+          },
+        });
+      }
     }
     await prisma.inasistencia.update({
       where: { id },

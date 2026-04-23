@@ -1,8 +1,12 @@
 import { OrdenReparacionVO } from "@/core/domain/value-objects/orden-reparacion.vo";
+import { assertTempPathInTmp } from "@/shared/utils/custom-file.helper";
 import { EstadoArchivo, Prisma } from "@prisma/client";
 
 export class OrdenReparacionDBMapper {
   static transformToCreateData(ordenReparacion: OrdenReparacionVO) {
+    for (const t of ordenReparacion.tercerosVO) {
+      if (t.recibo) assertTempPathInTmp(t.recibo);
+    }
     return {
       data: {
         autoId: Number(ordenReparacion.autoId),
@@ -86,6 +90,13 @@ export class OrdenReparacionDBMapper {
   }
 
   static transformToUpdateData(ordenReparacion: OrdenReparacionVO) {
+    if (ordenReparacion.pdfPath) assertTempPathInTmp(ordenReparacion.pdfPath);
+    for (const t of ordenReparacion.tercerosVO) {
+      if (t.recibo) assertTempPathInTmp(t.recibo);
+    }
+    for (const r of ordenReparacion.recibos ?? []) {
+      assertTempPathInTmp(r);
+    }
     return {
       where: { id: Number(ordenReparacion.id) },
       data: {

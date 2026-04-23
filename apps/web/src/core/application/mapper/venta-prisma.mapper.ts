@@ -1,4 +1,5 @@
 import { VentaVO } from "@/core/domain/value-objects/venta.vo";
+import { assertTempPathInTmp } from "@/shared/utils/custom-file.helper";
 import { EstadoArchivo, Prisma } from "@prisma/client";
 
 export function mapVentaVOToPrismaCreate(vo: VentaVO): Prisma.VentaCreateInput {
@@ -16,6 +17,11 @@ export function mapVentaVOToPrismaCreate(vo: VentaVO): Prisma.VentaCreateInput {
     tercerosVO,
     dolarId,
   } = vo;
+
+  if (cedulaTempPath && clienteId == null) assertTempPathInTmp(cedulaTempPath);
+  for (const t of tercerosVO) {
+    if (t.recibo) assertTempPathInTmp(t.recibo);
+  }
 
   return {
     fecha,
@@ -91,6 +97,9 @@ export function mapVentaVOToPrismaUpdate(vo: VentaVO): Prisma.VentaUpdateArgs {
   } = vo;
   if (!vo.id) {
     throw new Error("No se proporciono un id");
+  }
+  for (const t of tercerosVO) {
+    if (t.recibo) assertTempPathInTmp(t.recibo);
   }
   return {
     where: { id: vo.id },
