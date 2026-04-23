@@ -120,6 +120,8 @@ export class PrismaGastoRepository
                 auto: {
                   select: {
                     patent: true,
+                    brand: true,
+                    model: true,
                   },
                 },
                 mecanicos: {

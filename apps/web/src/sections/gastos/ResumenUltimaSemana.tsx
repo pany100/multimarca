@@ -244,11 +244,11 @@ function ResumenUltimaSemana() {
         }
         return (
           <Box>
-            {trabajos.map((t) => (
+            {trabajos.map((t, idx) => (
               <Typography
                 key={`${t.tipo}-${t.idOrep}-${t.compartida}`}
                 variant="body2"
-                sx={linkSx}
+                sx={{ ...linkSx, mt: idx === 0 ? 0 : 0.75 }}
               >
                 <Link href={getTrabajoLink(t)}>
                   <TipoChip tipo={t.tipo} />

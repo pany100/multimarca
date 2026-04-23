@@ -23,10 +23,18 @@ export class UltimaSemanaUseCase {
         const calculoVO = ComprobanteCalculadoFactory.fromOrden(orden);
         const manoDeObra = calculoVO.manoDeObraAPagarSinIva;
 
+        const autoInfo = [
+          orden.auto.brand,
+          orden.auto.model,
+          orden.auto.patent ? `(${orden.auto.patent})` : null,
+        ]
+          .filter(Boolean)
+          .join(" ");
+
         return {
           idOrep: orden.id,
           fecha: orden.fechaSalidaReparacion,
-          auto: orden.auto.patent,
+          auto: autoInfo,
           manoDeObra,
           tipo: "odr" as const,
         };
