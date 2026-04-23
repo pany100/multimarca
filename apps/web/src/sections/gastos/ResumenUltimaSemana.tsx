@@ -1,6 +1,6 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { Box, Chip, Grid, Typography } from "@mui/material";
+import { alpha, Box, Chip, Grid, Typography } from "@mui/material";
 import { DataGrid, GridColDef } from "@mui/x-data-grid";
 import { addDays, format } from "date-fns";
 import Link from "next/link";
@@ -148,13 +148,13 @@ function ResumenUltimaSemana() {
   };
 
   // Merge individual + shared data into a single per-mechanic list
-  const rows = useMemo(() => {
+  const { rowsConTrabajos, mecanicosSinTrabajos } = useMemo(() => {
     const mecanicoMap = new Map<
       number,
       { mecanicoId: number; mecanicoNombre: string; trabajos: Trabajo[] }
     >();
 
-    // Seed with individual data
+    // Seed with individual data (includes all active mechanics, even without trabajos)
     for (const m of data) {
       mecanicoMap.set(m.mecanicoId, {
         mecanicoId: m.mecanicoId,
@@ -193,18 +193,26 @@ function ResumenUltimaSemana() {
       }
     }
 
-    return Array.from(mecanicoMap.values())
-      .map((m) => ({
-        id: m.mecanicoId,
-        mecanicoId: m.mecanicoId,
-        mecanicoNombre: m.mecanicoNombre,
-        trabajos: m.trabajos,
-        manoDeObraTotal: m.trabajos.reduce((s, t) => s + t.manoDeObra, 0),
-      }))
-      .sort((a, b) => b.manoDeObraTotal - a.manoDeObraTotal);
+    const allRows = Array.from(mecanicoMap.values()).map((m) => ({
+      id: m.mecanicoId,
+      mecanicoId: m.mecanicoId,
+      mecanicoNombre: m.mecanicoNombre,
+      trabajos: m.trabajos,
+      manoDeObraTotal: m.trabajos.reduce((s, t) => s + t.manoDeObra, 0),
+    }));
+
+    return {
+      rowsConTrabajos: allRows
+        .filter((r) => r.trabajos.length > 0)
+        .sort((a, b) => b.manoDeObraTotal - a.manoDeObraTotal),
+      mecanicosSinTrabajos: allRows
+        .filter((r) => r.trabajos.length === 0)
+        .map((r) => r.mecanicoNombre)
+        .sort((a, b) => a.localeCompare(b, "es")),
+    };
   }, [data, compartida]);
 
-  const hayDatos = rows.some((r) => r.trabajos.length > 0);
+  const hayDatos = rowsConTrabajos.length > 0;
 
   const columns: GridColDef[] = [
     {
@@ -299,13 +307,6 @@ function ResumenUltimaSemana() {
         </Grid>
       </Grid>
 
-      {!loading && totalManoObraSemana !== null && (
-        <Typography variant="subtitle1" sx={{ fontWeight: 600, mb: 2 }}>
-          Mano de obra total de la semana:{" "}
-          {getFormattedPrice(totalManoObraSemana)}
-        </Typography>
-      )}
-
       {!loading && !hayDatos ? (
         <Typography
           variant="body1"
@@ -317,7 +318,7 @@ function ResumenUltimaSemana() {
       ) : (
         <Box sx={{ width: "100%", mt: 2 }}>
           <DataGrid
-            rows={rows}
+            rows={rowsConTrabajos}
             columns={columns}
             loading={loading}
             initialState={{
@@ -343,6 +344,65 @@ function ResumenUltimaSemana() {
               boxShadow: 1,
             }}
           />
+
+          {totalManoObraSemana !== null && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                mt: 2,
+              }}
+            >
+              <Box
+                sx={{
+                  display: "inline-flex",
+                  alignItems: "baseline",
+                  gap: 2,
+                  px: 2.5,
+                  py: 1.25,
+                  borderTop: 3,
+                  borderBottom: 1,
+                  borderColor: "error.dark",
+                  bgcolor: (t) => alpha(t.palette.error.main, 0.08),
+                  minWidth: 320,
+                  justifyContent: "space-between",
+                }}
+              >
+                <Typography
+                  variant="overline"
+                  sx={{
+                    fontWeight: 600,
+                    color: "text.secondary",
+                    lineHeight: 1.2,
+                    letterSpacing: 0.5,
+                  }}
+                >
+                  Total mano de obra
+                </Typography>
+                <Typography
+                  variant="h5"
+                  sx={{
+                    fontWeight: 700,
+                    color: "error.dark",
+                    fontVariantNumeric: "tabular-nums",
+                  }}
+                >
+                  {getFormattedPrice(totalManoObraSemana)}
+                </Typography>
+              </Box>
+            </Box>
+          )}
+
+          {mecanicosSinTrabajos.length > 0 && (
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ display: "block", mt: 1.5, fontStyle: "italic" }}
+            >
+              Sin trabajos registrados en este período:{" "}
+              {mecanicosSinTrabajos.join(", ")}.
+            </Typography>
+          )}
         </Box>
       )}
     </Box>
