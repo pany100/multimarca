@@ -6,8 +6,16 @@ export const listStockQuerySchema = z.object({
   query: z.string().nullable().optional(),
   needsRestock: z.boolean().optional(),
   proveedorId: z.coerce.number().int().positive().nullable().optional(),
+  sector: z.string().nullable().optional(),
   sortBy: z.string().optional(),
   sortOrder: z.enum(["asc", "desc"]).optional(),
+});
+
+export const exportStockQuerySchema = z.object({
+  query: z.string().nullable().optional(),
+  needsRestock: z.boolean().optional(),
+  proveedorId: z.coerce.number().int().positive().nullable().optional(),
+  sector: z.string().nullable().optional(),
 });
 
 export const createStockSchema = z.object({

@@ -19,6 +19,7 @@ export async function GET(request: Request) {
         query: searchParams.get("query") || "",
         needsRestock: searchParams.get("needsRestock") === "true",
         proveedorId: searchParams.get("proveedorId"),
+        sector: searchParams.get("sector") || "",
         sortBy: searchParams.get("sortBy") || "id",
         sortOrder: searchParams.get("sortOrder") || "desc",
       },

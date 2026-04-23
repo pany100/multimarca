@@ -1,4 +1,5 @@
 import {
+  ListAllStockParams,
   ListStockParams,
   StockRepository,
   StockWithProveedor,
@@ -15,6 +16,7 @@ export class PrismaStockRepository implements StockRepository {
       query = "",
       needsRestock,
       proveedorId,
+      sector,
       sortBy,
       sortOrder,
     } = params;
@@ -54,6 +56,9 @@ export class PrismaStockRepository implements StockRepository {
       ];
       if (proveedorId) {
         whereParts.push(Prisma.sql`s.proveedorId = ${proveedorId}`);
+      }
+      if (sector) {
+        whereParts.push(Prisma.sql`s.sector LIKE ${`%${sector}%`}`);
       }
       if (query) {
         whereParts.push(
@@ -126,6 +131,10 @@ export class PrismaStockRepository implements StockRepository {
       where = { AND: [where, { proveedorId }] };
     }
 
+    if (sector) {
+      where = { AND: [where, { sector: { contains: sector } }] };
+    }
+
     const orderBy: any = {};
     orderBy[sortBy || "id"] = sortOrder || "desc";
 
@@ -141,8 +150,85 @@ export class PrismaStockRepository implements StockRepository {
     );
   }
 
-  async listAll(): Promise<StockWithProveedor[]> {
+  async listAll(params?: ListAllStockParams): Promise<StockWithProveedor[]> {
+    const { query, needsRestock, proveedorId, sector } = params ?? {};
+
+    if (needsRestock) {
+      const like = `%${query ?? ""}%`;
+      const numericId = parseInt(query || "", 10);
+      const hasNumericId = Number.isFinite(numericId);
+
+      const whereParts: Prisma.Sql[] = [
+        Prisma.sql`(
+          s.units IS NULL
+          OR s.units = 0
+          OR (s.restockValue IS NOT NULL AND s.units <= s.restockValue)
+        )`,
+      ];
+      if (proveedorId) {
+        whereParts.push(Prisma.sql`s.proveedorId = ${proveedorId}`);
+      }
+      if (sector) {
+        whereParts.push(Prisma.sql`s.sector LIKE ${`%${sector}%`}`);
+      }
+      if (query) {
+        whereParts.push(
+          Prisma.sql`(
+            ${hasNumericId ? Prisma.sql`s.id = ${numericId}` : Prisma.sql`FALSE`}
+            OR s.name LIKE ${like}
+            OR s.brand LIKE ${like}
+            OR s.label LIKE ${like}
+            OR s.reportName LIKE ${like}
+            OR s.sector LIKE ${like}
+            OR s.carBrand LIKE ${like}
+          )`
+        );
+      }
+
+      const whereSql = Prisma.sql`WHERE ${Prisma.join(whereParts, " AND ")}`;
+
+      const ids = await prisma.$queryRaw<Array<{ id: number }>>(
+        Prisma.sql`
+          SELECT s.id
+          FROM Stock s
+          ${whereSql}
+          ORDER BY s.name ASC
+        `
+      );
+
+      const idList = ids.map((r) => r.id);
+      if (idList.length === 0) return [];
+
+      return prisma.stock.findMany({
+        where: { id: { in: idList } },
+        orderBy: { name: "asc" },
+        include: { proveedor: true },
+      });
+    }
+
+    const andClauses: any[] = [];
+    if (query) {
+      andClauses.push({
+        OR: [
+          { id: { equals: parseInt(query) || undefined } },
+          { name: { contains: query } },
+          { brand: { contains: query } },
+          { label: { contains: query } },
+          { reportName: { contains: query } },
+          { sector: { contains: query } },
+          { carBrand: { contains: query } },
+        ],
+      });
+    }
+    if (proveedorId) {
+      andClauses.push({ proveedorId });
+    }
+    if (sector) {
+      andClauses.push({ sector: { contains: sector } });
+    }
+
     return prisma.stock.findMany({
+      where: andClauses.length ? { AND: andClauses } : undefined,
       orderBy: { name: "asc" },
       include: { proveedor: true },
     });

@@ -43,6 +43,8 @@ export interface CustomTableProps {
   onlyFromDate?: boolean;
   /** Slot para agregar filtros adicionales junto a la barra de búsqueda */
   filterSlot?: React.ReactNode;
+  /** Acciones secundarias a la derecha (agrupadas junto al CTA principal) */
+  secondaryActions?: React.ReactNode;
   /** Callback llamado cuando se hace click en Buscar (además de la búsqueda interna) */
   onSearchClick?: () => void;
   /** Callback llamado cuando se hace click en Limpiar (además de limpiar filtros internos) */
@@ -72,6 +74,7 @@ function CustomTable<T extends { id: string }>({
   fetchOnMount = true,
   onlyFromDate = false,
   filterSlot,
+  secondaryActions,
   onSearchClick,
   onClearClick,
 }: CustomTableProps) {
@@ -644,25 +647,40 @@ function CustomTable<T extends { id: string }>({
               Limpiar
             </Button>
           </Stack>
-          {ctaCb && (
-            <Button
-              variant="contained"
-              onClick={ctaCb}
-              startIcon={<AddIcon />}
+          {(secondaryActions || ctaCb) && (
+            <Stack
+              direction="row"
+              alignItems="center"
               sx={{
-                backgroundColor: (theme) => theme.palette.primary.main,
-                color: "white",
-                "&:hover": {
-                  backgroundColor: (theme) => theme.palette.primary.dark,
-                },
-                px: 3,
-                py: 1,
-                borderRadius: 1,
-                boxShadow: 1,
+                flexWrap: "wrap",
+                gap: 1.5,
+                rowGap: 1.5,
+                width: { xs: "100%", md: "auto" },
+                justifyContent: { xs: "flex-start", md: "flex-end" },
               }}
             >
-              AGREGAR {title?.toUpperCase() || "Elemento"}
-            </Button>
+              {secondaryActions}
+              {ctaCb && (
+                <Button
+                  variant="contained"
+                  onClick={ctaCb}
+                  startIcon={<AddIcon />}
+                  sx={{
+                    backgroundColor: (theme) => theme.palette.primary.main,
+                    color: "white",
+                    "&:hover": {
+                      backgroundColor: (theme) => theme.palette.primary.dark,
+                    },
+                    px: 3,
+                    py: 1,
+                    borderRadius: 1,
+                    boxShadow: 1,
+                  }}
+                >
+                  AGREGAR {title?.toUpperCase() || "Elemento"}
+                </Button>
+              )}
+            </Stack>
           )}
         </Box>
       </Box>

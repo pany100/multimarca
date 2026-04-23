@@ -1,9 +1,23 @@
+import useExportStock from "@/hooks/useExportStock";
 import useProveedorAutocomplete from "@/hooks/useProveedorAutocomplete";
 import { getFormattedPrice } from "@/utils/fieldHelper";
 import { calcularPrecioVenta } from "@/utils/stock-pricing";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
+import PictureAsPdfIcon from "@mui/icons-material/PictureAsPdf";
 import SettingsIcon from "@mui/icons-material/Settings";
-import { Alert, Autocomplete, Box, MenuItem, Snackbar, Tab, Tabs, TextField } from "@mui/material";
+import {
+  Alert,
+  Autocomplete,
+  Box,
+  Button,
+  CircularProgress,
+  MenuItem,
+  Snackbar,
+  Stack,
+  Tab,
+  Tabs,
+  TextField,
+} from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import debounce from "lodash/debounce";
 import { useRouter } from "next/navigation";
@@ -29,8 +43,11 @@ function StockTable({
   const [proveedorCommitted, setProveedorCommitted] = useState<{ label: string; value: number } | null>(null);
   const [proveedorOptions, setProveedorOptions] = useState<{ label: string; value: number }[]>([]);
   const [proveedorLoading, setProveedorLoading] = useState(false);
+  const [sectorPending, setSectorPending] = useState("");
+  const [sectorCommitted, setSectorCommitted] = useState("");
 
   const { searchProveedores } = useProveedorAutocomplete();
+  const { exportFilteredToPdf, isLoadingFiltered } = useExportStock();
 
   const fetchProveedores = useMemo(
     () =>
@@ -158,41 +175,108 @@ function StockTable({
     return customActions.concat(defaultActions);
   };
 
-  const proveedorQuery = proveedorCommitted ? `&proveedorId=${proveedorCommitted.value}` : "";
+  const filterQueryString = [
+    proveedorCommitted ? `proveedorId=${proveedorCommitted.value}` : "",
+    sectorCommitted ? `sector=${encodeURIComponent(sectorCommitted)}` : "",
+  ]
+    .filter(Boolean)
+    .join("&");
 
   const handleSearchClick = () => {
     setProveedorCommitted(proveedorPending);
+    setSectorCommitted(sectorPending);
   };
 
   const handleClearClick = () => {
     setProveedorPending(null);
     setProveedorCommitted(null);
     setProveedorOptions([]);
+    setSectorPending("");
+    setSectorCommitted("");
   };
 
-  const proveedorFilterSlot = (
-    <Autocomplete
-      size="small"
-      options={proveedorOptions}
-      loading={proveedorLoading}
-      value={proveedorPending}
-      onChange={(_, newValue) => setProveedorPending(newValue)}
-      onInputChange={(_, newInputValue, reason) => {
-        if (newInputValue.length >= 2 && reason !== "reset") {
-          fetchProveedores(newInputValue);
-        }
-        if (newInputValue.length < 2) {
-          setProveedorOptions([]);
-        }
+  const handleExportFiltered = () => {
+    const currentUrl = new URL(window.location.href);
+    const query = currentUrl.searchParams.get("query") || undefined;
+    exportFilteredToPdf({
+      query,
+      proveedorId: proveedorCommitted?.value ?? null,
+      sector: sectorCommitted || undefined,
+      needsRestock: tabValue === 1,
+    });
+  };
+
+  const filtersSlot = (
+    <Stack
+      direction="row"
+      alignItems="center"
+      sx={{
+        flexWrap: "wrap",
+        gap: 1.5,
+        width: { xs: "100%", sm: "auto" },
       }}
-      isOptionEqualToValue={(option, value) => option.value === value.value}
-      getOptionLabel={(option) => option.label}
-      noOptionsText="No hay opciones"
-      sx={{ width: { xs: "100%", sm: 260 } }}
-      renderInput={(params) => (
-        <TextField {...params} label="Filtrar por proveedor" variant="outlined" size="small" />
-      )}
-    />
+    >
+      <Autocomplete
+        size="small"
+        options={proveedorOptions}
+        loading={proveedorLoading}
+        value={proveedorPending}
+        onChange={(_, newValue) => setProveedorPending(newValue)}
+        onInputChange={(_, newInputValue, reason) => {
+          if (newInputValue.length >= 2 && reason !== "reset") {
+            fetchProveedores(newInputValue);
+          }
+          if (newInputValue.length < 2) {
+            setProveedorOptions([]);
+          }
+        }}
+        isOptionEqualToValue={(option, value) => option.value === value.value}
+        getOptionLabel={(option) => option.label}
+        noOptionsText="No hay opciones"
+        sx={{ width: { xs: "100%", sm: 240 } }}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            label="Proveedor"
+            variant="outlined"
+            size="small"
+          />
+        )}
+      />
+      <TextField
+        size="small"
+        label="Sector"
+        value={sectorPending}
+        onChange={(e) => setSectorPending(e.target.value)}
+        sx={{ width: { xs: "100%", sm: 200 } }}
+      />
+    </Stack>
+  );
+
+  const secondaryActions = (
+    <Button
+      variant="outlined"
+      color="primary"
+      onClick={handleExportFiltered}
+      disabled={isLoadingFiltered}
+      startIcon={
+        isLoadingFiltered ? (
+          <CircularProgress size={16} color="inherit" />
+        ) : (
+          <PictureAsPdfIcon />
+        )
+      }
+      sx={{
+        height: 40,
+        px: 2,
+        textTransform: "none",
+        fontWeight: 500,
+        borderRadius: 1,
+        whiteSpace: "nowrap",
+      }}
+    >
+      {isLoadingFiltered ? "Generando PDF..." : "Exportar búsqueda"}
+    </Button>
   );
 
   return (
@@ -205,12 +289,15 @@ function StockTable({
         {tabValue === 1 ? (
           <CustomTable
             title="Stock Bajo"
-            apiEndpoint={`/api/stock?needsRestock=true${proveedorQuery}`}
+            apiEndpoint={`/api/stock?needsRestock=true${
+              filterQueryString ? `&${filterQueryString}` : ""
+            }`}
             extraActions={customActions}
             ctaCb={ctaCb}
             columns={columns}
             getRowClassName={getRowClassName}
-            filterSlot={proveedorFilterSlot}
+            filterSlot={filtersSlot}
+            secondaryActions={secondaryActions}
             onSearchClick={handleSearchClick}
             onClearClick={handleClearClick}
             {...rest}
@@ -218,12 +305,15 @@ function StockTable({
         ) : (
           <CustomTable
             title="Stock"
-            apiEndpoint={`/api/stock${proveedorCommitted ? `?proveedorId=${proveedorCommitted.value}` : ""}`}
+            apiEndpoint={`/api/stock${
+              filterQueryString ? `?${filterQueryString}` : ""
+            }`}
             extraActions={customActions}
             ctaCb={ctaCb}
             columns={columns}
             getRowClassName={getRowClassName}
-            filterSlot={proveedorFilterSlot}
+            filterSlot={filtersSlot}
+            secondaryActions={secondaryActions}
             onSearchClick={handleSearchClick}
             onClearClick={handleClearClick}
             {...rest}
