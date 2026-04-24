@@ -52,9 +52,8 @@ export class ReparacionTercero {
     markup: number,
     iva: number
   ): number {
-    return Math.round(
-      precioCompra * (1 + markup / 100) * (1 + iva / 100) || 0
-    );
+    const raw = precioCompra * (1 + markup / 100) * (1 + iva / 100) || 0;
+    return Math.round(raw * 100) / 100;
   }
 
   static from(p: ReparacionTerceroProps, files: FileStoragePort) {

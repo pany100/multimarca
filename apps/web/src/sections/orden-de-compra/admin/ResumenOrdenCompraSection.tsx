@@ -69,14 +69,14 @@ const ResumenOrdenCompraSection = () => {
   const items = orden.items || [];
   const percepcion = Number(orden.percepcion ?? 0);
 
-  const subtotalItems = items.reduce((total: number, item: any) => {
+  const subtotalItemsRaw = items.reduce((total: number, item: any) => {
     const precio = Number(item.precioUnitario) || 0;
     const iva = Number(item.iva) || 0;
-    const precioConIva = Math.round(precio * (1 + iva / 100));
-    return total + Math.round(precioConIva * Number(item.cantidad));
+    return total + precio * (1 + iva / 100) * Number(item.cantidad);
   }, 0);
+  const subtotalItems = Math.round(subtotalItemsRaw * 100) / 100;
 
-  const total = subtotalItems + percepcion;
+  const total = Math.round((subtotalItemsRaw + percepcion) * 100) / 100;
 
   return (
     <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -89,8 +89,8 @@ const ResumenOrdenCompraSection = () => {
           {items.map((item: any) => {
             const precio = Number(item.precioUnitario) || 0;
             const iva = Number(item.iva) || 0;
-            const precioConIva = Math.round(precio * (1 + iva / 100));
-            const subtotal = Math.round(precioConIva * Number(item.cantidad));
+            const precioConIva = Math.round(precio * (1 + iva / 100) * 100) / 100;
+            const subtotal = Math.round(precioConIva * Number(item.cantidad) * 100) / 100;
             const nombre = item.name || item.stock?.name || "—";
 
             return (

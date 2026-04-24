@@ -33,7 +33,7 @@ function TrabajoDeListaForm({ initialManoDeObra }: TrabajoDeListaFormProps) {
   const precio = Number(precioUnitario) || 0;
   const ivaVal = Number(iva) || 0;
   const precioConIva =
-    ivaVal > 0 ? Math.round(precio * (1 + ivaVal / 100)) : precio;
+    ivaVal > 0 ? Math.round(precio * (1 + ivaVal / 100) * 100) / 100 : precio;
 
   return (
     <Grid container spacing={1}>
@@ -73,7 +73,7 @@ function TrabajoDeListaForm({ initialManoDeObra }: TrabajoDeListaFormProps) {
             Precio final con IVA: <strong>{getFormattedPrice(precioConIva)}</strong>
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Precio final = Precio Neto × (1 + IVA/100), redondeado al entero más cercano. Si IVA es 0, el precio final es igual al precio neto.
+            Precio final = Precio Neto × (1 + IVA/100), redondeado a 2 decimales. Si IVA es 0, el precio final es igual al precio neto.
           </Typography>
         </Grid>
       )}

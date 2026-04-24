@@ -47,12 +47,12 @@ const OrdenDeCompraItemsSection = () => {
   const items = orden.items || [];
   const existingStockIds = items.map((item: any) => item.stockId);
 
-  const precioTotal = items.reduce((total: number, item: any) => {
+  const precioTotalRaw = items.reduce((total: number, item: any) => {
     const precio = Number(item.precioUnitario) || 0;
     const iva = Number(item.iva) || 0;
-    const precioConIva = Math.round(precio * (1 + iva / 100));
-    return total + Math.round(precioConIva * Number(item.cantidad));
+    return total + precio * (1 + iva / 100) * Number(item.cantidad);
   }, 0);
+  const precioTotal = Math.round(precioTotalRaw * 100) / 100;
 
   const handleAddItem = async (data: {
     stockId: number;

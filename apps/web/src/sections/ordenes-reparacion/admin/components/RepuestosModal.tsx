@@ -146,7 +146,7 @@ const RepuestosModal = ({
       ) ?? 0;
     setPrecioUnitario(newUnitario.toString());
     const units = Number(uds) || 1;
-    setPrecioVenta(Math.round(newUnitario * units).toString());
+    setPrecioVenta((Math.round(newUnitario * units * 100) / 100).toString());
   };
 
   const handlePrecioCompraChange = (value: string) => {
@@ -176,7 +176,7 @@ const RepuestosModal = ({
       ) ?? 0;
     setPrecioUnitario(newUnitario.toString());
     const units = Number(unidadesConsumidas) || 1;
-    setPrecioVenta(Math.round(newUnitario * units).toString());
+    setPrecioVenta((Math.round(newUnitario * units * 100) / 100).toString());
   };
 
   const handleUnidadesChange = (value: string) => {
@@ -185,7 +185,7 @@ const RepuestosModal = ({
     } else {
       setUnidadesConsumidas(value);
       const unitPrice = Number(precioUnitario) || 0;
-      setPrecioVenta(Math.round(unitPrice * Number(value)).toString());
+      setPrecioVenta((Math.round(unitPrice * Number(value) * 100) / 100).toString());
     }
   };
 
@@ -412,7 +412,7 @@ const RepuestosModal = ({
                   sx={{ mt: 1, fontStyle: "italic" }}
                 >
                   Valores pre-cargados del stock. Editables para esta operación.
-                  Los precios se redondean al entero más cercano.
+                  Los precios se redondean a 2 decimales.
                 </Typography>
               </Box>
             </Grid>

@@ -120,7 +120,7 @@ const TercerosModal = ({
       ) ?? 0;
     setPrecioUnitario(unit.toString());
     const c = Number(cd) || 1;
-    setPrecioVenta(Math.round(unit * c).toString());
+    setPrecioVenta((Math.round(unit * c * 100) / 100).toString());
   };
 
   const handlePrecioCompraChange = (value: string) => {
@@ -144,7 +144,7 @@ const TercerosModal = ({
     } else {
       setCantidad(value);
       const unit = Number(precioUnitario) || 0;
-      setPrecioVenta(Math.round(unit * Number(value)).toString());
+      setPrecioVenta((Math.round(unit * Number(value) * 100) / 100).toString());
     }
   };
 
@@ -381,7 +381,7 @@ const TercerosModal = ({
                   component="div"
                   sx={{ mt: 1, fontStyle: "italic" }}
                 >
-                  El precio se redondea al entero más cercano.
+                  El precio se redondea a 2 decimales.
                 </Typography>
               </Box>
             </Grid>

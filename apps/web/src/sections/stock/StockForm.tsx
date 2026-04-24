@@ -166,7 +166,7 @@ const StockForm = () => {
               component="div"
               sx={{ mt: 0.5, fontStyle: "italic" }}
             >
-              Los precios se redondean al entero más cercano.
+              Los precios se redondean a 2 decimales.
             </Typography>
           </Box>
         </Grid>

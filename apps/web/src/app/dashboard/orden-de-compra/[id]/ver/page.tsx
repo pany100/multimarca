@@ -138,14 +138,15 @@ const OrdenDeCompraDetallePage = ({ params }: { params: { id: string } }) => {
   );
 
   const percepcion = Number(orden.percepcion ?? 0);
-  const subtotalItems = hasPrecios
+  const subtotalItemsRaw = hasPrecios
     ? orden.items.reduce((total: number, item: any) => {
         const precio = Number(item.precioUnitario) || 0;
         const iva = Number(item.iva) || 0;
         return total + precio * (1 + iva / 100) * Number(item.cantidad);
       }, 0)
     : Number(orden.precioTotal) - percepcion;
-  const precioTotalCalculado = subtotalItems + percepcion;
+  const precioTotalCalculado =
+    Math.round((subtotalItemsRaw + percepcion) * 100) / 100;
 
   return (
     <Box sx={{ p: 3 }}>

@@ -127,6 +127,7 @@ const AjustesPrecioModal = ({
               onChange={(e) => setMonto(e.target.value)}
               disabled={loading}
               required
+              inputProps={{ step: 0.01, min: 0 }}
             />
           </Grid>
           <Grid item xs={6}>

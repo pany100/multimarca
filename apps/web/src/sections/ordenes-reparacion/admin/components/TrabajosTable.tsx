@@ -59,7 +59,7 @@ const TrabajosTable = ({
       valueGetter: (_value, row) => {
         const precio = Number(row.precioUnitario) || 0;
         const iva = Number(row.iva) || 0;
-        const precioFinal = iva > 0 ? Math.round(precio * (1 + iva / 100)) : precio;
+        const precioFinal = iva > 0 ? Math.round(precio * (1 + iva / 100) * 100) / 100 : precio;
         return getFormattedPrice(precioFinal);
       },
     },
