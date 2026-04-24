@@ -128,8 +128,13 @@ export class ComprobanteCalculadoFactory {
       TrabajoRealizado.fromOrderDb
     );
 
-    const terceros = (orden.reparacionesDeTercero ?? []).map((t) =>
-      ReparacionTercero.fromOrderDb(t)
+    const terceros = (orden.reparacionesDeTercero ?? []).map((t: any) =>
+      ReparacionTercero.fromOrderDb({
+        nombre: t.nombre,
+        precioCompra: t.precioCompra,
+        precioVenta: t.precioVenta,
+        cantidad: t.cantidad,
+      })
     );
     const pagos = (orden.ingresos ?? []).map((p) =>
       Pago.fromOrderDb({
@@ -168,8 +173,13 @@ export class ComprobanteCalculadoFactory {
       TrabajoRealizado.fromOrderDb
     );
 
-    const terceros = (venta.reparacionesDeTercero ?? []).map((t) =>
-      ReparacionTercero.fromOrderDb(t)
+    const terceros = (venta.reparacionesDeTercero ?? []).map((t: any) =>
+      ReparacionTercero.fromOrderDb({
+        nombre: t.nombre,
+        precioCompra: t.precioCompra,
+        precioVenta: t.precioVenta,
+        cantidad: t.cantidad,
+      })
     );
 
     // Transform venta ingresos to match the expected Pago structure
@@ -257,6 +267,7 @@ export class ComprobanteCalculadoFactory {
         nombre: t.nombre,
         precioCompra: new Decimal(t.precioCompra || 0),
         precioVenta: new Decimal(t.precioVenta || 0),
+        cantidad: t.cantidad ?? 1,
       })
     );
 
@@ -318,6 +329,7 @@ export class ComprobanteCalculadoFactory {
         nombre: t.nombre,
         precioCompra: new Decimal(t.precioCompra || 0),
         precioVenta: new Decimal(t.precioVenta || 0),
+        cantidad: t.cantidad ?? 1,
       })
     );
 

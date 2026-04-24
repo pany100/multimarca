@@ -12,6 +12,7 @@ export const repuestoSchema = z.object({
 export const terceroSchema = z.object({
   nombre: z.string().min(1),
   proveedor: z.object({ id: z.coerce.number() }),
+  cantidad: z.coerce.number().positive(),
   precioCompra: z.coerce.number().optional(),
   precioVenta: z.coerce.number().optional(),
   iva: z.coerce.number().nullable().optional(),
@@ -176,6 +177,7 @@ export const addReparacionTerceroSchema = z
     presupuestoId: z.coerce.number().optional(),
     nombre: z.string().min(1),
     proveedorId: z.coerce.number(),
+    cantidad: z.coerce.number().positive(),
     precioCompra: z.coerce.number(),
     precioVenta: z.coerce.number(),
     iva: z.coerce.number().nullable().optional(),
@@ -202,6 +204,7 @@ export const updateReparacionTerceroSchema = z.object({
   id: z.coerce.number(),
   nombre: z.string().min(1).optional(),
   proveedorId: z.coerce.number().optional(),
+  cantidad: z.coerce.number().positive().optional(),
   precioCompra: z.coerce.number().optional(),
   precioVenta: z.coerce.number().optional(),
   iva: z.coerce.number().nullable().optional(),

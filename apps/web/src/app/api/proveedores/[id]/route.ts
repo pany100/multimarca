@@ -72,6 +72,7 @@ export async function GET(
       select: {
         id: true,
         precioCompra: true,
+        cantidad: true,
         nombre: true,
         ordenReparacion: {
           select: {
@@ -103,6 +104,7 @@ export async function GET(
       select: {
         id: true,
         precioCompra: true,
+        cantidad: true,
         nombre: true,
         venta: {
           select: {
@@ -147,7 +149,7 @@ export async function GET(
         rowId: `rto-${rt.id}`,
         sortId: rt.id,
         fecha: rt.ordenReparacion?.fechaCreacion || new Date(),
-        monto: Number(rt.precioCompra),
+        monto: Number(rt.precioCompra) * Number(rt.cantidad),
         tipo: "Deuda" as const,
         operacion: "Rep. Tercero Orden" as const,
         descripcion: `${rt.nombre} - Orden #${rt.ordenReparacion?.id}`,
@@ -157,7 +159,7 @@ export async function GET(
         rowId: `rtv-${rt.id}`,
         sortId: rt.id,
         fecha: rt.venta?.fecha || new Date(),
-        monto: Number(rt.precioCompra),
+        monto: Number(rt.precioCompra) * Number(rt.cantidad),
         tipo: "Deuda" as const,
         operacion: "Rep. Tercero Venta" as const,
         descripcion: `${rt.nombre} - Venta #${rt.venta?.id}`,

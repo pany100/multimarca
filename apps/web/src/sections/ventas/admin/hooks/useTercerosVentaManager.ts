@@ -6,6 +6,7 @@ import { useVentaRequired } from "../contexts/VentaContext";
 interface ReparacionTercero {
   id: number;
   nombre: string;
+  cantidad: number;
   precioCompra: number;
   precioVenta: number;
   iva?: number | null;
@@ -31,6 +32,7 @@ export const useTercerosVentaManager = () => {
   const handleAddTercero = async (data: {
     nombre: string;
     proveedorId: number;
+    cantidad: number;
     precioCompra: number;
     precioVenta: number;
     iva?: number | null;
@@ -85,6 +87,7 @@ export const useTercerosVentaManager = () => {
     data: {
       nombre?: string;
       proveedorId?: number;
+      cantidad?: number;
       precioCompra?: number;
       precioVenta?: number;
       iva?: number | null;

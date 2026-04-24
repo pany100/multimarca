@@ -5,6 +5,7 @@ import { Money } from "./money.vo";
 export interface ReparacionTerceroProps {
   nombre: string;
   proveedorId: number;
+  cantidad?: number;
   precioCompra?: number;
   precioVenta?: number;
   iva?: number | null;
@@ -18,6 +19,7 @@ export interface ReparacionTerceroHTTPInput {
   proveedor: {
     id: number;
   };
+  cantidad?: number | undefined;
   precioCompra?: number | undefined;
   precioVenta?: number | undefined;
   iva?: number | null | undefined;
@@ -30,6 +32,7 @@ export class ReparacionTercero {
   constructor(
     public readonly nombre: string,
     public readonly proveedorId: number,
+    public readonly cantidad: number,
     public readonly precioCompra: Money,
     public readonly precioVenta: Money,
     public readonly iva: number | null,
@@ -38,6 +41,10 @@ export class ReparacionTercero {
     public readonly recibo: string | null
   ) {
     if (!nombre?.trim()) throw new Error("Nombre requerido");
+    const c = Number(cantidad);
+    if (!Number.isFinite(c) || c <= 0) {
+      throw new Error("Cantidad inválida");
+    }
   }
 
   static calcularPrecioVenta(
@@ -45,7 +52,7 @@ export class ReparacionTercero {
     markup: number,
     iva: number
   ): number {
-    return Math.ceil(
+    return Math.round(
       precioCompra * (1 + markup / 100) * (1 + iva / 100) || 0
     );
   }
@@ -54,6 +61,7 @@ export class ReparacionTercero {
     return new ReparacionTercero(
       p.nombre.trim(),
       Number(p.proveedorId),
+      Number(p.cantidad ?? 1),
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
       p.iva ?? null,
@@ -67,6 +75,7 @@ export class ReparacionTercero {
     return new ReparacionTercero(
       p.nombre.trim(),
       Number(p.proveedor.id),
+      Number(p.cantidad ?? 1),
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
       p.iva ?? null,
@@ -80,10 +89,12 @@ export class ReparacionTercero {
     nombre: string;
     precioCompra: Prisma.Decimal;
     precioVenta: Prisma.Decimal;
+    cantidad?: Prisma.Decimal | number | null;
   }) {
     return new ReparacionTercero(
       p.nombre.trim(),
       0,
+      Number(p.cantidad ?? 1),
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
       null,

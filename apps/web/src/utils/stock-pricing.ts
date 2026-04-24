@@ -5,7 +5,7 @@
  *   precioNeto = buyPrice * (1 + markup/100)
  *   precioVenta = precioNeto * (1 + sellIva/100)
  *
- * @returns precio de venta redondeado hacia arriba, o null si los inputs son inválidos.
+ * @returns precio de venta redondeado al entero más cercano, o null si los inputs son inválidos.
  */
 export function calcularPrecioVenta(
   buyPrice: unknown,
@@ -18,7 +18,7 @@ export function calcularPrecioVenta(
   if (!Number.isFinite(b) || b < 0) return null;
   if (!Number.isFinite(m)) return null;
   if (!Number.isFinite(iva)) return null;
-  return Math.ceil(b * (1 + m / 100) * (1 + iva / 100) || 0);
+  return Math.round(b * (1 + m / 100) * (1 + iva / 100) || 0);
 }
 
 /** Precio neto (sin IVA) = buyPrice * (1 + markup/100) */
@@ -30,5 +30,5 @@ export function calcularPrecioNeto(
   const m = markup === "" || markup == null ? 0 : Number(markup);
   if (!Number.isFinite(b) || b < 0) return null;
   if (!Number.isFinite(m)) return null;
-  return Math.ceil(b * (1 + m / 100) || 0);
+  return Math.round(b * (1 + m / 100) || 0);
 }

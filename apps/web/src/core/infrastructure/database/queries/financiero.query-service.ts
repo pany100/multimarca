@@ -139,7 +139,7 @@ export async function getKpisRentabilidad(from: string, to: string): Promise<Kpi
         WHERE r.ordenReparacionId IS NOT NULL GROUP BY r.ordenReparacionId
       ) ter_v ON ter_v.ordenReparacionId = o.id
       LEFT JOIN (
-        SELECT ordenReparacionId, SUM(r.precioCompra) AS total
+        SELECT ordenReparacionId, SUM(r.precioCompra * r.cantidad) AS total
         FROM ReparacionDeTercero r WHERE r.ordenReparacionId IS NOT NULL GROUP BY r.ordenReparacionId
       ) ter_c ON ter_c.ordenReparacionId = o.id
       LEFT JOIN (
@@ -177,7 +177,7 @@ export async function getKpisRentabilidad(from: string, to: string): Promise<Kpi
         WHERE r.ventaId IS NOT NULL GROUP BY r.ventaId
       ) ter_v ON ter_v.ventaId = v.id
       LEFT JOIN (
-        SELECT ventaId, SUM(r.precioCompra) AS total
+        SELECT ventaId, SUM(r.precioCompra * r.cantidad) AS total
         FROM ReparacionDeTercero r WHERE r.ventaId IS NOT NULL GROUP BY r.ventaId
       ) ter_c ON ter_c.ventaId = v.id
       LEFT JOIN (
@@ -221,7 +221,7 @@ export async function getDetalleOrdenes(from: string, to: string): Promise<Detal
       LEFT JOIN (SELECT ordenReparacionId, SUM(CASE WHEN oRep.porcentajeRecargo=0 THEN r.precioVenta ELSE CEIL(r.precioVenta*(1+oRep.porcentajeRecargo/100.0)/500.0)*500 END) AS total FROM RepuestoUsado r JOIN OrdenReparacion oRep ON oRep.id=r.ordenReparacionId WHERE r.ordenReparacionId IS NOT NULL GROUP BY r.ordenReparacionId) rep_v ON rep_v.ordenReparacionId=o.id
       LEFT JOIN (SELECT ordenReparacionId, SUM(r.precioCompra*r.unidadesConsumidas) AS total FROM RepuestoUsado r WHERE r.ordenReparacionId IS NOT NULL GROUP BY r.ordenReparacionId) rep_c ON rep_c.ordenReparacionId=o.id
       LEFT JOIN (SELECT ordenReparacionId, SUM(CASE WHEN oRep.porcentajeRecargo=0 THEN r.precioVenta ELSE CEIL(r.precioVenta*(1+oRep.porcentajeRecargo/100.0)/500.0)*500 END) AS total FROM ReparacionDeTercero r JOIN OrdenReparacion oRep ON oRep.id=r.ordenReparacionId WHERE r.ordenReparacionId IS NOT NULL GROUP BY r.ordenReparacionId) ter_v ON ter_v.ordenReparacionId=o.id
-      LEFT JOIN (SELECT ordenReparacionId, SUM(r.precioCompra) AS total FROM ReparacionDeTercero r WHERE r.ordenReparacionId IS NOT NULL GROUP BY r.ordenReparacionId) ter_c ON ter_c.ordenReparacionId=o.id
+      LEFT JOIN (SELECT ordenReparacionId, SUM(r.precioCompra * r.cantidad) AS total FROM ReparacionDeTercero r WHERE r.ordenReparacionId IS NOT NULL GROUP BY r.ordenReparacionId) ter_c ON ter_c.ordenReparacionId=o.id
       LEFT JOIN (SELECT ordenReparacionId, SUM(t.precioUnitario) AS total FROM TrabajoRealizado t WHERE t.ordenReparacionId IS NOT NULL GROUP BY t.ordenReparacionId) trab ON trab.ordenReparacionId=o.id
       WHERE o.estado IN ('Terminado','SeRetira') AND o.fechaCreacion >= ${from} AND o.fechaCreacion < ${to}
 
@@ -245,7 +245,7 @@ export async function getDetalleOrdenes(from: string, to: string): Promise<Detal
       LEFT JOIN (SELECT ventaId, SUM(CEIL(r.precioVenta*(1+vt.porcentajeRecargo/100.0)/500.0)*500) AS total FROM RepuestoUsado r JOIN Venta vt ON vt.id=r.ventaId WHERE r.ventaId IS NOT NULL GROUP BY r.ventaId) rep_v ON rep_v.ventaId=v.id
       LEFT JOIN (SELECT ventaId, SUM(r.precioCompra*r.unidadesConsumidas) AS total FROM RepuestoUsado r WHERE r.ventaId IS NOT NULL GROUP BY r.ventaId) rep_c ON rep_c.ventaId=v.id
       LEFT JOIN (SELECT ventaId, SUM(CEIL(r.precioVenta*(1+vt.porcentajeRecargo/100.0)/500.0)*500) AS total FROM ReparacionDeTercero r JOIN Venta vt ON vt.id=r.ventaId WHERE r.ventaId IS NOT NULL GROUP BY r.ventaId) ter_v ON ter_v.ventaId=v.id
-      LEFT JOIN (SELECT ventaId, SUM(r.precioCompra) AS total FROM ReparacionDeTercero r WHERE r.ventaId IS NOT NULL GROUP BY r.ventaId) ter_c ON ter_c.ventaId=v.id
+      LEFT JOIN (SELECT ventaId, SUM(r.precioCompra * r.cantidad) AS total FROM ReparacionDeTercero r WHERE r.ventaId IS NOT NULL GROUP BY r.ventaId) ter_c ON ter_c.ventaId=v.id
       LEFT JOIN (SELECT ventaId, SUM(t.precioUnitario) AS total FROM TrabajoRealizado t WHERE t.ventaId IS NOT NULL GROUP BY t.ventaId) trab ON trab.ventaId=v.id
       WHERE v.estado IN ('Entregado','Cerrado') AND v.fecha >= ${from} AND v.fecha < ${to}
     ) combined

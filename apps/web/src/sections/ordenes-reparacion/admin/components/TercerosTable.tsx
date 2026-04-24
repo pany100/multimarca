@@ -15,6 +15,7 @@ import Link from "next/link";
 interface ReparacionTercero {
   id: number;
   nombre: string;
+  cantidad: number;
   precioCompra: number;
   precioVenta: number;
   iva?: number | null;
@@ -53,6 +54,15 @@ const TercerosTable = ({
       headerName: "Proveedor",
       flex: 1,
       renderCell: (params) => params.row.proveedor?.name || "-",
+    },
+    {
+      field: "cantidad",
+      headerName: "Cantidad",
+      width: 90,
+      renderCell: (params) => {
+        const c = Number(params.row.cantidad);
+        return Number.isInteger(c) ? c.toString() : c.toString();
+      },
     },
     {
       field: "precioCompra",

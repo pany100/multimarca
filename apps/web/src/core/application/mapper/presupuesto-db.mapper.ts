@@ -39,6 +39,7 @@ export class PresupuestoDBMapper {
         reparacionesDeTercero: {
           create: presupuesto.tercerosVO.map((t) => ({
             nombre: t.nombre,
+            cantidad: t.cantidad,
             precioCompra: t.precioCompra.asDecimal(),
             precioVenta: t.precioVenta.asDecimal(),
             proveedor: { connect: { id: t.proveedorId } },
@@ -139,6 +140,7 @@ export class PresupuestoDBMapper {
           deleteMany: {},
           create: presupuesto.tercerosVO.map((t) => ({
             nombre: t.nombre,
+            cantidad: t.cantidad,
             precioCompra: t.precioCompra.asDecimal(),
             precioVenta: t.precioVenta.asDecimal(),
             proveedor: { connect: { id: t.proveedorId } },

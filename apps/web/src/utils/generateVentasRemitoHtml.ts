@@ -31,11 +31,11 @@ export default function generateVentasRemitoHtml(
         </tr>`,
     ),
     ...terceros.map(
-      (el: { nombre: string }) =>
+      (el: { nombre: string; cantidad?: number }) =>
         `<tr>
           <td class="cell">-</td>
           <td class="cell">${el.nombre}</td>
-          <td class="cell cell-center">1</td>
+          <td class="cell cell-center">${Number(el.cantidad ?? 1)}</td>
         </tr>`,
     ),
   ].join("");

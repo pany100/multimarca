@@ -338,23 +338,31 @@ export default function generateClientOrderHtml(repair: any, encabezadoPdf?: str
           let incrementoAplicado = false;
           return (
             repair.reparacionesDeTercero
-              .map((el: { nombre: string; precioVenta: number }) => {
-                let precio = calculoVO.getPrecioFinalForReparaciones(
-                  el.precioVenta,
-                );
-                if (!incrementoAplicado && incrementoSinAbsorber > 0) {
-                  precio += incrementoSinAbsorber;
-                  incrementoAplicado = true;
-                }
-                return `
+              .map(
+                (el: {
+                  nombre: string;
+                  cantidad: number;
+                  precioVenta: number;
+                }) => {
+                  let precio = calculoVO.getPrecioFinalForReparaciones(
+                    el.precioVenta,
+                  );
+                  if (!incrementoAplicado && incrementoSinAbsorber > 0) {
+                    precio += incrementoSinAbsorber;
+                    incrementoAplicado = true;
+                  }
+                  const c = Number(el.cantidad ?? 1);
+                  const prefix = c !== 1 ? `${c} - ` : "";
+                  return `
                 <div class="TypographyBody1">
-                  ${el.nombre}
+                  ${prefix}${el.nombre}
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
                   $${Number(precio).toLocaleString("es-AR")}
                 </div>
               `;
-              })
+                },
+              )
               .join("") +
             repair.repuestosUsados
               .filter((el: any) => !el.ocultoParaCliente)

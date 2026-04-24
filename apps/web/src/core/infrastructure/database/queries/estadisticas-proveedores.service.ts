@@ -107,7 +107,7 @@ export class EstadisticasProveedoresService {
 
     const [rtOrdenRow] = await prisma.$queryRaw<SumCountRow[]>`
       SELECT
-        COALESCE(SUM(rt.precioCompra), 0) AS suma,
+        COALESCE(SUM(rt.precioCompra * rt.cantidad), 0) AS suma,
         COUNT(*) AS cnt
       FROM ReparacionDeTercero rt
       INNER JOIN OrdenReparacion o ON o.id = rt.ordenReparacionId
@@ -118,7 +118,7 @@ export class EstadisticasProveedoresService {
 
     const [rtVentaRow] = await prisma.$queryRaw<SumCountRow[]>`
       SELECT
-        COALESCE(SUM(rt.precioCompra), 0) AS suma,
+        COALESCE(SUM(rt.precioCompra * rt.cantidad), 0) AS suma,
         COUNT(*) AS cnt
       FROM ReparacionDeTercero rt
       INNER JOIN Venta v ON v.id = rt.ventaId
@@ -171,7 +171,7 @@ export class EstadisticasProveedoresService {
       SELECT
         rt.proveedorId AS proveedor_id,
         p.name AS proveedor_nombre,
-        COALESCE(SUM(rt.precioCompra), 0) AS monto,
+        COALESCE(SUM(rt.precioCompra * rt.cantidad), 0) AS monto,
         COUNT(*) AS cnt
       FROM ReparacionDeTercero rt
       INNER JOIN OrdenReparacion o ON o.id = rt.ordenReparacionId
@@ -186,7 +186,7 @@ export class EstadisticasProveedoresService {
       SELECT
         rt.proveedorId AS proveedor_id,
         p.name AS proveedor_nombre,
-        COALESCE(SUM(rt.precioCompra), 0) AS monto,
+        COALESCE(SUM(rt.precioCompra * rt.cantidad), 0) AS monto,
         COUNT(*) AS cnt
       FROM ReparacionDeTercero rt
       INNER JOIN Venta v ON v.id = rt.ventaId
@@ -285,7 +285,7 @@ export class EstadisticasProveedoresService {
       ${to ? Prisma.sql`AND DATE(oc.fecha) <= DATE(${to})` : Prisma.empty}
     `;
     const [rtOrdenRow] = await prisma.$queryRaw<SumCountRow[]>`
-      SELECT COALESCE(SUM(rt.precioCompra), 0) AS suma, 0 AS cnt
+      SELECT COALESCE(SUM(rt.precioCompra * rt.cantidad), 0) AS suma, 0 AS cnt
       FROM ReparacionDeTercero rt
       INNER JOIN OrdenReparacion o ON o.id = rt.ordenReparacionId
       WHERE rt.ordenReparacionId IS NOT NULL
@@ -293,7 +293,7 @@ export class EstadisticasProveedoresService {
       ${to ? Prisma.sql`AND DATE(o.fechaCreacion) <= DATE(${to})` : Prisma.empty}
     `;
     const [rtVentaRow] = await prisma.$queryRaw<SumCountRow[]>`
-      SELECT COALESCE(SUM(rt.precioCompra), 0) AS suma, 0 AS cnt
+      SELECT COALESCE(SUM(rt.precioCompra * rt.cantidad), 0) AS suma, 0 AS cnt
       FROM ReparacionDeTercero rt
       INNER JOIN Venta v ON v.id = rt.ventaId
       WHERE rt.ventaId IS NOT NULL AND rt.ordenReparacionId IS NULL
@@ -328,7 +328,7 @@ export class EstadisticasProveedoresService {
       `,
       prisma.$queryRaw<MonthRow[]>`
         SELECT DATE_FORMAT(COALESCE(o.fechaCreacion, v.fecha), '%Y-%m') AS mes,
-               COALESCE(SUM(rt.precioCompra), 0) AS suma
+               COALESCE(SUM(rt.precioCompra * rt.cantidad), 0) AS suma
         FROM ReparacionDeTercero rt
         LEFT JOIN OrdenReparacion o ON o.id = rt.ordenReparacionId
         LEFT JOIN Venta v ON v.id = rt.ventaId

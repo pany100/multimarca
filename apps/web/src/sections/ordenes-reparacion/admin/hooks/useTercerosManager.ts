@@ -6,6 +6,7 @@ import { useOrden } from "../contexts/OrdenContext";
 interface ReparacionTercero {
   id: number;
   nombre: string;
+  cantidad: number;
   precioCompra: number;
   precioVenta: number;
   iva?: number | null;
@@ -31,6 +32,7 @@ export const useTercerosManager = () => {
   const handleAddTercero = async (data: {
     nombre: string;
     proveedorId: number;
+    cantidad: number;
     precioCompra: number;
     precioVenta: number;
     iva?: number | null;
@@ -87,6 +89,7 @@ export const useTercerosManager = () => {
     data: {
       nombre?: string;
       proveedorId?: number;
+      cantidad?: number;
       precioCompra?: number;
       precioVenta?: number;
       iva?: number | null;

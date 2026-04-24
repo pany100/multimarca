@@ -46,7 +46,7 @@ export class TrabajoRealizado {
     const precio = this.precioUnitario.toNumber();
     const ivaVal = this.iva ?? 0;
     if (ivaVal === 0) return precio;
-    return Math.ceil(precio * (1 + ivaVal / 100));
+    return Math.round(precio * (1 + ivaVal / 100));
   }
 
   static from(p: TrabajoRealizadoProps) {

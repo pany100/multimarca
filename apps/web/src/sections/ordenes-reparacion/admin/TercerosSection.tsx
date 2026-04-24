@@ -10,6 +10,7 @@ import TercerosTable from "./components/TercerosTable";
 export interface ReparacionTercero {
   id: number;
   nombre: string;
+  cantidad: number;
   precioCompra: number;
   precioVenta: number;
   iva?: number | null;
@@ -30,6 +31,7 @@ interface TercerosSectionProps {
   onAddTercero: (data: {
     nombre: string;
     proveedorId: number;
+    cantidad: number;
     precioCompra: number;
     precioVenta: number;
     iva?: number | null;
@@ -42,6 +44,7 @@ interface TercerosSectionProps {
     data: {
       nombre?: string;
       proveedorId?: number;
+      cantidad?: number;
       precioCompra?: number;
       precioVenta?: number;
       iva?: number | null;
@@ -76,6 +79,7 @@ const TercerosSection = ({
   const handleSubmit = async (data: {
     nombre: string;
     proveedorId: number;
+    cantidad: number;
     precioCompra: number;
     precioVenta: number;
     iva?: number | null;

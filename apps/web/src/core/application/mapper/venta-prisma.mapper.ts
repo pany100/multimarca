@@ -57,6 +57,7 @@ export function mapVentaVOToPrismaCreate(vo: VentaVO): Prisma.VentaCreateInput {
     reparacionesDeTercero: {
       create: tercerosVO.map((t) => ({
         nombre: t.nombre,
+        cantidad: t.cantidad,
         precioCompra: t.precioCompra.asDecimal(),
         precioVenta: t.precioVenta.asDecimal(),
         proveedor: { connect: { id: t.proveedorId } },
@@ -129,6 +130,7 @@ export function mapVentaVOToPrismaUpdate(vo: VentaVO): Prisma.VentaUpdateArgs {
         deleteMany: {},
         create: vo.tercerosVO.map((t) => ({
           nombre: t.nombre,
+          cantidad: t.cantidad,
           precioCompra: t.precioCompra.asDecimal(),
           precioVenta: t.precioVenta.asDecimal(),
           proveedor: { connect: { id: t.proveedorId } },

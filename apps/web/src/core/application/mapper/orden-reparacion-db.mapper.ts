@@ -49,6 +49,7 @@ export class OrdenReparacionDBMapper {
         reparacionesDeTercero: {
           create: ordenReparacion.tercerosVO.map((t) => ({
             nombre: t.nombre,
+            cantidad: t.cantidad,
             precioCompra: t.precioCompra.asDecimal(),
             precioVenta: t.precioVenta.asDecimal(),
             proveedor: { connect: { id: t.proveedorId } },
@@ -136,6 +137,7 @@ export class OrdenReparacionDBMapper {
           deleteMany: {},
           create: ordenReparacion.tercerosVO.map((t) => ({
             nombre: t.nombre,
+            cantidad: t.cantidad,
             precioCompra: t.precioCompra.asDecimal(),
             precioVenta: t.precioVenta.asDecimal(),
             proveedorId: t.proveedorId,

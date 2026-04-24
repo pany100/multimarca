@@ -114,9 +114,9 @@ function AddItemModal({
 
   const precioConIva =
     precioUnitarioNum != null
-      ? Math.ceil(precioUnitarioNum * (1 + (ivaNum || 0) / 100))
+      ? Math.round(precioUnitarioNum * (1 + (ivaNum || 0) / 100))
       : 0;
-  const subtotalItem = Math.ceil(precioConIva * cantidadNum);
+  const subtotalItem = Math.round(precioConIva * cantidadNum);
 
   const resetState = () => {
     setSelectedStock(null);
@@ -307,7 +307,7 @@ function AddItemModal({
           >
             <Typography variant="body2" color="text.secondary" gutterBottom>
               Subtotal item = Precio Unitario × (1 + IVA / 100) × Cantidad
-              (redondeado al entero más cercano hacia arriba)
+              (redondeado al entero más cercano)
             </Typography>
             <Typography variant="body2" sx={{ fontWeight: 600 }}>
               <Typography

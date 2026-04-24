@@ -274,15 +274,21 @@ export default function generateBudgetHtml(repair: any, encabezadoPdf?: string):
           let incrementoAplicado = false;
           return repair.reparacionesDeTercero
             .map(
-              (el: { nombre: string; precioVenta: number }) => {
+              (el: {
+                nombre: string;
+                cantidad: number;
+                precioVenta: number;
+              }) => {
                 let precio = calculoVO.getPrecioFinalForReparaciones(el.precioVenta);
                 if (!incrementoAplicado && incrementoSinAbsorber > 0) {
                   precio += incrementoSinAbsorber;
                   incrementoAplicado = true;
                 }
+                const c = Number(el.cantidad ?? 1);
+                const prefix = c !== 1 ? `${c} - ` : "";
                 return `
                 <div class="TypographyBody1">
-                  ${el.nombre}
+                  ${prefix}${el.nombre}
                 </div>
                 <div class="TypographyBody1" style="text-align: right;">
                   $${Number(precio).toLocaleString("es-AR")}
