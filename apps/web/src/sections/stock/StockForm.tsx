@@ -160,6 +160,14 @@ const StockForm = () => {
                 </Typography>
               )}
             </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              component="div"
+              sx={{ mt: 0.5, fontStyle: "italic" }}
+            >
+              Los precios se redondean al entero más cercano hacia arriba.
+            </Typography>
           </Box>
         </Grid>
       </Grid>

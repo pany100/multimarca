@@ -282,6 +282,14 @@ const TercerosModal = ({
                     "-"
                   )}
                 </Typography>
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  component="div"
+                  sx={{ mt: 1, fontStyle: "italic" }}
+                >
+                  El precio se redondea al entero más cercano hacia arriba.
+                </Typography>
               </Box>
             </Grid>
           )}

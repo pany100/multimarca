@@ -618,7 +618,8 @@ function AdminStockPageContent({ params }: { params: { id: string } }) {
                     {/* Paso 1: Precio neto */}
                     <Box sx={{ mb: 1.5 }}>
                       <Typography variant="body2" color="text.secondary">
-                        Precio neto = Precio de compra x (1 + Margen / 100)
+                        Precio neto = Precio de compra x (1 + Margen / 100),
+                        redondeado al entero más cercano hacia arriba
                       </Typography>
                       {stock.buyPrice != null && precioNeto != null && (
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>
@@ -638,7 +639,7 @@ function AdminStockPageContent({ params }: { params: { id: string } }) {
                     <Box sx={{ mb: 0.5 }}>
                       <Typography variant="body2" color="text.secondary">
                         Precio de venta = Precio neto x (1 + IVA venta / 100),
-                        redondeado hacia arriba
+                        redondeado al entero más cercano hacia arriba
                       </Typography>
                       {precioNeto != null && precioVentaCalculado != null && (
                         <Typography variant="body2" sx={{ fontWeight: 600 }}>

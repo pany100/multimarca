@@ -30,5 +30,5 @@ export function calcularPrecioNeto(
   const m = markup === "" || markup == null ? 0 : Number(markup);
   if (!Number.isFinite(b) || b < 0) return null;
   if (!Number.isFinite(m)) return null;
-  return b * (1 + m / 100);
+  return Math.ceil(b * (1 + m / 100) || 0);
 }

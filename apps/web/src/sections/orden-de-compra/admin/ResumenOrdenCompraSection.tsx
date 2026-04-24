@@ -72,7 +72,8 @@ const ResumenOrdenCompraSection = () => {
   const subtotalItems = items.reduce((total: number, item: any) => {
     const precio = Number(item.precioUnitario) || 0;
     const iva = Number(item.iva) || 0;
-    return total + precio * (1 + iva / 100) * Number(item.cantidad);
+    const precioConIva = Math.ceil(precio * (1 + iva / 100));
+    return total + Math.ceil(precioConIva * Number(item.cantidad));
   }, 0);
 
   const total = subtotalItems + percepcion;
@@ -88,8 +89,8 @@ const ResumenOrdenCompraSection = () => {
           {items.map((item: any) => {
             const precio = Number(item.precioUnitario) || 0;
             const iva = Number(item.iva) || 0;
-            const precioConIva = precio * (1 + iva / 100);
-            const subtotal = precioConIva * Number(item.cantidad);
+            const precioConIva = Math.ceil(precio * (1 + iva / 100));
+            const subtotal = Math.ceil(precioConIva * Number(item.cantidad));
             const nombre = item.name || item.stock?.name || "—";
 
             return (

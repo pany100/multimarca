@@ -73,7 +73,7 @@ function TrabajoDeListaForm({ initialManoDeObra }: TrabajoDeListaFormProps) {
             Precio final con IVA: <strong>{getFormattedPrice(precioConIva)}</strong>
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Precio final = Precio Neto × (1 + IVA/100). Si IVA es 0, el precio final es igual al precio neto.
+            Precio final = Precio Neto × (1 + IVA/100), redondeado al entero más cercano hacia arriba. Si IVA es 0, el precio final es igual al precio neto.
           </Typography>
         </Grid>
       )}
