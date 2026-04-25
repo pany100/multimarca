@@ -25,6 +25,7 @@ function DatosLaboralesSection() {
             options={[
               { value: "Mecanico", label: "Mecanico" },
               { value: "Administrativo", label: "Administrativo" },
+              { value: "EquipoDirectivo", label: "Equipo Directivo" },
             ]}
             name="tipo"
             label="Tipo"

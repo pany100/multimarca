@@ -1113,6 +1113,7 @@ model Recuperacion {
 enum TipoEmpleado {
   Mecanico
   Administrativo
+  EquipoDirectivo
 }
 
 enum EstadoOrdenReparacion {

@@ -24,7 +24,7 @@ export const schema = yup.object({
   postal_code: yup.string().nullable(),
   start_date: yup.date().nullable(),
   birthday: yup.date().nullable(),
-  tipo: yup.string().oneOf(["Mecanico", "Administrativo"]).nullable(),
+  tipo: yup.string().oneOf(["Mecanico", "Administrativo", "EquipoDirectivo"]).nullable(),
   dniImagePath: yup.string().nullable(),
   contactoEmergencia: yup.string().nullable(),
 });

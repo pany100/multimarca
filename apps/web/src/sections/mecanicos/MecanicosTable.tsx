@@ -9,6 +9,7 @@ import { useState } from "react";
 import CustomTable, {
   InheritedTableProps,
 } from "../../components/tableV2/CustomTable";
+import { tipoEmpleadoLabel } from "./utils/tipoEmpleadoLabel";
 
 function MecanicosTable({
   extraActions,
@@ -79,7 +80,12 @@ function MecanicosTable({
     },
     { field: "dni", headerName: "CUIT/CUIL", flex: 1 },
     { field: "email", headerName: "Email", flex: 1.5 },
-    { field: "tipo", headerName: "Tipo", flex: 1 },
+    {
+      field: "tipo",
+      headerName: "Tipo",
+      flex: 1,
+      valueGetter: (tipo: string) => tipoEmpleadoLabel(tipo),
+    },
     { field: "phone", headerName: "Teléfono", flex: 1 },
     {
       field: "dniFrentePath",

@@ -29,7 +29,7 @@ const baseMecanicoSchema = z.object({
   postal_code: z.string().nullable().optional(),
   start_date: z.coerce.date().nullable().optional(),
   birthday: z.coerce.date().nullable().optional(),
-  tipo: z.enum(["Mecanico", "Administrativo"]).nullable().optional(),
+  tipo: z.enum(["Mecanico", "Administrativo", "EquipoDirectivo"]).nullable().optional(),
   dniImagePath: z.string().nullable().optional(),
   contactoEmergencia: z.string().nullable().optional(),
 });

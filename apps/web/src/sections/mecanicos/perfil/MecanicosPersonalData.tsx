@@ -5,6 +5,7 @@ import { getFormattedDate } from "@/utils/fieldHelper";
 import { Box, Button, CardContent, Grid, Typography } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { useEmpleadosContext } from "../context/EmpleadosContext";
+import { tipoEmpleadoLabel } from "../utils/tipoEmpleadoLabel";
 
 function MecanicosPersonalData() {
   const { empleado } = useEmpleadosContext();
@@ -53,7 +54,7 @@ function MecanicosPersonalData() {
             <Typography variant="body2" color="text.secondary">
               Tipo de contrato
             </Typography>
-            <Typography>{empleado?.tipo || "No especificado"}</Typography>
+            <Typography>{tipoEmpleadoLabel(empleado?.tipo) || "No especificado"}</Typography>
           </Grid>
           <Grid item xs={12} sm={4}>
             <Typography variant="body2" color="text.secondary">
