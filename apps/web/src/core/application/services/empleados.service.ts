@@ -10,6 +10,7 @@ import {
 } from "@/core/infrastructure/validation/schemas/mecanico.schema";
 import { PageResult } from "@/shared/utils/pagination";
 import { Empleado } from "@prisma/client";
+import { mapEmpleadoToResponse } from "../mapper/empleado-response.mapper";
 import { EmpleadoVOMapper } from "../mapper/empleado-vo.mapper";
 
 export class EmpleadoService {
@@ -25,7 +26,7 @@ export class EmpleadoService {
   async findAll(dto: ListMecanicosQueryData): Promise<PageResult<Empleado>> {
     const result = await this.repo.listPaged(dto);
     const empleadosSerializables = result.items.map((empleado) =>
-      this.transformToSerializable(empleado)
+      mapEmpleadoToResponse(this.transformToSerializable(empleado))
     );
     return {
       items: empleadosSerializables,

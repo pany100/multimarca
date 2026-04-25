@@ -24,6 +24,10 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
           fechaBaja: null,
         },
         orderBy: { id: "desc" },
+        include: {
+          dniFrentePath: true,
+          dniDorsoPath: true,
+        },
       },
       dto.page,
       dto.size
