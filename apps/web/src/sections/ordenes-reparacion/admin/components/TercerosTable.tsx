@@ -72,10 +72,10 @@ const TercerosTable = ({
     },
     {
       field: "markup",
-      headerName: "Margen",
+      headerName: "Margen %",
       width: 100,
       renderCell: (params) =>
-        params.row.markup != null ? getFormattedPrice(params.row.markup) : "-",
+        params.row.markup != null ? `${params.row.markup}%` : "-",
     },
     {
       field: "iva",
