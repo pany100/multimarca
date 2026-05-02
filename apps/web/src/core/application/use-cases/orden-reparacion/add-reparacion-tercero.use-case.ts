@@ -31,6 +31,7 @@ export class AddReparacionTerceroUseCase {
           nombre: input.nombre,
           proveedorId: input.proveedorId,
           cantidad: input.cantidad,
+          mostrarCantidadEnPdf: input.mostrarCantidadEnPdf,
           precioCompra: input.precioCompra,
           precioVenta: input.precioVenta,
           iva: input.iva,

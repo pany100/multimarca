@@ -342,6 +342,7 @@ export default function generateClientOrderHtml(repair: any, encabezadoPdf?: str
                 (el: {
                   nombre: string;
                   cantidad: number;
+                  mostrarCantidadEnPdf?: boolean;
                   precioVenta: number;
                 }) => {
                   let precio = calculoVO.getPrecioFinalForReparaciones(
@@ -352,7 +353,8 @@ export default function generateClientOrderHtml(repair: any, encabezadoPdf?: str
                     incrementoAplicado = true;
                   }
                   const c = Number(el.cantidad ?? 1);
-                  const prefix = c !== 1 ? `${c} - ` : "";
+                  const prefix =
+                    el.mostrarCantidadEnPdf !== false ? `${c} - ` : "";
                   return `
                 <div class="TypographyBody1">
                   ${prefix}${el.nombre}

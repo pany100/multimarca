@@ -11,6 +11,7 @@ export interface ReparacionTercero {
   id: number;
   nombre: string;
   cantidad: number;
+  mostrarCantidadEnPdf?: boolean;
   precioCompra: number;
   precioVenta: number;
   iva?: number | null;
@@ -32,6 +33,7 @@ interface TercerosSectionProps {
     nombre: string;
     proveedorId: number;
     cantidad: number;
+    mostrarCantidadEnPdf: boolean;
     precioCompra: number;
     precioVenta: number;
     iva?: number | null;
@@ -45,6 +47,7 @@ interface TercerosSectionProps {
       nombre?: string;
       proveedorId?: number;
       cantidad?: number;
+      mostrarCantidadEnPdf?: boolean;
       precioCompra?: number;
       precioVenta?: number;
       iva?: number | null;
@@ -80,6 +83,7 @@ const TercerosSection = ({
     nombre: string;
     proveedorId: number;
     cantidad: number;
+    mostrarCantidadEnPdf: boolean;
     precioCompra: number;
     precioVenta: number;
     iva?: number | null;

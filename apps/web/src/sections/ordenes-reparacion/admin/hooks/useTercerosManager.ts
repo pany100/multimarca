@@ -7,6 +7,7 @@ interface ReparacionTercero {
   id: number;
   nombre: string;
   cantidad: number;
+  mostrarCantidadEnPdf?: boolean;
   precioCompra: number;
   precioVenta: number;
   iva?: number | null;
@@ -33,6 +34,7 @@ export const useTercerosManager = () => {
     nombre: string;
     proveedorId: number;
     cantidad: number;
+    mostrarCantidadEnPdf: boolean;
     precioCompra: number;
     precioVenta: number;
     iva?: number | null;
@@ -90,6 +92,7 @@ export const useTercerosManager = () => {
       nombre?: string;
       proveedorId?: number;
       cantidad?: number;
+      mostrarCantidadEnPdf?: boolean;
       precioCompra?: number;
       precioVenta?: number;
       iva?: number | null;

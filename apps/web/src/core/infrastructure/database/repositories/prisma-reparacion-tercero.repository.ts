@@ -25,6 +25,7 @@ export class PrismaReparacionTerceroRepository
       nombre: string;
       proveedorId: number;
       cantidad?: number;
+      mostrarCantidadEnPdf?: boolean;
       precioCompra: number;
       precioVenta: number;
       iva?: number | null;
@@ -45,6 +46,7 @@ export class PrismaReparacionTerceroRepository
         nombre: data.nombre,
         proveedorId: data.proveedorId,
         cantidad: data.cantidad ?? 1,
+        mostrarCantidadEnPdf: data.mostrarCantidadEnPdf ?? true,
         precioCompra: data.precioCompra,
         precioVenta: data.precioVenta,
         iva: data.iva,
@@ -87,6 +89,7 @@ export class PrismaReparacionTerceroRepository
       nombre?: string;
       proveedorId?: number;
       cantidad?: number;
+      mostrarCantidadEnPdf?: boolean;
       precioCompra?: number;
       precioVenta?: number;
       iva?: number | null;
@@ -103,6 +106,8 @@ export class PrismaReparacionTerceroRepository
     if (data.proveedorId !== undefined)
       dataToUpdate.proveedorId = data.proveedorId;
     if (data.cantidad !== undefined) dataToUpdate.cantidad = data.cantidad;
+    if (data.mostrarCantidadEnPdf !== undefined)
+      dataToUpdate.mostrarCantidadEnPdf = data.mostrarCantidadEnPdf;
     if (data.precioCompra !== undefined)
       dataToUpdate.precioCompra = data.precioCompra;
     if (data.precioVenta !== undefined)

@@ -726,6 +726,8 @@ model ReparacionDeTercero {
   precioVenta            Decimal               @db.Decimal(10, 2)
   /// Cantidad; decimal para servicios fraccionables (ej. 0.5 hs). Default 1.
   cantidad               Decimal               @default(1) @db.Decimal(10, 3)
+  /// Si es true, la cantidad aparece como prefijo en el PDF al cliente.
+  mostrarCantidadEnPdf   Boolean               @default(true)
   proveedorId            Int
   ordenReparacionId      Int?
   ventaId                Int?

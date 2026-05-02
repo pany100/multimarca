@@ -7,6 +7,7 @@ export interface ReparacionTerceroRepository {
       nombre: string;
       proveedorId: number;
       cantidad?: number;
+      mostrarCantidadEnPdf?: boolean;
       precioCompra: number;
       precioVenta: number;
       iva?: number | null;
@@ -23,6 +24,7 @@ export interface ReparacionTerceroRepository {
       nombre?: string;
       proveedorId?: number;
       cantidad?: number;
+      mostrarCantidadEnPdf?: boolean;
       precioCompra?: number;
       precioVenta?: number;
       iva?: number | null;

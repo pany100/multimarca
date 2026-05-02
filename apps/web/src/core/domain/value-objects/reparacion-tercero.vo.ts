@@ -6,6 +6,7 @@ export interface ReparacionTerceroProps {
   nombre: string;
   proveedorId: number;
   cantidad?: number;
+  mostrarCantidadEnPdf?: boolean;
   precioCompra?: number;
   precioVenta?: number;
   iva?: number | null;
@@ -20,6 +21,7 @@ export interface ReparacionTerceroHTTPInput {
     id: number;
   };
   cantidad?: number | undefined;
+  mostrarCantidadEnPdf?: boolean | undefined;
   precioCompra?: number | undefined;
   precioVenta?: number | undefined;
   iva?: number | null | undefined;
@@ -33,6 +35,7 @@ export class ReparacionTercero {
     public readonly nombre: string,
     public readonly proveedorId: number,
     public readonly cantidad: number,
+    public readonly mostrarCantidadEnPdf: boolean,
     public readonly precioCompra: Money,
     public readonly precioVenta: Money,
     public readonly iva: number | null,
@@ -61,6 +64,7 @@ export class ReparacionTercero {
       p.nombre.trim(),
       Number(p.proveedorId),
       Number(p.cantidad ?? 1),
+      p.mostrarCantidadEnPdf ?? true,
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
       p.iva ?? null,
@@ -75,6 +79,7 @@ export class ReparacionTercero {
       p.nombre.trim(),
       Number(p.proveedor.id),
       Number(p.cantidad ?? 1),
+      p.mostrarCantidadEnPdf ?? true,
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
       p.iva ?? null,
@@ -89,11 +94,13 @@ export class ReparacionTercero {
     precioCompra: Prisma.Decimal;
     precioVenta: Prisma.Decimal;
     cantidad?: Prisma.Decimal | number | null;
+    mostrarCantidadEnPdf?: boolean | null;
   }) {
     return new ReparacionTercero(
       p.nombre.trim(),
       0,
       Number(p.cantidad ?? 1),
+      p.mostrarCantidadEnPdf ?? true,
       Money.from(p.precioCompra),
       Money.from(p.precioVenta),
       null,

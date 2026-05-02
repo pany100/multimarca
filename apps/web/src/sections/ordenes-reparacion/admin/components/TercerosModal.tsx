@@ -13,7 +13,9 @@ import {
   DialogContent,
   DialogTitle,
   Divider,
+  FormControlLabel,
   Grid,
+  Switch,
   Typography,
 } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -27,6 +29,7 @@ interface ReparacionTercero {
   id: number;
   nombre: string;
   cantidad: number;
+  mostrarCantidadEnPdf?: boolean;
   precioCompra: number;
   precioVenta: number;
   iva?: number | null;
@@ -43,6 +46,7 @@ interface TercerosModalProps {
     nombre: string;
     proveedorId: number;
     cantidad: number;
+    mostrarCantidadEnPdf: boolean;
     precioCompra: number;
     precioVenta: number;
     iva?: number | null;
@@ -72,6 +76,8 @@ const TercerosModal = ({
   const [sellIva, setSellIva] = useState<string>("");
   const [precioUnitario, setPrecioUnitario] = useState<string>("");
   const [cantidad, setCantidad] = useState<string>("1");
+  const [mostrarCantidadEnPdf, setMostrarCantidadEnPdf] =
+    useState<boolean>(true);
   const [precioVenta, setPrecioVenta] = useState<string>("");
   const [recibo, setRecibo] = useState<string | null>(null);
 
@@ -92,6 +98,7 @@ const TercerosModal = ({
         );
         const c = Number(editTercero.cantidad) || 1;
         setCantidad(String(c));
+        setMostrarCantidadEnPdf(editTercero.mostrarCantidadEnPdf ?? true);
         const unit = (Number(editTercero.precioVenta) / c).toFixed(2);
         setPrecioUnitario(unit);
         setPrecioVenta(editTercero.precioVenta.toString());
@@ -104,6 +111,7 @@ const TercerosModal = ({
         setMarkup("");
         setSellIva("");
         setCantidad("1");
+        setMostrarCantidadEnPdf(true);
         setPrecioUnitario("");
         setPrecioVenta("");
         setRecibo(null);
@@ -156,6 +164,7 @@ const TercerosModal = ({
       nombre,
       proveedorId: proveedor.id,
       cantidad: Number(cantidad),
+      mostrarCantidadEnPdf,
       precioCompra: Number(precioCompra),
       precioVenta: Number(precioVenta),
       iva: sellIva !== "" ? Number(sellIva) : null,
@@ -293,6 +302,19 @@ const TercerosModal = ({
                 min: 0,
                 step: 0.001,
               }}
+            />
+          </Grid>
+
+          <Grid item xs={12}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={mostrarCantidadEnPdf}
+                  onChange={(e) => setMostrarCantidadEnPdf(e.target.checked)}
+                  disabled={loading}
+                />
+              }
+              label="Mostrar cantidad en PDF al cliente"
             />
           </Grid>
 
