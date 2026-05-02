@@ -14,6 +14,7 @@ type CustomFileLike = { finalPath?: string | null; tempPath: string };
 type EmpleadoWithDocRelations = {
   [key: string]: unknown;
   licenciaConducirPath?: { finalPath?: string | null; tempPath: string } | null;
+  licenciaDorsoPath?: { finalPath?: string | null; tempPath: string } | null;
   inscripcionMonotributoPath?: {
     finalPath?: string | null;
     tempPath: string;
@@ -38,6 +39,7 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
 ): Omit<
   T,
   | "licenciaConducirPath"
+  | "licenciaDorsoPath"
   | "inscripcionMonotributoPath"
   | "recategorizacionMonotributoPath"
   | "curriculumPath"
@@ -46,6 +48,7 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
   | "dniDorsoPath"
 > & {
   licenciaConducirPath: string | null;
+  licenciaDorsoPath: string | null;
   inscripcionMonotributoPath: string | null;
   recategorizacionMonotributoPath: string | null;
   curriculumPath: string | null;
@@ -55,6 +58,7 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
 } {
   const {
     licenciaConducirPath: lc,
+    licenciaDorsoPath: ld,
     inscripcionMonotributoPath: im,
     recategorizacionMonotributoPath: rm,
     curriculumPath: cv,
@@ -66,6 +70,7 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
   type MappedReturn = Omit<
     T,
     | "licenciaConducirPath"
+    | "licenciaDorsoPath"
     | "inscripcionMonotributoPath"
     | "recategorizacionMonotributoPath"
     | "curriculumPath"
@@ -74,6 +79,7 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
     | "dniDorsoPath"
   > & {
     licenciaConducirPath: string | null;
+    licenciaDorsoPath: string | null;
     inscripcionMonotributoPath: string | null;
     recategorizacionMonotributoPath: string | null;
     curriculumPath: string | null;
@@ -84,6 +90,7 @@ export function mapEmpleadoToResponse<T extends EmpleadoWithDocRelations>(
   const mapped: MappedReturn = {
     ...rest,
     licenciaConducirPath: getDocPath(lc ?? null),
+    licenciaDorsoPath: getDocPath(ld ?? null),
     inscripcionMonotributoPath: getDocPath(im ?? null),
     recategorizacionMonotributoPath: getDocPath(rm ?? null),
     curriculumPath: getDocPath(cv ?? null),

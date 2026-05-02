@@ -25,8 +25,12 @@ function MecanicosDocumentacionData() {
       filePath: empleado?.dniDorsoPath ?? null,
     },
     {
-      label: "Licencia de Conducir",
+      label: "Licencia de Conducir - Frente",
       filePath: empleado?.licenciaConducirPath ?? null,
+    },
+    {
+      label: "Licencia de Conducir - Dorso",
+      filePath: empleado?.licenciaDorsoPath ?? null,
     },
     {
       label: "Recategorización Monotributo",

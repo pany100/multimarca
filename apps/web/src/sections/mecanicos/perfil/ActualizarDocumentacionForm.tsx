@@ -19,6 +19,7 @@ import useEmpleadoPersistence from "../hooks/useEmpleadoPersistence";
 
 const schema = yup.object({
   licenciaConducirPath: yup.string().nullable(),
+  licenciaDorsoPath: yup.string().nullable(),
   recategorizacionMonotributoPath: yup.string().nullable(),
   inscripcionMonotributoPath: yup.string().nullable(),
   curriculumPath: yup.string().nullable(),
@@ -38,6 +39,7 @@ function ActualizarDocumentacionForm() {
     resolver: yupResolver(schema),
     defaultValues: {
       licenciaConducirPath: empleado?.licenciaConducirPath ?? null,
+      licenciaDorsoPath: empleado?.licenciaDorsoPath ?? null,
       recategorizacionMonotributoPath: empleado?.recategorizacionMonotributoPath ?? null,
       inscripcionMonotributoPath: empleado?.inscripcionMonotributoPath ?? null,
       curriculumPath: empleado?.curriculumPath ?? null,
@@ -51,6 +53,7 @@ function ActualizarDocumentacionForm() {
     if (empleado) {
       methods.reset({
         licenciaConducirPath: empleado.licenciaConducirPath ?? null,
+        licenciaDorsoPath: empleado.licenciaDorsoPath ?? null,
         recategorizacionMonotributoPath: empleado.recategorizacionMonotributoPath ?? null,
         inscripcionMonotributoPath: empleado.inscripcionMonotributoPath ?? null,
         curriculumPath: empleado.curriculumPath ?? null,
@@ -161,7 +164,25 @@ function ActualizarDocumentacionForm() {
                 >
                   <CustomFileInput
                     name="licenciaConducirPath"
-                    label="Licencia de Conducir"
+                    label="Licencia de Conducir - Frente"
+                  />
+                </Grid>
+
+                <Grid
+                  item
+                  xs={12}
+                  sm={12}
+                  sx={{
+                    border: "1px solid",
+                    borderColor: "divider",
+                    borderRadius: 1,
+                    p: 2,
+                    mb: 2,
+                  }}
+                >
+                  <CustomFileInput
+                    name="licenciaDorsoPath"
+                    label="Licencia de Conducir - Dorso"
                   />
                 </Grid>
 

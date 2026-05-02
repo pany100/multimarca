@@ -27,6 +27,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         include: {
           dniFrentePath: true,
           dniDorsoPath: true,
+          licenciaDorsoPath: true,
         },
       },
       dto.page,
@@ -68,6 +69,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         sueldos: true,
         notasAdministrativas: true,
         licenciaConducirPath: true,
+        licenciaDorsoPath: true,
         inscripcionMonotributoPath: true,
         recategorizacionMonotributoPath: true,
         curriculumPath: true,
@@ -186,6 +188,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
       path: string | null | undefined,
       fkField:
         | "empleadoLicenciaConducirId"
+        | "empleadoLicenciaDorsoId"
         | "empleadoInscripcionMonotributoId"
         | "empleadoRecategorizacionMonotributoId"
         | "empleadoCurriculumId"
@@ -237,6 +240,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
     };
 
     await processDoc(dto.licenciaConducirPath, "empleadoLicenciaConducirId");
+    await processDoc(dto.licenciaDorsoPath, "empleadoLicenciaDorsoId");
     await processDoc(
       dto.inscripcionMonotributoPath,
       "empleadoInscripcionMonotributoId"
@@ -254,6 +258,7 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
       where: { id: empleadoId },
       include: {
         licenciaConducirPath: true,
+        licenciaDorsoPath: true,
         inscripcionMonotributoPath: true,
         recategorizacionMonotributoPath: true,
         curriculumPath: true,

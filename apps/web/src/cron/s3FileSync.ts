@@ -172,6 +172,7 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile, ctx: RunContext)
       archivo.presupuestoCedulaId === null &&
       archivo.ventaCedulaId === null &&
       archivo.empleadoLicenciaConducirId === null &&
+      archivo.empleadoLicenciaDorsoId === null &&
       archivo.empleadoInscripcionMonotributoId === null &&
       archivo.empleadoRecategorizacionMonotributoId === null &&
       archivo.empleadoCurriculumId === null &&
@@ -288,7 +289,8 @@ async function procesarUnArchivoPending(archivo: CustomFile, ctx: RunContext): P
               archivo.ventaCedulaId ||
               archivo.autoCedulaVerdeId
             ? "cedula-verde"
-            : archivo.empleadoLicenciaConducirId
+            : archivo.empleadoLicenciaConducirId ||
+                archivo.empleadoLicenciaDorsoId
               ? "licencias-conducir"
               : archivo.empleadoInscripcionMonotributoId ||
                   archivo.empleadoRecategorizacionMonotributoId
@@ -437,6 +439,7 @@ async function procesarArchivosParaBorrar(ctx: RunContext) {
           presupuestoCedulaId: null,
           ventaCedulaId: null,
           empleadoLicenciaConducirId: null,
+          empleadoLicenciaDorsoId: null,
           empleadoInscripcionMonotributoId: null,
           empleadoRecategorizacionMonotributoId: null,
           empleadoCurriculumId: null,

@@ -21,6 +21,7 @@ interface ReparacionData {
 type EmpleadoWithAusencias = Omit<
   Empleado,
   | "licenciaConducirPath"
+  | "licenciaDorsoPath"
   | "inscripcionMonotributoPath"
   | "recategorizacionMonotributoPath"
   | "curriculumPath"
@@ -29,6 +30,7 @@ type EmpleadoWithAusencias = Omit<
   | "dniDorsoPath"
 > & {
   licenciaConducirPath?: string | null;
+  licenciaDorsoPath?: string | null;
   inscripcionMonotributoPath?: string | null;
   recategorizacionMonotributoPath?: string | null;
   curriculumPath?: string | null;

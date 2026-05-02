@@ -195,6 +195,7 @@ model Empleado {
   dniImagePath      String?                   @db.VarChar(1000)
   contactoEmergencia String?                   @db.VarChar(150)
   licenciaConducirPath           CustomFile?   @relation("EmpleadoLicenciaConducir")
+  licenciaDorsoPath              CustomFile?   @relation("EmpleadoLicenciaDorso")
   inscripcionMonotributoPath     CustomFile?   @relation("EmpleadoInscripcionMonotributo")
   recategorizacionMonotributoPath CustomFile?   @relation("EmpleadoRecategorizacionMonotributo")
   curriculumPath                CustomFile?   @relation("EmpleadoCurriculum")
@@ -614,6 +615,7 @@ model CustomFile {
   presupuestoCedulaId   Int?                 @unique
   ventaCedulaId         Int?                 @unique
   empleadoLicenciaConducirId        Int?     @unique
+  empleadoLicenciaDorsoId           Int?     @unique
   empleadoInscripcionMonotributoId  Int?     @unique
   empleadoRecategorizacionMonotributoId Int?  @unique
   empleadoCurriculumId  Int?                 @unique
@@ -629,6 +631,7 @@ model CustomFile {
   presupuestoCedula     Presupuesto?         @relation("PresupuestoCedula", fields: [presupuestoCedulaId], references: [id])
   ventaCedula           Venta?               @relation("VentaCedula", fields: [ventaCedulaId], references: [id])
   empleadoLicenciaConducir         Empleado? @relation("EmpleadoLicenciaConducir", fields: [empleadoLicenciaConducirId], references: [id])
+  empleadoLicenciaDorso            Empleado? @relation("EmpleadoLicenciaDorso", fields: [empleadoLicenciaDorsoId], references: [id])
   empleadoInscripcionMonotributo   Empleado? @relation("EmpleadoInscripcionMonotributo", fields: [empleadoInscripcionMonotributoId], references: [id])
   empleadoRecategorizacionMonotributo Empleado? @relation("EmpleadoRecategorizacionMonotributo", fields: [empleadoRecategorizacionMonotributoId], references: [id])
   empleadoCurriculum   Empleado?            @relation("EmpleadoCurriculum", fields: [empleadoCurriculumId], references: [id])
