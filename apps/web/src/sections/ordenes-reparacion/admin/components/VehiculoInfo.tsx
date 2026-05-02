@@ -11,6 +11,9 @@ interface VehiculoInfoProps {
     patent?: string;
     year?: number;
     color?: string;
+    valves?: string | null;
+    transmission_type?: string | null;
+    tipoCombustible?: string | null;
   } | null;
   kilometros?: number | null;
 }
@@ -56,6 +59,34 @@ export const VehiculoInfo = ({ vehiculo, kilometros }: VehiculoInfoProps) => {
       <Typography variant="body2" color="text.secondary" sx={{ ml: 4, mb: 2 }}>
         {vehiculo?.year} · {vehiculo?.color}
       </Typography>
+
+      {vehiculo?.valves && (
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ ml: 4, mb: 0.5 }}
+        >
+          Motor: {vehiculo.valves}
+        </Typography>
+      )}
+      {vehiculo?.transmission_type && (
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ ml: 4, mb: 0.5 }}
+        >
+          Transmisión: {vehiculo.transmission_type}
+        </Typography>
+      )}
+      {vehiculo?.tipoCombustible && (
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ ml: 4, mb: 2 }}
+        >
+          Combustible: {vehiculo.tipoCombustible}
+        </Typography>
+      )}
 
       {/* Kilómetros */}
       <Box

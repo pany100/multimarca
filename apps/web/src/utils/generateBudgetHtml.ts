@@ -177,11 +177,29 @@ export default function generateBudgetHtml(repair: any, encabezadoPdf?: string):
           <div class="TypographyBody1">
             Vehículo: ${repair.auto.brand} ${repair.auto.model} ${
               repair.auto.color
-            }
-            ${repair.auto.transmission_type === "Manual" ? "MT" : "AT"} - ${
-              repair.auto.year
-            }
+            } - ${repair.auto.year}
           </div>
+          ${
+            repair.auto.valves
+              ? `<div class="TypographyBody1">
+            Motor: ${repair.auto.valves}
+          </div>`
+              : ""
+          }
+          ${
+            repair.auto.transmission_type
+              ? `<div class="TypographyBody1">
+            Transmisión: ${repair.auto.transmission_type}
+          </div>`
+              : ""
+          }
+          ${
+            repair.auto.tipoCombustible
+              ? `<div class="TypographyBody1">
+            Combustible: ${repair.auto.tipoCombustible}
+          </div>`
+              : ""
+          }
           <div class="TypographyBody1">
             Patente: ${repair.auto.patent}
           </div>
