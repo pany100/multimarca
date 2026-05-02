@@ -493,6 +493,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             icono: <LocalShippingIcon />,
             ruta: "/dashboard/estadisticasProveedores",
           },
+          {
+            permiso: "Estadisticas",
+            texto: "Repuestos",
+            icono: <BuildIcon />,
+            ruta: "/dashboard/estadisticasRepuestos",
+          },
         ],
       },
       {

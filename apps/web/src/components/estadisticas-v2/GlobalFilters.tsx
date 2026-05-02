@@ -2,7 +2,7 @@
 
 import ClearIcon from "@mui/icons-material/Clear";
 import SearchIcon from "@mui/icons-material/Search";
-import { Box, Button, IconButton, Paper } from "@mui/material";
+import { Box, Button, ButtonGroup, IconButton, Paper } from "@mui/material";
 import {
   DateValidationError,
   PickerChangeHandlerContext,
@@ -22,6 +22,7 @@ interface GlobalFiltersProps {
   onApply: (filtro: FiltroEstadisticas) => void;
   defaultFrom?: Date | null;
   defaultTo?: Date | null;
+  showPeriodPresets?: boolean;
 }
 
 function formatDate(date: Date | null): string | null {
@@ -29,16 +30,45 @@ function formatDate(date: Date | null): string | null {
   return date.toISOString().split("T")[0];
 }
 
+function presetMesActual(): { from: Date; to: Date } {
+  const now = new Date();
+  const from = new Date(now.getFullYear(), now.getMonth(), 1);
+  const to = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+  return { from, to };
+}
+
+function presetTrimestreActual(): { from: Date; to: Date } {
+  const now = new Date();
+  const trimStart = Math.floor(now.getMonth() / 3) * 3;
+  const from = new Date(now.getFullYear(), trimStart, 1);
+  const to = new Date(now.getFullYear(), trimStart + 3, 1);
+  return { from, to };
+}
+
+function presetAnioActual(): { from: Date; to: Date } {
+  const now = new Date();
+  const from = new Date(now.getFullYear(), 0, 1);
+  const to = new Date(now.getFullYear() + 1, 0, 1);
+  return { from, to };
+}
+
 export default function GlobalFilters({
   onApply,
   defaultFrom,
   defaultTo,
+  showPeriodPresets = false,
 }: GlobalFiltersProps) {
   const [fromDate, setFromDate] = useState<Date | null>(defaultFrom ?? null);
   const [toDate, setToDate] = useState<Date | null>(defaultTo ?? null);
 
   const handleApply = () => {
     onApply({ from: formatDate(fromDate), to: formatDate(toDate) });
+  };
+
+  const applyPreset = (range: { from: Date; to: Date }) => {
+    setFromDate(range.from);
+    setToDate(range.to);
+    onApply({ from: formatDate(range.from), to: formatDate(range.to) });
   };
 
   return (
@@ -128,6 +158,19 @@ export default function GlobalFilters({
           >
             Buscar
           </Button>
+          {showPeriodPresets && (
+            <ButtonGroup size="small" variant="outlined" sx={{ height: 40 }}>
+              <Button onClick={() => applyPreset(presetMesActual())}>
+                Mes en curso
+              </Button>
+              <Button onClick={() => applyPreset(presetTrimestreActual())}>
+                Trimestre en curso
+              </Button>
+              <Button onClick={() => applyPreset(presetAnioActual())}>
+                Año en curso
+              </Button>
+            </ButtonGroup>
+          )}
         </Box>
       </LocalizationProvider>
     </Paper>

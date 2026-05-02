@@ -1,6 +1,6 @@
 ---
 name: next-task
-description: Fetch the next "Pendiente" row from the project task spreadsheet, analyze it, and create an implementation plan (without implementing). If info is insufficient, flag it and comment on the row.
+description: Fetch the next "Pendiente" row from the project task spreadsheet, analyze it, and create an implementation plan. After the user approves the plan, ask if they want to implement and proceed if confirmed. If info is insufficient, flag it and comment on the row.
 user_invocable: true
 ---
 
@@ -66,7 +66,7 @@ If **any** of these are missing or too vague to act on:
    - Stop here — do NOT create a plan. Do NOT enter plan mode.
 4. **Si las respuestas del usuario completan la información**, continuá al paso 5.
 
-### 5. Create an implementation plan (DO NOT IMPLEMENT)
+### 5. Create an implementation plan
 
 If the task has enough information:
 
@@ -79,9 +79,21 @@ If the task has enough information:
    - **Verification**: How to test the changes end-to-end.
 4. Exit plan mode with `ExitPlanMode` for user approval.
 
+### 6. After plan approval, ask whether to implement
+
+Once the user approves the plan and you exit plan mode:
+
+1. **Preguntale al usuario con `AskUserQuestion`** si quiere que implementes ahora el plan aprobado. Texto sugerido: "¿Querés que implemente ahora el plan aprobado?" con opciones "Sí, implementar" y "No, solo dejar el plan".
+2. **Si responde que sí**:
+   - Implementá el plan siguiendo exactamente lo aprobado, en el orden indicado en "Changes by layer".
+   - Usá `TodoWrite` para llevar el progreso de los pasos del plan.
+   - Al terminar, corré las verificaciones de la sección "Verification" del plan (lint, tests, smoke tests del endpoint, etc.) y reportá al usuario qué pasó.
+   - **Si durante la implementación encontrás un desvío del plan** (un archivo que no era el esperado, un supuesto que resulta falso, etc.), pará y avisale al usuario antes de continuar — no improvisar cambios fuera del plan.
+3. **Si responde que no**, terminá la conversación dejando el plan tal cual está, sin tocar archivos.
+
 ## Important rules
 
-- **NEVER implement code.** This skill only plans.
+- **NEVER implement code antes de la aprobación explícita** del paso 6. La implementación sólo arranca después de que el usuario diga que sí.
 - **NEVER assume which UI files are active.** Always trace from the page file (`apps/web/src/app/dashboard/...`) to find the real components.
 - If there are multiple pending tasks, only process the **first** one.
 - All output to the user should be in **Spanish**.

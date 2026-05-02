@@ -74,6 +74,34 @@ function buildLabel(row: Record<string, any>): string {
   return `Venta #${row.id}`;
 }
 
+const evolucionColumns: TableColumn[] = [
+  { key: "label", label: "Mes" },
+  {
+    key: "facturacion",
+    label: "Facturación",
+    align: "right",
+    format: formatCurrency,
+    sx: ventaSx,
+    headerSx: ventaHeaderSx,
+  },
+  {
+    key: "costo",
+    label: "Costo",
+    align: "right",
+    format: formatCurrency,
+    sx: costoSx,
+    headerSx: costoHeaderSx,
+  },
+  {
+    key: "ganancia",
+    label: "Ganancia",
+    align: "right",
+    format: formatCurrency,
+    sx: { fontWeight: 700 },
+    headerSx: { fontWeight: 800 },
+  },
+];
+
 const detalleColumns: TableColumn[] = [
   {
     key: "id",
@@ -388,8 +416,8 @@ export default function ResumenFinanciero() {
         title="Evolución mensual (últimos 6 meses)"
         icon={<AttachMoneyIcon color="primary" />}
         loading={loading}
-        columns={detalleColumns}
-        rows={resumen?.detalle ?? []}
+        columns={evolucionColumns}
+        rows={resumen?.evolucion ?? []}
         chart={
           <Box sx={{ height: 350 }}>
             <Bar data={evolucionChartData} options={evolucionOptions as any} />
