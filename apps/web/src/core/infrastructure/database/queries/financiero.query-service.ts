@@ -534,7 +534,7 @@ export async function getIvaPorDescuentoPeriodo(
         WHERE rt.ventaId IS NOT NULL
           AND v.estado IN ('Entregado', 'Cerrado')
           AND v.fecha >= ${from} AND v.fecha < ${to}
-      ) lines
+      ) doc_lines
       WHERE descuento > 0
     ) sized
     WHERE subtotal > 0
