@@ -4,7 +4,7 @@ import { useFetch } from "@/contexts/FetchContext";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import DonutLargeIcon from "@mui/icons-material/DonutLarge";
 import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
-import { Box, Grid, Link } from "@mui/material";
+import { Alert, AlertTitle, Box, Grid, Link, Tooltip as MuiTooltip } from "@mui/material";
 import GlobalFilters, { FiltroEstadisticas } from "../GlobalFilters";
 import {
   ArcElement,
@@ -61,11 +61,16 @@ interface ComposicionData {
   terceros: number;
 }
 
-interface SobranteIvaDescuentoData {
+interface IvaCategorias {
   manoDeObra: number;
   repuestos: number;
   terceros: number;
   total: number;
+}
+
+interface IvaPorDescuentoData {
+  absorbido: IvaCategorias;
+  recuperado: IvaCategorias;
 }
 
 interface ResumenExtendidoData {
@@ -73,8 +78,8 @@ interface ResumenExtendidoData {
   comprasRepuestosPrev: number;
   gananciaIva: { taller: number; terceros: number; total: number };
   gananciaIvaPrev: { taller: number; terceros: number; total: number };
-  sobranteIvaDescuento: SobranteIvaDescuentoData;
-  sobranteIvaDescuentoPrev: SobranteIvaDescuentoData;
+  ivaPorDescuento: IvaPorDescuentoData;
+  ivaPorDescuentoPrev: IvaPorDescuentoData;
 }
 
 function buildQuery(filtro: FiltroEstadisticas): string {
@@ -403,31 +408,30 @@ export default function ResumenFinanciero() {
     { key: "porcentaje", label: "% del total", align: "right" },
   ];
 
-  // Sobrante de IVA por descuento (donut + tabla)
-  const sobrante = extendido?.sobranteIvaDescuento;
-  const sobranteTotal = sobrante ? sobrante.total : 0;
-  const sobranteChartData = {
+  // IVA por descuento (donut con absorbido + tabla con ambas métricas)
+  const ivaDesc = extendido?.ivaPorDescuento;
+  const ivaAbs = ivaDesc?.absorbido;
+  const ivaRec = ivaDesc?.recuperado;
+  const absorbidoTotal = ivaAbs?.total ?? 0;
+  const ivaChartData = {
     labels: ["Mano de obra", "Repuestos taller", "Repuestos terceros"],
     datasets: [
       {
-        data: sobrante
-          ? [sobrante.manoDeObra, sobrante.repuestos, sobrante.terceros]
+        label: "IVA absorbido",
+        data: ivaAbs
+          ? [ivaAbs.manoDeObra, ivaAbs.repuestos, ivaAbs.terceros]
           : [0, 0, 0],
         backgroundColor: [
-          "rgba(102, 187, 106, 0.8)",
-          "rgba(66, 165, 245, 0.8)",
-          "rgba(255, 167, 38, 0.8)",
+          "rgba(239, 83, 80, 0.8)",
+          "rgba(239, 83, 80, 0.6)",
+          "rgba(239, 83, 80, 0.4)",
         ],
-        borderColor: [
-          "rgba(102, 187, 106, 1)",
-          "rgba(66, 165, 245, 1)",
-          "rgba(255, 167, 38, 1)",
-        ],
+        borderColor: "rgba(239, 83, 80, 1)",
         borderWidth: 1,
       },
     ],
   };
-  const sobranteOptions = {
+  const ivaChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -437,8 +441,8 @@ export default function ResumenFinanciero() {
           label: (ctx: any) => {
             const val = ctx.parsed ?? 0;
             const pct =
-              sobranteTotal > 0
-                ? ((val / sobranteTotal) * 100).toFixed(1)
+              absorbidoTotal > 0
+                ? ((val / absorbidoTotal) * 100).toFixed(1)
                 : "0";
             return `${ctx.label}: ${formatCurrency(val)} (${pct}%)`;
           },
@@ -446,34 +450,56 @@ export default function ResumenFinanciero() {
       },
     },
   };
-  const sobranteRows = sobrante
+  const ivaRows = ivaDesc
     ? [
         {
           fuente: "Mano de obra",
-          monto: sobrante.manoDeObra,
-          porcentaje:
-            sobranteTotal > 0
-              ? ((sobrante.manoDeObra / sobranteTotal) * 100).toFixed(1) + "%"
-              : "0%",
+          absorbido: ivaAbs!.manoDeObra,
+          recuperado: ivaRec!.manoDeObra,
+          total: ivaAbs!.manoDeObra + ivaRec!.manoDeObra,
         },
         {
           fuente: "Repuestos taller",
-          monto: sobrante.repuestos,
-          porcentaje:
-            sobranteTotal > 0
-              ? ((sobrante.repuestos / sobranteTotal) * 100).toFixed(1) + "%"
-              : "0%",
+          absorbido: ivaAbs!.repuestos,
+          recuperado: ivaRec!.repuestos,
+          total: ivaAbs!.repuestos + ivaRec!.repuestos,
         },
         {
           fuente: "Repuestos terceros",
-          monto: sobrante.terceros,
-          porcentaje:
-            sobranteTotal > 0
-              ? ((sobrante.terceros / sobranteTotal) * 100).toFixed(1) + "%"
-              : "0%",
+          absorbido: ivaAbs!.terceros,
+          recuperado: ivaRec!.terceros,
+          total: ivaAbs!.terceros + ivaRec!.terceros,
         },
       ]
     : [];
+
+  const ivaColumns: TableColumn[] = [
+    { key: "fuente", label: "Categoría" },
+    {
+      key: "absorbido",
+      label: "IVA absorbido",
+      align: "right",
+      format: formatCurrency,
+      sx: costoSx,
+      headerSx: costoHeaderSx,
+    },
+    {
+      key: "recuperado",
+      label: "IVA recuperado",
+      align: "right",
+      format: formatCurrency,
+      sx: ventaSx,
+      headerSx: ventaHeaderSx,
+    },
+    {
+      key: "total",
+      label: "IVA total contenido",
+      align: "right",
+      format: formatCurrency,
+      sx: { fontWeight: 600 },
+      headerSx: { fontWeight: 800 },
+    },
+  ];
 
   return (
     <Box>
@@ -533,13 +559,38 @@ export default function ResumenFinanciero() {
           />
         </Grid>
         <Grid item xs={6} md={2}>
-          <KPICard
-            label="Sobrante IVA por descuento"
-            value={extendido?.sobranteIvaDescuento.total ?? null}
-            previousValue={extendido?.sobranteIvaDescuentoPrev.total}
-            subtitle="MO + rep + terceros"
-            loading={loading}
-          />
+          <MuiTooltip
+            arrow
+            placement="top"
+            title="IVA que el taller deja de cobrar cuando aplica un descuento sobre un total que ya incluye IVA (también llamado 'sobrante de IVA por descuento'). Por cada OdR/Venta con descuento: monto = descuento × IVA / (100 + IVA), prorrateado entre mano de obra, repuestos y terceros según su peso en la facturación."
+          >
+            <Box>
+              <KPICard
+                label="IVA absorbido por descuento"
+                value={extendido?.ivaPorDescuento.absorbido.total ?? null}
+                previousValue={extendido?.ivaPorDescuentoPrev.absorbido.total}
+                subtitle="IVA cedido por el descuento"
+                loading={loading}
+              />
+            </Box>
+          </MuiTooltip>
+        </Grid>
+        <Grid item xs={6} md={2}>
+          <MuiTooltip
+            arrow
+            placement="top"
+            title="IVA contenido en el monto efectivamente cobrado al cliente (post-descuento). Por línea: (línea − parte del descuento) × IVA / (100 + IVA). Solo considera OdRs/Ventas con descuento. Sumado al absorbido = IVA total que se hubiera cobrado sin descuento."
+          >
+            <Box>
+              <KPICard
+                label="IVA recuperado post-descuento"
+                value={extendido?.ivaPorDescuento.recuperado.total ?? null}
+                previousValue={extendido?.ivaPorDescuentoPrev.recuperado.total}
+                subtitle="IVA en lo cobrado al cliente"
+                loading={loading}
+              />
+            </Box>
+          </MuiTooltip>
         </Grid>
       </Grid>
 
@@ -584,27 +635,68 @@ export default function ResumenFinanciero() {
         />
       </Box>
 
-      {/* Sobrante de IVA por descuento */}
+      {/* IVA por descuento (absorbido + recuperado) */}
       <Box sx={{ mt: 3 }}>
         <ChartWithDetail
-          title="Sobrante de IVA por descuento"
+          title="IVA por descuento"
           icon={<ReceiptLongIcon color="primary" />}
           loading={loading}
-          columns={composicionColumns}
-          rows={sobranteRows}
+          columns={ivaColumns}
+          rows={ivaRows}
           chart={
-            <Box
-              sx={{
-                height: 300,
-                display: "flex",
-                justifyContent: "center",
-              }}
-            >
-              <Box sx={{ maxWidth: 500, width: "100%" }}>
-                <Doughnut
-                  data={sobranteChartData}
-                  options={sobranteOptions as any}
-                />
+            <Box>
+              <Alert severity="info" sx={{ mb: 2 }}>
+                <AlertTitle sx={{ fontWeight: 600 }}>¿Qué es esto?</AlertTitle>
+                El total al cliente ya incluye IVA. Cuando aplicás un descuento
+                sobre ese total, ese IVA contenido se parte en dos:
+                <Box component="ul" sx={{ pl: 2.5, mt: 1, mb: 0 }}>
+                  <li>
+                    <strong>IVA absorbido</strong> — la porción del IVA que
+                    estaba contenida en lo que descontaste. Es lo que el taller{" "}
+                    <em>deja de cobrar</em>. Fórmula por línea:{" "}
+                    <em>(parte del descuento) × IVA / (100 + IVA)</em>.
+                  </li>
+                  <li>
+                    <strong>IVA recuperado</strong> — el IVA que sí está
+                    contenido en lo que el cliente terminó pagando (post-descuento).
+                    Fórmula por línea:{" "}
+                    <em>(línea − parte del descuento) × IVA / (100 + IVA)</em>.
+                  </li>
+                  <li>
+                    Suma de absorbido + recuperado = IVA total que se hubiera
+                    cobrado <em>sin</em> descuento.
+                  </li>
+                  <li>
+                    El descuento se prorratea entre mano de obra, repuestos
+                    taller y repuestos terceros según el peso de cada uno en la
+                    OdR / Venta. Tasa de IVA por línea (21% por defecto).
+                  </li>
+                </Box>
+              </Alert>
+              <Box
+                sx={{
+                  height: 300,
+                  display: "flex",
+                  justifyContent: "center",
+                }}
+              >
+                <Box sx={{ maxWidth: 500, width: "100%" }}>
+                  <Doughnut
+                    data={ivaChartData}
+                    options={ivaChartOptions as any}
+                  />
+                </Box>
+              </Box>
+              <Box sx={{ textAlign: "center", mt: 1 }}>
+                <em
+                  style={{
+                    fontSize: "0.85rem",
+                    color: "rgba(0,0,0,0.6)",
+                  }}
+                >
+                  Distribución del IVA absorbido por categoría. El detalle
+                  numérico de absorbido y recuperado está en la tabla debajo.
+                </em>
               </Box>
             </Box>
           }

@@ -60,11 +60,18 @@ export interface GananciaIvaPeriodo {
   total: number;
 }
 
-export interface SobranteIvaDescuento {
+export interface IvaCategorias {
   manoDeObra: number;
   repuestos: number;
   terceros: number;
   total: number;
+}
+
+export interface IvaPorDescuento {
+  /** IVA que el taller deja de cobrar por la porción descontada */
+  absorbido: IvaCategorias;
+  /** IVA contenido en el monto efectivamente cobrado al cliente (post-descuento) */
+  recuperado: IvaCategorias;
 }
 
 export interface FlujoCaja {
@@ -405,37 +412,44 @@ export async function getGananciaIvaPeriodo(from: string, to: string): Promise<G
   return { taller, terceros, total: taller + terceros };
 }
 
-// ─── Sobrante de IVA por descuento ───────────────────────────────────────────
+// ─── IVA por descuento (absorbido + recuperado) ──────────────────────────────
 
 /**
- * Sobrante de IVA "absorbido" por el taller cuando se aplica un descuento sobre
- * un total que ya incluye IVA.
+ * Métricas de IVA en OdRs / Ventas con descuento aplicado:
  *
- * Para cada OdR/Venta con descuento > 0, prorratea el descuento entre las líneas
- * (mano de obra, repuestos taller, repuestos terceros) según su participación en
- * el subtotal pre-descuento, y de cada porción extrae el IVA contenido:
+ *  - absorbido:  IVA que el taller deja de cobrar al aplicar descuento sobre
+ *                un total que ya incluye IVA.
+ *                Por línea: (line / subtotal) × descuento × iva / (100 + iva)
  *
- *   share_línea    = line_value / subtotal
- *   desc_línea     = descuento × share_línea
- *   sobrante_línea = desc_línea × iva / (100 + iva)        (iva por línea, fallback 21)
+ *  - recuperado: IVA contenido en el monto efectivamente cobrado al cliente
+ *                (post-descuento).
+ *                Por línea: (line − (line / subtotal) × descuento) × iva / (100 + iva)
  *
+ *  absorbido + recuperado = IVA total contenido en el bruto pre-descuento.
+ *
+ * Solo considera OdRs/Ventas con descuento > 0. IVA por línea (fallback 21).
  * Estados / fechas alineados con getKpisRentabilidad. Recargo de repuestos /
- * terceros usa la misma fórmula de redondeo (CEIL × 500). MO de OdR incluye
- * incrementoInterno como línea sintética con IVA 21 (consistente con
- * getComposicionFacturacion).
+ * terceros con redondeo CEIL × 500. MO de OdR incluye incrementoInterno como
+ * línea sintética con IVA 21 (consistente con getComposicionFacturacion).
  */
-export async function getSobranteIvaDescuentoPeriodo(
+export async function getIvaPorDescuentoPeriodo(
   from: string,
   to: string,
-): Promise<SobranteIvaDescuento> {
-  const rows = await prisma.$queryRaw<{ categoria: string; sobrante: number }[]>`
+): Promise<IvaPorDescuento> {
+  const rows = await prisma.$queryRaw<
+    { categoria: string; absorbido: number; recuperado: number }[]
+  >`
     SELECT
       categoria,
       COALESCE(SUM(
         (line_value / NULLIF(subtotal, 0))
         * descuento
         * (COALESCE(iva, 21) / (100 + COALESCE(iva, 21)))
-      ), 0) AS sobrante
+      ), 0) AS absorbido,
+      COALESCE(SUM(
+        (line_value - (line_value / NULLIF(subtotal, 0)) * descuento)
+        * (COALESCE(iva, 21) / (100 + COALESCE(iva, 21)))
+      ), 0) AS recuperado
     FROM (
       SELECT
         doc_type, doc_id, categoria, line_value, iva, descuento,
@@ -527,12 +541,15 @@ export async function getSobranteIvaDescuentoPeriodo(
     GROUP BY categoria
   `;
 
-  const map = new Map<string, number>();
-  for (const r of rows) map.set(r.categoria, toNum(r.sobrante));
-  const manoDeObra = map.get("mo") ?? 0;
-  const repuestos = map.get("rep") ?? 0;
-  const terceros = map.get("ter") ?? 0;
-  return { manoDeObra, repuestos, terceros, total: manoDeObra + repuestos + terceros };
+  const buildCat = (key: "absorbido" | "recuperado"): IvaCategorias => {
+    const map = new Map<string, number>();
+    for (const r of rows) map.set(r.categoria, toNum(r[key]));
+    const manoDeObra = map.get("mo") ?? 0;
+    const repuestos = map.get("rep") ?? 0;
+    const terceros = map.get("ter") ?? 0;
+    return { manoDeObra, repuestos, terceros, total: manoDeObra + repuestos + terceros };
+  };
+  return { absorbido: buildCat("absorbido"), recuperado: buildCat("recuperado") };
 }
 
 // ─── Flujo de caja ───────────────────────────────────────────────────────────
