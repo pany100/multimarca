@@ -54,6 +54,12 @@ export interface ComposicionFacturacion {
   terceros: number;
 }
 
+export interface GananciaIvaPeriodo {
+  taller: number;
+  terceros: number;
+  total: number;
+}
+
 export interface FlujoCaja {
   cobrado: number;
   gastos: number;
@@ -305,6 +311,91 @@ export async function getComposicionFacturacion(from: string, to: string): Promi
     manoDeObra: toNum(rows[0]?.mano_de_obra),
     terceros: toNum(rows[0]?.terceros),
   };
+}
+
+// ─── Compras de repuestos ────────────────────────────────────────────────────
+
+/**
+ * Total facturado por proveedores en órdenes de compra (cash-out a proveedores)
+ * dentro del período [from, to). Independiente de la facturación al cliente:
+ * refleja lo comprado al proveedor en el período, no lo consumido.
+ */
+export async function getComprasRepuestosPeriodo(from: string, to: string): Promise<number> {
+  const rows = await prisma.$queryRaw<{ total: number }[]>`
+    SELECT COALESCE(SUM(precioTotal), 0) AS total
+    FROM OrdenDeCompra
+    WHERE fecha >= ${from} AND fecha < ${to}
+  `;
+  return toNum(rows[0]?.total);
+}
+
+// ─── Ganancia por diferencia de IVA ──────────────────────────────────────────
+
+/**
+ * Ganancia por diferencia de IVA en repuestos consumidos en el período.
+ * Misma fórmula que estadisticas-repuestos.service.ts, pero agregada por período
+ * y separando taller (RepuestoUsado) de terceros (ReparacionDeTercero).
+ *
+ * Fórmula por item:
+ *   (precioCompra * (1 + markup/100) * (iva/100) - precioCompra * (buyIva/100))
+ *   * unidades_consumidas_o_cantidad
+ *
+ * Los estados válidos coinciden con getKpisRentabilidad (Terminado/SeRetira para
+ * OdR, Entregado/Cerrado para Venta) para que el período se alinee con la
+ * facturación.
+ */
+export async function getGananciaIvaPeriodo(from: string, to: string): Promise<GananciaIvaPeriodo> {
+  const tallerRows = await prisma.$queryRaw<{ total: number }[]>`
+    SELECT COALESCE(SUM(
+      (
+        r.precioCompra * (1 + COALESCE(r.markup, 0) / 100.0) * (COALESCE(r.iva, 0) / 100.0)
+        - r.precioCompra * (COALESCE(r.buyIva, 0) / 100.0)
+      ) * r.unidadesConsumidas
+    ), 0) AS total
+    FROM RepuestoUsado r
+    LEFT JOIN OrdenReparacion o ON o.id = r.ordenReparacionId
+    LEFT JOIN Venta v ON v.id = r.ventaId
+    WHERE (
+      (
+        r.ordenReparacionId IS NOT NULL
+        AND o.estado IN ('Terminado', 'SeRetira')
+        AND o.fechaCreacion >= ${from} AND o.fechaCreacion < ${to}
+      )
+      OR (
+        r.ventaId IS NOT NULL
+        AND v.estado IN ('Entregado', 'Cerrado')
+        AND v.fecha >= ${from} AND v.fecha < ${to}
+      )
+    )
+  `;
+
+  const tercerosRows = await prisma.$queryRaw<{ total: number }[]>`
+    SELECT COALESCE(SUM(
+      (
+        rt.precioCompra * (1 + COALESCE(rt.markup, 0) / 100.0) * (COALESCE(rt.iva, 0) / 100.0)
+        - rt.precioCompra * (COALESCE(rt.buyIva, 0) / 100.0)
+      ) * rt.cantidad
+    ), 0) AS total
+    FROM ReparacionDeTercero rt
+    LEFT JOIN OrdenReparacion o ON o.id = rt.ordenReparacionId
+    LEFT JOIN Venta v ON v.id = rt.ventaId
+    WHERE (
+      (
+        rt.ordenReparacionId IS NOT NULL
+        AND o.estado IN ('Terminado', 'SeRetira')
+        AND o.fechaCreacion >= ${from} AND o.fechaCreacion < ${to}
+      )
+      OR (
+        rt.ventaId IS NOT NULL
+        AND v.estado IN ('Entregado', 'Cerrado')
+        AND v.fecha >= ${from} AND v.fecha < ${to}
+      )
+    )
+  `;
+
+  const taller = toNum(tallerRows[0]?.total);
+  const terceros = toNum(tercerosRows[0]?.total);
+  return { taller, terceros, total: taller + terceros };
 }
 
 // ─── Flujo de caja ───────────────────────────────────────────────────────────

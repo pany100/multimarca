@@ -4,6 +4,7 @@ import { useFetch } from "@/contexts/FetchContext";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import DonutLargeIcon from "@mui/icons-material/DonutLarge";
 import { Box, Grid, Link } from "@mui/material";
+import GlobalFilters, { FiltroEstadisticas } from "../GlobalFilters";
 import {
   ArcElement,
   BarElement,
@@ -57,6 +58,21 @@ interface ComposicionData {
   repuestos: number;
   manoDeObra: number;
   terceros: number;
+}
+
+interface ResumenExtendidoData {
+  comprasRepuestos: number;
+  comprasRepuestosPrev: number;
+  gananciaIva: { taller: number; terceros: number; total: number };
+  gananciaIvaPrev: { taller: number; terceros: number; total: number };
+}
+
+function buildQuery(filtro: FiltroEstadisticas): string {
+  const params = new URLSearchParams();
+  if (filtro.from) params.set("from", filtro.from);
+  if (filtro.to) params.set("to", filtro.to);
+  const qs = params.toString();
+  return qs ? `?${qs}` : "";
 }
 
 const costoSx = { color: "error.main" };
@@ -198,21 +214,26 @@ export default function ResumenFinanciero() {
   const { authFetch } = useFetch();
   const [resumen, setResumen] = useState<ResumenData | null>(null);
   const [composicion, setComposicion] = useState<ComposicionData | null>(null);
+  const [extendido, setExtendido] = useState<ResumenExtendidoData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [filtro, setFiltro] = useState<FiltroEstadisticas>({ from: null, to: null });
 
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const [resumenRes, composicionRes] = await Promise.all([
-        authFetch("/api/estadisticas/v2/resumen-financiero"),
-        authFetch("/api/estadisticas/v2/composicion-facturacion"),
+      const qs = buildQuery(filtro);
+      const [resumenRes, composicionRes, extendidoRes] = await Promise.all([
+        authFetch(`/api/estadisticas/v2/resumen-financiero${qs}`),
+        authFetch(`/api/estadisticas/v2/composicion-facturacion${qs}`),
+        authFetch(`/api/estadisticas/v2/resumen-extendido${qs}`),
       ]);
       if (resumenRes.ok) setResumen(await resumenRes.json());
       if (composicionRes.ok) setComposicion(await composicionRes.json());
+      if (extendidoRes.ok) setExtendido(await extendidoRes.json());
     } finally {
       setLoading(false);
     }
-  }, [authFetch]);
+  }, [authFetch, filtro]);
 
   useEffect(() => {
     fetchData();
@@ -294,7 +315,7 @@ export default function ResumenFinanciero() {
       ? composicion.repuestos + composicion.manoDeObra + composicion.terceros
       : 0;
   const composicionChartData = {
-    labels: ["Repuestos", "Mano de obra", "Terceros"],
+    labels: ["Repuestos taller", "Mano de obra", "Repuestos terceros"],
     datasets: [
       {
         data: composicion
@@ -337,7 +358,7 @@ export default function ResumenFinanciero() {
   const composicionRows = composicion
     ? [
         {
-          fuente: "Repuestos",
+          fuente: "Repuestos taller",
           monto: composicion.repuestos,
           porcentaje:
             composicionTotal > 0
@@ -355,7 +376,7 @@ export default function ResumenFinanciero() {
               : "0%",
         },
         {
-          fuente: "Terceros",
+          fuente: "Repuestos terceros",
           monto: composicion.terceros,
           porcentaje:
             composicionTotal > 0
@@ -374,9 +395,11 @@ export default function ResumenFinanciero() {
 
   return (
     <Box>
+      <GlobalFilters onApply={setFiltro} showPeriodPresets />
+
       {/* KPIs */}
       <Grid container spacing={2} sx={{ mb: 3 }}>
-        <Grid item xs={6} md={3}>
+        <Grid item xs={6} md={2}>
           <KPICard
             label="Facturación total"
             value={kpis?.facturacion ?? null}
@@ -384,15 +407,15 @@ export default function ResumenFinanciero() {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid item xs={6} md={2}>
           <KPICard
-            label="Costo total"
+            label="Costo de repuestos"
             value={kpis?.costo ?? null}
             previousValue={kpisPrev?.costo}
             loading={loading}
           />
         </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid item xs={6} md={2}>
           <KPICard
             label="Ganancia bruta"
             value={kpis?.ganancia ?? null}
@@ -400,12 +423,30 @@ export default function ResumenFinanciero() {
             loading={loading}
           />
         </Grid>
-        <Grid item xs={6} md={3}>
+        <Grid item xs={6} md={2}>
           <KPICard
             label="Margen bruto"
             value={margen}
             previousValue={margenPrev}
             format="percent"
+            loading={loading}
+          />
+        </Grid>
+        <Grid item xs={6} md={2}>
+          <KPICard
+            label="Compras de repuestos"
+            value={extendido?.comprasRepuestos ?? null}
+            previousValue={extendido?.comprasRepuestosPrev}
+            subtitle="Cash-out a proveedores"
+            loading={loading}
+          />
+        </Grid>
+        <Grid item xs={6} md={2}>
+          <KPICard
+            label="Ganancia por IVA"
+            value={extendido?.gananciaIva.total ?? null}
+            previousValue={extendido?.gananciaIvaPrev.total}
+            subtitle="Taller + terceros"
             loading={loading}
           />
         </Grid>

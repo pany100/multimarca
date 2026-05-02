@@ -92,6 +92,21 @@ function isMenuPathActive(pathname: string, ruta: string): boolean {
   return pathname === ruta || pathname.startsWith(`${ruta}/`);
 }
 
+/**
+ * Devuelve la ruta más específica (la de mayor longitud) entre las que matchean
+ * el pathname actual. Evita que rutas padre y subrutas queden ambas activas
+ * (p. ej. /dashboard/estadisticas-v2 y /dashboard/estadisticas-v2/rotacion-stock).
+ */
+function findActiveRuta(pathname: string, rutas: string[]): string | null {
+  let best: string | null = null;
+  for (const ruta of rutas) {
+    if (isMenuPathActive(pathname, ruta)) {
+      if (best === null || ruta.length > best.length) best = ruta;
+    }
+  }
+  return best;
+}
+
 function WhatsAppNavBadgeIcon() {
   const { pendingCount } = useWhatsAppNotifications();
   return (
@@ -647,15 +662,24 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
     [cantidadNotificaciones, notificacionesWhatsappNoLeidas, cantidadTareas],
   );
 
+  const activeRuta = useMemo(
+    () =>
+      findActiveRuta(
+        pathname,
+        menuSections.flatMap((section) =>
+          section.items.map((item) => item.ruta),
+        ),
+      ),
+    [pathname, menuSections],
+  );
+
   useEffect(() => {
     const newOpenSections = menuSections.reduce((acc, section) => {
-      const isOpen = section.items.some((item) =>
-        isMenuPathActive(pathname, item.ruta),
-      );
+      const isOpen = section.items.some((item) => item.ruta === activeRuta);
       return { ...acc, [section.title]: isOpen };
     }, {});
     setOpenSections(newOpenSections);
-  }, [pathname, menuSections]);
+  }, [activeRuta, menuSections]);
 
   const drawer = (
     <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -807,12 +831,14 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                               mb: 0.5,
                               borderRadius: 1,
                               pl: 2,
-                              color: isMenuPathActive(pathname, item.ruta)
-                                ? "primary.main"
-                                : "text.primary",
-                              bgcolor: isMenuPathActive(pathname, item.ruta)
-                                ? "action.selected"
-                                : "transparent",
+                              color:
+                                activeRuta === item.ruta
+                                  ? "primary.main"
+                                  : "text.primary",
+                              bgcolor:
+                                activeRuta === item.ruta
+                                  ? "action.selected"
+                                  : "transparent",
                               "&:hover": {
                                 bgcolor: "action.hover",
                               },
@@ -822,9 +848,10 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                               sx={{
                                 minWidth:
                                   drawerCompressed && !isMobile ? 0 : 40,
-                                color: isMenuPathActive(pathname, item.ruta)
-                                  ? "primary.main"
-                                  : "inherit",
+                                color:
+                                  activeRuta === item.ruta
+                                    ? "primary.main"
+                                    : "inherit",
                               }}
                             >
                               {item.icono}
@@ -834,12 +861,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                                 primary={item.texto}
                                 sx={{
                                   "& .MuiListItemText-primary": {
-                                    fontWeight: isMenuPathActive(
-                                      pathname,
-                                      item.ruta,
-                                    )
-                                      ? 600
-                                      : 400,
+                                    fontWeight:
+                                      activeRuta === item.ruta ? 600 : 400,
                                     fontSize: "0.875rem",
                                   },
                                 }}
@@ -907,8 +930,8 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
                     ? "Dashboard"
                     : menuSections
                         .flatMap((section) => section.items)
-                        .find((item) => isMenuPathActive(pathname, item.ruta))
-                        ?.texto || "Dashboard"}
+                        .find((item) => item.ruta === activeRuta)?.texto ||
+                      "Dashboard"}
                 </Typography>
               </Box>
 
