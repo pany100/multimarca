@@ -47,5 +47,6 @@ apps/web/logs/
 
 .claude/settings.local.json
 .claude/settings.json
+.claude/skills/
 skills-lock.json
 dump.sql

@@ -1,13 +1,16 @@
 "use client";
 
 import { useFetch } from "@/contexts/FetchContext";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import {
   Box,
+  Button,
   Grid,
   Paper,
+  Stack,
   Table,
   TableBody,
   TableCell,
@@ -17,6 +20,7 @@ import {
   Typography,
   useTheme,
 } from "@mui/material";
+import Link from "next/link";
 import {
   BarElement,
   CategoryScale,
@@ -120,6 +124,18 @@ export default function StockInventario() {
 
   return (
     <Box>
+      <Stack direction="row" justifyContent="flex-end" sx={{ mb: 2 }}>
+        <Button
+          variant="outlined"
+          size="small"
+          startIcon={<AutorenewIcon />}
+          component={Link}
+          href="/dashboard/estadisticas-v2/rotacion-stock"
+        >
+          Ver rotación de stock
+        </Button>
+      </Stack>
+
       <Grid container spacing={2} sx={{ mb: 3 }}>
         <Grid item xs={6} md={3}>
           <KPICard label="Valor stock (costo)" value={data?.kpis.valorCosto ?? null} loading={loading} />

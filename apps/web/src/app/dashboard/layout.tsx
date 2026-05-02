@@ -3,6 +3,7 @@ import ProtectedRoute from "@/components/ProtectedRoute";
 import { useAuth } from "@/hooks/useAuth";
 import AccountBalanceIcon from "@mui/icons-material/AccountBalance";
 import AssessmentIcon from "@mui/icons-material/Assessment";
+import AutorenewIcon from "@mui/icons-material/Autorenew";
 import BuildIcon from "@mui/icons-material/Build";
 import CalculateIcon from "@mui/icons-material/Calculate";
 import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
@@ -455,6 +456,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
             texto: "Resumen General",
             icono: <AssessmentIcon />,
             ruta: "/dashboard/estadisticas-v2",
+          },
+          {
+            permiso: "Estadisticas",
+            texto: "Rotación de stock",
+            icono: <AutorenewIcon />,
+            ruta: "/dashboard/estadisticas-v2/rotacion-stock",
           },
           {
             permiso: "EstadisticasBalance",
