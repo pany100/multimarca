@@ -53,6 +53,12 @@ const RepuestosTable = ({
       renderCell: (params) => params.row.stock?.label,
     },
     {
+      field: "sector",
+      headerName: "Sector",
+      flex: 0.7,
+      renderCell: (params) => params.row.stock?.sector || "-",
+    },
+    {
       field: "precioCompra",
       headerName: "P. Compra",
       flex: 0.8,
