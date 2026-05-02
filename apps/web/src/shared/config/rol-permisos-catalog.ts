@@ -37,6 +37,7 @@ export const ROL_PERMISO_SECTIONS: RolPermisoSection[] = [
   {
     title: "Gestión de Taller",
     items: [
+      { id: 37, name: "Herramientas", label: "Préstamo de herramientas" },
       { id: 9, name: "Controles", label: "Controles" },
       { id: 10, name: "Trabajos", label: "Mano de obra" },
       { id: 8, name: "Reparaciones", label: "Presupuestos / Órdenes de reparación" },

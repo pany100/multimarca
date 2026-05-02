@@ -345,7 +345,7 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
         icono: <BuildIcon />,
         items: [
           {
-            permiso: "AdministracionGeneral",
+            permiso: "Herramientas",
             texto: "Préstamo De Herramientas",
             icono: <HandymanIcon />,
             ruta: "/dashboard/prestamo-herramientas",
