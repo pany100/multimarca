@@ -21,6 +21,9 @@ export class DeudoresQueriesService {
       WITH deudas AS (
         -- Deudas de ventas
         SELECT
+          'venta' AS tipo,
+          venta_id AS comprobante_id,
+          fecha,
           cliente_id,
           null as patente,
           cliente_nombre,
@@ -36,6 +39,9 @@ export class DeudoresQueriesService {
 
         -- Deudas de órdenes
         SELECT
+          'orden_reparacion' AS tipo,
+          orden_reparacion_id AS comprobante_id,
+          fecha,
           cliente_id,
           auto_patent as patente,
           cliente_nombre,
@@ -51,10 +57,19 @@ export class DeudoresQueriesService {
       )
       SELECT
         COALESCE(cliente_id, -1)       AS id,
-        patente,
+        MAX(patente)                   AS patente,
         MAX(cliente_nombre)            AS cliente_nombre,
         MAX(cliente_phone)             AS cliente_phone,
-        SUM(pendiente)                 AS deuda_total
+        SUM(pendiente)                 AS deuda_total,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'tipo', tipo,
+            'id', comprobante_id,
+            'patente', patente,
+            'fecha', fecha,
+            'pendiente', pendiente
+          )
+        )                              AS comprobantes
       FROM deudas
       GROUP BY cliente_id
       ORDER BY deuda_total DESC

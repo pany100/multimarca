@@ -1,12 +1,21 @@
 import { useFetch } from "@/contexts/FetchContext";
 import { useCallback, useState } from "react";
 
+export interface ComprobanteAdeudado {
+  tipo: "orden_reparacion" | "venta";
+  id: number;
+  patente: string | null;
+  fecha: string;
+  pendiente: number;
+}
+
 export interface Deudor {
   id: number;
   patente: string | null;
   cliente_nombre: string;
   cliente_phone: string | null;
   deuda_total: number;
+  comprobantes: ComprobanteAdeudado[];
 }
 
 interface PagedResponse<T> {
