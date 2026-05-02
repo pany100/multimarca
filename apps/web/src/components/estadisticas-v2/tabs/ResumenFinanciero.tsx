@@ -3,6 +3,7 @@
 import { useFetch } from "@/contexts/FetchContext";
 import AttachMoneyIcon from "@mui/icons-material/AttachMoney";
 import DonutLargeIcon from "@mui/icons-material/DonutLarge";
+import ReceiptLongIcon from "@mui/icons-material/ReceiptLong";
 import { Box, Grid, Link } from "@mui/material";
 import GlobalFilters, { FiltroEstadisticas } from "../GlobalFilters";
 import {
@@ -60,11 +61,20 @@ interface ComposicionData {
   terceros: number;
 }
 
+interface SobranteIvaDescuentoData {
+  manoDeObra: number;
+  repuestos: number;
+  terceros: number;
+  total: number;
+}
+
 interface ResumenExtendidoData {
   comprasRepuestos: number;
   comprasRepuestosPrev: number;
   gananciaIva: { taller: number; terceros: number; total: number };
   gananciaIvaPrev: { taller: number; terceros: number; total: number };
+  sobranteIvaDescuento: SobranteIvaDescuentoData;
+  sobranteIvaDescuentoPrev: SobranteIvaDescuentoData;
 }
 
 function buildQuery(filtro: FiltroEstadisticas): string {
@@ -393,6 +403,78 @@ export default function ResumenFinanciero() {
     { key: "porcentaje", label: "% del total", align: "right" },
   ];
 
+  // Sobrante de IVA por descuento (donut + tabla)
+  const sobrante = extendido?.sobranteIvaDescuento;
+  const sobranteTotal = sobrante ? sobrante.total : 0;
+  const sobranteChartData = {
+    labels: ["Mano de obra", "Repuestos taller", "Repuestos terceros"],
+    datasets: [
+      {
+        data: sobrante
+          ? [sobrante.manoDeObra, sobrante.repuestos, sobrante.terceros]
+          : [0, 0, 0],
+        backgroundColor: [
+          "rgba(102, 187, 106, 0.8)",
+          "rgba(66, 165, 245, 0.8)",
+          "rgba(255, 167, 38, 0.8)",
+        ],
+        borderColor: [
+          "rgba(102, 187, 106, 1)",
+          "rgba(66, 165, 245, 1)",
+          "rgba(255, 167, 38, 1)",
+        ],
+        borderWidth: 1,
+      },
+    ],
+  };
+  const sobranteOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { position: "right" as const },
+      tooltip: {
+        callbacks: {
+          label: (ctx: any) => {
+            const val = ctx.parsed ?? 0;
+            const pct =
+              sobranteTotal > 0
+                ? ((val / sobranteTotal) * 100).toFixed(1)
+                : "0";
+            return `${ctx.label}: ${formatCurrency(val)} (${pct}%)`;
+          },
+        },
+      },
+    },
+  };
+  const sobranteRows = sobrante
+    ? [
+        {
+          fuente: "Mano de obra",
+          monto: sobrante.manoDeObra,
+          porcentaje:
+            sobranteTotal > 0
+              ? ((sobrante.manoDeObra / sobranteTotal) * 100).toFixed(1) + "%"
+              : "0%",
+        },
+        {
+          fuente: "Repuestos taller",
+          monto: sobrante.repuestos,
+          porcentaje:
+            sobranteTotal > 0
+              ? ((sobrante.repuestos / sobranteTotal) * 100).toFixed(1) + "%"
+              : "0%",
+        },
+        {
+          fuente: "Repuestos terceros",
+          monto: sobrante.terceros,
+          porcentaje:
+            sobranteTotal > 0
+              ? ((sobrante.terceros / sobranteTotal) * 100).toFixed(1) + "%"
+              : "0%",
+        },
+      ]
+    : [];
+
   return (
     <Box>
       <GlobalFilters onApply={setFiltro} showPeriodPresets />
@@ -450,6 +532,15 @@ export default function ResumenFinanciero() {
             loading={loading}
           />
         </Grid>
+        <Grid item xs={6} md={2}>
+          <KPICard
+            label="Sobrante IVA por descuento"
+            value={extendido?.sobranteIvaDescuento.total ?? null}
+            previousValue={extendido?.sobranteIvaDescuentoPrev.total}
+            subtitle="MO + rep + terceros"
+            loading={loading}
+          />
+        </Grid>
       </Grid>
 
       {/* Evolución mensual */}
@@ -486,6 +577,33 @@ export default function ResumenFinanciero() {
                 <Doughnut
                   data={composicionChartData}
                   options={composicionOptions as any}
+                />
+              </Box>
+            </Box>
+          }
+        />
+      </Box>
+
+      {/* Sobrante de IVA por descuento */}
+      <Box sx={{ mt: 3 }}>
+        <ChartWithDetail
+          title="Sobrante de IVA por descuento"
+          icon={<ReceiptLongIcon color="primary" />}
+          loading={loading}
+          columns={composicionColumns}
+          rows={sobranteRows}
+          chart={
+            <Box
+              sx={{
+                height: 300,
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <Box sx={{ maxWidth: 500, width: "100%" }}>
+                <Doughnut
+                  data={sobranteChartData}
+                  options={sobranteOptions as any}
                 />
               </Box>
             </Box>

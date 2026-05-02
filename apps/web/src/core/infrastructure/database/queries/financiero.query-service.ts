@@ -60,6 +60,13 @@ export interface GananciaIvaPeriodo {
   total: number;
 }
 
+export interface SobranteIvaDescuento {
+  manoDeObra: number;
+  repuestos: number;
+  terceros: number;
+  total: number;
+}
+
 export interface FlujoCaja {
   cobrado: number;
   gastos: number;
@@ -396,6 +403,136 @@ export async function getGananciaIvaPeriodo(from: string, to: string): Promise<G
   const taller = toNum(tallerRows[0]?.total);
   const terceros = toNum(tercerosRows[0]?.total);
   return { taller, terceros, total: taller + terceros };
+}
+
+// ─── Sobrante de IVA por descuento ───────────────────────────────────────────
+
+/**
+ * Sobrante de IVA "absorbido" por el taller cuando se aplica un descuento sobre
+ * un total que ya incluye IVA.
+ *
+ * Para cada OdR/Venta con descuento > 0, prorratea el descuento entre las líneas
+ * (mano de obra, repuestos taller, repuestos terceros) según su participación en
+ * el subtotal pre-descuento, y de cada porción extrae el IVA contenido:
+ *
+ *   share_línea    = line_value / subtotal
+ *   desc_línea     = descuento × share_línea
+ *   sobrante_línea = desc_línea × iva / (100 + iva)        (iva por línea, fallback 21)
+ *
+ * Estados / fechas alineados con getKpisRentabilidad. Recargo de repuestos /
+ * terceros usa la misma fórmula de redondeo (CEIL × 500). MO de OdR incluye
+ * incrementoInterno como línea sintética con IVA 21 (consistente con
+ * getComposicionFacturacion).
+ */
+export async function getSobranteIvaDescuentoPeriodo(
+  from: string,
+  to: string,
+): Promise<SobranteIvaDescuento> {
+  const rows = await prisma.$queryRaw<{ categoria: string; sobrante: number }[]>`
+    SELECT
+      categoria,
+      COALESCE(SUM(
+        (line_value / NULLIF(subtotal, 0))
+        * descuento
+        * (COALESCE(iva, 21) / (100 + COALESCE(iva, 21)))
+      ), 0) AS sobrante
+    FROM (
+      SELECT
+        doc_type, doc_id, categoria, line_value, iva, descuento,
+        SUM(line_value) OVER (PARTITION BY doc_type, doc_id) AS subtotal
+      FROM (
+        -- OdR: mano de obra (trabajos)
+        SELECT 'OdR' AS doc_type, o.id AS doc_id, 'mo' AS categoria,
+          t.precioUnitario AS line_value, t.iva AS iva, o.descuento AS descuento
+        FROM TrabajoRealizado t
+        JOIN OrdenReparacion o ON o.id = t.ordenReparacionId
+        WHERE t.ordenReparacionId IS NOT NULL
+          AND o.estado IN ('Terminado', 'SeRetira')
+          AND o.fechaCreacion >= ${from} AND o.fechaCreacion < ${to}
+
+        UNION ALL
+
+        -- OdR: incrementoInterno como línea sintética de mano de obra
+        SELECT 'OdR' AS doc_type, o.id AS doc_id, 'mo' AS categoria,
+          o.incrementoInterno AS line_value, 21 AS iva, o.descuento AS descuento
+        FROM OrdenReparacion o
+        WHERE o.estado IN ('Terminado', 'SeRetira')
+          AND o.fechaCreacion >= ${from} AND o.fechaCreacion < ${to}
+          AND o.incrementoInterno > 0
+
+        UNION ALL
+
+        -- OdR: repuestos taller (con recargo)
+        SELECT 'OdR' AS doc_type, o.id AS doc_id, 'rep' AS categoria,
+          CASE WHEN o.porcentajeRecargo = 0 THEN r.precioVenta
+               ELSE CEIL(r.precioVenta * (1 + o.porcentajeRecargo / 100.0) / 500.0) * 500 END AS line_value,
+          r.iva AS iva, o.descuento AS descuento
+        FROM RepuestoUsado r
+        JOIN OrdenReparacion o ON o.id = r.ordenReparacionId
+        WHERE r.ordenReparacionId IS NOT NULL
+          AND o.estado IN ('Terminado', 'SeRetira')
+          AND o.fechaCreacion >= ${from} AND o.fechaCreacion < ${to}
+
+        UNION ALL
+
+        -- OdR: reparaciones de terceros (con recargo)
+        SELECT 'OdR' AS doc_type, o.id AS doc_id, 'ter' AS categoria,
+          CASE WHEN o.porcentajeRecargo = 0 THEN rt.precioVenta
+               ELSE CEIL(rt.precioVenta * (1 + o.porcentajeRecargo / 100.0) / 500.0) * 500 END AS line_value,
+          rt.iva AS iva, o.descuento AS descuento
+        FROM ReparacionDeTercero rt
+        JOIN OrdenReparacion o ON o.id = rt.ordenReparacionId
+        WHERE rt.ordenReparacionId IS NOT NULL
+          AND o.estado IN ('Terminado', 'SeRetira')
+          AND o.fechaCreacion >= ${from} AND o.fechaCreacion < ${to}
+
+        UNION ALL
+
+        -- Venta: mano de obra
+        SELECT 'Venta' AS doc_type, v.id AS doc_id, 'mo' AS categoria,
+          t.precioUnitario AS line_value, t.iva AS iva, v.descuento AS descuento
+        FROM TrabajoRealizado t
+        JOIN Venta v ON v.id = t.ventaId
+        WHERE t.ventaId IS NOT NULL
+          AND v.estado IN ('Entregado', 'Cerrado')
+          AND v.fecha >= ${from} AND v.fecha < ${to}
+
+        UNION ALL
+
+        -- Venta: repuestos
+        SELECT 'Venta' AS doc_type, v.id AS doc_id, 'rep' AS categoria,
+          CEIL(r.precioVenta * (1 + v.porcentajeRecargo / 100.0) / 500.0) * 500 AS line_value,
+          r.iva AS iva, v.descuento AS descuento
+        FROM RepuestoUsado r
+        JOIN Venta v ON v.id = r.ventaId
+        WHERE r.ventaId IS NOT NULL
+          AND v.estado IN ('Entregado', 'Cerrado')
+          AND v.fecha >= ${from} AND v.fecha < ${to}
+
+        UNION ALL
+
+        -- Venta: reparaciones de terceros
+        SELECT 'Venta' AS doc_type, v.id AS doc_id, 'ter' AS categoria,
+          CEIL(rt.precioVenta * (1 + v.porcentajeRecargo / 100.0) / 500.0) * 500 AS line_value,
+          rt.iva AS iva, v.descuento AS descuento
+        FROM ReparacionDeTercero rt
+        JOIN Venta v ON v.id = rt.ventaId
+        WHERE rt.ventaId IS NOT NULL
+          AND v.estado IN ('Entregado', 'Cerrado')
+          AND v.fecha >= ${from} AND v.fecha < ${to}
+      ) lines
+      WHERE descuento > 0
+    ) sized
+    WHERE subtotal > 0
+    GROUP BY categoria
+  `;
+
+  const map = new Map<string, number>();
+  for (const r of rows) map.set(r.categoria, toNum(r.sobrante));
+  const manoDeObra = map.get("mo") ?? 0;
+  const repuestos = map.get("rep") ?? 0;
+  const terceros = map.get("ter") ?? 0;
+  return { manoDeObra, repuestos, terceros, total: manoDeObra + repuestos + terceros };
 }
 
 // ─── Flujo de caja ───────────────────────────────────────────────────────────

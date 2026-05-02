@@ -4,6 +4,7 @@ import {
   getDefaultDateRange,
   getGananciaIvaPeriodo,
   getPreviousRange,
+  getSobranteIvaDescuentoPeriodo,
 } from "@/core/infrastructure/database/queries/financiero.query-service";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
 import { NextRequest, NextResponse } from "next/server";
@@ -22,19 +23,29 @@ export async function GET(request: NextRequest) {
 
     const prev = getPreviousRange(from, to);
 
-    const [comprasRepuestos, comprasRepuestosPrev, gananciaIva, gananciaIvaPrev] =
-      await Promise.all([
-        getComprasRepuestosPeriodo(from, to),
-        getComprasRepuestosPeriodo(prev.from, prev.to),
-        getGananciaIvaPeriodo(from, to),
-        getGananciaIvaPeriodo(prev.from, prev.to),
-      ]);
+    const [
+      comprasRepuestos,
+      comprasRepuestosPrev,
+      gananciaIva,
+      gananciaIvaPrev,
+      sobranteIvaDescuento,
+      sobranteIvaDescuentoPrev,
+    ] = await Promise.all([
+      getComprasRepuestosPeriodo(from, to),
+      getComprasRepuestosPeriodo(prev.from, prev.to),
+      getGananciaIvaPeriodo(from, to),
+      getGananciaIvaPeriodo(prev.from, prev.to),
+      getSobranteIvaDescuentoPeriodo(from, to),
+      getSobranteIvaDescuentoPeriodo(prev.from, prev.to),
+    ]);
 
     return NextResponse.json({
       comprasRepuestos,
       comprasRepuestosPrev,
       gananciaIva,
       gananciaIvaPrev,
+      sobranteIvaDescuento,
+      sobranteIvaDescuentoPrev,
     });
   } catch (e) {
     return handleApiError(e);
