@@ -10,6 +10,7 @@ interface AjustesPrecioTableProps {
   onEdit: (ajuste: AjustePrecio) => void;
   onDelete: (ajuste: AjustePrecio) => void;
   loading?: boolean;
+  showEsInterno?: boolean;
 }
 
 const AjustesPrecioTable = ({
@@ -17,6 +18,7 @@ const AjustesPrecioTable = ({
   onEdit,
   onDelete,
   loading = false,
+  showEsInterno = true,
 }: AjustesPrecioTableProps) => {
   const columns: GridColDef[] = [
     {
@@ -47,12 +49,16 @@ const AjustesPrecioTable = ({
       renderCell: (params) =>
         params.row.tipo === "porcentual" ? "Porcentual" : "Fijo",
     },
-    {
-      field: "esInterno",
-      headerName: "Oculto",
-      width: 80,
-      renderCell: (params) => (params.row.esInterno ? "Sí" : "No"),
-    },
+    ...(showEsInterno
+      ? [
+          {
+            field: "esInterno",
+            headerName: "Oculto",
+            width: 80,
+            renderCell: (params: any) => (params.row.esInterno ? "Sí" : "No"),
+          } as GridColDef,
+        ]
+      : []),
     {
       field: "actions",
       headerName: "Acciones",

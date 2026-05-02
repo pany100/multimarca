@@ -29,6 +29,7 @@ interface AjustesPrecioModalProps {
   }) => Promise<boolean>;
   loading?: boolean;
   editAjuste?: AjustePrecio;
+  showEsInterno?: boolean;
 }
 
 const AjustesPrecioModal = ({
@@ -37,6 +38,7 @@ const AjustesPrecioModal = ({
   onSubmit,
   loading = false,
   editAjuste,
+  showEsInterno = true,
 }: AjustesPrecioModalProps) => {
   const [efecto, setEfecto] = useState<"incremento" | "descuento">(
     "incremento",
@@ -72,7 +74,7 @@ const AjustesPrecioModal = ({
       monto: Number(monto),
       tipo,
       esDescuento: efecto === "descuento",
-      esInterno,
+      esInterno: showEsInterno ? esInterno : false,
       orden: editAjuste?.orden ?? 0,
     });
 
@@ -146,27 +148,29 @@ const AjustesPrecioModal = ({
               <MenuItem value="porcentual">Porcentual (%)</MenuItem>
             </TextField>
           </Grid>
-          <Grid item xs={12}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={esInterno}
-                  onChange={(e) => setEsInterno(e.target.checked)}
-                  disabled={loading || efecto === "descuento"}
-                />
-              }
-              label="Oculto para el cliente"
-            />
-            <Typography
-              variant="caption"
-              color="text.secondary"
-              sx={{ pl: 4, display: "block" }}
-            >
-              {efecto === "descuento"
-                ? "Los descuentos no pueden ocultarse."
-                : "Si está oculto, este incremento va a mostrarse como parte del primer item de la mano de obra cuando se imprima el presupuesto para el cliente. Si no hay mano de obra, se suma al primer repuesto o reparación de terceros. Ejemplo: redondeo."}
-            </Typography>
-          </Grid>
+          {showEsInterno && (
+            <Grid item xs={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={esInterno}
+                    onChange={(e) => setEsInterno(e.target.checked)}
+                    disabled={loading || efecto === "descuento"}
+                  />
+                }
+                label="Oculto para el cliente"
+              />
+              <Typography
+                variant="caption"
+                color="text.secondary"
+                sx={{ pl: 4, display: "block" }}
+              >
+                {efecto === "descuento"
+                  ? "Los descuentos no pueden ocultarse."
+                  : "Si está oculto, este incremento va a mostrarse como parte del primer item de la mano de obra cuando se imprima el presupuesto para el cliente. Si no hay mano de obra, se suma al primer repuesto o reparación de terceros. Ejemplo: redondeo."}
+              </Typography>
+            </Grid>
+          )}
         </Grid>
       </DialogContent>
       <DialogActions>

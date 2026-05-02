@@ -1,6 +1,14 @@
 "use client";
 
 import {
+  AjustePrecioInput,
+  calcularBaseOrdenDeCompra,
+  calcularImpactoAjuste,
+  calcularPrecioTotalOrdenDeCompra,
+  calcularSubtotalItem,
+  calcularSubtotalItems,
+} from "@/core/application/services/orden-de-compra-total.service";
+import {
   Box,
   Card,
   CardContent,
@@ -15,6 +23,8 @@ const fmt = (value: number | string | null | undefined) =>
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
   });
+
+const round2 = (n: number) => Math.round(n * 100) / 100;
 
 function LineItem({
   label,
@@ -63,20 +73,30 @@ function LineItem({
   );
 }
 
+const formatMontoAjuste = (ajuste: AjustePrecioInput) =>
+  ajuste.tipo === "porcentual"
+    ? `${Number(ajuste.monto)}%`
+    : `$ ${fmt(Number(ajuste.monto))}`;
+
 const ResumenOrdenCompraSection = () => {
   const { orden } = useOrdenDeCompraContext();
 
   const items = orden.items || [];
   const percepcion = Number(orden.percepcion ?? 0);
+  const ajustes: AjustePrecioInput[] = (orden.ajustesPrecio ?? []).map(
+    (a: any) => ({
+      descripcion: a.descripcion,
+      monto: Number(a.monto),
+      tipo: a.tipo,
+      esDescuento: a.esDescuento,
+      esInterno: a.esInterno,
+      orden: a.orden,
+    }),
+  );
 
-  const subtotalItemsRaw = items.reduce((total: number, item: any) => {
-    const precio = Number(item.precioUnitario) || 0;
-    const iva = Number(item.iva) || 0;
-    return total + precio * (1 + iva / 100) * Number(item.cantidad);
-  }, 0);
-  const subtotalItems = Math.round(subtotalItemsRaw * 100) / 100;
-
-  const total = Math.round((subtotalItemsRaw + percepcion) * 100) / 100;
+  const subtotalItems = round2(calcularSubtotalItems(items));
+  const baseAjustes = calcularBaseOrdenDeCompra(items, percepcion);
+  const total = calcularPrecioTotalOrdenDeCompra(items, percepcion, ajustes);
 
   return (
     <Card sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
@@ -89,8 +109,7 @@ const ResumenOrdenCompraSection = () => {
           {items.map((item: any) => {
             const precio = Number(item.precioUnitario) || 0;
             const iva = Number(item.iva) || 0;
-            const precioConIva = Math.round(precio * (1 + iva / 100) * 100) / 100;
-            const subtotal = Math.round(precioConIva * Number(item.cantidad) * 100) / 100;
+            const subtotal = round2(calcularSubtotalItem(item));
             const nombre = item.name || item.stock?.name || "—";
 
             return (
@@ -107,15 +126,13 @@ const ResumenOrdenCompraSection = () => {
             );
           })}
 
-          {items.length > 0 && (percepcion > 0 || items.length > 1) && (
-            <>
-              <Divider sx={{ my: 0.5 }} />
-              <LineItem
-                label="Subtotal Items"
-                amount={fmt(subtotalItems)}
-              />
-            </>
-          )}
+          {items.length > 0 &&
+            (percepcion > 0 || ajustes.length > 0 || items.length > 1) && (
+              <>
+                <Divider sx={{ my: 0.5 }} />
+                <LineItem label="Subtotal Items" amount={fmt(subtotalItems)} />
+              </>
+            )}
 
           {percepcion > 0 && (
             <LineItem
@@ -125,6 +142,22 @@ const ResumenOrdenCompraSection = () => {
               color="success.main"
             />
           )}
+
+          {ajustes.map((ajuste, idx) => {
+            const impacto = round2(calcularImpactoAjuste(ajuste, baseAjustes));
+            const sign: "+" | "-" = ajuste.esDescuento ? "-" : "+";
+            const color = ajuste.esDescuento ? "error.main" : "success.main";
+            return (
+              <LineItem
+                key={idx}
+                label={ajuste.descripcion}
+                amount={fmt(Math.abs(impacto))}
+                sign={sign}
+                color={color}
+                sub={`${ajuste.esDescuento ? "Descuento" : "Incremento"} ${formatMontoAjuste(ajuste)}`}
+              />
+            );
+          })}
 
           <Paper
             elevation={0}

@@ -1,5 +1,24 @@
+import { calcularPrecioTotalOrdenDeCompra } from "@/core/application/services/orden-de-compra-total.service";
 import { NextResponse } from "next/server";
 import prisma from "src/lib/prisma";
+
+const ORDEN_DE_COMPRA_INCLUDE = {
+  proveedor: true,
+  items: { include: { stock: true } },
+  ajustesPrecio: true,
+} as const;
+
+const decorarOrden = <T extends { items: { stock: { name: string; label: string | null; id: number } }[] }>(
+  orden: T,
+) => ({
+  ...orden,
+  items: orden.items.map((item) => ({
+    ...item,
+    name: item.stock.name,
+    label: item.stock.label,
+    stockId: item.stock.id,
+  })),
+});
 
 export async function PUT(
   request: Request,
@@ -8,7 +27,7 @@ export async function PUT(
   try {
     const id = parseInt(params.id);
     const body = await request.json();
-    const { fecha, precioTotal, proveedorId, items, percepcion } = body;
+    const { fecha, proveedorId, items, percepcion } = body;
 
     if (!proveedorId || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
@@ -19,15 +38,11 @@ export async function PUT(
 
     const ordenDeCompraActualizada = await prisma.$transaction(
       async (prisma) => {
-        // Obtener la orden de compra actual
         const ordenActual = await prisma.ordenDeCompra.findUnique({
           where: { id },
           include: {
-            items: {
-              include: {
-                stock: true,
-              },
-            },
+            items: { include: { stock: true } },
+            ajustesPrecio: true,
           },
         });
 
@@ -35,17 +50,12 @@ export async function PUT(
           throw new Error("Orden de compra no encontrada");
         }
 
-        // Restaurar el stock de los elementos eliminados
         for (const itemActual of ordenActual.items) {
           const itemNuevo = items.find((item) => item.id === itemActual.id);
           if (!itemNuevo) {
             const stockActualizado = await prisma.stock.update({
               where: { id: itemActual.stockId },
-              data: {
-                units: {
-                  decrement: itemActual.cantidad,
-                },
-              },
+              data: { units: { decrement: itemActual.cantidad } },
             });
 
             if (
@@ -59,18 +69,20 @@ export async function PUT(
           }
         }
 
-        // Calcular precioTotal a partir de los items + percepcion
         const percepcionNum = Number(percepcion) || 0;
-        const precioTotalCalculado = items.reduce(
-          (total: number, item: any) => {
-            const precio = Number(item.precioUnitario) || 0;
-            const iva = Number(item.iva) || 0;
-            return total + precio * (1 + iva / 100) * Number(item.cantidad);
-          },
-          0,
-        ) + percepcionNum;
+        const precioTotalCalculado = calcularPrecioTotalOrdenDeCompra(
+          items,
+          percepcionNum,
+          ordenActual.ajustesPrecio.map((a) => ({
+            descripcion: a.descripcion,
+            monto: Number(a.monto),
+            tipo: a.tipo,
+            esDescuento: a.esDescuento,
+            esInterno: a.esInterno,
+            orden: a.orden,
+          })),
+        );
 
-        // Actualizar la orden de compra
         const ordenActualizada = await prisma.ordenDeCompra.update({
           where: { id },
           data: {
@@ -88,25 +100,13 @@ export async function PUT(
               })),
             },
           },
-          include: {
-            proveedor: true,
-            items: {
-              include: {
-                stock: true,
-              },
-            },
-          },
+          include: ORDEN_DE_COMPRA_INCLUDE,
         });
 
-        // Actualizar el stock de los nuevos elementos
         for (const item of items) {
           await prisma.stock.update({
             where: { id: item.stockId },
-            data: {
-              units: {
-                increment: item.cantidad,
-              },
-            },
+            data: { units: { increment: item.cantidad } },
           });
         }
 
@@ -114,17 +114,7 @@ export async function PUT(
       },
     );
 
-    const ordenDeCompraActualizadaConLabel = {
-      ...ordenDeCompraActualizada,
-      items: ordenDeCompraActualizada.items.map((item) => ({
-        ...item,
-        name: item.stock.name,
-        label: item.stock.label,
-        stockId: item.stock.id,
-      })),
-    };
-
-    return NextResponse.json(ordenDeCompraActualizadaConLabel);
+    return NextResponse.json(decorarOrden(ordenDeCompraActualizada));
   } catch (error) {
     console.error("Error al actualizar orden de compra:", error);
     return NextResponse.json(
@@ -225,43 +215,38 @@ export async function PATCH(
       );
     }
 
-    // Si cambió la percepción, recalcular precioTotal
     if (percepcion !== undefined) {
-      const items = await prisma.ordenDeCompraItem.findMany({
-        where: { ordenDeCompraId: id },
+      const ordenActual = await prisma.ordenDeCompra.findUnique({
+        where: { id },
+        include: { items: true, ajustesPrecio: true },
       });
-      const totalItems = items.reduce((total, item) => {
-        const precio = Number(item.precioUnitario) || 0;
-        const iva = Number(item.iva) || 0;
-        return total + precio * (1 + iva / 100) * item.cantidad;
-      }, 0);
-      data.precioTotal = totalItems + (Number(percepcion) || 0);
+      if (!ordenActual) {
+        return NextResponse.json(
+          { error: "Orden de compra no encontrada" },
+          { status: 404 },
+        );
+      }
+      data.precioTotal = calcularPrecioTotalOrdenDeCompra(
+        ordenActual.items,
+        percepcion,
+        ordenActual.ajustesPrecio.map((a) => ({
+          descripcion: a.descripcion,
+          monto: Number(a.monto),
+          tipo: a.tipo,
+          esDescuento: a.esDescuento,
+          esInterno: a.esInterno,
+          orden: a.orden,
+        })),
+      );
     }
 
     const ordenActualizada = await prisma.ordenDeCompra.update({
       where: { id },
       data,
-      include: {
-        proveedor: true,
-        items: {
-          include: {
-            stock: true,
-          },
-        },
-      },
+      include: ORDEN_DE_COMPRA_INCLUDE,
     });
 
-    const ordenConLabel = {
-      ...ordenActualizada,
-      items: ordenActualizada.items.map((item) => ({
-        ...item,
-        name: item.stock.name,
-        label: item.stock.label,
-        stockId: item.stock.id,
-      })),
-    };
-
-    return NextResponse.json(ordenConLabel);
+    return NextResponse.json(decorarOrden(ordenActualizada));
   } catch (error) {
     console.error("Error al actualizar orden de compra:", error);
     return NextResponse.json(
@@ -287,14 +272,7 @@ export async function GET(
 
     const ordenDeCompra = await prisma.ordenDeCompra.findUnique({
       where: { id },
-      include: {
-        proveedor: true,
-        items: {
-          include: {
-            stock: true,
-          },
-        },
-      },
+      include: ORDEN_DE_COMPRA_INCLUDE,
     });
 
     if (!ordenDeCompra) {
@@ -304,17 +282,7 @@ export async function GET(
       );
     }
 
-    const ordenDeCompraConLabel = {
-      ...ordenDeCompra,
-      items: ordenDeCompra.items.map((item) => ({
-        ...item,
-        name: item.stock.name,
-        label: item.stock.label,
-        stockId: item.stock.id,
-      })),
-    };
-
-    return NextResponse.json(ordenDeCompraConLabel);
+    return NextResponse.json(decorarOrden(ordenDeCompra));
   } catch (error) {
     console.error("Error al obtener orden de compra:", error);
     return NextResponse.json(

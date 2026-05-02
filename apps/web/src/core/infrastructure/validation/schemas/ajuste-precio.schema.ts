@@ -22,6 +22,7 @@ export const createAjustePrecioSchema = z
     ordenReparacionId: z.coerce.number().optional(),
     ventaId: z.coerce.number().optional(),
     presupuestoId: z.coerce.number().optional(),
+    ordenDeCompraId: z.coerce.number().optional(),
   })
   .refine(
     (data) => {
@@ -29,12 +30,13 @@ export const createAjustePrecioSchema = z
         data.ordenReparacionId,
         data.ventaId,
         data.presupuestoId,
+        data.ordenDeCompraId,
       ].filter((id) => id !== undefined);
       return parentIds.length === 1;
     },
     {
       message:
-        "Debe proporcionar exactamente uno de: ordenReparacionId, ventaId, o presupuestoId",
+        "Debe proporcionar exactamente uno de: ordenReparacionId, ventaId, presupuestoId u ordenDeCompraId",
     },
   );
 

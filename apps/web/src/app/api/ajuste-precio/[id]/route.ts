@@ -1,3 +1,4 @@
+import { recalcularPrecioTotalOrdenDeCompra } from "@/core/application/services/orden-de-compra-recalculo.service";
 import {
   deleteAjustePrecioSchema,
   updateAjustePrecioSchema,
@@ -55,6 +56,10 @@ export async function PATCH(
       data: updateData,
     });
 
+    if (ajuste.ordenDeCompraId) {
+      await recalcularPrecioTotalOrdenDeCompra(ajuste.ordenDeCompraId);
+    }
+
     return NextResponse.json(ajuste);
   } catch (e) {
     return handleApiError(e);
@@ -71,7 +76,13 @@ export async function DELETE(
       deleteAjustePrecioSchema,
     );
 
-    await prisma.ajustePrecio.delete({ where: { id: dto.id } });
+    const ajusteEliminado = await prisma.ajustePrecio.delete({
+      where: { id: dto.id },
+    });
+
+    if (ajusteEliminado.ordenDeCompraId) {
+      await recalcularPrecioTotalOrdenDeCompra(ajusteEliminado.ordenDeCompraId);
+    }
 
     return NextResponse.json({ success: true });
   } catch (e) {

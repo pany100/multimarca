@@ -403,13 +403,14 @@ model Stock {
 }
 
 model OrdenDeCompra {
-  id          Int                 @id @default(autoincrement())
-  fecha       DateTime            @default(now())
-  precioTotal Decimal             @db.Decimal(10, 2)
-  percepcion  Decimal             @default(0) @db.Decimal(10, 2)
-  proveedorId Int
-  proveedor   Proveedor           @relation(fields: [proveedorId], references: [id])
-  items       OrdenDeCompraItem[]
+  id            Int                 @id @default(autoincrement())
+  fecha         DateTime            @default(now())
+  precioTotal   Decimal             @db.Decimal(10, 2)
+  percepcion    Decimal             @default(0) @db.Decimal(10, 2)
+  proveedorId   Int
+  proveedor     Proveedor           @relation(fields: [proveedorId], references: [id])
+  items         OrdenDeCompraItem[]
+  ajustesPrecio AjustePrecio[]      @relation("OrdenDeCompraAjustesPrecio")
 
   @@index([proveedorId])
   @@index([fecha])
@@ -1215,13 +1216,16 @@ model AjustePrecio {
   ordenReparacionId Int?
   ventaId           Int?
   presupuestoId     Int?
+  ordenDeCompraId   Int?
   ordenReparacion   OrdenReparacion? @relation("OrdenReparacionAjustesPrecio", fields: [ordenReparacionId], references: [id], onDelete: Cascade)
   venta             Venta?           @relation("VentaAjustesPrecio", fields: [ventaId], references: [id], onDelete: Cascade)
   presupuesto       Presupuesto?     @relation("PresupuestoAjustesPrecio", fields: [presupuestoId], references: [id], onDelete: Cascade)
+  ordenDeCompra     OrdenDeCompra?   @relation("OrdenDeCompraAjustesPrecio", fields: [ordenDeCompraId], references: [id], onDelete: Cascade)
 
   @@index([ordenReparacionId])
   @@index([ventaId])
   @@index([presupuestoId])
+  @@index([ordenDeCompraId])
 }
 
 model DocumentoGeneral {

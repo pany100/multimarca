@@ -1,3 +1,4 @@
+import { recalcularPrecioTotalOrdenDeCompra } from "@/core/application/services/orden-de-compra-recalculo.service";
 import { createAjustePrecioSchema } from "@/core/infrastructure/validation/schemas/ajuste-precio.schema";
 import { prisma } from "@/core/infrastructure/database/prisma";
 import { handleApiError } from "@/shared/middleware/error-handler.middleware";
@@ -20,8 +21,13 @@ export async function POST(request: Request) {
         ordenReparacionId: dto.ordenReparacionId,
         ventaId: dto.ventaId,
         presupuestoId: dto.presupuestoId,
+        ordenDeCompraId: dto.ordenDeCompraId,
       },
     });
+
+    if (dto.ordenDeCompraId) {
+      await recalcularPrecioTotalOrdenDeCompra(dto.ordenDeCompraId);
+    }
 
     return NextResponse.json(ajuste, { status: 201 });
   } catch (e) {

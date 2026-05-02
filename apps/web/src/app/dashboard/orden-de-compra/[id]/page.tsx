@@ -2,6 +2,7 @@
 
 import OrdenDeCompraHeader from "@/components/orden-de-compra/OrdenDeCompraHeader/OrdenDeCompraHeader";
 import { SnackbarProvider } from "@/contexts/SnackbarContext";
+import OrdenDeCompraAjustesPrecioSection from "@/sections/orden-de-compra/admin/OrdenDeCompraAjustesPrecioSection";
 import { OrdenDeCompraProvider } from "@/sections/orden-de-compra/admin/contexts/OrdenDeCompraContext";
 import OrdenDeCompraInfoSection from "@/sections/orden-de-compra/admin/OrdenDeCompraInfoSection";
 import OrdenDeCompraItemsSection from "@/sections/orden-de-compra/admin/OrdenDeCompraItemsSection";
@@ -51,6 +52,9 @@ const OrdenDeCompraAdminPage = ({ params }: { params: { id: string } }) => {
             </Grid>
             <Grid item xs={12}>
               <PercepcionSection />
+            </Grid>
+            <Grid item xs={12}>
+              <OrdenDeCompraAjustesPrecioSection />
             </Grid>
             <Grid item xs={12}>
               <ResumenOrdenCompraSection />
