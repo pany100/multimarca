@@ -351,71 +351,65 @@ export default function generateClientOrderHtml(repair: any, encabezadoPdf?: str
         <div class="TypographyBody1" style="text-align: right;font-weight: bold;">
           Importe
         </div>
-        ${(() => {
-          const incrementoSinAbsorber = calculoVO.incrementoInternoSinAbsorber;
-          let incrementoAplicado = false;
-          return (
-            repair.reparacionesDeTercero
-              .map(
-                (el: {
-                  nombre: string;
-                  cantidad: number;
-                  mostrarCantidadEnPdf?: boolean;
-                  precioVenta: number;
-                }) => {
-                  let precio = calculoVO.getPrecioFinalForReparaciones(
-                    el.precioVenta,
-                  );
-                  if (!incrementoAplicado && incrementoSinAbsorber > 0) {
-                    precio += incrementoSinAbsorber;
-                    incrementoAplicado = true;
-                  }
-                  const c = Number(el.cantidad ?? 1);
-                  const prefix =
-                    el.mostrarCantidadEnPdf !== false ? `${c} - ` : "";
-                  return `
-                <div class="TypographyBody1">
-                  ${prefix}${el.nombre}
-                </div>
-                <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(precio).toLocaleString("es-AR")}
-                </div>
-              `;
-                },
-              )
-              .join("") +
-            repair.repuestosUsados
-              .filter((el: any) => !el.ocultoParaCliente)
-              .map(
-                (el: {
-                  stock: {
-                    id: number;
-                    name: string;
-                    reportName?: string | null;
-                  };
-                  precioVenta: number;
-                  unidadesConsumidas: number;
-                }) => {
-                  let precio = calculoVO.getPrecioFinalForRepuestos(
-                    el.precioVenta,
-                  );
-                  if (!incrementoAplicado && incrementoSinAbsorber > 0) {
-                    precio += incrementoSinAbsorber;
-                    incrementoAplicado = true;
-                  }
-                  return `
-                <div class="TypographyBody1">
-                  ${el.unidadesConsumidas} - ${el.stock.reportName || el.stock.name}
-                </div>
-                <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(precio).toLocaleString("es-AR")}
-                </div>
-            `;
-                },
-              )
-              .join("")
-          );
-        })()}
+        ${repair.reparacionesDeTercero
+          .map(
+            (
+              el: {
+                nombre: string;
+                cantidad: number;
+                mostrarCantidadEnPdf?: boolean;
+                precioVenta: number;
+              },
+              idx: number,
+            ) => {
+              const precio = calculoVO.getPrecioFinalForReparaciones(
+                el.precioVenta,
+                idx,
+              );
+              const c = Number(el.cantidad ?? 1);
+              const prefix =
+                el.mostrarCantidadEnPdf !== false ? `${c} - ` : "";
+              return `
+            <div class="TypographyBody1">
+              ${prefix}${el.nombre}
+            </div>
+            <div class="TypographyBody1" style="text-align: right;">
+              ${getFormattedPrice(precio)}
+            </div>
+          `;
+            },
+          )
+          .join("")}
+        ${repair.repuestosUsados
+          .filter((el: any) => !el.ocultoParaCliente)
+          .map(
+            (
+              el: {
+                stock: {
+                  id: number;
+                  name: string;
+                  reportName?: string | null;
+                };
+                precioVenta: number;
+                unidadesConsumidas: number;
+              },
+              idx: number,
+            ) => {
+              const precio = calculoVO.getPrecioFinalForRepuestos(
+                el.precioVenta,
+                idx,
+              );
+              return `
+            <div class="TypographyBody1">
+              ${el.unidadesConsumidas} - ${el.stock.reportName || el.stock.name}
+            </div>
+            <div class="TypographyBody1" style="text-align: right;">
+              ${getFormattedPrice(precio)}
+            </div>
+          `;
+            },
+          )
+          .join("")}
         </div>
         ${
           calculoVO.manoDeObraForRecibosDiscriminado.length > 0
@@ -440,7 +434,7 @@ export default function generateClientOrderHtml(repair: any, encabezadoPdf?: str
               ${t.pdfName || t.descripcion}
             </div>
             <div class="TypographyBody1" style="text-align: right;">
-              $${Number(t.precioConIva).toLocaleString("es-AR")}
+              ${getFormattedPrice(t.precioConIva)}
             </div>
           `,
           )
@@ -459,8 +453,8 @@ export default function generateClientOrderHtml(repair: any, encabezadoPdf?: str
         <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; margin-bottom: 20px;">
           Importe Total:
         </div>
-        <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; text-align: right;">        
-          $${Number(calculoVO.total).toLocaleString("es-AR")}
+        <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; text-align: right;">
+          ${getFormattedPrice(calculoVO.total)}
         </div>
       </div>
              ${

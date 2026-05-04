@@ -5,6 +5,10 @@ import { RepuestoUsado } from "../value-objects/repuesto-usado.vo";
 import { TrabajoRealizado } from "../value-objects/trabajo-realizado.vo";
 
 export class ComprobanteCalculado {
+  private _distribucionCache:
+    | { terceros: number[]; repuestos: number[]; trabajos: number[] }
+    | undefined;
+
   constructor(
     private readonly repuestos: RepuestoUsado[],
     private readonly terceros: ReparacionTercero[],
@@ -33,16 +37,81 @@ export class ComprobanteCalculado {
     return parseFloat(total.toFixed(2));
   }
 
-  public getPrecioFinalForReparaciones(precio: number) {
-    return this.calcularPrecioFinal(precio, this.ajustes.porcentajeRecargo);
+  public getPrecioFinalForReparaciones(precio: number, idx: number = 0) {
+    const base = this.calcularPrecioFinal(
+      precio,
+      this.ajustes.porcentajeRecargo,
+    );
+    return base + (this.getDistribucion().terceros[idx] ?? 0);
   }
 
-  public getPrecioFinalForRepuestos(precio: number) {
-    return this.calcularPrecioFinal(precio, 0);
+  public getPrecioFinalForRepuestos(precio: number, idx: number = 0) {
+    const base = this.calcularPrecioFinal(precio, 0);
+    return base + (this.getDistribucion().repuestos[idx] ?? 0);
   }
 
   get manoDeObraForRecibos() {
     return this.totalManoDeObra + this.ajustes.incrementoInternoTotal;
+  }
+
+  get incrementoInternoEfectivo() {
+    const legacy = this.ajustes.incrementoInterno;
+    const fromAjustes = this.ajustes
+      .getAjustesConMontoEfectivo(this.totalBase)
+      .filter((a) => a.esInterno)
+      .reduce((sum, a) => sum + a.montoEfectivo, 0);
+    return legacy + fromAjustes;
+  }
+
+  /**
+   * Distribuye el incremento interno entre todos los items (terceros, repuestos
+   * y mano de obra) proporcionalmente al peso de cada uno en `totalBase`. Cada
+   * item recibe `incremento * (precioBase / totalBase)`, redondeado a centavos.
+   * El último item recibe el residuo para que la suma de adiciones cierre
+   * exacto contra el incremento.
+   */
+  private getDistribucion() {
+    if (this._distribucionCache) return this._distribucionCache;
+
+    const tercerosBase = this.terceros.map((t) =>
+      this.calcularPrecioFinal(
+        t.precioVenta.toNumber(),
+        this.ajustes.porcentajeRecargo,
+      ),
+    );
+    const repuestosBase = this.repuestos.map((r) =>
+      this.calcularPrecioFinal(r.precioVenta.toNumber(), 0),
+    );
+    const trabajosBase = this.trabajos.map((t) =>
+      this.calcularPrecioFinal(t.precioConIva, 0),
+    );
+    const allBases = [...tercerosBase, ...repuestosBase, ...trabajosBase];
+    const additions = new Array<number>(allBases.length).fill(0);
+
+    const incremento = this.incrementoInternoEfectivo;
+    const totalBase = allBases.reduce((s, v) => s + v, 0);
+
+    if (incremento > 0 && totalBase > 0 && allBases.length > 0) {
+      let asignado = 0;
+      for (let i = 0; i < allBases.length - 1; i++) {
+        const cuota =
+          Math.round(((incremento * allBases[i]) / totalBase) * 100) / 100;
+        additions[i] = cuota;
+        asignado += cuota;
+      }
+      additions[allBases.length - 1] = parseFloat(
+        (incremento - asignado).toFixed(2),
+      );
+    }
+
+    const tCount = this.terceros.length;
+    const rCount = this.repuestos.length;
+    this._distribucionCache = {
+      terceros: additions.slice(0, tCount),
+      repuestos: additions.slice(tCount, tCount + rCount),
+      trabajos: additions.slice(tCount + rCount),
+    };
+    return this._distribucionCache;
   }
 
   get totalRepuestos() {
@@ -73,14 +142,14 @@ export class ComprobanteCalculado {
   }
 
   get manoDeObraForRecibosDiscriminado() {
-    const incrementoTotal = this.ajustes.incrementoInternoTotal;
+    const adiciones = this.getDistribucion().trabajos;
     return this.trabajos.map((t, idx) => {
-      const incremento = idx === 0 ? incrementoTotal : 0;
+      const base = this.calcularPrecioFinal(t.precioConIva, 0);
+      const adicion = adiciones[idx] ?? 0;
       return {
         descripcion: t.descripcion,
         precioUnitario: t.precioUnitario.toNumber(),
-        precioConIva:
-          this.calcularPrecioFinal(t.precioConIva, 0) + incremento,
+        precioConIva: base + adicion,
         iva: t.iva ?? null,
         pdfName: t.pdfName ?? null,
       };
@@ -88,8 +157,7 @@ export class ComprobanteCalculado {
   }
 
   get incrementoInternoSinAbsorber() {
-    if (this.trabajos.length > 0) return 0;
-    return this.ajustes.incrementoInternoTotal;
+    return 0;
   }
 
   get totalBase() {

@@ -1,6 +1,10 @@
 import { ComprobanteCalculado } from "@/core/domain/services/comprobante-calculado.service";
 
-const fmtAR = (n: number) => Number(n).toLocaleString("es-AR");
+const fmtAR = (n: number) =>
+  Number(n).toLocaleString("es-AR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
 /**
  * Generates the HTML rows for the ajustes section in the PDF.

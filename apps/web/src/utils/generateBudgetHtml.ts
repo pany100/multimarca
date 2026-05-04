@@ -1,4 +1,5 @@
 import { ComprobanteCalculadoFactory } from "@/core/domain/services/comprobante-calculado.factory";
+import { getFormattedPrice } from "./fieldHelper";
 import { generateAjustesRowsHtml } from "./generateAjustesHtml";
 
 export default function generateBudgetHtml(repair: any, encabezadoPdf?: string): string {
@@ -287,61 +288,61 @@ export default function generateBudgetHtml(repair: any, encabezadoPdf?: string):
         <div class="TypographyBody1" style="text-align: right;font-weight: bold;">
           Importe
         </div>
-        ${(() => {
-          const incrementoSinAbsorber = calculoVO.incrementoInternoSinAbsorber;
-          let incrementoAplicado = false;
-          return repair.reparacionesDeTercero
-            .map(
-              (el: {
+        ${repair.reparacionesDeTercero
+          .map(
+            (
+              el: {
                 nombre: string;
                 cantidad: number;
                 mostrarCantidadEnPdf?: boolean;
                 precioVenta: number;
-              }) => {
-                let precio = calculoVO.getPrecioFinalForReparaciones(el.precioVenta);
-                if (!incrementoAplicado && incrementoSinAbsorber > 0) {
-                  precio += incrementoSinAbsorber;
-                  incrementoAplicado = true;
-                }
-                const c = Number(el.cantidad ?? 1);
-                const prefix =
-                  el.mostrarCantidadEnPdf !== false ? `${c} - ` : "";
-                return `
-                <div class="TypographyBody1">
-                  ${prefix}${el.nombre}
-                </div>
-                <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(precio).toLocaleString("es-AR")}
-                </div>
-              `;
               },
-            )
-            .join("") +
-          repair.repuestosUsados
-            .filter((el: any) => !el.ocultoParaCliente)
-            .map(
-              (el: {
+              idx: number,
+            ) => {
+              const precio = calculoVO.getPrecioFinalForReparaciones(
+                el.precioVenta,
+                idx,
+              );
+              const c = Number(el.cantidad ?? 1);
+              const prefix =
+                el.mostrarCantidadEnPdf !== false ? `${c} - ` : "";
+              return `
+              <div class="TypographyBody1">
+                ${prefix}${el.nombre}
+              </div>
+              <div class="TypographyBody1" style="text-align: right;">
+                ${getFormattedPrice(precio)}
+              </div>
+            `;
+            },
+          )
+          .join("")}
+        ${repair.repuestosUsados
+          .filter((el: any) => !el.ocultoParaCliente)
+          .map(
+            (
+              el: {
                 stock: { id: number; name: string; reportName?: string | null };
                 precioVenta: number;
                 unidadesConsumidas: number;
-              }) => {
-                let precio = calculoVO.getPrecioFinalForRepuestos(el.precioVenta);
-                if (!incrementoAplicado && incrementoSinAbsorber > 0) {
-                  precio += incrementoSinAbsorber;
-                  incrementoAplicado = true;
-                }
-                return `
-                <div class="TypographyBody1">
-                  ${el.unidadesConsumidas} - ${el.stock.reportName || el.stock.name}
-                </div>
-                <div class="TypographyBody1" style="text-align: right;">
-                  $${Number(precio).toLocaleString("es-AR")}
-                </div>
-            `;
               },
-            )
-            .join("");
-        })()}
+              idx: number,
+            ) => {
+              const precio = calculoVO.getPrecioFinalForRepuestos(
+                el.precioVenta,
+                idx,
+              );
+              return `
+              <div class="TypographyBody1">
+                ${el.unidadesConsumidas} - ${el.stock.reportName || el.stock.name}
+              </div>
+              <div class="TypographyBody1" style="text-align: right;">
+                ${getFormattedPrice(precio)}
+              </div>
+          `;
+            },
+          )
+          .join("")}
         </div>
         ${calculoVO.manoDeObraForRecibosDiscriminado.length > 0 ? `
         <hr class="divider" style="border-color: rgba(0, 0, 0, 0.12);"/>
@@ -360,7 +361,7 @@ export default function generateBudgetHtml(repair: any, encabezadoPdf?: string):
               ${t.pdfName || t.descripcion}
             </div>
             <div class="TypographyBody1" style="text-align: right;">
-              $${Number(t.precioConIva).toLocaleString("es-AR")}
+              ${getFormattedPrice(t.precioConIva)}
             </div>
           `,
           )
@@ -378,7 +379,7 @@ export default function generateBudgetHtml(repair: any, encabezadoPdf?: string):
           Importe Total:
         </div>
         <div class="TypographyBody1" style="margin-top: 20px; font-weight: bold; text-align: right;">
-          $${Number(calculoVO.total).toLocaleString("es-AR")}
+          ${getFormattedPrice(calculoVO.total)}
         </div>
         </div>
       </div>

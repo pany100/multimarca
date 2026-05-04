@@ -18,10 +18,11 @@ export class GetPreciosFinalReparacionesService {
 
     // Calcular precio final para cada reparación
     const reparacionesConPrecioFinal = dto.reparacionesTerceros.map(
-      (reparacion) => ({
+      (reparacion, idx) => ({
         ...reparacion,
         precioConRecargo: comprobanteCalculado.getPrecioFinalForReparaciones(
-          reparacion.precioVenta || 0
+          reparacion.precioVenta || 0,
+          idx,
         ),
       })
     );

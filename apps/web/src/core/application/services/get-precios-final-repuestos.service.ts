@@ -17,10 +17,11 @@ export class GetPreciosFinalRepuestosService {
     });
 
     // Calcular precio final para cada repuesto
-    const repuestosConPrecioFinal = dto.repuestosUsados.map((repuesto) => ({
+    const repuestosConPrecioFinal = dto.repuestosUsados.map((repuesto, idx) => ({
       ...repuesto,
       precioConRecargo: comprobanteCalculado.getPrecioFinalForRepuestos(
-        repuesto.precioVenta || 0
+        repuesto.precioVenta || 0,
+        idx,
       ),
     }));
 
