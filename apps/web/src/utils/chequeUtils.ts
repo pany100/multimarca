@@ -1,6 +1,7 @@
 import prisma from "@/lib/prisma";
+import { assertTempPathInTmp } from "@/shared/utils/custom-file.helper";
+import { EstadoArchivo } from "@prisma/client";
 import * as yup from "yup";
-import { deleteFileFromS3, moveFileInS3 } from "./s3Helper";
 
 export const CHEQUE_OPERACION_IDS = [3, 9, 21];
 
@@ -91,10 +92,7 @@ const saveCheque = async ({ cheque }: SaveChequeProps) => {
     numeroCheque,
     picturePath,
   } = cheque;
-  let picturePathUrl = picturePath;
-  if (picturePath && picturePath.includes("/tmp/")) {
-    picturePathUrl = await moveFileInS3(picturePath, "cheques");
-  }
+  if (picturePath) assertTempPathInTmp(picturePath);
   const newCheque = await prisma.cheque.create({
     data: {
       banco,
@@ -103,7 +101,14 @@ const saveCheque = async ({ cheque }: SaveChequeProps) => {
       fechaEmision,
       importe,
       numero: numeroCheque,
-      picturePath: picturePathUrl,
+      ...(picturePath && {
+        fotoFile: {
+          create: {
+            tempPath: picturePath,
+            status: EstadoArchivo.Pendiente,
+          },
+        },
+      }),
     },
   });
   return newCheque;
@@ -111,22 +116,27 @@ const saveCheque = async ({ cheque }: SaveChequeProps) => {
 
 export const deleteCheque = async (idCheque: number) => {
   const cheque = await prisma.cheque.findFirst({
-    where: {
-      id: idCheque,
-    },
+    where: { id: idCheque },
+    include: { fotoFile: true },
   });
-  if (cheque) {
-    if (cheque.picturePath) {
-      await deleteFileFromS3(cheque.picturePath);
+  if (!cheque) return;
+
+  await prisma.$transaction(async (tx) => {
+    if (cheque.fotoFile) {
+      await tx.customFile.update({
+        where: { id: cheque.fotoFile.id },
+        data: {
+          chequeFotoId: null,
+          status: EstadoArchivo.ListoParaBorrar,
+        },
+      });
     }
-    await prisma.cheque.delete({
-      where: {
-        id: idCheque,
-      },
-    });
-  }
+    await tx.cheque.delete({ where: { id: idCheque } });
+  });
 };
 
+// Selector base para cargar un cheque junto con su archivo. Las consultas que
+// devuelvan cheques deben usar `mapChequeForResponse` antes de serializar.
 export const chequeQueryData = {
   select: {
     id: true,
@@ -136,9 +146,31 @@ export const chequeQueryData = {
     fechaCobro: true,
     fechaEmision: true,
     owner: true,
-    picturePath: true,
     rechazado: true,
+    fotoFile: {
+      select: {
+        tempPath: true,
+        finalPath: true,
+      },
+    },
   },
+};
+
+type ChequeWithFotoFile = {
+  fotoFile?: { tempPath: string; finalPath: string | null } | null;
+  [key: string]: any;
+};
+
+// Devuelve un objeto plano con `picturePath` derivado del CustomFile asociado,
+// preservando el contrato externo de la API.
+export const mapChequeForResponse = <T extends ChequeWithFotoFile>(
+  cheque: T
+): Omit<T, "fotoFile"> & { picturePath: string | null } => {
+  const { fotoFile, ...rest } = cheque;
+  return {
+    ...rest,
+    picturePath: fotoFile?.finalPath ?? fotoFile?.tempPath ?? null,
+  };
 };
 
 export const returnAllModelsWithChequeData = (models: { cheque?: any }[]) => {
@@ -156,7 +188,8 @@ export const returnModelWithChequeData = (model: { cheque?: any }) => {
     fechaEmision: cheque.fechaEmision,
     importe: cheque.importe,
     numeroCheque: cheque.numero,
-    picturePath: cheque.picturePath,
+    picturePath:
+      cheque.fotoFile?.finalPath ?? cheque.fotoFile?.tempPath ?? null,
     chequeId: cheque.id,
   };
 };

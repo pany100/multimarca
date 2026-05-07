@@ -183,7 +183,8 @@ async function procesarUnArchivoParaBorrar(archivo: CustomFile, ctx: RunContext)
       archivo.inasistenciaCertificadoId === null &&
       archivo.certificadoEstudioRutaId === null &&
       archivo.documentoGeneralId === null &&
-      archivo.autoCedulaVerdeId === null;
+      archivo.autoCedulaVerdeId === null &&
+      archivo.chequeFotoId === null;
     const motivo = esDesreferenciado ? "desreferenciado" : "ListoParaBorrar";
 
     let msg = "";
@@ -309,7 +310,9 @@ async function procesarUnArchivoPending(archivo: CustomFile, ctx: RunContext): P
                             ? "certificados-estudio"
                             : archivo.documentoGeneralId
                               ? "documentacion"
-                              : "otros";
+                              : archivo.chequeFotoId
+                                ? "cheques"
+                                : "otros";
     const dev = isDev ? " [SIMULADO]" : "";
 
     if (archivo.finalPath) {
@@ -451,6 +454,7 @@ async function procesarArchivosParaBorrar(ctx: RunContext) {
           certificadoEstudioRutaId: null,
           documentoGeneralId: null,
           autoCedulaVerdeId: null,
+          chequeFotoId: null,
           status: { not: EstadoArchivo.Borrado },
         },
         { status: EstadoArchivo.ListoParaBorrar },

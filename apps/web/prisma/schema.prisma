@@ -642,6 +642,8 @@ model CustomFile {
   documentoGeneral      DocumentoGeneral?    @relation("DocumentoGeneralArchivo", fields: [documentoGeneralId], references: [id])
   autoCedulaVerdeId     Int?                 @unique
   autoCedulaVerde       Auto?                @relation("AutoCedulaVerde", fields: [autoCedulaVerdeId], references: [id])
+  chequeFotoId          Int?                 @unique
+  chequeFoto            Cheque?              @relation("ChequeFoto", fields: [chequeFotoId], references: [id])
 
   @@index([status])
   @@index([reciboORepId], map: "CustomFile_reciboORepId_fkey")
@@ -981,12 +983,12 @@ model Cheque {
   banco                 String                  @db.VarChar(255)
   importe               Decimal                 @db.Decimal(10, 2)
   owner                 String                  @db.VarChar(255)
-  picturePath           String                  @db.VarChar(255)
   rechazado             Boolean                 @default(false)
   fechaRechazo          DateTime?
   gastosAdministrativos Decimal?                @db.Decimal(10, 2)
   observaciones         String?                 @db.Text
   createdAt             DateTime?               @default(now())
+  fotoFile              CustomFile?             @relation("ChequeFoto")
   extraccion            Extraccion[]
   gasto                 Gasto[]
   ingresoManualDeDinero IngresoManualDeDinero[]

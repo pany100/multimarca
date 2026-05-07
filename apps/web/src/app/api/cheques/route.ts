@@ -43,7 +43,8 @@ export async function GET(request: Request) {
         where: whereClause,
         skip,
         take: size,
-        orderBy: { fechaCobro: "desc" },
+        orderBy: [{ createdAt: "desc" }, { id: "desc" }],
+        include: { fotoFile: true },
       }),
       prisma.cheque.count({
         where: whereClause,
@@ -54,8 +55,11 @@ export async function GET(request: Request) {
     const chequesWithOperaciones = await Promise.all(
       cheques.map(async (cheque) => {
         const operaciones = await getOperacionesByChequeId(cheque.id);
+        const { fotoFile, ...rest } = cheque;
         return {
-          ...cheque,
+          ...rest,
+          picturePath:
+            fotoFile?.finalPath ?? fotoFile?.tempPath ?? null,
           rechazado: cheque.rechazado ? "Si" : "No",
           operaciones,
         };
