@@ -17,8 +17,7 @@ function MecanicosDocumentacionData() {
   const documentos = [
     {
       label: "DNI - Frente",
-      filePath:
-        empleado?.dniFrentePath ?? empleado?.dniImagePath ?? null,
+      filePath: empleado?.dniFrentePath ?? null,
     },
     {
       label: "DNI - Dorso",

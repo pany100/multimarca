@@ -88,7 +88,6 @@ model Auto {
   observations      String?           @db.VarChar(255)
   transmission_type String?           @db.VarChar(20)
   tipoCombustible   TipoCombustible?
-  cedulaVerdePath   String?           @db.VarChar(1000)
   cedulaVerdeFile   CustomFile?       @relation("AutoCedulaVerde")
   owner             Cliente           @relation(fields: [ownerId], references: [id])
   ordenesReparacion OrdenReparacion[] @relation("AutoOrdenReparacion")
@@ -192,7 +191,6 @@ model Empleado {
   phone             String?                   @db.VarChar(150)
   birthday          DateTime?
   tipo              TipoEmpleado              @default(Mecanico)
-  dniImagePath      String?                   @db.VarChar(1000)
   contactoEmergencia String?                   @db.VarChar(150)
   licenciaConducirPath           CustomFile?   @relation("EmpleadoLicenciaConducir")
   licenciaDorsoPath              CustomFile?   @relation("EmpleadoLicenciaDorso")
@@ -565,7 +563,6 @@ model OrdenReparacion {
   observacionesOcultas   String?                   @db.Text
   detallesDeTrabajo      String?                   @db.Text
   estado                 EstadoOrdenReparacion     @default(Presupuestado)
-  pdfPath                String?                   @db.VarChar(255)
   recibos                String?                   @db.LongText
   descuento              Decimal                   @default(0.00) @db.Decimal(10, 2)
   dolarId                Int?

@@ -23,9 +23,7 @@ function MecanicosPerfilHeader() {
             Frente:
           </Typography>
           <MecanicosImagenData
-            filePath={
-              empleado?.dniFrentePath || empleado?.dniImagePath || null
-            }
+            filePath={empleado?.dniFrentePath || null}
             alt="DNI frente"
           />
         </Box>

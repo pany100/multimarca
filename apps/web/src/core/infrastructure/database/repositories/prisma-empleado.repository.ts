@@ -50,7 +50,6 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         phone: empleado.phone,
         tipo: empleado.tipo,
         birthday: empleado.birthday,
-        dniImagePath: empleado.dniImagePath,
       },
     });
   }
@@ -106,7 +105,6 @@ export class PrismaEmpleadoRepository implements EmpleadoRepository {
         phone: empleado.phone,
         tipo: empleado.tipo,
         birthday: empleado.birthday,
-        dniImagePath: empleado.dniImagePath,
         contactoEmergencia: empleado.contactoEmergencia,
       },
     });

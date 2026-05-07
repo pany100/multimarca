@@ -92,8 +92,7 @@ function MecanicosTable({
       headerName: "Foto DNI",
       flex: 0.7,
       renderCell: (params: GridRenderCellParams) => {
-        const src =
-          params.row.dniFrentePath ?? params.row.dniImagePath ?? null;
+        const src = params.row.dniFrentePath ?? null;
         return src ? (
           <Image src={src} alt="DNI" width={100} height={50} />
         ) : (

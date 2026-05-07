@@ -157,7 +157,6 @@ export async function createOrdenReparacion(
       "Aceptado",
       "Terminado",
     ]),
-    pdfPath: faker.system.filePath(),
     ...overrides,
   };
 

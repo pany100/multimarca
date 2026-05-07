@@ -75,7 +75,11 @@ describe("PUT /api/autos/[id]/cedula", () => {
 
     const mockUpdatedCar = {
       id: 1,
-      cedulaVerdePath: "https://ejemplo.com/cedula.jpg",
+      cedulaVerdeFile: {
+        id: 10,
+        tempPath:
+          "https://mtservicemultimarca-prod.s3.us-east-2.amazonaws.com/tmp/abc.jpg",
+      },
     };
     mockPrisma = {
       auto: {

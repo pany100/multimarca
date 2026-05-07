@@ -30,7 +30,6 @@ const baseMecanicoSchema = z.object({
   start_date: z.coerce.date().nullable().optional(),
   birthday: z.coerce.date().nullable().optional(),
   tipo: z.enum(["Mecanico", "Administrativo", "EquipoDirectivo"]).nullable().optional(),
-  dniImagePath: z.string().nullable().optional(),
   contactoEmergencia: z.string().nullable().optional(),
 });
 

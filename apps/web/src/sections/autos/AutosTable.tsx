@@ -89,14 +89,13 @@ function AutosTable({
       renderCell: (params: any) => params.row.owner?.fullName || "-",
     },
     {
-      field: "cedulaVerdePath",
+      field: "cedulaVerdeFile",
       headerName: "Cédula Verde",
       flex: 0.7,
       renderCell: (params: any) => {
         const src =
           params.row.cedulaVerdeFile?.finalPath ??
-          params.row.cedulaVerdeFile?.tempPath ??
-          params.row.cedulaVerdePath;
+          params.row.cedulaVerdeFile?.tempPath;
         return src ? (
           <ImageWithPreview
             src={src}

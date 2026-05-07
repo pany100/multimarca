@@ -4,6 +4,7 @@ import { EstadoArchivo, Prisma } from "@prisma/client";
 
 export class OrdenReparacionDBMapper {
   static transformToCreateData(ordenReparacion: OrdenReparacionVO) {
+    if (ordenReparacion.pdfPath) assertTempPathInTmp(ordenReparacion.pdfPath);
     for (const t of ordenReparacion.tercerosVO) {
       if (t.recibo) assertTempPathInTmp(t.recibo);
     }
@@ -20,7 +21,14 @@ export class OrdenReparacionDBMapper {
         observacionesEntrada: ordenReparacion.observacionesEntrada ?? "[]",
         observacionesSalida: ordenReparacion.observacionesSalida ?? "[]",
         estado: ordenReparacion.estado.toPrisma(),
-        pdfPath: ordenReparacion.pdfPath ?? null,
+        scannerFile: ordenReparacion.pdfPath?.includes("/tmp/")
+          ? {
+              create: {
+                tempPath: ordenReparacion.pdfPath,
+                status: EstadoArchivo.Pendiente,
+              },
+            }
+          : undefined,
         descuento: new Prisma.Decimal(ordenReparacion.descuento),
         descripcionDescuento: ordenReparacion.descripcionDescuento ?? null,
         incremento: new Prisma.Decimal(ordenReparacion.incremento),

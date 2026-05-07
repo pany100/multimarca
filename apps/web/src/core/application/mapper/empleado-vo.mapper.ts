@@ -20,7 +20,6 @@ export class EmpleadoVOMapper {
       dto.phone || null,
       dto.tipo || undefined,
       dto.birthday ? new Date(dto.birthday) : null,
-      dto.dniImagePath || null,
       dto.contactoEmergencia || null
     );
   }
@@ -40,7 +39,6 @@ export class EmpleadoVOMapper {
       dto.phone || null,
       dto.tipo || undefined,
       dto.birthday ? new Date(dto.birthday) : null,
-      dto.dniImagePath || null,
       dto.contactoEmergencia || null
     );
   }

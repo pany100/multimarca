@@ -150,8 +150,7 @@ const VerAutoPage = ({ params }: { params: { id: string } }) => {
             {(() => {
               const cedulaSrc =
                 auto.cedulaVerdeFile?.finalPath ??
-                auto.cedulaVerdeFile?.tempPath ??
-                auto.cedulaVerdePath;
+                auto.cedulaVerdeFile?.tempPath;
               if (!cedulaSrc) return null;
               return (
                 <Box>

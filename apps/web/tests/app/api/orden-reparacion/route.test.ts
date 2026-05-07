@@ -28,7 +28,6 @@ describe("POST /api/orden-reparacion", () => {
       observacionesEntrada: "[]",
       observacionesSalida: "[]",
       estado: EstadoOrdenReparacion.Terminado,
-      pdfPath: "/path/to/pdf",
       mecanicos: [{ id: mecanico.id }],
       repuestosUsados: [
         {

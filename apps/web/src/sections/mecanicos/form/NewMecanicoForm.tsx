@@ -25,7 +25,6 @@ export const schema = yup.object({
   start_date: yup.date().nullable(),
   birthday: yup.date().nullable(),
   tipo: yup.string().oneOf(["Mecanico", "Administrativo", "EquipoDirectivo"]).nullable(),
-  dniImagePath: yup.string().nullable(),
   contactoEmergencia: yup.string().nullable(),
 });
 
