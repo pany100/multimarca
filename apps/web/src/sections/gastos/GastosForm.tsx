@@ -9,7 +9,10 @@ import useFixedSelectData from "@/hooks/useFixedSelectData";
 import useMecanicoAutocomplete from "@/hooks/useMecanicoAutocomplete";
 import useProveedorAutocomplete from "@/hooks/useProveedorAutocomplete";
 import useTipoOperacion from "@/hooks/useTipoOperacion";
-import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
+import {
+  CHEQUE_OPERACION_IDS,
+  getSchemaPropsForCheque,
+} from "@/utils/chequeUtils";
 import { Grid, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
@@ -135,7 +138,7 @@ const GastosForm = () => {
             label="Tipo de Operación"
           />
         </Grid>
-        {(operacionValue === 3 || operacionValue === 9) && <ChequeData />}
+        {CHEQUE_OPERACION_IDS.includes(operacionValue) && <ChequeData />}
       </Grid>
     </>
   );

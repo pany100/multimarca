@@ -7,7 +7,10 @@ import CustomSelect from "@/components/formV2/CustomSelect";
 import useClientesAutocomplete from "@/hooks/useClientesAutocomplete";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import useTipoOperacion from "@/hooks/useTipoOperacion";
-import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
+import {
+  CHEQUE_OPERACION_IDS,
+  getSchemaPropsForCheque,
+} from "@/utils/chequeUtils";
 import {
   Box,
   Button,
@@ -110,7 +113,7 @@ function VentasForm() {
             label="Tipo de Operación"
           />
         </Grid>
-        {(operacionValue === 3 || operacionValue === 9) && <ChequeData />}
+        {CHEQUE_OPERACION_IDS.includes(operacionValue) && <ChequeData />}
         <Grid item xs={12} md={6}>
           <CustomSelect options={currency} name="moneda" label="Moneda" />
         </Grid>

@@ -2,7 +2,7 @@ import prisma from "@/lib/prisma";
 import * as yup from "yup";
 import { deleteFileFromS3, moveFileInS3 } from "./s3Helper";
 
-export const CHEQUE_OPERACION_IDS = [3, 9];
+export const CHEQUE_OPERACION_IDS = [3, 9, 21];
 
 const isChequeOperacion = (operacion: number) =>
   CHEQUE_OPERACION_IDS.includes(operacion);

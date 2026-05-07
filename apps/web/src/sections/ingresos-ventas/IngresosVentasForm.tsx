@@ -5,7 +5,10 @@ import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import useTipoOperacion from "@/hooks/useTipoOperacion";
-import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
+import {
+  CHEQUE_OPERACION_IDS,
+  getSchemaPropsForCheque,
+} from "@/utils/chequeUtils";
 import { Grid, Typography } from "@mui/material";
 import { useFormContext } from "react-hook-form";
 import * as yup from "yup";
@@ -85,7 +88,7 @@ const IngresosVentasForm = () => {
             options={tiposOperacion}
           />
         </Grid>
-        {(operacionValue === 3 || operacionValue === 9) && <ChequeData />}
+        {CHEQUE_OPERACION_IDS.includes(operacionValue) && <ChequeData />}
         <Grid
           item
           xs={12}

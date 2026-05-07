@@ -6,7 +6,10 @@ import CustomSelect from "@/components/formV2/CustomSelect";
 import { useFetch } from "@/contexts/FetchContext";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import useTipoOperacion from "@/hooks/useTipoOperacion";
-import { getSchemaPropsForCheque } from "@/utils/chequeUtils";
+import {
+  CHEQUE_OPERACION_IDS,
+  getSchemaPropsForCheque,
+} from "@/utils/chequeUtils";
 import {
   Accordion,
   AccordionDetails,
@@ -188,7 +191,7 @@ export default function NuevoIngresoReparacionForm() {
                 />
               </Grid>
 
-              {(operacionValue === 3 || operacionValue === 9) && (
+              {CHEQUE_OPERACION_IDS.includes(operacionValue) && (
                 <Grid item xs={12}>
                   <ChequeData />
                 </Grid>
