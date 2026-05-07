@@ -65,31 +65,32 @@ const IngresoReparacionInfoSection = () => {
   const { currency } = useFixedSelectData();
   const { tiposOperacion } = useTipoOperacion("ingreso");
 
+  const buildDefaults = () => ({
+    fecha: ingreso.fecha,
+    monto: parseFloat(ingreso.monto),
+    moneda: ingreso.moneda,
+    cotizacionDolar: ingreso.cotizacionDolar
+      ? parseFloat(ingreso.cotizacionDolar)
+      : undefined,
+    tipoOperacionId: ingreso.tipoOperacionId,
+    descripcion: ingreso.descripcion,
+    chequeId: ingreso.chequeId ?? null,
+    numeroCheque: ingreso.numeroCheque,
+    banco: ingreso.banco,
+    emisor: ingreso.emisor,
+    fechaEmision: ingreso.fechaEmision,
+    fechaCobro: ingreso.fechaCobro,
+    importe: ingreso.importe ? parseFloat(ingreso.importe) : undefined,
+    picturePath: ingreso.picturePath,
+  });
+
   const methods = useForm<FormData>({
     resolver: yupResolver(schema),
-    defaultValues: {
-      fecha: ingreso.fecha,
-      monto: parseFloat(ingreso.monto),
-      moneda: ingreso.moneda,
-      cotizacionDolar: ingreso.cotizacionDolar
-        ? parseFloat(ingreso.cotizacionDolar)
-        : undefined,
-      tipoOperacionId: ingreso.tipoOperacionId,
-      descripcion: ingreso.descripcion,
-    },
+    defaultValues: buildDefaults(),
   });
 
   const handleOpenModal = () => {
-    methods.reset({
-      fecha: ingreso.fecha,
-      monto: parseFloat(ingreso.monto),
-      moneda: ingreso.moneda,
-      cotizacionDolar: ingreso.cotizacionDolar
-        ? parseFloat(ingreso.cotizacionDolar)
-        : undefined,
-      tipoOperacionId: ingreso.tipoOperacionId,
-      descripcion: ingreso.descripcion,
-    });
+    methods.reset(buildDefaults());
   };
 
   const handleSubmit = async (data: any) => {

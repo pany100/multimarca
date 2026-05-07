@@ -160,18 +160,18 @@ export default function NuevoIngresoReparacionForm() {
             </Typography>
 
             <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={6}>
                 <CustomInputText name="fecha" label="Fecha" type="date" />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={6}>
                 <CustomInputText name="monto" label="Monto" type="number" />
               </Grid>
-              <Grid item xs={12} md={4}>
+              <Grid item xs={12} md={6}>
                 <CustomSelect name="moneda" label="Moneda" options={currency} />
               </Grid>
 
               {watch("moneda") === "Dolar" && (
-                <Grid item xs={12} md={4}>
+                <Grid item xs={12} md={6}>
                   <CustomInputText
                     name="cotizacionDolar"
                     label="Cotizacion Dolar"

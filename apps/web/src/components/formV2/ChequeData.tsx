@@ -34,8 +34,6 @@ function ChequeData() {
     <Paper
       elevation={1}
       sx={{
-        ml: 2,
-        mt: 2,
         p: 2,
         borderRadius: 2,
         backgroundColor: "#fafafa",

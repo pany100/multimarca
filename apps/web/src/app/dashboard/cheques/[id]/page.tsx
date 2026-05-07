@@ -1,9 +1,71 @@
 "use client";
 import { useFetch } from "@/contexts/FetchContext";
 import { getFormattedPrice } from "@/utils/fieldHelper";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Button, Paper, Typography } from "@mui/material";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
+
+const getFileExtension = (path: string) => {
+  const clean = path.split("?")[0].split("#")[0];
+  const dot = clean.lastIndexOf(".");
+  return dot >= 0 ? clean.slice(dot + 1).toLowerCase() : "";
+};
+
+const ChequeFilePreview = ({ path }: { path: string }) => {
+  const ext = getFileExtension(path);
+  const isImage = ["jpg", "jpeg", "png", "webp", "gif", "bmp"].includes(ext);
+  const isPdf = ext === "pdf";
+
+  return (
+    <Box sx={{ mt: 2 }}>
+      {isImage && (
+        <img
+          src={path}
+          alt="Foto del cheque"
+          style={{
+            maxWidth: "100%",
+            height: "auto",
+            borderRadius: "4px",
+          }}
+        />
+      )}
+      {isPdf && (
+        <Box
+          sx={{
+            width: "100%",
+            maxWidth: 600,
+            height: 500,
+            border: "1px solid #ddd",
+            borderRadius: 1,
+            overflow: "hidden",
+          }}
+        >
+          <iframe
+            src={path}
+            width="100%"
+            height="100%"
+            style={{ border: "none" }}
+            title="Foto del cheque"
+          />
+        </Box>
+      )}
+      {!isImage && !isPdf && (
+        <Typography variant="body2" color="text.secondary">
+          Archivo adjunto ({ext || "desconocido"}). No se puede previsualizar.
+        </Typography>
+      )}
+      <Box sx={{ mt: 1 }}>
+        <Button
+          variant="outlined"
+          size="small"
+          onClick={() => window.open(path, "_blank")}
+        >
+          Abrir en nueva pestaña
+        </Button>
+      </Box>
+    </Box>
+  );
+};
 
 const ChequePage = () => {
   const [cheque, setCheque] = useState<any>(null);
@@ -63,24 +125,16 @@ const ChequePage = () => {
           <Typography>
             <strong>Emisor:</strong> {cheque.owner}
           </Typography>
-          <Typography>
-            <strong>Imagen:</strong>{" "}
+          <Box>
+            <Typography component="span">
+              <strong>Imagen:</strong>
+            </Typography>
             {cheque.picturePath ? (
-              <Box sx={{ mt: 2 }}>
-                <img
-                  src={cheque.picturePath}
-                  alt="Foto del cheque"
-                  style={{
-                    maxWidth: "100%",
-                    height: "auto",
-                    borderRadius: "4px",
-                  }}
-                />
-              </Box>
+              <ChequeFilePreview path={cheque.picturePath} />
             ) : (
-              "No hay foto disponible"
+              <Typography component="span"> No hay foto disponible</Typography>
             )}
-          </Typography>
+          </Box>
         </Box>
       </Paper>
     </Box>

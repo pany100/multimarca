@@ -16,8 +16,23 @@ type Props = {
   setImage: (image: string | null) => void;
 };
 
+const ACCEPT = "image/*,application/pdf";
+
+const isAllowedFile = (file: File) => {
+  if (file.type === "application/pdf") return true;
+  if (file.type.startsWith("image/")) return true;
+  const ext = file.name.split(".").pop()?.toLowerCase() || "";
+  return ["jpg", "jpeg", "png", "webp", "gif", "bmp", "pdf"].includes(ext);
+};
+
+const isPdfPath = (path: string) => {
+  const clean = path.split("?")[0].split("#")[0];
+  return clean.toLowerCase().endsWith(".pdf");
+};
+
 function ImageInput({ image, label, setImage }: Props) {
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleImageChange = async (
     event: React.ChangeEvent<HTMLInputElement>
@@ -25,6 +40,13 @@ function ImageInput({ image, label, setImage }: Props) {
     const file = event.target.files?.[0];
     if (!file) return;
 
+    if (!isAllowedFile(file)) {
+      setError("Solo se permiten imágenes o archivos PDF");
+      event.target.value = "";
+      return;
+    }
+
+    setError(null);
     setLoading(true);
     const formData = new FormData();
     formData.append("file", file);
@@ -36,13 +58,14 @@ function ImageInput({ image, label, setImage }: Props) {
       });
 
       if (!response.ok) {
-        throw new Error("Error al subir la imagen");
+        throw new Error("Error al subir el archivo");
       }
 
       const data = await response.json();
       setImage(data.url);
-    } catch (error) {
-      console.error("Error al subir imagen:", error);
+    } catch (err) {
+      console.error("Error al subir archivo:", err);
+      setError("Error al subir el archivo");
     } finally {
       setLoading(false);
     }
@@ -51,6 +74,8 @@ function ImageInput({ image, label, setImage }: Props) {
   const handleDeleteImage = () => {
     setImage(null);
   };
+
+  const showPdf = image ? isPdfPath(image) : false;
 
   return (
     <Box sx={{ mt: 2 }}>
@@ -76,37 +101,64 @@ function ImageInput({ image, label, setImage }: Props) {
 
       {!loading && image && (
         <Box>
-          {/* Imagen centrada */}
           <Box display="flex" justifyContent="center" mb={2}>
-            <Image
-              src={image}
-              alt="Imagen seleccionada"
-              width={300}
-              height={200}
-              style={{ width: "300px", height: "auto" }}
-            />
+            {showPdf ? (
+              <Box
+                sx={{
+                  width: "100%",
+                  maxWidth: 400,
+                  height: 300,
+                  border: "1px solid #ddd",
+                  borderRadius: 1,
+                  overflow: "hidden",
+                }}
+              >
+                <iframe
+                  src={image}
+                  width="100%"
+                  height="100%"
+                  style={{ border: "none" }}
+                  title="Vista previa del PDF"
+                />
+              </Box>
+            ) : (
+              <Image
+                src={image}
+                alt="Imagen seleccionada"
+                width={300}
+                height={200}
+                style={{ width: "300px", height: "auto" }}
+              />
+            )}
           </Box>
 
-          {/* Botones en fila centrados */}
           <Stack
             direction="row"
             spacing={2}
             justifyContent="center"
             alignItems="center"
           >
+            {showPdf && (
+              <Button
+                variant="outlined"
+                onClick={() => window.open(image, "_blank")}
+              >
+                Abrir en nueva pestaña
+              </Button>
+            )}
             <Button
               variant="outlined"
               color="error"
               startIcon={<DeleteIcon />}
               onClick={handleDeleteImage}
             >
-              Eliminar imagen
+              Eliminar
             </Button>
             <Button variant="contained" component="label">
-              Cambiar imagen
+              Cambiar archivo
               <input
                 type="file"
-                accept="image/*"
+                accept={ACCEPT}
                 onChange={handleImageChange}
                 hidden
               />
@@ -117,17 +169,23 @@ function ImageInput({ image, label, setImage }: Props) {
 
       {!loading && !image && (
         <Box display="flex" flexDirection="column" alignItems="center" py={2}>
-          <Typography mb={2}>No hay imagen seleccionada</Typography>
+          <Typography mb={2}>No hay archivo seleccionado</Typography>
           <Button variant="contained" component="label">
-            Subir imagen
+            Subir imagen o PDF
             <input
               type="file"
-              accept="image/*"
+              accept={ACCEPT}
               onChange={handleImageChange}
               hidden
             />
           </Button>
         </Box>
+      )}
+
+      {error && (
+        <Typography variant="subtitle2" color="error" sx={{ mt: 1 }}>
+          {error}
+        </Typography>
       )}
     </Box>
   );
