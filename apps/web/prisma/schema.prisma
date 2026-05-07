@@ -989,6 +989,7 @@ model Cheque {
   fechaRechazo          DateTime?
   gastosAdministrativos Decimal?                @db.Decimal(10, 2)
   observaciones         String?                 @db.Text
+  createdAt             DateTime?               @default(now())
   extraccion            Extraccion[]
   gasto                 Gasto[]
   ingresoManualDeDinero IngresoManualDeDinero[]
