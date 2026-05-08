@@ -1,122 +1,687 @@
 "use client";
 
-import FormSnackbar from "@/components/orden-reparacion/formV2/commons/FormSnackbar";
+import ChequeDetailsView from "@/components/cheques/ChequeDetailsView";
 import { useFetch } from "@/contexts/FetchContext";
-import { SnackbarProvider } from "@/contexts/SnackbarContext";
-import { useAuth } from "@/hooks/useAuth";
-import { IngresoReparacionProvider } from "@/sections/ingresos-reparacion/admin/contexts/IngresoReparacionContext";
-import IngresoReparacionDetalleOrdenSection from "@/sections/ingresos-reparacion/admin/IngresoReparacionDetalleOrdenSection";
-import IngresoReparacionGastosSection from "@/sections/ingresos-reparacion/admin/IngresoReparacionGastosSection";
-import IngresoReparacionHeader from "@/sections/ingresos-reparacion/admin/IngresoReparacionHeader";
-import IngresoReparacionInfoSection from "@/sections/ingresos-reparacion/admin/IngresoReparacionInfoSection";
-import IngresoReparacionOrdenSection from "@/sections/ingresos-reparacion/admin/IngresoReparacionOrdenSection";
-import { Box, CircularProgress, Grid, Typography } from "@mui/material";
-import { useRouter } from "next/navigation";
+import useRecibo from "@/hooks/useRecibo";
+import RecibosModal from "@/sections/ingresos-reparacion/RecibosModal";
+import { CHEQUE_OPERACION_IDS } from "@/utils/chequeUtils";
+import { getFormattedDate, getFormattedPrice } from "@/utils/fieldHelper";
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EditIcon from "@mui/icons-material/Edit";
+import SendIcon from "@mui/icons-material/Send";
+import {
+  Alert,
+  Box,
+  Button,
+  Card,
+  CardContent,
+  CardHeader,
+  Chip,
+  CircularProgress,
+  Divider,
+  LinearProgress,
+  Paper,
+  Snackbar,
+  Stack,
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableRow,
+  Typography,
+} from "@mui/material";
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
-const IngresoReparacionAdminPage = ({
-  params,
+const SectionTitle = ({ children }: { children: React.ReactNode }) => (
+  <Typography
+    variant="overline"
+    sx={{
+      color: "text.secondary",
+      letterSpacing: 1,
+      fontWeight: 600,
+    }}
+  >
+    {children}
+  </Typography>
+);
+
+const Field = ({
+  label,
+  children,
 }: {
-  params: { id: string };
-}) => {
-  const router = useRouter();
-  const { userData, isLoading } = useAuth();
-  const { authFetch } = useFetch();
+  label: string;
+  children: React.ReactNode;
+}) => (
+  <Box sx={{ display: "flex", flexDirection: "column" }}>
+    <Typography variant="caption" color="text.secondary">
+      {label}
+    </Typography>
+    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+      {children}
+    </Typography>
+  </Box>
+);
 
-  const [ingreso, setIngreso] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+const Row = ({ children }: { children: React.ReactNode }) => (
+  <Box
+    sx={{
+      display: "flex",
+      flexDirection: { xs: "column", md: "row" },
+      gap: 2,
+      "& > *": { flex: 1, minWidth: 0 },
+    }}
+  >
+    {children}
+  </Box>
+);
 
-  useEffect(() => {
-    if (!isLoading) {
-      const permisos = userData?.permisos || [];
-      if (
-        !permisos.includes("Reparaciones") &&
-        !permisos.includes("Ingresos")
-      ) {
-        router.push("/dashboard");
-      }
-    }
-  }, [userData, router, isLoading]);
+const fmt = (value: number | string | null | undefined) =>
+  Number(value ?? 0).toLocaleString("es-AR", {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+  });
 
-  useEffect(() => {
-    const fetchIngreso = async () => {
-      try {
-        const response = await authFetch(
-          `/api/ingresos-reparacion/${params.id}`
-        );
-        if (response.ok) {
-          const data = await response.json();
-          setIngreso(data);
-        }
-      } catch (error) {
-        console.error("Error al obtener el ingreso:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchIngreso();
-  }, [params.id, authFetch]);
-
-  if (loading) {
-    return (
+function LineItem({
+  label,
+  amount,
+  sign,
+  color,
+  badge,
+  sub,
+}: {
+  label: string;
+  amount: string;
+  sign?: "+" | "-";
+  color?: string;
+  badge?: string;
+  sub?: string;
+}) {
+  return (
+    <Box>
       <Box
         sx={{
           display: "flex",
-          justifyContent: "center",
+          justifyContent: "space-between",
           alignItems: "center",
-          height: "100vh",
+          py: 0.3,
         }}
       >
-        <CircularProgress />
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
+          <Typography variant="body2" color="text.secondary">
+            {label}
+          </Typography>
+          {badge && (
+            <Chip
+              size="small"
+              label={badge}
+              color="warning"
+              variant="outlined"
+              sx={{ height: 20, fontSize: "0.65rem" }}
+            />
+          )}
+        </Box>
+        <Typography
+          variant="body2"
+          sx={{
+            fontFamily: "monospace",
+            fontWeight: 500,
+            color: color ?? "text.secondary",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {sign ? `${sign} ` : ""}$ {amount}
+        </Typography>
       </Box>
-    );
-  }
+      {sub && (
+        <Typography variant="caption" color="text.disabled" sx={{ pl: 1 }}>
+          {sub}
+        </Typography>
+      )}
+    </Box>
+  );
+}
 
-  if (!ingreso) {
-    return (
-      <Box sx={{ p: 3 }}>
-        <Typography>No se encontro el ingreso</Typography>
-      </Box>
-    );
-  }
+export default function VerPagoReparacionPage({
+  params,
+}: {
+  params: { id: string };
+}) {
+  const { authFetch } = useFetch();
+  const { generateRecibo } = useRecibo();
+  const id = parseInt(params.id);
+  const [pago, setPago] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const [reciboModalOpen, setReciboModalOpen] = useState(false);
+  const [reciboLoading, setReciboLoading] = useState(false);
+  const [pdfUrl, setPdfUrl] = useState("");
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({ open: false, message: "", severity: "success" });
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await authFetch(`/api/ingresos-reparacion/${id}`);
+        const body = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (!res.ok) {
+          setError(body?.error || "No se pudo cargar el pago");
+          return;
+        }
+        setPago(body);
+      } catch {
+        if (!cancelled) setError("Error de red al cargar el pago");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [authFetch, id]);
+
+  const handleGenerarRecibo = async () => {
+    if (!pago) return;
+    setReciboLoading(true);
+    try {
+      const url = await generateRecibo({ id: String(id) });
+      setPdfUrl(`${url}#zoom=100`);
+      setReciboModalOpen(true);
+    } catch {
+      setSnackbar({
+        open: true,
+        message: "Error al generar el recibo",
+        severity: "error",
+      });
+    } finally {
+      setReciboLoading(false);
+    }
+  };
+
+  const tipoOperacionId = pago?.tipoOperacionId as number | undefined;
+  const hasCheque =
+    typeof tipoOperacionId === "number" &&
+    CHEQUE_OPERACION_IDS.includes(tipoOperacionId) &&
+    !!pago?.chequeId;
+
+  const orden = pago?.ordenReparacion;
+  const auto = orden?.auto;
+  const autoLabel = auto
+    ? [auto.patent, auto.brand, auto.model].filter(Boolean).join(" - ")
+    : "—";
+
+  const otrosPagos = orden?.otrosPagos ?? [];
+  const ajustesEfectivos = orden?.ajustesConMontoEfectivo ?? [];
+  const porcentajePagado =
+    orden && orden.totalAPagar > 0
+      ? Math.min((orden.totalPagado / orden.totalAPagar) * 100, 100)
+      : 0;
 
   return (
-    <SnackbarProvider>
-      <IngresoReparacionProvider ingreso={ingreso}>
-        <Box sx={{ px: 3 }}>
-          <IngresoReparacionHeader />
+    <Box sx={{ p: { xs: 2, md: 3 } }}>
+      <Box
+        sx={{
+          mb: 2,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
+        <Button
+          component={Link}
+          href="/dashboard/ingresos-reparacion"
+          startIcon={<ArrowBackIcon />}
+          variant="text"
+        >
+          Volver al listado
+        </Button>
+        {pago && !error && (
+          <Stack direction="row" spacing={1}>
+            <Button
+              variant="outlined"
+              startIcon={
+                reciboLoading ? <CircularProgress size={18} /> : <SendIcon />
+              }
+              onClick={handleGenerarRecibo}
+              disabled={reciboLoading}
+            >
+              Generar Recibo
+            </Button>
+            <Button
+              component={Link}
+              href={`/dashboard/ingresos-reparacion/${id}/editar`}
+              startIcon={<EditIcon />}
+              variant="contained"
+            >
+              Editar
+            </Button>
+          </Stack>
+        )}
+      </Box>
 
-          {/* Fila 1: Informacion del pago + Gastos */}
-          <Grid container spacing={3} alignItems="stretch">
-            <Grid item xs={12} md={8} sx={{ display: "flex" }}>
-              <Box sx={{ width: "100%" }}>
-                <IngresoReparacionInfoSection />
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={4} sx={{ display: "flex" }}>
-              <Box sx={{ width: "100%" }}>
-                <IngresoReparacionGastosSection />
-              </Box>
-            </Grid>
-          </Grid>
+      <Card>
+        <CardHeader
+          title={
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: 1,
+              }}
+            >
+              <span>Pago #{id}</span>
+              {pago && (
+                <>
+                  <Chip
+                    label={pago.moneda}
+                    color={pago.moneda === "Dolar" ? "success" : "warning"}
+                    size="small"
+                    variant="outlined"
+                  />
+                  <Chip
+                    label={
+                      pago.reciboEnviado
+                        ? "Recibo Enviado"
+                        : "Recibo Pendiente"
+                    }
+                    color={pago.reciboEnviado ? "success" : "default"}
+                    size="small"
+                  />
+                </>
+              )}
+            </Box>
+          }
+          subheader={
+            pago && orden ? (
+              <Typography variant="body2" color="text.secondary">
+                {getFormattedDate(pago.fecha)} —{" "}
+                <Link
+                  href={`/dashboard/ordenes-reparacion/${orden.id}/ver`}
+                  style={{
+                    textDecoration: "underline",
+                    color: "inherit",
+                  }}
+                >
+                  OdR #{orden.id}
+                </Link>{" "}
+                — {pago.cliente?.fullName || "Sin cliente"} — {autoLabel}
+              </Typography>
+            ) : (
+              "Detalle del pago"
+            )
+          }
+          sx={{ px: { xs: 3, md: 4 }, pt: 3, pb: 1 }}
+        />
+        <CardContent sx={{ px: { xs: 3, md: 4 }, pb: 4 }}>
+          {error && <Alert severity="error">{error}</Alert>}
+          {!error && !pago && (
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+            </Box>
+          )}
+          {!error && pago && (
+            <Stack spacing={3}>
+              <Stack spacing={1.5}>
+                <SectionTitle>Información del pago</SectionTitle>
+                <Field label="Tipo de Operación">
+                  {pago.tipoOperacion?.label || "No especificado"}
+                </Field>
+                <Row>
+                  <Field label="Monto">
+                    <Box
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      {getFormattedPrice(pago.monto)}
+                      <Chip
+                        label={pago.moneda}
+                        color={
+                          pago.moneda === "Dolar" ? "success" : "warning"
+                        }
+                        size="small"
+                      />
+                    </Box>
+                  </Field>
+                  {pago.cotizacionDolar != null && (
+                    <Field label="Cotización">
+                      {`${getFormattedPrice(pago.cotizacionDolar)} ARS / USD`}
+                    </Field>
+                  )}
+                  <Field label="Fecha">{getFormattedDate(pago.fecha)}</Field>
+                </Row>
+                <Field label="Descripción">
+                  <Box
+                    component="span"
+                    sx={{ whiteSpace: "pre-wrap", fontWeight: 400 }}
+                  >
+                    {pago.descripcion || "Sin descripción"}
+                  </Box>
+                </Field>
+              </Stack>
 
-          {/* Fila 2: Orden asociada + Detalle de la orden */}
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            <Grid item xs={12} md={4} sx={{ display: "flex" }}>
-              <Box sx={{ width: "100%" }}>
-                <IngresoReparacionOrdenSection />
-              </Box>
-            </Grid>
-            <Grid item xs={12} md={8}>
-              <IngresoReparacionDetalleOrdenSection />
-            </Grid>
-          </Grid>
-        </Box>
-        <FormSnackbar />
-      </IngresoReparacionProvider>
-    </SnackbarProvider>
+              {hasCheque && (
+                <>
+                  <Divider />
+                  <Stack spacing={1.5}>
+                    <SectionTitle>Cheque asociado</SectionTitle>
+                    <ChequeDetailsView chequeId={pago.chequeId} />
+                  </Stack>
+                </>
+              )}
+
+              <Divider />
+
+              <Stack spacing={1.5}>
+                <SectionTitle>Cargos bancarios</SectionTitle>
+                <Row>
+                  <Field label="Gastos Bancarios">
+                    {getFormattedPrice(pago.gastosBancarios ?? 0)}
+                  </Field>
+                  <Field label="Gastos ARBA">
+                    {getFormattedPrice(pago.gastosArba ?? 0)}
+                  </Field>
+                </Row>
+              </Stack>
+
+              {orden && (
+                <>
+                  <Divider />
+                  <Stack spacing={1.5}>
+                    <SectionTitle>Detalle de la OdR #{orden.id}</SectionTitle>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.5,
+                      }}
+                    >
+                      <LineItem
+                        label="Repuestos"
+                        amount={fmt(orden.totalRepuestos)}
+                      />
+                      <LineItem
+                        label="Reparaciones de terceros"
+                        amount={fmt(orden.totalTerceros)}
+                      />
+                      <LineItem
+                        label="Mano de obra"
+                        amount={fmt(orden.totalManoDeObra)}
+                      />
+
+                      {ajustesEfectivos.length > 0 && (
+                        <>
+                          <Divider sx={{ my: 0.5 }} />
+                          <Typography
+                            variant="caption"
+                            fontWeight="bold"
+                            color="text.secondary"
+                          >
+                            Ajustes
+                          </Typography>
+                          {ajustesEfectivos.map((a: any, idx: number) => (
+                            <LineItem
+                              key={idx}
+                              label={
+                                a.tipo === "porcentual"
+                                  ? `${a.descripcion} (${Number(a.montoOriginal)}%)`
+                                  : a.descripcion
+                              }
+                              amount={fmt(Math.abs(a.montoEfectivo))}
+                              sign={a.esDescuento ? "-" : "+"}
+                              color={
+                                a.esDescuento ? "error.main" : "success.main"
+                              }
+                              badge={a.esInterno ? "Oculto" : undefined}
+                            />
+                          ))}
+                        </>
+                      )}
+
+                      <Divider sx={{ my: 0.5 }} />
+                      <Paper
+                        elevation={0}
+                        sx={{
+                          p: 1.5,
+                          backgroundColor: "primary.lighter",
+                          borderRadius: 1,
+                        }}
+                      >
+                        <Box
+                          display="flex"
+                          justifyContent="space-between"
+                          alignItems="center"
+                        >
+                          <Typography
+                            variant="subtitle1"
+                            fontWeight="bold"
+                            color="primary.dark"
+                          >
+                            Total OdR
+                          </Typography>
+                          <Typography
+                            variant="h6"
+                            fontWeight="bold"
+                            color="primary.dark"
+                            sx={{ fontFamily: "monospace" }}
+                          >
+                            $ {fmt(orden.totalAPagar)}
+                          </Typography>
+                        </Box>
+                      </Paper>
+                    </Box>
+
+                    <Typography
+                      variant="subtitle1"
+                      fontWeight="bold"
+                      sx={{ mt: 1 }}
+                    >
+                      Pagos realizados
+                    </Typography>
+
+                    <Table size="small">
+                      <TableHead>
+                        <TableRow>
+                          <TableCell>Pago</TableCell>
+                          <TableCell>Fecha</TableCell>
+                          <TableCell>Tipo</TableCell>
+                          <TableCell align="right">Monto</TableCell>
+                        </TableRow>
+                      </TableHead>
+                      <TableBody>
+                        <TableRow
+                          sx={{ backgroundColor: "action.selected" }}
+                        >
+                          <TableCell>
+                            <Typography variant="body2" fontWeight="bold">
+                              #{pago.id} (este pago)
+                            </Typography>
+                          </TableCell>
+                          <TableCell>
+                            {getFormattedDate(pago.fecha)}
+                          </TableCell>
+                          <TableCell>
+                            {pago.tipoOperacion?.label || "N/A"}
+                          </TableCell>
+                          <TableCell align="right">
+                            <Typography variant="body2" fontWeight="bold">
+                              {getFormattedPrice(pago.monto)}
+                              {pago.moneda === "Dolar" && (
+                                <Chip
+                                  label="USD"
+                                  size="small"
+                                  color="success"
+                                  sx={{
+                                    ml: 0.5,
+                                    height: 18,
+                                    fontSize: "0.65rem",
+                                  }}
+                                />
+                              )}
+                            </Typography>
+                          </TableCell>
+                        </TableRow>
+                        {otrosPagos.map((p: any) => (
+                          <TableRow key={p.id}>
+                            <TableCell>
+                              <Link
+                                href={`/dashboard/ingresos-reparacion/${p.id}`}
+                                style={{ textDecoration: "underline" }}
+                              >
+                                #{p.id}
+                              </Link>
+                            </TableCell>
+                            <TableCell>{getFormattedDate(p.fecha)}</TableCell>
+                            <TableCell>{p.tipoOperacion}</TableCell>
+                            <TableCell align="right">
+                              {getFormattedPrice(p.monto)}
+                              {p.moneda === "Dolar" && (
+                                <Chip
+                                  label="USD"
+                                  size="small"
+                                  color="success"
+                                  sx={{
+                                    ml: 0.5,
+                                    height: 18,
+                                    fontSize: "0.65rem",
+                                  }}
+                                />
+                              )}
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                        {otrosPagos.length === 0 && (
+                          <TableRow>
+                            <TableCell colSpan={4}>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                align="center"
+                              >
+                                No hay otros pagos registrados
+                              </Typography>
+                            </TableCell>
+                          </TableRow>
+                        )}
+                      </TableBody>
+                    </Table>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: 0.5,
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          Total pagado
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          fontWeight="bold"
+                          color="success.main"
+                          sx={{ fontFamily: "monospace" }}
+                        >
+                          $ {fmt(orden.totalPagado)}
+                        </Typography>
+                      </Box>
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          alignItems: "center",
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          Deuda pendiente
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          fontWeight="bold"
+                          color={
+                            orden.deuda > 0 ? "warning.main" : "success.main"
+                          }
+                          sx={{ fontFamily: "monospace" }}
+                        >
+                          $ {fmt(orden.deuda)}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ mt: 1 }}>
+                        <Box
+                          sx={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            mb: 0.5,
+                          }}
+                        >
+                          <Typography variant="caption" color="text.secondary">
+                            Progreso de pago
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {porcentajePagado.toFixed(0)}%
+                          </Typography>
+                        </Box>
+                        <LinearProgress
+                          variant="determinate"
+                          value={porcentajePagado}
+                          color={orden.deuda <= 0 ? "success" : "primary"}
+                          sx={{
+                            height: 8,
+                            borderRadius: 4,
+                            backgroundColor: "grey.200",
+                            "& .MuiLinearProgress-bar": { borderRadius: 4 },
+                          }}
+                        />
+                      </Box>
+                    </Box>
+                  </Stack>
+                </>
+              )}
+            </Stack>
+          )}
+        </CardContent>
+      </Card>
+
+      {pago && (
+        <RecibosModal
+          modalOpen={reciboModalOpen}
+          setModalOpen={setReciboModalOpen}
+          pdfUrl={pdfUrl}
+          selectedIngreso={{ id: String(id) }}
+          setSnackbar={setSnackbar}
+        />
+      )}
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={4000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
-};
-
-export default IngresoReparacionAdminPage;
+}

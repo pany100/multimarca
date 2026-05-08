@@ -162,7 +162,7 @@ function ResumenTransaccionesTable({
       case "IngresoPorVenta":
         return `/dashboard/ingresos-ventas/${id}/ver`;
       case "IngresoPorReparacion":
-        return `/dashboard/ingresos-reparacion/${id}/ver`;
+        return `/dashboard/ingresos-reparacion/${id}`;
       case "IngresoManualDeDinero":
         return `/dashboard/ingresos-manuales/${id}/ver`;
       default:
