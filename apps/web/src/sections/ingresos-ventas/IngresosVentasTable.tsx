@@ -6,8 +6,9 @@ import CustomTable, {
 import useRecibo from "@/hooks/useRecibo";
 import authFetch from "@/utils/authFetch";
 import { getFormattedDate, getFormattedPrice } from "@/utils/fieldHelper";
-import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
+import EditIcon from "@mui/icons-material/Edit";
 import SendIcon from "@mui/icons-material/Send";
+import VisibilityIcon from "@mui/icons-material/Visibility";
 import { Alert, Checkbox, Chip, MenuItem, Snackbar } from "@mui/material";
 import { GridRowParams } from "@mui/x-data-grid";
 import Link from "next/link";
@@ -156,13 +157,22 @@ function IngresosVentasTable({
     const defaultActions = extraActions ? extraActions(params) : [];
     const customActions: React.ReactNode[] = [
       <MenuItem
-        key="admin"
+        key="ver"
         onClick={() =>
           router.push(`/dashboard/ingresos-ventas/${params.id}`)
         }
       >
-        <ManageAccountsIcon sx={{ mr: 1 }} />
-        Administrar
+        <VisibilityIcon sx={{ mr: 1 }} />
+        Ver
+      </MenuItem>,
+      <MenuItem
+        key="editar"
+        onClick={() =>
+          router.push(`/dashboard/ingresos-ventas/${params.id}/editar`)
+        }
+      >
+        <EditIcon sx={{ mr: 1 }} />
+        Editar
       </MenuItem>,
       <MenuItem key="recibo" onClick={() => handleExtraAction(params.id)}>
         <SendIcon sx={{ mr: 1 }} />

@@ -160,7 +160,7 @@ function ResumenTransaccionesTable({
       case "Extraccion":
         return `/dashboard/extracciones/${id}/ver`;
       case "IngresoPorVenta":
-        return `/dashboard/ingresos-ventas/${id}/ver`;
+        return `/dashboard/ingresos-ventas/${id}`;
       case "IngresoPorReparacion":
         return `/dashboard/ingresos-reparacion/${id}`;
       case "IngresoManualDeDinero":

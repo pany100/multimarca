@@ -6,6 +6,7 @@ import CustomTable, {
 import {
   getFormattedPrice,
   getOperacionChequeLabel,
+  getOperacionChequeUrl,
 } from "@/utils/fieldHelper";
 import { Box, Grid } from "@mui/material";
 import { GridColDef } from "@mui/x-data-grid";
@@ -96,9 +97,23 @@ function ChequesTable({
       renderCell: (params) => {
         const chequeId = params.row.id;
         const operaciones = params.row.operaciones.map(
-          (operacion: { fecha: Date; tipo: string; descripcion: string }) => (
+          (operacion: {
+            idOperacion: number;
+            fecha: Date;
+            tipo: string;
+            descripcion: string;
+          }) => (
             <Box key={`${chequeId}-${operacion.fecha.toString()}`}>
-              * {getOperacionChequeLabel(operacion)}
+              *{" "}
+              <Link
+                href={getOperacionChequeUrl(
+                  operacion.tipo,
+                  operacion.idOperacion
+                )}
+                style={{ textDecoration: "underline", color: "inherit" }}
+              >
+                {getOperacionChequeLabel(operacion)}
+              </Link>
             </Box>
           )
         );

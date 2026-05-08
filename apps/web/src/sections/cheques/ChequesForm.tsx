@@ -4,7 +4,11 @@ import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import ImageInput from "@/components/ImageInput";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
-import { getFormattedChequeType } from "@/utils/fieldHelper";
+import {
+  getFormattedChequeType,
+  getOperacionChequeUrl,
+} from "@/utils/fieldHelper";
+import Link from "next/link";
 import {
   Box,
   Grid,
@@ -99,7 +103,17 @@ const ChequesForm = () => {
                     index: number
                   ) => (
                     <TableRow key={index}>
-                      <TableCell>{operacion.idOperacion}</TableCell>
+                      <TableCell>
+                        <Link
+                          href={getOperacionChequeUrl(
+                            operacion.tipo,
+                            operacion.idOperacion
+                          )}
+                          style={{ textDecoration: "underline" }}
+                        >
+                          {operacion.idOperacion}
+                        </Link>
+                      </TableCell>
                       <TableCell>
                         {getFormattedChequeType(operacion.tipo)}
                       </TableCell>

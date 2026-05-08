@@ -50,6 +50,23 @@ function getFormattedChequeType(type: string) {
   }
 }
 
+function getOperacionChequeUrl(type: string, id: number | string) {
+  switch (type) {
+    case "VENTA":
+      return `/dashboard/ingresos-ventas/${id}`;
+    case "GASTO":
+      return `/dashboard/gastos/${id}/ver`;
+    case "EXTRACCION":
+      return `/dashboard/extracciones/${id}/ver`;
+    case "INGRESO_MANUAL":
+      return `/dashboard/ingresos-manuales/${id}/ver`;
+    case "INGRESO_REPARACION":
+      return `/dashboard/ingresos-reparacion/${id}`;
+    default:
+      return "#";
+  }
+}
+
 function getOperacionChequeLabel({
   fecha,
   tipo,
@@ -121,6 +138,7 @@ export {
   getFormattedPrice,
   getFormattedPriceDolar,
   getOperacionChequeLabel,
+  getOperacionChequeUrl,
   getSortedCheckControls,
   getSortedGroupControls,
   getSortedTextControls,
