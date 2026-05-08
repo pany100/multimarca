@@ -1,255 +1,239 @@
 "use client";
 
+import ChequeDetailsView from "@/components/cheques/ChequeDetailsView";
 import { useFetch } from "@/contexts/FetchContext";
+import { CHEQUE_OPERACION_IDS } from "@/utils/chequeUtils";
 import { getFormattedDate, getFormattedPrice } from "@/utils/fieldHelper";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,
   Box,
   Button,
+  Card,
+  CardContent,
+  CardHeader,
   Chip,
   CircularProgress,
   Divider,
-  Grid,
-  Paper,
-  Snackbar,
+  Stack,
   Typography,
 } from "@mui/material";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function ExtraccionVerPage({
+const SectionTitle = ({ children }: { children: React.ReactNode }) => (
+  <Typography
+    variant="overline"
+    sx={{
+      color: "text.secondary",
+      letterSpacing: 1,
+      fontWeight: 600,
+    }}
+  >
+    {children}
+  </Typography>
+);
+
+const Field = ({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) => (
+  <Box sx={{ display: "flex", flexDirection: "column" }}>
+    <Typography variant="caption" color="text.secondary">
+      {label}
+    </Typography>
+    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+      {children}
+    </Typography>
+  </Box>
+);
+
+const Row = ({ children }: { children: React.ReactNode }) => (
+  <Box
+    sx={{
+      display: "flex",
+      flexDirection: { xs: "column", md: "row" },
+      gap: 2,
+      "& > *": { flex: 1, minWidth: 0 },
+    }}
+  >
+    {children}
+  </Box>
+);
+
+export default function VerExtraccionPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const router = useRouter();
   const { authFetch } = useFetch();
+  const id = parseInt(params.id);
   const [extraccion, setExtraccion] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
+
   useEffect(() => {
-    const fetchExtraccion = async () => {
+    let cancelled = false;
+    (async () => {
       try {
-        setLoading(true);
-        const response = await authFetch(`/api/extracciones/${params.id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setExtraccion(data);
-        } else {
-          setError("Error al obtener la extracción");
+        const res = await authFetch(`/api/extracciones/${id}`);
+        const body = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (!res.ok) {
+          setError(body?.error || "No se pudo cargar la extracción");
+          return;
         }
-      } catch (err) {
-        setError("Error al cargar los datos de la extracción");
-        console.error(err);
-      } finally {
-        setLoading(false);
+        setExtraccion(body);
+      } catch {
+        if (!cancelled) setError("Error de red al cargar la extracción");
       }
+    })();
+    return () => {
+      cancelled = true;
     };
+  }, [authFetch, id]);
 
-    fetchExtraccion();
-  }, [params.id, authFetch]);
-
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "50vh",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error || !extraccion) {
-    return (
-      <Box
-        sx={{
-          p: 3,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Typography variant="h6" color="error" gutterBottom>
-          {error || "No se pudo cargar la extracción"}
-        </Typography>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => router.back()}
-          sx={{ mt: 2 }}
-        >
-          Volver
-        </Button>
-      </Box>
-    );
-  }
+  const tipoOperacionId = extraccion?.tipoOperacionId as number | undefined;
+  const hasCheque =
+    typeof tipoOperacionId === "number" &&
+    CHEQUE_OPERACION_IDS.includes(tipoOperacionId) &&
+    !!extraccion?.chequeId;
 
   return (
-    <Paper
-      elevation={1}
-      sx={{
-        p: { xs: 2, md: 3 },
-        borderRadius: 2,
-        mb: 3,
-      }}
-    >
-      {/* Header */}
+    <Box sx={{ p: { xs: 2, md: 3 } }}>
       <Box
         sx={{
+          mb: 2,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 3,
+          flexWrap: "wrap",
+          gap: 1,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Button
+          component={Link}
+          href="/dashboard/extracciones"
+          startIcon={<ArrowBackIcon />}
+          variant="text"
+        >
+          Volver al listado
+        </Button>
+        {extraccion && !error && (
           <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            sx={{ mr: 2 }}
-            onClick={() => router.back()}
+            component={Link}
+            href={`/dashboard/extracciones/${id}/editar`}
+            startIcon={<EditIcon />}
+            variant="contained"
           >
-            Volver
+            Editar
           </Button>
-          <Typography variant="h5" component="h1">
-            Extracción #{extraccion.id}
-          </Typography>
-        </Box>
+        )}
       </Box>
 
-      <Divider sx={{ my: 2 }} />
+      <Card>
+        <CardHeader
+          title={`Extracción #${id}`}
+          subheader="Detalle de la extracción"
+          sx={{ px: { xs: 3, md: 4 }, pt: 3, pb: 1 }}
+        />
+        <CardContent sx={{ px: { xs: 3, md: 4 }, pb: 4 }}>
+          {error && <Alert severity="error">{error}</Alert>}
+          {!error && !extraccion && (
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+            </Box>
+          )}
+          {!error && extraccion && (
+            <Stack spacing={3}>
+              <Stack spacing={1.5}>
+                <SectionTitle>Fecha y usuario</SectionTitle>
+                <Row>
+                  <Field label="Fecha">
+                    {getFormattedDate(extraccion.fecha)}
+                  </Field>
+                  <Field label="Usuario">
+                    {extraccion.usuario?.fullName || "No especificado"}
+                  </Field>
+                </Row>
+              </Stack>
 
-      {/* Basic Info */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Fecha
-          </Typography>
-          <Typography variant="body1">
-            {getFormattedDate(extraccion.fecha)}
-          </Typography>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Monto
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{ fontWeight: "bold", fontSize: "1.1rem" }}
-          >
-            {getFormattedPrice(extraccion.monto)}{" "}
-            <Chip
-              label={extraccion.moneda}
-              color={extraccion.moneda === "Dolar" ? "success" : "warning"}
-              size="small"
-              sx={{ ml: 1 }}
-            />
-          </Typography>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Gastos Bancarios
-          </Typography>
-          <Typography variant="body1">
-            {getFormattedPrice(extraccion.gastosBancarios)}
-          </Typography>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Gastos ARBA
-          </Typography>
-          <Typography variant="body1">
-            {getFormattedPrice(extraccion.gastosArba)}
-          </Typography>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Usuario
-          </Typography>
-          <Typography variant="body1">
-            {extraccion.usuario?.fullName || "No especificado"}
-          </Typography>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Tipo de Operación
-          </Typography>
-          <Typography variant="body1">
-            {extraccion.tipoOperacion?.label &&
-            extraccion.tipoOperacion.label === "Cheque" &&
-            extraccion.chequeId ? (
-              <Link
-                href={`/dashboard/cheques/${extraccion.chequeId}`}
-                style={{ textDecoration: "underline" }}
-              >
-                Cheque{" "}
-                {extraccion.cheque?.rechazado ? "(Rechazado, revisar)" : ""}
-              </Link>
-            ) : (
-              extraccion.tipoOperacion?.label || "No especificado"
-            )}
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Motivo
-          </Typography>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
-              bgcolor: "background.default",
-              borderRadius: 1,
-              mt: 1,
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            <Typography variant="body1">
-              {extraccion.motivo || "Sin motivo especificado"}
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
+              <Divider />
 
-      {/* Dolar Info if applicable */}
-      {extraccion.moneda === "Dolar" && (
-        <>
-          <Divider sx={{ my: 2 }} />
-          <Typography variant="h6" gutterBottom>
-            Cotización del Dólar
-          </Typography>
-          <Grid item xs={12} md={6}>
-            <Typography variant="body1">
-              {getFormattedPrice(extraccion.cotizacionDolar)}
-            </Typography>
-          </Grid>
-        </>
-      )}
+              <Stack spacing={1.5}>
+                <SectionTitle>Detalles de la extracción</SectionTitle>
+                <Field label="Tipo de Operación">
+                  {extraccion.tipoOperacion?.label || "No especificado"}
+                </Field>
+                <Row>
+                  <Field label="Monto">
+                    <Box
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      {getFormattedPrice(extraccion.monto)}
+                      <Chip
+                        label={extraccion.moneda}
+                        color={
+                          extraccion.moneda === "Dolar"
+                            ? "success"
+                            : "warning"
+                        }
+                        size="small"
+                      />
+                    </Box>
+                  </Field>
+                  {extraccion.moneda === "Dolar" && (
+                    <Field label="Cotización">
+                      {extraccion.cotizacionDolar != null
+                        ? `${getFormattedPrice(extraccion.cotizacionDolar)} ARS / USD`
+                        : "—"}
+                    </Field>
+                  )}
+                </Row>
+                <Field label="Motivo">
+                  <Box
+                    component="span"
+                    sx={{ whiteSpace: "pre-wrap", fontWeight: 400 }}
+                  >
+                    {extraccion.motivo || "Sin motivo"}
+                  </Box>
+                </Field>
+              </Stack>
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert
-          severity={snackbar.severity}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Paper>
+              {hasCheque && (
+                <>
+                  <Divider />
+                  <Stack spacing={1.5}>
+                    <SectionTitle>Cheque asociado</SectionTitle>
+                    <ChequeDetailsView chequeId={extraccion.chequeId} />
+                  </Stack>
+                </>
+              )}
+
+              <Divider />
+
+              <Stack spacing={1.5}>
+                <SectionTitle>Cargos bancarios</SectionTitle>
+                <Row>
+                  <Field label="Gastos Bancarios">
+                    {getFormattedPrice(extraccion.gastosBancarios ?? 0)}
+                  </Field>
+                  <Field label="Gastos ARBA">
+                    {getFormattedPrice(extraccion.gastosArba ?? 0)}
+                  </Field>
+                </Row>
+              </Stack>
+            </Stack>
+          )}
+        </CardContent>
+      </Card>
+    </Box>
   );
 }

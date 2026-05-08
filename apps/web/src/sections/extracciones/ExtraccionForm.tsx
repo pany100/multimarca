@@ -4,7 +4,7 @@ import ChequePicker from "@/components/cheques/ChequePicker";
 import CustomInputText from "@/components/formV2/CustomInputText";
 import CustomSelect from "@/components/formV2/CustomSelect";
 import { useFetch } from "@/contexts/FetchContext";
-import useAdminsAndGaby from "@/hooks/useAdminsAndGaby";
+import useAdmins from "@/hooks/useAdmins";
 import useFixedSelectData from "@/hooks/useFixedSelectData";
 import useTipoOperacion from "@/hooks/useTipoOperacion";
 import { CHEQUE_OPERACION_IDS } from "@/utils/chequeUtils";
@@ -46,7 +46,7 @@ const schema = yup.object({
   }),
   fecha: yup.date().required("La fecha es requerida"),
   usuarioId: yup.number().required("El usuario es requerido"),
-  descripcion: yup.string().required("La descripción es requerida"),
+  motivo: yup.string().required("El motivo es requerido"),
   chequeId: yup
     .number()
     .nullable()
@@ -94,16 +94,12 @@ type Props = {
   initialValues?: Record<string, any>;
 };
 
-const IngresoManualForm = ({
-  mode = "create",
-  id,
-  initialValues,
-}: Props) => {
+const ExtraccionForm = ({ mode = "create", id, initialValues }: Props) => {
   const router = useRouter();
   const { authFetch } = useFetch();
-  const { admins } = useAdminsAndGaby();
+  const { admins } = useAdmins();
   const { currency } = useFixedSelectData();
-  const { tiposOperacion } = useTipoOperacion("ingreso");
+  const { tiposOperacion } = useTipoOperacion("gasto");
   const [feedback, setFeedback] = useState<{
     type: "success" | "error";
     message: string;
@@ -136,9 +132,7 @@ const IngresoManualForm = ({
 
   const onSubmit = async (data: any) => {
     try {
-      const url = isEdit
-        ? `/api/ingresos-manuales/${id}`
-        : "/api/ingresos-manuales";
+      const url = isEdit ? `/api/extracciones/${id}` : "/api/extracciones";
       const method = isEdit ? "PUT" : "POST";
       const response = await authFetch(url, {
         method,
@@ -152,23 +146,23 @@ const IngresoManualForm = ({
             body?.error ||
             (isEdit
               ? "No se pudieron guardar los cambios"
-              : "No se pudo crear el ingreso"),
+              : "No se pudo crear la extracción"),
         });
         return;
       }
       setFeedback({
         type: "success",
         message: isEdit
-          ? "Ingreso actualizado con éxito"
-          : "Ingreso creado con éxito",
+          ? "Extracción actualizada con éxito"
+          : "Extracción creada con éxito",
       });
-      setTimeout(() => router.push("/dashboard/ingresos-manuales"), 600);
+      setTimeout(() => router.push("/dashboard/extracciones"), 600);
     } catch {
       setFeedback({
         type: "error",
         message: isEdit
           ? "Error de red al guardar los cambios"
-          : "Error de red al crear el ingreso",
+          : "Error de red al crear la extracción",
       });
     }
   };
@@ -192,7 +186,7 @@ const IngresoManualForm = ({
           <Divider />
 
           <Stack spacing={1.5}>
-            <SectionTitle>Detalles del ingreso</SectionTitle>
+            <SectionTitle>Detalles de la extracción</SectionTitle>
             <CustomSelect
               options={tiposOperacion}
               name="tipoOperacionId"
@@ -225,8 +219,8 @@ const IngresoManualForm = ({
               />
             </Row>
             <CustomInputText
-              name="descripcion"
-              label="Descripción"
+              name="motivo"
+              label="Motivo"
               multiline
               minRows={2}
             />
@@ -278,7 +272,7 @@ const IngresoManualForm = ({
           >
             <Button
               variant="outlined"
-              onClick={() => router.push("/dashboard/ingresos-manuales")}
+              onClick={() => router.push("/dashboard/extracciones")}
               disabled={isSubmitting}
             >
               Cancelar
@@ -293,7 +287,7 @@ const IngresoManualForm = ({
                 ? "Guardando..."
                 : isEdit
                   ? "Guardar cambios"
-                  : "Guardar ingreso"}
+                  : "Guardar extracción"}
             </Button>
           </Stack>
         </Stack>
@@ -319,4 +313,4 @@ const IngresoManualForm = ({
   );
 };
 
-export default IngresoManualForm;
+export default ExtraccionForm;
