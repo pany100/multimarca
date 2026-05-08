@@ -7,10 +7,12 @@ import GastosForm, { schema } from "@/sections/gastos/GastosForm";
 import GastosTable from "@/sections/gastos/GastosTable";
 import ResumenUltimaSemana from "@/sections/gastos/ResumenUltimaSemana";
 import { Box } from "@mui/material";
+import { useRouter } from "next/navigation";
 
 const GastosPage = () => {
   const { userData } = useAuth();
   const permisos = userData?.permisos || [];
+  const router = useRouter();
 
   return (
     <Box>
@@ -21,6 +23,10 @@ const GastosPage = () => {
         form={GastosForm}
         schema={schema}
         crudActions={[CrudAction.ADD, CrudAction.EDIT, CrudAction.DELETE]}
+        onAddClick={() => router.push("/dashboard/gastos/nuevo")}
+        onEditClick={(entity) =>
+          router.push(`/dashboard/gastos/${entity.id}/editar`)
+        }
       />
     </Box>
   );

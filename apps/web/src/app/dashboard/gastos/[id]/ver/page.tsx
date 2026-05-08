@@ -1,318 +1,248 @@
 "use client";
 
+import ChequeDetailsView from "@/components/cheques/ChequeDetailsView";
 import { useFetch } from "@/contexts/FetchContext";
-import { getFormattedPrice } from "@/utils/fieldHelper";
+import { CHEQUE_OPERACION_IDS } from "@/utils/chequeUtils";
+import { getFormattedDate, getFormattedPrice } from "@/utils/fieldHelper";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EditIcon from "@mui/icons-material/Edit";
 import {
+  Alert,
   Box,
   Button,
   Card,
   CardContent,
+  CardHeader,
+  Chip,
   CircularProgress,
   Divider,
-  Grid,
   Stack,
   Typography,
 } from "@mui/material";
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 
-const GastoDetallePage = ({ params }: { params: { id: string } }) => {
-  const [gasto, setGasto] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+const SectionTitle = ({ children }: { children: React.ReactNode }) => (
+  <Typography
+    variant="overline"
+    sx={{
+      color: "text.secondary",
+      letterSpacing: 1,
+      fontWeight: 600,
+    }}
+  >
+    {children}
+  </Typography>
+);
+
+const Field = ({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) => (
+  <Box sx={{ display: "flex", flexDirection: "column" }}>
+    <Typography variant="caption" color="text.secondary">
+      {label}
+    </Typography>
+    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+      {children}
+    </Typography>
+  </Box>
+);
+
+const Row = ({ children }: { children: React.ReactNode }) => (
+  <Box
+    sx={{
+      display: "flex",
+      flexDirection: { xs: "column", md: "row" },
+      gap: 2,
+      "& > *": { flex: 1, minWidth: 0 },
+    }}
+  >
+    {children}
+  </Box>
+);
+
+export default function VerGastoPage({
+  params,
+}: {
+  params: { id: string };
+}) {
   const { authFetch } = useFetch();
-
-  const fetchGasto = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await authFetch(`/api/gastos/${params.id}`);
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || "Error al cargar el gasto");
-      }
-
-      const data = await response.json();
-      setGasto(data);
-    } catch (err: any) {
-      console.error("Error fetching gasto:", err);
-      setError(err.message || "Ha ocurrido un error al cargar el gasto");
-    } finally {
-      setLoading(false);
-    }
-  }, [authFetch, params.id]);
+  const id = parseInt(params.id);
+  const [gasto, setGasto] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchGasto();
-  }, [fetchGasto]);
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await authFetch(`/api/gastos/${id}`);
+        const body = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (!res.ok) {
+          setError(body?.error || "No se pudo cargar el gasto");
+          return;
+        }
+        setGasto(body);
+      } catch {
+        if (!cancelled) setError("Error de red al cargar el gasto");
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [authFetch, id]);
 
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          minHeight: "300px",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 2,
-          p: 3,
-        }}
-      >
-        <Typography color="error" variant="h6">
-          {error}
-        </Typography>
-        <Button
-          component={Link}
-          href="/dashboard/gastos"
-          startIcon={<ArrowBackIcon />}
-          variant="contained"
-        >
-          Volver a Gastos
-        </Button>
-      </Box>
-    );
-  }
-
-  if (!gasto) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: 2,
-          p: 3,
-        }}
-      >
-        <Typography variant="h6">Gasto no encontrado</Typography>
-        <Button
-          component={Link}
-          href="/dashboard/gastos"
-          startIcon={<ArrowBackIcon />}
-          variant="contained"
-        >
-          Volver a Gastos
-        </Button>
-      </Box>
-    );
-  }
-
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("es-AR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  };
+  const tipoOperacionId = gasto?.tipoOperacionId as number | undefined;
+  const hasCheque =
+    typeof tipoOperacionId === "number" &&
+    CHEQUE_OPERACION_IDS.includes(tipoOperacionId) &&
+    !!gasto?.chequeId;
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Stack
-        direction="row"
-        justifyContent="space-between"
-        alignItems="center"
-        mb={3}
+    <Box sx={{ p: { xs: 2, md: 3 } }}>
+      <Box
+        sx={{
+          mb: 2,
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          flexWrap: "wrap",
+          gap: 1,
+        }}
       >
-        <Typography variant="h5" component="h1" fontWeight="bold">
-          Detalle de Gasto
-        </Typography>
         <Button
           component={Link}
           href="/dashboard/gastos"
           startIcon={<ArrowBackIcon />}
-          variant="outlined"
+          variant="text"
         >
-          Volver a Gastos
+          Volver al listado
         </Button>
-      </Stack>
+        {gasto && !error && (
+          <Button
+            component={Link}
+            href={`/dashboard/gastos/${id}/editar`}
+            startIcon={<EditIcon />}
+            variant="contained"
+          >
+            Editar
+          </Button>
+        )}
+      </Box>
 
-      <Card elevation={2} sx={{ mb: 4 }}>
-        <CardContent>
-          <Grid container spacing={2}>
-            <Grid item xs={12} md={6}>
-              <Stack spacing={2}>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    ID
-                  </Typography>
-                  <Typography variant="body1" fontWeight="medium">
-                    {gasto.id}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Nombre
-                  </Typography>
-                  <Typography variant="body1" fontWeight="medium">
-                    {gasto.nombre}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Fecha
-                  </Typography>
-                  <Typography variant="body1" fontWeight="medium">
-                    {formatDate(gasto.fecha)}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Categoría
-                  </Typography>
-                  <Typography variant="body1" fontWeight="medium">
-                    {gasto.categoria?.nombre || "Sin categoría"}
-                  </Typography>
-                </Box>
-              </Stack>
-            </Grid>
-            <Grid item xs={12} md={6}>
-              <Stack spacing={2}>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Monto
-                  </Typography>
-                  <Typography
-                    variant="h5"
-                    fontWeight="bold"
-                    color="primary.main"
-                  >
-                    {getFormattedPrice(gasto.precio)}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Gastos Bancarios
-                  </Typography>
-                  <Typography variant="body1" fontWeight="medium">
-                    {getFormattedPrice(gasto.gastosBancarios)}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Gastos ARBA
-                  </Typography>
-                  <Typography variant="body1" fontWeight="medium">
-                    {getFormattedPrice(gasto.gastosArba)}
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="caption" color="text.secondary">
-                    Tipo de Operación
-                  </Typography>
-                  <Typography variant="body1" fontWeight="medium">
-                    {gasto.tipoOperacion?.label || "N/A"}
-                  </Typography>
-                </Box>
-                {gasto.proveedor && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Proveedor
-                    </Typography>
-                    <Typography variant="body1" fontWeight="medium">
-                      {gasto.proveedor.name}
-                    </Typography>
-                  </Box>
-                )}
+      <Card>
+        <CardHeader
+          title={`Gasto #${id}`}
+          subheader="Detalle del gasto"
+          sx={{ px: { xs: 3, md: 4 }, pt: 3, pb: 1 }}
+        />
+        <CardContent sx={{ px: { xs: 3, md: 4 }, pb: 4 }}>
+          {error && <Alert severity="error">{error}</Alert>}
+          {!error && !gasto && (
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+            </Box>
+          )}
+          {!error && gasto && (
+            <Stack spacing={3}>
+              <Stack spacing={1.5}>
+                <SectionTitle>Fecha y categoría</SectionTitle>
+                <Row>
+                  <Field label="Fecha">{getFormattedDate(gasto.fecha)}</Field>
+                  <Field label="Categoría">
+                    {gasto.categoria?.nombre || "No especificada"}
+                  </Field>
+                </Row>
                 {gasto.mecanico && (
-                  <Box>
-                    <Typography variant="caption" color="text.secondary">
-                      Mecánico
-                    </Typography>
-                    <Typography variant="body1" fontWeight="medium">
-                      {gasto.mecanico.name}
-                    </Typography>
-                  </Box>
+                  <Field label="Empleado">
+                    {gasto.mecanico.fullName ||
+                      `${gasto.mecanico.firstName ?? ""} ${gasto.mecanico.lastName ?? ""}`.trim() ||
+                      "—"}
+                  </Field>
+                )}
+                {gasto.proveedor && (
+                  <Field label="Proveedor">
+                    {gasto.proveedor.nombre ||
+                      gasto.proveedor.razonSocial ||
+                      "—"}
+                  </Field>
                 )}
               </Stack>
-            </Grid>
-          </Grid>
 
-          {gasto.detalle && (
-            <>
-              <Divider sx={{ my: 2 }} />
-              <Box>
-                <Typography variant="caption" color="text.secondary">
-                  Detalle
-                </Typography>
-                <Typography variant="body1" sx={{ whiteSpace: "pre-wrap" }}>
-                  {gasto.detalle}
-                </Typography>
-              </Box>
-            </>
-          )}
+              <Divider />
 
-          {gasto.cheque && (
-            <>
-              <Divider sx={{ my: 2 }} />
-              <Box>
-                <Typography variant="h6" gutterBottom>
-                  Información del Cheque
-                </Typography>
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6} md={4}>
-                    <Typography variant="caption" color="text.secondary">
-                      Número
-                    </Typography>
-                    <Typography variant="body1" fontWeight="medium">
-                      {gasto.cheque.numero}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
-                    <Typography variant="caption" color="text.secondary">
-                      Banco
-                    </Typography>
-                    <Typography variant="body1" fontWeight="medium">
-                      {gasto.cheque.banco}
-                    </Typography>
-                  </Grid>
-                  <Grid item xs={12} sm={6} md={4}>
-                    <Typography variant="caption" color="text.secondary">
-                      Fecha de Cobro
-                    </Typography>
-                    <Typography variant="body1" fontWeight="medium">
-                      {formatDate(gasto.cheque.fechaCobro)}
-                    </Typography>
-                  </Grid>
-                </Grid>
-              </Box>
-            </>
-          )}
+              <Stack spacing={1.5}>
+                <SectionTitle>Detalles del gasto</SectionTitle>
+                <Field label="Tipo de Operación">
+                  {gasto.tipoOperacion?.label || "No especificado"}
+                </Field>
+                <Field label="Nombre">{gasto.nombre || "—"}</Field>
+                <Row>
+                  <Field label="Monto">
+                    <Box
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      {getFormattedPrice(gasto.precio)}
+                      <Chip
+                        label={gasto.moneda}
+                        color={
+                          gasto.moneda === "Dolar" ? "success" : "warning"
+                        }
+                        size="small"
+                      />
+                    </Box>
+                  </Field>
+                  {gasto.cotizacionDolar != null && (
+                    <Field label="Cotización">
+                      {`${getFormattedPrice(gasto.cotizacionDolar)} ARS / USD`}
+                    </Field>
+                  )}
+                </Row>
+                <Field label="Detalle">
+                  <Box
+                    component="span"
+                    sx={{ whiteSpace: "pre-wrap", fontWeight: 400 }}
+                  >
+                    {gasto.detalle || "Sin detalle"}
+                  </Box>
+                </Field>
+              </Stack>
 
-          {/* Dolar Info if applicable */}
-          {gasto.moneda === "Dolar" && (
-            <>
-              <Divider sx={{ my: 2 }} />
-              <Typography variant="h6" gutterBottom>
-                Cotización del Dólar
-              </Typography>
-              <Grid item xs={12} md={6}>
-                <Typography variant="body1">
-                  {getFormattedPrice(gasto.cotizacionDolar)}
-                </Typography>
-              </Grid>
-            </>
+              {hasCheque && (
+                <>
+                  <Divider />
+                  <Stack spacing={1.5}>
+                    <SectionTitle>Cheque asociado</SectionTitle>
+                    <ChequeDetailsView chequeId={gasto.chequeId} />
+                  </Stack>
+                </>
+              )}
+
+              <Divider />
+
+              <Stack spacing={1.5}>
+                <SectionTitle>Cargos bancarios</SectionTitle>
+                <Row>
+                  <Field label="Gastos Bancarios">
+                    {getFormattedPrice(gasto.gastosBancarios ?? 0)}
+                  </Field>
+                  <Field label="Gastos ARBA">
+                    {getFormattedPrice(gasto.gastosArba ?? 0)}
+                  </Field>
+                </Row>
+              </Stack>
+            </Stack>
           )}
         </CardContent>
       </Card>
     </Box>
   );
-};
-
-export default GastoDetallePage;
+}
