@@ -82,7 +82,7 @@ type ChequeEditRequestData = Omit<Cheque, "numeroCheque" | "emisor"> & {
   owner: string;
 };
 
-const saveCheque = async ({ cheque }: SaveChequeProps) => {
+export const saveCheque = async ({ cheque }: SaveChequeProps) => {
   const {
     banco,
     emisor,

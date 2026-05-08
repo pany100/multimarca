@@ -47,7 +47,12 @@ const CommonModalForm = ({
     >
       <DialogTitle sx={{ paddingBottom: 0 }}>{title}</DialogTitle>
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit(onSubmit)}>
+        <form
+          onSubmit={(e) => {
+            e.stopPropagation();
+            methods.handleSubmit(onSubmit)(e);
+          }}
+        >
           <DialogContent sx={{ padding: 2 }}>{children}</DialogContent>
           <DialogActions sx={{ padding: 2 }}>
             <Button onClick={onClose} disabled={loading}>
