@@ -2,14 +2,13 @@
 
 import { useFetch } from "@/contexts/FetchContext";
 import useChequesAutocomplete from "@/hooks/useChequesAutocomplete";
-import { getFormattedDate, getFormattedPrice } from "@/utils/fieldHelper";
+import { getFormattedPrice } from "@/utils/fieldHelper";
 import AddIcon from "@mui/icons-material/Add";
 import EditIcon from "@mui/icons-material/Edit";
 import {
   Autocomplete,
   Box,
   Button,
-  CircularProgress,
   Divider,
   Paper,
   Stack,
@@ -17,24 +16,12 @@ import {
   Typography,
 } from "@mui/material";
 import debounce from "lodash/debounce";
-import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Controller, useFormContext } from "react-hook-form";
+import ChequeDetailsView, { ChequeDetailsData } from "./ChequeDetailsView";
 import ChequeFormDialog, { ChequeSummary } from "./ChequeFormDialog";
 
 type Option = { label: string; value: number };
-
-type ChequeDetails = {
-  id: number;
-  numero: string;
-  banco: string;
-  owner: string;
-  importe: number;
-  fechaEmision: string;
-  fechaCobro: string;
-  picturePath: string | null;
-  rechazado?: string;
-};
 
 type Props = {
   name?: string;
@@ -50,22 +37,6 @@ const buildLabel = (cheque: {
     cheque.importe
   )}`;
 
-const isPdfPath = (path: string) => {
-  const clean = path.split("?")[0].split("#")[0];
-  return clean.toLowerCase().endsWith(".pdf");
-};
-
-const DetailRow = ({ label, value }: { label: string; value: string }) => (
-  <Box sx={{ display: "flex", flexDirection: "column" }}>
-    <Typography variant="caption" color="text.secondary">
-      {label}
-    </Typography>
-    <Typography variant="body2" sx={{ fontWeight: 500 }}>
-      {value}
-    </Typography>
-  </Box>
-);
-
 const ChequePicker = ({ name = "chequeId", label = "Cheque" }: Props) => {
   const {
     control,
@@ -76,62 +47,28 @@ const ChequePicker = ({ name = "chequeId", label = "Cheque" }: Props) => {
   const chequeId = watch(name) as number | null | undefined;
 
   const { authFetch } = useFetch();
-  const { searchCheques, initialCheque } = useChequesAutocomplete();
+  const { searchCheques } = useChequesAutocomplete();
 
   const [options, setOptions] = useState<Option[]>([]);
   const [loading, setLoading] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<"create" | "edit">("create");
-  const [details, setDetails] = useState<ChequeDetails | null>(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
-  const [detailsError, setDetailsError] = useState<string | null>(null);
+  const [details, setDetails] = useState<ChequeDetailsData | null>(null);
   const [detailsRefresh, setDetailsRefresh] = useState(0);
-  const initialLoadedFor = useRef<number | null>(null);
-
-  useEffect(() => {
-    if (!chequeId) return;
-    if (options.some((o) => o.value === chequeId)) return;
-    if (initialLoadedFor.current === chequeId) return;
-    initialLoadedFor.current = chequeId;
-    let cancelled = false;
-    (async () => {
-      try {
-        const option = await initialCheque(String(chequeId));
-        if (cancelled) return;
-        setOptions((prev) =>
-          prev.some((o) => o.value === option.value)
-            ? prev
-            : [{ label: option.label, value: Number(option.value) }, ...prev]
-        );
-      } catch {
-        // silent — el field quedará sin label hasta que el usuario busque
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [chequeId, options, initialCheque]);
 
   useEffect(() => {
     if (!chequeId) {
       setDetails(null);
-      setDetailsError(null);
       return;
     }
     let cancelled = false;
-    setDetailsLoading(true);
-    setDetailsError(null);
     (async () => {
       try {
         const res = await authFetch(`/api/cheques/${chequeId}`);
-        const body = await res.json().catch(() => ({}));
+        if (!res.ok) return;
+        const body = await res.json();
         if (cancelled) return;
-        if (!res.ok) {
-          setDetails(null);
-          setDetailsError(body?.error || "No se pudo cargar el cheque");
-          return;
-        }
-        setDetails({
+        const cheque: ChequeDetailsData = {
           id: body.id,
           numero: body.numero,
           banco: body.banco,
@@ -141,11 +78,19 @@ const ChequePicker = ({ name = "chequeId", label = "Cheque" }: Props) => {
           fechaCobro: body.fechaCobro,
           picturePath: body.picturePath ?? null,
           rechazado: body.rechazado,
-        });
+        };
+        setDetails(cheque);
+        const option: Option = {
+          label: buildLabel(cheque),
+          value: cheque.id,
+        };
+        setOptions((prev) =>
+          prev.some((o) => o.value === option.value)
+            ? prev
+            : [option, ...prev]
+        );
       } catch {
-        if (!cancelled) setDetailsError("Error de red al cargar el cheque");
-      } finally {
-        if (!cancelled) setDetailsLoading(false);
+        // silent
       }
     })();
     return () => {
@@ -189,9 +134,6 @@ const ChequePicker = ({ name = "chequeId", label = "Cheque" }: Props) => {
 
   const error = errors[name];
   const errorMessage = error?.message?.toString();
-
-  const showPdf =
-    !!details?.picturePath && isPdfPath(details.picturePath);
 
   return (
     <Paper
@@ -242,10 +184,16 @@ const ChequePicker = ({ name = "chequeId", label = "Cheque" }: Props) => {
         name={name}
         control={control}
         render={({ field: { onChange, value } }) => {
-          const currentValue =
-            value != null
-              ? options.find((o) => o.value === Number(value)) || null
+          const numericValue = value != null ? Number(value) : null;
+          const fromOptions =
+            numericValue != null
+              ? options.find((o) => o.value === numericValue)
               : null;
+          const fromDetails =
+            !fromOptions && details && details.id === numericValue
+              ? { label: buildLabel(details), value: details.id }
+              : null;
+          const currentValue = fromOptions ?? fromDetails ?? null;
           return (
             <Autocomplete
               options={options}
@@ -276,132 +224,10 @@ const ChequePicker = ({ name = "chequeId", label = "Cheque" }: Props) => {
         }}
       />
 
-      {chequeId ? (
+      {chequeId && details ? (
         <Box sx={{ mt: 2 }}>
           <Divider sx={{ mb: 2 }} />
-
-          {detailsLoading && (
-            <Box display="flex" justifyContent="center" py={3}>
-              <CircularProgress size={24} />
-            </Box>
-          )}
-
-          {!detailsLoading && detailsError && (
-            <Typography variant="body2" color="error">
-              {detailsError}
-            </Typography>
-          )}
-
-          {!detailsLoading && !detailsError && details && (
-            <Stack spacing={2}>
-              <Box
-                sx={{
-                  display: "grid",
-                  gridTemplateColumns: {
-                    xs: "1fr 1fr",
-                    md: "repeat(3, 1fr)",
-                  },
-                  gap: 2,
-                }}
-              >
-                <DetailRow label="Número" value={details.numero} />
-                <DetailRow label="Banco" value={details.banco} />
-                <DetailRow label="Emisor" value={details.owner} />
-                <DetailRow
-                  label="Importe"
-                  value={getFormattedPrice(details.importe)}
-                />
-                <DetailRow
-                  label="Fecha emisión"
-                  value={getFormattedDate(details.fechaEmision)}
-                />
-                <DetailRow
-                  label="Fecha cobro"
-                  value={getFormattedDate(details.fechaCobro)}
-                />
-                {details.rechazado === "Si" && (
-                  <DetailRow label="Estado" value="Rechazado" />
-                )}
-              </Box>
-
-              {details.picturePath ? (
-                <Box>
-                  <Typography
-                    variant="caption"
-                    color="text.secondary"
-                    sx={{ display: "block", mb: 1 }}
-                  >
-                    Foto del cheque
-                  </Typography>
-                  <Box
-                    sx={{
-                      display: "flex",
-                      justifyContent: "center",
-                      backgroundColor: "background.paper",
-                      borderRadius: 1,
-                      p: 1,
-                      border: "1px solid",
-                      borderColor: "divider",
-                    }}
-                  >
-                    {showPdf ? (
-                      <Box
-                        sx={{
-                          width: "100%",
-                          maxWidth: 500,
-                          height: 360,
-                          overflow: "hidden",
-                          borderRadius: 1,
-                        }}
-                      >
-                        <iframe
-                          src={details.picturePath ?? ""}
-                          width="100%"
-                          height="100%"
-                          style={{ border: "none" }}
-                          title={`Cheque ${details.numero}`}
-                        />
-                      </Box>
-                    ) : (
-                      <Image
-                        src={details.picturePath}
-                        alt={`Cheque ${details.numero}`}
-                        width={400}
-                        height={260}
-                        style={{
-                          maxWidth: "100%",
-                          width: "auto",
-                          height: "auto",
-                          maxHeight: 320,
-                        }}
-                      />
-                    )}
-                  </Box>
-                  {showPdf && (
-                    <Box display="flex" justifyContent="center" mt={1}>
-                      <Button
-                        size="small"
-                        variant="text"
-                        onClick={() =>
-                          window.open(details.picturePath ?? "", "_blank")
-                        }
-                      >
-                        Abrir PDF en nueva pestaña
-                      </Button>
-                    </Box>
-                  )}
-                </Box>
-              ) : (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  sx={{ fontStyle: "italic" }}
-                >
-                  Este cheque no tiene foto cargada.
-                </Typography>
-              )}
-            </Stack>
-          )}
+          <ChequeDetailsView data={details} />
         </Box>
       ) : null}
 

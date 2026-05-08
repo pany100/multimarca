@@ -88,7 +88,17 @@ const Row = ({ children }: { children: React.ReactNode }) => (
   </Box>
 );
 
-const NuevoIngresoManualForm = () => {
+type Props = {
+  mode?: "create" | "edit";
+  id?: number;
+  initialValues?: Record<string, any>;
+};
+
+const IngresoManualForm = ({
+  mode = "create",
+  id,
+  initialValues,
+}: Props) => {
   const router = useRouter();
   const { authFetch } = useFetch();
   const { admins } = useAdminsAndGaby();
@@ -99,6 +109,8 @@ const NuevoIngresoManualForm = () => {
     message: string;
   } | null>(null);
 
+  const isEdit = mode === "edit";
+
   const methods = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
@@ -107,6 +119,7 @@ const NuevoIngresoManualForm = () => {
       gastosBancarios: 0,
       gastosArba: 0,
       chequeId: null,
+      ...(initialValues ?? {}),
     },
   });
 
@@ -125,24 +138,39 @@ const NuevoIngresoManualForm = () => {
 
   const onSubmit = async (data: any) => {
     try {
-      const response = await authFetch("/api/ingresos-manuales", {
-        method: "POST",
+      const url = isEdit
+        ? `/api/ingresos-manuales/${id}`
+        : "/api/ingresos-manuales";
+      const method = isEdit ? "PUT" : "POST";
+      const response = await authFetch(url, {
+        method,
         body: JSON.stringify(data),
       });
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
         setFeedback({
           type: "error",
-          message: body?.error || "No se pudo crear el ingreso",
+          message:
+            body?.error ||
+            (isEdit
+              ? "No se pudieron guardar los cambios"
+              : "No se pudo crear el ingreso"),
         });
         return;
       }
-      setFeedback({ type: "success", message: "Ingreso creado con éxito" });
+      setFeedback({
+        type: "success",
+        message: isEdit
+          ? "Ingreso actualizado con éxito"
+          : "Ingreso creado con éxito",
+      });
       setTimeout(() => router.push("/dashboard/ingresos-manuales"), 600);
     } catch {
       setFeedback({
         type: "error",
-        message: "Error de red al crear el ingreso",
+        message: isEdit
+          ? "Error de red al guardar los cambios"
+          : "Error de red al crear el ingreso",
       });
     }
   };
@@ -265,7 +293,11 @@ const NuevoIngresoManualForm = () => {
               disabled={isSubmitting}
               startIcon={isSubmitting && <CircularProgress size={20} />}
             >
-              {isSubmitting ? "Guardando..." : "Guardar ingreso"}
+              {isSubmitting
+                ? "Guardando..."
+                : isEdit
+                  ? "Guardar cambios"
+                  : "Guardar ingreso"}
             </Button>
           </Stack>
         </Stack>
@@ -291,4 +323,4 @@ const NuevoIngresoManualForm = () => {
   );
 };
 
-export default NuevoIngresoManualForm;
+export default IngresoManualForm;

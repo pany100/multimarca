@@ -1,255 +1,235 @@
 "use client";
 
+import ChequeDetailsView from "@/components/cheques/ChequeDetailsView";
 import { useFetch } from "@/contexts/FetchContext";
+import { CHEQUE_OPERACION_IDS } from "@/utils/chequeUtils";
 import { getFormattedDate, getFormattedPrice } from "@/utils/fieldHelper";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
+import EditIcon from "@mui/icons-material/Edit";
 import {
   Alert,
   Box,
   Button,
+  Card,
+  CardContent,
+  CardHeader,
   Chip,
   CircularProgress,
   Divider,
-  Grid,
-  Paper,
-  Snackbar,
+  Stack,
   Typography,
 } from "@mui/material";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
-export default function IngresoManualVerPage({
+const SectionTitle = ({ children }: { children: React.ReactNode }) => (
+  <Typography
+    variant="overline"
+    sx={{
+      color: "text.secondary",
+      letterSpacing: 1,
+      fontWeight: 600,
+    }}
+  >
+    {children}
+  </Typography>
+);
+
+const Field = ({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) => (
+  <Box sx={{ display: "flex", flexDirection: "column" }}>
+    <Typography variant="caption" color="text.secondary">
+      {label}
+    </Typography>
+    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+      {children}
+    </Typography>
+  </Box>
+);
+
+const Row = ({ children }: { children: React.ReactNode }) => (
+  <Box
+    sx={{
+      display: "flex",
+      flexDirection: { xs: "column", md: "row" },
+      gap: 2,
+      "& > *": { flex: 1, minWidth: 0 },
+    }}
+  >
+    {children}
+  </Box>
+);
+
+export default function VerIngresoManualPage({
   params,
 }: {
   params: { id: string };
 }) {
-  const router = useRouter();
   const { authFetch } = useFetch();
+  const id = parseInt(params.id);
   const [ingreso, setIngreso] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [snackbar, setSnackbar] = useState({
-    open: false,
-    message: "",
-    severity: "success" as "success" | "error",
-  });
 
   useEffect(() => {
-    const fetchIngresoManual = async () => {
+    let cancelled = false;
+    (async () => {
       try {
-        setLoading(true);
-        const response = await authFetch(`/api/ingresos-manuales/${params.id}`);
-        if (response.ok) {
-          const data = await response.json();
-          setIngreso(data);
-        } else {
-          setError("Error al obtener el ingreso manual");
+        const res = await authFetch(`/api/ingresos-manuales/${id}`);
+        const body = await res.json().catch(() => ({}));
+        if (cancelled) return;
+        if (!res.ok) {
+          setError(body?.error || "No se pudo cargar el ingreso");
+          return;
         }
-      } catch (err) {
-        setError("Error al cargar los datos del ingreso manual");
-        console.error(err);
-      } finally {
-        setLoading(false);
+        setIngreso(body);
+      } catch {
+        if (!cancelled) setError("Error de red al cargar el ingreso");
       }
+    })();
+    return () => {
+      cancelled = true;
     };
+  }, [authFetch, id]);
 
-    fetchIngresoManual();
-  }, [params.id]);
-
-  if (loading) {
-    return (
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          height: "50vh",
-        }}
-      >
-        <CircularProgress />
-      </Box>
-    );
-  }
-
-  if (error || !ingreso) {
-    return (
-      <Box
-        sx={{
-          p: 3,
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-        }}
-      >
-        <Typography variant="h6" color="error" gutterBottom>
-          {error || "No se pudo cargar el ingreso manual"}
-        </Typography>
-        <Button
-          variant="outlined"
-          startIcon={<ArrowBackIcon />}
-          onClick={() => router.back()}
-          sx={{ mt: 2 }}
-        >
-          Volver
-        </Button>
-      </Box>
-    );
-  }
+  const tipoOperacionId = ingreso?.tipoOperacionId as number | undefined;
+  const hasCheque =
+    typeof tipoOperacionId === "number" &&
+    CHEQUE_OPERACION_IDS.includes(tipoOperacionId) &&
+    !!ingreso?.chequeId;
 
   return (
-    <Paper
-      elevation={1}
-      sx={{
-        p: { xs: 2, md: 3 },
-        borderRadius: 2,
-        mb: 3,
-      }}
-    >
-      {/* Header */}
+    <Box sx={{ p: { xs: 2, md: 3 } }}>
       <Box
         sx={{
+          mb: 2,
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          mb: 3,
+          flexWrap: "wrap",
+          gap: 1,
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Button
+          component={Link}
+          href="/dashboard/ingresos-manuales"
+          startIcon={<ArrowBackIcon />}
+          variant="text"
+        >
+          Volver al listado
+        </Button>
+        {ingreso && !error && (
           <Button
-            variant="outlined"
-            startIcon={<ArrowBackIcon />}
-            sx={{ mr: 2 }}
-            onClick={() => router.back()}
+            component={Link}
+            href={`/dashboard/ingresos-manuales/${id}/editar`}
+            startIcon={<EditIcon />}
+            variant="contained"
           >
-            Volver
+            Editar
           </Button>
-          <Typography variant="h5" component="h1">
-            Ingreso Manual #{ingreso.id}
-          </Typography>
-        </Box>
+        )}
       </Box>
 
-      <Divider sx={{ my: 2 }} />
+      <Card>
+        <CardHeader
+          title={`Ingreso Manual #${id}`}
+          subheader="Detalle del ingreso"
+          sx={{ px: { xs: 3, md: 4 }, pt: 3, pb: 1 }}
+        />
+        <CardContent sx={{ px: { xs: 3, md: 4 }, pb: 4 }}>
+          {error && <Alert severity="error">{error}</Alert>}
+          {!error && !ingreso && (
+            <Box display="flex" justifyContent="center" py={4}>
+              <CircularProgress />
+            </Box>
+          )}
+          {!error && ingreso && (
+            <Stack spacing={3}>
+              <Stack spacing={1.5}>
+                <SectionTitle>Fecha y usuario</SectionTitle>
+                <Row>
+                  <Field label="Fecha">{getFormattedDate(ingreso.fecha)}</Field>
+                  <Field label="Usuario">
+                    {ingreso.usuario?.fullName || "No especificado"}
+                  </Field>
+                </Row>
+              </Stack>
 
-      {/* Basic Info */}
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Fecha
-          </Typography>
-          <Typography variant="body1">
-            {getFormattedDate(ingreso.fecha)}
-          </Typography>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Monto
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{ fontWeight: "bold", fontSize: "1.1rem" }}
-          >
-            {getFormattedPrice(ingreso.monto)}{" "}
-            <Chip
-              label={ingreso.moneda}
-              color={ingreso.moneda === "Dolar" ? "success" : "warning"}
-              size="small"
-              sx={{ ml: 1 }}
-            />
-          </Typography>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Gastos Bancarios
-          </Typography>
-          <Typography variant="body1">
-            {getFormattedPrice(ingreso.gastosBancarios)}
-          </Typography>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Gastos ARBA
-          </Typography>
-          <Typography variant="body1">
-            {getFormattedPrice(ingreso.gastosArba)}
-          </Typography>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Usuario
-          </Typography>
-          <Typography variant="body1">
-            {ingreso.usuario?.fullName || "No especificado"}
-          </Typography>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Tipo de Operación
-          </Typography>
-          <Typography variant="body1">
-            {ingreso.tipoOperacion?.label &&
-            ingreso.tipoOperacion.label === "Cheque" &&
-            ingreso.chequeId ? (
-              <Link
-                href={`/dashboard/cheques/${ingreso.chequeId}`}
-                style={{ textDecoration: "underline" }}
-              >
-                Cheque {ingreso.cheque?.rechazado ? "(Rechazado, revisar)" : ""}
-              </Link>
-            ) : (
-              ingreso.tipoOperacion?.label || "No especificado"
-            )}
-          </Typography>
-        </Grid>
-        <Grid item xs={12}>
-          <Typography variant="subtitle1" fontWeight="bold">
-            Descripción
-          </Typography>
-          <Paper
-            elevation={0}
-            sx={{
-              p: 2,
-              bgcolor: "background.default",
-              borderRadius: 1,
-              mt: 1,
-              whiteSpace: "pre-wrap",
-            }}
-          >
-            <Typography variant="body1">
-              {ingreso.descripcion || "Sin descripción"}
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
+              <Divider />
 
-      {/* Dolar Info if applicable */}
-      {ingreso.moneda === "Dolar" && (
-        <>
-          <Divider sx={{ my: 2 }} />
-          <Typography variant="h6" gutterBottom>
-            Cotización del Dólar
-          </Typography>
-          <Grid item xs={12} md={6}>
-            <Typography variant="body1">
-              {getFormattedPrice(ingreso.cotizacionDolar)}
-            </Typography>
-          </Grid>
-        </>
-      )}
+              <Stack spacing={1.5}>
+                <SectionTitle>Detalles del ingreso</SectionTitle>
+                <Field label="Tipo de Operación">
+                  {ingreso.tipoOperacion?.label || "No especificado"}
+                </Field>
+                <Row>
+                  <Field label="Monto">
+                    <Box
+                      sx={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: 1,
+                      }}
+                    >
+                      {getFormattedPrice(ingreso.monto)}
+                      <Chip
+                        label={ingreso.moneda}
+                        color={
+                          ingreso.moneda === "Dolar" ? "success" : "warning"
+                        }
+                        size="small"
+                      />
+                    </Box>
+                  </Field>
+                  {ingreso.moneda === "Dolar" && (
+                    <Field label="Cotización">
+                      {ingreso.cotizacionDolar != null
+                        ? `${getFormattedPrice(ingreso.cotizacionDolar)} ARS / USD`
+                        : "—"}
+                    </Field>
+                  )}
+                </Row>
+                <Field label="Descripción">
+                  <Box
+                    component="span"
+                    sx={{ whiteSpace: "pre-wrap", fontWeight: 400 }}
+                  >
+                    {ingreso.descripcion || "Sin descripción"}
+                  </Box>
+                </Field>
+              </Stack>
 
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert
-          severity={snackbar.severity}
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Paper>
+              {hasCheque && (
+                <>
+                  <Divider />
+                  <Stack spacing={1.5}>
+                    <SectionTitle>Cheque asociado</SectionTitle>
+                    <ChequeDetailsView chequeId={ingreso.chequeId} />
+                  </Stack>
+                </>
+              )}
+
+              <Divider />
+
+              <Stack spacing={1.5}>
+                <SectionTitle>Cargos bancarios</SectionTitle>
+                <Row>
+                  <Field label="Gastos Bancarios">
+                    {getFormattedPrice(ingreso.gastosBancarios ?? 0)}
+                  </Field>
+                  <Field label="Gastos ARBA">
+                    {getFormattedPrice(ingreso.gastosArba ?? 0)}
+                  </Field>
+                </Row>
+              </Stack>
+            </Stack>
+          )}
+        </CardContent>
+      </Card>
+    </Box>
   );
 }

@@ -20,6 +20,7 @@ type Props = {
   schema?: yup.ObjectSchema<any>;
   postCallbackFn?: () => void;
   onAddClick?: () => void;
+  onEditClick?: (entity: any) => void;
   /** Método HTTP para edición. Por defecto PUT. */
   editMethod?: "PUT" | "PATCH";
 };
@@ -34,6 +35,7 @@ function ABMPage({
   schema,
   postCallbackFn,
   onAddClick,
+  onEditClick,
   editMethod = "PUT",
 }: Props) {
   const { authFetch } = useFetch();
@@ -144,6 +146,10 @@ function ABMPage({
         <MenuItem
           key="edit"
           onClick={() => {
+            if (onEditClick) {
+              onEditClick(params);
+              return;
+            }
             setIsEditModalOpen(true);
             setEntity(params);
           }}

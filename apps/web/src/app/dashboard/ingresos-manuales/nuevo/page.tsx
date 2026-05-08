@@ -1,6 +1,6 @@
 "use client";
 
-import NuevoIngresoManualForm from "@/sections/ingresos-manuales/NuevoIngresoManualForm";
+import IngresoManualForm from "@/sections/ingresos-manuales/IngresoManualForm";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Box, Button, Card, CardContent, CardHeader } from "@mui/material";
 import Link from "next/link";
@@ -25,7 +25,7 @@ const NuevoIngresoManualPage = () => {
           sx={{ px: { xs: 3, md: 4 }, pt: 3, pb: 1 }}
         />
         <CardContent sx={{ px: { xs: 3, md: 4 }, pb: 4 }}>
-          <NuevoIngresoManualForm />
+          <IngresoManualForm mode="create" />
         </CardContent>
       </Card>
     </Box>

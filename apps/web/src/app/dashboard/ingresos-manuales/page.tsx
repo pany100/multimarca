@@ -18,6 +18,9 @@ const IngresosPage = () => {
       crudActions={[CrudAction.ADD, CrudAction.EDIT, CrudAction.DELETE]}
       schema={schema}
       onAddClick={() => router.push("/dashboard/ingresos-manuales/nuevo")}
+      onEditClick={(entity) =>
+        router.push(`/dashboard/ingresos-manuales/${entity.id}/editar`)
+      }
     />
   );
 };
