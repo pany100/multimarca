@@ -504,6 +504,12 @@ const DashboardLayout = ({ children }: { children: React.ReactNode }) => {
           },
           {
             permiso: "Estadisticas",
+            texto: "Gastos por empleado",
+            icono: <GroupIcon />,
+            ruta: "/dashboard/estadisticasGastosEmpleado",
+          },
+          {
+            permiso: "Estadisticas",
             texto: "Proveedores",
             icono: <LocalShippingIcon />,
             ruta: "/dashboard/estadisticasProveedores",
