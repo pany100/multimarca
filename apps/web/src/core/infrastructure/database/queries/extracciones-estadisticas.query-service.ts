@@ -36,20 +36,6 @@ export interface EvolucionExtracciones {
   usuarios: string[];
 }
 
-export interface DetalleExtraccion {
-  id: number;
-  fecha: Date;
-  monto: number;
-  montoArs: number;
-  moneda: string;
-  motivo: string;
-  usuario: string | null;
-  tipo_operacion: string | null;
-  gastos_bancarios: number;
-  gastos_arba: number;
-  revisado: boolean;
-}
-
 export interface ExtraccionPorUsuario {
   usuario: string;
   total: number;
@@ -95,41 +81,6 @@ export async function getKpisExtracciones(from: string, to: string): Promise<Kpi
     gastosBancarios: toNum(rows[0]?.gastos_bancarios),
     gastosArba: toNum(rows[0]?.gastos_arba),
   };
-}
-
-// ─── Detalle ─────────────────────────────────────────────────────────────────
-
-/**
- * Listado de extracciones individuales del período con usuario y tipo de operación.
- */
-export async function getDetalleExtracciones(from: string, to: string): Promise<DetalleExtraccion[]> {
-  const rows = await prisma.$queryRaw<DetalleExtraccion[]>`
-    SELECT
-      e.id,
-      e.fecha,
-      e.monto AS monto,
-      CASE WHEN e.moneda = 'Dolar' THEN e.monto * COALESCE(e.cotizacionDolar, 1) ELSE e.monto END AS montoArs,
-      e.moneda,
-      e.motivo,
-      u.fullName AS usuario,
-      t.label AS tipo_operacion,
-      e.gastosBancarios AS gastos_bancarios,
-      e.gastosArba AS gastos_arba,
-      e.revisado
-    FROM Extraccion e
-    INNER JOIN Usuario u ON u.id = e.usuarioId
-    LEFT JOIN TipoDeOperacion t ON t.id = e.tipoOperacionId
-    WHERE e.fecha >= ${from} AND e.fecha < ${to}
-    ORDER BY e.fecha DESC
-  `;
-  return rows.map((r) => ({
-    ...r,
-    monto: toNum(r.monto),
-    montoArs: toNum(r.montoArs),
-    gastos_bancarios: toNum(r.gastos_bancarios),
-    gastos_arba: toNum(r.gastos_arba),
-    revisado: Boolean(r.revisado),
-  }));
 }
 
 // ─── Desglose por usuario ─────────────────────────────────────────────────────

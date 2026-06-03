@@ -4,7 +4,6 @@ import {
   getPreviousRange,
 } from "@/core/infrastructure/database/queries/financiero.query-service";
 import {
-  getDetalleExtracciones,
   getEvolucionExtracciones,
   getExtraccionesPorUsuario,
   getKpisExtracciones,
@@ -26,10 +25,9 @@ export async function GET(request: NextRequest) {
 
     const prev = getPreviousRange(from, to);
 
-    const [kpis, kpisPrev, detalle, porUsuario, evolucion] = await Promise.all([
+    const [kpis, kpisPrev, porUsuario, evolucion] = await Promise.all([
       getKpisExtracciones(from, to),
       getKpisExtracciones(prev.from, prev.to),
-      getDetalleExtracciones(from, to),
       getExtraccionesPorUsuario(from, to),
       getEvolucionExtracciones(to),
     ]);
@@ -37,7 +35,6 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({
       kpis,
       kpisPrev,
-      detalle,
       porUsuario,
       evolucion,
     });

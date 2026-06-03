@@ -3,9 +3,8 @@
 import { useFetch } from "@/contexts/FetchContext";
 import GroupIcon from "@mui/icons-material/Group";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
-import PaymentsIcon from "@mui/icons-material/Payments";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
-import { Box, Chip, Grid, Tooltip as MuiTooltip } from "@mui/material";
+import { Box, Grid, Tooltip as MuiTooltip } from "@mui/material";
 import {
   ArcElement,
   BarElement,
@@ -61,26 +60,11 @@ interface PorUsuarioItem {
   cantidad: number;
 }
 
-interface DetalleItem {
-  id: number;
-  fecha: string;
-  monto: number;
-  montoArs: number;
-  moneda: string;
-  motivo: string;
-  usuario: string | null;
-  tipo_operacion: string | null;
-  gastos_bancarios: number;
-  gastos_arba: number;
-  revisado: boolean;
-}
-
 interface ExtraccionesData {
   kpis: KpiExtracciones;
   kpisPrev: KpiExtracciones;
   evolucion: EvolucionData;
   porUsuario: PorUsuarioItem[];
-  detalle: DetalleItem[];
 }
 
 function buildQuery(filtro: FiltroEstadisticas): string {
@@ -128,23 +112,6 @@ const usuarioColumns: TableColumn[] = [
   },
   { key: "cantidad", label: "Cantidad", align: "right" },
   { key: "porcentaje", label: "% del total", align: "right" },
-];
-
-const detalleColumns: TableColumn[] = [
-  {
-    key: "fecha",
-    label: "Fecha",
-    format: (v: string) => (v ? new Date(v).toLocaleDateString("es-AR") : "-"),
-  },
-  { key: "usuario", label: "Usuario" },
-  {
-    key: "montoArs",
-    label: "Monto",
-    align: "right",
-    format: formatCurrency,
-    sx: { fontWeight: 700 },
-    headerSx: { fontWeight: 800 },
-  },
 ];
 
 export default function Extracciones() {
@@ -352,32 +319,6 @@ export default function Extracciones() {
           chart={
             <Box sx={{ height: 350 }}>
               <Bar data={evolucionChartData} options={evolucionOptions as any} />
-            </Box>
-          }
-        />
-      </Box>
-
-      {/* Detalle de extracciones */}
-      <Box sx={{ mt: 3 }}>
-        <ChartWithDetail
-          title="Detalle de extracciones"
-          icon={<PaymentsIcon color="primary" />}
-          loading={loading}
-          columns={detalleColumns}
-          rows={data?.detalle ?? []}
-          emptyMessage="Sin extracciones en el período"
-          chart={
-            <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap" }}>
-              <Chip
-                label={`${data?.detalle.length ?? 0} extracciones en el período`}
-                color="primary"
-                variant="outlined"
-              />
-              <Chip
-                label={`Total: ${formatCurrency(kpis?.total ?? 0)}`}
-                color="error"
-                variant="outlined"
-              />
             </Box>
           }
         />
