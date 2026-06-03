@@ -4,6 +4,7 @@ import ResumenFinanciero from "@/components/estadisticas-v2/tabs/ResumenFinancie
 import GastosBalance from "@/components/estadisticas-v2/tabs/GastosBalance";
 import StockInventario from "@/components/estadisticas-v2/tabs/StockInventario";
 import OperacionesClientes from "@/components/estadisticas-v2/tabs/OperacionesClientes";
+import Extracciones from "@/components/estadisticas-v2/tabs/Extracciones";
 import { Box, Tab, Tabs, Typography } from "@mui/material";
 import { useState } from "react";
 
@@ -27,6 +28,7 @@ export default function EstadisticasV2Page() {
           <Tab label="Gastos y Balance" />
           <Tab label="Stock e Inventario" />
           <Tab label="Operaciones y Clientes" />
+          <Tab label="Extracciones" />
         </Tabs>
       </Box>
 
@@ -34,6 +36,7 @@ export default function EstadisticasV2Page() {
       {tab === 1 && <GastosBalance />}
       {tab === 2 && <StockInventario />}
       {tab === 3 && <OperacionesClientes />}
+      {tab === 4 && <Extracciones />}
     </Box>
   );
 }
